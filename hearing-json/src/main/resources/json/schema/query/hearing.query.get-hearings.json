@@ -74,6 +74,10 @@
         "id": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
+        "parentApplicationId": {
+          "description": "The identifier of the linked parent application.  Linked applications are a single level deep",
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
         "applicationReference": {
 		  "description": "The human readable reference for the application.  For linked applications this will be the case urn or the prosecution authority reference suffixed with a numerical sequence",
 		  "type": "string"

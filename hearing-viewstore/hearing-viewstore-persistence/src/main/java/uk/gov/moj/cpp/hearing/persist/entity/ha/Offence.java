@@ -74,6 +74,13 @@ public class Offence {
     @Column(name = "conviction_date")
     private LocalDate convictionDate;
 
+    @Column(name = "ctl_days_spent")
+    private Integer ctlDaysSpent;
+
+    @Column(name = "ctl_time_limit")
+    private LocalDate ctlTimeLimit;
+
+
     @Embedded
     private NotifiedPlea notifiedPlea;
 
@@ -309,5 +316,21 @@ public class Offence {
             return false;
         }
         return Objects.equals(this.id, ((Offence) o).id);
+    }
+
+    public Integer getCtlDaysSpent() {
+        return ctlDaysSpent;
+    }
+
+    public void setCtlDaysSpent(Integer ctlDaysSpent) {
+        this.ctlDaysSpent = ctlDaysSpent;
+    }
+
+    public LocalDate getCtlTimeLimit() {
+        return ctlTimeLimit;
+    }
+
+    public void setCtlTimeLimit(LocalDate ctlTimeLimit) {
+        this.ctlTimeLimit = ctlTimeLimit;
     }
 }

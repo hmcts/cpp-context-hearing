@@ -8,6 +8,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.util.UUID;
@@ -27,9 +28,8 @@ public class AllocationDecisionJPAMapperTest {
                 .with(AllocationDecision::getAllocationDecisionDate, is(entity.getAllocationDecisionDate()))
                 .with(AllocationDecision::getSequenceNumber, is(entity.getSequenceNumber()))
                 .with(AllocationDecision::getCourtIndicatedSentence, whenCourtIndicatedSentence(isBean(CourtIndicatedSentence.class), entity.getCourtIndicatedSentence()));
-
-
     }
+
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision> whenAllocationDecision(
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision> m, final AllocationDecision pojo) {

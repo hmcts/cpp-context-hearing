@@ -109,6 +109,7 @@ public class GetHearingsTransformer {
         result.withId(courtApplication.getId());
         result.withApplicationReference(courtApplication.getApplicationReference());
         result.withApplicant(summary(courtApplication.getApplicant()).build());
+        result.withParentApplicationId(courtApplication.getParentApplicationId());
         result.withRespondents(courtApplication.getRespondents() == null ? emptyList() :
                 courtApplication.getRespondents().stream().map(ca -> summary(ca).build())
                         .collect(Collectors.toList())

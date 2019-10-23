@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -16,8 +17,8 @@ public class PersonDefendant {
     @Column(name = "arrest_summons_number")
     private String arrestSummonsNumber;
 
-    @Column(name = "bail_status")
-    private String bailStatus;
+    @Column(name = "bail_status_desc")
+    private String bailStatusDesc;
 
     @Column(name = "custody_time_limit")
     private LocalDate custodyTimeLimit;
@@ -32,6 +33,12 @@ public class PersonDefendant {
 
     @Column(name = "perceived_birth_year")
     private Integer perceivedBirthYear;
+
+    @Column(name = "bail_status_id")
+    private UUID bailStatusId;
+
+    @Column(name = "bail_status_code")
+    private String bailStatusCode;
 
     @Embedded
     private Person personDetails;
@@ -52,12 +59,12 @@ public class PersonDefendant {
         this.arrestSummonsNumber = arrestSummonsNumber;
     }
 
-    public String getBailStatus() {
-        return bailStatus;
+    public String getBailStatusDesc() {
+        return bailStatusDesc;
     }
 
-    public void setBailStatus(String bailStatus) {
-        this.bailStatus = bailStatus;
+    public void setBailStatusDesc(String bailStatus) {
+        this.bailStatusDesc = bailStatus;
     }
 
     public LocalDate getCustodyTimeLimit() {
@@ -106,5 +113,21 @@ public class PersonDefendant {
 
     public void setPersonDetails(Person personDetails) {
         this.personDetails = personDetails;
+    }
+
+    public UUID getBailStatusId() {
+        return bailStatusId;
+    }
+
+    public void setBailStatusId(UUID bailStatusId) {
+        this.bailStatusId = bailStatusId;
+    }
+
+    public String getBailStatusCode() {
+        return bailStatusCode;
+    }
+
+    public void setBailStatusCode(String bailStatusCode) {
+        this.bailStatusCode = bailStatusCode;
     }
 }

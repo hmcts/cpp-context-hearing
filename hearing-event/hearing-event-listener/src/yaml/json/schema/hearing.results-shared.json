@@ -121,6 +121,47 @@
         "orderedDate"
       ]
     },
+    "atendee": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "personId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "attendeeId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "defendantIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uuid"
+          }
+        },
+        "hearingId": {
+          "$ref": "#/definitions/uuid"
+        },
+        "status": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "firstName": {
+          "type": "string"
+        },
+        "lastName": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "attendeeId",
+        "firstName",
+        "hearingId",
+        "lastName",
+        "personId",
+        "status"
+      ]
+    },
     "uuid": {
       "type": "string",
       "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"

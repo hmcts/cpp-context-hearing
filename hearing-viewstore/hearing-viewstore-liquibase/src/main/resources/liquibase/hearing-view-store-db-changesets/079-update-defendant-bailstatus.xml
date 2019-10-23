@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="79" author="hearing" logicalFilePath="079-update-defendant-bailstatus.xml">
+
+        <renameColumn tableName="ha_defendant" oldColumnName="bail_status"
+                      newColumnName="bail_status_desc"/>
+
+        <addColumn tableName="ha_defendant">
+            <column name="bail_status_id" type="UUID"/>
+            <column name="bail_status_code" type="TEXT"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
