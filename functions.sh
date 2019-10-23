@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+declare -rx CONTEXT_NAME=hearing
+declare -rx FRAMEWORK_VERSION=6.2.1
+declare -rx EVENT_STORE_VERSION=2.2.1
+declare -rx FILE_SERVICE_VERSION=1.17.2
+
 function buildWars {
   echo
   echo "Building wars."
