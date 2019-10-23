@@ -10,12 +10,11 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
-import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
-
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
@@ -94,7 +93,9 @@ public class HearingEventListenerRamlConfigTest {
             HearingInitiateIgnored.class.getAnnotation(Event.class).value(),
             HearingChangeIgnored.class.getAnnotation(Event.class).value(),
             InterpreterIntermediaryChangeIgnored.class.getAnnotation(Event.class).value(),
-            CompanyRepresentativeChangeIgnored.class.getAnnotation(Event.class).value()
+            CompanyRepresentativeChangeIgnored.class.getAnnotation(Event.class).value(),
+            DefendantOffenceResultsUpdated.class.getAnnotation(Event.class).value(),
+            DefendantCaseWithdrawnOrDismissed.class.getAnnotation(Event.class).value()
     );
 
     private Map<String, String> handlerNames = new HashMap<>();

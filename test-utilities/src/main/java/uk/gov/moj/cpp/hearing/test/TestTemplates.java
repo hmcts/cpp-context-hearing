@@ -755,6 +755,38 @@ public class TestTemplates {
             return saveDraftResultCommandTemplateForDeletedResult(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID());
         }
 
+        public static List<SaveDraftResultCommand> saveDraftResultCommandForMultipleOffences(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final UUID resultDefId) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+            final Offence offence0 = defendant0.getOffences().get(0);
+
+            final Target target0 = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult("draft results content")
+                    .withOffenceId(offence0.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(randomUUID(), resultDefId, orderedDate).build()))
+                    .build();
+
+            List<SaveDraftResultCommand> saveDraftResultCommandList = new ArrayList<>();
+            saveDraftResultCommandList.add(new SaveDraftResultCommand(target0, hearing.getId()));
+            final Offence offence1 = defendant0.getOffences().get(1);
+            final Target target1 = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult("draft results content")
+                    .withOffenceId(offence1.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(randomUUID(), randomUUID(), orderedDate).build()))
+                    .build();
+
+            saveDraftResultCommandList.add(new SaveDraftResultCommand(target1, hearing.getId()));
+
+            return saveDraftResultCommandList;
+
+        }
+
         public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
@@ -877,6 +909,7 @@ public class TestTemplates {
                     .build();
             return new SaveDraftResultCommand(target, null);
         }
+
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand,
                                                                                             final LocalDate orderedDate, final UUID resultLineId,
@@ -2016,7 +2049,7 @@ public class TestTemplates {
     }
 
     public static List<CourtApplication> createCourtApplications() {
-        final  List<CourtApplication> courtApplications = new ArrayList<>();
+        final List<CourtApplication> courtApplications = new ArrayList<>();
         courtApplications.add(CourtApplication.courtApplication()
                 .withId(UUID.randomUUID())
                 .withLinkedCaseId(UUID.randomUUID())

@@ -215,6 +215,11 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.company-representative-change-ignored.json
             example: !include json/hearing.company-representative-change-ignored.json
 
+# Defendant case withdrawn or dismissed
+        application/vnd.hearing.event.defendant-case-withdrawn-or-dismissed+json:
+            schema: !include json/schema/hearing.event.defendant-case-withdrawn-or-dismissed.json
+            example: !include json/hearing.event.defendant-case-withdrawn-or-dismissed.json
+
 /public.event:
   post:
     body:

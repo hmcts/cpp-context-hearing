@@ -272,7 +272,6 @@ public class HearingAdjournIT extends AbstractIT {
         DocumentGeneratorStub.stubDocumentCreate("N/A");
 
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
-        initiateHearingCommand.getHearing().setProsecutionCases(null);
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingCommand));
         hearingOne.getHearing().setHearingLanguage(HearingLanguage.ENGLISH);
         stubReferenceData(orderedDate, primaryResultDefinitionId, randomUUID(), hearingOne.getHearing().getCourtCentre().getId());
@@ -407,6 +406,7 @@ public class HearingAdjournIT extends AbstractIT {
                         .setId(primaryResultDefinitionId)
                         .setUserGroups(singletonList(userGroup1))
                         .setFinancial("Y")
+                        .setCategory("F")
                         .setPrompts(promptDefs)
                 )
         );

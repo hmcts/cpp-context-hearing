@@ -46,6 +46,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 
@@ -77,7 +78,8 @@ public class UpdatePleaCommandHandlerTest {
             PleaUpsert.class,
             OffencePleaUpdated.class,
             ConvictionDateAdded.class,
-            ConvictionDateRemoved.class);
+            ConvictionDateRemoved.class,
+            VerdictUpsert.class);
     @InjectMocks
     private UpdatePleaCommandHandler hearingCommandHandler;
     @Mock

@@ -1,19 +1,25 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
+import static java.util.UUID.*;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.PleaValue.GUILTY;
+import static uk.gov.justice.core.courts.Verdict.verdict;
+import static uk.gov.justice.core.courts.VerdictType.verdictType;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
+import static uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert.verdictUpsert;
 
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -73,17 +79,14 @@ public class PleaDelegate implements Serializable {
 
 
         if (nonNull(plea)) {
-            events.add(plea.getPleaValue() == GUILTY ?
-                    convictionDateAdded()
-                            .setCaseId(prosecutionCase.getId())
-                            .setHearingId(hearingId)
-                            .setOffenceId(offenceId)
-                            .setConvictionDate(plea.getPleaDate()) :
-                    convictionDateRemoved()
-                            .setCaseId(prosecutionCase.getId())
-                            .setHearingId(hearingId)
-                            .setOffenceId(offenceId)
-            );
+            if (plea.getPleaValue() == GUILTY) {
+                events.addAll(updateVerdictAndSetConvictionDate(hearingId, offenceId, prosecutionCase, plea.getPleaDate()));
+            } else {
+                events.add(convictionDateRemoved()
+                        .setCaseId(prosecutionCase.getId())
+                        .setHearingId(hearingId)
+                        .setOffenceId(offenceId));
+            }
         } else if (nonNull(indicatedPlea)) {
             events.add(indicatedPlea.getIndicatedPleaValue() == INDICATED_GUILTY ?
                     convictionDateAdded()
@@ -99,6 +102,33 @@ public class PleaDelegate implements Serializable {
         }
 
         return events.stream();
+    }
+
+    private List<Object> updateVerdictAndSetConvictionDate(final UUID hearingId, final UUID offenceId, final ProsecutionCase prosecutionCase, final LocalDate pleaDate) {
+
+        final List<Object> events = new ArrayList<>();
+
+        events.add(convictionDateAdded()
+                .setCaseId(prosecutionCase.getId())
+                .setHearingId(hearingId)
+                .setOffenceId(offenceId)
+                .setConvictionDate(pleaDate));
+
+        final Verdict verdict = verdict()
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(hearingId)
+                .withVerdictDate(pleaDate)
+                .withVerdictType(verdictType()
+                        .withId(randomUUID())
+                        .withCategory("No verdict")
+                        .withCategoryType("NO_VERDICT")
+                        .build())
+                .build();
+        events.add(verdictUpsert()
+                .setHearingId(hearingId)
+                .setVerdict(verdict));
+
+        return events;
     }
 
     private void setOriginatingHearingId(final UUID hearingId, final PleaModel pleaModel) {

@@ -21,7 +21,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedPerson;
-import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
@@ -236,8 +235,7 @@ public class CoreTestTemplates {
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
-                        .build())
-                ;
+                        .build());
 
         if (!args.isOffenceCountNull) {
             result.withCount(INTEGER.next());
@@ -424,18 +422,18 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,int year, int month, int day) throws NoSuchAlgorithmException {
-       final Random random = SecureRandom.getInstanceStrong();
-       final int min = 1;
-       final int max = 5;
-       final Hearing.Builder hearingBuilder = Hearing.hearing()
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, int year, int month, int day) throws NoSuchAlgorithmException {
+        final Random random = SecureRandom.getInstanceStrong();
+        final int min = 1;
+        final int max = 5;
+        final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
-                                            hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
-                                            hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
+                .withHearingDays(asList(hearingDayWithParam(year, month, day + 1, random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(year, month, day, random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(year, month, day - 1, random.nextInt((max - min) + 1) + min).build()))
                 .withCourtCentre(courtCentreWithArgs(courtAndRoomId).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
@@ -651,6 +649,34 @@ public class CoreTestTemplates {
                 .withIsComplete(true)
                 .withIsModified(false)
                 .withIsDeleted(true)
+                .build();
+    }
+
+    public static Target.Builder targetForOffenceResultShared(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId, UUID resultDefinitionId) {
+        return Target.target()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult("json string")
+                .withResultLines(new ArrayList<>(asList(resultLineForOffenceResultShared(resultLineId, resultDefinitionId))));
+    }
+
+    public static ResultLine resultLineForOffenceResultShared(UUID resultLineId, UUID resultDefinitionId) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(resultDefinitionId)
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.OFFENCE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
                 .build();
     }
 

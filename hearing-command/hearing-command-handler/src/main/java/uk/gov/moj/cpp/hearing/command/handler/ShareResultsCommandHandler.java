@@ -46,9 +46,9 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.application-draft-result event received {}", envelope.toObfuscatedDebugString());
         }
         final ApplicationDraftResultCommand applicationDraftResultCommand = convertToObject(envelope, ApplicationDraftResultCommand.class);
-            aggregate(HearingAggregate.class, applicationDraftResultCommand.getHearingId(), envelope,
-                    aggregate -> aggregate.applicationDraftResults(applicationDraftResultCommand.getTargetId(), applicationDraftResultCommand.getApplicationId(), applicationDraftResultCommand.getHearingId(),
-                            applicationDraftResultCommand.getDraftResult(), applicationDraftResultCommand.getApplicationOutcomeType(), applicationDraftResultCommand.getApplicationOutcomeDate() ));
+        aggregate(HearingAggregate.class, applicationDraftResultCommand.getHearingId(), envelope,
+                aggregate -> aggregate.applicationDraftResults(applicationDraftResultCommand.getTargetId(), applicationDraftResultCommand.getApplicationId(), applicationDraftResultCommand.getHearingId(),
+                        applicationDraftResultCommand.getDraftResult(), applicationDraftResultCommand.getApplicationOutcomeType(), applicationDraftResultCommand.getApplicationOutcomeDate()));
     }
 
     @Handles("hearing.command.share-results")

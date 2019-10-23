@@ -170,4 +170,40 @@ public class NowsTemplates {
                 ))
                 .build();
     }
+
+    public static ResultsShared resultsSharedTemplateForSendingResultSharedForOffence(final UUID resultDefinitionId) {
+        InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+
+
+        UUID completedResultLineId = randomUUID();
+
+        final List<Target> targets = asList(
+                CoreTestTemplates.targetForOffenceResultShared(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId, resultDefinitionId).build()
+        );
+
+        return ResultsShared.builder()
+                .withHearingId(hearingOne.getHearingId())
+                .withTargets(targets)
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                .withHearing(hearingOne.getHearing())
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
+                        .withCourtClerk(DelegatedPowers.delegatedPowers()
+                                .withUserId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .withId(completedResultLineId)
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                        .build()
+                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                ))
+                .build();
+    }
 }

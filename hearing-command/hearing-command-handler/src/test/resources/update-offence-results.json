@@ -1,0 +1,21 @@
+{
+  "caseId": "195e3091-d4a2-4878-9855-41a738ce3132",
+  "hearingId": "cff4bfc7-4320-432e-aa07-2fefc8bc5051",
+  "defendantId": "562b9321-1102-4b58-ad8d-4078296d932c",
+  "offenceIds": [
+    "48119a1c-aa21-472b-a034-44cfc9d57fcb",
+    "57f3acb0-bbdc-4074-a3b7-f28df3b97658",
+    "2db3865f-922f-4568-b8c0-77f700a56dc2",
+    "09a77c98-6d6b-4641-871e-b12de4880aab"
+  ],
+  "resultedOffences": [
+    {
+      "offenceId": "48119a1c-aa21-472b-a034-44cfc9d57fcb",
+      "offenceResult": "DISMISSED"
+    },
+    {
+      "offenceId": "57f3acb0-bbdc-4074-a3b7-f28df3b97658",
+      "offenceResult": "GUILTY"
+    }
+  ]
+}
