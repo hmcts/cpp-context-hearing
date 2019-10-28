@@ -10,7 +10,7 @@ rule "Command - API - Action - hearing.initiate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.initiate");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users"));
   then
     $outcome.setSuccess(true);
 end
