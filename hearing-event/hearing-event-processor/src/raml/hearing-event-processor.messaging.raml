@@ -220,6 +220,11 @@ baseUri: message://event/processor/message/hearing
             schema: !include json/schema/hearing.event.defendant-case-withdrawn-or-dismissed.json
             example: !include json/hearing.event.defendant-case-withdrawn-or-dismissed.json
 
+# Case Marker
+        application/vnd.hearing.events.case-markers-enriched-with-associated-hearings+json:
+            schema: !include json/schema/hearing.events.case-markers-enriched-with-associated-hearings.json
+            example: !include json/hearing.events.case-markers-enriched-with-associated-hearings.json
+
 /public.event:
   post:
     body:
@@ -267,3 +272,8 @@ baseUri: message://event/processor/message/hearing
         application/vnd.public.progression.events.case-or-application-ejected+json:
                 schema: !include json/schema/public.progression.events.case-or-application-ejected.json
                 example: !include json/public.progression.events.case-or-application-ejected.json
+
+# Case Markers updated
+        application/vnd.public.progression.case-markers-updated+json:
+                schema: !include json/schema/public.progression.case-markers-updated.json
+                example: !include json/public.progression.case-markers-updated.json

@@ -55,6 +55,9 @@ public class DefendantAggregate implements Aggregate {
     }
 
     public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(final Defendant defendant) {
+        if (hearingIds.isEmpty()) {
+            return Stream.empty();
+        }
 
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings =
                 CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()

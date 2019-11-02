@@ -137,6 +137,10 @@ public class Defendant {
     @Column(name = "p_nci_id")
     private String pncId;
 
+    @Column(name = "is_youth")
+    private Boolean isYouth;
+
+
     public Defendant() {
         //For JPA
     }
@@ -259,6 +263,14 @@ public class Defendant {
 
     public void setPncId(String pncId) {
         this.pncId = pncId;
+    }
+
+    public Boolean getIsYouth() {
+        return isYouth;
+    }
+
+    public void setIsYouth(final Boolean youth) {
+        isYouth = youth;
     }
 
     @Override

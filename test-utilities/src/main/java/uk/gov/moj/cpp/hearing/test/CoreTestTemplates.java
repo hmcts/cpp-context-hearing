@@ -42,6 +42,7 @@ import uk.gov.justice.core.courts.JudicialRoleType;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.NotifiedPlea;
 import uk.gov.justice.core.courts.NotifiedPleaValue;
 import uk.gov.justice.core.courts.Offence;
@@ -355,6 +356,7 @@ public class CoreTestTemplates {
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withNumberOfPreviousConvictionsCited(INTEGER.next())
                 .withProsecutionAuthorityReference(STRING.next())
+                .withIsYouth(Boolean.TRUE)
                 .withOffences(
                         structure.getV().stream()
                                 .map(offenceId -> offence(args, offenceId).build())
@@ -364,6 +366,15 @@ public class CoreTestTemplates {
                 .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
                 .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
                 .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null);
+    }
+
+    public static Marker.Builder marker(Pair<UUID, List<UUID>> structure) {
+
+        return Marker.marker()
+                .withId(structure.getK())
+                .withMarkerTypeCode(STRING.next())
+                .withMarkerTypeDescription(STRING.next())
+                .withMarkerTypeid(UUID.randomUUID());
     }
 
     public static ProsecutionCase.Builder prosecutionCase(CoreTemplateArguments args, Pair<UUID, Map<UUID, List<UUID>>> structure) {
@@ -376,11 +387,20 @@ public class CoreTestTemplates {
                 .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
                 .withStatementOfFacts(STRING.next())
                 .withStatementOfFactsWelsh(STRING.next())
+                .withCaseMarkers(buildCaseMarkers())
                 .withDefendants(
                         structure.getV().entrySet().stream()
                                 .map(entry -> defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build())
                                 .collect(toList())
                 );
+    }
+
+    private static List<Marker> buildCaseMarkers() {
+        return singletonList(Marker.marker()
+                .withId(randomUUID())
+                .withMarkerTypeCode(STRING.next())
+                .withMarkerTypeDescription(STRING.next())
+                .withMarkerTypeid(randomUUID()).build());
     }
 
     public static ReferralReason.Builder referralReason() {

@@ -10,6 +10,7 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
@@ -95,7 +96,8 @@ public class HearingEventListenerRamlConfigTest {
             InterpreterIntermediaryChangeIgnored.class.getAnnotation(Event.class).value(),
             CompanyRepresentativeChangeIgnored.class.getAnnotation(Event.class).value(),
             DefendantOffenceResultsUpdated.class.getAnnotation(Event.class).value(),
-            DefendantCaseWithdrawnOrDismissed.class.getAnnotation(Event.class).value()
+            DefendantCaseWithdrawnOrDismissed.class.getAnnotation(Event.class).value(),
+            CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value()
     );
 
     private Map<String, String> handlerNames = new HashMap<>();
@@ -125,7 +127,8 @@ public class HearingEventListenerRamlConfigTest {
                 CaseEjectedEventListener.class,
                 CourtApplicationEjectedEventListener.class,
                 InterpreterIntermediaryEventListener.class,
-                CompanyRepresentativeEventListener.class));
+                CompanyRepresentativeEventListener.class,
+                CaseMarkerEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 

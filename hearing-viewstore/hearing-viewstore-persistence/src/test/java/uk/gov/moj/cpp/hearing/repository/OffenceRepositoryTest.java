@@ -63,6 +63,7 @@ public class OffenceRepositoryTest {
             }));
             // because h2 incorrectly maps column type TEXT to VARCHAR(255)
             hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
+            hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
             hearingRepository.save(hearingEntity);
         });
     }

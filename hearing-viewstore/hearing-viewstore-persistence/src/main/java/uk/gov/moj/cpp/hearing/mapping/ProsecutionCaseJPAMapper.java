@@ -19,12 +19,15 @@ public class ProsecutionCaseJPAMapper {
     private static final String CASE_STATUS_EJECTED = "EJECTED";
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
     private DefendantJPAMapper defendantJPAMapper;
+    private CaseMarkerJPAMapper caseMarkerJPAMapper;
 
     @Inject
     public ProsecutionCaseJPAMapper(final ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper,
-                                    final DefendantJPAMapper defendantJPAMapper) {
+                                    final DefendantJPAMapper defendantJPAMapper,
+                                    final CaseMarkerJPAMapper caseMarkerJPAMapper) {
         this.prosecutionCaseIdentifierJPAMapper = prosecutionCaseIdentifierJPAMapper;
         this.defendantJPAMapper = defendantJPAMapper;
+        this.caseMarkerJPAMapper = caseMarkerJPAMapper;
     }
 
     //to keep cdi tester jhappy
@@ -41,6 +44,7 @@ public class ProsecutionCaseJPAMapper {
         prosecutionCase.setOriginatingOrganisation(pojo.getOriginatingOrganisation());
         prosecutionCase.setInitiationCode(pojo.getInitiationCode());
         prosecutionCase.setCaseStatus(pojo.getCaseStatus());
+        prosecutionCase.setMarkers(caseMarkerJPAMapper.toJPA(hearing, prosecutionCase, pojo.getCaseMarkers()));
         prosecutionCase.setStatementOfFacts(pojo.getStatementOfFacts());
         prosecutionCase.setStatementOfFactsWelsh(pojo.getStatementOfFactsWelsh());
         prosecutionCase.setDefendants(defendantJPAMapper.toJPA(hearing, prosecutionCase, pojo.getDefendants()));
@@ -60,6 +64,7 @@ public class ProsecutionCaseJPAMapper {
                 .withStatementOfFacts(entity.getStatementOfFacts())
                 .withStatementOfFactsWelsh(entity.getStatementOfFactsWelsh())
                 .withDefendants(defendantJPAMapper.fromJPA(entity.getDefendants()))
+                .withCaseMarkers(caseMarkerJPAMapper.fromJPA(entity.getMarkers()))
                 .build();
     }
 

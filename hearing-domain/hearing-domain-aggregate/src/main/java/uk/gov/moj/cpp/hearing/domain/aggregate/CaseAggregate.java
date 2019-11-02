@@ -4,9 +4,11 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
+import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -19,7 +21,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S1068", "squid:S1948"})
 public class CaseAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 100L;
+    private static final long serialVersionUID = 101L;
 
     private Boolean sendingSheetCompleteProcessed = false;
 
@@ -60,5 +62,14 @@ public class CaseAggregate implements Aggregate {
     }
     public List<UUID> getHearingIds() {
         return hearingIds;
+    }
+
+    public Stream<Object> enrichUpdateCaseMarkersWithHearingIds(final UUID prosecutionCaseId, final List<Marker> markers) {
+        if (!hearingIds.isEmpty()) {
+            return apply(Stream.of(new
+                    CaseMarkersEnrichedWithAssociatedHearings(prosecutionCaseId, hearingIds, markers)));
+        } else {
+            return Stream.empty();
+        }
     }
 }

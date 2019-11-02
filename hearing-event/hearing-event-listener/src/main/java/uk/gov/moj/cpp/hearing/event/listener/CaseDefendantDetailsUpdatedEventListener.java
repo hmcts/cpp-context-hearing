@@ -60,6 +60,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
             defendant.setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh());
             defendant.setMitigation(defendantIn.getMitigation());
             defendant.setMitigationWelsh(defendantIn.getMitigationWelsh());
+            defendant.setIsYouth(defendantIn.getIsYouth());
             with(defendant.getDefenceOrganisation(), defendantIn.getDefenceOrganisation(), this::setOrganisation);
             with(defendant.getLegalEntityOrganisation(), getLegalEntityDefendantOrganisation(defendantIn.getLegalEntityDefendant()), this::setOrganisation);
             with(defendant.getPersonDefendant(), defendantIn.getPersonDefendant(),
