@@ -32,12 +32,12 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
         }, 0);
     }
 
-    @Test
-    public void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotSharedNoBailStatus() throws Exception {
-        updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
-            c.getDefendants().get(0).getPersonDefendant().setBailStatus(null);
-        }, 10);
-    }
+//    @Test
+//    public void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotSharedNoBailStatus() throws Exception {
+//        updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
+//            c.getDefendants().get(0).getPersonDefendant().setBailStatus(null);
+//        }, 10);
+//    }
 
 
     private void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(Consumer<CaseDefendantDetails> caseDefendantDetailsConsumer, long waitTime) throws Exception {
