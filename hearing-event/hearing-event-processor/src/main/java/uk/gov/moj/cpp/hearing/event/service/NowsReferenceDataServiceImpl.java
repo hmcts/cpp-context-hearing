@@ -6,6 +6,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -19,15 +20,23 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
 
     private final LjaReferenceDataLoader ljaReferenceDataLoader;
 
+    private final EventMapperDataLoader eventMapperDataLoader;
+
     @Inject
-    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader) {
+    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader, final EventMapperDataLoader eventMapperDataLoader) {
         this.nowsReferenceCache = nowsReferenceCache;
         this.ljaReferenceDataLoader = ljaReferenceDataLoader;
+        this.eventMapperDataLoader = eventMapperDataLoader;
     }
 
     @Override
     public LjaDetails getLjaDetailsByCourtCentreId(JsonEnvelope context, UUID courtCentreId) {
         return ljaReferenceDataLoader.getLjaDetailsByCourtCentreId(context, courtCentreId);
+    }
+
+    @Override
+    public List<EventMapping> getEventMapping() {
+        return eventMapperDataLoader.getEventMappingFromReferenceData();
     }
 
     @Override
