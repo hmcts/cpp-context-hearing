@@ -166,4 +166,9 @@ public class HearingCommandApi {
     public void removeCompanyRepresentative(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-company-representative").apply(envelope.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.publish-court-list")
+    public void publishCourtList(final JsonEnvelope envelope){
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.publish-court-list").apply(envelope.payloadAsJsonObject()));
+    }
 }

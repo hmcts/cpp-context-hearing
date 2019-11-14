@@ -275,3 +275,19 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get-cracked-ineffective-reason+json:
                     example:  !include json/hearing.get-cracked-ineffective-reason.json
                     schema:  !include json/schema/hearing.get-cracked-ineffective-reason.json
+
+/court-list-publish-status/{courtCentreId}:
+  description: get status of latest publish court list document
+  get:
+    description: |
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.court.list.publish.status+json
+          name: hearing.court.list.publish.status
+      ...
+    responses:
+      200:
+        body:
+          application/vnd.hearing.court.list.publish.status+json:
+            example:  !include json/hearing.court.list.publish.status.json
+            schema:  !include  json/schema/hearing.court.list.publish.status.json

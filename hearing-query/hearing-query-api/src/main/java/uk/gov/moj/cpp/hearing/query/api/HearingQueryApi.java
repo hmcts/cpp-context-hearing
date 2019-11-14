@@ -73,4 +73,9 @@ public class HearingQueryApi {
     public JsonEnvelope getCrackedIneffectiveTrialReason(final JsonEnvelope query) {
         return this.requester.request(query);
     }
+
+    @Handles("hearing.court.list.publish.status")
+    public JsonEnvelope publishCourtListStatus(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

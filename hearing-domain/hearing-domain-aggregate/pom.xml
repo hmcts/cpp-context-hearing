@@ -9,6 +9,14 @@
 
     <dependencies>
 
+
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>uk.gov.justice.framework-api</groupId>
             <artifactId>framework-api-domain</artifactId>
@@ -59,5 +67,60 @@
             <version>1.7.24</version>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>domain-test-dsl</artifactId>
+            <version>${domain.test.dsl.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>dsl-domain</id>
+            <activation>
+                <file>
+                    <exists>src/test/resources/domain-features/</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <dependenciesToScan>
+                                <dependency>uk.gov.justice.services:domain-test-dsl</dependency>
+                            </dependenciesToScan>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>net.masterthought</groupId>
+                        <artifactId>maven-cucumber-reporting</artifactId>
+                        <version>${maven.cucumber.reporting.plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>execution</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <projectName>${project.artifactId}</projectName>
+                                    <outputDirectory>
+                                        ${project.build.directory}/site/cucumber-reports
+                                    </outputDirectory>
+                                    <cucumberOutput>${project.build.directory}/cucumber.json
+                                    </cucumberOutput>
+                                    <skippedFails>true</skippedFails>
+                                    <buildNumber>${ci.build}</buildNumber>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

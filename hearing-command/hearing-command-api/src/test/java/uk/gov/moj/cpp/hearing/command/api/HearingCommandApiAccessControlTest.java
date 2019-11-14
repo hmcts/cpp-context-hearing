@@ -39,6 +39,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_ADD_APPLICANT_COUNSEL = "hearing.add-applicant-counsel";
     private static final String ACTION_NAME_REMOVE_APPLICANT_COUNSEL = "hearing.remove-applicant-counsel";
     private static final String ACTION_NAME_UPDATE_APPLICANT_COUNSEL = "hearing.update-applicant-counsel";
+    private static final String ACTION_NAME_COURT_LIST_PUBLISH_STATUS = "hearing.publish-court-list";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -454,6 +455,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     public void shouldNotAllowUnauthorisedUserToUpdateRespondentCounsel() {
         final Action action = createActionFor(ACTION_NAME_UPDATE_RESPONDENT_COUNSEL);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        final Action action = createActionFor(ACTION_NAME_COURT_LIST_PUBLISH_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        final Action action = createActionFor(ACTION_NAME_COURT_LIST_PUBLISH_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group"))
+                .willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);

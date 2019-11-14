@@ -1,0 +1,7 @@
+{
+  "courtCentreId": "COURT_CENTRE_ID",
+  "courtListFileId": "COURT_LIST_FILE_ID",
+  "courtListFileName":"COURT_LIST_FILE_NAME",
+  "createdTime": "CREATED_TIME",
+  "errorMessage": "ERROR_MESSAGE"
+}

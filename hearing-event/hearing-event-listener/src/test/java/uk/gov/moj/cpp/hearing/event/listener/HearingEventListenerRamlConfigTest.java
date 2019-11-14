@@ -10,10 +10,7 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
-import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
-
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
@@ -124,7 +121,8 @@ public class HearingEventListenerRamlConfigTest {
                 CaseEjectedEventListener.class,
                 CourtApplicationEjectedEventListener.class,
                 InterpreterIntermediaryEventListener.class,
-                CompanyRepresentativeEventListener.class));
+                CompanyRepresentativeEventListener.class,
+                PublishCourtListEventListener.class));
 
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
 
@@ -146,7 +144,9 @@ public class HearingEventListenerRamlConfigTest {
                 "uk.gov.moj.cpp.hearing.domain.event",
                 "uk.gov.moj.cpp.hearing.nows.events",
                 "uk.gov.justice.hearing.courts",
-                "uk.gov.moj.cpp.hearing.subscription.events")
+                "uk.gov.moj.cpp.hearing.subscription.events",
+                "uk.gov.moj.cpp.hearing.publishing.events")
+
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {
                     try {

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="8" author="TechPod" logicalFilePath="079-add-court-list.xml">
+        <createTable tableName="courtlist">
+            <column name="court_centre_id" type="UUID">
+                <constraints  nullable="false"/>
+            </column>
+            <column name="publish_status" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="court_list_file_id" type="UUID"/>
+
+            <column name="court_list_file_name" type="TEXT"/>
+
+            <column name="last_updated" type="DATETIME">
+                <constraints nullable="false"/>
+            </column>
+            <column name="error_message" type="TEXT"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="court_centre_id,publish_status,last_updated"
+                       constraintName="combination_primary_key"
+                       tableName="courtlist"/>
+    </changeSet>
+</databaseChangeLog>

@@ -263,3 +263,20 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.set-trial-type+json:
             schema: !include json/schema/hearing.command.set-trial-type.json
             example: !include json/hearing.command.set-trial-type.json
+
+#  Export court list to exhibit
+        application/vnd.hearing.command.record-court-list-export-successful+json:
+            schema: !include json/schema/hearing.record-court-list-export-successful.json
+            example: !include json/hearing.record-court-list-export-successful.json
+
+        application/vnd.hearing.command.record-court-list-export-failed+json:
+            schema: !include json/schema/hearing.command.record-court-list-export-failed.json
+            example: !include json/hearing.command.record-court-list-export-failed.json
+
+        application/vnd.hearing.command.publish-court-list+json:
+            schema: !include json/schema/hearing.command.publish-court-list.json
+            example: !include json/hearing.command.publish-court-list.json
+
+        application/vnd.hearing.command.record-court-list-produced+json:
+            schema: !include json/schema/hearing.command.record-court-list-produced.json
+            example: !include json/hearing.command.record-court-list-produced.json

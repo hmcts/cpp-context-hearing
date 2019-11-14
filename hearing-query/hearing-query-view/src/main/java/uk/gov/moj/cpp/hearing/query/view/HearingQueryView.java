@@ -1,6 +1,10 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.util.UUID.fromString;
+import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import static uk.gov.justice.services.messaging.JsonObjects.toJsonArray;
 
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.LocalDates;
@@ -14,13 +18,16 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
@@ -37,6 +44,9 @@ public class HearingQueryView {
     private HearingService hearingService;
     @Inject
     private Enveloper enveloper;
+
+    @Inject
+    CourtListRepository courtListRepository;
 
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope envelope) {
@@ -106,4 +116,23 @@ public class HearingQueryView {
         return enveloper.withMetadataFrom(envelope, "hearing.get-cracked-ineffective-reason")
                 .apply(hearingService.getCrackedIneffectiveTrial(trialTypeId.get()));
     }
+
+    @Handles("hearing.court.list.publish.status")
+    public JsonEnvelope getCourtListPublishStatus(final JsonEnvelope query) {
+        final String courtCentreId = query.payloadAsJsonObject().getString(FIELD_COURT_CENTRE_ID);
+
+        final JsonArray courtListPublishStatuses = toJsonArray(courtListRepository
+                        .courtListPublishStatuses(fromString(courtCentreId)),
+                publishCourtListStatus -> {
+                    final JsonObjectBuilder builder = createObjectBuilder();
+                    builder.add("courtCentreId", publishCourtListStatus.getCourtCentreId().toString())
+                            .add("lastUpdated", publishCourtListStatus.getLastUpdated().toString())
+                            .add("publishStatus", publishCourtListStatus.getPublishStatus().toString())
+                            .add("errorMessage", defaultIfEmpty(publishCourtListStatus.getFailureMessage(), ""));
+                    return builder.build();
+                });
+
+        return enveloper.withMetadataFrom(query, "hearing.court.list.publish.status").apply(createObjectBuilder().add("publishCourtListStatuses", courtListPublishStatuses).build());
+    }
 }
+

@@ -329,3 +329,11 @@ rule "Command - API - Action - hearing.set-trial-type"
   then
     $outcome.setSuccess(true);
 end
+rule "Command - API - Action - hearing.publish-court-list"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.publish-court-list");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end

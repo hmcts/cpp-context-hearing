@@ -113,3 +113,11 @@ rule "Query - API - hearing.get-cracked-ineffective-reason"
   then
     $outcome.setSuccess(true);
 end
+rule "Query - API - hearing.court.list.publish.status"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.court.list.publish.status");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers"));
+  then
+    $outcome.setSuccess(true);
+end
