@@ -25,14 +25,13 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
 
+        <authorisation.service.version>0.1.96</authorisation.service.version>
+        <criminal-court-public-model.version>1.0.51</criminal-court-public-model.version>
         <referencedata.version>2.0.275</referencedata.version>
         <material.version>6.0.1</material.version>
         <results.version>1.0.16</results.version>
         <notification.notify.version>0.0.26</notification.notify.version>
-        <stagingenforcement.version>0.0.90</stagingenforcement.version>
-        <progression-version>2.0.145</progression-version>
-
-        <criminal-court-public-model.version>1.0.48</criminal-court-public-model.version>
+        <stagingenforcement.version>0.0.94</stagingenforcement.version>
     </properties>
     <modules>
         <module>hearing-query</module>
@@ -125,23 +124,6 @@
 
         <plugins>
             <plugin>
-                <groupId>external.atlassian.jgitflow</groupId>
-                <artifactId>jgitflow-maven-plugin</artifactId>
-                <configuration>
-                    <flowInitContext>
-                        <masterBranchName>dev/hearing-release</masterBranchName>
-                        <developBranchName>master</developBranchName>
-                        <featureBranchPrefix>dev/hearing-feature-</featureBranchPrefix>
-                        <releaseBranchPrefix>dev/hearing-release-</releaseBranchPrefix>
-                        <hotfixBranchPrefix>dev/hearing-hotfix-</hotfixBranchPrefix>
-                        <versionTagPrefix>hearing-tag-</versionTagPrefix>
-                    </flowInitContext>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <enableSshAgent>true</enableSshAgent>
-                    <pushReleases>true</pushReleases>
-                </configuration>
-            </plugin>
-            <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
                     <archiveClasses>true</archiveClasses>
@@ -167,6 +149,13 @@
                 <artifactId>datafactory</artifactId>
                 <version>${datafactory.version}</version>
                 <scope>test</scope>
+            </dependency>
+            <!-- TODO remove this once techpod has fixed teh enveloper for FW5 -->
+            <dependency>
+                <groupId>uk.gov.justice.services</groupId>
+                <artifactId>test-utils-enveloper-provider</artifactId>
+                <scope>test</scope>
+                <version>${cpp.framework.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

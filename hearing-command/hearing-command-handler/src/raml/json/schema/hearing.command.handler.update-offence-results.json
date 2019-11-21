@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/hearing.command.handler.update-offence-results.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "caseId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "defendantId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "offenceIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
+    },
+    "resultedOffences": {
+      "type": "array",
+      "items": {
+        "properties": {
+          "offenceId": {
+            "$ref": "#/definitions/uuid"
+          },
+          "offenceResult": {
+            "$ref": "#/definitions/resultType"
+          }
+        },
+        "requiredProperties": [
+          "offenceId",
+          "offenceResult"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "hearingId",
+    "caseId",
+    "defendantId",
+    "offenceIds",
+    "resultedOffences"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "resultType": {
+      "type": "string",
+      "enum": [
+        "DISMISSED",
+        "GUILTY",
+        "WITHDRAWN",
+        "ADJOURNED"
+      ]
+    }
+  }
+}

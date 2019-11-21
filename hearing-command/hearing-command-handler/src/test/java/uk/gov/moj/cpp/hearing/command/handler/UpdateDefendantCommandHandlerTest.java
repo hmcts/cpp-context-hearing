@@ -36,6 +36,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
 import java.util.UUID;
 
@@ -53,7 +54,8 @@ public class UpdateDefendantCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             DefendantDetailsUpdated.class,
-            CaseDefendantDetailsWithHearings.class);
+            CaseDefendantDetailsWithHearings.class,
+            RegisteredHearingAgainstDefendant.class);
 
     @Mock
     private EventStream eventStream;
@@ -92,10 +94,7 @@ public class UpdateDefendantCommandHandlerTest {
 
         changeDefendantDetailsCommandHandler.initiateCaseDefendantDetailsChange(envelope);
 
-        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.update-case-defendant-details-enriched-with-hearing-ids"),
-                        payloadIsJson(allOf(withJsonPath("$.defendant.id", is(caseDefendantChanged.getDefendants().get(0).getId().toString()))))
-                )));
+        assertThat(this.eventStream.size(), is(0L));
     }
 
     @SuppressWarnings("unchecked")

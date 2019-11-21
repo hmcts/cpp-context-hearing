@@ -22,6 +22,7 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
@@ -52,6 +53,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDe
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.OffenceDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.PleaDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ProsecutionCaseDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ProsecutionCounselDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.RespondentCounselDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ResultsSharedDelegate;
@@ -64,6 +66,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeAdded;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
@@ -155,6 +158,8 @@ public class HearingAggregate implements Aggregate {
 
     private final CompanyRepresentativeDelegate companyRepresentativeDelegate = new CompanyRepresentativeDelegate(momento);
 
+    private final ProsecutionCaseDelegate prosecutionCaseDelegate = new ProsecutionCaseDelegate(momento);
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
@@ -203,6 +208,7 @@ public class HearingAggregate implements Aggregate {
                 when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
+                when(CaseMarkersUpdated.class).apply(prosecutionCaseDelegate::handleCaseMarkersUpdated),
                 otherwiseDoNothing()
         );
 
@@ -417,5 +423,9 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> removeCompanyRepresentative(final UUID id, final UUID hearingId) {
         return apply(companyRepresentativeDelegate.removeCompanyRepresentative(id, hearingId));
+    }
+
+    public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, List<Marker> markers) {
+        return prosecutionCaseDelegate.updateCaseMarkers(hearingId, prosecutionCaseId, markers);
     }
 }

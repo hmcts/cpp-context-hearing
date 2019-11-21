@@ -31,6 +31,7 @@ import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
+import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.NotifiedPlea;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
@@ -300,6 +301,8 @@ public class InitiateHearingIT extends AbstractIT {
                                                 .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()))
                                                 .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCaseIdentifier.getCaseURN()))
                                                 .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(prosecutionCaseIdentifier.getProsecutionAuthorityReference())))
+                                        .with(ProsecutionCase::getCaseMarkers, first(isBean(Marker.class)
+                                                .with(Marker::getId, is(hearingOne.getFirstCase().getCaseMarkers().get(0).getId()))))
                                         .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getId, is(defendant.getId()))
                                                 .with(Defendant::getProsecutionCaseId, is(defendant.getProsecutionCaseId()))

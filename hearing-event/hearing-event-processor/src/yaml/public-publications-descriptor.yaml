@@ -85,4 +85,8 @@ subscriptions_descriptor:
         - name: public.hearing.company-representative-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-company-representative-change-ignored.json
 
+      # defendant case withdrawn or dismissed
+        - name: public.hearing.defendant-case-withdrawn-or-dismissed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/public.hearing.defendant-case-withdrawn-or-dismissed.json
+
       event_source_name: public.event.source

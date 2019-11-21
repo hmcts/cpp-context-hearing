@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.event.defendant-case-withdrawn-or-dismissed.json",
+  "type": "object",
+  "properties": {
+    "caseId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "defendantId": {
+      "$ref": "#/definitions/uuid"
+    },
+    "resultedOffences": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$": {
+          "$ref": "#/definitions/resultType"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "caseId",
+    "defendantId",
+    "resultedOffences"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    },
+    "resultType": {
+      "type": "string",
+      "enum": [
+        "DISMISSED",
+        "GUILTY",
+        "WITHDRAWN",
+        "ADJOURNED"
+      ]
+    }
+  }
+}

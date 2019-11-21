@@ -42,6 +42,8 @@ public class Defendant implements Serializable {
 
     private String pncId;
 
+    private Boolean isYouth;
+
     public List<DefendantAlias> getAliases() {
         return aliases;
     }
@@ -152,5 +154,13 @@ public class Defendant implements Serializable {
 
     public void setWitnessStatementWelsh(String witnessStatementWelsh) {
         this.witnessStatementWelsh = witnessStatementWelsh;
+    }
+
+    public Boolean getIsYouth() {
+        return isYouth;
+    }
+
+    public void setIsYouth(final Boolean youth) {
+        isYouth = youth;
     }
 }

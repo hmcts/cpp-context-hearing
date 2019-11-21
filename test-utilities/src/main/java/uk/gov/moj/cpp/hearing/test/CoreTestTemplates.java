@@ -21,7 +21,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedPerson;
-import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
@@ -43,6 +42,7 @@ import uk.gov.justice.core.courts.JudicialRoleType;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.NotifiedPlea;
 import uk.gov.justice.core.courts.NotifiedPleaValue;
 import uk.gov.justice.core.courts.Offence;
@@ -236,8 +236,7 @@ public class CoreTestTemplates {
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
-                        .build())
-                ;
+                        .build());
 
         if (!args.isOffenceCountNull) {
             result.withCount(INTEGER.next());
@@ -357,6 +356,7 @@ public class CoreTestTemplates {
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withNumberOfPreviousConvictionsCited(INTEGER.next())
                 .withProsecutionAuthorityReference(STRING.next())
+                .withIsYouth(Boolean.TRUE)
                 .withOffences(
                         structure.getV().stream()
                                 .map(offenceId -> offence(args, offenceId).build())
@@ -366,6 +366,15 @@ public class CoreTestTemplates {
                 .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
                 .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
                 .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null);
+    }
+
+    public static Marker.Builder marker(Pair<UUID, List<UUID>> structure) {
+
+        return Marker.marker()
+                .withId(structure.getK())
+                .withMarkerTypeCode(STRING.next())
+                .withMarkerTypeDescription(STRING.next())
+                .withMarkerTypeid(UUID.randomUUID());
     }
 
     public static ProsecutionCase.Builder prosecutionCase(CoreTemplateArguments args, Pair<UUID, Map<UUID, List<UUID>>> structure) {
@@ -378,11 +387,20 @@ public class CoreTestTemplates {
                 .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
                 .withStatementOfFacts(STRING.next())
                 .withStatementOfFactsWelsh(STRING.next())
+                .withCaseMarkers(buildCaseMarkers())
                 .withDefendants(
                         structure.getV().entrySet().stream()
                                 .map(entry -> defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build())
                                 .collect(toList())
                 );
+    }
+
+    private static List<Marker> buildCaseMarkers() {
+        return singletonList(Marker.marker()
+                .withId(randomUUID())
+                .withMarkerTypeCode(STRING.next())
+                .withMarkerTypeDescription(STRING.next())
+                .withMarkerTypeid(randomUUID()).build());
     }
 
     public static ReferralReason.Builder referralReason() {
@@ -424,18 +442,18 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,int year, int month, int day) throws NoSuchAlgorithmException {
-       final Random random = SecureRandom.getInstanceStrong();
-       final int min = 1;
-       final int max = 5;
-       final Hearing.Builder hearingBuilder = Hearing.hearing()
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, int year, int month, int day) throws NoSuchAlgorithmException {
+        final Random random = SecureRandom.getInstanceStrong();
+        final int min = 1;
+        final int max = 5;
+        final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
-                                            hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
-                                            hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
+                .withHearingDays(asList(hearingDayWithParam(year, month, day + 1, random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(year, month, day, random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(year, month, day - 1, random.nextInt((max - min) + 1) + min).build()))
                 .withCourtCentre(courtCentreWithArgs(courtAndRoomId).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
@@ -651,6 +669,34 @@ public class CoreTestTemplates {
                 .withIsComplete(true)
                 .withIsModified(false)
                 .withIsDeleted(true)
+                .build();
+    }
+
+    public static Target.Builder targetForOffenceResultShared(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId, UUID resultDefinitionId) {
+        return Target.target()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult("json string")
+                .withResultLines(new ArrayList<>(asList(resultLineForOffenceResultShared(resultLineId, resultDefinitionId))));
+    }
+
+    public static ResultLine resultLineForOffenceResultShared(UUID resultLineId, UUID resultDefinitionId) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(resultDefinitionId)
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.OFFENCE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
                 .build();
     }
 

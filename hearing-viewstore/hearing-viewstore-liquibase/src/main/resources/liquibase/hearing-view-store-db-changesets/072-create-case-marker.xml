@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="72" author="hearing" logicalFilePath="072-create-case-marker">
+
+        <createTable tableName="ha_case_marker">
+            <column name="id" type="UUID"/>
+            <column name="hearing_id" type="UUID"/>
+            <column name="prosecution_case_id" type="UUID"/>
+            <column name="payload" type="jsonb"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_ha_case_marker"
+                       tableName="ha_case_marker"/>
+
+        <addForeignKeyConstraint baseColumnNames="prosecution_case_id, hearing_id"
+                                 baseTableName="ha_case_marker"
+                                 constraintName="fk_marker_case"
+                                 referencedColumnNames="id, hearing_id"
+                                 referencedTableName="ha_case"/>
+
+
+    </changeSet>
+
+</databaseChangeLog>

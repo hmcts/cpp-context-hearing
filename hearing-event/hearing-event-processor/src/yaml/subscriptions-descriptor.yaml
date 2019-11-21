@@ -170,6 +170,14 @@ subscriptions_descriptor:
         - name: hearing.company-representative-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/company-representative-change-ignored.json
 
+      # Defendant case withdrawn or dismissed
+        - name: hearing.event.defendant-case-withdrawn-or-dismissed
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.event.defendant-case-withdrawn-or-dismissed.json
+
+      # Case Marker
+        - name: hearing.events.case-markers-enriched-with-associated-hearings
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.case-markers-enriched-with-associated-hearings.json
+
       event_source_name: hearing
 
     - name: public event subscription
@@ -210,5 +218,9 @@ subscriptions_descriptor:
       # Progression Hearing Detail Changed
         - name: public.progression.events.case-or-application-ejected
           schema_uri: http://justice.gov.uk/progression/courts/case-or-application-ejected
+
+      # Case Markers updated
+        - name: public.progression.case-markers-updated
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.case-markers-updated.json
 
       event_source_name: public.event.source

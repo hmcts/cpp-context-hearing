@@ -23,8 +23,8 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
-
 import uk.gov.justice.core.courts.InterpreterIntermediary;
+import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
 import uk.gov.justice.core.courts.Target;
@@ -40,6 +40,7 @@ import uk.gov.justice.hearing.courts.RemoveInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
 import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
 import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
+import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
@@ -859,4 +860,28 @@ public class UseCases {
 
         return trialType;
     }
+
+    public static void updateCaseMarkers(final UUID prosecutionCaseId, final UUID hearingId, final List<Marker> markers) throws Exception {
+
+        final String eventName = "public.progression.case-markers-updated";
+        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        for (Marker marker : markers) {
+            final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
+            String payloadAsString = mapper.writeValueAsString(marker);
+            final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
+            arrayBuilder.add(uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build());
+        }
+        JsonObject payload = createObjectBuilder()
+                .add("prosecutionCaseId", prosecutionCaseId.toString())
+                .add("hearingId", hearingId.toString())
+                .add("caseMarkers", arrayBuilder)
+                .build();
+        sendMessage(
+                publicEvents.createProducer(),
+                eventName,
+                payload,
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+    
 }

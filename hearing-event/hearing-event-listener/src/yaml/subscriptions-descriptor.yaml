@@ -186,4 +186,8 @@ subscriptions_descriptor:
         - name: hearing.court-application-ejected
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.court-application-ejected.json
 
+      # Case Marker
+        - name: hearing.events.case-markers-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.case-markers-updated.json
+
       event_source_name: hearing

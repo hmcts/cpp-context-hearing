@@ -57,6 +57,7 @@ public class DefendantAttendanceRepositoryTest {
         hearings.add(initiateHearingCommand.getHearing());
         uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
         Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
+        hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
         hearingRepository.save(hearingEntity);
 
         final UUID id = randomUUID();
