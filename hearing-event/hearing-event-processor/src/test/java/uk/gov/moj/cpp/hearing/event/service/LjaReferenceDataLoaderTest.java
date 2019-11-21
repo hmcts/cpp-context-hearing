@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event.service;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.GET_ENFORCEMENT_AREA_BY_COURT_CODE;
+import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.ENFORCEMENT_AREA_QUERY_NAME;
 import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.GET_ORGANISATION_UNIT_BY_ID_ID;
 
 import uk.gov.justice.core.courts.LjaDetails;
@@ -45,9 +45,9 @@ public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
         final UUID courtCentreId = UUID.randomUUID();
 
         mockQuery(GET_ORGANISATION_UNIT_BY_ID_ID, organisationalUnit, false);
-        mockQuery(GET_ENFORCEMENT_AREA_BY_COURT_CODE, enforcementArea, true);
+        mockQuery(ENFORCEMENT_AREA_QUERY_NAME, enforcementArea, true);
 
-        final LjaDetails result = target.getLjaDetailsByCourtCentreId(context, courtCentreId);
+        final LjaDetails result = target.getLjaDetails(context, courtCentreId, null);
 
         assertThat(result.getAccountDivisionCode(), is(enforcementArea.getAccountDivisionCode().toString()));
         assertThat(result.getEnforcementEmail(), is(enforcementArea.getEmail()));
