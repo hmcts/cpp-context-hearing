@@ -96,7 +96,7 @@ public class UpdatePleaCommandHandlerTest {
     @Before
     public void setup() {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-        setField(this.jsonObjectToObjectConverter, "mapper", objectMapper);
+        setField(this.jsonObjectToObjectConverter, "objectMapper", objectMapper);
         setField(this.objectToJsonObjectConverter, "mapper", objectMapper);
     }
 
