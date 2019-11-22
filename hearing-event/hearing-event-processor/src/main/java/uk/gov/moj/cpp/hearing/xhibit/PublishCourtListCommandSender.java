@@ -27,7 +27,7 @@ public class PublishCourtListCommandSender {
 
     private static final String RECORD_COURT_LIST_PRODUCED = "hearing.command.record-court-list-produced";
     private static final String RECORD_COURT_LIST_EXPORT_SUCCESSFUL = "hearing.command.record-court-list-export-successful";
-    private static final String RECORD_COURT_LIST_EXPORT_FAILED = "hearing.command.record-court-list-publish-export-failed";
+    private static final String RECORD_COURT_LIST_EXPORT_FAILED = "hearing.command.record-court-list-export-failed";
 
 
     @Inject
@@ -66,12 +66,14 @@ public class PublishCourtListCommandSender {
         sendCommandWith(RECORD_COURT_LIST_EXPORT_SUCCESSFUL, courtListFileId, payload);
     }
 
-    public void recordCourtListExportFailed(final UUID courtListFileId,
+    public void recordCourtListExportFailed(final String courtCentreId,
+                                            final UUID courtListFileId,
                                             final String courtListFileName,
                                             final String errorMessage) {
 
         final JsonObjectBuilder objectBuilder = createObjectBuilder()
-                .add(COURT_LIST_FILE_ID, courtListFileName)
+                .add(COURT_CENTRE_ID, courtCentreId)
+                .add(COURT_LIST_FILE_ID, courtListFileId.toString())
                 .add(COURT_LIST_FILE_NAME, courtListFileName)
                 .add(CREATED_TIME, ZonedDateTimes.toString(utcClock.now()))
                 .add(ERROR_MESSAGE, errorMessage);

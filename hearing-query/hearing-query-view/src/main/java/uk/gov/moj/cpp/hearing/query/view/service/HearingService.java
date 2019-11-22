@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 import static java.lang.Boolean.TRUE;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
@@ -19,16 +20,19 @@ import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
@@ -66,6 +70,8 @@ public class HearingService {
     @Inject
     private HearingRepository hearingRepository;
     @Inject
+    private HearingEventRepository hearingEventRepository;
+    @Inject
     private NowRepository nowRepository;
     @Inject
     private NowsMaterialRepository nowsMaterialRepository;
@@ -89,6 +95,16 @@ public class HearingService {
     private ReferenceDataService referenceDataService;
 
     private final ZoneId zid = ZoneId.of(ZoneOffset.UTC.getId());
+
+    //TODO: Extend this logic for xml mappings
+    public HearingListXhibitResponse getHearingsBy(final UUID courtCentreId, final ZonedDateTime lastModifiedTime) {
+        final List<HearingEvent> hearings = hearingEventRepository.findBy(courtCentreId, lastModifiedTime);
+
+        final List<Hearing> hearingsList = hearings.stream().map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId())).collect(toList());
+
+        return new HearingListXhibitResponse(hearingsList.isEmpty() ? randomUUID(): hearingsList.get(0).getCourtCentre().getId());
+    }
+
 
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {

@@ -224,6 +224,35 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.size(), is(0));
     }
 
+    @Test
+    public void shouldFindHearingEventByCourCentreId() {
+        givenHearingExistsWithCourtCentre();
+
+        hearingEventRepository.save(
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(false)
+        );
+
+        final List<HearingEvent> hearingEventList = hearingEventRepository.findBy(COURT_CENTRE_ID, LAST_MODIFIED_TIME.minusMinutes(10l));
+
+        assertThat(hearingEventList.size(), is(1));
+        final HearingEvent hearingEvent = hearingEventList.get(0);
+
+        assertThat(hearingEvent.getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvent.getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_1));
+        assertThat(hearingEvent.getId(), is(HEARING_EVENT_ID_1));
+        assertThat(hearingEvent.getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(hearingEvent.getEventTime(), is(EVENT_TIME));
+        assertThat(hearingEvent.getLastModifiedTime(), is(LAST_MODIFIED_TIME));
+        assertThat(hearingEvent.isDeleted(), is(false));
+    }
+
     private void givenHearingEventsExistWithDeletedOnes() {
         final List<HearingEvent> hearingEvents = newArrayList(
                 HearingEvent.hearingEvent()

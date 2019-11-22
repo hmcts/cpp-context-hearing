@@ -12,14 +12,22 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsASystemUser;
 
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
+
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 public class PublishCourtListSteps extends AbstractIT {
 
     private static final String MEDIA_TYPE_QUERY_COURT_LIST_STATUS = "application/vnd.hearing.court.list.publish.status+json";
+    private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.get-hearings-by-court-centre+json";
 
     public void verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(final String courtCentreId) {
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+
         final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.court.list.publish.status"), courtCentreId);
         final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
 
@@ -51,6 +59,20 @@ public class PublishCourtListSteps extends AbstractIT {
                                         equalTo("EXPORT_SUCCESSFUL")),
                                 withJsonPath("$.publishCourtListStatuses[2].errorMessage",
                                         equalTo(""))
+                        )));
+    }
+
+    public void verifyLatestHearingEvents(final UUID courtCentreId, final ZonedDateTime modifiedTime) {
+
+        givenAUserHasLoggedInAsASystemUser(USER_ID_VALUE_AS_ADMIN);
+
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearings-by-court-centre"), courtCentreId, modifiedTime);
+        final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
+
+        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
+                .until(status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.courtCentreId", equalTo(courtCentreId.toString()))
                         )));
     }
 }

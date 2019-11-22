@@ -117,7 +117,16 @@ rule "Query - API - hearing.court.list.publish.status"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.court.list.publish.status");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers","System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get-hearings-by-court-centre"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-hearings-by-court-centre");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
   then
     $outcome.setSuccess(true);
 end

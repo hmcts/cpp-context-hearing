@@ -78,4 +78,9 @@ public class HearingQueryApi {
     public JsonEnvelope publishCourtListStatus(final JsonEnvelope query) {
         return requester.request(query);
     }
+
+    @Handles("hearing.get-hearings-by-court-centre")
+    public JsonEnvelope getHeringsByCourtCentre(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

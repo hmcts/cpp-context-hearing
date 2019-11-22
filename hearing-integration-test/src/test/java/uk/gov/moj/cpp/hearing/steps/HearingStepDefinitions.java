@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.steps;
 
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
 
@@ -11,6 +12,11 @@ public class HearingStepDefinitions extends AbstractIT {
 
     public static void givenAUserHasLoggedInAsACourtClerk(final UUID validUserId) {
         setupAsAuthorisedUser(validUserId);
+        setLoggedInUser(validUserId);
+    }
+
+    public static void givenAUserHasLoggedInAsASystemUser(final UUID validUserId) {
+        setupAsSystemUser(validUserId);
         setLoggedInUser(validUserId);
     }
 }

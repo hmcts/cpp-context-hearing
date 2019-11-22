@@ -21,9 +21,12 @@ import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCC
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatus;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +41,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class HearingQueryViewTest {
 
     private static final String COURT_CENTRE_QUERY_PARAMETER = "courtCentreId";
+    private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
 
     @Spy
     private Enveloper enveloper = createEnveloper();
@@ -45,8 +49,11 @@ public class HearingQueryViewTest {
     @Mock
     private CourtListRepository courtListRepository;
 
+    @Mock
+    private HearingService hearingService;
+
     @InjectMocks
-    HearingQueryView hearingQueryView;
+    private HearingQueryView hearingQueryView;
 
     public static final UUID COURT_CENTRE_ID = randomUUID();
 
@@ -69,6 +76,29 @@ public class HearingQueryViewTest {
                         withJsonPath("$.publishCourtListStatuses[0].publishStatus", equalTo(EXPORT_SUCCESSFUL.name()))
                 )))));
 
+    }
+
+
+    @Test
+    public void shouldGetHearingsByCourtCentre() {
+        final ZonedDateTime lastModifiedTime = ZonedDateTime.parse("2016-11-12T09:27:12Z");
+        final UUID courtCentreId = randomUUID();
+        final HearingListXhibitResponse hearingListXhibitResponse = new HearingListXhibitResponse(courtCentreId);
+
+        when(hearingService.getHearingsBy(COURT_CENTRE_ID, lastModifiedTime)).thenReturn(hearingListXhibitResponse);
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.get-hearings-by-court-centre"),
+                createObjectBuilder()
+                        .add(COURT_CENTRE_QUERY_PARAMETER, COURT_CENTRE_ID.toString())
+                        .add(LAST_MODIFIED_TIME, "2016-11-12T09:27:12Z")
+                        .build());
+
+
+        final JsonEnvelope results = hearingQueryView.getHearingsByCourtCentre(query);
+
+        assertThat(results.metadata().name(), is("hearing.get-hearings-by-court-centre"));
+        assertThat(results.payloadAsJsonObject().getString("courtCentreId"), is(courtCentreId.toString()));
     }
 
     private List<CourtListPublishStatus> publishCourtListStatuses() {

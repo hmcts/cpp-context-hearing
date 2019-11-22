@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
+import static java.time.ZonedDateTime.*;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -188,7 +189,7 @@ public class UseCases {
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withHearingId(initiateHearingCommand.getHearing().getId())
                         .withEventTime(eventTime)
-                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
+                        .withLastModifiedTime(now().withZoneSameLocal(ZoneId.of("UTC")))
                         .withRecordedLabel(STRING.next())
                         .withDefenceCounselId(defenceCounselId)
                 , consumer).build();

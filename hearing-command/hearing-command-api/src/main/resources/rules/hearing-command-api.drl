@@ -333,7 +333,7 @@ rule "Command - API - Action - hearing.publish-court-list"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.publish-court-list");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isSystemUser($action));
   then
     $outcome.setSuccess(true);
 end

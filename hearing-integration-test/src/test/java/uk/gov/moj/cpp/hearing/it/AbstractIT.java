@@ -4,6 +4,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
+import static java.util.UUID.*;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -59,7 +60,7 @@ import org.slf4j.LoggerFactory;
 public class  AbstractIT {
 
     protected static final UUID USER_ID_VALUE = randomUUID();
-    protected static final UUID USER_ID_VALUE_AS_ADMIN = randomUUID();
+    protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
     protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
     protected static final Header CPP_UID_HEADER_AS_ADMIN = new Header(USER_ID, USER_ID_VALUE_AS_ADMIN.toString());
     protected static final Properties ENDPOINT_PROPERTIES = new Properties();
@@ -82,6 +83,12 @@ public class  AbstractIT {
     protected static MultivaluedMap<String, Object> getLoggedInHeader() {
         final MultivaluedMap<String, Object> header = new MultivaluedHashMap<>();
         header.add(USER_ID, getLoggedInUser().toString());
+        return header;
+    }
+
+    protected static MultivaluedMap<String, Object> getLoggedInSystemUserHeader() {
+        final MultivaluedMap<String, Object> header = new MultivaluedHashMap<>();
+        header.add(USER_ID, USER_ID_VALUE_AS_ADMIN);
         return header;
     }
 
@@ -138,7 +145,7 @@ public class  AbstractIT {
     }
 
     protected static UUID getUUID(final Object bean, final String name) {
-        return UUID.fromString(getString(bean, name));
+        return fromString(getString(bean, name));
     }
 
     protected static String getString(final Object bean, final String name) {

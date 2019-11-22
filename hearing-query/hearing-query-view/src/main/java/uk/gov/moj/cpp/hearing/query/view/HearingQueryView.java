@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.time.ZonedDateTime.parse;
 import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.justice.services.messaging.JsonObjects.toJsonArray;
 
@@ -15,6 +17,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
@@ -36,6 +39,7 @@ public class HearingQueryView {
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
+    private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_TIME = "startTime";
     private static final String FIELD_END_TIME = "endTime";
@@ -46,7 +50,7 @@ public class HearingQueryView {
     private Enveloper enveloper;
 
     @Inject
-    CourtListRepository courtListRepository;
+    private CourtListRepository courtListRepository;
 
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope envelope) {
@@ -133,6 +137,17 @@ public class HearingQueryView {
                 });
 
         return enveloper.withMetadataFrom(query, "hearing.court.list.publish.status").apply(createObjectBuilder().add("publishCourtListStatuses", courtListPublishStatuses).build());
+    }
+
+
+    @Handles("hearing.get-hearings-by-court-centre")
+    public JsonEnvelope getHearingsByCourtCentre(final JsonEnvelope envelope) {
+        final Optional<UUID> courtCentreId = getUUID(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
+        final Optional<String> lastModifiedTime = getString(envelope.payloadAsJsonObject(), LAST_MODIFIED_TIME);
+
+        final HearingListXhibitResponse hearingListXhibitResponse = hearingService.getHearingsBy(courtCentreId.get(), parse(lastModifiedTime.get()));
+
+        return enveloper.withMetadataFrom(envelope, "hearing.get-hearings-by-court-centre").apply(hearingListXhibitResponse);
     }
 }
 

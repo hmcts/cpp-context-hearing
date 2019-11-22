@@ -462,7 +462,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
         final Action action = createActionFor(ACTION_NAME_COURT_LIST_PUBLISH_STATUS);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers"))
+        given(this.userAndGroupProvider.isSystemUser(action))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
