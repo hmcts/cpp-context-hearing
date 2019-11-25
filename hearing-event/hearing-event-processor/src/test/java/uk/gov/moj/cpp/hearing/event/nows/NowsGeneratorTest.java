@@ -414,9 +414,7 @@ public class NowsGeneratorTest {
 
         final LjaDetails ljaDetails = JurisdictionType.CROWN.equals(jurisdictionType) ? null : ljaDetails();
 
-        when(referenceDataService.getLjaDetailsByCourtCentreId(event, hearing.getCourtCentre().getId())).thenReturn(ljaDetails);
-
-        when(referenceDataService.getLjaDetailsByCourtCentreId(event, hearing.getCourtCentre().getId())).thenReturn(ljaDetails);
+        when(referenceDataService.getLjaDetails(event, hearing.getCourtCentre().getId(), null)).thenReturn(ljaDetails);
 
         final UUID promptId = resultsShared.getFirstCompletedResultLineFirstPrompt().getId();
 

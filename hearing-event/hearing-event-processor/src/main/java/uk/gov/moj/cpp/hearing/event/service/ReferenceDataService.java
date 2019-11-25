@@ -16,6 +16,6 @@ public interface ReferenceDataService {
 
     ResultDefinition getResultDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID id);
 
-    LjaDetails getLjaDetailsByCourtCentreId(JsonEnvelope context, UUID courtCentreId);
+    LjaDetails getLjaDetails(JsonEnvelope context, UUID courtCentreId, String postcode);
 
 }

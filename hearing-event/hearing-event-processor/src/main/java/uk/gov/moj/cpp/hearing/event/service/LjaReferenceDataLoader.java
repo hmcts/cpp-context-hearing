@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static javax.json.Json.createObjectBuilder;
 
 import uk.gov.justice.core.courts.Address;
@@ -15,20 +16,21 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 @SuppressWarnings({"squid:S00112", "squid:S1181"})
 public class LjaReferenceDataLoader {
 
     public static final String GET_ORGANISATION_UNIT_BY_ID_ID = "referencedata.query.organisation-unit.v2";
-    public static final String GET_ENFORCEMENT_AREA_BY_COURT_CODE = "referencedata.query.enforcement-area";
+    public static final String ENFORCEMENT_AREA_QUERY_NAME = "referencedata.query.enforcement-area";
 
     public static final String COURT_CODE_QUERY_PARAMETER = "localJusticeAreaNationalCourtCode";
     public static final String COURT_CENTRE_ID_PATH_PARAM = "id";
-
 
     @Inject
     @ServiceComponent(Component.EVENT_PROCESSOR)
@@ -37,6 +39,8 @@ public class LjaReferenceDataLoader {
     @Inject
     private Enveloper enveloper;
 
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     private OrganisationalUnit organisationalUnitById(JsonEnvelope context, final UUID id) {
         JsonEnvelope requestEnvelope;
@@ -54,7 +58,7 @@ public class LjaReferenceDataLoader {
     private EnforcementArea enforcementAreaByLjaCode(JsonEnvelope context, final String ljaCode) {
         JsonEnvelope requestEnvelope;
         JsonEnvelope jsonResultEnvelope;
-        requestEnvelope = enveloper.withMetadataFrom(context, GET_ENFORCEMENT_AREA_BY_COURT_CODE)
+        requestEnvelope = enveloper.withMetadataFrom(context, ENFORCEMENT_AREA_QUERY_NAME)
                 .apply(createObjectBuilder().add(COURT_CODE_QUERY_PARAMETER, ljaCode)
                         .build());
         jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope);
@@ -62,10 +66,22 @@ public class LjaReferenceDataLoader {
         return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), EnforcementArea.class);
     }
 
-    @Inject
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private EnforcementArea getEnforcementAreaByPostcode(final JsonEnvelope sourceEvent, final String postcode) {
+        final JsonObject queryParams = createObjectBuilder().add("postcode", postcode).build();
 
-    public LjaDetails getLjaDetailsByCourtCentreId(JsonEnvelope context, final UUID courtCentreId) {
+        final Optional<JsonObject> jsonObject = getEnforcementArea(sourceEvent, queryParams);
+
+        return jsonObject.map(object -> jsonObjectToObjectConverter.convert(object, EnforcementArea.class)).orElse(null);
+    }
+
+    private Optional<JsonObject> getEnforcementArea(final JsonEnvelope sourceEvent, final JsonObject queryParams) {
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(sourceEvent, ENFORCEMENT_AREA_QUERY_NAME).apply(queryParams);
+
+        final JsonValue enforcementArea = requester.requestAsAdmin(requestEnvelope).payload();
+        return JsonValue.NULL.equals(enforcementArea) ? Optional.empty() : Optional.of((JsonObject) enforcementArea);
+    }
+
+    public LjaDetails getLjaDetails(JsonEnvelope context, final UUID courtCentreId, final String postcode) {
         OrganisationalUnit organisationUnit = null;
 
         try {
@@ -74,12 +90,22 @@ public class LjaReferenceDataLoader {
             throw new RuntimeException(String.format("failed to find organisational unit with court centreId %s", courtCentreId), tw);
         }
 
-        final EnforcementArea enforcementArea;
+        EnforcementArea enforcementArea = null;
 
-        try {
-            enforcementArea = enforcementAreaByLjaCode(context, organisationUnit.getLja());
-        } catch (Throwable tw) {
-            throw new RuntimeException(String.format("failed to find enforcement area for lja code %s organisational unit (from  court centreId %s)", organisationUnit.getLja(), courtCentreId), tw);
+        if(nonNull(postcode)) {
+            try {
+                enforcementArea = getEnforcementAreaByPostcode(context, postcode);
+            } catch (Throwable tw) {
+                throw new RuntimeException(String.format("failed to find enforcement area for defendant postcode %s ", postcode), tw);
+            }
+        }
+
+        if(isNull(enforcementArea)) {
+            try {
+                enforcementArea = enforcementAreaByLjaCode(context, organisationUnit.getLja());
+            } catch (Throwable tw) {
+                throw new RuntimeException(String.format("failed to find enforcement area for lja code %s organisational unit (from  court centreId %s)", organisationUnit.getLja(), courtCentreId), tw);
+            }
         }
 
         final EnforcementAreaBacs enforcementAreaBACS = organisationUnit.getEnforcementArea();

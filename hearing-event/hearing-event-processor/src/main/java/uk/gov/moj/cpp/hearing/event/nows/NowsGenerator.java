@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.nows;
 
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_ADDRESS1_PROMPT_REFERENCE;
@@ -358,11 +359,11 @@ public class NowsGenerator {
         return id2PromptRef;
     }
 
-    private LjaDetails ljaDetails(final JsonEnvelope context, final Hearing hearing) {
+    private LjaDetails ljaDetails(final JsonEnvelope context, final Hearing hearing, final String defendantPostcode) {
         if (JurisdictionType.CROWN.equals(hearing.getJurisdictionType())) {
             return null;
         } else {
-            return referenceDataService.getLjaDetailsByCourtCentreId(context, hearing.getCourtCentre().getId());
+            return referenceDataService.getLjaDetails(context, hearing.getCourtCentre().getId(), defendantPostcode);
         }
     }
 
@@ -463,7 +464,7 @@ public class NowsGenerator {
         final boolean isFinancial = !financialResultDefinitionList.isEmpty();
         final Optional<String> accountNumber = !isFinancial ? Optional.empty() : Optional.of("TBC");
         financialOrderDetailsBuilder.withAccountReference(accountNumber.orElse(null)).build();
-
+        final Address address = getAddress(defendant);
         return Now.now()
                 .withId(UUID.randomUUID())
                 .withDefendantId(defendantId)
@@ -471,7 +472,7 @@ public class NowsGenerator {
                 .withRequestedMaterials(materials)
                 .withFinancialOrders(isFinancial ? financialOrderDetailsBuilder.build() : null)
                 .withReferenceDate(resultLines4NowIn.stream().map(ResultLine::getOrderedDate).findFirst().orElse(LocalDate.now()))
-                .withLjaDetails(ljaDetails(context, hearing))
+                .withLjaDetails(ljaDetails(context, hearing,  nonNull(address) ? address.getPostcode() : null))
                 .build();
     }
 
