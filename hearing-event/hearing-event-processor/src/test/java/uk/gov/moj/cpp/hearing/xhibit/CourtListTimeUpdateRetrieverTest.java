@@ -53,9 +53,7 @@ public class CourtListTimeUpdateRetrieverTest {
                 .add("createdTime", "2016-09-09T08:31:40Z")
                 .build();
 
-        final JsonArray jsonArray = createArrayBuilder().add(publishStatus).build();
-
-        final JsonObject jsonObject = createObjectBuilder().add("publishCourtListStatuses", jsonArray).build();
+        final JsonObject jsonObject = createObjectBuilder().add("publishCourtListStatus", publishStatus).build();
 
         final JsonEnvelope jsonEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUIDAndName(), jsonObject);
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
@@ -78,9 +76,7 @@ public class CourtListTimeUpdateRetrieverTest {
                 .add("createdTime", "2016-09-09T08:31:40Z")
                 .build();
 
-        final JsonArray jsonArray = createArrayBuilder().add(publishStatus).build();
-
-        final JsonObject jsonObject = createObjectBuilder().add("publishCourtListStatuses", jsonArray).build();
+        final JsonObject jsonObject = createObjectBuilder().add("publishCourtListStatus", publishStatus).build();
 
         final JsonEnvelope jsonEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUIDAndName(), jsonObject);
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
@@ -98,14 +94,9 @@ public class CourtListTimeUpdateRetrieverTest {
     @Test
     public void shouldReturnCurrentTimeMinusTenMinutes() {
 
-        final JsonObject publishStatus = createObjectBuilder()
-                .add("publishStatus", COURT_LIST_PRODUCED.name())
-                .add("createdTime", "2016-09-09T08:31:40Z")
-                .build();
+        final JsonObject publishStatus = createObjectBuilder().build();
 
-        final JsonArray jsonArray = createArrayBuilder().add(publishStatus).build();
-
-        final JsonObject jsonObject = createObjectBuilder().add("publishCourtListStatuses", jsonArray).build();
+        final JsonObject jsonObject = createObjectBuilder().add("publishCourtListStatus", publishStatus).build();
 
         final JsonEnvelope jsonEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUIDAndName(), jsonObject);
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);

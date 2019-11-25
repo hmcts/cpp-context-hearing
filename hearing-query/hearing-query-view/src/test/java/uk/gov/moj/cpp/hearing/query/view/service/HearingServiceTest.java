@@ -16,7 +16,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent.hearingEvent;
-import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.HearingHelper;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
@@ -50,6 +49,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
+import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -181,8 +181,8 @@ public class HearingServiceTest {
                 .withListingSequence(5)
                 .build();
 
-        LocalDate startDateStartOfDay = START_DATE_1.toLocalDate();
-        final HearingHelper hearingHelper = helper(buildHearing());
+        LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
+        final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
         final Hearing hearingEntity = hearingHelper.it();
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
         final UUID hearingSummaryId = randomUUID();

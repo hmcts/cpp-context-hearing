@@ -1,11 +1,9 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -23,11 +21,11 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
-import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatus;
+import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 
 import java.time.ZonedDateTime;
-import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -72,8 +70,7 @@ public class HearingQueryViewTest {
         final JsonEnvelope results = hearingQueryView.getCourtListPublishStatus(query);
         assertThat(results, is(jsonEnvelope(withMetadataEnvelopedFrom(query).withName("hearing.court.list.publish.status"), payloadIsJson(
                 allOf(
-                        withJsonPath("$.publishCourtListStatuses", hasSize(1)),
-                        withJsonPath("$.publishCourtListStatuses[0].publishStatus", equalTo(EXPORT_SUCCESSFUL.name()))
+                        withJsonPath("$.publishCourtListStatus.publishStatus", equalTo(EXPORT_SUCCESSFUL.name()))
                 )))));
 
     }
@@ -101,10 +98,10 @@ public class HearingQueryViewTest {
         assertThat(results.payloadAsJsonObject().getString("courtCentreId"), is(courtCentreId.toString()));
     }
 
-    private List<CourtListPublishStatus> publishCourtListStatuses() {
-        final UUID courtCentreId1 = randomUUID();
-        final CourtListPublishStatus publishCourtListStatus3 = new CourtListPublishStatus(courtCentreId1, now(), EXPORT_SUCCESSFUL);
-        return newArrayList(publishCourtListStatus3);
+    private Optional<CourtListPublishStatusResult> publishCourtListStatuses() {
+        final UUID courtCentreId = randomUUID();
+        final CourtListPublishStatusResult publishCourtListStatus = new CourtListPublishStatusResult(courtCentreId, now(), EXPORT_SUCCESSFUL);
+        return Optional.of(publishCourtListStatus);
     }
 
 }

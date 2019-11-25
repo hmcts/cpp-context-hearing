@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.steps;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
@@ -31,34 +32,17 @@ public class PublishCourtListSteps extends AbstractIT {
         final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.court.list.publish.status"), courtCentreId);
         final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
 
-        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_COURT_LIST_STATUS).withHeader(USER_ID, getLoggedInUser()))
+        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_COURT_LIST_STATUS).withHeader(USER_ID, getLoggedInUser())).timeout(30, SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.publishCourtListStatuses[0].courtCentreId",
+
+                                withJsonPath("$.publishCourtListStatus.courtCentreId",
                                         equalTo(courtCentreId)),
-                                withJsonPath("$.publishCourtListStatuses[0].lastUpdated",
+                                withJsonPath("$.publishCourtListStatus.lastUpdated",
                                         is(notNullValue())),
-                                withJsonPath("$.publishCourtListStatuses[0].publishStatus",
-                                        equalTo("COURT_LIST_REQUESTED")),
-                                withJsonPath("$.publishCourtListStatuses[0].errorMessage",
-                                        equalTo("")),
-                                withJsonPath("$.publishCourtListStatuses[1].courtCentreId",
-                                        equalTo(courtCentreId)),
-                                withJsonPath("$.publishCourtListStatuses[1].lastUpdated",
-                                        is(notNullValue())),
-                                withJsonPath("$.publishCourtListStatuses[1].publishStatus",
-                                        equalTo("COURT_LIST_PRODUCED")),
-                                withJsonPath("$.publishCourtListStatuses[1].errorMessage",
-                                        equalTo("")),
-                                withJsonPath("$.publishCourtListStatuses[2].courtCentreId",
-                                        equalTo(courtCentreId)),
-                                withJsonPath("$.publishCourtListStatuses[2].lastUpdated",
-                                        is(notNullValue())),
-                                withJsonPath("$.publishCourtListStatuses[2].publishStatus",
-                                        equalTo("EXPORT_SUCCESSFUL")),
-                                withJsonPath("$.publishCourtListStatuses[2].errorMessage",
-                                        equalTo(""))
+                                withJsonPath("$.publishCourtListStatus.publishStatus",
+                                        equalTo("EXPORT_SUCCESSFUL"))
                         )));
     }
 

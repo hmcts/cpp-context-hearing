@@ -5,25 +5,22 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
     <changeSet id="8" author="TechPod" logicalFilePath="079-add-court-list.xml">
-        <createTable tableName="courtlist">
+        <createTable tableName="court_list_publish_status">
+            <column name="court_list_publish_status_id" type="UUID">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
             <column name="court_centre_id" type="UUID">
                 <constraints  nullable="false"/>
             </column>
             <column name="publish_status" type="TEXT">
                 <constraints nullable="false"/>
             </column>
-            <column name="court_list_file_id" type="UUID"/>
-
-            <column name="court_list_file_name" type="TEXT"/>
-
             <column name="last_updated" type="DATETIME">
                 <constraints nullable="false"/>
             </column>
+            <column name="court_list_file_id" type="UUID"/>
+            <column name="court_list_file_name" type="TEXT"/>
             <column name="error_message" type="TEXT"/>
         </createTable>
-
-        <addPrimaryKey columnNames="court_centre_id,publish_status,last_updated"
-                       constraintName="combination_primary_key"
-                       tableName="courtlist"/>
     </changeSet>
 </databaseChangeLog>
