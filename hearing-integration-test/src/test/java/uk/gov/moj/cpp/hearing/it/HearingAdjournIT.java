@@ -333,7 +333,7 @@ public class HearingAdjournIT extends AbstractIT {
         }));
         targets.forEach(target -> target.setApplicationId(initiateHearingCommand.getHearing().getCourtApplications().get(0).getId()));
         hearingOne.getHearing();
-        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", 60000)
+        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", 90000)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
                         .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
