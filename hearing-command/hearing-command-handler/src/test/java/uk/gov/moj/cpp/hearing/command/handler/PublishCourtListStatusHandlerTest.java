@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed.publishCourtListExportFailed;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful.publishCourtListExportSuccessful;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListProduced.publishCourtListProduced;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested.publishCourtListRequested;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -21,7 +20,6 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CourtListAggregate;
-import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListProduced;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -141,26 +139,6 @@ public class PublishCourtListStatusHandlerTest {
         verify(courtListAggregate).recordCourtListRequested(any(UUID.class), any(ZonedDateTime.class));
     }
 
-    @Test
-    public void shouldCreatePublishCourtListProducedEvent() throws Exception {
-        final UUID courtCentreId = randomUUID();
-        final PublishCourtListProduced publishCourtListProduced = publishCourtListProduced().build();
-
-        when(eventSource.getStreamById(courtCentreId)).thenReturn(eventStream);
-        when(aggregateService.get(eventStream, CourtListAggregate.class)).thenReturn(courtListAggregate);
-        when(courtListAggregate.recordCourtListProduced(any(UUID.class), any(UUID.class), any(String.class), any(ZonedDateTime.class)))
-                .thenReturn(Stream.of(publishCourtListProduced));
-
-        final String jsonString = givenPayload("/hearing.command.record-court-list-produced.json").toString()
-                .replace("COURT_CENTRE_ID", courtCentreId.toString());
-
-        final JsonReader jsonReader = Json.createReader(new StringReader(jsonString));
-        final JsonEnvelope commandEnvelope = createEnvelope("hearing.command.record-court-list-produced", jsonReader.readObject());
-
-        publishCourtListStatusHandler.recordCourtListProduced(commandEnvelope);
-
-        verify(courtListAggregate).recordCourtListProduced(any(UUID.class), any(UUID.class), any(String.class), any(ZonedDateTime.class));
-    }
 
 
     private static JsonObject givenPayload(final String filePath) {

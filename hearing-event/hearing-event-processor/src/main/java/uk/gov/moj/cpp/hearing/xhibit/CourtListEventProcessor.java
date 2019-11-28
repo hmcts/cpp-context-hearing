@@ -62,16 +62,10 @@ public class CourtListEventProcessor {
                     .withMetadataFrom(envelope, HEARING_QUERY_GET_HEARINGS_BY_COURT_CENTRE)
                     .apply(queryParameters));
 
-            publishCourtListCommandSender.recordCourtListProduced(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "TEST");
+            publishCourtListCommandSender.recordCourtListExportSuccessful(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "TEST");
         } catch (final Exception e) {
             LOGGER.error("Court List generation failed", e);
             publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "NONE", e.getMessage());
         }
-    }
-
-    @Handles("hearing.event.publish-court-list-produced")
-    public void handleProducedCourtList(final JsonEnvelope envelope) {
-        final String courtCentreId = envelope.payloadAsJsonObject().getString("courtCentreId");
-        publishCourtListCommandSender.recordCourtListExportSuccessful(courtCentreId, courtListFileId, "TEST");
     }
 }

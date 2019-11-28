@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_PRODUCED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_REQUESTED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_FAILED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
@@ -12,7 +11,6 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful;
-import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListProduced;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatus;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
@@ -31,17 +29,6 @@ public class PublishCourtListEventListener {
         final CourtListPublishStatus publishRequested = new CourtListPublishStatus(randomUUID(), publishCourtListRequested.getCourtCentreId(),
                  COURT_LIST_REQUESTED, publishCourtListRequested.getCreatedTime());
         courtListRepository.save(publishRequested);
-    }
-
-    @Handles("hearing.event.publish-court-list-produced")
-    public void courtListPublishProduced(final Envelope<PublishCourtListProduced> event) {
-        final PublishCourtListProduced publishCourtListProduced = event.payload();
-        final CourtListPublishStatus publishProduced = new CourtListPublishStatus(
-                randomUUID(), publishCourtListProduced.getCourtCentreId(),
-             COURT_LIST_PRODUCED, publishCourtListProduced.getCreatedTime(),
-                publishCourtListProduced.getCourtListFileId(), publishCourtListProduced.getCourtListFileName(), ""
-        );
-        courtListRepository.save(publishProduced);
     }
 
     @Handles("hearing.event.publish-court-list-export-failed")

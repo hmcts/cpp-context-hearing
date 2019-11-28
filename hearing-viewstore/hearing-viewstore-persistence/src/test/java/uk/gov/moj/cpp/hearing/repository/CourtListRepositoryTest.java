@@ -6,7 +6,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_PRODUCED;
+import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_REQUESTED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_FAILED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 
@@ -61,7 +61,7 @@ public class CourtListRepositoryTest extends BaseTransactionalTest {
     public void shouldNotReturnPublishStatus() {
         final UUID courtCentreId = randomUUID();
 
-        final PublishStatus publishStatus = COURT_LIST_PRODUCED;
+        final PublishStatus publishStatus = COURT_LIST_REQUESTED;
         final UUID courtListFileId1 = randomUUID();
         final String courtListFileName1 = "c1";
         final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);

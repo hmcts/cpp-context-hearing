@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.time.ZonedDateTime.*;
-import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -13,7 +12,6 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_PRODUCED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_FAILED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 
@@ -23,7 +21,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.time.ZonedDateTime;
 
-import javax.json.JsonArray;
+
 import javax.json.JsonObject;
 
 import org.junit.Test;

@@ -5,8 +5,6 @@ public enum PublishStatus {
 
     EXPORT_SUCCESSFUL,
 
-    COURT_LIST_PRODUCED,
-
     COURT_LIST_REQUESTED
 
 }

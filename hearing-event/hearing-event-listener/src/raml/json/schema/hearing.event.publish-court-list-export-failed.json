@@ -18,8 +18,7 @@
       "enum": [
         "EXPORT_FAILED",
         "EXPORT_SUCCESSFUL",
-        "COURT_LIST_REQUESTED",
-        "COURT_LIST_PRODUCED"
+        "COURT_LIST_REQUESTED"
       ]
     },
     "createdTime": {

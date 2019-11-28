@@ -11,7 +11,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.PublishCourtList;
 import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportFailed;
 import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportSuccessful;
-import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListProduced;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CourtListAggregate;
 
 import java.util.UUID;
@@ -66,25 +65,6 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
         final Stream<Object> events = courtListAggregate.recordCourtListRequested(
                 courtCentreId,
                 publishCourtList.getCreatedTime());
-        appendEventsToStream(commandEnvelope, eventStream, events);
-    }
-
-
-    @Handles("hearing.command.record-court-list-produced")
-    public void recordCourtListProduced(final JsonEnvelope commandEnvelope) throws EventStreamException {
-
-         final RecordCourtListProduced recordCourtListProduced = jsonObjectConverter.convert(commandEnvelope.payloadAsJsonObject(), RecordCourtListProduced.class);
-
-        final UUID courtCentreId = recordCourtListProduced.getCourtCentreId();
-        final EventStream eventStream = eventSource.getStreamById(courtCentreId);
-        final CourtListAggregate courtListAggregate = aggregateService.get(eventStream, CourtListAggregate.class);
-
-        final Stream<Object> events = courtListAggregate.recordCourtListProduced(
-                courtCentreId,
-                recordCourtListProduced.getCourtListFileId(),
-                recordCourtListProduced.getCourtListFileName(),
-                recordCourtListProduced.getCreatedTime());
-
         appendEventsToStream(commandEnvelope, eventStream, events);
     }
 }

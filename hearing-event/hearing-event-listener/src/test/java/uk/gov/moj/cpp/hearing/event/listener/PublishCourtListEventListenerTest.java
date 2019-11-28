@@ -8,9 +8,7 @@ import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed.publishCourtListExportFailed;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful.publishCourtListExportSuccessful;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListProduced.publishCourtListProduced;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested.publishCourtListRequested;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_PRODUCED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_REQUESTED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_FAILED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
@@ -19,7 +17,6 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportFailed;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful;
-import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListProduced;
 import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatus;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
@@ -70,33 +67,6 @@ public class PublishCourtListEventListenerTest {
         assertThat(courtListArg.getCourtCentreId(), is(COURT_CENTRE_ID));
         assertThat(courtListArg.getPublishStatus(), is(COURT_LIST_REQUESTED));
         assertThat(courtListArg.getLastUpdated(), is(createdTime));
-    }
-
-    @Test
-    public void shouldRecordPublishCourtListProduced() {
-        final ZonedDateTime createdTime = new UtcClock().now();
-        final String courtListFileName = "Document Name";
-        final UUID courtListFileId = randomUUID();
-
-        final PublishCourtListProduced publishCourtListProduced = publishCourtListProduced()
-                .withCourtCentreId(COURT_CENTRE_ID)
-                .withCourtListFileId(courtListFileId)
-                .withCourtListFileName(courtListFileName)
-                .withCreatedTime(createdTime)
-                .build();
-
-        final Envelope<PublishCourtListProduced> publishCourtListProducedEvent = envelopeFrom(metadataWithDefaults(), publishCourtListProduced);
-
-        publishCourtListEventListener.courtListPublishProduced(publishCourtListProducedEvent);
-
-        verify(courtListRepository).save(notificationArgumentCaptor.capture());
-
-        final CourtListPublishStatus courtListArg = notificationArgumentCaptor.getValue();
-        assertThat(courtListArg.getCourtCentreId(), is(COURT_CENTRE_ID));
-        assertThat(courtListArg.getCourtListFileId(), is(courtListFileId));
-        assertThat(courtListArg.getPublishStatus(), is(COURT_LIST_PRODUCED));
-        assertThat(courtListArg.getLastUpdated(), is(createdTime));
-        assertThat(courtListArg.getCourtListFileName(), is(courtListFileName));
     }
 
     @Test

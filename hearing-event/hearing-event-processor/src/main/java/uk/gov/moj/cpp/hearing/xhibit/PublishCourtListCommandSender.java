@@ -25,7 +25,6 @@ public class PublishCourtListCommandSender {
     private static final String COURT_CENTRE_ID = "courtCentreId";
     private static final String COURT_LIST_FILE_NAME = "courtListFileName";
 
-    private static final String RECORD_COURT_LIST_PRODUCED = "hearing.command.record-court-list-produced";
     private static final String RECORD_COURT_LIST_EXPORT_SUCCESSFUL = "hearing.command.record-court-list-export-successful";
     private static final String RECORD_COURT_LIST_EXPORT_FAILED = "hearing.command.record-court-list-export-failed";
 
@@ -36,20 +35,6 @@ public class PublishCourtListCommandSender {
 
     @Inject
     private UtcClock utcClock;
-
-    public void recordCourtListProduced(final String courtCentreId,
-                                        final UUID courtListFileId,
-                                        final String courtListFileName) {
-
-        final JsonObject payload = createObjectBuilder()
-                .add(COURT_CENTRE_ID, courtCentreId)
-                .add(COURT_LIST_FILE_ID, courtListFileId.toString())
-                .add(COURT_LIST_FILE_NAME, courtListFileName)
-                .add(CREATED_TIME, ZonedDateTimes.toString(utcClock.now()))
-                .build();
-
-        sendCommandWith(RECORD_COURT_LIST_PRODUCED, courtListFileId, payload);
-    }
 
     @SuppressWarnings("squid:S1192")
     public void recordCourtListExportSuccessful(final String courtCentreId,
