@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
@@ -10,6 +9,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.xhibit.pojo.PublishCourtListRequestParameters;
 
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -40,17 +40,21 @@ public class CourtListEventProcessor {
     @Inject
     private CourtListTimeUpdateRetriever courtListTimeUpdateRetriever;
 
+    @Inject
+    private PublishCourtListRequestParametersParser publishCourtListRequestParametersParser;
+
 
     private static final UUID courtListFileId = randomUUID();
 
     @Handles("hearing.event.publish-court-list-requested")
     public void handlePublishCourtListRequested(final JsonEnvelope envelope) {
-        final String courtCentreId = envelope.payloadAsJsonObject().getString("courtCentreId");
-        try {
 
-            final ZonedDateTime latestCourtListUploadTime = courtListTimeUpdateRetriever.getLatestCourtListUploadTime(envelope, courtCentreId);
+        final PublishCourtListRequestParameters publishCourtListRequestParameters = publishCourtListRequestParametersParser.parse(envelope);
+        try {
+            final ZonedDateTime latestCourtListUploadTime = courtListTimeUpdateRetriever.getLatestCourtListUploadTime(envelope, publishCourtListRequestParameters.getCourtCentreId());
+
             final JsonObject queryParameters = createObjectBuilder()
-                    .add("courtCentreId", courtCentreId)
+                    .add("courtCentreId", publishCourtListRequestParameters.getCourtCentreId())
                     .add("lastModifiedTime", latestCourtListUploadTime.toString())
                     .build();
 
@@ -58,16 +62,16 @@ public class CourtListEventProcessor {
                     .withMetadataFrom(envelope, HEARING_QUERY_GET_HEARINGS_BY_COURT_CENTRE)
                     .apply(queryParameters));
 
-            publishCourtListCommandSender.recordCourtListProduced(fromString(courtCentreId), courtListFileId, "TEST");
+            publishCourtListCommandSender.recordCourtListProduced(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "TEST");
         } catch (final Exception e) {
             LOGGER.error("Court List generation failed", e);
-            publishCourtListCommandSender.recordCourtListExportFailed(courtCentreId, courtListFileId, "NONE", e.getMessage());
+            publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "NONE", e.getMessage());
         }
     }
 
     @Handles("hearing.event.publish-court-list-produced")
     public void handleProducedCourtList(final JsonEnvelope envelope) {
         final String courtCentreId = envelope.payloadAsJsonObject().getString("courtCentreId");
-        publishCourtListCommandSender.recordCourtListExportSuccessful(fromString(courtCentreId), courtListFileId, "TEST");
+        publishCourtListCommandSender.recordCourtListExportSuccessful(courtCentreId, courtListFileId, "TEST");
     }
 }

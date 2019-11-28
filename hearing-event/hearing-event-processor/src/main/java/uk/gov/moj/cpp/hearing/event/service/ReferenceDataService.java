@@ -6,7 +6,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,7 +17,5 @@ public interface ReferenceDataService {
     ResultDefinition getResultDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID id);
 
     LjaDetails getLjaDetailsByCourtCentreId(JsonEnvelope context, UUID courtCentreId);
-
-    List<EventMapping> getEventMapping();
 
 }

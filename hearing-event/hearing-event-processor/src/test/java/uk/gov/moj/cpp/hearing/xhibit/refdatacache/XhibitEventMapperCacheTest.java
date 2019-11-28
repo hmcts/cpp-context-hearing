@@ -1,16 +1,15 @@
-package uk.gov.moj.cpp.hearing.event;
+package uk.gov.moj.cpp.hearing.xhibit.refdatacache;
 
-import static org.junit.Assert.*;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.hearing.event.service.EventMapping;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.xhibit.ReferenceDataXhibitDataLoader;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static org.hamcrest.Matchers.is;
-
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class XhibitEventMapperCacheTest {
 
     @Mock
-    private ReferenceDataService referenceDataService;
+    private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
 
     @InjectMocks
     private XhibitEventMapperCache xhibitEventMapperCache;
@@ -34,9 +33,9 @@ public class XhibitEventMapperCacheTest {
         final String key2 = "testKey2";
         final String value2 = "testValue2";
 
-        final List<EventMapping> mappings = Arrays.asList(new EventMapping(key1, value1) , new EventMapping(key2, value2));
+        final List<EventMapping> mappings = Arrays.asList(new EventMapping(key1, value1), new EventMapping(key2, value2));
 
-        when(referenceDataService.getEventMapping()).thenReturn(mappings);
+        when(referenceDataXhibitDataLoader.getEventMapping()).thenReturn(mappings);
 
         xhibitEventMapperCache.init();
 

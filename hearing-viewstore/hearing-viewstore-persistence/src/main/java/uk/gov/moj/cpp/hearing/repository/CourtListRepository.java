@@ -18,6 +18,7 @@ import org.apache.deltaspike.data.api.criteria.CriteriaSupport;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("squid:S1166")
 @Repository
 @ApplicationScoped
 public abstract class CourtListRepository implements EntityRepository<CourtListPublishStatus, UUID>, CriteriaSupport<CourtListPublishStatus> {
@@ -40,7 +41,7 @@ public abstract class CourtListRepository implements EntityRepository<CourtListP
 
             return of(new CourtListPublishStatusResult(resultList.getCourtCentreId(), resultList.getLastUpdated(), resultList.getPublishStatus()));
         } catch (final NoResultException nre) {
-            LOGGER.warn(format("No EXHIBT export status found for courtCentreId: %s", courtCentreId), nre);
+            LOGGER.warn(format("No EXHIBT export status found for courtCentreId: %s", courtCentreId));
             return empty();
         }
     }

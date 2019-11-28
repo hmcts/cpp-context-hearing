@@ -37,12 +37,12 @@ public class PublishCourtListCommandSender {
     @Inject
     private UtcClock utcClock;
 
-    public void recordCourtListProduced(final UUID courtCentreId,
+    public void recordCourtListProduced(final String courtCentreId,
                                         final UUID courtListFileId,
                                         final String courtListFileName) {
 
         final JsonObject payload = createObjectBuilder()
-                .add(COURT_CENTRE_ID, courtCentreId.toString())
+                .add(COURT_CENTRE_ID, courtCentreId)
                 .add(COURT_LIST_FILE_ID, courtListFileId.toString())
                 .add(COURT_LIST_FILE_NAME, courtListFileName)
                 .add(CREATED_TIME, ZonedDateTimes.toString(utcClock.now()))
@@ -52,12 +52,12 @@ public class PublishCourtListCommandSender {
     }
 
     @SuppressWarnings("squid:S1192")
-    public void recordCourtListExportSuccessful(final UUID courtCentreId,
+    public void recordCourtListExportSuccessful(final String courtCentreId,
                                                 final UUID courtListFileId,
                                                 final String courtListFileName) {
 
         final JsonObject payload = createObjectBuilder()
-                .add(COURT_CENTRE_ID, courtCentreId.toString())
+                .add(COURT_CENTRE_ID, courtCentreId)
                 .add(COURT_LIST_FILE_ID, courtListFileId.toString())
                 .add(COURT_LIST_FILE_NAME, courtListFileName)
                 .add(CREATED_TIME, ZonedDateTimes.toString(utcClock.now()))

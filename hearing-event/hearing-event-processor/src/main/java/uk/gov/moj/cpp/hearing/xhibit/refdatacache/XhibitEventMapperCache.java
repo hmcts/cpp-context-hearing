@@ -1,7 +1,7 @@
-package uk.gov.moj.cpp.hearing.event;
+package uk.gov.moj.cpp.hearing.xhibit.refdatacache;
 
 import uk.gov.moj.cpp.hearing.event.service.EventMapping;
-import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.xhibit.ReferenceDataXhibitDataLoaderService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -15,13 +15,13 @@ import javax.inject.Inject;
 public class XhibitEventMapperCache {
 
     @Inject
-    private ReferenceDataService referenceDataService;
+    private ReferenceDataXhibitDataLoaderService referenceDataXhibitDataLoaderService;
 
     private Map<String, String> eventMapperCache = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        final List<EventMapping> eventMapping = referenceDataService.getEventMapping();
+        final List<EventMapping> eventMapping = referenceDataXhibitDataLoaderService.getEventMapping();
         eventMapping.forEach(event -> eventMapperCache.put(event.getCppEventCode(),event.getXhibitEventCode()));
     }
 
