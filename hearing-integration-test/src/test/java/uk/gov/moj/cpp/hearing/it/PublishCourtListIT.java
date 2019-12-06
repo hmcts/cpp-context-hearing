@@ -73,7 +73,7 @@ public class PublishCourtListIT extends AbstractIT {
         logEvent(requestSpec, asDefault(), hearing.it(), hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME);
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
-        publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing().getCourtCentre().getId(), now().minusMinutes(10l));
+        publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), now().minusMinutes(10l));
     }
 
     private void sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject) {

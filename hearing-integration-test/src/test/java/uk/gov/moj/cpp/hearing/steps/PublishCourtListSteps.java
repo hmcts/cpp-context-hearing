@@ -16,10 +16,10 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsASystemUser;
 
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
 
 import java.time.ZonedDateTime;
-import java.util.UUID;
 
 public class PublishCourtListSteps extends AbstractIT {
 
@@ -46,17 +46,18 @@ public class PublishCourtListSteps extends AbstractIT {
                         )));
     }
 
-    public void verifyLatestHearingEvents(final UUID courtCentreId, final ZonedDateTime modifiedTime) {
+    public void verifyLatestHearingEvents(final Hearing hearing, final ZonedDateTime modifiedTime) {
 
         givenAUserHasLoggedInAsASystemUser(USER_ID_VALUE_AS_ADMIN);
 
-        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearings-by-court-centre"), courtCentreId, modifiedTime);
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearings-by-court-centre"), hearing.getCourtCentre().getId(), modifiedTime);
         final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
                 .until(status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.courtCentreId", equalTo(courtCentreId.toString()))
+                                withJsonPath("$.court.courtName", equalTo(hearing.getCourtCentre().getName())),
+                                withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomName", equalTo(hearing.getCourtCentre().getRoomName()))
                         )));
     }
 }

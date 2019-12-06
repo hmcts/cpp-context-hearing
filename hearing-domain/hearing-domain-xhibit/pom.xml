@@ -30,9 +30,9 @@
                             <strict>false</strict>
                             <bindingDirectory>src/main/resources/xhibit/bindings
                             </bindingDirectory>
-                            <generatePackage>uk.gov.moj.cpp.listing.domain.xhibit.generated.iwp
+                            <generatePackage>uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp
                             </generatePackage>
-                            <generateDirectory>${project.build.directory}/generated-sources/xjc-a
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc-iwp
                             </generateDirectory>
                         </configuration>
                     </execution>
@@ -49,9 +49,9 @@
                             <strict>false</strict>
                             <bindingDirectory>src/main/resources/xhibit/bindings
                             </bindingDirectory>
-                            <generatePackage>uk.gov.moj.cpp.listing.domain.xhibit.generated.pd
+                            <generatePackage>uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd
                             </generatePackage>
-                            <generateDirectory>${project.build.directory}/generated-sources/xjc-b
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc-pd
                             </generateDirectory>
                         </configuration>
                     </execution>

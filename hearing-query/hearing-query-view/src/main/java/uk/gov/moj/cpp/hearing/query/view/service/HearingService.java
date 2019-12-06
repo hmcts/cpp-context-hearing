@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.Boolean.TRUE;
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZoneOffset.of;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.UUID.randomUUID;
+import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
@@ -27,10 +29,10 @@ import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -40,7 +42,6 @@ import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -94,17 +95,25 @@ public class HearingService {
     @Inject
     private ReferenceDataService referenceDataService;
 
-    private final ZoneId zid = ZoneId.of(ZoneOffset.UTC.getId());
+    @Inject
+    private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
-    //TODO: Extend this logic for xml mappings
-    public HearingListXhibitResponse getHearingsBy(final UUID courtCentreId, final ZonedDateTime lastModifiedTime) {
-        final List<HearingEvent> hearings = hearingEventRepository.findBy(courtCentreId, lastModifiedTime);
+    private final ZoneId zid = of(UTC.getId());
 
-        final List<Hearing> hearingsList = hearings.stream().map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId())).collect(toList());
+    public Optional<CurrentCourtStatus> getHearingsBy(final UUID courtCentreId, final ZonedDateTime lastModifiedTime) {
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreId, lastModifiedTime);
 
-        return new HearingListXhibitResponse(hearingsList.isEmpty() ? randomUUID(): hearingsList.get(0).getCourtCentre().getId());
+        final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingEvents
+                .stream()
+                .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
+                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .collect(toList());
+
+        if (!hearingList.isEmpty()) {
+            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingList));
+        }
+        return empty();
     }
-
 
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {

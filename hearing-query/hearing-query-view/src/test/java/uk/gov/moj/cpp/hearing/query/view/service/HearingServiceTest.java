@@ -20,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
@@ -53,8 +54,8 @@ import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -68,6 +69,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -122,6 +124,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingEventRepository hearingEventRepository;
+
+    @Mock
+    private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
     @InjectMocks
     private HearingService hearingService;
@@ -495,12 +500,20 @@ public class HearingServiceTest {
         final List<HearingEvent> hearingEventList = asList(hearingEvent);
         final Hearing hearing = buildHearing();
 
+        final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
+        final CurrentCourtStatus currentCourtStatus = currentCourtStatus()
+                .withPageName("hello")
+                .build();
+
+
         when(hearingEventRepository.findBy(courtCentreId, lastModifiedTime)).thenReturn(hearingEventList);
-        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
+        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
+        when(hearingListXhibitResponseTransformer.transformFrom(asList(hearinPojo))).thenReturn(currentCourtStatus);
 
-        final HearingListXhibitResponse response = hearingService.getHearingsBy(courtCentreId, lastModifiedTime);
+        final Optional<CurrentCourtStatus> response = hearingService.getHearingsBy(courtCentreId, lastModifiedTime);
 
-        assertThat(response.getCourtCentreId(), is(hearing.getCourtCentre().getId()));
+        assertThat(response.get().getPageName(), is(currentCourtStatus.getPageName()));
     }
 
     private Document buildDocument() {

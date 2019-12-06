@@ -16,9 +16,9 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingListXhibitResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
@@ -142,9 +142,9 @@ public class HearingQueryView {
         final Optional<UUID> courtCentreId = getUUID(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
         final Optional<String> lastModifiedTime = getString(envelope.payloadAsJsonObject(), LAST_MODIFIED_TIME);
 
-        final HearingListXhibitResponse hearingListXhibitResponse = hearingService.getHearingsBy(courtCentreId.get(), parse(lastModifiedTime.get()));
+        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsBy(courtCentreId.get(), parse(lastModifiedTime.get()));
 
-        return enveloper.withMetadataFrom(envelope, "hearing.get-hearings-by-court-centre").apply(hearingListXhibitResponse);
+        return enveloper.withMetadataFrom(envelope, "hearing.get-hearings-by-court-centre").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }
 }
 
