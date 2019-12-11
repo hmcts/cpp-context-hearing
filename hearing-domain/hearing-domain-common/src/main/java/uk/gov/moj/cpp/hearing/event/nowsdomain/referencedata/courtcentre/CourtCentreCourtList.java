@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.xhibit.pojo;
+package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre;
 
 import java.util.List;
 

@@ -33,7 +33,6 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
         final CourtListAggregate aggregate = aggregateService.get(eventStream, CourtListAggregate.class);
         final Stream<Object> events = aggregate.recordCourtListExportSuccessful(
                 recordCourtListExportSuccessful.getCourtCentreId(),
-                recordCourtListExportSuccessful.getCourtListFileId(),
                 recordCourtListExportSuccessful.getCourtListFileName(),
                 recordCourtListExportSuccessful.getCreatedTime());
         appendEventsToStream(commandEnvelope, eventStream, events);
@@ -48,7 +47,6 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
         final CourtListAggregate aggregate = aggregateService.get(eventStream, CourtListAggregate.class);
         final Stream<Object> events = aggregate.recordCourtListExportFailed(
                 recordCourtListExportFailed.getCourtCentreId(),
-                recordCourtListExportFailed.getCourtListFileId(),
                 recordCourtListExportFailed.getCourtListFileName(),
                 recordCourtListExportFailed.getCreatedTime(),
                 recordCourtListExportFailed.getErrorMessage());

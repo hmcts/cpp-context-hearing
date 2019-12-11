@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing;
+package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 import static java.time.ZonedDateTime.parse;
 import static java.util.Optional.of;

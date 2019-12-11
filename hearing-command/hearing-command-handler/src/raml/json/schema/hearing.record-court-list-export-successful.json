@@ -6,9 +6,6 @@
     "courtCentreId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
-    "courtListFileId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
     "courtListFileName": {
       "type": "string"
     },
@@ -19,7 +16,6 @@
   },
   "required": [
     "courtCentreId",
-    "courtListFileId",
     "courtListFileName",
     "createdTime"
   ],

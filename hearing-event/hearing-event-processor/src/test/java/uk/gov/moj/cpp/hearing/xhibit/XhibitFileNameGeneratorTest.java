@@ -1,22 +1,17 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
-import static java.time.ZonedDateTime.*;
-import static java.util.UUID.*;
+import static java.time.ZonedDateTime.now;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.isNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.CourtCentre;
-import uk.gov.moj.cpp.hearing.xhibit.pojo.CourtCentreCode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.UUID;
-
-import javax.inject.Inject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

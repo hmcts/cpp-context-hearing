@@ -37,8 +37,8 @@ public class PublishCourtListEventListener {
 
         final CourtListPublishStatus exportFailed = new CourtListPublishStatus(
                 randomUUID(), publishCourtListExportFailed.getCourtCentreId(),
-                 EXPORT_FAILED, publishCourtListExportFailed.getCreatedTime(),
-                publishCourtListExportFailed.getCourtListFileId(), publishCourtListExportFailed.getCourtListFileName(), publishCourtListExportFailed.getErrorMessage()
+                 EXPORT_FAILED, publishCourtListExportFailed.getCreatedTime()
+                , publishCourtListExportFailed.getCourtListFileName(), publishCourtListExportFailed.getErrorMessage()
         );
         exportFailed.setErrorMessage(publishCourtListExportFailed.getErrorMessage());
         courtListRepository.save(exportFailed);
@@ -50,7 +50,7 @@ public class PublishCourtListEventListener {
         final CourtListPublishStatus exportSuccessful = new CourtListPublishStatus(
                 randomUUID(), publishCourtListExportSuccessful.getCourtCentreId(),
                 EXPORT_SUCCESSFUL, publishCourtListExportSuccessful.getCreatedTime(),
-                publishCourtListExportSuccessful.getCourtListFileId(), publishCourtListExportSuccessful.getCourtListFileName(), ""
+                 publishCourtListExportSuccessful.getCourtListFileName(), ""
         );
         courtListRepository.save(exportSuccessful);
     }

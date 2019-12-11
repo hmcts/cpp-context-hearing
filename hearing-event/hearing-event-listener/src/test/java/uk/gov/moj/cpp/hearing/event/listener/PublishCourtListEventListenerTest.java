@@ -74,11 +74,9 @@ public class PublishCourtListEventListenerTest {
         final ZonedDateTime createdTime = new UtcClock().now();
         final String errorMessage = "some error";
         final String courtListFileName = "Document Name";
-        final UUID courtListFileId = randomUUID();
 
         final PublishCourtListExportFailed publishCourtListExportFailed = publishCourtListExportFailed()
                 .withCourtCentreId(COURT_CENTRE_ID)
-                .withCourtListFileId(courtListFileId)
                 .withCourtListFileName(courtListFileName)
                 .withCreatedTime(createdTime)
                 .withErrorMessage(errorMessage)
@@ -93,7 +91,6 @@ public class PublishCourtListEventListenerTest {
         final CourtListPublishStatus courtListArg = notificationArgumentCaptor.getValue();
         assertThat(courtListArg.getErrorMessage(), is(errorMessage));
         assertThat(courtListArg.getCourtCentreId(), is(COURT_CENTRE_ID));
-        assertThat(courtListArg.getCourtListFileId(), is(courtListFileId));
         assertThat(courtListArg.getPublishStatus(), is(EXPORT_FAILED));
         assertThat(courtListArg.getLastUpdated(), is(createdTime));
         assertThat(courtListArg.getCourtListFileName(), is(courtListFileName));
@@ -103,10 +100,8 @@ public class PublishCourtListEventListenerTest {
     public void shouldRecordPublishCourtListExportSuccessful() {
         final ZonedDateTime createdTime = new UtcClock().now();
         final String courtListFileName = "Document Name";
-        final UUID courtListFileId = randomUUID();
         final PublishCourtListExportSuccessful publishCourtListExportSuccessful = publishCourtListExportSuccessful()
                 .withCourtCentreId(COURT_CENTRE_ID)
-                .withCourtListFileId(courtListFileId)
                 .withCourtListFileName(courtListFileName)
                 .withCreatedTime(createdTime)
                 .build();
@@ -119,7 +114,6 @@ public class PublishCourtListEventListenerTest {
 
         final CourtListPublishStatus courtListArg = notificationArgumentCaptor.getValue();
         assertThat(courtListArg.getCourtCentreId(), is(COURT_CENTRE_ID));
-        assertThat(courtListArg.getCourtListFileId(), is(courtListFileId));
         assertThat(courtListArg.getPublishStatus(), is(EXPORT_SUCCESSFUL));
         assertThat(courtListArg.getLastUpdated(), is(createdTime));
         assertThat(courtListArg.getCourtListFileName(), is(courtListFileName));

@@ -10,17 +10,14 @@ import java.util.UUID;
 public class PublishCourtListExportSuccessful {
     private final UUID courtCentreId;
 
-    private final UUID courtListFileId;
-
     private final String courtListFileName;
 
     private final PublishStatus publishStatus;
 
     private final ZonedDateTime createdTime;
 
-    public PublishCourtListExportSuccessful(final UUID courtCentreId, final UUID courtListFileId, final String courtListFileName, final PublishStatus publishStatus, final ZonedDateTime createdTime) {
+    public PublishCourtListExportSuccessful(final UUID courtCentreId, final String courtListFileName, final PublishStatus publishStatus, final ZonedDateTime createdTime) {
         this.courtCentreId = courtCentreId;
-        this.courtListFileId = courtListFileId;
         this.courtListFileName = courtListFileName;
         this.publishStatus = publishStatus;
         this.createdTime = createdTime;
@@ -28,10 +25,6 @@ public class PublishCourtListExportSuccessful {
 
     public UUID getCourtCentreId() {
         return courtCentreId;
-    }
-
-    public UUID getCourtListFileId() {
-        return courtListFileId;
     }
 
     public String getCourtListFileName() {
@@ -61,7 +54,6 @@ public class PublishCourtListExportSuccessful {
         final PublishCourtListExportSuccessful that = (PublishCourtListExportSuccessful) obj;
 
         return java.util.Objects.equals(this.courtCentreId, that.courtCentreId) &&
-                java.util.Objects.equals(this.courtListFileId, that.courtListFileId) &&
                 java.util.Objects.equals(this.courtListFileName, that.courtListFileName) &&
                 java.util.Objects.equals(this.publishStatus, that.publishStatus) &&
                 java.util.Objects.equals(this.createdTime, that.createdTime);
@@ -69,14 +61,13 @@ public class PublishCourtListExportSuccessful {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(courtCentreId, courtListFileId, courtListFileName, publishStatus, createdTime);
+        return java.util.Objects.hash(courtCentreId, courtListFileName, publishStatus, createdTime);
     }
 
     @Override
     public String toString() {
         return "PublishCourtListExportSuccessful{" +
                 "courtCentreId='" + courtCentreId + "'," +
-                "courtListFileId='" + courtListFileId + "'," +
                 "courtListFileName='" + courtListFileName + "'," +
                 "publishStatus='" + publishStatus + "'," +
                 "createdTime='" + createdTime + "'" +
@@ -86,8 +77,6 @@ public class PublishCourtListExportSuccessful {
     public static class Builder {
         private UUID courtCentreId;
 
-        private UUID courtListFileId;
-
         private String courtListFileName;
 
         private PublishStatus publishStatus;
@@ -96,11 +85,6 @@ public class PublishCourtListExportSuccessful {
 
         public Builder withCourtCentreId(final UUID courtCentreId) {
             this.courtCentreId = courtCentreId;
-            return this;
-        }
-
-        public Builder withCourtListFileId(final UUID courtListFileId) {
-            this.courtListFileId = courtListFileId;
             return this;
         }
 
@@ -120,7 +104,7 @@ public class PublishCourtListExportSuccessful {
         }
 
         public PublishCourtListExportSuccessful build() {
-            return new PublishCourtListExportSuccessful(courtCentreId, courtListFileId, courtListFileName, publishStatus, createdTime);
+            return new PublishCourtListExportSuccessful(courtCentreId, courtListFileName, publishStatus, createdTime);
         }
     }
 }

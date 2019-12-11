@@ -33,6 +33,7 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
+        <listing.version>1.0.60-SCSL-SNAPSHOT</listing.version>
     </properties>
     <modules>
         <module>hearing-query</module>

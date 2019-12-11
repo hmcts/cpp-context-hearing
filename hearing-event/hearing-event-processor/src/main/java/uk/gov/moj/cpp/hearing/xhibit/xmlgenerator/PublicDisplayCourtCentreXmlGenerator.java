@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.xhibit;
+package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 
 import static java.lang.String.valueOf;
@@ -18,6 +18,8 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Defendants;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
+import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 
 import java.time.ZonedDateTime;
 import java.util.List;

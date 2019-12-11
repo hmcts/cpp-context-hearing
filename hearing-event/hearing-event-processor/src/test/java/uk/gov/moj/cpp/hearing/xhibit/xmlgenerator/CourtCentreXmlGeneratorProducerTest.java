@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing;
+package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 import static java.time.ZonedDateTime.now;
 import static java.util.Optional.empty;
@@ -12,8 +12,6 @@ import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
-import uk.gov.moj.cpp.hearing.xhibit.CourtCentreXmlGenerator;
-import uk.gov.moj.cpp.hearing.xhibit.PublicDisplayCourtCentreXmlGenerator;
 import uk.gov.moj.cpp.hearing.xhibit.exception.GenerationFailedException;
 
 import org.junit.Rule;

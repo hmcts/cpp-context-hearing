@@ -7,8 +7,6 @@ import java.util.UUID;
 public class RecordCourtListExportFailed {
     private final UUID courtCentreId;
 
-    private final UUID courtListFileId;
-
     private final String courtListFileName;
 
     private final String errorMessage;
@@ -16,9 +14,8 @@ public class RecordCourtListExportFailed {
     private final ZonedDateTime createdTime;
 
 
-    public RecordCourtListExportFailed(final UUID courtCentreId, final UUID courtListFileId, final String courtListFileName, final String errorMessage, final ZonedDateTime createdTime) {
+    public RecordCourtListExportFailed(final UUID courtCentreId, final String courtListFileName, final String errorMessage, final ZonedDateTime createdTime) {
         this.courtCentreId = courtCentreId;
-        this.courtListFileId = courtListFileId;
         this.courtListFileName = courtListFileName;
         this.errorMessage = errorMessage;
         this.createdTime = createdTime;
@@ -26,10 +23,6 @@ public class RecordCourtListExportFailed {
 
     public UUID getCourtCentreId() {
         return courtCentreId;
-    }
-
-    public UUID getCourtListFileId() {
-        return courtListFileId;
     }
 
     public String getCourtListFileName() {
@@ -59,7 +52,6 @@ public class RecordCourtListExportFailed {
         final uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportFailed that = (uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportFailed) obj;
 
         return java.util.Objects.equals(this.courtCentreId, that.courtCentreId) &&
-                java.util.Objects.equals(this.courtListFileId, that.courtListFileId) &&
                 java.util.Objects.equals(this.courtListFileName, that.courtListFileName) &&
                 java.util.Objects.equals(this.errorMessage, that.errorMessage) &&
                 java.util.Objects.equals(this.createdTime, that.createdTime);
@@ -67,14 +59,13 @@ public class RecordCourtListExportFailed {
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(courtCentreId, courtListFileId, courtListFileName, errorMessage, createdTime);
+        return java.util.Objects.hash(courtCentreId, courtListFileName, errorMessage, createdTime);
     }
 
     @Override
     public String toString() {
         return "RecordCourtListExportFailed{" +
                 "courtCentreId='" + courtCentreId + "'," +
-                "courtListFileId='" + courtListFileId + "'," +
                 "courtListFileName='" + courtListFileName + "'," +
                 "errorMessage='" + errorMessage + "'," +
                 "createdTime='" + createdTime + "'," +
@@ -83,8 +74,6 @@ public class RecordCourtListExportFailed {
 
     public static class Builder {
         private UUID courtCentreId;
-
-        private UUID courtListFileId;
 
         private String courtListFileName;
 
@@ -95,11 +84,6 @@ public class RecordCourtListExportFailed {
 
         public Builder withCourtCentreId(final UUID courtCentreId) {
             this.courtCentreId = courtCentreId;
-            return this;
-        }
-
-        public Builder withCourtListFileId(final UUID courtListFileId) {
-            this.courtListFileId = courtListFileId;
             return this;
         }
 
@@ -119,7 +103,7 @@ public class RecordCourtListExportFailed {
         }
 
         public RecordCourtListExportFailed build() {
-            return new uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportFailed(courtCentreId, courtListFileId, courtListFileName, errorMessage, createdTime);
+            return new uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportFailed(courtCentreId, courtListFileName, errorMessage, createdTime);
         }
     }
 }

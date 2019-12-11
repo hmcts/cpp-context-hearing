@@ -35,25 +35,21 @@ public class CourtListAggregate implements Aggregate {
     }
 
     public Stream<Object> recordCourtListExportSuccessful(final UUID courtCentreId,
-                                                          final UUID courtListFileId,
                                                           final String courtListFileName,
                                                           final ZonedDateTime createdTime) {
         return apply(Stream.of(publishCourtListExportSuccessful()
                 .withCourtCentreId(courtCentreId)
-                .withCourtListFileId(courtListFileId)
                 .withCourtListFileName(courtListFileName)
                 .withPublishStatus(EXPORT_SUCCESSFUL)
                 .withCreatedTime(createdTime).build()));
     }
 
     public Stream<Object> recordCourtListExportFailed(final UUID courtCentreId,
-                                                      final UUID courtListFileId,
                                                       final String courtListFileName,
                                                       final ZonedDateTime createdTime,
                                                       final String errorMessage) {
         return apply(Stream.of(publishCourtListExportFailed()
                 .withCourtCentreId(courtCentreId)
-                .withCourtListFileId(courtListFileId)
                 .withCourtListFileName(courtListFileName)
                 .withPublishStatus(EXPORT_FAILED)
                 .withErrorMessage(errorMessage)

@@ -1,19 +1,21 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
-import static java.util.UUID.randomUUID;
+import static java.time.ZonedDateTime.parse;
+import static org.apache.commons.io.IOUtils.toInputStream;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.CourtCentreXmlGeneratorProducer;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.xhibit.pojo.PublishCourtListRequestParameters;
+import uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.CourtCentreXmlGenerator;
+import uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.CourtCentreXmlGeneratorProducer;
+import uk.gov.moj.cpp.listing.common.xhibit.XhibitService;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -21,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //TODO: Extend this class as part of SCSL-132
-@SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S2221"})
+@SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S2221", "squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_PROCESSOR)
 public class CourtListEventProcessor {
 
@@ -42,8 +44,12 @@ public class CourtListEventProcessor {
     @Inject
     private CourtCentreXmlGeneratorProducer courtCentreXmlGeneratorProducer;
 
+    @Inject
+    private XhibitService xhibitService;
 
-    private static final UUID courtListFileId = randomUUID();
+    @Inject
+    private XhibitFileNameGenerator xhibitFileNameGenerator;
+
 
     @Handles("hearing.event.publish-court-list-requested")
     public void handlePublishCourtListRequested(final JsonEnvelope envelope) {
@@ -57,12 +63,17 @@ public class CourtListEventProcessor {
             final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, hearingData, latestCourtListUploadTime);
             final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 
-            final String generateXml = courtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
+            final String xhibitXml = courtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
 
-            publishCourtListCommandSender.recordCourtListExportSuccessful(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "TEST");
+            //TODO: Uncomment this this line once Ref data endpoint is clear - https://tools.hmcts.net/jira/browse/SCRD-512
+            //final String webPageFileName = xhibitFileNameGenerator.generateWebPageFileName(envelope, parse(publishCourtListRequestParameters.getCreatedTime()), publishCourtListRequestParameters.getCourtCentreId());
+
+            xhibitService.sendToXhibit(toInputStream(xhibitXml), "TEST.xml");
+
+            publishCourtListCommandSender.recordCourtListExportSuccessful(publishCourtListRequestParameters.getCourtCentreId(), "TEST.xml");
         } catch (final Exception e) {
             LOGGER.error("Court List generation failed", e);
-            publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), courtListFileId, "NONE", e.getMessage());
+            publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), "NONE", e.getMessage());
         }
     }
 }

@@ -1,11 +1,9 @@
-package uk.gov.moj.cpp.hearing;
+package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 import static java.lang.String.format;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
 
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
-import uk.gov.moj.cpp.hearing.xhibit.CourtCentreXmlGenerator;
-import uk.gov.moj.cpp.hearing.xhibit.PublicDisplayCourtCentreXmlGenerator;
 import uk.gov.moj.cpp.hearing.xhibit.exception.GenerationFailedException;
 
 import javax.enterprise.context.ApplicationScoped;

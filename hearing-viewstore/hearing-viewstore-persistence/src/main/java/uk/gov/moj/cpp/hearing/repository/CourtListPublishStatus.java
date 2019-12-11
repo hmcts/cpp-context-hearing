@@ -35,9 +35,6 @@ public class CourtListPublishStatus implements Serializable {
     @Column(name = "last_updated", nullable = false)
     private ZonedDateTime lastUpdated;
 
-    @Column(name = "court_list_file_id")
-    private UUID courtListFileId;
-
     @Column(name = "court_list_file_name")
     private String courtListFileName;
 
@@ -63,13 +60,11 @@ public class CourtListPublishStatus implements Serializable {
                                   final UUID courtCentreId,
                                   final PublishStatus publishStatus,
                                   final ZonedDateTime lastUpdated,
-                                  final UUID courtListFileId,
                                   final String courtListFileName,
                                   final String errorMessage
     ) {
         this.publishCourtListStatusId = publishCourtListStatusId;
         this.courtCentreId = courtCentreId;
-        this.courtListFileId = courtListFileId;
         this.courtListFileName = courtListFileName;
         this.publishStatus = publishStatus;
         this.lastUpdated = lastUpdated;
@@ -107,14 +102,6 @@ public class CourtListPublishStatus implements Serializable {
 
     public void setLastUpdated(ZonedDateTime lastUpdated) {
         this.lastUpdated = lastUpdated;
-    }
-
-    public UUID getCourtListFileId() {
-        return courtListFileId;
-    }
-
-    public void setCourtListFileId(UUID courtListFileId) {
-        this.courtListFileId = courtListFileId;
     }
 
     public String getCourtListFileName() {

@@ -13,8 +13,8 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.xhibit.pojo.CourtCentreCode;
-import uk.gov.moj.cpp.hearing.xhibit.pojo.CourtCentreCourtList;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCourtList;
 
 import javax.json.JsonObject;
 

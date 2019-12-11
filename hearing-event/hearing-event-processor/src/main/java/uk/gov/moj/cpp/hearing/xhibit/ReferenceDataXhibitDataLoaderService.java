@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.service.EventMapping;
-import uk.gov.moj.cpp.hearing.xhibit.pojo.CourtCentreCode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
 
 import java.util.List;
 

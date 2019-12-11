@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
+import static java.lang.String.format;
+
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.xhibit.pojo.CourtCentreCode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,16 +33,13 @@ public class XhibitFileNameGenerator {
 
         final CourtCentreCode xhibitCourtCentreCode = getCourtCode(jsonEnvelope, courtCentreId);
 
-        final String filename = String.format("%s_%s_%s.xml", prefix, xhibitCourtCentreCode.getCrestCodeId(), getSendDate(requestedDate));
-
-        return filename;
+        return format("%s_%s_%s.xml", prefix, xhibitCourtCentreCode.getCrestCodeId(), getSendDate(requestedDate));
     }
 
     private String getSendDate(final ZonedDateTime createdDate) {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         return createdDate.format(formatter);
     }
-
 
     private CourtCentreCode getCourtCode(final JsonEnvelope jsonEnvelope, final String courtCentreId) {
         return referenceDataXhibitDataLoaderService.getXhibitCourtCentreCodeBy(jsonEnvelope, courtCentreId);

@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import static java.time.ZonedDateTime.*;
+import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -35,15 +35,13 @@ public class CourtListRepositoryTest extends BaseTransactionalTest {
         final UUID courtCentreId = randomUUID();
 
         final PublishStatus publishStatus = EXPORT_SUCCESSFUL;
-        final UUID courtListFileId1 = randomUUID();
         final String courtListFileName1 = "c1";
         final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);
-        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileId1, courtListFileName1, "");
+        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileName1, "");
 
-        final UUID courtListFileId2 = randomUUID();
         final String courtListFileName2 = "c2";
         final ZonedDateTime lastUpdated2 = now();
-        final CourtListPublishStatus courtList2 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated2, courtListFileId2, courtListFileName2, "");
+        final CourtListPublishStatus courtList2 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated2, courtListFileName2, "");
 
         courtListRepository.save(courtList1);
         courtListRepository.save(courtList2);
@@ -62,10 +60,9 @@ public class CourtListRepositoryTest extends BaseTransactionalTest {
         final UUID courtCentreId = randomUUID();
 
         final PublishStatus publishStatus = COURT_LIST_REQUESTED;
-        final UUID courtListFileId1 = randomUUID();
         final String courtListFileName1 = "c1";
         final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);
-        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileId1, courtListFileName1, "");
+        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileName1, "");
 
 
         courtListRepository.save(courtList1);
@@ -82,15 +79,13 @@ public class CourtListRepositoryTest extends BaseTransactionalTest {
         final UUID courtCentreId = randomUUID();
 
         final PublishStatus publishStatus = EXPORT_FAILED;
-        final UUID courtListFileId = randomUUID();
         final String courtListFileName = "c1";
         final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);
-        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileId, courtListFileName, "");
+        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileName, "");
 
-        final UUID courtListFileId2 = randomUUID();
         final String courtListFileName2 = "c2";
         final ZonedDateTime lastUpdated2 = now();
-        final CourtListPublishStatus courtList2 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated2, courtListFileId2, courtListFileName2, "");
+        final CourtListPublishStatus courtList2 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated2, courtListFileName2, "");
 
         courtListRepository.save(courtList1);
         courtListRepository.save(courtList2);

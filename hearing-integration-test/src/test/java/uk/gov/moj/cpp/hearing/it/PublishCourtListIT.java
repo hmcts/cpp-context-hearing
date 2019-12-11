@@ -16,6 +16,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearin
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
@@ -29,6 +30,8 @@ import java.util.UUID;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +45,10 @@ public class PublishCourtListIT extends AbstractIT {
 
     private static final ZonedDateTime EVENT_TIME = now().minusMinutes(5l).withZoneSameLocal(ZoneId.of("UTC"));
 
+    @Before
+    public void initStub(){
+        stubExhibitFileUpload();
+    }
 
     @Test
     public void shouldRequestToPublishCourtList() {
