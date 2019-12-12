@@ -81,6 +81,7 @@ import java.util.stream.Collectors;
 public class CoreTestTemplates {
 
     private static final UUID BAIL_STATUS_ID = randomUUID();
+    private static final String JSON_STRING = "json string";
 
     public static CoreTemplateArguments defaultArguments() {
         return new CoreTemplateArguments();
@@ -117,6 +118,16 @@ public class CoreTestTemplates {
                 .withName(STRING.next())
                 .withWelshName(STRING.next())
                 .withRoomId(courtAndRoomId)
+                .withRoomName(STRING.next())
+                .withWelshRoomName(STRING.next());
+    }
+
+    public static CourtCentre.Builder courtCentreWithArgs(String courtRoomName) {
+        return CourtCentre.courtCentre()
+                .withId(randomUUID())
+                .withName(courtRoomName)
+                .withWelshName(STRING.next())
+                .withRoomId(randomUUID())
                 .withRoomName(STRING.next())
                 .withWelshRoomName(STRING.next());
     }
@@ -265,6 +276,11 @@ public class CoreTestTemplates {
                 .withAddress3(STRING.next())
                 .withAddress4(STRING.next())
                 .withAddress5(STRING.next())
+                .withWelshAddress1(STRING.next())
+                .withWelshAddress2(STRING.next())
+                .withWelshAddress3(STRING.next())
+                .withWelshAddress4(STRING.next())
+                .withWelshAddress5(STRING.next())
                 .withPostcode(POST_CODE.next());
     }
 
@@ -407,13 +423,15 @@ public class CoreTestTemplates {
         return ReferralReason.referralReason()
                 .withId(randomUUID())
                 .withDefendantId(randomUUID())
-                .withDescription(STRING.next());
+                .withDescription(STRING.next())
+                .withWelshDescription("welshDescription");
     }
 
     public static HearingType.Builder hearingType() {
         return HearingType.hearingType()
                 .withId(randomUUID())
-                .withDescription(STRING.next());
+                .withDescription(STRING.next())
+                .withWelshDescription(STRING.next());
     }
 
     public static Hearing.Builder hearing(CoreTemplateArguments args) {
@@ -423,7 +441,6 @@ public class CoreTestTemplates {
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(hearingDay().build()))
-                .withCourtCentre(courtCentre().build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
@@ -436,8 +453,10 @@ public class CoreTestTemplates {
 
         if (args.hearingLanguage == WELSH) {
             hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+            hearingBuilder.withCourtCentre(courtCentreWithArgs("welshCourtRoom").build());
         } else {
             hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+            hearingBuilder.withCourtCentre(courtCentre().build());
         }
         return hearingBuilder;
     }
@@ -484,7 +503,7 @@ public class CoreTestTemplates {
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
                 .withOffenceId(offenceId)
-                .withDraftResult("json string")
+                .withDraftResult(JSON_STRING)
                 .withResultLines(new ArrayList<>(asList(resultLine(resultLineId))));
     }
 
@@ -649,7 +668,7 @@ public class CoreTestTemplates {
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
                 .withOffenceId(offenceId)
-                .withDraftResult("json string")
+                .withDraftResult(JSON_STRING)
                 .withResultLines(new ArrayList<>(asList(resultLineForDocumentIsDeleted(resultLineId))));
     }
 
@@ -678,7 +697,7 @@ public class CoreTestTemplates {
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
                 .withOffenceId(offenceId)
-                .withDraftResult("json string")
+                .withDraftResult(JSON_STRING)
                 .withResultLines(new ArrayList<>(asList(resultLineForOffenceResultShared(resultLineId, resultDefinitionId))));
     }
 

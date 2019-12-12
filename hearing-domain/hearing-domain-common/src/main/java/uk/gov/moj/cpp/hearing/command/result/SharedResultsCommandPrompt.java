@@ -11,6 +11,7 @@ public class SharedResultsCommandPrompt {
     private String fixedListCode;
     private String value;
     private String welshValue;
+    private String welshLabel;
 
     @JsonCreator
     public SharedResultsCommandPrompt(
@@ -18,13 +19,15 @@ public class SharedResultsCommandPrompt {
             @JsonProperty("label") final String label,
             @JsonProperty("fixedListCode") final String fixedListCode,
             @JsonProperty("value") final String value,
-            @JsonProperty("welshValue") final String welshValue
+            @JsonProperty("welshValue") final String welshValue,
+            @JsonProperty("welshLabel") final String welshLabel
     ) {
         this.id = id;
         this.label = label;
         this.fixedListCode = fixedListCode;
         this.value = value;
         this.welshValue = welshValue;
+        this.welshLabel = welshLabel;
     }
 
 
@@ -66,6 +69,14 @@ public class SharedResultsCommandPrompt {
 
     public void setWelshValue(String welshValue) {
         this.welshValue = welshValue;
+    }
+
+    public String getWelshLabel() {
+        return welshLabel;
+    }
+
+    public void setWelshLabel(final String welshLabel) {
+        this.welshLabel = welshLabel;
     }
 }
 

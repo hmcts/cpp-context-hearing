@@ -64,6 +64,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -200,6 +201,7 @@ public class NowsGeneratorTest {
 
         return NowDefinition.now()
                 .setId(id)
+                .setWelshText("Welsh Text")
                 .setJurisdiction("C")
                 .setResultDefinitions(nowResultDefinitionRequirements);
     }
@@ -212,6 +214,9 @@ public class NowsGeneratorTest {
 
     @Mock
     private PaymentTermsCalculator paymentTermsCalculator;
+
+    @Mock
+    private CourtHouseReverseLookup courtHouseReverseLookup;
 
     @InjectMocks
     private NowsGenerator target;

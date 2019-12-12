@@ -1,0 +1,25 @@
+{
+  "fixedListCollection": [
+    {
+      "id": "6e5f1afe-e35f-11e8-9f32-f2801f1b9fd1",
+      "version": "2019-11-30T17:10:40.166Z",
+      "startDate": "2019-12-01",
+      "elements": [
+        {
+          "code": "TFL2",
+          "value": "Transport for London"
+        },
+        {
+          "code": "DVL2",
+          "value": "Driver and Vehicle Licensing Agency",
+          "welshValue": "Asiantaeth Trwyddedu Gyrwyr a Cherbydau"
+        },
+        {
+          "code": "TVL3",
+          "value": "Television Licensing Organisation",
+          "welshValue": "Sefydliad Trwyddedu Teledu"
+        }
+      ]
+    }
+  ]
+}

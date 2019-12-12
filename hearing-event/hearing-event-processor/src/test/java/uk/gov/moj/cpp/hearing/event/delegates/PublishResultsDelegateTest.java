@@ -128,12 +128,14 @@ public class PublishResultsDelegateTest {
                 uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
                         .setId(randomUUID())
                         .setLabel("promptReferenceData0")
+                        .setWelshLabel("welshLabel")
                         .setType("CURR")
                         .setUserGroups(Arrays.asList("usergroup0", "usergroup1"));
 
         final Prompt prompt0 = Prompt.prompt()
                 .withLabel(promptReferenceData.getLabel())
                 .withValue("400")
+                .withWelshValue("welshValue")
                 .withId(promptReferenceData.getId())
                 .withFixedListCode("fixedListCode0")
                 .build();
@@ -201,8 +203,10 @@ public class PublishResultsDelegateTest {
                         .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                 .withValue(CourtCentre::getId, hearingIn.getCourtCentre().getId())
                                 .withValue(CourtCentre::getName, hearingIn.getCourtCentre().getName())
+                                .withValue(CourtCentre::getWelshName, hearingIn.getCourtCentre().getWelshName())
                                 .withValue(CourtCentre::getRoomId, hearingIn.getCourtCentre().getRoomId())
                                 .withValue(CourtCentre::getRoomName, hearingIn.getCourtCentre().getRoomName())
+                                .withValue(CourtCentre::getWelshRoomName, hearingIn.getCourtCentre().getWelshRoomName())
                         )
                         // no nested or detailed check because shareResults just copies the array references
                         .withValue(sh -> sh.getJudiciary().size(), hearingIn.getJudiciary().size())
