@@ -32,7 +32,18 @@ public class PaymentTermsCalculator {
 
     private static final String OPTIONAL_TEXT = " Number of days in default %s";
 
-    public String calculatePaymentTerms(final Map<UUID, Prompt> id2PromptRef, final List<ResultLine> resultLines4Now) {
+    private static final DateTimeFormatter FORMATTER_WELSH = DateTimeFormatter.ofPattern("dd-MM-YYYY");
+
+    private static final String PAY_BY_DATE_WELSH = "Rhaid talu'r swm llawn erbyn %s";
+
+    private static final String LUMP_SUM_PLUS_INSTALMENTS_WELSH = "Cyfanswm y lwmp swm £%s Swm y rhandaliad £%s Amlder y taliadau %s Dyddiad cychwyn talu rhandaliadau %s";
+
+    private static final String INSTALMENTS_ONLY_WELSH = "Swm y rhandaliad £%s Amlder y taliadau %s Dyddiad cychwyn talu rhandaliadau %s";
+
+    private static final String OPTIONAL_TEXT_WELSH = " Nifer y diwrnodau lle erys y ddyled heb ei thalu %s";
+
+
+    public String calculatePaymentTerms(final Map<UUID, Prompt> id2PromptRef, final List<ResultLine> resultLines4Now, final Boolean isWelsh) {
 
         final boolean hasPayDateResult = resultLines4Now.stream().anyMatch(resultLine -> resultLine.getResultDefinitionId().equals(RD_PDATE));
 
@@ -42,6 +53,15 @@ public class PaymentTermsCalculator {
 
         final boolean hasOptionalText = nonNull(getPromptValue(id2PromptRef, resultLines4Now, P_DAYS_IN_DEFAULT));
 
+        if (isWelsh) {
+            return extractPromptValueWelsh(id2PromptRef, resultLines4Now, hasPayDateResult, hasLumpSumPlusInstalmentsResult, hasInstalmentsOnlyResult, hasOptionalText);
+        } else {
+            return extractPromptValue(id2PromptRef, resultLines4Now, hasPayDateResult, hasLumpSumPlusInstalmentsResult, hasInstalmentsOnlyResult, hasOptionalText);
+        }
+    }
+
+
+    private String extractPromptValue(final Map<UUID, Prompt> id2PromptRef, final List<ResultLine> resultLines4Now, final boolean hasPayDateResult, final boolean hasLumpSumPlusInstalmentsResult, final boolean hasInstalmentsOnlyResult, final boolean hasOptionalText) {
         if (hasPayDateResult) {
             if (hasOptionalText) {
                 return String.format(PAY_BY_DATE + OPTIONAL_TEXT, LocalDate.parse(getPromptValue(id2PromptRef, resultLines4Now, P_PAY_BY_DATE)).format(FORMATTER),
@@ -97,4 +117,62 @@ public class PaymentTermsCalculator {
                 .findFirst()
                 .orElse(null);
     }
+
+    private String extractPromptValueWelsh(final Map<UUID, Prompt> id2PromptRef, final List<ResultLine> resultLines4Now, final boolean hasPayDateResult, final boolean hasLumpSumPlusInstalmentsResult, final boolean hasInstalmentsOnlyResult, final boolean hasOptionalText) {
+        if (hasPayDateResult) {
+            if (hasOptionalText) {
+                return String.format(PAY_BY_DATE_WELSH + OPTIONAL_TEXT_WELSH, LocalDate.parse(getPromptValueWelsh(id2PromptRef, resultLines4Now, P_PAY_BY_DATE)).format(FORMATTER_WELSH),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_DAYS_IN_DEFAULT));
+            } else {
+                return String.format(PAY_BY_DATE_WELSH, LocalDate.parse(getPromptValueWelsh(id2PromptRef, resultLines4Now, P_PAY_BY_DATE)).format(FORMATTER_WELSH));
+            }
+        }
+
+        if (hasLumpSumPlusInstalmentsResult) {
+            if (hasOptionalText) {
+                return String.format(LUMP_SUM_PLUS_INSTALMENTS_WELSH + OPTIONAL_TEXT_WELSH,
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_LUMP_SUM_AMOUNT),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_AMOUNT),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_PAYMENT_FREQUENCY),
+                        LocalDate.parse(getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_START_DATE)).format(FORMATTER_WELSH),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_DAYS_IN_DEFAULT));
+            } else {
+                return String.format(LUMP_SUM_PLUS_INSTALMENTS_WELSH,
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_LUMP_SUM_AMOUNT),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_AMOUNT),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_PAYMENT_FREQUENCY),
+                        LocalDate.parse(getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_START_DATE)).format(FORMATTER_WELSH)
+                );
+            }
+        }
+
+        if (hasInstalmentsOnlyResult) {
+            if (hasOptionalText) {
+                return String.format(INSTALMENTS_ONLY_WELSH + OPTIONAL_TEXT_WELSH,
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_AMOUNT),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_PAYMENT_FREQUENCY),
+                        LocalDate.parse(getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_START_DATE)).format(FORMATTER_WELSH),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_DAYS_IN_DEFAULT)
+                );
+            } else {
+                return String.format(INSTALMENTS_ONLY_WELSH,
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_AMOUNT),
+                        getPromptValueWelsh(id2PromptRef, resultLines4Now, P_PAYMENT_FREQUENCY),
+                        LocalDate.parse(getPromptValueWelsh(id2PromptRef, resultLines4Now, P_INSTALMENT_START_DATE)).format(FORMATTER_WELSH)
+                );
+            }
+        }
+
+        return null;
+    }
+
+    private String getPromptValueWelsh(final Map<UUID, Prompt> id2PromptRef, final List<ResultLine> resultLines4Now, String promptReference) {
+        return resultLines4Now.stream().flatMap(rl -> rl.getPrompts().stream())
+                .filter(p -> promptReference.equals(id2PromptRef.get(p.getId()).getReference())
+                )
+                .map(p -> (nonNull(p.getWelshValue()) &&!p.getWelshValue().isEmpty()) ? p.getWelshValue() : p.getValue())
+                .findFirst()
+                .orElse(null);
+    }
+
 }

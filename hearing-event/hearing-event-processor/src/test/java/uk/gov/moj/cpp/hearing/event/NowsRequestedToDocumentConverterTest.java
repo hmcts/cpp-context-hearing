@@ -6,23 +6,29 @@ import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.nowdocument.NowDocumentRequest;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -35,6 +41,9 @@ public class NowsRequestedToDocumentConverterTest {
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
+    @Mock
+    private CourtHouseReverseLookup courtHouseReverseLookup;
+
     @InjectMocks
     private StringToJsonObjectConverter stringToJsonObjectConverter;
 
@@ -46,6 +55,12 @@ public class NowsRequestedToDocumentConverterTest {
 
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        CourtCentreOrganisationUnit courtCentreOrganisationUnit = new CourtCentreOrganisationUnit(null,null,null,null,
+                null,null,null,null,
+                "1234",false,null,null,null,
+                null,null,null,null,null,
+                null,null,null,null,null);
+        when(courtHouseReverseLookup.getCourtCentreById(any(),any())).thenReturn(Optional.of(courtCentreOrganisationUnit));
     }
 
 

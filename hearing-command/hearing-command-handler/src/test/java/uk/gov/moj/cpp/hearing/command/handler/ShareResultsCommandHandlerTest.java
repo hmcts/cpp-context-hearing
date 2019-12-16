@@ -301,7 +301,7 @@ public class ShareResultsCommandHandlerTest {
                         targetDraft.getDefendantId(),
                         resultLineIn.getResultDefinitionId(),
                         resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                                p.getFixedListCode(), p.getValue(), p.getWelshValue())).collect(Collectors.toList()),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel())).collect(Collectors.toList()),
                         resultLineIn.getResultLabel(),
                         resultLineIn.getLevel().name(),
                         resultLineIn.getIsModified(),

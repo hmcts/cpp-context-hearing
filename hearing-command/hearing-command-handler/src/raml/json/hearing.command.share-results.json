@@ -24,7 +24,8 @@
           "label": "rdLFeuh6tj",
           "fixedListCode": "fixedListCode",
           "value": "value1",
-          "welshValue": "wvalue1"
+          "welshValue": "wvalue1",
+          "welshLabel": "wlabel"
         }
       ],
       "level": "OFFENCE",

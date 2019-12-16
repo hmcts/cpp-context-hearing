@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import uk.gov.justice.core.courts.LjaDetails;
+import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -12,22 +14,34 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-@SuppressWarnings("squid:S00112")
 public class NowsReferenceDataServiceImpl implements ReferenceDataService {
 
     private final NowsReferenceCache nowsReferenceCache;
 
     private final LjaReferenceDataLoader ljaReferenceDataLoader;
 
+    private final FixedListLookup fixedListLookup;
+
     @Inject
-    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader) {
+    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader, final FixedListLookup fixedListLookup) {
         this.nowsReferenceCache = nowsReferenceCache;
         this.ljaReferenceDataLoader = ljaReferenceDataLoader;
+        this.fixedListLookup = fixedListLookup;
     }
 
     @Override
     public LjaDetails getLjaDetails(final JsonEnvelope context, final UUID courtCentreId, final String postcode) {
         return ljaReferenceDataLoader.getLjaDetails(context, courtCentreId, postcode);
+    }
+
+    @Override
+    public LocalJusticeAreas getLJAByNationalCourtCode(final JsonEnvelope context, final String nationalCourtCode) {
+        return ljaReferenceDataLoader.getLJAByNationalCourtCode(context,nationalCourtCode);
+    }
+
+    @Override
+    public FixedListResult getAllFixedLists(final JsonEnvelope context) {
+        return fixedListLookup.getAllFixedLists(context);
     }
 
     @Override

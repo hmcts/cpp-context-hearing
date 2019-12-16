@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
@@ -10,9 +11,12 @@ import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -33,11 +37,12 @@ public class CourtHouseReverseLookup {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     private OuCourtRoomsResult courtRoomsResult(JsonEnvelope context) {
-        JsonEnvelope requestEnvelope;
-        JsonEnvelope jsonResultEnvelope;
-        requestEnvelope = enveloper.withMetadataFrom(context, GET_COURT_HOUSES)
-                .apply(createObjectBuilder().build());
-        jsonResultEnvelope = requester.request(requestEnvelope);
+
+        final Envelope<JsonObject> envelope = Enveloper.envelop(createObjectBuilder().build())
+                .withName(GET_COURT_HOUSES)
+                .withMetadataFrom(context);
+        final JsonEnvelope requestEnvelope = envelopeFrom(envelope.metadata(), envelope.payload());
+        final JsonEnvelope jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope);
 
         final JsonObject json = jsonResultEnvelope.payloadAsJsonObject();
         return jsonObjectToObjectConverter.convert(json, OuCourtRoomsResult.class);
@@ -57,6 +62,14 @@ public class CourtHouseReverseLookup {
         final String normalizedName = normalize(roomName);
         return courtcentreOrganisationunits.getCourtrooms().stream()
                 .filter(cr -> normalizedName.equals(normalize(cr.getCourtroomName())))
+                .findFirst();
+    }
+
+    public Optional<CourtCentreOrganisationUnit> getCourtCentreById(final JsonEnvelope context, final UUID courtCentreId) {
+
+        final List<CourtCentreOrganisationUnit> allCourtCentreOrganisationUnits = courtRoomsResult(context).getOrganisationunits();
+        return allCourtCentreOrganisationUnits.stream()
+                .filter(ou -> ou.getId().equals(courtCentreId.toString()))
                 .findFirst();
     }
 

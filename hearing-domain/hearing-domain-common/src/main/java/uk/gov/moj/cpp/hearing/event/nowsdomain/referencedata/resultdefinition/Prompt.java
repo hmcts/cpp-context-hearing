@@ -1,5 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition;
 
+import static java.util.Optional.ofNullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -91,20 +95,20 @@ public class Prompt {
     }
 
     public List<String> getWordGroup() {
-        return this.wordGroup;
+        return Collections.unmodifiableList(ofNullable(this.wordGroup).orElseGet(ArrayList::new));
     }
 
     public Prompt setWordGroup(List<String> wordGroup) {
-        this.wordGroup = wordGroup;
+        this.wordGroup = Collections.unmodifiableList(ofNullable(wordGroup).orElseGet(ArrayList::new));
         return this;
     }
 
     public List<String> getUserGroups() {
-        return this.userGroups;
+        return Collections.unmodifiableList(ofNullable(this.userGroups).orElseGet(ArrayList::new));
     }
 
     public Prompt setUserGroups(List<String> userGroups) {
-        this.userGroups = userGroups;
+        this.userGroups = Collections.unmodifiableList(ofNullable(userGroups).orElseGet(ArrayList::new));
         return this;
     }
 
@@ -139,8 +143,8 @@ public class Prompt {
         return welshLabel;
     }
 
-    public void setWelshLabel(String welshLabel) {
+    public Prompt setWelshLabel(String welshLabel) {
         this.welshLabel = welshLabel;
-
+        return this;
     }
 }

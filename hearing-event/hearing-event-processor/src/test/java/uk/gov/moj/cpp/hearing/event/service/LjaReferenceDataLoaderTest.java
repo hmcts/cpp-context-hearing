@@ -1,7 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payload;
 import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.ENFORCEMENT_AREA_QUERY_NAME;
 import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.GET_ORGANISATION_UNIT_BY_ID_ID;
 
@@ -13,6 +19,7 @@ import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 
 import java.util.UUID;
 
+import com.jayway.jsonpath.matchers.JsonPathMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,15 +44,16 @@ public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
                         .withBankAccntSortCode("12-34-56")
                         .build())
                 .build();
+
         final EnforcementArea enforcementArea = EnforcementArea.enforcementArea()
                 .withAccountDivisionCode(98765)
                 .withLocalJusticeArea(LocalJusticeArea.localJusticeArea().build())
                 .build();
 
-        final UUID courtCentreId = UUID.randomUUID();
+        final UUID courtCentreId = randomUUID();
 
-        mockQuery(GET_ORGANISATION_UNIT_BY_ID_ID, organisationalUnit, false);
-        mockQuery(ENFORCEMENT_AREA_QUERY_NAME, enforcementArea, true);
+        mockQuery(orgUnitQueryEnvelopeCaptor, organisationalUnit);
+        mockAdminQuery(enforcementAreaQueryEnvelopeCaptor, enforcementArea);
 
         final LjaDetails result = target.getLjaDetails(context, courtCentreId, null);
 
@@ -55,6 +63,14 @@ public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
         assertThat(result.getEnforcementAddress().getAddress2(), is(enforcementArea.getAddress1()));
         assertThat(result.getEnforcementAddress().getAddress3(), is(enforcementArea.getAddress1()));
 
+        verify(requester).request(orgUnitQueryEnvelopeCaptor.capture());
+        verify(requester).requestAsAdmin(enforcementAreaQueryEnvelopeCaptor.capture());
+
+        assertThat(enforcementAreaQueryEnvelopeCaptor.getValue(), jsonEnvelope()
+                .withMetadataOf(metadata().withName(ENFORCEMENT_AREA_QUERY_NAME)));
+
+        assertThat(orgUnitQueryEnvelopeCaptor.getValue().metadata(), metadata().withName(GET_ORGANISATION_UNIT_BY_ID_ID));
+        assertThat(orgUnitQueryEnvelopeCaptor.getValue().payload(), payload().isJson(withJsonPath("$.id", is(courtCentreId.toString()))));
     }
 
 }

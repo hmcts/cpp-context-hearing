@@ -18,12 +18,13 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
-import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.NextHearingDefendant;
 import uk.gov.justice.core.courts.NextHearingOffence;
@@ -94,7 +95,8 @@ public class HearingAdjournIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
         hearingOne.getHearing().setHearingLanguage(HearingLanguage.ENGLISH);
         stubReferenceData(orderedDate, primaryResultDefinitionId, randomUUID(), hearingOne.getHearing().getCourtCentre().getId());
-
+        stubGetReferenceDataCourtRooms(hearingOne.getHearing().getCourtCentre(), hearingOne.getHearing().getHearingLanguage());
+        stubFixedListForWelshValues();
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
         final List<Target> targets = new ArrayList<>();

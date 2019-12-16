@@ -127,6 +127,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .withFixedListCode(pin.getFixedListCode())
                                 .withValue(pin.getValue())
                                 .withWelshValue(pin.getWelshValue())
+                                .withWelshLabel(pin.getWelshLabel())
                                 .withId(pin.getId())
                                 .withLabel(pin.getLabel())
                                 .build())

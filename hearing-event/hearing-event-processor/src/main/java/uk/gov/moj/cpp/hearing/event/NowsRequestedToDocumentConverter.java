@@ -9,9 +9,9 @@ import static java.util.Optional.empty;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
-import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Now;
@@ -39,6 +39,8 @@ import uk.gov.justice.core.courts.nowdocument.Nowdefendant;
 import uk.gov.justice.core.courts.nowdocument.OrderAddressee;
 import uk.gov.justice.core.courts.nowdocument.Prompt;
 import uk.gov.justice.core.courts.nowdocument.Result;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.services.common.configuration.Value;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscription;
@@ -47,6 +49,8 @@ import uk.gov.moj.cpp.hearing.event.nows.InvalidNotificationException;
 import uk.gov.moj.cpp.hearing.event.nows.NowsNotificationDocumentState;
 import uk.gov.moj.cpp.hearing.event.nows.SubscriptionClient;
 import uk.gov.moj.cpp.hearing.event.order.Prompts;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
+import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -70,7 +74,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@SuppressWarnings({"squid:S1188", "squid:S1192", "squid:S00112", "squid:S1125"})
+@SuppressWarnings({"squid:S1188", "squid:S1192", "squid:S00112", "squid:S1125", "squid:S2589"})
 public class NowsRequestedToDocumentConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedToDocumentConverter.class);
@@ -96,16 +100,22 @@ public class NowsRequestedToDocumentConverter {
     private static final String URGENT_MESSAGE = "The listed notice, order or warrant has been marked as URGENT and requires your immediate attention.";
     private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    public static final String WELSH_LJA_NAME = "welshName";
+    public static final String WELSH = "welsh";
 
     private final SubscriptionClient subscriptionClient;
+    private final CourtHouseReverseLookup courtHouseReverseLookup;
+    private final ReferenceDataService referenceDataService;
 
     @Inject
     @Value(key = "materialExternalWebLinkBaseUrl")
     private String materialExternalWebLinkBaseUrl;
 
     @Inject
-    public NowsRequestedToDocumentConverter(final SubscriptionClient subscriptionClient) {
+    public NowsRequestedToDocumentConverter(final SubscriptionClient subscriptionClient, final CourtHouseReverseLookup courtHouseReverseLookup, final ReferenceDataService referenceDataService) {
         this.subscriptionClient = subscriptionClient;
+        this.courtHouseReverseLookup = courtHouseReverseLookup;
+        this.referenceDataService = referenceDataService;
     }
 
     public List<NowDocumentRequest> convert(final JsonEnvelope context, final CreateNowsRequest nowsRequested) {
@@ -120,7 +130,7 @@ public class NowsRequestedToDocumentConverter {
 
             List<Subscription> subscriptions = new ArrayList<>();
 
-            if(nonNull(context)) {
+            if (nonNull(context)) {
                 subscriptions = subscriptionClient.getAll(context, matchingNowType.getId(), LocalDate.now()).getSubscriptions();
 
                 if (subscriptions.isEmpty()) {
@@ -131,14 +141,14 @@ public class NowsRequestedToDocumentConverter {
                 }
             }
             for (final NowVariant selectedNowMaterial : selectedNow.getRequestedMaterials()) {
-                nowDocumentRequests.add(mapVariant(nowsRequested, selectedNowMaterial, selectedNow, matchingNowType, isCrownCourt, subscriptions));
+                nowDocumentRequests.add(mapVariant(context, nowsRequested, selectedNowMaterial, selectedNow, matchingNowType, isCrownCourt, subscriptions));
             }
         });
 
         return nowDocumentRequests;
     }
 
-    private NowDocumentRequest mapVariant(final CreateNowsRequest nowsRequested,
+    private NowDocumentRequest mapVariant(final JsonEnvelope context, final CreateNowsRequest nowsRequested,
                                           final NowVariant selectedNowMaterial,
                                           final Now selectedNow,
                                           final NowType matchingNowType,
@@ -152,6 +162,7 @@ public class NowsRequestedToDocumentConverter {
         final List<String> caseUrns = getCaseUrns(nowsRequested, selectedNow);
 
         final String courtCentreName = nowsRequested.getHearing().getCourtCentre().getName();
+
 
         final String defendantName = nowdefendant != null ? nowdefendant.getName() : null;
 
@@ -197,6 +208,14 @@ public class NowsRequestedToDocumentConverter {
         if (nonNull(selectedNow.getLjaDetails())) {
             ljaDetails = selectedNow.getLjaDetails().getLjaName();
         }
+        String welshLjaName = "";
+        String courtWelshName = "";
+        final CourtCentreOrganisationUnit courtCentreOrganisationUnit = getCourtCentreOrganisationUnit(context, nowsRequested.getHearing())
+                .orElseThrow(() -> new RuntimeException(format("No Court Centre For Hearing with court centre id %s.", nowsRequested.getHearing().getCourtCentre().getId())));
+        if (courtCentreOrganisationUnit.getIsWelsh() != null && courtCentreOrganisationUnit.getIsWelsh()) {
+            welshLjaName = getWelshLjaName(context, ljaCode);
+            courtWelshName = courtCentreOrganisationUnit.getOucodeL3WelshName();
+        }
 
         final List<EmailChannel> emailChannels = buildEmailNotifications(nowsNotificationDocumentState, subscriptions);
 
@@ -212,17 +231,21 @@ public class NowsRequestedToDocumentConverter {
                                 .withCases(cases)
                                 .withCaseUrns(caseUrns)
                                 .withCourtCentreName(courtCentreName)
+                                .withWelshCourtCentreName(courtWelshName)
                                 .withCourtClerkName(courtClerkName)
                                 .withDefendant(nowdefendant)
                                 .withFinancialOrderDetails(financialOrderDetails)
                                 .withLjaCode(ljaCode)
                                 .withLjaName(ljaDetails)
+                                .withWelshLjaName(welshLjaName)
                                 .withNextHearingCourtDetails(createNextHearingCourtDetails(selectedNow.getNextHearingCourtDetails()))
                                 .withNowResultDefinitionsText(createAdditionalPropertiesForNowResultDefinitionsText(cases))
                                 .withNowText(matchingNowType.getStaticText())
+                                .withWelshNowText(matchingNowType.getWelshStaticText())
                                 .withOrderAddressee(getOrderAddressee(selectedNowMaterial.getNowVariantAddressee()))
                                 .withOrderDate(findOrderDate(nowsRequested.getSharedResultLines(), selectedNowMaterial, selectedNow.getReferenceDate()))
                                 .withOrderName(matchingNowType.getDescription())
+                                .withWelshOrderName(matchingNowType.getWelshDescription())
                                 .withSubTemplateName(subTemplateName)
                                 .withIsCrownCourt(isCrownCourt)
                                 .withAmendmentDate(findAmendmentDate(nowsRequested.getSharedResultLines(), selectedNowMaterial))
@@ -239,6 +262,22 @@ public class NowsRequestedToDocumentConverter {
         return builder.build();
     }
 
+    private String getWelshLjaName(final JsonEnvelope context, final String ljaCode) {
+        String welshLjaName = "";
+        if (nonNull(ljaCode)) {
+            final LocalJusticeAreas ljaByNationalCourtCode = referenceDataService.getLJAByNationalCourtCode(context, ljaCode);
+            if (ljaByNationalCourtCode != null
+                    && ljaByNationalCourtCode.getWelshName() != null) {
+                welshLjaName = ljaByNationalCourtCode.getWelshName();
+            }
+        }
+        return welshLjaName;
+    }
+
+    private Optional<CourtCentreOrganisationUnit> getCourtCentreOrganisationUnit(final JsonEnvelope event, final Hearing hearing) {
+        return courtHouseReverseLookup.getCourtCentreById(event, hearing.getCourtCentre().getId());
+    }
+
     private String findAmendmentDate(final List<SharedResultLine> sharedResultLines, final NowVariant selectedNowMaterial) {
         final List<LocalDate> finalAmendmentDates = new ArrayList<>();
 
@@ -249,10 +288,10 @@ public class NowsRequestedToDocumentConverter {
                     .map(SharedResultLine::getAmendmentDate)
                     .collect(Collectors.toList());
 
-                finalAmendmentDates.addAll(amendmentDates);
+            finalAmendmentDates.addAll(amendmentDates);
         }
 
-        if(CollectionUtils.isNotEmpty(finalAmendmentDates)) {
+        if (CollectionUtils.isNotEmpty(finalAmendmentDates)) {
             finalAmendmentDates.sort(Comparator.reverseOrder());
 
             return finalAmendmentDates.get(0).toString();
@@ -289,20 +328,10 @@ public class NowsRequestedToDocumentConverter {
 
         if (nonNull(nextHearingCourtDetails)) {
 
-            final Address address = nextHearingCourtDetails.getCourtCentre().getAddress();
-
-            final Nowaddress nowaddress = Nowaddress.nowaddress()
-                    .withLine1(address.getAddress1())
-                    .withLine2(address.getAddress2())
-                    .withLine3(address.getAddress3())
-                    .withLine4(address.getAddress4())
-                    .withLine5(address.getAddress5())
-                    .withPostCode(address.getPostcode())
-                    .build();
-
             nextHearingCourtDetails1 = NextHearingCourtDetails.nextHearingCourtDetails()
-                    .withCourtAddress(nowaddress)
+                    .withCourtAddress(toNowAddress(nextHearingCourtDetails.getCourtCentre().getAddress()))
                     .withCourtName(nextHearingCourtDetails.getCourtCentre().getName())
+                    .withWelshCourtName(nextHearingCourtDetails.getCourtCentre().getWelshName())
                     .withHearingDate(nextHearingCourtDetails.getHearingDate())
                     .withHearingTime(nextHearingCourtDetails.getHearingTime())
                     .build();
@@ -315,39 +344,40 @@ public class NowsRequestedToDocumentConverter {
 
         final NowResultDefinitionsText nowResultDefinitionsText = NowResultDefinitionsText.nowResultDefinitionsText().build();
 
-        final List<Result> results = cases.stream()
+        final List<Result> defendantCaseOffenceResults = cases.stream()
                 .flatMap(caseOffence -> caseOffence.getDefendantCaseOffences().stream())
                 .filter(caseOffence -> nonNull(caseOffence.getResults()))
                 .flatMap(defendantCaseOffence -> defendantCaseOffence.getResults().stream())
                 .collect(toList());
 
-        final List<Result> results2 = cases.stream()
+        final List<Result> defendantCaseResults = cases.stream()
                 .filter(caseResults -> nonNull(caseResults.getDefendantCaseResults()))
                 .flatMap(c -> c.getDefendantCaseResults().stream())
                 .collect(toList());
 
+        setAdditionalPropertyForResults(nowResultDefinitionsText, defendantCaseOffenceResults);
+
+        setAdditionalPropertyForResults(nowResultDefinitionsText, defendantCaseResults);
+
+        return nowResultDefinitionsText;
+    }
+
+    private void setAdditionalPropertyForResults(final NowResultDefinitionsText nowResultDefinitionsText, final List<Result> results) {
         results.forEach(result -> {
             final Map<String, Object> resultAdditionalProperties = result.getAdditionalProperties();
             final Set<String> keys = resultAdditionalProperties.keySet();
             keys.forEach(key -> {
                         nowResultDefinitionsText.setAdditionalProperty(key, resultAdditionalProperties.get(key));
-                        nowResultDefinitionsText.setAdditionalProperty(additionalPropertyLabelKey(key), result.getLabel());
+                        final String labelKey = additionalPropertyLabelKey(key);
+                        if (labelKey.toLowerCase().contains(WELSH)) {
+                            nowResultDefinitionsText.setAdditionalProperty(labelKey, result.getWelshLabel());
+                        } else {
+                            nowResultDefinitionsText.setAdditionalProperty(labelKey, result.getLabel());
+                        }
+
                     }
             );
         });
-
-        results2.forEach(result -> {
-            final Map<String, Object> resultAdditionalProperties = result.getAdditionalProperties();
-            final Set<String> keys = resultAdditionalProperties.keySet();
-            keys.forEach(key ->
-            {
-                nowResultDefinitionsText.setAdditionalProperty(key, resultAdditionalProperties.get(key));
-                nowResultDefinitionsText.setAdditionalProperty(additionalPropertyLabelKey(key), result.getLabel());
-            });
-
-        });
-
-        return nowResultDefinitionsText;
     }
 
     private String additionalPropertyLabelKey(String key) {
@@ -362,6 +392,7 @@ public class NowsRequestedToDocumentConverter {
                             .withTotalAmountImposed(financialOrdersDetails.getTotalAmountImposed())
                             .withTotalBalance(financialOrdersDetails.getTotalBalance())
                             .withIsCrownCourt(financialOrdersDetails.getIsCrownCourt())
+                            .withPaymentTermsWelsh(financialOrdersDetails.getPaymentTermsWelsh())
                             .withPaymentTerms(financialOrdersDetails.getPaymentTerms());
 
             if (ljaDetails != null) {
@@ -369,7 +400,7 @@ public class NowsRequestedToDocumentConverter {
                         .withBacsAccountNumber(ljaDetails.getBacsAccountNumber())
                         .withBacsBankName(ljaDetails.getBacsBankName())
                         .withBacsSortCode(ljaDetails.getBacsSortCode())
-                        .withEnforcementAddress(getAddress(ljaDetails.getEnforcementAddress()))
+                        .withEnforcementAddress(toNowAddress(ljaDetails.getEnforcementAddress()))
                         .withEnforcementEmail(ljaDetails.getEnforcementEmail())
                         .withEnforcementPhoneNumber(ljaDetails.getEnforcementPhoneNumber());
             }
@@ -382,10 +413,10 @@ public class NowsRequestedToDocumentConverter {
         return
                 OrderAddressee.orderAddressee()
                         .withName(nowVariantAddressee.getName())
-                        .withAddress(getAddress(nowVariantAddressee.getAddress())).build();
+                        .withAddress(toNowAddress(nowVariantAddressee.getAddress())).build();
     }
 
-    private Nowaddress getAddress(final uk.gov.justice.core.courts.Address address) {
+    private Nowaddress toNowAddress(final uk.gov.justice.core.courts.Address address) {
         return Nowaddress.nowaddress()
                 .withLine1(address.getAddress1())
                 .withLine2(address.getAddress2())
@@ -393,6 +424,11 @@ public class NowsRequestedToDocumentConverter {
                 .withLine4(address.getAddress4())
                 .withLine5(address.getAddress5())
                 .withPostCode(address.getPostcode())
+                .withWelshLine1(address.getWelshAddress1())
+                .withWelshLine2(address.getWelshAddress2())
+                .withWelshLine3(address.getWelshAddress3())
+                .withWelshLine4(address.getWelshAddress4())
+                .withWelshLine5(address.getWelshAddress5())
                 .build();
     }
 
@@ -455,11 +491,14 @@ public class NowsRequestedToDocumentConverter {
     }
 
     private Nowdefendant getNowdefendant(final NowVariantDefendant nowVariantDefendant) {
-        return Nowdefendant.nowdefendant()
+        final Nowdefendant.Builder builder = Nowdefendant.nowdefendant()
                 .withName(nowVariantDefendant.getName())
-                .withDateOfBirth(nonNull(nowVariantDefendant.getDateOfBirth()) ? nowVariantDefendant.getDateOfBirth().toString() : null)
-                .withAddress(getAddress(nowVariantDefendant.getAddress()))
-                .build();
+                .withAddress(toNowAddress(nowVariantDefendant.getAddress()));
+
+        if (nonNull(nowVariantDefendant.getDateOfBirth())) {
+            builder.withDateOfBirth(nowVariantDefendant.getDateOfBirth().toString());
+        }
+        return builder.build();
     }
 
     @SuppressWarnings({"squid:S3776", "squid:S134"})
@@ -512,10 +551,13 @@ public class NowsRequestedToDocumentConverter {
                                             Prompt.prompt()
                                                     .withLabel(prompts.getLabel())
                                                     .withValue(prompts.getValue())
+                                                    .withWelshLabel(prompts.getWelshLabel())
+                                                    .withWelshValue(prompts.getWelshValue())
                                                     .build())
                                     .collect(Collectors.toList());
 
                             final Result defendantCaseResults = Result.result()
+                                    .withWelshLabel(sharedResultLine.getWelshLabel())
                                     .withLabel(sharedResultLine.getLabel())
                                     .withPrompts(promptList)
                                     .build();
@@ -534,7 +576,7 @@ public class NowsRequestedToDocumentConverter {
 
                         if (OFFENCE.equalsIgnoreCase(sharedResultLine.getLevel())) {
 
-                            final Result results = getResults(selectedNowResult, sharedResultLine.getLabel(), orderPrompts);
+                            final Result results = getResults(selectedNowResult, sharedResultLine.getLabel(), sharedResultLine.getWelshLabel(), orderPrompts);
 
                             prosecutionCase.getDefendants().stream()
                                     .filter(d -> d.getId().equals(sharedResultLine.getDefendantId()))
@@ -573,7 +615,10 @@ public class NowsRequestedToDocumentConverter {
                     defendantCaseOffences.add(DefendantCaseOffence.defendantCaseOffence()
                             .withConvictionDate(nonNull(convictionDate) ? convictionDate.toString() : "")
                             .withStartDate(nonNull(startDate) ? startDate.toString() : "")
+                            .withTitle(offence.getOffenceTitle())
+                            .withWelshTitle(offence.getOffenceTitleWelsh())
                             .withWording(offence.getWording())
+                            .withWelshWording(offence.getWordingWelsh())
                             .withResults(offenceResults.get(offence.getId()))
                             .build());
                 });
@@ -587,7 +632,7 @@ public class NowsRequestedToDocumentConverter {
         return new ArrayList<>(orderCasesMap.values());
     }
 
-    private Result getResults(final NowVariantResult selectedNowResult, final String label, final List<Prompts> orderPrompts) {
+    private Result getResults(final NowVariantResult selectedNowResult, final String label, final String welshLabel, final List<Prompts> orderPrompts) {
 
         final NowVariantResultText nowVariantResultTextOptional = selectedNowResult.getNowVariantResultText();
 
@@ -596,6 +641,8 @@ public class NowsRequestedToDocumentConverter {
                         Prompt.prompt()
                                 .withLabel(prompts.getLabel())
                                 .withValue(prompts.getValue())
+                                .withWelshLabel(prompts.getWelshLabel())
+                                .withWelshValue(prompts.getWelshValue())
                                 .build())
                 .collect(Collectors.toList());
 
@@ -605,6 +652,7 @@ public class NowsRequestedToDocumentConverter {
 
             final Result results = Result.result()
                     .withLabel(label)
+                    .withWelshLabel(welshLabel)
                     .withPrompts(promptList)
                     .build();
 
@@ -615,6 +663,7 @@ public class NowsRequestedToDocumentConverter {
         } else {
             return Result.result()
                     .withLabel(label)
+                    .withWelshLabel(welshLabel)
                     .withPrompts(promptList)
                     .build();
         }
@@ -623,7 +672,7 @@ public class NowsRequestedToDocumentConverter {
     private List<Prompts> preparePrompts(final NowVariantResult selectedNowResult, final SharedResultLine sharedResultLine) {
         final List<ResultPrompt> nowResultPrompts = getMatchingPrompts(selectedNowResult, sharedResultLine);
         return nowResultPrompts.stream()
-                .map(prompt -> new Prompts(prompt.getLabel(), prompt.getValue()))
+                .map(prompt -> new Prompts(prompt.getLabel(), prompt.getValue(), prompt.getWelshLabel(), prompt.getWelshValue()))
                 .collect(toList());
     }
 

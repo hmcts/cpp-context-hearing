@@ -65,16 +65,17 @@ public class HearingLogEventListener {
     public void hearingEventLogged(final JsonEnvelope event) {
         final HearingEventLogged hearingEventLogged = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventLogged.class);
 
-        final ZonedDateTime londonZoned = hearingEventLogged.getEventTime().withZoneSameInstant(ZoneId.of("Europe/London"));
+        final ZonedDateTime eventTimeUTC = hearingEventLogged.getEventTime().withZoneSameInstant(ZoneId.of("UTC"));
+        final ZonedDateTime modifiedTimeUTC = hearingEventLogged.getLastModifiedTime().withZoneSameInstant(ZoneId.of("UTC"));
 
         hearingEventRepository.save(HearingEvent.hearingEvent()
                 .setId(hearingEventLogged.getHearingEventId())
                 .setHearingId(hearingEventLogged.getHearingId())
                 .setHearingEventDefinitionId(hearingEventLogged.getHearingEventDefinitionId())
                 .setRecordedLabel(hearingEventLogged.getRecordedLabel())
-                .setEventDate(londonZoned.toLocalDate())
-                .setEventTime(hearingEventLogged.getEventTime())
-                .setLastModifiedTime(hearingEventLogged.getLastModifiedTime())
+                .setEventDate(eventTimeUTC.toLocalDate())
+                .setEventTime(eventTimeUTC)
+                .setLastModifiedTime(modifiedTimeUTC)
                 .setAlterable(hearingEventLogged.isAlterable())
                 .setDefenceCounselId(hearingEventLogged.getDefenceCounselId())
         );

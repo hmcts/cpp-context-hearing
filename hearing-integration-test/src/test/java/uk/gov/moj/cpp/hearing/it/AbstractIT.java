@@ -216,6 +216,12 @@ public class  AbstractIT {
                 .withOucode(ljaCode)
                 .withLja(ljaCode)
                 .withId(courtCentreId.toString())
+                .withIsWelsh(true)
+                .withWelshAddress1("address1 " + ljaCode)
+                .withWelshAddress2("address2 " + ljaCode)
+                .withWelshAddress3("address3 " + ljaCode)
+                .withWelshAddress4("address4 " + ljaCode)
+                .withOucodeL3WelshName("OucodeL3WelshName")
                 .build();
 
         final EnforcementArea enforcementArea = EnforcementArea.enforcementArea()

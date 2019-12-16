@@ -16,7 +16,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 @SuppressWarnings({"squid:S1068", "squid:S1948"})
 public class ApplicationAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 100L;
+    private static final long serialVersionUID = 101L;
 
     private List<UUID> hearingIds = new ArrayList<>();
 

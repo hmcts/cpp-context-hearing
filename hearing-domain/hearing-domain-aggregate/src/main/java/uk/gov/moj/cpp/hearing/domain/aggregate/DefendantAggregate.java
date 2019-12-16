@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1948"})
 public class DefendantAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 3437111723927797318L;
+    private static final long serialVersionUID = 3437111723927797319L;
 
     private List<UUID> hearingIds = new ArrayList<>();
 

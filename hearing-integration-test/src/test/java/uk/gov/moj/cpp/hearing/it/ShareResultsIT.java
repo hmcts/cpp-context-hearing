@@ -7,6 +7,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.collections.ListUtils.unmodifiableList;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
@@ -19,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.welshInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultWithOutcomeCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandForMultipleOffences;
@@ -33,6 +35,8 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -44,6 +48,8 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.HearingLanguage;
+import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
@@ -82,10 +88,12 @@ import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.jayway.restassured.path.json.JsonPath;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -134,11 +142,13 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows() {
+        stubFixedListForWelshValues();
         shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(false);
     }
 
     @Test
     public void shareResults_shouldPublishResults_When_Result_Is_Deleted() {
+        stubFixedListForWelshValues();
         shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(true);
     }
 
@@ -386,7 +396,7 @@ public class ShareResultsIT extends AbstractIT {
 
         //Given
         // Hearing Initiated
-
+        stubFixedListForWelshValues();
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = UUID.fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
@@ -434,8 +444,9 @@ public class ShareResultsIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingCommand));
 
-
-        stubLjaDetails(hearingOne.getHearing().getCourtCentre().getId());
+        CourtCentre courtCentre = hearingOne.getHearing().getCourtCentre();
+        stubLjaDetails(courtCentre.getId());
+        stubGetReferenceDataCourtRooms(courtCentre, hearingOne.getHearing().getHearingLanguage());
 
         final EventListener publicEventForDefendentCaseWithDrawnOrDismissed = listenFor("public.hearing.defendant-case-withdrawn-or-dismissed")
                 .withFilter(isJson(allOf(
@@ -555,6 +566,7 @@ public class ShareResultsIT extends AbstractIT {
 
 
     private void shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(final boolean checkIfResultDeleted) {
+
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
 
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
@@ -572,7 +584,9 @@ public class ShareResultsIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
 
-        stubLjaDetails(hearingOne.getHearing().getCourtCentre().getId());
+        CourtCentre courtCentre = hearingOne.getHearing().getCourtCentre();
+        stubLjaDetails(courtCentre.getId());
+        stubGetReferenceDataCourtRooms(courtCentre, hearingOne.getHearing().getHearingLanguage());
 
         ProsecutionCounselIT.createFirstProsecutionCounsel(hearingOne);
 
@@ -807,7 +821,109 @@ public class ShareResultsIT extends AbstractIT {
         );
     }
 
-    @Ignore("This test is failing on the pipeline")
+    @Test
+    public void shouldShareResultsInWelsh() {
+
+        //Given
+        //Hearing Initiated
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+
+        final UUID guiltyResultDefId = UUID.fromString("ce23a452-9015-4619-968f-1628d7a271c9");
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+
+        final AllResultDefinitionsReferenceDataHelper refDataHelper1 = setupResultDefinitionsReferenceData(orderedDate, asList(guiltyResultDefId));
+
+        final ResultDefinition guiltyResultDefinition =
+                refDataHelper1.it().getResultDefinitions().stream()
+                        .filter(rd -> rd.getId().equals(guiltyResultDefId))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("invalid test data")
+                        );
+
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt guiltyResultDefinitionPrompt = guiltyResultDefinition.getPrompts().get(0);
+
+        InitiateHearingCommand initiateHearingCommand = welshInitiateHearingTemplate();
+
+        final List<Offence> offences = getOffences(initiateHearingCommand);
+        final UUID offenceId = randomUUID();
+        offences.add(Offence.offence()
+                .withId(offenceId)
+                .withStartDate(PAST_LOCAL_DATE.next())
+                .withEndDate(PAST_LOCAL_DATE.next())
+                .withArrestDate(PAST_LOCAL_DATE.next())
+                .withChargeDate(PAST_LOCAL_DATE.next())
+                .withOffenceDefinitionId(randomUUID())
+                .withOffenceTitle(STRING.next())
+                .withOffenceCode(STRING.next())
+                .withOffenceTitleWelsh(STRING.next())
+                .withOffenceLegislation(STRING.next())
+                .withOffenceLegislationWelsh(STRING.next())
+                .withIndicatedPlea(CoreTestTemplates.indicatedPlea(offenceId, INDICATED_GUILTY).build())
+                .withNotifiedPlea(CoreTestTemplates.notifiedPlea(offenceId).build())
+                .withWording(STRING.next())
+                .withCount(INTEGER.next())
+                .withWordingWelsh(STRING.next())
+                .withModeOfTrial(STRING.next())
+                .withOrderIndex(INTEGER.next()).build());
+
+        final InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(requestSpec, initiateHearingCommand));
+
+        final Hearing hearing = hearingCommandHelper.getHearing();
+
+        stubLjaDetails(hearing.getCourtCentre().getId());
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+        final ResultLine resultLine = saveDraftResultCommand.getTarget().getResultLines().get(0);
+        resultLine.setResultLineId(UUID.randomUUID());
+        resultLine.setResultDefinitionId(guiltyResultDefId);
+        resultLine.setOrderedDate(orderedDate);
+        resultLine.setPrompts(singletonList(Prompt.prompt()
+                .withLabel(guiltyResultDefinitionPrompt.getLabel())
+                .withWelshLabel("welshLabel")
+                .withFixedListCode("fixedListCode")
+                .withValue("value1")
+                .withWelshValue("wvalue1")
+                .withId(guiltyResultDefinitionPrompt.getId())
+                .build()));
+
+        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
+
+        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearingCommandHelper.getHearingId()))
+                                .with(Hearing::getHearingLanguage, is(HearingLanguage.WELSH))
+                                .with(Hearing::getType, isBean(HearingType.class)
+                                        .with(HearingType::getWelshDescription, is(hearing.getType().getWelshDescription())))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))
+                                        .with(CourtCentre::getWelshRoomName, is(hearing.getCourtCentre().getWelshRoomName()))
+                                        .with(CourtCentre::getWelshName, is(hearing.getCourtCentre().getWelshName()))))));
+
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(UUID.randomUUID()).build();
+
+        UseCases.shareResults(requestSpec, hearingCommandHelper.getHearingId(), with(
+                basicShareResultsCommandTemplate(),
+                command -> command.setCourtClerk(courtClerk1)
+        ), targets);
+
+        final JsonPath jsonPath = publicEventResulted.waitFor();
+
+        final List<HashMap> defendantReferralReasons = jsonPath.getList("hearing.defendantReferralReasons", HashMap.class);
+        assertThat(defendantReferralReasons.get(0).get("welshDescription").toString(), is(hearing.getDefendantReferralReasons().get(0).getWelshDescription()));
+        final String actualOffenceTitleWelsh = jsonPath.getString("hearing.prosecutionCases[0].defendants[0].offences[0].offenceTitleWelsh");
+        final String expectedOffenceTitleWelsh = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getOffenceTitleWelsh();
+        assertThat(actualOffenceTitleWelsh, is(expectedOffenceTitleWelsh));
+    }
+
+    @Ignore("This test is failing on the  pipeline")
     @Test
     public void shareResults_shouldPublishResults_andAmendAndReShareResultsAgain() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
@@ -1023,14 +1139,19 @@ public class ShareResultsIT extends AbstractIT {
                                 .setResultDefinitions(asList(NowResultDefinitionRequirement.resultDefinitions()
                                                 .setId(randomUUID())
                                                 .setMandatory(true)
+                                                .setWelshText("Welsh Text Primary")
                                                 .setPrimary(true),
                                         NowResultDefinitionRequirement.resultDefinitions()
                                                 .setId(randomUUID())
                                                 // This causes a test failure but this field is under review .setText("ResultDefinitionLevel/" + STRING.next())
                                                 .setMandatory(false)
-                                                .setPrimary(false)))
+                                                .setPrimary(false)
+                                                .setWelshText("Welsh Text Not Primary")
+                                ))
                                 .setName(STRING.next())
                                 .setText("NowLevel/" + STRING.next())
+                                .setWelshText("NowLevel/" + STRING.next() + " Welsh")
+                                .setWelshName("Welsh Name")
                                 .setTemplateName(STRING.next())
                                 .setRank(INTEGER.next())
                                 .setJurisdiction("B")
@@ -1039,12 +1160,14 @@ public class ShareResultsIT extends AbstractIT {
                                 .setId(randomUUID())
                                 .setResultDefinitions(asList(NowResultDefinitionRequirement.resultDefinitions()
                                                 .setId(randomUUID())
+                                                .setWelshText("Welsh Text Primary")
                                                 .setMandatory(true)
                                                 .setPrimary(true),
                                         NowResultDefinitionRequirement.resultDefinitions()
                                                 .setId(randomUUID())
                                                 .setMandatory(false)
                                                 .setPrimary(false)
+                                                .setWelshText("Welsh Text Not Primary")
                                 ))
                                 .setName(STRING.next())
                                 .setTemplateName(STRING.next())
@@ -1052,6 +1175,8 @@ public class ShareResultsIT extends AbstractIT {
                                 .setJurisdiction(BOTH_JURISDICTIONS)
                                 .setRemotePrintingRequired(false)
                                 .setText(STRING.next())
+                                .setWelshText("welshText")
+                                .setWelshName("welshName")
                 ));
         return setupNowsReferenceData(referenceDate, allnows);
     }
@@ -1082,10 +1207,14 @@ public class ShareResultsIT extends AbstractIT {
                                                                 .setId(randomUUID())
                                                                 .setMandatory(true)
                                                                 .setLabel(STRING.next())
+                                                                .setWelshLabel(STRING.next())
                                                                 .setUserGroups(singletonList(LISTING_OFFICER_USERGROUP))
                                                                 .setReference(STRING.next())
                                                         )
                                                 )
+                                                .setLabel(STRING.next())
+                                                .setWelshLabel(STRING.next())
+                                                .setUserGroups(singletonList(LISTING_OFFICER_USERGROUP))
                         ).collect(Collectors.toList())
                 ));
 
