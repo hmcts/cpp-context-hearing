@@ -106,13 +106,13 @@ public class CoreTestTemplates {
                 .withWelshRoomName(STRING.next());
     }
 
-    public static CourtCentre.Builder courtCentreWithArgs(UUID courtAndRoomId) {
+    public static CourtCentre.Builder courtCentreWithArgs(final UUID courtAndRoomId, final String courtRoomName) {
         return CourtCentre.courtCentre()
                 .withId(courtAndRoomId)
                 .withName(STRING.next())
                 .withWelshName(STRING.next())
                 .withRoomId(courtAndRoomId)
-                .withRoomName(STRING.next())
+                .withRoomName(courtRoomName)
                 .withWelshRoomName(STRING.next());
     }
 
@@ -414,7 +414,7 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,int year, int month, int day) throws NoSuchAlgorithmException {
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,final String courtRoomName, int year, int month, int day) throws NoSuchAlgorithmException {
        final Random random = SecureRandom.getInstanceStrong();
        final int min = 1;
        final int max = 5;
@@ -426,7 +426,7 @@ public class CoreTestTemplates {
                 .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
                                             hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
                                             hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
-                .withCourtCentre(courtCentreWithArgs(courtAndRoomId).build())
+                .withCourtCentre(courtCentreWithArgs(courtAndRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(

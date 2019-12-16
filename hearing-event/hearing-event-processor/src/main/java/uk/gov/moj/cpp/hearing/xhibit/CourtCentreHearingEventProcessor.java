@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
 //TODO: Extend this class as part of SCSL-132
 @SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S2221", "squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_PROCESSOR)
-public class CourtListEventProcessor {
+public class CourtCentreHearingEventProcessor {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CourtCentreHearingEventProcessor.class.getName());
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CourtListEventProcessor.class.getName());
     @Inject
     private PublishCourtListCommandSender publishCourtListCommandSender;
 
@@ -65,12 +65,11 @@ public class CourtListEventProcessor {
 
             final String xhibitXml = courtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
 
-            //TODO: Uncomment this this line once Ref data endpoint is clear - https://tools.hmcts.net/jira/browse/SCRD-512
-            //final String webPageFileName = xhibitFileNameGenerator.generateWebPageFileName(envelope, parse(publishCourtListRequestParameters.getCreatedTime()), publishCourtListRequestParameters.getCourtCentreId());
+            final String publicDisplayFileName = xhibitFileNameGenerator.generatePublicDisplayFileName(parse(publishCourtListRequestParameters.getCreatedTime()), publishCourtListRequestParameters.getCourtCentreId());
 
-            xhibitService.sendToXhibit(toInputStream(xhibitXml), "TEST.xml");
+            xhibitService.sendToXhibit(toInputStream(xhibitXml), publicDisplayFileName);
 
-            publishCourtListCommandSender.recordCourtListExportSuccessful(publishCourtListRequestParameters.getCourtCentreId(), "TEST.xml");
+            publishCourtListCommandSender.recordCourtListExportSuccessful(publishCourtListRequestParameters.getCourtCentreId(), publicDisplayFileName);
         } catch (final Exception e) {
             LOGGER.error("Court List generation failed", e);
             publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), "NONE", e.getMessage());

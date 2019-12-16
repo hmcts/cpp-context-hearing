@@ -12,7 +12,6 @@
 
     <properties>
         <cpp.service-component>QUERY_API</cpp.service-component>
-        <referencedata.version>2.0.240</referencedata.version>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
         <material.version>2.0.116</material.version>
         <notification.notify.version>0.0.26</notification.notify.version>

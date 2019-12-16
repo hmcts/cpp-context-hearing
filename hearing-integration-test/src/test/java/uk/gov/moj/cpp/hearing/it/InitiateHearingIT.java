@@ -56,6 +56,8 @@ import org.junit.Test;
 
 public class InitiateHearingIT extends AbstractIT {
 
+    private static final String COURT_ROOM_NAME = "Room 1";
+
     @Test
     public void initiateHearing_withOnlyMandatoryFields() {
 
@@ -793,8 +795,8 @@ public class InitiateHearingIT extends AbstractIT {
 
         UUID courtAndRoomId = UUID.randomUUID();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, 2019, 7, 5)));
-        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, 2019, 7, 4));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, 2019, 7, 5)));
+        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, 2019, 7, 4));
 
         LocalDate localDate = LocalDate.of(2019, 7, 5);
 

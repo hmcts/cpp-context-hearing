@@ -1,9 +1,7 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.lang.String.format;
-
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -19,29 +17,29 @@ public class XhibitFileNameGenerator {
     private static final String PUBLIC_DISPLAY_PAGE_PREFIX = "PD";
 
     @Inject
-    private ReferenceDataXhibitDataLoaderService referenceDataXhibitDataLoaderService;
+    private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
 
-    public String generateWebPageFileName(final JsonEnvelope jsonEnvelope, final ZonedDateTime requestedDate, final String courtCentreId) {
-        return generateFileName(jsonEnvelope, WEB_PAGE_PREFIX, requestedDate, courtCentreId);
+    public String generateWebPageFileName(final ZonedDateTime requestedDate, final String courtCentreId) {
+        return generateFileName(WEB_PAGE_PREFIX, requestedDate, courtCentreId);
     }
 
-    public String generatePublicDisplayFileName(final JsonEnvelope jsonEnvelope, final ZonedDateTime requestedDate, final String courtCentreId) {
-        return generateFileName(jsonEnvelope, PUBLIC_DISPLAY_PAGE_PREFIX, requestedDate, courtCentreId);
+    public String generatePublicDisplayFileName(final ZonedDateTime requestedDate, final String courtCentreId) {
+        return generateFileName(PUBLIC_DISPLAY_PAGE_PREFIX, requestedDate, courtCentreId);
     }
 
-    private String generateFileName(final JsonEnvelope jsonEnvelope, final String prefix, final ZonedDateTime requestedDate, final String courtCentreId) {
+    private String generateFileName(final String prefix, final ZonedDateTime requestedDate, final String courtCentreId) {
 
-        final CourtCentreCode xhibitCourtCentreCode = getCourtCode(jsonEnvelope, courtCentreId);
+        final String xhibitCourtCentreCode = getCourtCode(courtCentreId);
 
-        return format("%s_%s_%s.xml", prefix, xhibitCourtCentreCode.getCrestCodeId(), getSendDate(requestedDate));
+        return format("%s_%s_%s.xml", prefix, xhibitCourtCentreCode, getSendDate(requestedDate));
     }
 
     private String getSendDate(final ZonedDateTime createdDate) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        final DateTimeFormatter formatter = ofPattern("yyyyMMddHHmmss");
         return createdDate.format(formatter);
     }
 
-    private CourtCentreCode getCourtCode(final JsonEnvelope jsonEnvelope, final String courtCentreId) {
-        return referenceDataXhibitDataLoaderService.getXhibitCourtCentreCodeBy(jsonEnvelope, courtCentreId);
+    private String getCourtCode(final String courtCentreId) {
+        return referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId);
     }
 }

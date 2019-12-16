@@ -1,8 +1,9 @@
-package uk.gov.moj.cpp.hearing.xhibit;
+package uk.gov.moj.cpp.hearing.query.view.referencedata;
 
+import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
@@ -10,36 +11,39 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappings;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
-import uk.gov.moj.cpp.hearing.event.service.EventMapping;
 
-import java.util.List;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
-@SuppressWarnings("squid:S1168")
 @ApplicationScoped
-public class ReferenceDataXhibitDataLoader {
+public class ReferenceDataCourtRoomService {
 
     private static final String XHIBIT_COURT_ROOM_MAPPINGS = "referencedata.query.cp-xhibit-courtroom-mappings";
     private static final String XHIBIT_COURT_MAPPINGS_QUERY_PARAM = "ouId";
 
-    @ServiceComponent(EVENT_PROCESSOR)
+    @ServiceComponent(QUERY_VIEW)
     @Inject
     private Requester requester;
 
     @Inject
     private UtcClock utcClock;
 
-    public List<EventMapping> getEventMapping() {
-        return null;
-    }
+    public CourtRoomMappings getCourtRoomNameBy(final UUID courtCentreId, final UUID courtRoomId) {
 
-    public String getXhibitCourtCentreCodeBy(final String courtCentreId) {
-        final CourtRoomMappingsList courtRoomMappingsList = getCourtRoomMappingsList(courtCentreId);
-        return courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteCode();
+        final CourtRoomMappingsList courtRoomMappingsList = getCourtRoomMappingsList(courtCentreId.toString());
+
+        return courtRoomMappingsList
+                .getCpXhibitCourtRoomMappings()
+                .stream()
+                .filter(courtRoomMappings -> courtRoomMappings.getId().equals(courtRoomId))
+                .findFirst()
+                .orElseThrow(() ->
+                        new ExhibitReferenceDataException(format("Unable to find exhibit court room name for CPP court centre id: %s and CPP court room id: %s", courtCentreId.toString(), courtRoomId.toString())));
     }
 
     private CourtRoomMappingsList getCourtRoomMappingsList(final String courtCentreId) {
@@ -55,7 +59,8 @@ public class ReferenceDataXhibitDataLoader {
                         .build(),
                 query);
 
-        return requester.request(jsonEnvelope, CourtRoomMappingsList.class).payload();
+        return requester
+                .request(jsonEnvelope, CourtRoomMappingsList.class)
+                .payload();
     }
 }
-

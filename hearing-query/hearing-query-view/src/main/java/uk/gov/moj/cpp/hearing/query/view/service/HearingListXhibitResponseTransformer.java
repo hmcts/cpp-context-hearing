@@ -15,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
@@ -27,9 +28,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 //TODO: crete test
+@ApplicationScoped
 public class HearingListXhibitResponseTransformer {
+
+    @Inject
+    private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
 
     public CurrentCourtStatus transformFrom(final List<uk.gov.justice.core.courts.Hearing> hearing) {
         return currentCourtStatus()
@@ -54,8 +61,10 @@ public class HearingListXhibitResponseTransformer {
     }
 
     private List<CourtRoom> getCourtRooms(final List<Hearing> hearingList) {
-        return hearingList.stream().map(hearing -> courtRoom()
-                .withCourtRoomName(hearing.getCourtCentre().getRoomName())
+        return hearingList
+                .stream()
+                .map(hearing -> courtRoom()
+                .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
                 .withCases(getCases(hearing))
                 .build())
                 .collect(toList());

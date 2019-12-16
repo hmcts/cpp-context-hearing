@@ -4,17 +4,17 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCourtList;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappings;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 
 import javax.json.JsonObject;
 
@@ -22,41 +22,41 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferenceDataXhibitDataLoaderTest {
 
-    @Mock
+    @Mock(answer = RETURNS_DEEP_STUBS)
     private Requester requester;
 
     @Mock
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
+    @Spy
+    private UtcClock utcClock;
+
     @InjectMocks
     private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
+
+    private static final String CREST_COURT_SITE_CODE = "123";
 
 
     @Test
     public void shouldLoadDataFromExhibit() {
-        final JsonEnvelope query = envelope().with(metadataWithDefaults()).build();
-        final JsonEnvelope envelope = mock(JsonEnvelope.class);
         final String courtCentreId = randomUUID().toString();
-        final CourtCentreCourtList courtCentreCourtList = courtMappingsEnvelope();
+        final CourtRoomMappingsList courtCentreCourtList = courtRoomMappingList();
 
-        when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(envelope);
+        when(requester.request(any(JsonEnvelope.class), eq(CourtRoomMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
         when(jsonObjectToObjectConverter.convert(any(JsonObject.class), any())).thenReturn(courtCentreCourtList);
 
-        final CourtCentreCode courtCentreCode = referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(query, courtCentreId);
+        final String courtCentreCode = referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId);
 
-        assertThat(courtCentreCode.getCrestCodeId(), is(courtCentreCourtList.getCpXhibitCourtMappings().get(0).getCrestCodeId()));
-        assertThat(courtCentreCode.getCrestCourtSiteId(), is(courtCentreCourtList.getCpXhibitCourtMappings().get(0).getCrestCourtSiteId()));
-        assertThat(courtCentreCode.getCrestCourtSiteName(), is(courtCentreCourtList.getCpXhibitCourtMappings().get(0).getCrestCourtSiteName()));
-        assertThat(courtCentreCode.getId(), is(courtCentreCourtList.getCpXhibitCourtMappings().get(0).getId()));
-        assertThat(courtCentreCode.getOucode(), is(courtCentreCourtList.getCpXhibitCourtMappings().get(0).getOucode()));
+        assertThat(courtCentreCode, is(CREST_COURT_SITE_CODE));
     }
 
-    private CourtCentreCourtList courtMappingsEnvelope() {
-        return new CourtCentreCourtList(asList(new CourtCentreCode(randomUUID(), "", "", "", "", "")));
+    private CourtRoomMappingsList courtRoomMappingList() {
+        return new CourtRoomMappingsList(asList(new CourtRoomMappings(randomUUID(), "", "", "", "", CREST_COURT_SITE_CODE, "")));
     }
 }

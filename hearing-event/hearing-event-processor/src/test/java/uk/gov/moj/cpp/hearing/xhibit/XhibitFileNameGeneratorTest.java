@@ -4,11 +4,7 @@ import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.courtcentre.CourtCentreCode;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,7 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class XhibitFileNameGeneratorTest {
 
     @Mock
-    private ReferenceDataXhibitDataLoaderService referenceDataXhibitDataLoaderService;
+    private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
 
     @InjectMocks
     private XhibitFileNameGenerator xhibitFileNameGenerator;
@@ -31,37 +27,27 @@ public class XhibitFileNameGeneratorTest {
 
     @Test
     public void shouldGenerateWebPageFileName() {
-
-        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
         final ZonedDateTime requestedTime = now();
         final String courtCentreId = randomUUID().toString();
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
+        when(referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId)).thenReturn("TEST");
 
-        final CourtCentreCode courtCentreCode = new CourtCentreCode(randomUUID(), "", "123", "", "", "");
+        final String generateWebPageFileName = xhibitFileNameGenerator.generateWebPageFileName(requestedTime, courtCentreId);
 
-        when(referenceDataXhibitDataLoaderService.getXhibitCourtCentreCodeBy(jsonEnvelope, courtCentreId)).thenReturn(courtCentreCode);
-
-        final String generateWebPageFileName = xhibitFileNameGenerator.generateWebPageFileName(jsonEnvelope, requestedTime, courtCentreId);
-
-        assertThat(generateWebPageFileName, is("WebPage_123_".concat(requestedTime.format(formatter).concat(".xml"))));
+        assertThat(generateWebPageFileName, is("WebPage_TEST_".concat(requestedTime.format(formatter).concat(".xml"))));
     }
 
     @Test
     public void shouldGeneratePublicDisplayFileName() {
-
-        final JsonEnvelope jsonEnvelope = mock(JsonEnvelope.class);
         final ZonedDateTime requestedTime = now();
         final String courtCentreId = randomUUID().toString();
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
 
+        when(referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId)).thenReturn("TEST");
 
-        final CourtCentreCode courtCentreCode = new CourtCentreCode(randomUUID(), "", "123", "", "", "");
+        final String generateWebPageFileName = xhibitFileNameGenerator.generatePublicDisplayFileName(requestedTime, courtCentreId);
 
-        when(referenceDataXhibitDataLoaderService.getXhibitCourtCentreCodeBy(jsonEnvelope, courtCentreId)).thenReturn(courtCentreCode);
-
-        final String generateWebPageFileName = xhibitFileNameGenerator.generatePublicDisplayFileName(jsonEnvelope, requestedTime, courtCentreId);
-
-        assertThat(generateWebPageFileName, is("PD_123_".concat(requestedTime.format(formatter).concat(".xml"))));
+        assertThat(generateWebPageFileName, is("PD_TEST_".concat(requestedTime.format(formatter).concat(".xml"))));
     }
 }

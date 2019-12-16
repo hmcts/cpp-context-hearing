@@ -5,8 +5,11 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static org.apache.http.HttpStatus.SC_OK;
+import static uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils.stubPingFor;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
@@ -16,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeRead
 
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
-import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -56,6 +58,8 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit.v2+json";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE = "application/vnd.referencedata.query.enforcement-area+json";
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
+    private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-courtroom-mappings";
+    private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-courtroom-mappings+json";
 
 
     public static void stubForReferenceDataResults() {
@@ -86,7 +90,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitionsWithdrawn() {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL))
                 .willReturn(aResponse().withStatus(SC_OK)
@@ -98,7 +101,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitionsNextHearing() {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL))
                 .willReturn(aResponse().withStatus(SC_OK)
@@ -140,7 +142,6 @@ public class ReferenceDataStub {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
         stubFor(get(urlPathEqualTo(queryUrl))
                 .willReturn(aResponse().withStatus(SC_OK)
@@ -165,7 +166,6 @@ public class ReferenceDataStub {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
-        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
         stubFor(get(urlPathEqualTo(queryUrl))
                 .withQueryParam(strKey, equalTo(strValue))
@@ -203,7 +203,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitions(final LocalDate orderedDate, final String responsePath) {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
@@ -216,7 +215,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitionsKeywords(final LocalDate orderedDate, final String responsePath) {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_KEYWORDS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
@@ -229,7 +227,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultPromptFixedLists(final LocalDate orderedDate, final String responsePath) {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
@@ -242,7 +239,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultPromptWordSynonyms(final LocalDate orderedDate, final String responsePath) {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
@@ -255,7 +251,6 @@ public class ReferenceDataStub {
     }
 
     private static void stubDynamicPromptFixedList() {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String courtRoomPath = "/referencedata-service/query/api/rest/referencedata/courtrooms";
         final String courtRoomCT = "application/vnd.referencedata.ou-courtrooms+json";
@@ -276,5 +271,19 @@ public class ReferenceDataStub {
                         .withBody(getPayload("referencedata.dyna.fixedlists.hearing.type.json"))));
 
         waitForStubToBeReady(hearingTypePath, hearingTypePathCT);
+    }
+
+    public static void stubGetReferenceDataCourtRoomMappings(final String courtCentreId) {
+
+        String payload = getPayload("stub-data/referencedata.query.cp-xhibit-courtroom-mappings.json").replace("COURT_CENTRE_ID", courtCentreId);
+
+        stubFor(get(urlPathMatching(REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL, REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE);
     }
 }
