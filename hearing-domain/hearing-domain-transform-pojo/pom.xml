@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-domain</artifactId>
-        <version>2.0.195-SNAPSHOT</version>
+        <version>6.4.0-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-domain-transform-pojo</artifactId>
 
@@ -41,9 +41,8 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>generator-plugin</artifactId>
-                <groupId>uk.gov.justice.maven.generator</groupId>
-                <version>2.6.1</version>
+                <groupId>uk.gov.justice.generators</groupId>
+                <artifactId>pojo-generation-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>pojo-generation</id>
@@ -90,6 +89,9 @@
                                 </typeMappings>
                             </generatorProperties>
                         </configuration>
+                        <goals>
+                            <goal>generate-pojos</goal>
+                        </goals>
                     </execution>
                 </executions>
                 <dependencies>

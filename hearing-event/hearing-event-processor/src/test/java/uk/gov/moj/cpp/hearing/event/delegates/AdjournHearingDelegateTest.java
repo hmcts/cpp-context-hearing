@@ -88,7 +88,7 @@ public class AdjournHearingDelegateTest {
     @Before
     public void setup() {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-        setField(this.jsonObjectToObjectConvertor, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConvertor, "objectMapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test

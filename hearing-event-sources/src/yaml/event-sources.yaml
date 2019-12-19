@@ -1,0 +1,11 @@
+event_sources:
+  - name: hearing
+    is_default: true
+    location:
+      jms_uri:  jms:topic:hearing.event
+      rest_uri: http://localhost:8080/hearing-service/event-source-api/rest
+      data_source: java:/app/hearing-service/DS.eventstore
+
+  - name: public.event.source
+    location:
+      jms_uri:  jms:topic:public.event

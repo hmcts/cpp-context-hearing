@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-delete-offence.json",
+  "type": "object",
+  "properties": {
+    "id": {
+      "$ref": "#/definitions/uuid"
+    },
+    "hearingIds": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uuid"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "hearingIds"
+  ],
+  "definitions": {
+    "uuid": {
+      "type": "string",
+      "pattern": "[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
+    }
+  }
+}

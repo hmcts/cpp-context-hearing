@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-listed.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "type": "string"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "hearingType": {
+      "type": "string"
+    },
+    "startDateOfHearing": {
+      "type": "string"
+    },
+    "courtCentreName": {
+      "type": "string"
+    },
+    "duration": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "hearingId",
+    "caseId",
+    "hearingType",
+    "startDateOfHearing",
+    "courtCentreName",
+    "duration"
+  ]
+}

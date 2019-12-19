@@ -192,7 +192,7 @@ public class HearingEventProcessorTest {
     @Before
     public void initMocks() {
         MockitoAnnotations.initMocks(this);
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
