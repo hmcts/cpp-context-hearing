@@ -1,10 +1,9 @@
 package uk.gov.moj.cpp.hearing.xhibit.refdatacache;
 
-import uk.gov.moj.cpp.hearing.event.service.EventMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.xhibit.ReferenceDataXhibitDataLoader;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -21,8 +20,8 @@ public class XhibitEventMapperCache {
 
     @PostConstruct
     public void init() {
-        final List<EventMapping> eventMapping = referenceDataXhibitDataLoader.getEventMapping();
-        eventMapping.forEach(event -> eventMapperCache.put(event.getCppEventCode(), event.getXhibitEventCode()));
+        final XhibitEventMappingsList eventMapping = referenceDataXhibitDataLoader.getEventMapping();
+        eventMapping.getCpXhibitHearingEventMappings().forEach(event -> eventMapperCache.put(event.getCpHearingEventId().toString(), event.getXhibitHearingEventCode()));
     }
 
     public String getXhibitEventCodeBy(final String cppEventCode) {

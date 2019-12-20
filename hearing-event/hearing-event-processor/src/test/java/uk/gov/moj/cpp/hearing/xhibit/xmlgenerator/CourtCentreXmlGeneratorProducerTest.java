@@ -27,10 +27,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class CourtCentreXmlGeneratorProducerTest {
 
     @Mock
-    private PublicDisplayCourtCentreXmlGenerator publicDisplayCourtCentreXmlGenerator;
+    private WebPageCourtCentreXmlGenerator webPageCourtCentreXmlGenerator;
 
     @Mock
-    private DummyPublicDisplayCourtCentreXmlGenerator dummyPublicDisplayCourtCentreXmlGenerator;
+    private EmptyWebPageCourtCentreXmlGenerator emptyWebPageCourtCentreXmlGenerator;
 
     @InjectMocks
     private CourtCentreXmlGeneratorProducer courtCentreXmlGeneratorProducer;
@@ -42,30 +42,30 @@ public class CourtCentreXmlGeneratorProducerTest {
     public void shouldGenerateInstanceOfPublicDisplayCourtCentreXmlGenerator() {
         final CurrentCourtStatus currentCourtStatus = mock(CurrentCourtStatus.class);
 
-        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, of(currentCourtStatus), now());
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(WEB_PAGE, of(currentCourtStatus), now());
 
         final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 
-        assertThat(courtCentreXmlGenerator, is(instanceOf(PublicDisplayCourtCentreXmlGenerator.class)));
+        assertThat(courtCentreXmlGenerator, is(instanceOf(WebPageCourtCentreXmlGenerator.class)));
     }
 
     @Test
     public void shouldGenerateInstanceOfDummyPublicDisplayCourtCentreXmlGenerator() {
-        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, empty(), now());
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(WEB_PAGE, empty(), now());
 
         final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 
-        assertThat(courtCentreXmlGenerator, is(instanceOf(DummyPublicDisplayCourtCentreXmlGenerator.class)));
+        assertThat(courtCentreXmlGenerator, is(instanceOf(EmptyWebPageCourtCentreXmlGenerator.class)));
     }
 
     @Test
     public void shouldThrowException() {
         exception.expect(GenerationFailedException.class);
-        exception.expectMessage("Unknown xml generator type: WEB_PAGE");
+        exception.expectMessage("Unknown xml generator type: PUBLIC_DISPLAY");
 
         final CurrentCourtStatus currentCourtStatus = mock(CurrentCourtStatus.class);
 
-        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(WEB_PAGE, of(currentCourtStatus), now());
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, of(currentCourtStatus), now());
 
         courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 

@@ -9,14 +9,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappings;
-import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
+import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 
-import javax.json.JsonObject;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,9 +30,6 @@ public class ReferenceDataXhibitDataLoaderTest {
     @Mock(answer = RETURNS_DEEP_STUBS)
     private Requester requester;
 
-    @Mock
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Spy
     private UtcClock utcClock;
 
@@ -41,22 +37,24 @@ public class ReferenceDataXhibitDataLoaderTest {
     private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
 
     private static final String CREST_COURT_SITE_CODE = "123";
-
+    private static final UUID EVENT_ID = randomUUID();
 
     @Test
-    public void shouldLoadDataFromExhibit() {
-        final String courtCentreId = randomUUID().toString();
-        final CourtRoomMappingsList courtCentreCourtList = courtRoomMappingList();
+    public void shouldLoadXhibitCourtCentreCodeByCourtCentreId() {
+        final XhibitEventMappingsList courtCentreCourtList = getExhibitEventMappingsList();
 
-        when(requester.request(any(JsonEnvelope.class), eq(CourtRoomMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
-        when(jsonObjectToObjectConverter.convert(any(JsonObject.class), any())).thenReturn(courtCentreCourtList);
+        when(requester.request(any(JsonEnvelope.class), eq(XhibitEventMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
 
-        final String courtCentreCode = referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId);
+        final XhibitEventMappingsList xhibitEventMappingsList = referenceDataXhibitDataLoader.getEventMapping();
 
-        assertThat(courtCentreCode, is(CREST_COURT_SITE_CODE));
+        assertThat(xhibitEventMappingsList.getCpXhibitHearingEventMappings().get(0).getCpHearingEventId(), is(EVENT_ID));
+        assertThat(xhibitEventMappingsList.getCpXhibitHearingEventMappings().get(0).getXhibitHearingEventCode(), is(CREST_COURT_SITE_CODE));
     }
 
-    private CourtRoomMappingsList courtRoomMappingList() {
-        return new CourtRoomMappingsList(asList(new CourtRoomMappings(randomUUID(), "", "", "", "", CREST_COURT_SITE_CODE, "")));
+    private XhibitEventMappingsList getExhibitEventMappingsList() {
+        return new XhibitEventMappingsList(asList(new XhibitEventMapping(EVENT_ID, CREST_COURT_SITE_CODE, "", "", ""), new XhibitEventMapping(randomUUID(), "sdfsdf", "", "", "")));
+
     }
+
+
 }

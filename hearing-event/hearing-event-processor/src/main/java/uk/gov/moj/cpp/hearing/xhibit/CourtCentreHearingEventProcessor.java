@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
-import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
+import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -60,7 +60,7 @@ public class CourtCentreHearingEventProcessor {
 
             final Optional<CurrentCourtStatus> hearingData = courtCentreHearingsRetriever.getHearingData(publishCourtListRequestParameters.getCourtCentreId(), latestCourtListUploadTime, envelope);
 
-            final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, hearingData, latestCourtListUploadTime);
+            final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(WEB_PAGE, hearingData, latestCourtListUploadTime);
             final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 
             final String xhibitXml = courtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);

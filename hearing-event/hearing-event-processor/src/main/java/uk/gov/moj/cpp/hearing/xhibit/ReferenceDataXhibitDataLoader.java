@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
+import static javax.json.JsonObject.NULL;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
@@ -10,10 +11,9 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
-import uk.gov.moj.cpp.hearing.event.service.EventMapping;
-
-import java.util.List;
+import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -24,6 +24,7 @@ import javax.json.JsonObject;
 public class ReferenceDataXhibitDataLoader {
 
     private static final String XHIBIT_COURT_ROOM_MAPPINGS = "referencedata.query.cp-xhibit-courtroom-mappings";
+    private static final String XHIBIT_EVENT_MAPPINGS = "referencedata.query.cp-xhibit-hearing-event-mappings";
     private static final String XHIBIT_COURT_MAPPINGS_QUERY_PARAM = "ouId";
 
     @ServiceComponent(EVENT_PROCESSOR)
@@ -33,8 +34,16 @@ public class ReferenceDataXhibitDataLoader {
     @Inject
     private UtcClock utcClock;
 
-    public List<EventMapping> getEventMapping() {
-        return null;
+    public XhibitEventMappingsList getEventMapping() {
+        final Metadata metadata = metadataBuilder()
+                .createdAt(utcClock.now())
+                .withName(XHIBIT_EVENT_MAPPINGS)
+                .withId(randomUUID())
+                .build();
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, NULL);
+
+        return requester.request(jsonEnvelope, XhibitEventMappingsList.class).payload();
     }
 
     public String getXhibitCourtCentreCodeBy(final String courtCentreId) {

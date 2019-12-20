@@ -7,7 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.COURT_LIST_REQUESTED;
-import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_FAILED;
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 
 import uk.gov.justice.services.test.utils.persistence.BaseTransactionalTest;
@@ -72,29 +71,5 @@ public class CourtListRepositoryTest extends BaseTransactionalTest {
                 courtListRepository.courtListPublishStatuses(courtCentreId);
 
         assertFalse(courtListPublishStatus.isPresent());
-    }
-
-    @Test
-    public void shouldReturnLatestFailedPublishStatus() {
-        final UUID courtCentreId = randomUUID();
-
-        final PublishStatus publishStatus = EXPORT_FAILED;
-        final String courtListFileName = "c1";
-        final ZonedDateTime lastUpdated1 = now().minusMinutes(10l);
-        final CourtListPublishStatus courtList1 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated1, courtListFileName, "");
-
-        final String courtListFileName2 = "c2";
-        final ZonedDateTime lastUpdated2 = now();
-        final CourtListPublishStatus courtList2 = new CourtListPublishStatus(randomUUID(), courtCentreId, publishStatus, lastUpdated2, courtListFileName2, "");
-
-        courtListRepository.save(courtList1);
-        courtListRepository.save(courtList2);
-
-        final Optional<CourtListPublishStatusResult> courtListPublishStatus =
-                courtListRepository.courtListPublishStatuses(courtCentreId);
-
-        assertTrue(courtListPublishStatus.isPresent());
-        assertThat(courtListPublishStatus.get().getPublishStatus(), is(publishStatus));
-        assertThat(courtListPublishStatus.get().getLastUpdated(), is(lastUpdated2));
     }
 }

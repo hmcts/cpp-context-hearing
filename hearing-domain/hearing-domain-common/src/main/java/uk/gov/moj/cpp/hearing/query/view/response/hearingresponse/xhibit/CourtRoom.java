@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit;
 
+import uk.gov.justice.core.courts.HearingEvent;
+
 import java.io.Serializable;
 
 public class CourtRoom implements Serializable {
@@ -9,9 +11,12 @@ public class CourtRoom implements Serializable {
 
     private Cases cases;
 
-    public CourtRoom(final String courtRoomName, final Cases cases) {
+    private HearingEvent hearingEvent;
+
+    public CourtRoom(final String courtRoomName, final Cases cases, final HearingEvent hearingEvent) {
         this.courtRoomName = courtRoomName;
         this.cases = cases;
+        this.hearingEvent = hearingEvent;
     }
 
     public String getCourtRoomName() {
@@ -22,21 +27,27 @@ public class CourtRoom implements Serializable {
         return cases;
     }
 
+    public HearingEvent getHearingEvent() {
+        return hearingEvent;
+    }
+
     public static Builder courtRoom() {
         return new CourtRoom.Builder();
     }
 
+
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj){
+        if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()){
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         final CourtRoom that = (CourtRoom) obj;
 
         return java.util.Objects.equals(this.courtRoomName, that.courtRoomName) &&
+                java.util.Objects.equals(this.hearingEvent, that.hearingEvent) &&
                 java.util.Objects.equals(this.cases, that.cases);
     }
 
@@ -49,6 +60,7 @@ public class CourtRoom implements Serializable {
     public String toString() {
         return "CourtRoom{" +
                 "courtRoomName='" + courtRoomName + "'," +
+                "hearingEvent='" + hearingEvent + "'," +
                 "cases='" + cases + "'" +
                 "}";
     }
@@ -63,10 +75,17 @@ public class CourtRoom implements Serializable {
         return this;
     }
 
+    public CourtRoom setHearingEvent(HearingEvent hearingEvent) {
+        this.hearingEvent = hearingEvent;
+        return this;
+    }
+
     public static class Builder {
         private String courtRoomName;
 
         private Cases cases;
+
+        private HearingEvent hearingEvent;
 
         public Builder withCourtRoomName(final String courtRoomName) {
             this.courtRoomName = courtRoomName;
@@ -78,8 +97,13 @@ public class CourtRoom implements Serializable {
             return this;
         }
 
+        public Builder withHearingEvent(final HearingEvent hearingEvent) {
+            this.hearingEvent = hearingEvent;
+            return this;
+        }
+
         public CourtRoom build() {
-            return new CourtRoom(courtRoomName, cases);
+            return new CourtRoom(courtRoomName, cases, hearingEvent);
         }
     }
 }

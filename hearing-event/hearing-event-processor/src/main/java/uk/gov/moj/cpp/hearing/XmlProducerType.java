@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing;
 
 public enum XmlProducerType {
-    PUBLIC_DISPLAY("InternetPageCPP_PD.xsd"),
-    WEB_PAGE("InternetPageCPP_IWP.xsd");
+    PUBLIC_DISPLAY("CPPX_PublicDisplay_V1-0.xsd"),
+    WEB_PAGE("CPPX_InternetWebPage_V1-0.xsd");
 
     private final String schemaName;
 

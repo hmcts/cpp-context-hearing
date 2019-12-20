@@ -58,10 +58,10 @@ public class CaseDetail implements Serializable {
 
     @Override
     public boolean equals(final Object obj) {
-        if (this == obj){
+        if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()){
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
         final CaseDetail that = (CaseDetail) obj;

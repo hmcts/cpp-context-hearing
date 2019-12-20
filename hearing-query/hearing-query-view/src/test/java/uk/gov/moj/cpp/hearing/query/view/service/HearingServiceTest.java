@@ -501,6 +501,8 @@ public class HearingServiceTest {
         final Hearing hearing = buildHearing();
 
         final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+
         final CurrentCourtStatus currentCourtStatus = currentCourtStatus()
                 .withPageName("hello")
                 .build();
@@ -509,7 +511,7 @@ public class HearingServiceTest {
         when(hearingEventRepository.findBy(courtCentreId, lastModifiedTime)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
-        when(hearingListXhibitResponseTransformer.transformFrom(asList(hearinPojo))).thenReturn(currentCourtStatus);
+        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(currentCourtStatus);
 
         final Optional<CurrentCourtStatus> response = hearingService.getHearingsBy(courtCentreId, lastModifiedTime);
 

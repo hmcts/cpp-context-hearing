@@ -38,35 +38,38 @@ public class HearingListXhibitResponseTransformer {
     @Inject
     private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
 
-    public CurrentCourtStatus transformFrom(final List<uk.gov.justice.core.courts.Hearing> hearing) {
+    public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return currentCourtStatus()
-                .withCourt(getCourt(hearing))
+                .withCourt(getCourt(hearingEventsToHearingMapper))
                 .build();
     }
 
-    private Court getCourt(final List<Hearing> hearingList) {
+    private Court getCourt(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return court()
                 //Logically all hearings will belong to single court centre, therefore we pick up the first one
-                .withCourtName(hearingList.get(0).getCourtCentre().getName())
-                .withCourtSites(getCourtSites(hearingList))
+                .withCourtName(hearingEventsToHearingMapper.getHearingList().get(0).getCourtCentre().getName())
+                .withCourtSites(getCourtSites(hearingEventsToHearingMapper))
                 .build();
     }
 
-    private List<CourtSite> getCourtSites(final List<Hearing> hearingList) {
-        return hearingList.stream().map(hearing -> courtSite()
-                .withCourtSiteName(hearing.getCourtCentre().getName())
-                .withCourtRooms(getCourtRooms(hearingList))
-                .build())
+    private List<CourtSite> getCourtSites(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
+        return hearingEventsToHearingMapper.getHearingList()
+                .stream()
+                .map(hearing -> courtSite()
+                        .withCourtSiteName(hearing.getCourtCentre().getName())
+                        .withCourtRooms(getCourtRooms(hearingEventsToHearingMapper))
+                        .build())
                 .collect(toList());
     }
 
-    private List<CourtRoom> getCourtRooms(final List<Hearing> hearingList) {
-        return hearingList
+    private List<CourtRoom> getCourtRooms(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
+        return hearingEventsToHearingMapper.getHearingList()
                 .stream()
                 .map(hearing -> courtRoom()
-                .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
-                .withCases(getCases(hearing))
-                .build())
+                        .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
+                        .withCases(getCases(hearing))
+                        .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()))
+                        .build())
                 .collect(toList());
     }
 
@@ -77,7 +80,6 @@ public class HearingListXhibitResponseTransformer {
                 .forEach(prosecutionCase ->
                         caseDetailsList.add(caseDetail()
                                 .withCppUrn(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
-                                .withCaseNumber(prosecutionCase.getId().toString()) //TODO: 8 digit case number.  Only supplied by XHIBIT cases.
                                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
                                 .withHearingType(hearing.getType().getDescription())
                                 .withDefendants(getDefendants(prosecutionCase))

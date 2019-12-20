@@ -45,7 +45,6 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "hearing.courtCentre.id = :courtCentreId and " +
                     "hearingEvent.lastModifiedTime >= :lastModifiedTime and " +
                     "hearingEvent.deleted is false and " +
-                    //TODO ---> what is the logic here
                     "hearingEvent.alterable is false";
 
     public Optional<HearingEvent> findOptionalById(final UUID hearingEventId) {

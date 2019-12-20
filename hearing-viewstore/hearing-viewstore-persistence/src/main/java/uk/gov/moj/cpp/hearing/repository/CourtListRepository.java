@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -28,7 +28,7 @@ public abstract class CourtListRepository implements EntityRepository<CourtListP
 
     private static final String COURT_LIST_PUBLISH_STATUS_QUERY =
             "SELECT * FROM court_list_publish_status WHERE court_centre_id = :courtCenterId " +
-                    "AND publish_status IN ( 'EXPORT_SUCCESSFUL','EXPORT_FAILED' ) " +
+                    "AND publish_status ='EXPORT_SUCCESSFUL' " +
                     " ORDER  BY last_updated DESC limit 1";
 
     @Inject

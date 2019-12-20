@@ -12,16 +12,16 @@
                                 <cppurn></cppurn>
                                 <casetype></casetype>
                                 <hearingtype></hearingtype>
-                                <defendants>
-                                    <defendant>
-                                        <firstname></firstname>
-                                        <middlename></middlename>
-                                        <lastname></lastname>
-                                    </defendant>
-                                </defendants>
-                                <judgename></judgename>
                             </caseDetails>
                         </cases>
+                        <defendants>
+                            <defendant>
+                                <firstname></firstname>
+                                <middlename></middlename>
+                                <lastname></lastname>
+                            </defendant>
+                        </defendants>
+                        <currentstatus/>
                         <courtroomname></courtroomname>
                     </courtroom>
                 </courtrooms>
@@ -29,9 +29,9 @@
         </courtsites>
     </court>
     <datetimestamp>
-        <dayofweek>THURSDAY</dayofweek>
+        <dayofweek>Thursday</dayofweek>
         <date>5</date>
-        <month>DECEMBER</month>
+        <month>December</month>
         <year>2019</year>
         <hour>13</hour>
         <min>50</min>

@@ -110,7 +110,8 @@ public class HearingService {
                 .collect(toList());
 
         if (!hearingList.isEmpty()) {
-            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingList));
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(hearingEvents, hearingList);
+            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
         }
         return empty();
     }
