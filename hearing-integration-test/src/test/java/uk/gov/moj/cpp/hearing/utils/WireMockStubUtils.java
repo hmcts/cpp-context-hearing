@@ -28,6 +28,8 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for setting stubs.
@@ -35,7 +37,7 @@ import org.apache.http.HttpStatus;
 public class WireMockStubUtils {
 
     public static final String MATERIAL_STATUS_UPLOAD_COMMAND =
-                    "/results-service/command/api/rest/results/hearings/.*/nowsmaterial/.*";
+            "/results-service/command/api/rest/results/hearings/.*/nowsmaterial/.*";
 
     public static final String MATERIAL_UPLOAD_COMMAND =
             "/material-service/command/api/rest/material/material";
@@ -44,7 +46,10 @@ public class WireMockStubUtils {
     private static final String CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS = "application/vnd.progression.query.caseprogressiondetail+json";
 
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WireMockStubUtils.class);
+
     static {
+        LOGGER.info("Configuring and reseting wiremock");
         configureFor(HOST, 8080);
         reset();
     }
@@ -89,9 +94,9 @@ public class WireMockStubUtils {
         stubPingFor("material-service");
 
         stubFor(post(urlMatching(MATERIAL_UPLOAD_COMMAND))
-                        .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
-                                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                                        .withBody("")));
+                .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody("")));
     }
 
     public static final void mockUpdateHmpsMaterialStatus() {

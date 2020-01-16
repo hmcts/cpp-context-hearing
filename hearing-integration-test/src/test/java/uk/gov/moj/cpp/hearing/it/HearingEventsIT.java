@@ -50,9 +50,11 @@ import java.util.concurrent.TimeUnit;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import net.jcip.annotations.NotThreadSafe;
 import org.junit.Test;
 
 @SuppressWarnings("unchecked")
+@NotThreadSafe
 public class HearingEventsIT extends AbstractIT {
 
     private static final UUID DEFENCE_COUNSEL_ID = randomUUID();

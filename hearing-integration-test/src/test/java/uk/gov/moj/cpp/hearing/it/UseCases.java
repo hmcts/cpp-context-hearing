@@ -18,7 +18,7 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -27,14 +27,12 @@ import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
-import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.hearing.courts.AddApplicantCounsel;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
 import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;
-
+import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
 import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
 import uk.gov.justice.hearing.courts.RemoveInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
@@ -43,22 +41,13 @@ import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
 import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
-import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
-import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
-import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
-import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
-import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
-import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
-import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.TrialType;
-
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -94,7 +83,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.ReadContext;
 import com.jayway.restassured.response.Header;
@@ -612,7 +600,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
                         .add("defendant",
@@ -635,7 +623,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(jsonValueAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 jsonObject,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
@@ -651,7 +639,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(hearingDetailsUpdateCommand), JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 jsonObject,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
@@ -780,7 +768,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
                         .add("foooo", "to test additional properties")
@@ -800,7 +788,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
                         .add("courtApplication", uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build())
@@ -877,7 +865,7 @@ public class UseCases {
                 .add("caseMarkers", arrayBuilder)
                 .build();
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 payload,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());

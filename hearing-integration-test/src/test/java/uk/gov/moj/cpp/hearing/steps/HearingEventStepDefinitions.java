@@ -13,6 +13,8 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
@@ -31,14 +33,15 @@ import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import com.jayway.jsonpath.ReadContext;
 import com.jayway.restassured.response.Response;
 import org.hamcrest.Matcher;
 
@@ -133,17 +136,26 @@ public class HearingEventStepDefinitions extends AbstractIT {
         assertThat(response.getStatusCode(), equalTo(SC_ACCEPTED));
 
         final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl();
+
         poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
-                        payload().isJson(
-                                withJsonPath("$.eventDefinitions", hasSize(hearingEventDefinitions.getEventDefinitions().size()))
-                        )
+                        payload().isJson(allOf(
+                                getMatchers(hearingEventDefinitions)))
+
                 );
 
         return hearingEventDefinitions;
     }
 
+    private static Matcher[] getMatchers(final HearingEventDefinitionData hearingEventDefinitions) {
+        final List<String> hearingDefinitionsId = hearingEventDefinitions.getEventDefinitions().stream().map(ed -> ed.getId().toString()).collect(Collectors.toList());
+        List<Matcher> matchers = Lists.newArrayList();
+        for (String hearingDefinitionId : hearingDefinitionsId) {
+            matchers.add(withJsonPath("$.eventDefinitions[*].id", hasItem(hearingDefinitionId)));
+        }
+        return matchers.toArray(new Matcher[0]);
+    }
 
 
     public static void thenHearingEventDefinitionsAreRecorded(final HearingEventDefinitionData hearingEventDefinitions) {
@@ -151,31 +163,32 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
         sortBasedOnSequenceAndActionLabel(eventDefinitions);
 
-        final List<Matcher<? super ReadContext>> conditionsOnJson = new ArrayList<>();
-        conditionsOnJson.add(withJsonPath("$.eventDefinitions", hasSize(eventDefinitions.size())));
+        final List<Matcher> conditionsOnJson = new ArrayList<>();
+        conditionsOnJson.add(withJsonPath("$.eventDefinitions", hasSize(greaterThanOrEqualTo(eventDefinitions.size()))));
 
         IntStream.range(0, eventDefinitions.size())
                 .forEach(index -> {
                     final HearingEventDefinition eventDefinition = eventDefinitions.get(index);
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].id", index), equalTo(eventDefinition.getId().toString())));
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].actionLabel", index), equalTo(eventDefinition.getActionLabel())));
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].actionSequence", index), equalTo(eventDefinition.getActionSequence())));
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].groupLabel", index), equalTo(eventDefinition.getGroupLabel())));
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].groupSequence", index), equalTo(eventDefinition.getGroupSequence())));
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].recordedLabel", index), equalTo(eventDefinition.getRecordedLabel())));
-                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].alterable", index), equalTo(eventDefinition.isAlterable())));
+                    final String eventDefinitionId = eventDefinition.getId().toString();
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].id", eventDefinitionId), hasItem(eventDefinitionId)));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].actionLabel", eventDefinitionId), hasItem(eventDefinition.getActionLabel())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].actionSequence", eventDefinitionId), hasItem(eventDefinition.getActionSequence())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].groupLabel", eventDefinitionId), hasItem(eventDefinition.getGroupLabel())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].groupSequence", eventDefinitionId), hasItem(eventDefinition.getGroupSequence())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].recordedLabel", eventDefinitionId), hasItem(eventDefinition.getRecordedLabel())));
+                    conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].alterable", eventDefinitionId), hasItem(eventDefinition.isAlterable())));
 
                     if (eventDefinition.getCaseAttribute() != null) {
-                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[%s].caseAttributes", index), hasSize(greaterThan(0))));
+                        conditionsOnJson.add(withJsonPath(format("$.eventDefinitions[?(@.id=='%s')].caseAttributes", eventDefinitionId), hasSize(greaterThan(0))));
                     } else {
-                        conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions[%s].caseAttributes", index)));
+                        conditionsOnJson.add(withoutJsonPath(format("$.eventDefinitions?(@.id=='%s')].caseAttributes", eventDefinitionId)));
                     }
                 });
 
         poll(requestParams(getQueryEventDefinitionsUrl(), MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
                 .until(
                         status().is(OK),
-                        payload().isJson(allOf(conditionsOnJson))
+                        payload().isJson(allOf(conditionsOnJson.toArray(new Matcher[0])))
                 );
     }
 

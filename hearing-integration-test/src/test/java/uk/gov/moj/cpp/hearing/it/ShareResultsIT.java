@@ -47,11 +47,9 @@ import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
@@ -94,11 +92,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.jayway.restassured.path.json.JsonPath;
+import net.jcip.annotations.NotThreadSafe;
 import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+@NotThreadSafe
 public class ShareResultsIT extends AbstractIT {
 
     public static final String DOCUMENT_TEXT = "someDocumentText";
@@ -220,7 +220,7 @@ public class ShareResultsIT extends AbstractIT {
                     targets.add(saveDraftResultCommand.getTarget());
                 });
         final ResultLine resultLine1 = saveDraftResultCommandList.get(0).getTarget().getResultLines().get(0);
-        resultLine1.setResultLineId(UUID.randomUUID());
+        resultLine1.setResultLineId(randomUUID());
         resultLine1.setResultDefinitionId(guiltyResultDefId);
         resultLine1.setOrderedDate(orderedDate);
         resultLine1.setPrompts(singletonList(Prompt.prompt()
@@ -232,7 +232,7 @@ public class ShareResultsIT extends AbstractIT {
                 .build()));
 
         final ResultLine resultLine2 = saveDraftResultCommandList.get(1).getTarget().getResultLines().get(0);
-        resultLine2.setResultLineId(UUID.randomUUID());
+        resultLine2.setResultLineId(randomUUID());
         resultLine2.setResultDefinitionId(dismissedResultDefId);
         resultLine2.setOrderedDate(orderedDate);
         resultLine2.setPrompts(singletonList(Prompt.prompt()
@@ -258,7 +258,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
-                .withUserId(UUID.randomUUID()).build();
+                .withUserId(randomUUID()).build();
         //When
         // Hearing result shared first with time with first offence as Dismissed and second offence result as guilty.
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
@@ -338,7 +338,7 @@ public class ShareResultsIT extends AbstractIT {
                     targets.add(saveDraftResultCommand.getTarget());
                 });
         final ResultLine resultLine1 = saveDraftResultCommandList.get(0).getTarget().getResultLines().get(0);
-        resultLine1.setResultLineId(UUID.randomUUID());
+        resultLine1.setResultLineId(randomUUID());
         resultLine1.setResultDefinitionId(withdrawnResultDefId);
         resultLine1.setOrderedDate(orderedDate);
         resultLine1.setPrompts(singletonList(Prompt.prompt()
@@ -350,7 +350,7 @@ public class ShareResultsIT extends AbstractIT {
                 .build()));
 
         final ResultLine resultLine2 = saveDraftResultCommandList.get(1).getTarget().getResultLines().get(0);
-        resultLine2.setResultLineId(UUID.randomUUID());
+        resultLine2.setResultLineId(randomUUID());
         resultLine2.setResultDefinitionId(dismissedResultDefId);
         resultLine2.setOrderedDate(orderedDate);
         resultLine2.setPrompts(singletonList(Prompt.prompt()
@@ -376,7 +376,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
-                .withUserId(UUID.randomUUID()).build();
+                .withUserId(randomUUID()).build();
 
         //When
         // Hearing result shared first with time with first offence as Dismissed and second offence result as adjourned.
@@ -463,7 +463,7 @@ public class ShareResultsIT extends AbstractIT {
                     targets.add(saveDraftResultCommand.getTarget());
                 });
         final ResultLine resultLine1 = saveDraftResultCommandList.get(0).getTarget().getResultLines().get(0);
-        resultLine1.setResultLineId(UUID.randomUUID());
+        resultLine1.setResultLineId(randomUUID());
         resultLine1.setResultDefinitionId(allNows.getFirstPrimaryResultDefinitionId());
         resultLine1.setOrderedDate(orderedDate);
         resultLine1.setPrompts(singletonList(Prompt.prompt()
@@ -475,7 +475,7 @@ public class ShareResultsIT extends AbstractIT {
                 .build()));
 
         final ResultLine resultLine2 = saveDraftResultCommandList.get(1).getTarget().getResultLines().get(0);
-        resultLine2.setResultLineId(UUID.randomUUID());
+        resultLine2.setResultLineId(randomUUID());
         resultLine2.setResultDefinitionId(withDrawnResultDefId);
         resultLine2.setOrderedDate(orderedDate);
         resultLine2.setPrompts(singletonList(Prompt.prompt()
@@ -493,7 +493,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
-                .withUserId(UUID.randomUUID()).build();
+                .withUserId(randomUUID()).build();
         //when
         // Hearing result shared first with time with first offence as Dismissed and second offence result as withdrawn.
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
@@ -532,7 +532,7 @@ public class ShareResultsIT extends AbstractIT {
                 .withUserId(randomUUID()).build();
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
-                standardResultLineTemplate(UUID.randomUUID(), withDrawnResultDefId, orderedDate2).withPrompts(
+                standardResultLineTemplate(randomUUID(), withDrawnResultDefId, orderedDate2).withPrompts(
                         singletonList(Prompt.prompt().withId(withDrawnResultDefinitionPrompt2.getId()).withValue("val0").withWelshValue("wval0")
                                 .withFixedListCode("fixedList0").withLabel(withDrawnResultDefinitionPrompt2.getLabel()).build())
                 ).build()));
@@ -656,7 +656,7 @@ public class ShareResultsIT extends AbstractIT {
         targets.add(saveDraftResultCommand.getTarget());
 
         final ResultLine resultLine1 = saveDraftResultCommand.getTarget().getResultLines().get(0);
-        resultLine1.setResultLineId(UUID.randomUUID());
+        resultLine1.setResultLineId(randomUUID());
         resultLine1.setResultDefinitionId(allNows.getFirstPrimaryResultDefinitionId());
         resultLine1.setOrderedDate(orderedDate);
 
@@ -667,13 +667,9 @@ public class ShareResultsIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
         DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
 
-        final HearingDay hearingDay = hearing.getHearingDays().get(0);
-        final JudicialRole judicialRole = hearing.getJudiciary().get(0);
-        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
-        final Defendant defendant = prosecutionCase.getDefendants().get(0);
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
-                .withUserId(UUID.randomUUID()).build();
+                .withUserId(randomUUID()).build();
 
         UseCases.shareResults(requestSpec, hearingOne.getHearingId(), with(
                 basicShareResultsCommandTemplate(),
@@ -708,11 +704,11 @@ public class ShareResultsIT extends AbstractIT {
         final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate2);
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
-                standardResultLineTemplate(UUID.randomUUID(), firstNowNonMandatoryResultDefinitionId, orderedDate2).withPrompts(
+                standardResultLineTemplate(randomUUID(), firstNowNonMandatoryResultDefinitionId, orderedDate2).withPrompts(
                         singletonList(Prompt.prompt().withId(firstNowNonMandatoryPrompt.getId()).withValue("val0").withWelshValue("wval0")
                                 .withFixedListCode("fixedList0").withLabel(firstNowNonMandatoryPrompt.getLabel()).build())
                 ).build(),
-                standardResultLineTemplate(UUID.randomUUID(), secondNowPrimaryResultDefinitionId, orderedDate2).withPrompts(
+                standardResultLineTemplate(randomUUID(), secondNowPrimaryResultDefinitionId, orderedDate2).withPrompts(
                         singletonList(Prompt.prompt().withId(secondNowPrimaryPrompt.getId()).withValue("val1").withWelshValue("wval1")
                                 .withFixedListCode("fixedList1").withLabel(secondNowPrimaryPrompt.getLabel()).build())
                 ).build()
@@ -762,8 +758,8 @@ public class ShareResultsIT extends AbstractIT {
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate);
 
         saveDraftResultCommand.getTarget().setResultLines(
-                asList(standardResultLineTemplate(UUID.randomUUID(), UUID.randomUUID(), orderedDate).build(),
-                        standardResultLineTemplate(UUID.randomUUID(), UUID.randomUUID(), orderedDate).build())
+                asList(standardResultLineTemplate(randomUUID(), randomUUID(), orderedDate).build(),
+                        standardResultLineTemplate(randomUUID(), randomUUID(), orderedDate).build())
         );
 
         final Hearing hearing = hearingOne.getHearing();
@@ -798,7 +794,7 @@ public class ShareResultsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
         final UUID applicationId = hearingOne.getHearing().getCourtApplications().get(0).getId();
         final CourtApplicationOutcomeType applicationOutcome = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Granted")
-                .withId(UUID.randomUUID())
+                .withId(randomUUID())
                 .withSequence(1).build();
         final uk.gov.justice.core.courts.Hearing hearing = hearingOne.getHearing();
         final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultWithOutcomeCommandTemplate(hearingOne.getHearingId(), applicationId, applicationOutcome);
@@ -878,7 +874,7 @@ public class ShareResultsIT extends AbstractIT {
         final List<Target> targets = new ArrayList<>();
         targets.add(saveDraftResultCommand.getTarget());
         final ResultLine resultLine = saveDraftResultCommand.getTarget().getResultLines().get(0);
-        resultLine.setResultLineId(UUID.randomUUID());
+        resultLine.setResultLineId(randomUUID());
         resultLine.setResultDefinitionId(guiltyResultDefId);
         resultLine.setOrderedDate(orderedDate);
         resultLine.setPrompts(singletonList(Prompt.prompt()
@@ -907,7 +903,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
-                .withUserId(UUID.randomUUID()).build();
+                .withUserId(randomUUID()).build();
 
         UseCases.shareResults(requestSpec, hearingCommandHelper.getHearingId(), with(
                 basicShareResultsCommandTemplate(),
@@ -990,7 +986,7 @@ public class ShareResultsIT extends AbstractIT {
         targets.add(saveDraftResultCommand.getTarget());
 
         final ResultLine resultLine1 = saveDraftResultCommand.getTarget().getResultLines().get(0);
-        resultLine1.setResultLineId(UUID.randomUUID());
+        resultLine1.setResultLineId(randomUUID());
         resultLine1.setResultDefinitionId(allNows.getFirstPrimaryResultDefinitionId());
         resultLine1.setOrderedDate(orderedDate);
 
@@ -1003,7 +999,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
-                .withUserId(UUID.randomUUID()).build();
+                .withUserId(randomUUID()).build();
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
@@ -1047,7 +1043,7 @@ public class ShareResultsIT extends AbstractIT {
         final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate2);
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
-                standardAmendedResultLineTemplate(UUID.randomUUID(), firstNowNonMandatoryResultDefinitionId, orderedDate2)
+                standardAmendedResultLineTemplate(randomUUID(), firstNowNonMandatoryResultDefinitionId, orderedDate2)
                         .withPrompts(
                                 singletonList(Prompt.prompt()
                                         .withId(firstNowNonMandatoryPrompt.getId())
@@ -1057,7 +1053,7 @@ public class ShareResultsIT extends AbstractIT {
                                         .withLabel(firstNowNonMandatoryPrompt.getLabel())
                                         .build()))
                         .build(),
-                standardAmendedResultLineTemplate(UUID.randomUUID(), secondNowPrimaryResultDefinitionId, orderedDate2)
+                standardAmendedResultLineTemplate(randomUUID(), secondNowPrimaryResultDefinitionId, orderedDate2)
                         .withPrompts(
                                 singletonList(Prompt.prompt()
                                         .withId(secondNowPrimaryPrompt.getId())

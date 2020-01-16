@@ -8,7 +8,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -64,7 +64,7 @@ public class ExtendHearingIT extends AbstractIT {
 
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 commandJson,
                 metadataOf(randomUUID(), eventName)

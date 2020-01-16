@@ -7,7 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -65,7 +65,7 @@ public class Utilities {
 
         public EventListener(final String eventType, long timeout) {
             this.eventType = eventType;
-            this.messageConsumer = publicEvents.createConsumer(eventType);
+            this.messageConsumer = getPublicTopicInstance().createConsumer(eventType);
             this.timeout = timeout;
         }
 

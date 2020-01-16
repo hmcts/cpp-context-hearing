@@ -105,6 +105,9 @@
                         </executions>
                         <configuration>
                             <skipITs>false</skipITs>
+                            <forkCount>1</forkCount>
+                            <threadCount>8</threadCount>
+                            <parallel>methods</parallel>
                             <systemProperties>
                                 <property>
                                     <name>baseUri</name>

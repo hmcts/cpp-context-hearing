@@ -8,7 +8,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -24,7 +24,6 @@ import org.junit.Test;
 
 public class ChangeApplicationDetailIT extends AbstractIT {
     private final String eventName = "public.progression.events.hearing-extended";
-    private final String applicationChangeEventFromProgression = "public.progression.court-application-updated";
 
     @Test
     public void changeApplicationDetailShouldApplied_When_Progression_Announce() throws Exception {
@@ -76,7 +75,7 @@ public class ChangeApplicationDetailIT extends AbstractIT {
 
         JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 commandJson,
                 metadataOf(randomUUID(), eventName)

@@ -36,7 +36,9 @@ public class QueueUtil {
 
     private final Topic topic;
 
-    public static final QueueUtil publicEvents = new QueueUtil("public.event");
+    public static QueueUtil getPublicTopicInstance() {
+        return new QueueUtil("public.event");
+    }
 
     private QueueUtil(final String topicName) {
         try {
@@ -67,12 +69,13 @@ public class QueueUtil {
             throw new RuntimeException(e);
         }
     }
+
     public static JsonPath retrieveMessage(final MessageConsumer consumer) {
         return retrieveMessage(consumer, RETRIEVE_TIMEOUT);
     }
 
     public static void sendMessage(final MessageProducer messageProducer, final String commandName, final JsonObject payload, final Metadata metadata) {
-        
+
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
 
         final String json = jsonEnvelope.asJsonObject().toString();
