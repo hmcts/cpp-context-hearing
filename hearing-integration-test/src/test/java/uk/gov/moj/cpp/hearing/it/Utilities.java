@@ -60,7 +60,7 @@ public class Utilities {
         private long timeout;
 
         public EventListener(final String eventType) {
-            this(eventType, 10000);
+            this(eventType, 30000);
         }
 
         public EventListener(final String eventType, long timeout) {

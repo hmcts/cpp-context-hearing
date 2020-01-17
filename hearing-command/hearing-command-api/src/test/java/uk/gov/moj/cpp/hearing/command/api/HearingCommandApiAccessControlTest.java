@@ -16,6 +16,7 @@ import org.mockito.Mock;
 public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlTest {
 
     private static final String ACTION_NAME_UPDATE_PLEA = "hearing.update-plea";
+    private static final String ACTION_NAME_INITIATE_HEARING = "hearing.initiate";
     private static final String ACTION_NAME_UPDATE_VERDICT = "hearing.update-verdict";
     private static final String ACTION_NAME_ADD_PROSECUTION_COUNSEL = "hearing.add-prosecution-counsel";
     private static final String ACTION_NAME_REMOVE_PROSECUTION_COUNSEL = "hearing.remove-prosecution-counsel";
@@ -43,6 +44,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
+
+    @Test
+    public void shouldAllowAuthorisedUserToInitiateHearing() {
+        final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToInitiateHearing() {
+        final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
 
     @Test
     public void shouldAllowAuthorisedUserToUpdatePlea() {

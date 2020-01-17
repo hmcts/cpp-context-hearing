@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import uk.gov.justice.core.courts.LjaDetails;
+import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -16,6 +18,10 @@ public interface ReferenceDataService {
 
     ResultDefinition getResultDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID id);
 
-    LjaDetails getLjaDetailsByCourtCentreId(JsonEnvelope context, UUID courtCentreId);
+    LjaDetails getLjaDetails(JsonEnvelope context, UUID courtCentreId, String postcode);
+
+    LocalJusticeAreas getLJAByNationalCourtCode(JsonEnvelope context, final String nationalCourtCode);
+
+    FixedListResult getAllFixedLists(final JsonEnvelope context);
 
 }

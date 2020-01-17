@@ -29,7 +29,9 @@ public class PersonDefendantJPAMapper {
         final PersonDefendant personDefendant = new PersonDefendant();
         personDefendant.setArrestSummonsNumber(pojo.getArrestSummonsNumber());
         if (pojo.getBailStatus() != null) {
-            personDefendant.setBailStatus(pojo.getBailStatus().name());
+            personDefendant.setBailStatusDesc(pojo.getBailStatus().getDescription());
+            personDefendant.setBailStatusId(pojo.getBailStatus().getId());
+            personDefendant.setBailStatusCode(pojo.getBailStatus().getCode());
         }
         personDefendant.setCustodyTimeLimit(pojo.getCustodyTimeLimit());
         personDefendant.setDriverNumber(pojo.getDriverNumber());
@@ -44,15 +46,25 @@ public class PersonDefendantJPAMapper {
         if (null == pojo) {
             return null;
         }
-        return uk.gov.justice.core.courts.PersonDefendant.personDefendant()
+        uk.gov.justice.core.courts.PersonDefendant.Builder personDetailsBuilder = uk.gov.justice.core.courts.PersonDefendant.personDefendant()
                 .withArrestSummonsNumber(pojo.getArrestSummonsNumber())
-                .withBailStatus(pojo.getBailStatus() != null ? BailStatus.valueOf(pojo.getBailStatus()) : null)
+                .withBailStatus(extractBailStatus(pojo))
                 .withCustodyTimeLimit(pojo.getCustodyTimeLimit())
                 .withDriverNumber(pojo.getDriverNumber())
                 .withEmployerOrganisation(organisationJPAMapper.fromJPA(pojo.getEmployerOrganisation()))
                 .withEmployerPayrollReference(pojo.getEmployerPayrollReference())
                 .withPerceivedBirthYear(pojo.getPerceivedBirthYear())
-                .withPersonDetails(personJPAMapper.fromJPA(pojo.getPersonDetails()))
+                .withPersonDetails(personJPAMapper.fromJPA(pojo.getPersonDetails()));
+        return personDetailsBuilder
                 .build();
     }
+
+    private BailStatus extractBailStatus(final PersonDefendant pojo) {
+        if (pojo.getBailStatusCode()==null &&  pojo.getBailStatusId()==null &&  pojo.getBailStatusDesc()==null)  {
+            return null;
+        } else {
+            return BailStatus.bailStatus().withId(pojo.getBailStatusId()).withCode(pojo.getBailStatusCode()).withDescription(pojo.getBailStatusDesc()).build();
+        }
+    }
+
 }

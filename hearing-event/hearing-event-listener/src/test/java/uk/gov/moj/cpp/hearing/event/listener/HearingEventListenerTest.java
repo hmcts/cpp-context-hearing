@@ -89,7 +89,7 @@ public class HearingEventListenerTest {
 
     @Before
     public void setUp() {
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
     }
 
     @Test

@@ -30,7 +30,7 @@ public class Defendant {
     @JoinColumns({
             @JoinColumn(name = "prosecution_case_id", insertable = false, updatable = false, referencedColumnName = "id"),
             @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
-    private ProsecutionCase prosecutionCase;
+     private ProsecutionCase prosecutionCase;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
     private Set<Offence> offences = new HashSet<>();
@@ -136,6 +136,10 @@ public class Defendant {
 
     @Column(name = "p_nci_id")
     private String pncId;
+
+    @Column(name = "is_youth")
+    private Boolean isYouth;
+
 
     public Defendant() {
         //For JPA
@@ -259,6 +263,14 @@ public class Defendant {
 
     public void setPncId(String pncId) {
         this.pncId = pncId;
+    }
+
+    public Boolean getIsYouth() {
+        return isYouth;
+    }
+
+    public void setIsYouth(final Boolean youth) {
+        isYouth = youth;
     }
 
     @Override

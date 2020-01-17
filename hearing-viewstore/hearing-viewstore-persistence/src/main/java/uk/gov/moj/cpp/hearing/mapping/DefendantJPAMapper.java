@@ -73,6 +73,7 @@ public class DefendantJPAMapper {
         defendant.setWitnessStatement(pojo.getWitnessStatement());
         defendant.setWitnessStatementWelsh(pojo.getWitnessStatementWelsh());
         defendant.setPncId(pojo.getPncId());
+        defendant.setIsYouth(pojo.getIsYouth());
         return defendant;
     }
 
@@ -104,6 +105,7 @@ public class DefendantJPAMapper {
                 .withPncId(pojo.getPncId())
                 .withWitnessStatementWelsh(pojo.getWitnessStatementWelsh())
                 .withProsecutionCaseId(pojo.getProsecutionCaseId())
+                .withIsYouth(pojo.getIsYouth())
                 .build();
     }
 

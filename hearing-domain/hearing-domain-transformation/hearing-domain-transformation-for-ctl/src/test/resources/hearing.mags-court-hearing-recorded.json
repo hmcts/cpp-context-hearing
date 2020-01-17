@@ -1,0 +1,128 @@
+{
+  "originatingHearing": {
+    "caseId": "621110cd-6480-447f-ab62-944ca6462f86",
+    "caseUrn": "56GD7749019",
+    "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+    "courtCentreName": "Lavender Hill Magistrates' Court",
+    "defendants": [
+      {
+        "address": {
+          "address1": "222 Furze Road",
+          "address2": "Exeter",
+          "address3": "England",
+          "address4": "UK"
+        },
+        "bailStatus": "UNCONDITIONAL",
+        "dateOfBirth": "1983-05-23",
+        "defenceOrganisation": "TestOne",
+        "firstName": "Elwyn",
+        "gender": "Male",
+        "id": "5b8a2405-647f-4161-b5ec-be71bdd58f18",
+        "interpreter": {
+          "language": "English",
+          "needed": false
+        },
+        "lastName": "Schoen",
+        "nationality": "British",
+        "offences": [
+          {
+            "category": "category",
+            "convictionDate": "2019-07-24",
+            "description": "description",
+            "endDate": "2018-08-01",
+            "id": "5e9031c2-f2a3-4ce5-a051-9eeb5ae780a8",
+            "offenceCode": "OF61131",
+            "plea": {
+              "id": "b8fba787-749e-4b2a-b3bd-a4d4156022d3",
+              "pleaDate": "2019-07-24",
+              "value": "GUILTY"
+            },
+            "reason": "xyz reason",
+            "section": "Section 51",
+            "startDate": "2010-08-01",
+            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+          },
+          {
+            "category": "category",
+            "convictionDate": "2019-07-24",
+            "description": "description",
+            "endDate": "2018-08-01",
+            "id": "1ff43fd0-674a-437c-8ae6-5f627427613f",
+            "offenceCode": "OF61131",
+            "plea": {
+              "id": "6050a865-e83e-436b-af5a-f31093ea8001",
+              "pleaDate": "2019-07-24",
+              "value": "GUILTY"
+            },
+            "reason": "xyz reason",
+            "section": "Section 51",
+            "startDate": "2010-08-01",
+            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+          }
+        ],
+        "personId": "c9b5b084-d734-4429-b0e3-cda7f64fa98c"
+      },
+      {
+        "address": {
+          "address1": "222 Furze Road",
+          "address2": "Exeter",
+          "address3": "England",
+          "address4": "UK"
+        },
+        "bailStatus": "UNCONDITIONAL",
+        "dateOfBirth": "1980-10-12",
+        "defenceOrganisation": "TestTwo",
+        "firstName": "Brenda",
+        "gender": "Male",
+        "id": "996fd229-7d70-4149-a455-b425b4679881",
+        "interpreter": {
+          "language": "English",
+          "needed": false
+        },
+        "lastName": "Mraz",
+        "nationality": "British",
+        "offences": [
+          {
+            "category": "category",
+            "convictionDate": "2019-07-24",
+            "description": "description",
+            "endDate": "2018-08-01",
+            "id": "4ed3d14c-c62e-477e-8ef5-5b346671de8f",
+            "offenceCode": "OF61131",
+            "plea": {
+              "id": "e91bc4b4-c342-4162-960c-05c06a2d9fd7",
+              "pleaDate": "2019-07-24",
+              "value": "GUILTY"
+            },
+            "reason": "xyz reason",
+            "section": "Section 51",
+            "startDate": "2010-08-01",
+            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+          },
+          {
+            "category": "category",
+            "convictionDate": "2019-07-24",
+            "description": "description",
+            "endDate": "2018-08-01",
+            "id": "efb46d10-9f7d-481c-a577-f9863a9f2ab8",
+            "offenceCode": "OF61131",
+            "plea": {
+              "id": "0f68689f-fc52-4e36-81a7-ffbcdc6de84c",
+              "pleaDate": "2019-07-24",
+              "value": "GUILTY"
+            },
+            "reason": "xyz reason",
+            "section": "Section 51",
+            "startDate": "2010-08-01",
+            "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith"
+          }
+        ],
+        "personId": "868dd051-c3f3-443b-b9a2-af8c83187a03"
+      }
+    ],
+    "sendingCommittalDate": "2018-01-02",
+    "type": "MAGS Sending Hearing"
+  },
+  "convictionDate": "2019-07-24",
+  "hearingId": "ab2cfff6-afaa-46cb-ab71-f68a0e55bb77"
+}

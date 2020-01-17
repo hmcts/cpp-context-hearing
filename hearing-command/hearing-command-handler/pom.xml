@@ -15,8 +15,8 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>generator-plugin</artifactId>
-                <groupId>uk.gov.justice.maven.generator</groupId>
+                <groupId>uk.gov.justice.framework-generators</groupId>
+                <artifactId>rest-client-generator-plugin</artifactId>
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>

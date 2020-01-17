@@ -21,7 +21,7 @@ final class JPACompositeMappers {
     public static final DefendantJPAMapper DEFENDANT_JPA_MAPPER = new DefendantJPAMapper(ASSOCIATED_PERSON_JPA_MAPPER,
             ORGANISATION_JPA_MAPPER, OFFENCE_JPA_MAPPER, PERSON_DEFENDANT_JPA_MAPPER);
     public static final ProsecutionCaseJPAMapper PROSECUTION_CASE_JPA_MAPPER = new ProsecutionCaseJPAMapper(
-            new ProsecutionCaseIdentifierJPAMapper(), DEFENDANT_JPA_MAPPER);
+            new ProsecutionCaseIdentifierJPAMapper(), DEFENDANT_JPA_MAPPER, new CaseMarkerJPAMapper());
     public static final HearingCaseNoteJPAMapper HEARING_CASE_NOTE_JPA_MAPPER = new HearingCaseNoteJPAMapper();
     public static final HearingDefenceCounselJPAMapper HEARING_DEFENCE_COUNSEL_JPA_MAPPER = new HearingDefenceCounselJPAMapper();
     private static final ResultLineJPAMapper RESULT_LINE_JPA_MAPPER = new ResultLineJPAMapper(new PromptJPAMapper(),

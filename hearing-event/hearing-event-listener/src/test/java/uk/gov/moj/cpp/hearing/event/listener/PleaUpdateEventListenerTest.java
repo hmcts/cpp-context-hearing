@@ -74,7 +74,7 @@ public class PleaUpdateEventListenerTest {
 
     @Before
     public void setup() {
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 

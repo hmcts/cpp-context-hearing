@@ -11,11 +11,7 @@
     <artifactId>hearing-event-processor</artifactId>
 
     <properties>
-        <cpp.service-component>QUERY_API</cpp.service-component>
         <cpp.service-component>EVENT_PROCESSOR</cpp.service-component>
-        <material.version>2.0.116</material.version>
-        <notification.notify.version>0.0.26</notification.notify.version>
-        <stagingenforcement.version>0.0.82</stagingenforcement.version>
     </properties>
 
     <build>
@@ -25,8 +21,26 @@
                 <artifactId>maven-failsafe-plugin</artifactId>
             </plugin>
             <plugin>
-                <artifactId>generator-plugin</artifactId>
-                <groupId>uk.gov.justice.maven.generator</groupId>
+                <groupId>uk.gov.justice.framework-generators</groupId>
+                <artifactId>messaging-client-generator-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.hearing</groupId>
+                        <artifactId>hearing-command-handler</artifactId>
+                        <version>${project.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>uk.gov.justice.framework-generators</groupId>
+                <artifactId>rest-client-generator-plugin</artifactId>
                 <dependencies>
                     <dependency>
                         <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
@@ -47,30 +61,6 @@
                         </exclusions>
                     </dependency>
                     <dependency>
-                        <groupId>uk.gov.moj.cpp.hearing</groupId>
-                        <artifactId>hearing-query-api</artifactId>
-                        <version>${project.version}</version>
-                        <classifier>raml</classifier>
-                        <exclusions>
-                            <exclusion>
-                                <artifactId>*</artifactId>
-                                <groupId>*</groupId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
-                        <groupId>uk.gov.moj.cpp.hearing</groupId>
-                        <artifactId>hearing-command-handler</artifactId>
-                        <version>${project.version}</version>
-                        <classifier>raml</classifier>
-                        <exclusions>
-                            <exclusion>
-                                <artifactId>*</artifactId>
-                                <groupId>*</groupId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                    <dependency>
                         <groupId>uk.gov.moj.cpp.material</groupId>
                         <artifactId>material-command-api</artifactId>
                         <version>${material.version}</version>
@@ -79,6 +69,30 @@
                             <exclusion>
                                 <groupId>*</groupId>
                                 <artifactId>*</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.results</groupId>
+                        <artifactId>results-command-api</artifactId>
+                        <version>${results.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.hearing</groupId>
+                        <artifactId>hearing-query-api</artifactId>
+                        <version>${project.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
                             </exclusion>
                         </exclusions>
                     </dependency>
@@ -174,6 +188,11 @@
         </dependency>
 
         <!-- Test Dependencies -->
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-enveloper-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-core</artifactId>

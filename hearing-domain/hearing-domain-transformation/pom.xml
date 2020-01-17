@@ -16,5 +16,7 @@
         <module>hearing-domain-anonymization-events</module>
         <module>hearing-domain-transformation-for-log-event</module>
         <module>hearing-domain-transformation-for-MOT</module>
+        <module>hearing-domain-transformation-anonymise</module>
+        <module>hearing-domain-transformation-for-ctl</module>
     </modules>
 </project>

@@ -99,6 +99,9 @@ public class Hearing {
     @Column(name = "is_effective_trial")
     private Boolean isEffectiveTrial;
 
+    @Column(name = "is_box_hearing")
+    private Boolean isBoxHearing;
+
     public Hearing() {
         //For JPA
     }
@@ -196,8 +199,17 @@ public class Hearing {
         return hasSharedResults;
     }
 
+    public Boolean getIsBoxHearing() {
+        return isBoxHearing;
+    }
+
     public Hearing setHasSharedResults(Boolean hasSharedResults) {
         this.hasSharedResults = hasSharedResults;
+        return this;
+    }
+
+    public Hearing setIsBoxHearing(Boolean isBoxHearing) {
+        this.isBoxHearing = isBoxHearing;
         return this;
     }
 

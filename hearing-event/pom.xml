@@ -11,4 +11,33 @@
         <module>hearing-event-listener</module>
         <module>hearing-event-processor</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>uk.gov.justice.framework-generators</groupId>
+                <artifactId>messaging-adapter-generator-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.hearing</groupId>
+                        <artifactId>hearing-event-sources</artifactId>
+                        <classifier>yaml</classifier>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>uk.gov.justice.framework-generators</groupId>
+                <artifactId>messaging-client-generator-plugin</artifactId>
+                <dependencies>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.hearing</groupId>
+                        <artifactId>hearing-event-sources</artifactId>
+                        <classifier>yaml</classifier>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+        </plugins>
+    </build>
 </project>

@@ -237,34 +237,34 @@ public class HearingService {
 
         LOGGER.debug("Get subscriptions for the given reference date and nowTypeId ='{} - {}'", referenceDateParam, nowTypeParam);
 
-        try {
+            try {
 
-            final LocalDate referenceDate = LocalDate.parse(referenceDateParam, formatter);
+                final LocalDate referenceDate = LocalDate.parse(referenceDateParam, formatter);
 
-            final UUID nowTypeId = UUID.fromString(nowTypeParam);
+                final UUID nowTypeId = UUID.fromString(nowTypeParam);
 
-            final List<Document> existingDocuments = documentRepository.findAllByOrderByStartDateAsc();
+                final List<Document> existingDocuments = documentRepository.findAllByOrderByStartDateAsc();
 
-            final List<Document> documents = existingDocuments
-                    .stream()
-                    .filter(existingDocument -> (referenceDate.isAfter(existingDocument.getStartDate()) || referenceDate.isEqual(existingDocument.getStartDate())))
-                    .filter(existingDocument -> (isNull(existingDocument.getEndDate()) || referenceDate.isBefore(existingDocument.getEndDate()) || (referenceDate.isEqual(existingDocument.getEndDate()))))
-                    .collect(Collectors.toList());
+                final List<Document> documents = existingDocuments
+                        .stream()
+                        .filter(existingDocument -> (referenceDate.isAfter(existingDocument.getStartDate()) || referenceDate.isEqual(existingDocument.getStartDate())))
+                        .filter(existingDocument -> (isNull(existingDocument.getEndDate()) || referenceDate.isBefore(existingDocument.getEndDate()) || (referenceDate.isEqual(existingDocument.getEndDate()))))
+                        .collect(Collectors.toList());
 
-            final List<Subscription> subscriptionList = new ArrayList<>();
+                final List<Subscription> subscriptionList = new ArrayList<>();
 
-            documents.forEach(d -> d.getSubscriptions().forEach(s -> s.getNowTypeIds().forEach(nt -> {
-                if (nowTypeId.equals(nt)) {
-                    subscriptionList.add(s);
-                }
-            })));
+                documents.forEach(d -> d.getSubscriptions().forEach(s -> s.getNowTypeIds().forEach(nt -> {
+                    if (nowTypeId.equals(nt)) {
+                        subscriptionList.add(s);
+                    }
+                })));
 
-            final Subscriptions subscriptions = new Subscriptions();
-            subscriptions.setSubscriptions(subscriptionList.stream().map(populateHearing()).collect(Collectors.toList()));
+                final Subscriptions subscriptions = new Subscriptions();
+                subscriptions.setSubscriptions(subscriptionList.stream().map(populateHearing()).collect(Collectors.toList()));
 
-            return objectToJsonObjectConverter.convert(subscriptions);
+                return objectToJsonObjectConverter.convert(subscriptions);
 
-        } catch (DateTimeParseException | IllegalArgumentException e) {
+            } catch (DateTimeParseException | IllegalArgumentException e) {
 
             LOGGER.error(String.format("Exception occurred while retrieve get subscriptions = '%s - %s'", referenceDateParam, nowTypeParam), e);
 

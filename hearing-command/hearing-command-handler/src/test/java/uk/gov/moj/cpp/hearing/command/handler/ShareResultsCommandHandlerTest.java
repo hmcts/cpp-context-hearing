@@ -155,7 +155,7 @@ public class ShareResultsCommandHandlerTest {
 
     @Before
     public void setup() {
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
         when(this.clock.now()).thenReturn(sharedTime);
@@ -301,7 +301,7 @@ public class ShareResultsCommandHandlerTest {
                         targetDraft.getDefendantId(),
                         resultLineIn.getResultDefinitionId(),
                         resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                                p.getFixedListCode(), p.getValue(), p.getWelshValue())).collect(Collectors.toList()),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel())).collect(Collectors.toList()),
                         resultLineIn.getResultLabel(),
                         resultLineIn.getLevel().name(),
                         resultLineIn.getIsModified(),

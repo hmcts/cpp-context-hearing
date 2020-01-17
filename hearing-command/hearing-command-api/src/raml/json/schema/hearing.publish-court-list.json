@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/listing/commands/hearing.command.publish-court-list.json",
+  "id": "http://justice.gov.uk/hearing/commands/hearing.command.publish-court-list.json",
   "type": "object",
   "properties": {
     "courtCentreId": {

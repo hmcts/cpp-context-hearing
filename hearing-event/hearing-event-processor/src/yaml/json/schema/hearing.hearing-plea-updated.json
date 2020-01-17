@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-plea-updated.json",
+  "type": "object",
+  "properties": {
+    "offenceId": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "offenceId"
+  ]
+}

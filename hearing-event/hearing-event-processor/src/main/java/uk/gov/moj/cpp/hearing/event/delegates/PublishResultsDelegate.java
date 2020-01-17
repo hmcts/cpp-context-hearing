@@ -60,15 +60,20 @@ public class PublishResultsDelegate {
 
     private final RelistReferenceDataService relistReferenceDataService;
 
+    private final CustodyTimeLimitCalculator custodyTimeLimitCalculator;
+
     private ResultsSharedFilter resultsSharedFilter = new ResultsSharedFilter();
 
     @Inject
     public PublishResultsDelegate(final Enveloper enveloper, final ObjectToJsonObjectConverter objectToJsonObjectConverter,
-                                  final ReferenceDataService referenceDataService, final RelistReferenceDataService relistReferenceDataService) {
+                                  final ReferenceDataService referenceDataService, final RelistReferenceDataService relistReferenceDataService,
+                                  final CustodyTimeLimitCalculator custodyTimeLimitCalculator) {
         this.enveloper = enveloper;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.referenceDataService = referenceDataService;
         this.relistReferenceDataService = relistReferenceDataService;
+        this.custodyTimeLimitCalculator = custodyTimeLimitCalculator;
+
     }
 
     public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsShared resultsShared) {
@@ -86,7 +91,10 @@ public class PublishResultsDelegate {
 
             buildDefendantJudicialResults(context, filterCaseResults);
 
-            buildOffenceJudicialResults(context, filterCaseResults);
+            buildOffenceJudicialResults(context, resultsShared);
+
+            this.custodyTimeLimitCalculator.calculate(resultsShared.getHearing());
+
         }
 
         final PublicHearingResulted hearingResulted =

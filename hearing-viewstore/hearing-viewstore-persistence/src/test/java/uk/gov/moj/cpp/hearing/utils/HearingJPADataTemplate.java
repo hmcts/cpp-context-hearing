@@ -2,13 +2,12 @@ package uk.gov.moj.cpp.hearing.utils;
 
 import static io.github.benas.randombeans.EnhancedRandomBuilder.aNewEnhancedRandom;
 import static io.github.benas.randombeans.api.EnhancedRandom.randomStreamOf;
+import static java.util.UUID.randomUUID;
 
-import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NotifiedPlea;
@@ -27,6 +26,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 
 public final class HearingJPADataTemplate {
 
+    private static final UUID BAIL_STATUS_ID = randomUUID();
     private final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing;
 
     private HearingJPADataTemplate() {
@@ -68,7 +68,9 @@ public final class HearingJPADataTemplate {
                     final Person person = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.Person.class);
 
                     final PersonDefendant personDefendant = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant.class);
-                    personDefendant.setBailStatus(BailStatus.CONDITIONAL.name());
+                    personDefendant.setBailStatusDesc("Conditional Bail");
+                    personDefendant.setBailStatusCode("B");
+                    personDefendant.setBailStatusId(BAIL_STATUS_ID);
                     personDefendant.setPersonDetails(person);
 
                     final Organisation legalEntityOrganisation = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation.class);

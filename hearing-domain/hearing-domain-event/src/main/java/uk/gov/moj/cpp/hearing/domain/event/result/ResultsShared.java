@@ -148,7 +148,9 @@ public class ResultsShared implements Serializable {
         }
 
         public Builder withCompletedResultLinesStatus(final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus) {
-            this.completedResultLinesStatus = new HashMap<>(completedResultLinesStatus);
+            if (completedResultLinesStatus != null && !completedResultLinesStatus.isEmpty()) {
+                this.completedResultLinesStatus = new HashMap<>(completedResultLinesStatus);
+            }
             return this;
         }
 

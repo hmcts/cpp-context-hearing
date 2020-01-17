@@ -41,6 +41,7 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialRole;
+import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
@@ -49,6 +50,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -62,9 +64,20 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 public class PublishResultsDelegateTest {
 
@@ -89,9 +102,14 @@ public class PublishResultsDelegateTest {
     private RelistReferenceDataService relistReferenceDataService;
     @Mock
     private Sender sender;
+    @Mock
+    private CustodyTimeLimitCalculator custodyTimeLimitCalculator;
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Hearing> custodyLimitCalculatorHearingIn;
 
     @InjectMocks
     private PublishResultsDelegate publishResultsDelegate;
@@ -110,12 +128,14 @@ public class PublishResultsDelegateTest {
                 uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
                         .setId(randomUUID())
                         .setLabel("promptReferenceData0")
+                        .setWelshLabel("welshLabel")
                         .setType("CURR")
                         .setUserGroups(Arrays.asList("usergroup0", "usergroup1"));
 
         final Prompt prompt0 = Prompt.prompt()
                 .withLabel(promptReferenceData.getLabel())
                 .withValue("400")
+                .withWelshValue("welshValue")
                 .withId(promptReferenceData.getId())
                 .withFixedListCode("fixedListCode0")
                 .build();
@@ -142,7 +162,6 @@ public class PublishResultsDelegateTest {
                 nowDefinition.getId())).thenReturn(nowDefinition);
 
         final ResultLine resultLine = resultsShared.getFirstTarget().getResultLines().get(0);
-
         resultLine.setDelegatedPowers(
                 DelegatedPowers.delegatedPowers().withUserId(randomUUID()).build()
         );
@@ -184,8 +203,10 @@ public class PublishResultsDelegateTest {
                         .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                 .withValue(CourtCentre::getId, hearingIn.getCourtCentre().getId())
                                 .withValue(CourtCentre::getName, hearingIn.getCourtCentre().getName())
+                                .withValue(CourtCentre::getWelshName, hearingIn.getCourtCentre().getWelshName())
                                 .withValue(CourtCentre::getRoomId, hearingIn.getCourtCentre().getRoomId())
                                 .withValue(CourtCentre::getRoomName, hearingIn.getCourtCentre().getRoomName())
+                                .withValue(CourtCentre::getWelshRoomName, hearingIn.getCourtCentre().getWelshRoomName())
                         )
                         // no nested or detailed check because shareResults just copies the array references
                         .withValue(sh -> sh.getJudiciary().size(), hearingIn.getJudiciary().size())
@@ -211,6 +232,12 @@ public class PublishResultsDelegateTest {
                         .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
                                 .withValue(DefendantAttendance::getDefendantId, hearingIn.getDefendantAttendance().get(0).getDefendantId()
                                 )))));
+
+        //check call to custody time limit calculator was made
+        verify(custodyTimeLimitCalculator, times(1)).calculate(custodyLimitCalculatorHearingIn.capture());
+        Hearing calHearingIn = custodyLimitCalculatorHearingIn.getValue();
+        Assert.assertEquals(resultsShared.it().getHearing(), calHearingIn);
+
     }
 
     @Test

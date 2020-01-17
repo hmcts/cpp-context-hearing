@@ -1,7 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -13,9 +17,14 @@ import uk.gov.justice.core.courts.ResultPrompt;
 import uk.gov.justice.core.courts.SharedResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.nowdocument.NowDocumentRequest;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
+import uk.gov.justice.hearing.courts.referencedata.Elements;
+import uk.gov.justice.hearing.courts.referencedata.FixedListCollection;
+import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -24,13 +33,15 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.GenerateNowsCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PendingNowsRequestedCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,21 +49,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
+import javax.inject.Inject;
+import javax.json.JsonObject;
 
-@SuppressWarnings({"squid:S1188", "squid:S1602", "squid:S1135", "squid:S00112", "squid:S1612"})
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@SuppressWarnings({"squid:S1188", "squid:S1602", "squid:S1135", "squid:S00112", "squid:S1612", "squid:S1166"})
 public class NowsDelegate {
-
-    private final Enveloper enveloper;
-
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    private final ReferenceDataService referenceDataService;
-
-    private final NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsDelegate.class.getName());
 
@@ -61,15 +67,38 @@ public class NowsDelegate {
     public static final String DATE_PROMPT_TYPE = "DATE";
     public static final String CURRENCY_PROMPT_TYPE = "CURR";
 
+    /*
+    Following welsh values are borrowed from ref data.  This is a temporary solution. we should get the values from  event payload in future.
+     */
+    private static final String YEARS_IN_WELSH = "Flynedd";
+    private static final String MONTHS_IN_WELSH = "Mis";
+    private static final String WEEKS_IN_WELSH = "Wythnos";
+    private static final String DAYS_IN_WELSH = "Niwrnod";
+
+    private static final String YEARS_IN_ENGLISH = "Years";
+    private static final String MONTHS_IN_ENGLISH = "Months";
+    private static final String WEEKS_IN_ENGLISH = "Weeks";
+    private static final String DAYS_IN_ENGLISH = "Days";
+    public static final String PERIOD_OF_CONDITIONAL_DISCHARGE = "Period of conditional discharge";
+    public static final String COURTHOUSE_NAME = "Courthouse name";
+
+    private final CourtHouseReverseLookup courtHouseReverseLookup;
+
+    private final ReferenceDataService referenceDataService;
+
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    private final NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter;
+
     @Inject
-    public NowsDelegate(final Enveloper enveloper,
-                        final ObjectToJsonObjectConverter objectToJsonObjectConverter,
+    public NowsDelegate(final ObjectToJsonObjectConverter objectToJsonObjectConverter,
                         final ReferenceDataService referenceDataService,
-                        final NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter) {
-        this.enveloper = enveloper;
+                        final NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter,
+                        final CourtHouseReverseLookup courtHouseReverseLookup) {
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
         this.referenceDataService = referenceDataService;
         this.nowsRequestedToDocumentConverter = nowsRequestedToDocumentConverter;
+        this.courtHouseReverseLookup = courtHouseReverseLookup;
     }
 
     private List<ResultLine> getCompletedResultLines(final ResultsShared resultsShared) {
@@ -87,7 +116,7 @@ public class NowsDelegate {
                 .build();
     }
 
-    private NowType nowType(final NowDefinition nowDefinition) {
+    private NowType nowType(final NowDefinition nowDefinition, final boolean isWelsh) {
 
         final String nowText = nowDefinition.getText() == null ? "" : nowDefinition.getText();
         final String welshText = nowDefinition.getWelshText() == null ? "" : nowDefinition.getWelshText();
@@ -97,15 +126,12 @@ public class NowsDelegate {
                 .withStaticText(nowText)
                 .withWelshStaticText(welshText)
                 .withDescription(nowDefinition.getName())
+                .withWelshDescription(nowDefinition.getWelshName())
                 .withJurisdiction(nowDefinition.getJurisdiction())
                 .withPriority(ofNullable(nowDefinition.getUrgentTimeLimitInMinutes()).map(Object::toString).orElse(null))
                 .withRank(nowDefinition.getRank())
-                .withTemplateName(nowDefinition.getTemplateName())
+                .withTemplateName(isWelsh ? nowDefinition.getBilingualTemplateName() : nowDefinition.getTemplateName())
                 .withSubTemplateName(nowDefinition.getSubTemplateName())
-                //TODO GPE-6313 what about these ?
-                //.setBilingualTemplateName(nowDefinition.getBilingualTemplateName())
-                //.setWelshDescription(nowDefinition.getWelshName())
-                // is this mapping correct ?
                 .withRequiresBulkPrinting(nowDefinition.getRemotePrintingRequired())
                 .withRequiresEnforcement(false)
                 .build();
@@ -113,12 +139,12 @@ public class NowsDelegate {
 
     private Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> getPrompt(final ResultDefinition resultDefinition, final UUID pInId, final String pInLabel) {
 
-        Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> promptRef = resultDefinition.getPrompts().stream()
+        final Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> promptRef = resultDefinition.getPrompts().stream()
                 .filter(p -> p.getId().equals(pInId))
                 .findFirst();
 
         if (!promptRef.isPresent() && LOGGER.isErrorEnabled()) {
-            LOGGER.error(String.format("unknown prompt ref %s %s ", pInId, pInLabel));
+            LOGGER.error(format("unknown prompt ref %s %s ", pInId, pInLabel));
         }
 
         return promptRef;
@@ -127,13 +153,15 @@ public class NowsDelegate {
 
     private ResultPrompt mapPrompt(final ResultDefinition resultDefinition, Prompt prompt) {
 
-        uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptRef =
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptRef =
                 getPrompt(resultDefinition, prompt.getId(), prompt.getLabel()).orElse(null);
 
         return ResultPrompt.resultPrompt()
                 .withId(prompt.getId())
                 .withLabel(prompt.getLabel())
                 .withValue(prompt.getValue())
+                .withWelshLabel(prompt.getWelshLabel())
+                .withWelshValue(prompt.getWelshValue())
                 .withIsAvailableForCourtExtract(false)
                 .withPromptReference(promptRef == null ? null : promptRef.getReference())
                 .build();
@@ -159,7 +187,7 @@ public class NowsDelegate {
                             final ResultDefinition resultDefinition =
                                     referenceDataService.getResultDefinitionById(event, line.getOrderedDate(), line.getResultDefinitionId());
                             if (resultDefinition == null) {
-                                throw new RuntimeException(String.format("failed to find resultdefinition %s for orderedDate %s", line.getResultDefinitionId(), line.getOrderedDate()));
+                                throw new RuntimeException(format("failed to find resultdefinition %s for orderedDate %s", line.getResultDefinitionId(), line.getOrderedDate()));
                             }
 
 
@@ -180,7 +208,7 @@ public class NowsDelegate {
                                     .withOrderedDate(line.getOrderedDate())
                                     .withLevel(line.getLevel().name())
                                     .withLabel(line.getResultLabel() != null ? line.getResultLabel() : "")
-                                    .withPrompts(prompts)
+                                    .withWelshLabel(resultDefinition.getWelshLabel()).withPrompts(prompts)
                                     .withCourtClerk(line.getDelegatedPowers() != null ? line.getDelegatedPowers() :
                                             DelegatedPowers.delegatedPowers()
                                                     .withFirstName(resultsShared.getCourtClerk().getFirstName())
@@ -204,7 +232,9 @@ public class NowsDelegate {
                         .collect(Collectors.toList())));
 
         final Hearing hearing = resultsShared.getHearing();
-        //TODO bring hearing.json schema updto date with global so this is not necessary
+
+        final boolean isWelsh = isCourtWelshOrganisationUnit(event, hearing);
+
         return CreateNowsRequest.createNowsRequest().build()
                 .setHearing(hearing)
                 .setNows(nows)
@@ -212,9 +242,15 @@ public class NowsDelegate {
                 .setCourtClerk(delegatedPowers(resultsShared.getCourtClerk()))
                 .setNowTypes(findNowDefinitions(event, getCompletedResultLines(resultsShared))
                         .stream()
-                        .map(nowDefinition -> nowType(nowDefinition))
+                        .map(nowDefinition -> nowType(nowDefinition, isWelsh))
                         .collect(toList())
                 );
+    }
+
+    protected boolean isCourtWelshOrganisationUnit(final JsonEnvelope event, final Hearing hearing) {
+        final Optional<CourtCentreOrganisationUnit> courtCentreOrganisationUnit = courtHouseReverseLookup.getCourtCentreById(event, hearing.getCourtCentre().getId());
+
+        return ofNullable(courtCentreOrganisationUnit.orElseThrow(() -> new IllegalStateException(format("No Court Centre For Hearing with court centre id %s.", hearing.getCourtCentre().getId()))).getIsWelsh()).orElse(false);
     }
 
     private Set<NowDefinition> findNowDefinitions(final JsonEnvelope context, final List<ResultLine> resultLines) {
@@ -222,11 +258,11 @@ public class NowsDelegate {
                 .map(resultLine -> referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(context,
                         resultLine.getOrderedDate(),
                         resultLine.getResultDefinitionId()))
-                .flatMap(rds -> rds.stream())
+                .flatMap(Collection::stream)
                 .collect(toSet());
     }
 
-    private void formatPrompts(final JsonEnvelope context, final List<Target> targets, final List<SharedResultLine> sharedResultLines) {
+    private void getPromptReferenceData(final JsonEnvelope context, final List<Target> targets, final List<SharedResultLine> sharedResultLines) {
         final Map<UUID, UUID> resultLineId2ResultDefinitionId = new HashMap<>();
         if (sharedResultLines == null) {
             return;
@@ -235,27 +271,94 @@ public class NowsDelegate {
             resultLineId2ResultDefinitionId.put(rl.getResultLineId(), rl.getResultDefinitionId());
         });
         sharedResultLines.forEach(
-                rl -> {
-                    if (rl.getPrompts() == null) {
+                sharedResultLine -> {
+                    if (sharedResultLine.getPrompts() == null) {
                         return;
                     }
-                    final UUID resultDefinitionId = resultLineId2ResultDefinitionId.get(rl.getId());
-                    final ResultDefinition rd = referenceDataService.getResultDefinitionById(context, rl.getOrderedDate(), resultDefinitionId);
-                    rl.getPrompts().forEach(p -> {
-                        final Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> promptRef = getPrompt(rd, p.getId(), p.getLabel());
-                        if (promptRef.isPresent()) {
-                            p.setValue(PublishResultUtil.reformatValue(p.getValue(), promptRef.get()));
-                        }
+                    final UUID resultDefinitionId = resultLineId2ResultDefinitionId.get(sharedResultLine.getId());
+                    final ResultDefinition rd = referenceDataService.getResultDefinitionById(context, sharedResultLine.getOrderedDate(), resultDefinitionId);
+                    sharedResultLine.getPrompts().forEach(resultPrompt -> {
+                        final Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> promptRef = getPrompt(rd, resultPrompt.getId(), resultPrompt.getLabel());
+                        promptRef.ifPresent(prompt -> {
+                            resultPrompt.setValue(PublishResultUtil.reformatValue(resultPrompt.getValue(), prompt));
+                            resultPrompt.setWelshLabel(prompt.getWelshLabel());
+                            resultPrompt.setWelshValue(enrichWithWelshValue(context, prompt, resultPrompt.getValue()));
+                        });
                     });
                 }
         );
+    }
+
+    private String enrichWithWelshValue(final JsonEnvelope context,
+                                        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt prompt,
+                                        final String promptValue) {
+
+        if (prompt.getLabel().equalsIgnoreCase(PERIOD_OF_CONDITIONAL_DISCHARGE)) {
+            return replaceDurationInEngToWelsh(promptValue);
+        }
+        if (prompt.getLabel().equalsIgnoreCase(COURTHOUSE_NAME)) {
+            final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional = courtHouseReverseLookup.getCourtCentreByName(context, COURTHOUSE_NAME);
+            if (courtCentreOrgOptional.isPresent()) {
+                return courtCentreOrgOptional.get().getOucodeL3WelshName();
+            }
+        }
+        final FixedListResult allFixedLists = referenceDataService.getAllFixedLists(context);
+        if (prompt.getFixedListId() != null) {
+            final List<FixedListCollection> fixedListCollectionList = allFixedLists.getFixedListCollection().stream()
+                    .filter(fixedList -> fixedList.getId().equals(prompt.getFixedListId()))
+                    .collect(toList());
+            if (!fixedListCollectionList.isEmpty()) {
+                if (promptValue.contains(",")) {
+                    return Stream.of(promptValue.split(",")).map(
+                            s -> getWelshValueFromFixedListElementList(s, fixedListCollectionList))
+                            .collect(Collectors.joining(","));
+                } else {
+                    return getWelshValueFromFixedListElementList(promptValue, fixedListCollectionList);
+                }
+            }
+        }
+
+        if (prompt.getLabel().toLowerCase().contains("date")) {
+            return welshDatepromptValue(promptValue);
+        }
+
+        return promptValue;
+    }
+
+    private String welshDatepromptValue(final String date) {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(OUTGOING_PROMPT_DATE_FORMAT);
+        final DateTimeFormatter welshFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String welshDate = date;
+        try {
+            welshDate = LocalDate.parse(date, formatter).format(welshFormatter);
+        } catch (DateTimeParseException ex) {
+            //do nothing
+        }
+        return welshDate;
+    }
+
+    private String getWelshValueFromFixedListElementList(final String promptValue, final List<FixedListCollection> fixedListsList) {
+        final FixedListCollection fixedList = fixedListsList.get(0);
+        final List<Elements> elementsList = fixedList.getElements().stream().filter(element -> element.getValue().equalsIgnoreCase(promptValue)).collect(toList());
+        if (!elementsList.isEmpty()) {
+            final Elements resultElement = elementsList.get(0);
+            return resultElement.getWelshValue();
+        }
+        return "";
+    }
+
+    private String replaceDurationInEngToWelsh(final String date) {
+        final String replacedYears = date.replace(YEARS_IN_ENGLISH, YEARS_IN_WELSH);
+        final String replacedMonths = replacedYears.replace(MONTHS_IN_ENGLISH, MONTHS_IN_WELSH);
+        final String replacedWeeks = replacedMonths.replace(WEEKS_IN_ENGLISH, WEEKS_IN_WELSH);
+        return replacedWeeks.replace(DAYS_IN_ENGLISH, DAYS_IN_WELSH);
     }
 
     public void sendNows(final Sender sender, final JsonEnvelope event, final CreateNowsRequest nowsRequest, final List<Target> targets) {
 
         final GenerateNowsCommand generateNowsCommand = new GenerateNowsCommand();
 
-        formatPrompts(event, targets, nowsRequest.getSharedResultLines());
+        getPromptReferenceData(event, targets, nowsRequest.getSharedResultLines());
 
         generateNowsCommand.setCreateNowsRequest(nowsRequest);
 
@@ -264,8 +367,11 @@ public class NowsDelegate {
         nowDocumentRequests.forEach(nowDocumentRequest -> {
             final JsonObject nowsDocumentOrderJson = objectToJsonObjectConverter.convert(nowDocumentRequest);
 
-            sender.sendAsAdmin(this.enveloper.withMetadataFrom(event, "public.hearing.now-document-requested")
-                    .apply(this.objectToJsonObjectConverter.convert(nowsDocumentOrderJson)));
+            final Envelope<JsonObject> envelope = Enveloper.envelop(nowsDocumentOrderJson)
+                    .withName("public.hearing.now-document-requested")
+                    .withMetadataFrom(event);
+            LOGGER.info("Raising public.hearing.now-document-requested {}", nowsDocumentOrderJson);
+            sender.sendAsAdmin(envelopeFrom(envelope.metadata(), envelope.payload()));
         });
     }
 
@@ -274,8 +380,11 @@ public class NowsDelegate {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("sending hearing.command.pending-nows-requested {} ", this.objectToJsonObjectConverter.convert(pendingNowsRequestedCommand));
         }
-        sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.pending-nows-requested")
-                .apply(this.objectToJsonObjectConverter.convert(pendingNowsRequestedCommand)));
+        final Envelope<JsonObject> envelope = Enveloper.envelop(this.objectToJsonObjectConverter.convert(pendingNowsRequestedCommand))
+                .withName("hearing.command.pending-nows-requested")
+                .withMetadataFrom(event);
+
+        sender.send(envelopeFrom(envelope.metadata(), envelope.payload()));
     }
 
 }

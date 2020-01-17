@@ -98,6 +98,9 @@
               },
               "welshValue": {
                 "type": "string"
+              },
+              "welshLabel": {
+                "type": "string"
               }
             },
             "required": [

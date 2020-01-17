@@ -16,10 +16,10 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommand
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefenceCounselCommandTemplates.updateDefenceCounselCommandTemplate;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
-import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.LocalDate;
@@ -173,17 +173,18 @@ public class DefenceCounselIT extends AbstractIT {
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearing.defenceCounsels", hasSize(1)),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].status", is(secondDefenceCounsel.getStatus())),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].firstName", is(secondDefenceCounsel.getFirstName())),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].lastName", is(secondDefenceCounsel.getLastName())),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].title", is(secondDefenceCounsel.getTitle())),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].middleName", is(secondDefenceCounsel.getMiddleName())),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].attendanceDays.[0]", is(secondDefenceCounsel.getAttendanceDays().get(0).toString())),
-                                        withJsonPath("$.hearing.defenceCounsels.[0].defendants.[0]", is(secondDefenceCounsel.getDefendants().get(0).toString())))));
+                                withJsonPath("$.hearing.defenceCounsels.[0].status", is(secondDefenceCounsel.getStatus())),
+                                withJsonPath("$.hearing.defenceCounsels.[0].firstName", is(secondDefenceCounsel.getFirstName())),
+                                withJsonPath("$.hearing.defenceCounsels.[0].lastName", is(secondDefenceCounsel.getLastName())),
+                                withJsonPath("$.hearing.defenceCounsels.[0].title", is(secondDefenceCounsel.getTitle())),
+                                withJsonPath("$.hearing.defenceCounsels.[0].middleName", is(secondDefenceCounsel.getMiddleName())),
+                                withJsonPath("$.hearing.defenceCounsels.[0].attendanceDays.[0]", is(secondDefenceCounsel.getAttendanceDays().get(0).toString())),
+                                withJsonPath("$.hearing.defenceCounsels.[0].defendants.[0]", is(secondDefenceCounsel.getDefendants().get(0).toString())))));
 
 
     }
@@ -195,6 +196,7 @@ public class DefenceCounselIT extends AbstractIT {
         DefenceCounsel secondDefenceCounsel = secondDefenceCounselCommand.getDefenceCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .timeout(30, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -223,7 +225,7 @@ public class DefenceCounselIT extends AbstractIT {
 
         DefenceCounsel firstDefenceCounsel = createFirstDefenceCounsel(hearingOne);
 
-        String tempFirstDefenceCounsel = firstDefenceCounsel.getFirstName() ;
+        String tempFirstDefenceCounsel = firstDefenceCounsel.getFirstName();
 
         //Updating defence counsel first time
         firstDefenceCounsel.setFirstName("DummyFirstName");

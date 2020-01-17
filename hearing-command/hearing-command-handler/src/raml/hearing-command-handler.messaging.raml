@@ -264,10 +264,23 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.set-trial-type.json
             example: !include json/hearing.command.set-trial-type.json
 
+# Update offence results for a defendant
+        application/vnd.hearing.command.handler.update-offence-results+json:
+            schema: !include json/schema/hearing.command.handler.update-offence-results.json
+            example: !include json/hearing.command.handler.update-offence-results.json
+
+# Update Case Markers
+        application/vnd.hearing.command.update-case-markers+json:
+              schema: !include json/schema/hearing.command.update-case-markers.json
+              example: !include json/hearing.command.update-case-markers.json
+        application/vnd.hearing.command.update-case-markers-with-associated-hearings+json:
+              schema: !include json/schema/hearing.command.update-case-markers-with-associated-hearings.json
+              example: !include json/hearing.command.update-case-markers-with-associated-hearings.json
+
 #  Export court list to exhibit
         application/vnd.hearing.command.record-court-list-export-successful+json:
-            schema: !include json/schema/hearing.record-court-list-export-successful.json
-            example: !include json/hearing.record-court-list-export-successful.json
+            schema: !include json/schema/hearing.command.record-court-list-export-successful.json
+            example: !include json/hearing.command.record-court-list-export-successful.json
 
         application/vnd.hearing.command.record-court-list-export-failed+json:
             schema: !include json/schema/hearing.command.record-court-list-export-failed.json

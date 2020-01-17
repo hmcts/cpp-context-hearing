@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
+import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
 import static uk.gov.justice.core.courts.PleaModel.pleaModel;
@@ -32,7 +35,10 @@ import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.Attendant;
 import uk.gov.justice.core.courts.CompanyRepresentative;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtApplicationRespondent;
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAlias;
@@ -58,6 +64,8 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
@@ -140,6 +148,15 @@ public class TestTemplates {
     private static final String WELSH_STATIC_TEXT = "<h3> Prison </h3> <p> Fe'ch dedfrydwyd i dymor o garchar. Os ydych <ul> <li> Peidiwch â chydymffurfio â gofynion y gorchymyn hwn yn ystod y cyfnod goruchwylio </u>; neu </li> <li> Ymrwymo unrhyw drosedd arall yn ystod y cyfnod gweithredol </u> </li> </ul> efallai y byddwch yn atebol i wasanaethu'r cyfnod gwarchodaeth </u> yn y carchar. <br/> <br/> <br/> <p> Yn ystod y cyfnod goruchwylio </u>, byddwch chi'n cael eich goruchwylio gan eich Swyddog Prawf, a <br/> Rhaid ichi <ul> < li> Cadwch mewn cysylltiad â'ch Swyddog Prawf wrth iddyn nhw ddweud wrthych </li> <li> Dywedwch wrth eich Swyddog Prawf os ydych yn bwriadu newid eich cyfeiriad </li> <li> Cydymffurfio â'r holl ofynion eraill </li></ul > <p> <strong> Gofynion </strong> - Cyfeiriwch yn unig at y gofynion a nododd y llys yn manylion eich archeb, fel y nodir uchod </u> <p> <strong> Gwaith Di-dāl Gofyniad </strong><p> Rhaid i chi wneud gwaith di-dāl am yr oriau a bennir fel y dywedir wrthych a chi erbyn y dyddiad a bennir yn y gorchymyn. Bydd eich Swyddog Prawf yn dweud wrthych pwy fydd yn gyfrifol am oruchwylio gwaith.<p> <strong> Gweithgaredd Gofyniad </strong> <p> Rhaid i chi gyflwyno eich hun fel y'i cyfarwyddir ar yr amser ac ar y diwrnodau a bennir yn y gorchymyn a rhaid i chi ymgymryd â chi y gweithgaredd y mae'r llys wedi ei nodi ar gyfer y cyfnod a bennir yn y drefn yn y ffordd y dywedir wrth eich Swyddog Prawf <p> <strong> Gofyniad Rhaglen </strong><p> Rhaid i chi gymryd rhan yn y rhaglen a bennir yn y drefn yn y lleoliad a bennir ac am y nifer o ddyddiau a bennir yn y gorchymyn <p> <strong> Gofyniad Gweithgaredd Gwahardd </strong> <p> Rhaid i chi beidio â chymryd rhan yn y gweithgaredd a waharddodd y llys yn y drefn ar gyfer nifer y dyddiau llys penodol <p> <strong> Curfew Requirement </strong> <p> Rhaid i chi aros yn y lle neu lle mae'r llys wedi nodi yn ystod y cyfnodau a bennir. Mae'r gofyniad cyrffyw yn para am y nifer o ddyddiau a bennir yn y<p> Gweler \"Darpariaeth Monitro Electronig\" yn yr orchymyn hwn <p> <strong> Gofyniad Preswyl </strong> <p> Rhaid i chi fyw yn yr adeilad y llys wedi nodi ac ufuddhau i unrhyw reolau sy'n berthnasol yno am y nifer o ddyddiau a bennir yn y gorchymyn. Efallai y byddwch yn byw yn ???? gyda chymeradwyaeth ymlaen llaw eich Swyddog Prawf. <p> <strong> Gofyniad Gwahardd Teithio Tramor </strong> <p> Rhaid i chi beidio â theithio i'r lleoliad gwaharddedig a bennir yn yr orchymyn yn ystod y cyfnod y mae'r llys wedi'i bennu yn y gorchymyn. < p> <strong> Gofyniad Triniaeth Iechyd Meddwl </strong> <p> Rhaid i chi gael triniaeth iechyd meddwl gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y <p> <strong> Angen Adsefydlu Cyffuriau </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar gyffuriau gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am nifer y dyddiau <p> Er mwyn sicrhau nad oes gennych unrhyw gyffur anghyfreithlon yn eich corff, rhaid i chi ddarparu samplau i'w profi ar yr adegau hynny neu mewn amgylchiadau o'r fath y bydd eich Swyddog Prawf neu'r person sy'n gyfrifol am eich triniaeth yn dweud wrthych chi . Anfonir canlyniadau'r profion ar y samplau i'ch Swyddog Prawf a fydd yn adrodd y canlyniadau i'r llys. Bydd eich Swyddog Prawf hefyd yn dweud wrth y llys sut mae'ch gorchymyn yn mynd rhagddo a barn eich darparwr triniaeth. <P> Bydd y llys yn adolygu'r gorchymyn hwn ????. Bydd yr adolygiad cyntaf ar y dyddiad a'r amser a bennir yn y llys a bennir. <P> Rhaid i chi / nid oes angen i chi fynychu'r gwrandawiad hwn. <P> <strong> Gofyniad Trin Alcohol </strong> <p> Rhaid i chi gael triniaeth ar gyfer dibyniaeth ar alcohol gan neu o dan gyfarwyddyd yr ymarferydd y mae'r llys wedi ei nodi yn y lleoliad a bennir fel claf preswyl am y nifer o ddyddiau a bennir yn y gorchymyn. <p> <strong> Gofyniad Goruchwylio </strong> <p> Rhaid i chi fynychu penodiadau gyda'ch Swyddog Prawf neu berson arall ar yr adegau a lle mae eich Swyddog Prawf yn dweud. <p> <strong> Gofyniad y Ganolfan Bresennol </strong> <p> Rhaid i chi fynychu canolfan bresenoldeb - <p> <strong> RHYBUDD </strong> <p> Os na fyddwch chi'n cydymffurfio â'ch archeb, fe'ch cewch eich troi'n ôl i'r llys. Gall y llys wedyn <ul> <li> Newid y gorchymyn trwy ychwanegu gofynion ychwanegol </li> <li> Pasiwch frawddeg wahanol ar gyfer y troseddau gwreiddiol; neu </li> <li> Anfonwch chi at y carchar </li> </ul> <p> <strong> NOTE </strong> <p> Naill ai chi neu'ch Swyddog Prawf all ofyn i'r llys edrych eto ar y gorchymyn hwn ac yna gall y llys ei newid neu ei ganslo os yw'n teimlo mai dyna'r peth iawn i'w wneud. Gall y llys hefyd basio brawddeg wahanol ar gyfer y trosedd (wyr) gwreiddiol. Os hoffech ofyn i'r llys edrych ar eich archeb eto dylech gysylltu â'r llys yn y cyfeiriad uchod. ";
     private static final String STATIC_TEXT = "<h3>Imprisonment</h3><p>You have been sentenced to a term of imprisonment. If you<ul><li>Do not comply with the requirements of this order during the <u>supervision period</u>; or</li><li>Commit any other offence during the <u>operational period</u></li></ul>you may be liable to serve the <u>custodial period</u> in prison.<br/><br/><br/><p>For the duration of the <u>supervision period</u>, you will be supervised by your Probation Officer, and<br/>You must<ul><li>Keep in touch with your Probation Officer as they tell you</li><li>Tell your Probation Officer if you intend to change your address</li><li>Comply with all other requirements</li></ul><p><strong>Requirements</strong> – Please refer only to the requirements that the court has specified in the details of your order, <u>as set out above</u><p><strong>Unpaid Work Requirement</strong><p>You must carry out unpaid work for the hours specified as you are told and by the date specified in the order. Your Probation Officer will tell you who will be responsible for supervising work.<p><strong>Activity Requirement</strong><p>You must present yourself as directed at the time and on the days specified in the order and you must undertake the activity the court has specified for the duration specified in the order in the way you are told by your Probation Officer<p><strong>Programme Requirement</strong><p>You must participate in the programme specified in the order at the location specified and for the number of days specified in the order<p><strong>Prohibited Activity Requirement</strong><p>You must not take part in the activity that the court has prohibited in the order for the number of days the court specified<p><strong>Curfew Requirement</strong><p>You must remain in the place or places the court has specified during the periods specified. The curfew requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Exclusion Requirement</strong><p>You must not enter the place or places the court has specified between the hours specified in the order. The exclusion requirement lasts for the number of days specified in the order<p>See \"Electronic Monitoring Provision\" in this order<p><strong>Residence Requirement</strong><p>You must live at the premises the court has specified and obey any rules that apply there for the number of days specified in the order. You may live at ???? with the prior approval of your Probation Officer.<p><strong>Foreign Travel Prohibition Requirement</strong><p>You must not travel to the prohibited location specified in the order during the period the court has specified in the order.<p><strong>Mental Health Treatment Requirement</strong><p>You must have mental health treatment by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Drug Rehabilitation Requirement</strong><p>You must have treatment for drug dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p>To be sure that you do not have any illegal drug in your body, you must provide samples for testing at such times or in such circumstances as your Probation Officer or the person responsible for your treatment will tell you. The results of tests on the samples will be sent to your Probation Officer who will report the results to the court. Your Probation Officer will also tell the court how your order is progressing and the views of your treatment provider.<p>The court will review this order ????. The first review will be on the date and time specified at the court specified.<p>You must / need not attend this review hearing.<p><strong>Alcohol Treatment Requirement</strong><p>You must have treatment for alcohol dependency by or under the direction of the practitioner the court has specified at the location specified as a resident patient for the number of days specified in the order.<p><strong>Supervision Requirement</strong><p>You must attend appointments with your Probation Officer or another person at the times and places your Probation Officer says.<p><strong>Attendance Centre Requirement</strong><p>You must attend an attendance centre - see separate sheet for details<p><strong>WARNING</strong><p>If you do not comply with your order, you will be brought back to court. The court may then<ul><li>Change the order by adding extra requirements</li><li>Pass a different sentence for the original offences; or</li><li>Send you to prison</li></ul><p><strong>NOTE</strong><p>Either you or your Probation Officer can ask the court to look again at this order and the court can then change it or cancel it if it feels that is the right thing to do. The court may also pass a different sentence for the original offence(s). If you wish to ask the court to look at your order again you should get in touch with the court at the address above.";
     private static final String OFFENCE = "Offence";
+    private static final String WELSH_SPACE_LABEL_SPACE = "WELSH LABEL ";
+    private static final String WELSH_LABEL_SPACE = "welshLabel ";
+    private static final String IMPRISONMENT = "imprisonment";
+    private static final String WELSH_VALUE_500 = "welshValue 500";
+    private static final String DRAFT_RESULTS_CONTENT = "draft results content";
+    public static final String FIXEDLISTCODE_0 = "fixedlistcode0";
+    public static final String IMPRISONMENT_TERM = "imprisonment term";
+    public static final String SIX_YEARS = "6 years";
+    public static final String WELSH_VALUE = "6 blynedd";
 
     private TestTemplates() {
     }
@@ -276,7 +293,7 @@ public class TestTemplates {
         }
 
         public List<Target> getTargets() {
-            return targets;
+            return unmodifiableList(targets);
         }
     }
 
@@ -329,17 +346,22 @@ public class TestTemplates {
                                 .withOffenceId(offenceId)
                                 .withLevel("CASE")
                                 .withLabel(IMPRISONMENT_LABEL)
+                                .withWelshLabel(WELSH_SPACE_LABEL_SPACE + IMPRISONMENT_LABEL)
                                 .withRank(BigDecimal.ONE)
                                 .withPrompts(asList(
                                         ResultPrompt.resultPrompt()
                                                 .withId(promptId00)
                                                 .withLabel(promptLabel0)
+                                                .withWelshLabel(WELSH_LABEL_SPACE + promptLabel0)
                                                 .withValue("500")
+                                                .withWelshValue(WELSH_VALUE_500)
                                                 .build(),
                                         ResultPrompt.resultPrompt()
                                                 .withId(promptId01)
                                                 .withLabel(promptLabel1)
+                                                .withWelshLabel(WELSH_LABEL_SPACE + promptLabel1)
                                                 .withValue("500")
+                                                .withWelshValue(WELSH_VALUE_500)
                                                 .build()
                                         )
                                 ).build(),
@@ -350,17 +372,23 @@ public class TestTemplates {
                                 .withOffenceId(offenceId)
                                 .withLevel(DEFENDANT_LEVEL)
                                 .withLabel(IMPRISONMENT_LABEL)
+                                .withWelshLabel(WELSH_SPACE_LABEL_SPACE + IMPRISONMENT_LABEL)
                                 .withRank(BigDecimal.valueOf(2))
                                 .withPrompts(asList(
                                         ResultPrompt.resultPrompt()
                                                 .withId(promptId10)
                                                 .withLabel(promptLabel0)
+                                                .withWelshLabel(WELSH_LABEL_SPACE + promptLabel0)
                                                 .withValue("500")
+                                                .withWelshValue(WELSH_VALUE_500)
                                                 .build(),
                                         ResultPrompt.resultPrompt()
                                                 .withId(promptId11)
                                                 .withLabel(promptLabel1)
-                                                .withValue("500").build()
+                                                .withWelshLabel(WELSH_LABEL_SPACE + promptLabel1)
+                                                .withValue("500")
+                                                .withWelshValue(WELSH_VALUE_500)
+                                                .build()
                                         )
                                 ).build(),
                         SharedResultLine.sharedResultLine()
@@ -370,16 +398,23 @@ public class TestTemplates {
                                 .withOffenceId(offenceId)
                                 .withLevel(OFFENCE_LEVEL)
                                 .withLabel(IMPRISONMENT_LABEL)
+                                .withWelshLabel(WELSH_SPACE_LABEL_SPACE + IMPRISONMENT_LABEL)
                                 .withRank(BigDecimal.valueOf(3))
                                 .withPrompts(asList(
                                         ResultPrompt.resultPrompt()
                                                 .withId(promptId20)
                                                 .withLabel(promptLabel0)
-                                                .withValue("500").build(),
+                                                .withWelshLabel(WELSH_LABEL_SPACE + promptLabel0)
+                                                .withValue("500")
+                                                .withWelshValue(WELSH_VALUE_500)
+                                                .build(),
                                         ResultPrompt.resultPrompt()
                                                 .withId(promptId21)
                                                 .withLabel(promptLabel1)
-                                                .withValue("500").build()
+                                                .withWelshLabel(WELSH_LABEL_SPACE + promptLabel0)
+                                                .withValue("500")
+                                                .withWelshValue(WELSH_VALUE_500)
+                                                .build()
                                         )
                                 ).build()
 
@@ -399,6 +434,11 @@ public class TestTemplates {
                                                 .withAddress3("Emp Address Line 3")
                                                 .withAddress4("Emp Address Line 4")
                                                 .withAddress5("Emp Address Line 5")
+                                                .withWelshAddress1("Welsh Address Line 1")
+                                                .withWelshAddress2("Welsh Address Line 2")
+                                                .withWelshAddress3("Welsh Address Line 3")
+                                                .withWelshAddress4("Welsh Address Line 4")
+                                                .withWelshAddress5("Welsh Address Line 5")
                                                 .withPostcode("TF3 1YE")
                                                 .build()).build()).build())
                         .withRequestedMaterials(asList(
@@ -488,7 +528,7 @@ public class TestTemplates {
 
     public static uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantTemplate() {
 
-        Defendant defendant = new Defendant();
+        final Defendant defendant = new Defendant();
 
         defendant.setId(randomUUID());
 
@@ -587,6 +627,15 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand welshInitiateHearingTemplate() {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(WELSH)
+                            .setJurisdictionType(CROWN)
+                    ).build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingTemplateForIndicatedPlea(
                 final IndicatedPleaValue indicatedPleaValue,
                 final boolean isAllocationDecision) {
@@ -617,7 +666,7 @@ public class TestTemplates {
                                     .setJurisdictionType(CROWN)
                                     .setMinimumAssociatedPerson(true)
                                     .setMinimumDefenceOrganisation(true)
-                            , courtAndRoomId,courtRoomName, year, month, day).build());
+                            , courtAndRoomId, courtRoomName, year, month, day).build());
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForDefendantTypeOrganisation() {
@@ -751,6 +800,38 @@ public class TestTemplates {
             return saveDraftResultCommandTemplateForDeletedResult(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID());
         }
 
+        public static List<SaveDraftResultCommand> saveDraftResultCommandForMultipleOffences(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final UUID resultDefId) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+            final Offence offence0 = defendant0.getOffences().get(0);
+
+            final Target target0 = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withOffenceId(offence0.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(randomUUID(), resultDefId, orderedDate).build()))
+                    .build();
+
+            final List<SaveDraftResultCommand> saveDraftResultCommandList = new ArrayList<>();
+            saveDraftResultCommandList.add(new SaveDraftResultCommand(target0, hearing.getId()));
+            final Offence offence1 = defendant0.getOffences().get(1);
+            final Target target1 = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withOffenceId(offence1.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(randomUUID(), randomUUID(), orderedDate).build()))
+                    .build();
+
+            saveDraftResultCommandList.add(new SaveDraftResultCommand(target1, hearing.getId()));
+
+            return saveDraftResultCommandList;
+
+        }
+
         public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
@@ -767,17 +848,18 @@ public class TestTemplates {
                     .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
-                    .withResultLabel("imprisonment")
+                    .withResultLabel(IMPRISONMENT)
                     .withSharedDate(LocalDate.now())
                     .withResultDefinitionId(resultDefinitionId)
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()
-                                            .withFixedListCode("fixedlistcode0")
+                                            .withFixedListCode(FIXEDLISTCODE_0)
                                             .withId(UUID.randomUUID())
-                                            .withLabel("imprisonment term")
-                                            .withValue("6 years")
-                                            .withWelshValue("6 blynedd")
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue(SIX_YEARS)
+                                            .withWelshLabel(WELSH_LABEL_SPACE + IMPRISONMENT_TERM)
+                                            .withWelshValue(WELSH_VALUE)
                                             .build()
                             )
                     );
@@ -800,17 +882,18 @@ public class TestTemplates {
                     .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
-                    .withResultLabel("imprisonment")
+                    .withResultLabel(IMPRISONMENT)
                     .withSharedDate(LocalDate.now())
                     .withResultDefinitionId(resultDefinitionId)
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()
-                                            .withFixedListCode("fixedlistcode0")
+                                            .withFixedListCode(FIXEDLISTCODE_0)
                                             .withId(UUID.randomUUID())
-                                            .withLabel("imprisonment term")
-                                            .withValue("6 years")
-                                            .withWelshValue("6 blynedd")
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue(SIX_YEARS)
+                                            .withWelshValue(WELSH_VALUE)
+                                            .withWelshLabel(WELSH_LABEL_SPACE + IMPRISONMENT_TERM)
                                             .build()
                             )
                     );
@@ -832,7 +915,7 @@ public class TestTemplates {
                     .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
-                    .withResultLabel("imprisonment")
+                    .withResultLabel(IMPRISONMENT)
                     .withSharedDate(LocalDate.now())
                     .withResultDefinitionId(resultDefinitionId)
                     .withAmendmentReason(STRING.next())
@@ -847,11 +930,12 @@ public class TestTemplates {
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()
-                                            .withFixedListCode("fixedlistcode0")
+                                            .withFixedListCode(FIXEDLISTCODE_0)
                                             .withId(UUID.randomUUID())
-                                            .withLabel("imprisonment term")
-                                            .withValue("6 years")
-                                            .withWelshValue("6 blynedd")
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue(SIX_YEARS)
+                                            .withWelshLabel(WELSH_LABEL_SPACE + IMPRISONMENT_TERM)
+                                            .withWelshValue(WELSH_VALUE)
                                             .build()
                             )
                     );
@@ -866,13 +950,14 @@ public class TestTemplates {
             final Target target = Target.target()
                     .withHearingId(hearing.getId())
                     .withDefendantId(defendant0.getId())
-                    .withDraftResult("draft results content")
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
                     .withOffenceId(offence0.getId())
                     .withTargetId(UUID.randomUUID())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
                     .build();
             return new SaveDraftResultCommand(target, null);
         }
+
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand,
                                                                                             final LocalDate orderedDate, final UUID resultLineId,
@@ -883,7 +968,7 @@ public class TestTemplates {
             final Target target = Target.target()
                     .withHearingId(hearing.getId())
                     .withDefendantId(defendant0.getId())
-                    .withDraftResult("draft results content")
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
                     .withOffenceId(offence0.getId())
                     .withTargetId(UUID.randomUUID())
                     .withResultLines(Collections.singletonList(standardResultLineTemplateForDeletedResult(resultLineId, resultDefinitionId, orderedDate).build()))
@@ -1061,32 +1146,31 @@ public class TestTemplates {
             }
 
             public List<UUID> getOffencesToAdd() {
-                return offencesToAdd;
+                return unmodifiableList(offencesToAdd);
             }
 
             public TemplateArguments setOffencesToAdd(List<UUID> offencesToAdd) {
-                this.offencesToAdd = offencesToAdd;
+                this.offencesToAdd = unmodifiableList(offencesToAdd);
                 return this;
             }
 
             public List<UUID> getOffencesToUpdate() {
-                return offencesToUpdate;
+                return unmodifiableList(ofNullable(offencesToUpdate).orElseGet(ArrayList::new));
             }
 
             public TemplateArguments setOffencesToUpdate(List<UUID> offencesToUpdate) {
-                this.offencesToUpdate = offencesToUpdate;
+                this.offencesToUpdate = unmodifiableList(ofNullable(offencesToUpdate).orElseGet(ArrayList::new));
                 return this;
             }
 
             public List<UUID> getOffenceToDelete() {
-                return offenceToDelete;
+                return unmodifiableList(ofNullable(offenceToDelete).orElseGet(ArrayList::new));
             }
 
             public TemplateArguments setOffenceToDelete(List<UUID> offenceToDelete) {
-                this.offenceToDelete = offenceToDelete;
+                this.offenceToDelete = unmodifiableList(ofNullable(offenceToDelete).orElseGet(ArrayList::new));
                 return this;
             }
-
 
         }
     }
@@ -1168,7 +1252,7 @@ public class TestTemplates {
         }
 
         public static AddProsecutionCounsel addProsecutionCounselCommandTemplate(final UUID hearingId) {
-            ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+            final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
                     Arrays.asList(LocalDate.now()),
                     STRING.next(),
                     randomUUID(),
@@ -1182,7 +1266,7 @@ public class TestTemplates {
         }
 
         public static AddProsecutionCounsel addProsecutionCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
-            ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+            final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
                     Arrays.asList(LocalDate.now()),
                     STRING.next(),
                     randomUUID(),
@@ -1205,7 +1289,7 @@ public class TestTemplates {
         }
 
         public static AddApplicantCounsel addApplicantCounselCommandTemplate(final UUID hearingId) {
-            ApplicantCounsel applicantCounsel = new ApplicantCounsel(
+            final ApplicantCounsel applicantCounsel = new ApplicantCounsel(
                     Arrays.asList(UUID.randomUUID()),
                     Arrays.asList(LocalDate.now()),
                     STRING.next(),
@@ -1219,7 +1303,7 @@ public class TestTemplates {
         }
 
         public static AddApplicantCounsel addApplicantCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
-            ApplicantCounsel applicantCounsel = new ApplicantCounsel(
+            final ApplicantCounsel applicantCounsel = new ApplicantCounsel(
                     Arrays.asList(UUID.randomUUID()),
                     Arrays.asList(LocalDate.now()),
                     STRING.next(),
@@ -1232,7 +1316,7 @@ public class TestTemplates {
             return new AddApplicantCounsel(applicantCounsel, hearingId);
         }
 
-        public static AddApplicantCounsel addApplicantCounselCommandTemplate(final UUID hearingId, ApplicantCounsel applicantCounsel) {
+        public static AddApplicantCounsel addApplicantCounselCommandTemplate(final UUID hearingId, final ApplicantCounsel applicantCounsel) {
             return new AddApplicantCounsel(applicantCounsel, hearingId);
         }
     }
@@ -1242,7 +1326,7 @@ public class TestTemplates {
         }
 
         public static UpdateProsecutionCounsel updateProsecutionCounselCommandTemplate(final UUID hearingId) {
-            ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+            final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
                     Arrays.asList(LocalDate.now()),
                     STRING.next(),
                     randomUUID(),
@@ -1265,7 +1349,7 @@ public class TestTemplates {
         }
 
         public static UpdateApplicantCounsel updateApplicantCounselCommandTemplate(final UUID hearingId) {
-            ApplicantCounsel applicantCounsel = new ApplicantCounsel(
+            final ApplicantCounsel applicantCounsel = new ApplicantCounsel(
                     Arrays.asList(UUID.randomUUID()),
                     Arrays.asList(LocalDate.now()),
                     STRING.next(),
@@ -1278,7 +1362,7 @@ public class TestTemplates {
             return new UpdateApplicantCounsel(applicantCounsel, hearingId);
         }
 
-        public static UpdateApplicantCounsel updateApplicantCounselCommandTemplate(final UUID hearingId, ApplicantCounsel applicantCounsel) {
+        public static UpdateApplicantCounsel updateApplicantCounselCommandTemplate(final UUID hearingId, final ApplicantCounsel applicantCounsel) {
             return new UpdateApplicantCounsel(applicantCounsel, hearingId);
         }
     }
@@ -2009,5 +2093,30 @@ public class TestTemplates {
         public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
             return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
         }
+    }
+
+    public static List<CourtApplication> createCourtApplications() {
+        final List<CourtApplication> courtApplications = new ArrayList<>();
+        courtApplications.add(CourtApplication.courtApplication()
+                .withId(UUID.randomUUID())
+                .withLinkedCaseId(UUID.randomUUID())
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withId(UUID.randomUUID())
+                        .withDefendant(uk.gov.justice.core.courts.Defendant.defendant()
+                                .withId(UUID.randomUUID())
+                                .build())
+                        .build())
+                .withRespondents(Arrays.asList(CourtApplicationRespondent.courtApplicationRespondent()
+                        .withPartyDetails(CourtApplicationParty.courtApplicationParty()
+                                .withId(UUID.randomUUID())
+                                .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority()
+                                        .withProsecutionAuthorityId(UUID.randomUUID())
+
+                                        .build())
+                                .build())
+
+                        .build()))
+                .build());
+        return courtApplications;
     }
 }

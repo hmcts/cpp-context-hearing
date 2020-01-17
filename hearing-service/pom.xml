@@ -47,6 +47,12 @@
             <version>${project.version}</version>
             <classifier>classes</classifier>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-event-sources</artifactId>
+            <version>${project.version}</version>
+            <classifier>yaml</classifier>
+        </dependency>
     </dependencies>
 
     <build>

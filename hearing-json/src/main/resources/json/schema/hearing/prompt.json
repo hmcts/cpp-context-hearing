@@ -10,6 +10,9 @@
     "label": {
       "type": "string"
     },
+    "welshLabel": {
+      "type": "string"
+    },
     "fixedListCode": {
       "type": "string"
     },

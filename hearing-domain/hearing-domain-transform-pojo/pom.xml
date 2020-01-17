@@ -41,9 +41,8 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>generator-plugin</artifactId>
-                <groupId>uk.gov.justice.maven.generator</groupId>
-                <version>2.6.1</version>
+                <groupId>uk.gov.justice.generators</groupId>
+                <artifactId>pojo-generation-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>pojo-generation</id>
@@ -90,6 +89,9 @@
                                 </typeMappings>
                             </generatorProperties>
                         </configuration>
+                        <goals>
+                            <goal>generate-pojos</goal>
+                        </goals>
                     </execution>
                 </executions>
                 <dependencies>

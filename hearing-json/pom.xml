@@ -12,8 +12,8 @@
     <build>
         <plugins>
             <plugin>
-                <artifactId>generator-plugin</artifactId>
-                <groupId>uk.gov.justice.maven.generator</groupId>
+                <groupId>uk.gov.justice.schema</groupId>
+                <artifactId>catalog-generation-plugin</artifactId>
                 <executions>
                     <execution>
                         <id>schema-catalog-generation</id>

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
@@ -83,6 +84,13 @@ public class OffenceJPAMapper {
         offence.setPlea(pleaJPAMapper.toJPA(pojo.getPlea()));
         offence.setVerdict(verdictJPAMapper.toJPA(pojo.getVerdict()));
         offence.setAllocationDecision(allocationDecisionJPAMapper.toJPA(pojo.getAllocationDecision()));
+        if (pojo.getCustodyTimeLimit()!=null && (pojo.getCustodyTimeLimit().getDaysSpent()!=null || pojo.getCustodyTimeLimit().getTimeLimit()!=null )) {
+            offence.setCtlDaysSpent(pojo.getCustodyTimeLimit().getDaysSpent());
+            offence.setCtlTimeLimit(pojo.getCustodyTimeLimit().getTimeLimit());
+        } else {
+            offence.setCtlTimeLimit(null);
+            offence.setCtlDaysSpent(null);
+        }
 
         return offence;
     }
@@ -113,7 +121,7 @@ public class OffenceJPAMapper {
                 .withOrderIndex(entity.getOrderIndex())
                 .withCount(entity.getCount())
                 .withConvictionDate(entity.getConvictionDate())
-
+                .withCustodyTimeLimit(extractCustodyTimeLimit(entity))
                 .withNotifiedPlea(notifiedPleaJPAMapper.fromJPA(offenceId, entity.getNotifiedPlea()))
                 .withIndicatedPlea(indicatedPleaJPAMapper.fromJPA(offenceId, entity.getIndicatedPlea()))
                 .withOffenceFacts(offenceFactsJPAMapper.fromJPA(entity.getOffenceFacts()))
@@ -122,6 +130,14 @@ public class OffenceJPAMapper {
                 .withAllocationDecision(allocationDecisionJPAMapper.fromJPA(offenceId, entity.getAllocationDecision()))
 
                 .build();
+    }
+
+    private CustodyTimeLimit extractCustodyTimeLimit(final Offence offence) {
+        if (offence.getCtlDaysSpent()!=null || offence.getCtlTimeLimit()!=null) {
+            return new CustodyTimeLimit(offence.getCtlDaysSpent(), offence.getCtlTimeLimit());
+        } else {
+            return null;
+        }
     }
 
     public Set<Offence> toJPA(final Hearing hearing, final UUID defendantId, final List<uk.gov.justice.core.courts.Offence> pojos) {

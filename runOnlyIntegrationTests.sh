@@ -12,12 +12,6 @@ if [[ ! -d "${VAGRANT_DIR}" ]]; then
   exit 1;
 fi
 
-declare -rx WILDFLY_DEPLOYMENT_DIR="${VAGRANT_DIR}/deployments"
-declare -rx CONTEXT_NAME=hearing
-declare -rx EVENT_STORE_VERSION=1.1.8
-declare -rx EVENT_BUFFER_VERSION=1.1.8
-declare -rx FILE_SERVICE_VERSION=1.17.2
-
 #fail script on error
 set -e
 

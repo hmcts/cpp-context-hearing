@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -30,6 +31,7 @@ import uk.gov.justice.core.courts.nowdocument.Nowdefendant;
 import uk.gov.justice.core.courts.nowdocument.Prompt;
 import uk.gov.justice.core.courts.nowdocument.ProsecutionCase;
 import uk.gov.justice.core.courts.nowdocument.Result;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -37,11 +39,13 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.event.NowsRequestedToDocumentConverter;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -68,13 +72,22 @@ public class NowsRequestedToDocumentConverterTest {
     @Mock
     private SubscriptionClient subscriptionClient;
 
+    @Mock
+    private CourtHouseReverseLookup courtHouseReverseLookup;
+
     @InjectMocks
     private NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter;
 
     @Before
     public void setup() {
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        CourtCentreOrganisationUnit courtCentreOrganisationUnit = new CourtCentreOrganisationUnit(null,null,null,null,
+                null,null,null,null,
+                "1234",false,null,null,null,
+                null,null,null,null,null,
+                null,null,null,null,null);
+        when(courtHouseReverseLookup.getCourtCentreById(any(),any())).thenReturn(Optional.of(courtCentreOrganisationUnit));
     }
 
     @Test
@@ -152,7 +165,8 @@ public class NowsRequestedToDocumentConverterTest {
                                 ))
                         ))
                         .with(ProsecutionCase::getDefendantCaseOffences, first(isBean(DefendantCaseOffence.class)
-                                .withValue(DefendantCaseOffence::getWording, offence.getWording())
+                                .withValue(DefendantCaseOffence::getTitle, offence.getOffenceTitle())
+                                .withValue(DefendantCaseOffence::getWelshTitle, offence.getOffenceTitleWelsh())
                                 .with(DefendantCaseOffence::getStartDate, is(offence.getStartDate().toString()))
                                 .with(DefendantCaseOffence::getConvictionDate, is(expectedConvictionDate.toString()))
                                 .with(DefendantCaseOffence::getResults, first(isBean(Result.class)
@@ -228,7 +242,8 @@ public class NowsRequestedToDocumentConverterTest {
                                 ))
                         ))
                         .with(ProsecutionCase::getDefendantCaseOffences, first(isBean(DefendantCaseOffence.class)
-                                .with(DefendantCaseOffence::getWording, is(offence.getWording()))
+                                .with(DefendantCaseOffence::getTitle, is(offence.getOffenceTitle()))
+                                .with(DefendantCaseOffence::getWelshTitle, is(offence.getOffenceTitleWelsh()))
                                 .with(DefendantCaseOffence::getStartDate, is(offence.getStartDate().toString()))
                                 .with(DefendantCaseOffence::getConvictionDate, is(expectedConvictionDate.toString()))
                                 .with(DefendantCaseOffence::getResults, first(isBean(Result.class)

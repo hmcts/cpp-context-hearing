@@ -15,10 +15,13 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.util.UUID;
 
@@ -36,12 +39,14 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDefendantDetailsUpdatedEventListenerTest {
 
+    @Mock
+    HearingRepository hearingRepository;
+    @Spy
+    CourtApplicationsSerializer courtApplicationsSerializer;
     @InjectMocks
     private CaseDefendantDetailsUpdatedEventListener caseDefendantDetailsUpdatedEventListener;
-
     @Mock
     private DefendantRepository defendantRepository;
-
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -50,8 +55,10 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
     @Before
     public void setup() {
-        setField(this.jsonObjectToObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
+        setField(this.courtApplicationsSerializer, "objectToJsonObjectConverter", objectToJsonObjectConverter);
     }
 
     @Test
@@ -62,6 +69,10 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         final DefendantDetailsUpdated defendantDetailsUpdated = DefendantDetailsUpdated.defendantDetailsUpdated()
                 .setHearingId(hearingId)
                 .setDefendant(defendantTemplate());
+
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
 
         final JsonEnvelope envelope = createJsonEnvelope(defendantDetailsUpdated);
 
@@ -77,6 +88,8 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
         when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
 
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
         caseDefendantDetailsUpdatedEventListener.defendantDetailsUpdated(envelope);
 
         final ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
@@ -87,6 +100,7 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
         assertThat(defendant.getId(), is(defendantOut.getId()));
     }
+
 
     private JsonEnvelope createJsonEnvelope(final DefendantDetailsUpdated defendantDetailsUpdated) {
 

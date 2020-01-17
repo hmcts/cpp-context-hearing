@@ -8,8 +8,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_OK;
-import static uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils.stubPingFor;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
@@ -17,8 +18,11 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeReady;
 
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
+import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -28,6 +32,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 public class ReferenceDataStub {
@@ -41,7 +46,6 @@ public class ReferenceDataStub {
 
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/withdrawn";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/next-hearing";
-    private static final String REFERENCE_DATA_RESULT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-word-synonyms";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/nows-metadata";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/organisation-units";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/enforcement-area";
@@ -60,6 +64,9 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-courtroom-mappings";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-courtroom-mappings+json";
+
+    private static final String COURT_ROOM_MEDIA_TYPE = "application/vnd.referencedata.query.courtrooms+json";
+    private static final String COURT_ROOM_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/courtrooms";
 
 
     public static void stubForReferenceDataResults() {
@@ -90,10 +97,11 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitionsWithdrawn() {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_MEDIA_TYPE)
                         .withBody(getPayload("referencedata.result-definitions-withdrawn.json"))));
 
@@ -101,10 +109,11 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitionsNextHearing() {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         stubFor(get(urlPathEqualTo(REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_MEDIA_TYPE)
                         .withBody(getPayload("referencedata.result-definitions-next-hearing.json"))));
 
@@ -142,10 +151,11 @@ public class ReferenceDataStub {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
         stubFor(get(urlPathEqualTo(queryUrl))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", mediaType)
                         .withBody(strPayload)));
 
@@ -166,11 +176,12 @@ public class ReferenceDataStub {
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
         stubFor(get(urlPathEqualTo(queryUrl))
                 .withQueryParam(strKey, equalTo(strValue))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", mediaType)
                         .withBody(strPayload)));
         final String url = MessageFormat.format("{0}/{1}?{2}={3}", getBaseUri(), queryUrl, strKey, strValue);
@@ -203,11 +214,12 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitions(final LocalDate orderedDate, final String responsePath) {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE)
                         .withBody(getPayload(responsePath))));
 
@@ -215,11 +227,12 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultDefinitionsKeywords(final LocalDate orderedDate, final String responsePath) {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_KEYWORDS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_WORD_SYNONYMS_MEDIA_TYPE)
                         .withBody(getPayload(responsePath))));
 
@@ -227,11 +240,12 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultPromptFixedLists(final LocalDate orderedDate, final String responsePath) {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_MEDIA_TYPE)
                         .withBody(getPayload(responsePath))));
 
@@ -239,24 +253,57 @@ public class ReferenceDataStub {
     }
 
     private static void stubGetReferenceDataResultPromptWordSynonyms(final LocalDate orderedDate, final String responsePath) {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String urlPath = format(REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE)
                         .withBody(getPayload(responsePath))));
 
         waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE);
     }
 
-    private static void stubDynamicPromptFixedList() {
+
+    public static void stubCourtRoomsForWelshValues(UUID courtRoomID) {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
 
         final String courtRoomPath = "/referencedata-service/query/api/rest/referencedata/courtrooms";
         final String courtRoomCT = "application/vnd.referencedata.ou-courtrooms+json";
         stubFor(get(urlPathEqualTo(courtRoomPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", courtRoomCT)
+                        .withBody(getPayload("referencedata.court.rooms.welsh.json").replaceAll("%COURT_ROOM_ID%", courtRoomID.toString()))));
+
+        waitForStubToBeReady(courtRoomPath, courtRoomCT);
+
+    }
+
+    public static void stubFixedListForWelshValues() {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
+
+        final String fixedListPath = "/referencedata-service/query/api/rest/referencedata/fixed-list";
+        final String fixedListCT = "application/vnd.referencedata.get-all-fixed-list+json";
+        stubFor(get(urlPathEqualTo(fixedListPath))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", fixedListCT)
+                        .withBody(getPayload("referencedata.fixed-list-collection-with-welsh.json")))
+        );
+
+        waitForStubToBeReady(fixedListPath, fixedListCT);
+    }
+
+    private static void stubDynamicPromptFixedList() {
+        InternalEndpointMockUtils.stubPingFor("referencedata-service");
+
+        final String courtRoomPath = "/referencedata-service/query/api/rest/referencedata/courtrooms";
+        final String courtRoomCT = "application/vnd.referencedata.ou-courtrooms+json";
+        stubFor(get(urlPathEqualTo(courtRoomPath))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", courtRoomCT)
                         .withBody(getPayload("referencedata.dyna.fixedlists.court.centre.json"))));
 
@@ -266,11 +313,93 @@ public class ReferenceDataStub {
         final String hearingTypePathCT = "application/vnd.referencedata.query.hearing-types+json";
         stubFor(get(urlPathEqualTo(hearingTypePath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", hearingTypePathCT)
                         .withBody(getPayload("referencedata.dyna.fixedlists.hearing.type.json"))));
 
         waitForStubToBeReady(hearingTypePath, hearingTypePathCT);
+    }
+
+    public static void stubGetReferenceDataCourtRooms(CourtCentre courtCentre, final HearingLanguage hearingLanguage) {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        UUID welshCourtId = randomUUID();
+        UUID englishCourtId = randomUUID();
+
+        if (HearingLanguage.WELSH.equals(hearingLanguage)) {
+            welshCourtId = courtCentre.getId();
+        } else {
+            englishCourtId = courtCentre.getId();
+        }
+
+        final JsonObject responsePayload = createObjectBuilder()
+                .add("organisationunits", createArrayBuilder()
+                        .add(createObjectBuilder()
+                                .add("id", englishCourtId.toString())
+                                .add("oucodeL3Name", courtCentre.getName())
+                                .add("isWelsh", false)
+                                .add("courtrooms", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", courtCentre.getRoomId().toString())
+                                                .add("venueName", courtCentre.getName())
+                                                .add("courtroomName", courtCentre.getRoomName())
+                                                .build())
+                                        .build())
+                                .build())
+                        .add(createObjectBuilder()
+                                .add("id", "80921334-2cf0-4609-8a29-0921bf6b3520")
+                                .add("oucode", "B01BE01")
+                                .add("oucodeL1Code", "C")
+                                .add("oucodeL3Name", "Wimbledon")
+                                .add("address1", "4 Belmarsh Road")
+                                .add("address2", "London")
+                                .add("postcode", "SE28 0HA")
+                                .add("defaultStartTime", "10:00")
+                                .add("defaultDurationHrs", "7:00")
+                                .add("isWelsh", false)
+                                .add("courtrooms", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", "f703dc83-d0e4-42c8-8d44-0352d46e5194")
+                                                .add("venueName", "WIMBLEDON MAGISTRATES' COURT")
+                                                .add("courtroomId", 789)
+                                                .add("courtroomName", "Room A")
+                                                .add("oucodeL3Name", "Wimbledon")
+                                                .build())
+                                        .add(createObjectBuilder()
+                                                .add("id", "2bd3e322-f603-411d-a5ab-2e42ff4b6e00")
+                                                .add("venueName", "WIMBLEDON MAGISTRATES' COURT")
+                                                .add("courtroomId", 790)
+                                                .add("courtroomName", "Room B")
+                                                .add("oucodeL3Name", "Wimbledon")
+                                                .build())
+                                        .build())
+                                .build())
+                        .add(createObjectBuilder()
+                                .add("id", welshCourtId.toString())
+                                .add("oucode", "C55BN00")
+                                .add("lja", 3522)
+                                .add("oucodeL1Code", "C")
+                                .add("oucodeL3Name", "welshCourtRoom")
+                                .add("isWelsh", true)
+                                .add("courtrooms", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", courtCentre.getRoomId().toString())
+                                                .add("venueName", "welshCourtRoom")
+                                                .add("welshVenueName", courtCentre.getWelshName())
+                                                .add("courtroomName", "welshCourtRoom")
+                                                .build())
+                                        .build())
+                                .build())
+                        .build())
+                .build();
+
+        stubFor(get(urlPathEqualTo(COURT_ROOM_QUERY_URL))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", COURT_ROOM_MEDIA_TYPE)
+                        .withBody(responsePayload.toString())));
+
+        waitForStubToBeReady(COURT_ROOM_QUERY_URL, COURT_ROOM_MEDIA_TYPE);
     }
 
     public static void stubGetReferenceDataCourtRoomMappings(final String courtCentreId) {

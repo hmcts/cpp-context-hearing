@@ -19,11 +19,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>uk.gov.justice.event-store</groupId>
-            <artifactId>test-utils-persistence</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>wiremock-test-utils</artifactId>
             <scope>test</scope>
@@ -59,7 +54,12 @@
             <scope>test</scope>
             <version>${project.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+            <version>5.14.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>

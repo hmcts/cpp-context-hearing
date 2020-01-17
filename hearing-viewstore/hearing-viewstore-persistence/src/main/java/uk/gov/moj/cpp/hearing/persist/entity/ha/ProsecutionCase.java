@@ -1,11 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import uk.gov.justice.core.courts.InitiationCode;
-
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -18,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "ha_case")
@@ -51,6 +49,9 @@ public class ProsecutionCase {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
     private Set<Defendant> defendants = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
+    private Set<CaseMarker> markers = new HashSet<>();
 
     public ProsecutionCase() {
         //For JPA
@@ -126,6 +127,14 @@ public class ProsecutionCase {
 
     public void setDefendants(Set<Defendant> defendants) {
         this.defendants = defendants;
+    }
+
+    public Set<CaseMarker> getMarkers() {
+        return markers;
+    }
+
+    public void setMarkers(Set<CaseMarker> markers) {
+        this.markers = markers;
     }
 
     @Override

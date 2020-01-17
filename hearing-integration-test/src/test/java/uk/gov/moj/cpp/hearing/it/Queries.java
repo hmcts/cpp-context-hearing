@@ -20,6 +20,7 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import java.io.StringReader;
 import java.time.ZonedDateTime;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -34,6 +35,11 @@ import org.hamcrest.Matchers;
 public class Queries {
 
     public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
+        getHearingPollForMatch(hearingId, timeout, 0, resultMatcher);
+
+    }
+
+    public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final long waitTime ,final BeanMatcher<HearingDetailsResponse> resultMatcher) {
 
         /*
         You might be wondering why I don't use the Framework's poll stuff.  Its because that stuff polls and if the matcher
@@ -42,6 +48,9 @@ public class Queries {
 
         Do not use the framework matcher.
          */
+
+        waitForFewSeconds(waitTime);
+
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearing", hearingId), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
                 .build();
@@ -134,6 +143,14 @@ public class Queries {
         try {
             Thread.sleep(200);
         } catch (InterruptedException e) {
+            //ignore
+        }
+    }
+
+    public static void waitForFewSeconds(long numberOfSeconds) {
+        try {
+            TimeUnit.SECONDS.sleep(numberOfSeconds);
+        }catch (InterruptedException ex) {
             //ignore
         }
     }

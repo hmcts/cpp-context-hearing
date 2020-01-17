@@ -9,10 +9,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
@@ -43,16 +43,20 @@ import uk.gov.justice.core.courts.ResultPrompt;
 import uk.gov.justice.core.courts.SharedResultLine;
 import uk.gov.justice.core.courts.notification.EmailChannel;
 import uk.gov.justice.core.courts.nowdocument.NowDocumentRequest;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
+import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
+import uk.gov.justice.hearing.courts.referencedata.FixedListCollection;
+import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.NowsRequestedToDocumentConverter;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
-import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
+import uk.gov.moj.cpp.hearing.event.service.NowsReferenceDataServiceImpl;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.ResultsSharedEventHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
@@ -64,6 +68,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -73,26 +78,26 @@ import io.github.benas.randombeans.FieldDefinition;
 import io.github.benas.randombeans.api.EnhancedRandom;
 import io.github.benas.randombeans.api.Randomizer;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class NowsDelegateTest {
-
-    @Spy
-    private final Enveloper enveloper = createEnveloper();
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Spy
     @InjectMocks
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
     @Mock
-    private ReferenceDataService referenceDataService;
+    private NowsReferenceDataServiceImpl referenceDataService;
+    @Mock
+    private CourtHouseReverseLookup courtHouseReverseLookup;
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
     @Mock
@@ -102,23 +107,30 @@ public class NowsDelegateTest {
     @Mock
     private NowsRequestedToDocumentConverter nowsRequestedToDocumentConverter;
 
-    @Before
-    public void initMocks() {
-        MockitoAnnotations.initMocks(this);
+    @Test
+    public void testGenerateEnglishNows() {
+        stubEnglishCourtHouseLookUp();
+        final NowDefinition nowDefinition = standardNowDefinition();
+        testGenerateNows(nowDefinition, nowDefinition.getTemplateName());
     }
 
     @Test
-    public void testGenerateNows() {
-        testGenerateNows(standardNowDefinition());
+    public void testGenerateWelshNows() {
+        stubWelshCourtHouseLookUp();
+        final NowDefinition nowDefinition = standardNowDefinition();
+        testGenerateNows(nowDefinition, nowDefinition.getBilingualTemplateName());
     }
 
     @Test
     public void testGenerateNowsMultiPrimaries() {
-        testGenerateNows(TestTemplates.multiPrimaryNowDefinition());
+        stubEnglishCourtHouseLookUp();
+        final NowDefinition nowDefinition = TestTemplates.multiPrimaryNowDefinition();
+        testGenerateNows(nowDefinition, nowDefinition.getTemplateName());
     }
 
     @Test
     public void testGenerateNows_withNullNowText() {
+        stubEnglishCourtHouseLookUp();
 
         final ResultsSharedEventHelper resultsShared = h(resultsSharedTemplate());
 
@@ -165,6 +177,7 @@ public class NowsDelegateTest {
         final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
 
         stubResultDefinition(resultsShared);
+        stubEnglishCourtHouseLookUp();
 
         final CreateNowsRequest nowsRequest = nowsDelegate.generateNows(envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared.it())), nows.it(), resultsShared.it());
@@ -178,7 +191,16 @@ public class NowsDelegateTest {
     }
 
     @Test
-    public void testSendNows_shouldSendProgressionGenerateNowsEvent() {
+    public void testSendNows_shouldSendProgressionGenerateNowsEventEnglish() {
+        sendNows_shouldSendProgressionGenerateNowsEvent();
+    }
+
+    @Test
+    public void testSendNows_shouldSendProgressionGenerateNowsEventWelsh() {
+        sendNows_shouldSendProgressionGenerateNowsEvent();
+    }
+
+    public void sendNows_shouldSendProgressionGenerateNowsEvent() {
         final UUID defendantId = UUID.randomUUID();
         final TestTemplates.FullNowsRequest fullNowsRequest = generateFullNowsRequestTemplate(defendantId);
         final CreateNowsRequest nowsRequest = fullNowsRequest.getCreateNowsRequest();
@@ -244,11 +266,18 @@ public class NowsDelegateTest {
                         id2PromptRef.put(p.getId(), p);
                     });
 
-                    when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinition.getId())))
-                            .thenReturn(resultDefinition);
+                    doReturn(resultDefinition).when(referenceDataService).getResultDefinitionById(any(), any(), eq(resultDefinition.getId()));
 
                 }
         );
+
+        List<FixedListCollection> fixedLists = new ArrayList<>();
+        FixedListCollection fixedListsItem = new FixedListCollection("cjseQualifier", new ArrayList<>(), null, UUID.randomUUID(), null, null);
+        fixedLists.add(fixedListsItem);
+        FixedListResult fixedListResult = FixedListResult.fixedListResult().withFixedListCollection(fixedLists).build();
+
+        doReturn(fixedListResult).when(referenceDataService).getAllFixedLists(any());
+
 
         nowsRequest.getNows().get(0).getRequestedMaterials().stream().flatMap(rm -> rm.getNowResults().stream()).forEach(
                 nr -> {
@@ -308,7 +337,7 @@ public class NowsDelegateTest {
 
         NowDocumentRequest nowDocumentRequest = randomGenerator.nextObject(NowDocumentRequest.class);
 
-        when(nowsRequestedToDocumentConverter.convert(envelope, nowsRequest)).thenReturn(asList(nowDocumentRequest));
+        doReturn(asList(nowDocumentRequest)).when(nowsRequestedToDocumentConverter).convert(any(), any());
 
         nowsDelegate.sendNows(sender, envelope, nowsRequest, fullNowsRequest.getTargets());
 
@@ -349,35 +378,7 @@ public class NowsDelegateTest {
 
     }
 
-    private ResultDefinition stubResultDefinition(ResultsSharedEventHelper resultsShared) {
-        UUID resultDefinitionId = resultsShared.getFirstCompletedResultLine().getResultDefinitionId();
-        // GPE-6752 bulk input resultDefinition, add prompt references
-
-
-        final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
-            d.setText(null);
-            d.getResultDefinitions().get(0).setText(null);
-            d.setWelshText(null);
-            d.getResultDefinitions().get(0).setWelshText(null);
-        });
-
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
-                .setPrompts(asList(
-                        Prompt.prompt()
-                                .setId(resultsShared.getFirstCompletedResultLineFirstPrompt().getId())
-
-                ))
-                .setId(resultDefinitionId);
-
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
-                .thenReturn(new HashSet<>(asList(nowDefinition)));
-        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinitionId)))
-                .thenReturn(resultDefinition);
-        return resultDefinition;
-
-    }
-
-    private void testGenerateNows(final NowDefinition nowDefinition) {
+    private void testGenerateNows(final NowDefinition nowDefinition, final String templateName) {
 
         final ResultsSharedEventHelper sharedEventHelper = h(
                 resultsSharedTemplate());
@@ -390,8 +391,7 @@ public class NowsDelegateTest {
 
         final CommandHelpers.NowsHelper nows = h(basicNowsTemplate());
 
-        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId())))
-                .thenReturn(new HashSet<>(asList(nowDefinition)));
+        doReturn(new HashSet<>(asList(nowDefinition))).when(referenceDataService).getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId()));
 
         final UUID resultDefinitionId = sharedEventHelper.getFirstCompletedResultLine().getResultDefinitionId();
 
@@ -470,9 +470,10 @@ public class NowsDelegateTest {
                         .with(NowType::getDescription, is(nowDefinition.getName()))
                         .with(NowType::getJurisdiction, is(nowDefinition.getJurisdiction()))
                         .withValue(NowType::getPriority, nowDefinition.getUrgentTimeLimitInMinutes().toString())
-                        .withValue(NowType::getTemplateName, nowDefinition.getTemplateName())
+                        .withValue(NowType::getTemplateName, templateName)
                         .withValue(NowType::getRank, nowDefinition.getRank())
                         .withValue(NowType::getStaticText, nowDefinition.getText())
+                        .withValue(NowType::getWelshDescription, nowDefinition.getWelshName())
                         //this are changing .with(NowType::getStaticText, is(exp))
                         //this is changing .with(NowType::getWelshStaticText, is(nowDefinition.getWelshText() + "\n" + nowDefinition.getResultDefinitions().get(0).getWelshText()))
                         //TODO GPE-6313 resolve these 2
@@ -483,5 +484,87 @@ public class NowsDelegateTest {
         );
     }
 
+    private ResultDefinition stubResultDefinition(ResultsSharedEventHelper resultsShared) {
+        UUID resultDefinitionId = resultsShared.getFirstCompletedResultLine().getResultDefinitionId();
+        // GPE-6752 bulk input resultDefinition, add prompt references
+
+        final NowDefinition nowDefinition = with(standardNowDefinition(), d -> {
+            d.setText(null);
+            d.getResultDefinitions().get(0).setText(null);
+            d.setWelshText(null);
+            d.getResultDefinitions().get(0).setWelshText(null);
+        });
+
+        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition()
+                .setPrompts(asList(
+                        Prompt.prompt()
+                                .setId(resultsShared.getFirstCompletedResultLineFirstPrompt().getId())
+
+                ))
+                .setId(resultDefinitionId);
+
+        when(referenceDataService.getNowDefinitionByPrimaryResultDefinitionId(any(), any(), eq(resultsShared.getFirstCompletedResultLine().getResultDefinitionId())))
+                .thenReturn(new HashSet<>(asList(nowDefinition)));
+        when(referenceDataService.getResultDefinitionById(any(), any(), eq(resultDefinitionId)))
+                .thenReturn(resultDefinition);
+        return resultDefinition;
+
+    }
+
+
+    private void stubEnglishCourtHouseLookUp() {
+
+        final Courtrooms englishCourtRoom = Courtrooms.courtrooms()
+                .withCourtroomId(54321)
+                .withCourtroomName("English Court Room")
+                .withId(UUID.randomUUID())
+                .build();
+
+        final CourtCentreOrganisationUnit englishCourtCentreOrganisationunits = CourtCentreOrganisationUnit.courtCentreOrganisationUnit()
+                .withOucodeL3Name("English Court Room")
+                .withId(UUID.randomUUID().toString())
+                .withCourtrooms(asList(englishCourtRoom))
+                .withPostcode("AA1 1AA")
+                .withAddress1("address1")
+                .withAddress2("address2")
+                .withAddress3("address3")
+                .withAddress4("address4")
+                .withAddress5("address5")
+                .withIsWelsh(false)
+                .build();
+
+        doReturn(Optional.of(englishCourtCentreOrganisationunits)).when(courtHouseReverseLookup).getCourtCentreById(any(JsonEnvelope.class), any());
+    }
+
+    private void stubWelshCourtHouseLookUp() {
+
+        final Courtrooms welshCourtRooom = Courtrooms.courtrooms()
+                .withCourtroomId(12345)
+                .withCourtroomName("Welsh Court Room")
+                .withWelshCourtroomName("Welsh Court Room")
+                .withId(UUID.randomUUID())
+                .build();
+
+        final CourtCentreOrganisationUnit welshCourtCentreOrganisationunits = CourtCentreOrganisationUnit.courtCentreOrganisationUnit()
+                .withOucodeL3Name("Welsh Court Room")
+                .withOucodeL3WelshName("Welsh Court Room")
+                .withId(UUID.randomUUID().toString())
+                .withCourtrooms(asList(welshCourtRooom))
+                .withPostcode("AA1 1AA")
+                .withAddress1("address1")
+                .withAddress2("address2")
+                .withAddress3("address3")
+                .withAddress4("address4")
+                .withAddress5("address5")
+                .withWelshAddress1("welsh address1")
+                .withWelshAddress2("welsh address2")
+                .withWelshAddress3("welsh address3")
+                .withWelshAddress4("welsh address4")
+                .withWelshAddress4("welsh address5")
+                .withIsWelsh(true)
+                .build();
+
+        doReturn(Optional.of(welshCourtCentreOrganisationunits)).when(courtHouseReverseLookup).getCourtCentreById(any(JsonEnvelope.class), any());
+    }
 
 }

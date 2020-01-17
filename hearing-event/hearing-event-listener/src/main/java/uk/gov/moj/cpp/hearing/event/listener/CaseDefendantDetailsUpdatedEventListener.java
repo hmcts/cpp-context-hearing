@@ -12,6 +12,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
@@ -27,14 +28,17 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+@SuppressWarnings({"squid:S3776", "pmd:NullAssignment"})
 @ServiceComponent(EVENT_LISTENER)
 public class CaseDefendantDetailsUpdatedEventListener {
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-
     @Inject
     private DefendantRepository defendantRepository;
+    @Inject
+    private CourtApplicationsSerializer courtApplicationsSerializer;
+
 
     @Transactional
     @Handles("hearing.defendant-details-updated")
@@ -48,6 +52,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantIn.getId(), hearingId));
 
+
         if (defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
             defendant.setNumberOfPreviousConvictionsCited(defendantIn.getNumberOfPreviousConvictionsCited());
             defendant.setProsecutionAuthorityReference(defendantIn.getProsecutionAuthorityReference());
@@ -55,13 +60,16 @@ public class CaseDefendantDetailsUpdatedEventListener {
             defendant.setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh());
             defendant.setMitigation(defendantIn.getMitigation());
             defendant.setMitigationWelsh(defendantIn.getMitigationWelsh());
+            defendant.setIsYouth(defendantIn.getIsYouth());
             with(defendant.getDefenceOrganisation(), defendantIn.getDefenceOrganisation(), this::setOrganisation);
             with(defendant.getLegalEntityOrganisation(), getLegalEntityDefendantOrganisation(defendantIn.getLegalEntityDefendant()), this::setOrganisation);
             with(defendant.getPersonDefendant(), defendantIn.getPersonDefendant(),
                     (personDefendantJpa, personDefendantPojo) -> {
                         if (nonNull(personDefendantJpa) && nonNull(personDefendantPojo)) {
                             personDefendantJpa.setArrestSummonsNumber(personDefendantPojo.getArrestSummonsNumber());
-                            personDefendantJpa.setBailStatus(nonNull(personDefendantPojo.getBailStatus()) ? personDefendantPojo.getBailStatus().name() : null);
+                            personDefendantJpa.setBailStatusCode(nonNull(personDefendantPojo.getBailStatus()) ? personDefendantPojo.getBailStatus().getCode() : null);
+                            personDefendantJpa.setBailStatusDesc(nonNull(personDefendantPojo.getBailStatus()) ? personDefendantPojo.getBailStatus().getDescription() : null);
+                            personDefendantJpa.setBailStatusId(nonNull(personDefendantPojo.getBailStatus()) ? personDefendantPojo.getBailStatus().getId() : null);
                             personDefendantJpa.setCustodyTimeLimit(personDefendantPojo.getCustodyTimeLimit());
                             personDefendantJpa.setDriverNumber(personDefendantPojo.getDriverNumber());
                             personDefendantJpa.setEmployerPayrollReference(personDefendantPojo.getEmployerPayrollReference());
@@ -81,6 +89,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
 
             defendantRepository.save(defendant);
         }
+
     }
 
     private uk.gov.justice.core.courts.Organisation getLegalEntityDefendantOrganisation(LegalEntityDefendant legalEntityDefendant) {

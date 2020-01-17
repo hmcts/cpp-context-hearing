@@ -25,13 +25,14 @@ public class AdjournHearingDelegate implements Serializable {
         adjournHearing.getNextHearings().forEach(hearing -> {
             if (this.momento.getHearing().getHearingLanguage() == null) {
                 hearing.setHearingLanguage(HearingLanguage.ENGLISH);
+            } else {
+                hearing.setHearingLanguage(this.momento.getHearing().getHearingLanguage());
             }
-            hearing.setHearingLanguage(this.momento.getHearing().getHearingLanguage());
         });
         // End - This is a hack and this snippet of code will be removed and hearing language will be set in HearingAdjournTransformer once the language is made mandatory in initiate hearing..
         HearingAdjourned hearingAdjourned = new HearingAdjourned(adjournHearing.getAdjournedHearing(), adjournHearing.getNextHearings());
         //TODO remove this bodge and update listing json schema
-        hearingAdjourned.getNextHearings().forEach(hearing->hearing.getCourtCentre().setAddress(null));
+        hearingAdjourned.getNextHearings().forEach(hearing -> hearing.getCourtCentre().setAddress(null));
         return Stream.of(hearingAdjourned);
 
     }

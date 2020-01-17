@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json",
+  "type": "object",
+  "properties": {
+    "target": {
+      "$ref": "http://justice.gov.uk/core/courts/target.json"
+    }
+  },
+  "required": [
+    "target"
+  ],
+  "additionalProperties": false
+}

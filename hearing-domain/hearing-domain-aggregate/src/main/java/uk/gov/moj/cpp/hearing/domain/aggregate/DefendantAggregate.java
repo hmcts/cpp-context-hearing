@@ -4,24 +4,31 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
-import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @SuppressWarnings({"squid:S00107", "squid:S1948"})
 public class DefendantAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3437111723927797319L;
 
     private List<UUID> hearingIds = new ArrayList<>();
+
+    private final Map<UUID, OffenceResult> offenceResults = new HashMap<>();
 
     @Override
     public Object apply(Object event) {
@@ -29,6 +36,11 @@ public class DefendantAggregate implements Aggregate {
         return match(event)
                 .with(
                         when(RegisteredHearingAgainstDefendant.class).apply(defendant -> hearingIds.add(defendant.getHearingId())),
+                        when(DefendantOffenceResultsUpdated.class).apply(e ->
+                                updateOffenceResults(this.offenceResults, e.getOffenceIds(), e.getResultedOffences())
+                        ),
+                        when(DefendantCaseWithdrawnOrDismissed.class).apply(e -> {
+                        }),
                         otherwiseDoNothing()
                 );
     }
@@ -43,6 +55,9 @@ public class DefendantAggregate implements Aggregate {
     }
 
     public Stream<Object> enrichCaseDefendantDetailsWithHearingIds(final Defendant defendant) {
+        if (hearingIds.isEmpty()) {
+            return Stream.empty();
+        }
 
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings =
                 CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
@@ -59,5 +74,42 @@ public class DefendantAggregate implements Aggregate {
                 .withOffence(offence)
                 .withHearingIds(hearingIds)
         ));
+    }
+
+    public Stream<Object> updateOffenceResults(final UUID defendantId, final UUID caseId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> updatedResults) {
+        final Map<UUID, OffenceResult> offenceResultsCopy = new HashMap(this.offenceResults);
+        updateOffenceResults(offenceResultsCopy, offenceIds, updatedResults);
+
+        final Stream.Builder<Object> builder = Stream.builder();
+        builder.add(
+                DefendantOffenceResultsUpdated.newBuilder()
+                        .withDefendantId(defendantId)
+                        .withOffenceIds(offenceIds)
+                        .withResultedOffences(updatedResults)
+                        .build()
+        );
+
+        if (computeAllOffencesWithdrawnOrDismissed(offenceResultsCopy)) {
+            builder.add(
+                    DefendantCaseWithdrawnOrDismissed.newBuilder()
+                            .withDefendantId(defendantId)
+                            .withCaseId(caseId)
+                            .withResultedOffences(offenceResultsCopy)
+                            .build());
+        }
+
+        return apply(builder.build());
+    }
+
+    private void updateOffenceResults(final Map<UUID, OffenceResult> offenceResultsCopy, final List<UUID> offenceIds, final Map<UUID, OffenceResult> results) {
+        offenceIds.stream().forEach(offenceId -> offenceResultsCopy.putIfAbsent(offenceId, OffenceResult.ADJOURNED));
+        results.entrySet().stream().forEach(p -> offenceResultsCopy.put(p.getKey(), p.getValue()));
+    }
+
+    public static boolean computeAllOffencesWithdrawnOrDismissed(final Map<UUID, OffenceResult> offenceResults) {
+        if (offenceResults.isEmpty()) {
+            return false;
+        }
+        return offenceResults.entrySet().stream().noneMatch(entry -> entry.getValue().equals(OffenceResult.ADJOURNED) || entry.getValue().equals(OffenceResult.GUILTY));
     }
 }

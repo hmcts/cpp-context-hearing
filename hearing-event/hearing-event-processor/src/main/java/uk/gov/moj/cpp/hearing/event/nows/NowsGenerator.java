@@ -1,7 +1,11 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.EMPLOYER_ORGANISATION_ADDRESS1_PROMPT_REFERENCE;
@@ -39,6 +43,7 @@ import uk.gov.justice.core.courts.NowVariantResultText;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -46,6 +51,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.time.LocalDate;
@@ -73,7 +79,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"squid:S1188", "squid:S2384", "squid:S1135", "squid:S2259", "squid:S1612", "squid:S134",
-        "squid:S1172", "squid:S3400", "squid:S00112", "squid:S3776", "squid:S3864"})
+        "squid:S1172", "squid:S3400", "squid:S00112", "squid:S3776", "squid:S3864", "squid:MethodCyclomaticComplexity"})
 public class NowsGenerator {
 
     public static final String INITIAL_MATERIAL_STATUS = "requesting";
@@ -93,13 +99,15 @@ public class NowsGenerator {
     private final ReferenceDataService referenceDataService;
     private final FinancialResultCalculator financialResultCalculator;
     private final PaymentTermsCalculator paymentTermsCalculator;
+    private final CourtHouseReverseLookup courtHouseReverseLookup;
 
     @Inject
     public NowsGenerator(final ReferenceDataService referenceDataService, final FinancialResultCalculator financialResultCalculator,
-                         PaymentTermsCalculator paymentTermsCalculator) {
+                         PaymentTermsCalculator paymentTermsCalculator, final CourtHouseReverseLookup courtHouseReverseLookup) {
         this.referenceDataService = referenceDataService;
         this.financialResultCalculator = financialResultCalculator;
         this.paymentTermsCalculator = paymentTermsCalculator;
+        this.courtHouseReverseLookup = courtHouseReverseLookup;
     }
 
     private static List<ResultLine> uncompletedResultLinesForDefendant(final ResultsShared resultsShared, final Defendant defendant) {
@@ -119,7 +127,7 @@ public class NowsGenerator {
     protected static NowVariantResultText nowVariantResultText(final NowResultDefinitionRequirement nowsRequirementRow, final Map<UUID, Prompt> id2PromptRef, final ResultLine resultLine) {
 
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(String.format("nowVariantResultText_nowReference: '%s'  text: '%s' ",
+            LOGGER.info(format("nowVariantResultText_nowReference: '%s'  text: '%s' ",
                     nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
         }
 
@@ -131,13 +139,13 @@ public class NowsGenerator {
                 text = text + extractByPromptReference(id2PromptRef, P_NON_STANDARD_REASON, Collections.singletonList(resultLine)).orElse("");
             }
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(String.format("**** nowVariantResultText nowReference: '%s'  text: '%s' ",
+                LOGGER.info(format("**** nowVariantResultText nowReference: '%s'  text: '%s' ",
                         nowsRequirementRow.getNowReference(), nowsRequirementRow.getText()));
             }
 
             builder
                     .withAdditionalProperty(nowsRequirementRow.getNowReference(), text)
-                    .withAdditionalProperty(nowsRequirementRow.getNowReference() + ".welsh", nowsRequirementRow.getWelshText() != null ? nowsRequirementRow.getWelshText() : text);
+                    .withAdditionalProperty(nowsRequirementRow.getNowReference() + "Welsh", nowsRequirementRow.getWelshText() != null ? nowsRequirementRow.getWelshText() : text);
             return builder.build();
         }
 
@@ -195,7 +203,7 @@ public class NowsGenerator {
             return true;
         }
         //TODO GPE-7138 blow up if there is a reference data error !
-        throw new RuntimeException(String.format("nowDefinition %s %s has unexpected jurisdiction \"%s\"",
+        throw new RuntimeException(format("nowDefinition %s %s has unexpected jurisdiction \"%s\"",
                 nowDefinition.getName(), nowDefinition.getId(), nowDefinition.getJurisdiction()));
     }
 
@@ -243,9 +251,9 @@ public class NowsGenerator {
                 if (!uncompletedResultLinesForDefendant.isEmpty()) {
                     if (LOGGER.isInfoEnabled()) {
                         final StringBuilder sbError = new StringBuilder();
-                        sbError.append(String.format("aborting NOWs generation for defendant %s as there are uncompleted result lines:", defendant.getId()));
+                        sbError.append(format("aborting NOWs generation for defendant %s as there are uncompleted result lines:", defendant.getId()));
                         uncompletedResultLinesForDefendant.forEach(
-                                resultLine -> sbError.append(String.format(", %s", resultLine.toString()))
+                                resultLine -> sbError.append(format(", %s", resultLine.toString()))
                         );
                         LOGGER.info(sbError.toString());
                     }
@@ -281,7 +289,7 @@ public class NowsGenerator {
 
         final Set<NowDefinition> candidateNowDefinitions = findNowDefinitions(context, hearing.getJurisdictionType(), resultLines);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(String.format("considering these nows for hearing %s defendant %s : %s", hearing.getId(),
+            LOGGER.info(format("considering these nows for hearing %s defendant %s : %s", hearing.getId(),
                     defendantId, candidateNowDefinitions.stream().map(nd -> "" + nd.getId() + "/" + nd.getName()).collect(Collectors.joining(","))
             ));
         }
@@ -294,9 +302,9 @@ public class NowsGenerator {
             if (!mandatoryResultsNotPresent.isEmpty()) {
                 if (LOGGER.isInfoEnabled()) {
                     final StringBuilder sb = new StringBuilder();
-                    sb.append(String.format("aborting NOW generation for defendant: %s nowDefinition: %s as not all mandatory results are present", defendantId, nowDefinition.getId()));
+                    sb.append(format("aborting NOW generation for defendant: %s nowDefinition: %s as not all mandatory results are present", defendantId, nowDefinition.getId()));
                     mandatoryResultsNotPresent.forEach(
-                            r -> sb.append(String.format(", id: %s %s %s %s", r.getId(), r.getNowReference(), r.getPrimary(), r.getText()))
+                            r -> sb.append(format(", id: %s %s %s %s", r.getId(), r.getNowReference(), r.getPrimary(), r.getText()))
                     );
                     LOGGER.info(sb.toString());
                 }
@@ -358,11 +366,11 @@ public class NowsGenerator {
         return id2PromptRef;
     }
 
-    private LjaDetails ljaDetails(final JsonEnvelope context, final Hearing hearing) {
+    private LjaDetails ljaDetails(final JsonEnvelope context, final Hearing hearing, final String defendantPostcode) {
         if (JurisdictionType.CROWN.equals(hearing.getJurisdictionType())) {
             return null;
         } else {
-            return referenceDataService.getLjaDetailsByCourtCentreId(context, hearing.getCourtCentre().getId());
+            return referenceDataService.getLjaDetails(context, hearing.getCourtCentre().getId(), defendantPostcode);
         }
     }
 
@@ -394,7 +402,14 @@ public class NowsGenerator {
 
         final boolean isCrownCourt = hearing.getJurisdictionType() == JurisdictionType.CROWN;
 
-        final FinancialOrderDetails.Builder financialOrderDetailsBuilder = financialOrderDetails(id2PromptRef, hasAttachmentOfEarningsResult, resultLines4Now)
+        boolean isWelsh = false;
+        if (nonNull(hearing.getCourtCentre()) && nonNull(context)) {
+            final Optional<CourtCentreOrganisationUnit> courtCentreOrganisationUnit = courtHouseReverseLookup.getCourtCentreById(context, hearing.getCourtCentre().getId());
+            if (nonNull(courtCentreOrganisationUnit) && courtCentreOrganisationUnit.isPresent()) {
+                isWelsh = ofNullable(courtCentreOrganisationUnit.get().getIsWelsh()).orElse(false);
+            }
+        }
+        final FinancialOrderDetails.Builder financialOrderDetailsBuilder = financialOrderDetails(id2PromptRef, hasAttachmentOfEarningsResult, resultLines4Now, isWelsh)
                 .withIsCrownCourt(isCrownCourt);
 
         final Set<UUID> promptIdsToExclude = hasAttachmentOfEarningsResult ? findAttachmentOfEarningsPrompts(resultLines4Now, id2PromptRef) : new HashSet<>();
@@ -456,14 +471,14 @@ public class NowsGenerator {
         //lets make the materials always return in a fixed order
         materials.sort((m1, m2) -> {
             final String ug1 = m1.getKey().getUsergroups().stream().sorted().collect(Collectors.joining(""));
-            final String ug2 = String.join("", m2.getKey().getUsergroups());
+            final String ug2 = join("", m2.getKey().getUsergroups());
             return ug1.compareTo(ug2);
         });
 
         final boolean isFinancial = !financialResultDefinitionList.isEmpty();
         final Optional<String> accountNumber = !isFinancial ? Optional.empty() : Optional.of("TBC");
         financialOrderDetailsBuilder.withAccountReference(accountNumber.orElse(null)).build();
-
+        final Address address = getAddress(defendant);
         return Now.now()
                 .withId(UUID.randomUUID())
                 .withDefendantId(defendantId)
@@ -471,7 +486,7 @@ public class NowsGenerator {
                 .withRequestedMaterials(materials)
                 .withFinancialOrders(isFinancial ? financialOrderDetailsBuilder.build() : null)
                 .withReferenceDate(resultLines4NowIn.stream().map(ResultLine::getOrderedDate).findFirst().orElse(LocalDate.now()))
-                .withLjaDetails(ljaDetails(context, hearing))
+                .withLjaDetails(ljaDetails(context, hearing, nonNull(address) ? address.getPostcode() : null))
                 .build();
     }
 
@@ -534,12 +549,16 @@ public class NowsGenerator {
                 .collect(toSet());
     }
 
-    private FinancialOrderDetails.Builder financialOrderDetails(final Map<UUID, Prompt> id2PromptRef, boolean isAttachmentOfEarningsOrder, final List<ResultLine> resultLines4Now) {
+    private FinancialOrderDetails.Builder financialOrderDetails(final Map<UUID, Prompt> id2PromptRef, boolean isAttachmentOfEarningsOrder, final List<ResultLine> resultLines4Now, final Boolean isWelsh) {
         final FinancialOrderDetails.Builder result = FinancialOrderDetails.financialOrderDetails();
         final FinancialResultCalculator.FinancialResult financialResult = financialResultCalculator.calculate(id2PromptRef, resultLines4Now);
         result.withTotalAmountImposed(financialResult.getTotalAmountImposed());
         result.withTotalBalance(financialResult.getTotalBalance());
-        result.withPaymentTerms(paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now));
+        result.withPaymentTerms(paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false));
+
+        if (isWelsh != null && isWelsh) {
+            result.withPaymentTermsWelsh(paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, true));
+        }
 
         if (!isAttachmentOfEarningsOrder) {
             return result;
@@ -603,7 +622,7 @@ public class NowsGenerator {
                                     .getResultDefinitionById(context, resultLine.getOrderedDate(),
                                             resultLine.getResultDefinitionId());
                             if (resultDefinition == null) {
-                                throw new RuntimeException(String.format("failed to getResultDefinitionById orderDate: %s, resultDefinitionID: %s",
+                                throw new RuntimeException(format("failed to getResultDefinitionById orderDate: %s, resultDefinitionID: %s",
                                         resultLine.getOrderedDate(),
                                         resultLine.getResultDefinitionId()));
                             }
