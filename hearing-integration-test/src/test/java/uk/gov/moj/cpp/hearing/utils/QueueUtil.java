@@ -74,7 +74,7 @@ public class QueueUtil {
         return retrieveMessage(consumer, RETRIEVE_TIMEOUT);
     }
 
-    public static void sendMessage(final MessageProducer messageProducer, final String commandName, final JsonObject payload, final Metadata metadata) {
+    public static void sendMessage(final MessageProducer messageProducer, final String eventName, final JsonObject payload, final Metadata metadata) {
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, payload);
 
@@ -84,11 +84,11 @@ public class QueueUtil {
             final TextMessage message = new ActiveMQTextMessage();
 
             message.setText(json);
-            message.setStringProperty("CPPNAME", commandName);
+            message.setStringProperty("CPPNAME", eventName);
 
             messageProducer.send(message);
         } catch (final JMSException e) {
-            throw new RuntimeException("Failed to send message. commandName: '" + commandName + "', json: " + json, e);
+            throw new RuntimeException("Failed to send message. commandName: '" + eventName + "', json: " + json, e);
         }
     }
 

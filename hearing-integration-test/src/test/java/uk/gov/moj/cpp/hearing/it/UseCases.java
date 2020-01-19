@@ -22,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
@@ -103,8 +104,17 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
+        return initiateHearing(requestSpec, initiateHearing, true);
+    }
+
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, boolean includeApplication) {
+
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString()))));
+
+        if (!includeApplication) {
+            initiateHearing.getHearing().setCourtApplications(null);
+        }
 
         makeCommand(requestSpec, "hearing.initiate")
                 .ofType("application/vnd.hearing.initiate+json")
@@ -456,6 +466,10 @@ public class UseCases {
     }
 
     private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
+        return sharedResultsCommandResultLineStream(target, null);
+    }
+
+    private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target, final CourtApplicationOutcome courtApplicationOutcome) {
         return target.getResultLines().stream().map(resultLineIn ->
                 new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
@@ -477,15 +491,23 @@ public class UseCases {
                         resultLineIn.getAmendmentDate(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
-                        resultLineIn.getIsDeleted(),null));
+                        resultLineIn.getIsDeleted(),
+                        courtApplicationOutcome));
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
 
+        return shareResults(requestSpec, hearingId, shareResultsCommand, targets, null);
+    }
+
+    public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets, final CourtApplicationOutcome courtApplicationOutcome) {
+
         // TODO GPE-6699
         shareResultsCommand.setResultLines(
-                targets.stream().flatMap(target -> sharedResultsCommandResultLineStream(target)).collect(Collectors.toList())
-        );
+                targets.stream()
+                        .flatMap(target -> sharedResultsCommandResultLineStream(target, courtApplicationOutcome))
+                        .collect(Collectors.toList()));
+
 
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")

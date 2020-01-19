@@ -21,6 +21,8 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCourtRoomsForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.stubEnforceFinancialImposition;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -45,6 +47,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
+import uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -58,19 +61,19 @@ import org.junit.Test;
 
 public class NowDocumentRequestedIT extends AbstractIT {
 
-    private static final String DOCUMENT_TEXT = "someDocumentText";
-    private static final String BOTH_JURISDICTIONS = "B";
     protected static final List<String> guiltyResultList = unmodifiableList(
             asList(
                     "fc612b8f-9699-459f-9ea7-b307164e4754",
                     "ce23a452-9015-4619-968f-1628d7a271c9"));
-
-
+    private static final String DOCUMENT_TEXT = "someDocumentText";
+    private static final String BOTH_JURISDICTIONS = "B";
     private static final UUID TRAIL_TYPE_ID_1 = randomUUID();
 
     @Before
     public void begin() {
         stubProgressionGenerateNows();
+        SystemIdMapperStub.stubAddMapping();
+        stubEnforceFinancialImposition();
         ReferenceDataStub.stubRelistReferenceDataResults();
     }
 
@@ -124,8 +127,10 @@ public class NowDocumentRequestedIT extends AbstractIT {
 
         final Hearing hearing = hearingCommandHelper.getHearing();
 
+        stubGetReferenceDataCourtRooms(hearing.getCourtCentre(), hearing.getHearingLanguage());
         stubCourtRoomsForWelshValues(hearing.getCourtCentre().getId());
         stubFixedListForWelshValues();
+        stubLjaDetails(hearing.getCourtCentre().getId());
 
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
         final List<Target> targets = new ArrayList<>();
@@ -173,7 +178,6 @@ public class NowDocumentRequestedIT extends AbstractIT {
         publicNowDocumentRequested.waitFor();
     }
 
-
     private List<Offence> getOffences(InitiateHearingCommand initiateHearingCommand) {
         return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
     }
@@ -199,6 +203,7 @@ public class NowDocumentRequestedIT extends AbstractIT {
                                 .setWelshText("NowLevel/" + STRING.next() + " Welsh")
                                 .setWelshName("Welsh Name")
                                 .setTemplateName(STRING.next())
+                                .setBilingualTemplateName(STRING.next())
                                 .setRank(INTEGER.next())
                                 .setJurisdiction("B")
                                 .setRemotePrintingRequired(false),
@@ -217,6 +222,7 @@ public class NowDocumentRequestedIT extends AbstractIT {
                                 ))
                                 .setName(STRING.next())
                                 .setTemplateName(STRING.next())
+                                .setBilingualTemplateName(STRING.next())
                                 .setRank(INTEGER.next())
                                 .setJurisdiction(BOTH_JURISDICTIONS)
                                 .setRemotePrintingRequired(false)
@@ -243,7 +249,7 @@ public class NowDocumentRequestedIT extends AbstractIT {
                                         ResultDefinition.resultDefinition()
                                                 .setId(resultDefinitionId)
                                                 .setUserGroups(singletonList(LISTING_OFFICER_USERGROUP))
-                                                .setFinancial("Y")
+//                                                .setFinancial("Y")
                                                 .setCategory(getCategoryForResultDefinition(resultDefinitionId))
                                                 .setPrompts(singletonList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
                                                                 .setId(randomUUID())
@@ -254,6 +260,8 @@ public class NowDocumentRequestedIT extends AbstractIT {
                                                                 .setReference(STRING.next())
                                                         )
                                                 )
+                                                .setRank(INTEGER.next())
+                                                .setIsAvailableForCourtExtract(false)
                                                 .setLabel(STRING.next())
                                                 .setWelshLabel(STRING.next())
                                                 .setUserGroups(singletonList(LISTING_OFFICER_USERGROUP))

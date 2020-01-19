@@ -11,8 +11,9 @@ import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACH
 import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID;
 
 import uk.gov.justice.core.courts.Category;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CreateNowsRequest;
-import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.core.courts.Offence;
@@ -30,7 +31,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
-import uk.gov.moj.cpp.hearing.event.delegates.SaveNowVariantsDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDetailsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.ResultDefinitionNotFoundException;
 import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
@@ -59,11 +60,10 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S1188"})
 public class PublishResultsEventProcessor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsEventProcessor.class.getName());
     protected static final List<String> dismissedResultList = Collections.unmodifiableList(Arrays.asList("14d66587-8fbe-424f-a369-b1144f1684e3", "f8bd4d1f-1467-4903-b1e6-d2249ccc8c25", "8542b0d9-27f0-4df3-a4a3-0ac0a85c33ad"));
     protected static final List<String> withDrawnResultList = Collections.unmodifiableList(Arrays.asList("6feb0f2e-8d1e-40c7-af2c-05b28c69e5fc", "eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8",
             "c8326b9e-56eb-406c-b74b-9f90c772b657", "eaecff82-32da-4cc1-b530-b55195485cc7", "4d5f25a5-9102-472f-a2da-c58d1eeb9c93"));
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsEventProcessor.class.getName());
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -74,7 +74,7 @@ public class PublishResultsEventProcessor {
     private NowsDelegate nowsDelegate;
 
     @Inject
-    private SaveNowVariantsDelegate saveNowVariantsDelegate;
+    private UpdateDefendantWithApplicationDetailsDelegate updateDefendantWithApplicationDetailsDelegate;
 
     @Inject
     private UpdateResultLineStatusDelegate updateResultLineStatusDelegate;
@@ -105,8 +105,9 @@ public class PublishResultsEventProcessor {
 
         final ResultsShared resultsShared = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
+        Hearing hearing = resultsShared.getHearing();
+        List<CourtApplication> courtApplications = hearing.getCourtApplications();
 
-        final List<Target> targets = resultsShared.getTargets();
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
                         prosecutionCases
@@ -123,7 +124,12 @@ public class PublishResultsEventProcessor {
                                 ));
 
 
-        if (resultsShared.getHearing().getProsecutionCases() != null || resultsShared.getHearing().getCourtApplications() != null) {
+        if (courtApplications != null && !courtApplications.isEmpty()) {
+            // invoke command (resultsShared)
+            updateDefendantWithApplicationDetailsDelegate.execute(sender, event, resultsShared);
+        }
+
+        if (hearing.getProsecutionCases() != null || courtApplications != null) {
             final HearingAdjourned hearingAdjourned = adjournHearingDelegate.execute(resultsShared, event);
 
             final ResultsShared resultsSharedFiltered = resultsSharedFilter.filterTargets(resultsShared, t -> t.getApplicationId() == null);
@@ -139,20 +145,20 @@ public class PublishResultsEventProcessor {
 
                         final CreateNowsRequest nowsRequest = nowsDelegate.generateNows(event, nowsList, resultsSharedFiltered);
 
-                        final JurisdictionType jurisdictionType = resultsSharedFiltered.getHearing().getJurisdictionType();
-
                         final Set<UUID> nowTypeIds = nowsRequest.getNows().stream()
                                 .filter(now ->
                                         (now.getNowsTypeId().equals(NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID) ||
-                                                now.getNowsTypeId().equals(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID)) && jurisdictionType != JurisdictionType.CROWN)
+                                                now.getNowsTypeId().equals(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID)))
                                 .map(Now::getNowsTypeId)
                                 .collect(Collectors.toSet());
 
-                        processOrderWithNonFinancialOrCrownCourt(event, nowsRequest, nowTypeIds, jurisdictionType, targets);
+                        final List<Target> targets = resultsShared.getTargets();
 
-                        processOrderWithFinancialPenaltyAndAttachmentOfEarnings(event, nowsRequest, nowTypeIds, jurisdictionType, targets);
+                        processOrderWithNonFinancial(event, nowsRequest, targets);
 
-                        processOrderWithFinancial(event, nowsRequest, nowTypeIds, jurisdictionType, targets);
+                        processOrderWithFinancialPenaltyAndAttachmentOfEarnings(event, nowsRequest, nowTypeIds, targets);
+
+                        processOrderWithFinancial(event, nowsRequest, nowTypeIds, targets);
 
                     }
 
@@ -272,22 +278,23 @@ public class PublishResultsEventProcessor {
     }
 
 
-    private void processOrderWithFinancialPenaltyAndAttachmentOfEarnings(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds, final JurisdictionType jurisdictionType,
+    private void processOrderWithFinancialPenaltyAndAttachmentOfEarnings(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds,
                                                                          final List<Target> targets) {
 
         final boolean hasOrderWithFinancialPenaltyAndAttachmentOfEarnings = nowTypeIds.size() == 2;
 
         if (hasOrderWithFinancialPenaltyAndAttachmentOfEarnings) {
 
-            final List<Now> financialPenaltyWithAttachmentOfEarningsOrder = nowsRequest.getNows().stream()
-                    .filter(now -> nowTypeIds.contains(now.getNowsTypeId()) && jurisdictionType != JurisdictionType.CROWN)
+            final List<Now> financialPenaltyWithAttachmentOfEarningsOrder = nowsRequest.getNows()
+                    .stream()
+                    .filter(now -> nowTypeIds.contains(now.getNowsTypeId()))
                     .collect(Collectors.toList());
 
             nowsDelegate.sendPendingNows(sender, event, createNowsRequest(nowsRequest, financialPenaltyWithAttachmentOfEarningsOrder), targets);
         }
     }
 
-    private void processOrderWithFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds, final JurisdictionType jurisdictionType,
+    private void processOrderWithFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds,
                                            final List<Target> targets) {
 
         final boolean hasOrderWithFinancialPenaltyAndAttachmentOfEarnings = nowTypeIds.size() == 2;
@@ -296,16 +303,15 @@ public class PublishResultsEventProcessor {
 
         if (hasOrderWithFinancialPenaltyAndAttachmentOfEarnings) {
 
-            nowsPendingWithFinancialImposition = nowsRequest.getNows().stream()
-                    .filter(now -> nonNull(now.getFinancialOrders()) && nonNull(now.getFinancialOrders().getAccountReference())
-                            && jurisdictionType != JurisdictionType.CROWN)
+            nowsPendingWithFinancialImposition = nowsRequest.getNows()
+                    .stream()
+                    .filter(now -> nonNull(now.getFinancialOrders()) && nonNull(now.getFinancialOrders().getAccountReference()))
                     .filter(now -> !nowTypeIds.contains(now.getNowsTypeId()))
                     .collect(Collectors.toList());
         } else {
 
             nowsPendingWithFinancialImposition = nowsRequest.getNows().stream()
-                    .filter(now -> nonNull(now.getFinancialOrders()) && nonNull(now.getFinancialOrders().getAccountReference())
-                            && jurisdictionType != JurisdictionType.CROWN)
+                    .filter(now -> nonNull(now.getFinancialOrders()) && nonNull(now.getFinancialOrders().getAccountReference()))
                     .collect(Collectors.toList());
         }
 
@@ -314,28 +320,14 @@ public class PublishResultsEventProcessor {
         }
     }
 
-    private void processOrderWithNonFinancialOrCrownCourt(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds, final JurisdictionType jurisdictionType,
-                                                          final List<Target> targets) {
+    private void processOrderWithNonFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest,
+                                              final List<Target> targets) {
 
-        final boolean hasOrderWithFinancialPenaltyAndAttachmentOfEarnings = nowTypeIds.size() == 2;
+        List<Now> nowsToSendToSendDirect = nowsRequest.getNows().stream()
+                .filter(now -> isNull(now.getFinancialOrders()) || isNull(now.getFinancialOrders().getAccountReference())
+                )
+                .collect(Collectors.toList());
 
-        List<Now> nowsToSendToSendDirect;
-
-        if (hasOrderWithFinancialPenaltyAndAttachmentOfEarnings) {
-
-            nowsToSendToSendDirect = nowsRequest.getNows().stream()
-                    .filter(now -> isNull(now.getFinancialOrders()) || isNull(now.getFinancialOrders().getAccountReference())
-                            || jurisdictionType == JurisdictionType.CROWN)
-                    .filter(now -> !nowTypeIds.contains(now.getNowsTypeId()))
-                    .collect(Collectors.toList());
-
-        } else {
-
-            nowsToSendToSendDirect = nowsRequest.getNows().stream()
-                    .filter(now -> isNull(now.getFinancialOrders()) || isNull(now.getFinancialOrders().getAccountReference())
-                            || jurisdictionType == JurisdictionType.CROWN)
-                    .collect(Collectors.toList());
-        }
 
         if (!nowsToSendToSendDirect.isEmpty()) {
             nowsDelegate.sendNows(sender, event, createNowsRequest(nowsRequest, nowsToSendToSendDirect), targets);

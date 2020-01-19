@@ -247,7 +247,11 @@ public class SharedResultsCommandResultLine implements Serializable {
         this.isDeleted = isDeleted;
     }
 
-    public CourtApplicationOutcome getCourtApplicationOutcome() {
+    public CourtApplicationOutcome getApplicationOutcome() {
         return courtApplicationOutcome;
+    }
+
+    public void setApplicationOutcome(final CourtApplicationOutcome courtApplicationOutcome) {
+        this.courtApplicationOutcome = courtApplicationOutcome;
     }
 }

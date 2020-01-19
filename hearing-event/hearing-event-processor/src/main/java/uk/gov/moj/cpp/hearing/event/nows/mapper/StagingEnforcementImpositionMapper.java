@@ -3,6 +3,12 @@ package uk.gov.moj.cpp.hearing.event.nows.mapper;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static uk.gov.justice.json.schemas.staging.ImpositionResultCode.FCOMP;
+import static uk.gov.justice.json.schemas.staging.ImpositionResultCode.FCOST;
+import static uk.gov.justice.json.schemas.staging.ImpositionResultCode.FCPC;
+import static uk.gov.justice.json.schemas.staging.ImpositionResultCode.FO;
+import static uk.gov.justice.json.schemas.staging.ImpositionResultCode.FVEBD;
+import static uk.gov.justice.json.schemas.staging.ImpositionResultCode.FVS;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_AMOUNT_OF_BACK_DUTY;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_AMOUNT_OF_COMPENSATION;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_AMOUNT_OF_COSTS;
@@ -23,6 +29,7 @@ import uk.gov.justice.json.schemas.staging.ImpositionResultCode;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +38,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMapper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StagingEnforcementImpositionMapper.class.getName());
 
     private final Map<UUID, UUID> resultLineResultDefinitionIdMap;
 
@@ -42,6 +54,8 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
     private final Map<String, String> majorCreditorMap;
 
     private final Set<String> prosecutionAuthorityCodes;
+
+    private static final EnumMap<ImpositionResultCode, String> impositionAmountPromptReferences = getImpositionAmountPromptReferences();
 
     StagingEnforcementImpositionMapper(final List<SharedResultLine> sharedResultLines,
                                        final Map<UUID, UUID> resultLineResultDefinitionIdMap,
@@ -73,11 +87,13 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
             final String offenceCode = sharedResultLineOffenceCodeMap.get(sharedResultLineId);
 
+            LOGGER.info("mapped offenceCode {} ", offenceCode);
+
             final ImpositionResultCode impositionResultCode = setImpositionResultCode(resultDefinitionId);
 
             if (nonNull(impositionResultCode)) {
 
-                final BigDecimal impositionAmount = setImpositionAmount(impositionResultCode, promptRefsList);
+                final BigDecimal impositionAmount = setImpositionAmount(impositionResultCode, promptRefsList, sharedResultLineId);
 
                 final String majorCreditor = getMajorCreditor(impositionResultCode, promptRefsList);
 
@@ -109,7 +125,7 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
         String majorCreditor = null;
 
-        if (impositionResultCode == ImpositionResultCode.FCOMP || impositionResultCode == ImpositionResultCode.FCOST) {
+        if (impositionResultCode == FCOMP || impositionResultCode == ImpositionResultCode.FCOST) {
 
             majorCreditor = getPromptValue(promptRefsList, P_CREDITOR_NAME);
 
@@ -124,30 +140,24 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
         return majorCreditor;
     }
 
-    private BigDecimal setImpositionAmount(final ImpositionResultCode impositionResultCode, List<UUID> promptRefsList) {
+    private static final EnumMap<ImpositionResultCode, String> getImpositionAmountPromptReferences() {
+        final EnumMap<ImpositionResultCode, String> result = new EnumMap<>(ImpositionResultCode.class);
+        result.put(FO, P_AMOUNT_OF_FINE);
+        result.put(FCPC, P_AMOUNT_OF_COSTS);
+        result.put(FVS, P_AMOUNT_OF_SURCHARGE);
+        result.put(FVEBD, P_AMOUNT_OF_BACK_DUTY);
+        result.put(FCOST, P_AMOUNT_OF_COSTS);
+        result.put(FCOMP, P_AMOUNT_OF_COMPENSATION);
+        // FCC, P_AMOUNT_OF_COMPENSATION never be available in courts and therefore will never match
+        return result;
+
+    }
+
+    private BigDecimal setImpositionAmount(final ImpositionResultCode impositionResultCode, List<UUID> promptRefsList, UUID sharedResultLineId) {
         String impositionAmount = null;
-        switch (impositionResultCode) {
-            case FO:
-                impositionAmount = getPromptValue(promptRefsList, P_AMOUNT_OF_FINE);
-                break;
-            case FCPC:
-                impositionAmount = getPromptValue(promptRefsList, P_AMOUNT_OF_COSTS);
-                break;
-            case FVS:
-                impositionAmount = getPromptValue(promptRefsList, P_AMOUNT_OF_SURCHARGE);
-                break;
-            case FVEBD:
-                impositionAmount = getPromptValue(promptRefsList, P_AMOUNT_OF_BACK_DUTY);
-                break;
-            case FCOST:
-                impositionAmount = getPromptValue(promptRefsList, P_AMOUNT_OF_COSTS);
-                break;
-            case FCOMP:
-                impositionAmount = getPromptValue(promptRefsList, P_AMOUNT_OF_COMPENSATION);
-                break;
-            case FCC:
-//                Will never be available in courts and therefore will never match
-                break;
+        if (impositionAmountPromptReferences.containsKey(impositionResultCode)) {
+            impositionAmount = getPromptValue(promptRefsList, impositionAmountPromptReferences.get(impositionResultCode), sharedResultLineId);
+
         }
 
         if(isNull(impositionAmount)) {
@@ -164,17 +174,17 @@ class StagingEnforcementImpositionMapper extends AbstractStagingEnforcementMappe
 
     private ImpositionResultCode setImpositionResultCode(final UUID resultDefinitionId) {
         if(RD_FINE.equals(resultDefinitionId)) {
-            return ImpositionResultCode.FO;
+            return FO;
         } else if (RD_COSTSTOCROWNPROSECUTIONSERVICE.equals(resultDefinitionId)) {
-            return ImpositionResultCode.FCPC;
+            return FCPC;
         } else if (RD_SURCHARGE.equals(resultDefinitionId)) {
-            return ImpositionResultCode.FVS;
+            return FVS;
         } else if (RD_VEHICLEEXCISEBACKDUTY.equals(resultDefinitionId)) {
-            return ImpositionResultCode.FVEBD;
+            return FVEBD;
         } else if (RD_COSTS.equals(resultDefinitionId)) {
             return ImpositionResultCode.FCOST;
         } else if (RD_COMPENSATION.equals(resultDefinitionId)) {
-            return ImpositionResultCode.FCOMP;
+            return FCOMP;
         } else {
             return null;
         }

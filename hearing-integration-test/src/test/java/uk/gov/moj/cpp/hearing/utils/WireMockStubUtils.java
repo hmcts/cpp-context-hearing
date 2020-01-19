@@ -78,6 +78,18 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
+    public static void setupAsWildcardUserBelongingToAllGroups() {
+        stubPingFor("usersgroups-service");
+
+        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-all-groups-by-user.json"))));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
         stubPingFor("progression-service");
 
@@ -112,7 +124,7 @@ public class WireMockStubUtils {
         waitForStubToBeReady(resource, mediaType, Status.OK);
     }
 
-    private static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
+    static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
         poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType).build())
                 .until(status().is(expectedStatus));
     }

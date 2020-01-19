@@ -153,8 +153,8 @@ public class ResultDefinition {
         return this;
     }
 
-    public boolean isFinancial() {
-        return financial != null && financial.equalsIgnoreCase(YES);
+    public String getFinancial() {
+        return financial;
     }
 
     public ResultDefinition setFinancial(final String financial) {

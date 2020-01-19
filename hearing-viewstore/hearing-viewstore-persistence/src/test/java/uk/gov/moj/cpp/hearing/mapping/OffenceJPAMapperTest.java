@@ -149,6 +149,7 @@ public class OffenceJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getWordingWelsh, is(pojo.getWordingWelsh()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlDaysSpent, is(pojo.getCustodyTimeLimit().getDaysSpent()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlTimeLimit, is(pojo.getCustodyTimeLimit().getTimeLimit()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getLaidDate, is(pojo.getLaidDate()))
                 ;
     }
 }

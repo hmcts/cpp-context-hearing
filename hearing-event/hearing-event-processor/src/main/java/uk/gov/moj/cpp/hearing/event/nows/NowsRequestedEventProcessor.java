@@ -13,6 +13,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.delegates.NcesNotificationDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
@@ -30,19 +31,24 @@ public class NowsRequestedEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NowsRequestedEventProcessor.class);
 
+
     private final Enveloper enveloper;
     private final Sender sender;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
     private final NowsDelegate nowsDelegate;
+    private final NcesNotificationDelegate ncesNotificationDelegate;
 
     @Inject
     public NowsRequestedEventProcessor(final Enveloper enveloper, final Sender sender,
                                        final NowsDelegate nowsDelegate,
+                                       final NcesNotificationDelegate ncesNotificationDelegate,
                                        final JsonObjectToObjectConverter jsonObjectToObjectConverter) {
         this.enveloper = enveloper;
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         this.nowsDelegate = nowsDelegate;
+        this.ncesNotificationDelegate = ncesNotificationDelegate;
     }
 
     @Handles("hearing.events.nows-requested")
@@ -52,31 +58,34 @@ public class NowsRequestedEventProcessor {
         }
 
         final NowsRequested nowsRequested = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), NowsRequested.class);
-
         final String accountNumber = nowsRequested.getAccountNumber();
-
         final UUID requestId = nowsRequested.getRequestId();
-
         final CreateNowsRequest createNowsRequest = nowsRequested.getCreateNowsRequest();
-
         final List<Now> nows = createNowsRequest.getNows();
 
         if (nows.isEmpty()) {
             throw new IllegalArgumentException("No Orders");
         }
 
-        final List<Now> financialOrders = nows.stream().filter(now -> now.getId().equals(requestId)).filter(now -> nonNull(now.getFinancialOrders())).collect(Collectors.toList());
 
-        financialOrders.forEach(financialOrderDetail -> financialOrderDetail.getFinancialOrders().setAccountReference(accountNumber));
+        final List<Now> nowsWithFinancialOrders = nows.stream()
+                .filter(now -> now.getId().equals(requestId))
+                .filter(now -> nonNull(now.getFinancialOrders()))
+                .collect(Collectors.toList());
 
-        nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, financialOrders), nowsRequested.getTargets());
+        if (accountNumber != null) {
+            nowsWithFinancialOrders.forEach(financialOrderDetail -> financialOrderDetail.getFinancialOrders().setAccountReference(accountNumber));
+            ncesNotificationDelegate.updateDefendantWithFinancialOrder(sender, envelope, nowsRequested, requestId);
+        }
+
+        nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, nowsWithFinancialOrders), nowsRequested.getTargets());
 
         //Get all non financial orders
         final List<Now> nonFinancialOrders = nows.stream().filter(now -> isNull(now.getFinancialOrders())).collect(Collectors.toList());
 
-        nonFinancialOrders.forEach(nonFinancialOrder -> nonFinancialOrder.setFinancialOrders(financialOrders.get(0).getFinancialOrders()));
+        nonFinancialOrders.forEach(nonFinancialOrder -> nonFinancialOrder.setFinancialOrders(nowsWithFinancialOrders.get(0).getFinancialOrders()));
 
-        if(!nonFinancialOrders.isEmpty()) {
+        if (!nonFinancialOrders.isEmpty()) {
             nowsDelegate.sendNows(sender, envelope, createNowsRequest(createNowsRequest, nonFinancialOrders), nowsRequested.getTargets());
         }
     }

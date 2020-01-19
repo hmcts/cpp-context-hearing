@@ -79,7 +79,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"squid:S1188", "squid:S2384", "squid:S1135", "squid:S2259", "squid:S1612", "squid:S134",
-        "squid:S1172", "squid:S3400", "squid:S00112", "squid:S3776", "squid:S3864", "squid:MethodCyclomaticComplexity"})
+        "squid:S1172", "squid:S3400", "squid:S00112", "squid:S3776", "squid:S3864", "squid:MethodCyclomaticComplexity", "squid:S2221"})
 public class NowsGenerator {
 
     public static final String INITIAL_MATERIAL_STATUS = "requesting";
@@ -367,10 +367,11 @@ public class NowsGenerator {
     }
 
     private LjaDetails ljaDetails(final JsonEnvelope context, final Hearing hearing, final String defendantPostcode) {
-        if (JurisdictionType.CROWN.equals(hearing.getJurisdictionType())) {
-            return null;
-        } else {
+        try {
             return referenceDataService.getLjaDetails(context, hearing.getCourtCentre().getId(), defendantPostcode);
+        } catch (Exception ex) {
+            LOGGER.error(String.format("failed to load lja Details %s ", hearing.getCourtCentre().getId()), ex);
+            return null;
         }
     }
 
@@ -506,7 +507,7 @@ public class NowsGenerator {
                 .filter(id -> !promptIdsToExclude.contains(id))
                 .collect(toList());
 
-        if (resultDefinition.isFinancial()) {
+        if (ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial())) {
             financialResultDefinitionList.add(resultDefinition);
         }
 

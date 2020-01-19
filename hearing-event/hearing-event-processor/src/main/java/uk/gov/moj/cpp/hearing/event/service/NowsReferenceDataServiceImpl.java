@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+@SuppressWarnings("squid:S00112")
 public class NowsReferenceDataServiceImpl implements ReferenceDataService {
 
     private final NowsReferenceCache nowsReferenceCache;

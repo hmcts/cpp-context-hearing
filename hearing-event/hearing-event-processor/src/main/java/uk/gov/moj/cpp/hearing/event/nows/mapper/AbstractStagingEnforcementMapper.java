@@ -21,11 +21,24 @@ public class AbstractStagingEnforcementMapper {
         this.sharedResultLines = sharedResultLines;
     }
 
+    /*
+    search sharedREsultsLines for promptmatching reference, exclude prompts with references not in
+    promptRefsList.
+    */
     protected String getPromptValue(List<UUID> promptRefsList, String reference) {
+        return getPromptValue(promptRefsList, reference, null);
+    }
+
+    /*
+    search sharedREsultsLines for promptmatching reference, exclude prompts with references not in
+    promptRefsList.
+    */
+    protected String getPromptValue(List<UUID> promptRefsList, String reference, UUID sharedResultLineId) {
 
         return sharedResultLines.stream()
                 .filter(r -> (isNull(r.getIsDeleted()) || !r.getIsDeleted()))
                 .filter(sharedResultLine -> sharedResultLine.getPrompts()!=null)
+                .filter(sharedResultLine->sharedResultLineId==null || sharedResultLineId.equals(sharedResultLine.getId()))
                 .flatMap(sharedResultLine -> sharedResultLine.getPrompts().stream())
                 .filter(sharedPrompt -> reference.equals(sharedPrompt.getPromptReference()))
                 .filter(sharedPrompt -> promptRefsList.stream().anyMatch(uuid->sharedPrompt.getId().equals(uuid)))

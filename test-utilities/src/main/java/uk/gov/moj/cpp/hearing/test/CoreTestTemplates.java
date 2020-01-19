@@ -244,6 +244,7 @@ public class CoreTestTemplates {
                 .withWordingWelsh(STRING.next())
                 .withModeOfTrial(STRING.next())
                 .withOrderIndex(INTEGER.next())
+                .withLaidDate(PAST_LOCAL_DATE.next())
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())

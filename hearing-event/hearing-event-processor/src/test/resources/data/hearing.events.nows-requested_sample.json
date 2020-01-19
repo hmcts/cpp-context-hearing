@@ -1,885 +1,628 @@
 {
-  "hearing": {
-    "id": "fac1affe-3a40-456d-b33a-399cc0bb9570",
-    "hearingDates": [
-      "2018-07-05T08:00:00.000Z",
-      "2018-07-06T09:30:00.000Z",
-      "2018-07-07T09:30:00.000Z",
-      "2018-07-09T09:30:00.000Z",
-      "2018-07-10T14:00:00.000Z"
-    ],
-    "courtCentre": {
-      "courtCentreId": "e8821a38-546d-4b56-9992-ebdd772a561f",
-      "courtCentreName": "Liverpool Crown Court",
-      "courtRoomId": "7b1eccb8-8683-4af9-9fab-d94caffbeecd",
-      "courtRoomName": "2.1"
+  "requestId": "213b0824-c763-4660-be25-29ace9f59fc3",
+  "createNowsRequest": {
+    "courtClerk": {
+      "firstName": "Erica",
+      "lastName": "Wilson",
+      "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
     },
-    "attendees": [
+    "hearing": {
+      "courtCentre": {
+        "address": {
+          "address1": "The Law Courts",
+          "address2": "Winston Churchill Avenue",
+          "address3": "Portsmouth",
+          "address4": "Hants.",
+          "address5": "",
+          "postcode": "PO1 2DQ"
+        },
+        "id": "403b489c-8fff-3e49-8864-570de4bc1c65",
+        "name": "Portsmouth Magistrates' Court",
+        "roomId": "39d4a64b-f2e6-3abb-a73b-c3ab1d579a12",
+        "roomName": "Courtroom 01"
+      },
+      "defendantAttendance": [
+        {
+          "attendanceDays": [
+            {
+              "day": "2019-10-04",
+              "isInAttendance": false
+            }
+          ],
+          "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa"
+        }
+      ],
+      "defendantReferralReasons": [
+        {
+          "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+          "description": "REF_REASON_For sentencing hearing - defendant to attend",
+          "id": "23121983-9c84-4e1e-8e5f-9b1d81124204"
+        }
+      ],
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 30,
+          "listingSequence": 5,
+          "sittingDay": "2019-10-04T00:00:00.000Z"
+        }
+      ],
+      "hearingLanguage": "WELSH",
+      "id": "10316f3a-000d-470f-a67a-2ec8f9598ebf",
+      "jurisdictionType": "MAGISTRATES",
+      "prosecutionCases": [
+        {
+          "caseStatus": "SJP_REFERRAL",
+          "defendants": [
+            {
+              "id": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+              "mitigation": "306o3a5HmE",
+              "mitigationWelsh": "306o3a5HmE_WELSH",
+              "numberOfPreviousConvictionsCited": 0,
+              "offences": [
+                {
+                  "arrestDate": "2019-09-05",
+                  "chargeDate": "2019-09-05",
+                  "convictionDate": "2019-10-04",
+                  "count": 1,
+                  "endDate": "2019-06-05",
+                  "id": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+                  "modeOfTrial": "Summary",
+                  "notifiedPlea": {
+                    "notifiedPleaDate": "2019-09-25",
+                    "notifiedPleaValue": "NOTIFIED_GUILTY",
+                    "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68"
+                  },
+                  "offenceCode": "TR11005",
+                  "offenceDefinitionId": "b1d8655a-0871-44cd-b03e-94f4da913589",
+                  "offenceFacts": {
+                    "alcoholReadingAmount": 2,
+                    "alcoholReadingMethodCode": "AA",
+                    "vehicleCode": "LARGE_GOODS_VEHICLE",
+                    "vehicleRegistration": "VS07BSF"
+                  },
+                  "offenceLegislation": "Contrary to byelaws 4(1) and 23 of the Transport for London Railway Byelaws made under paragraph 26 of Schedule 11 to the Greater London Authority Act 1999 and confirmed under section 67 of the Transport Act 1962.",
+                  "offenceLegislationWelsh": "",
+                  "offenceTitle": "Enter / attempt to enter / remain on the Transport for London regional railway network when intoxicated",
+                  "offenceTitleWelsh": "",
+                  "orderIndex": 0,
+                  "startDate": "2018-12-05",
+                  "verdict": {
+                    "jurors": {
+                      "numberOfJurors": 12,
+                      "numberOfSplitJurors": 0,
+                      "unanimous": true
+                    },
+                    "lesserOrAlternativeOffence": {
+                      "offenceCode": "TR11005",
+                      "offenceDefinitionId": "b1d8655a-0871-44cd-b03e-94f4da913589",
+                      "offenceLegislation": "Contrary to byelaws 4(1) and 23 of the Transport for London Railway Byelaws made under paragraph 26 of Schedule 11 to the Greater London Authority Act 1999 and confirmed under section 67 of the Transport Act 1962.",
+                      "offenceTitle": "Enter / attempt to enter / remain on the Transport for London regional railway network when intoxicated"
+                    },
+                    "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+                    "originatingHearingId": "10316f3a-000d-470f-a67a-2ec8f9598ebf",
+                    "verdictDate": "2019-10-04",
+                    "verdictType": {
+                      "category": "Guilty",
+                      "categoryType": "GUILTY_BY_JURY_CONVICTED",
+                      "id": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                    }
+                  },
+                  "wording": "Wound / inflict grievous bodily harm without intent",
+                  "wordingWelsh": "Wound / inflict grievous bodily harm without intent_WELSH"
+                }
+              ],
+              "personDefendant": {
+                "arrestSummonsNumber": "007",
+                "custodyTimeLimit": "2019-09-07",
+                "driverNumber": "007",
+                "employerOrganisation": {
+                  "address": {
+                    "address1": "836",
+                    "address2": "000 Sporer Lake",
+                    "address3": "Port Giuseppe",
+                    "address4": "SR",
+                    "address5": "Argentina",
+                    "postcode": "SW11 1JU"
+                  },
+                  "contact": {
+                    "fax": "(641) 022-7122",
+                    "home": "1-773-587-4236",
+                    "mobile": "102.945.9136",
+                    "primaryEmail": "makayla.schoen@gmail.com",
+                    "secondaryEmail": "royal.king@gmail.com",
+                    "work": "1-155-809-0068"
+                  },
+                  "incorporationNumber": "1975",
+                  "name": "EY",
+                  "registeredCharityNumber": "007"
+                },
+                "employerPayrollReference": "IgUYIbvHiw",
+                "perceivedBirthYear": 1975,
+                "personDetails": {
+                  "additionalNationalityCode": "GBR",
+                  "additionalNationalityDescription": "British",
+                  "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                  "address": {
+                    "address1": "836",
+                    "address2": "000 Sporer Lake",
+                    "address3": "Port Giuseppe",
+                    "address4": "SR",
+                    "address5": "Argentina",
+                    "postcode": "SW11 1JU"
+                  },
+                  "contact": {
+                    "fax": "(641) 022-7122",
+                    "home": "1-773-587-4236",
+                    "mobile": "102.945.9136",
+                    "primaryEmail": "makayla.schoen@gmail.com",
+                    "secondaryEmail": "royal.king@gmail.com",
+                    "work": "1-155-809-0068"
+                  },
+                  "dateOfBirth": "1994-10-05",
+                  "disabilityStatus": "im4AExxGBR",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "ethnicity": {
+                    "observedEthnicityCode": "W1",
+                    "observedEthnicityDescription": "British",
+                    "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                    "selfDefinedEthnicityCode": "W1",
+                    "selfDefinedEthnicityDescription": "British",
+                    "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                  },
+                  "firstName": "Lia",
+                  "gender": "MALE",
+                  "interpreterLanguageNeeds": "NA",
+                  "lastName": "Cronin",
+                  "middleName": "Humberto",
+                  "nationalInsuranceNumber": "KY483727D",
+                  "nationalityCode": "GBR",
+                  "nationalityDescription": "British",
+                  "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                  "occupation": "Service",
+                  "occupationCode": "SS",
+                  "specificRequirements": "NA",
+                  "title": "MR"
+                }
+              },
+              "prosecutionAuthorityReference": "TFL0551900",
+              "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a",
+              "witnessStatement": "2XsAKeTyKV",
+              "witnessStatementWelsh": "2XsAKeTyKV_WELSH"
+            }
+          ],
+          "id": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a",
+          "initiationCode": "J",
+          "originatingOrganisation": "KsxBW4qesC",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "31af405e-7b60-4dd8-a244-c24c2d3fa595",
+            "prosecutionAuthorityReference": "TFL0551900"
+          },
+          "statementOfFacts": "d4x9XtIXBV",
+          "statementOfFactsWelsh": "d4x9XtIXBV_WELSH"
+        }
+      ],
+      "reportingRestrictionReason": "DO NOT SHOW IT TO PRESS",
+      "type": {
+        "description": "Pre-Trial Review",
+        "id": "c6d76309-c912-436b-a21b-a4c4450bc052"
+      }
+    },
+    "nowTypes": [
       {
-        "firstName": "Cherie",
-        "lastName": "Blair",
-        "type": "CourtClerk",
-        "defendants": [],
-        "cases": []
+        "description": "Notice of Financial Penalty",
+        "id": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "jurisdiction": "B",
+        "priority": "0",
+        "rank": 30,
+        "requiresBulkPrinting": true,
+        "requiresEnforcement": false,
+        "staticText": "<h3>If the court has made a Deduction from Benefits order or an Attachment of Earnings order, please see further down.</h3> <h3>How to pay</h3> <p>Allow 5 days for payment to reach us.</p> <p><strong>Online:</strong> <a href=\"http://www.gov.uk/pay-court-fine-online\">www.gov.uk/pay-court-fine-online</a></p> <p><strong>By phone:</strong> 0300 790 9901</p> <p><strong>When paying online or by phone:</strong></p> <ul> <li>you can pay 24 hours a day with a credit or debit card (Visa, Mastercard or Maestro)</li> <li>you must quote your division number and account number as stated at the top of this notice</li> <li>you&rsquo;ll be given an authorisation number when you pay - keep this as proof along with the date and amount. The court won&rsquo;t issue you a receipt.</li> </ul> <p><strong>If you are granted time to pay, you can either:</strong></p> <ul> <li>ask for a payment card which you can use at a Post Office or PayPoint Outlets</li> <li>set up a direct debit</li> </ul> <p><strong>Paying other parties</strong></p> <p>You can only make your payment to HM Courts and Tribunals Service.</p> <p>If you pay anyone else, for example, the prosecutor or victims, there&rsquo;ll be no record and we may have to take action against you for non-payment.</p> <p>We&rsquo;ll pay any amounts owed to other parties once we&rsquo;ve received your payment.</p> <p><strong>Fraud and scams</strong></p> <p>There are several fake websites offering to let you pay your court fines, often with a discount.</p> <p>You can only use the official website, or telephone line, as above. If you use any other site or number to pay, we can&rsquo;t accept it and you&rsquo;ll still be liable to pay the debt.</p> <p>&nbsp;</p> <p><strong>For any questions NOT relating to financial penalties</strong></p> <p>Contact the Service Centre:</p><p><strong>Telephone:</strong> 0300 303 0656 Monday to Friday 9am to 5pm</p> <p>&nbsp;</p> <p><strong>If you&rsquo;re having difficulty paying or to discuss alternative ways to pay:</strong></p> <p>Contact the Fines Team:</p>",
+        "subTemplateName": "Noticefine",
+        "templateName": "NoticeOrderWarrants",
+        "welshStaticText": ""
       }
     ],
-    "defendants": [
+    "nows": [
       {
-        "id": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "person": {
-          "id": "5b5418a6-47d0-4370-9661-c23b9d619c34",
-          "firstName": "David",
-          "lastName": "LLOYD",
-          "title": "Mr",
-          "dateOfBirth": "1980-10-12",
-          "nationality": "British",
-          "address": {
-            "address1": "Flat 50",
-            "address2": "Croydon Road",
-            "address3": "UK",
-            "address4": "",
-            "postCode": "CR1 2BD"
-          }
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "documentationLanguage": "WELSH",
+        "financialOrders": {
+          "accountReference": "TBC",
+          "isCrownCourt": false,
+          "paymentTerms": "Date to pay in full by 27-Oct-2019",
+          "totalAmountImposed": "332.00",
+          "totalBalance": "332.00"
         },
-        "interpreter": {},
-        "cases": [
+        "id": "213b0824-c763-4660-be25-29ace9f59fc3",
+        "ljaDetails": {
+          "accountDivisionCode": "92",
+          "bacsAccountNumber": "27049094",
+          "bacsBankName": "HMCTS/STH Hampshire",
+          "bacsSortCode": "56-00-33",
+          "enforcementAddress": {
+            "address1": "HMCTS",
+            "address2": "Park Road",
+            "address3": "Poole",
+            "postcode": "BH15 2NS"
+          },
+          "enforcementEmail": "do-pooleenforcement@hmcts.gsi.gov.uk",
+          "enforcementPhoneNumber": "01633 645112",
+          "ljaCode": "1800",
+          "ljaName": "East Hampshire Magistrates' Court"
+        },
+        "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "referenceDate": "2019-10-04",
+        "requestedMaterials": [
           {
-            "id": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-            "urn": "URN678913",
-            "offences": [
+            "description": "Notice of Financial Penalty",
+            "isAmended": false,
+            "isRemotePrintingRequired": true,
+            "key": {
+              "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+              "hearingId": "10316f3a-000d-470f-a67a-2ec8f9598ebf",
+              "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+              "usergroups": [
+                "Court Clerks",
+                "Legal Advisers"
+              ]
+            },
+            "materialId": "b1466490-98f4-488f-ae92-c7c117f97238",
+            "nowResults": [
               {
-                "id": "80a78832-bd66-4e72-9b3a-fe7017648752",
-                "code": "OF61131",
-                "plea": {
-                  "id": "80a78832-bd66-4e72-9b3a-fe7017648752",
-                  "value": "GUILTY",
-                  "date": "2018-07-03",
-                  "enteredHearingId": "fac1affe-3a40-456d-b33a-399cc0bb9570"
+                "nowVariantResultText": {
+                  "collOrd": "<h4>COLLECTION ORDER</h4> <p><strong>A collection order has been made, which means the court has powers to collect the money</strong></p> <p><strong>See above for how to pay</strong></p> <p>If you don&rsquo;t pay, we may:</p> <ul> <li>take money from your earnings or benefits</li> <li>increase your fine</li> <li>issue a warrant to seize your possessions which will mean extra costs</li> <li>log this in the Register of Judgements, Orders and Fines, making it harder for you to get credit</li> <li>apply to the court for a warrant for your arrest to bring you to court</li> </ul> <p><strong>If you still don’t pay, you could be sent to prison for non-payment.</strong></p>",
+                  "collOrd.welsh": "<h4>COLLECTION ORDER</h4> <p><strong>A collection order has been made, which means the court has powers to collect the money</strong></p> <p><strong>See above for how to pay</strong></p> <p>If you don&rsquo;t pay, we may:</p> <ul> <li>take money from your earnings or benefits</li> <li>increase your fine</li> <li>issue a warrant to seize your possessions which will mean extra costs</li> <li>log this in the Register of Judgements, Orders and Fines, making it harder for you to get credit</li> <li>apply to the court for a warrant for your arrest to bring you to court</li> </ul> <p><strong>If you still don’t pay, you could be sent to prison for non-payment.</strong></p>"
                 },
-                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
-                "startDate": "2010-08-01"
+                "promptRefs": [
+                  "6b36e5ff-e116-4dc3-b438-8c02d493959e",
+                  "369b6e22-4678-4b04-9fe9-5bb53bed5067",
+                  "dc44f589-6dd2-4a8d-9164-c1796c6b0e36",
+                  "16ade3fb-9f0f-4ce4-a6c8-fa96277e1519"
+                ],
+                "sequence": 451,
+                "sharedResultId": "fd2bfc1e-3b06-4a68-95bf-6a1309002a73"
               },
               {
-                "id": "c2cce59c-53b8-4ad7-b0e2-5f414ccda86e",
-                "code": "OF61131",
-                "plea": {
-                  "id": "c2cce59c-53b8-4ad7-b0e2-5f414ccda86e",
-                  "value": "GUILTY",
-                  "date": "2018-07-03",
-                  "enteredHearingId": "fac1affe-3a40-456d-b33a-399cc0bb9570"
-                },
-                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
-                "startDate": "2010-08-01"
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "person": {
-          "id": "45c9bf9d-1bce-455f-baac-f6df08957524",
-          "firstName": "Eric",
-          "lastName": "Ormsby",
-          "dateOfBirth": "1983-05-23",
-          "nationality": "British",
-          "address": {
-            "address1": "Flat 50",
-            "address2": "Croydon Road",
-            "address3": "UK",
-            "address4": "",
-            "postCode": "CR1 2BD"
-          }
-        },
-        "interpreter": {},
-        "cases": [
-          {
-            "id": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-            "urn": "URN678913",
-            "offences": [
-              {
-                "id": "61ba0688-95f4-4411-a273-a29711acb0ae",
-                "code": "OF61131",
-                "plea": {
-                  "id": "61ba0688-95f4-4411-a273-a29711acb0ae",
-                  "value": "GUILTY",
-                  "date": "2018-07-03",
-                  "enteredHearingId": "fac1affe-3a40-456d-b33a-399cc0bb9570"
-                },
-                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
-                "startDate": "2010-08-01"
+                "promptRefs": [
+                  "629a971e-9d7a-4526-838d-0a4cb922b5cb"
+                ],
+                "sequence": 68,
+                "sharedResultId": "e82e7803-467c-4aaf-85c7-4f7d69025c07"
               },
               {
-                "id": "6bef1cff-f5d8-4ca7-9da2-0753ba5a8abc",
-                "code": "OF61131",
-                "plea": {
-                  "id": "6bef1cff-f5d8-4ca7-9da2-0753ba5a8abc",
-                  "value": "GUILTY",
-                  "date": "2018-07-03",
-                  "enteredHearingId": "fac1affe-3a40-456d-b33a-399cc0bb9570"
-                },
-                "wording": "on 01/08/2009 at  the County public house, unlawfully and maliciously wounded, John Smith",
-                "startDate": "2010-08-01"
+                "promptRefs": [
+                  "7cd1472f-2379-4f5b-9e67-98a43d86e122"
+                ],
+                "sequence": 71,
+                "sharedResultId": "22120488-cfc6-41a3-a3b5-70fb3fd1193c"
+              },
+              {
+                "promptRefs": [
+                  "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+                  "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
+                  "f6f953b6-e369-11e8-9f32-f2801f1b9fd1"
+                ],
+                "sequence": 76,
+                "sharedResultId": "a58bf376-006a-42cf-beb3-97ab482b1c4a"
+              },
+              {
+                "promptRefs": [
+                  "ee7d253a-c629-11e8-a355-529269fb1459",
+                  "a2ab25ce-97a3-435a-b688-192354e0da5a",
+                  "3bc844d0-e364-11e8-9f32-f2801f1b9fd1"
+                ],
+                "sequence": 564,
+                "sharedResultId": "9ebab147-1877-42be-8dac-6e7ff123a60e"
+              },
+              {
+                "promptRefs": [
+                  "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+                  "2b0ca749-7ede-4446-ae59-5beec3a72143"
+                ],
+                "sequence": 556,
+                "sharedResultId": "0062a6e0-297b-467a-b0d4-96e0e8b2efb9"
               }
-            ]
+            ],
+            "nowVariantAddressee": {
+              "address": {
+                "address1": "836",
+                "address2": "000 Sporer Lake",
+                "address3": "Port Giuseppe",
+                "address4": "SR",
+                "address5": "Argentina",
+                "postcode": "SW11 1JU"
+              },
+              "name": "Lia Humberto Cronin"
+            },
+            "nowVariantDefendant": {
+              "address": {
+                "address1": "836",
+                "address2": "000 Sporer Lake",
+                "address3": "Port Giuseppe",
+                "address4": "SR",
+                "address5": "Argentina",
+                "postcode": "SW11 1JU"
+              },
+              "dateOfBirth": "1994-10-05",
+              "name": "Lia Humberto Cronin"
+            },
+            "status": "requesting",
+            "subTemplateName": "Noticefine",
+            "templateName": "NoticeOrderWarrants"
           }
         ]
       }
     ],
     "sharedResultLines": [
       {
-        "id": "08a993ad-d99a-404e-ac06-04075bfe4dfb",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "offenceId": "80a78832-bd66-4e72-9b3a-fe7017648752",
-        "orderedDate": "2010-08-01",
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "id": "22120488-cfc6-41a3-a3b5-70fb3fd1193c",
+        "isAvailableForCourtExtract": true,
+        "label": "Fine",
         "level": "OFFENCE",
-        "label": "Imprisonment",
+        "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+        "orderedDate": "2019-10-04",
         "prompts": [
           {
-            "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-            "label": "Imprisonment Period",
-            "value": "1 Years"
-          },
-          {
-            "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
-            "label": "Prison",
-            "value": "1"
+            "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of fine",
+            "promptReference": "AOF",
+            "value": "100",
+            "resultDefinitionId": "17c02158-4322-4dd0-b913-0ada7fcf81b7"
           }
-        ]
+        ],
+        "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a"
       },
       {
-        "id": "cb0c9147-0d71-4d61-835a-fb9b89d0b687",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "offenceId": "80a78832-bd66-4e72-9b3a-fe7017648752",
-        "orderedDate": "2010-08-01",
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "id": "0062a6e0-297b-467a-b0d4-96e0e8b2efb9",
+        "isAvailableForCourtExtract": true,
+        "label": "Costs",
         "level": "CASE",
-        "label": "Collection order",
-        "prompts": []
+        "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+        "orderedDate": "2019-10-04",
+        "prompts": [
+          {
+            "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of costs",
+            "promptReference": "AOC",
+            "value": "200"
+          },
+          {
+            "id": "2b0ca749-7ede-4446-ae59-5beec3a72143",
+            "isAvailableForCourtExtract": false,
+            "label": "Creditor name",
+            "promptReference": "CREDNAME",
+            "value": "Transport for London"
+          }
+        ],
+        "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a"
       },
       {
-        "id": "c031b55d-b9f5-403d-b2fc-1a5c40a3c84f",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "61ba0688-95f4-4411-a273-a29711acb0ae",
-        "orderedDate": "2010-08-01",
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "id": "a58bf376-006a-42cf-beb3-97ab482b1c4a",
+        "isAvailableForCourtExtract": true,
+        "label": "Compensation",
+        "level": "OFFENCE",
+        "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+        "orderedDate": "2019-10-04",
+        "prompts": [
+          {
+            "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of compensation",
+            "promptReference": "AOCOM",
+            "value": "2"
+          }
+        ],
+        "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "id": "fd2bfc1e-3b06-4a68-95bf-6a1309002a73",
+        "isAvailableForCourtExtract": true,
+        "label": "Collection order",
         "level": "CASE",
-        "label": "Collection order",
-        "prompts": []
+        "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+        "orderedDate": "2019-10-04",
+        "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a"
       },
       {
-        "id": "d50f1a74-fd1b-4199-9e47-abb5a8f530be",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "61ba0688-95f4-4411-a273-a29711acb0ae",
-        "level": "OFFENCE",
-        "label": "Imprisonment",
-        "prompts": [
-          {
-            "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-            "label": "Imprisonment Period",
-            "value": "1 Years"
-          },
-          {
-            "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
-            "label": "Prison",
-            "value": "1"
-          }
-        ]
-      },
-      {
-        "id": "68936026-9f68-49c2-817a-6f15d242a65f",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "61ba0688-95f4-4411-a273-a29711acb0ae",
-        "orderedDate": "2010-08-01",
-        "level": "OFFENCE",
-        "label": "Community order England / Wales",
-        "prompts": [
-          {
-            "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
-            "label": "End Date",
-            "value": "01/01/2019"
-          },
-          {
-            "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
-            "label": "Responsible officer",
-            "value": "a probation officer"
-          },
-          {
-            "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
-            "label": "Supervising Court name",
-            "value": "liverpool"
-          }
-        ]
-      },
-      {
-        "id": "c624d60f-e60b-456e-b79e-46c915b673c8",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "61ba0688-95f4-4411-a273-a29711acb0ae",
-        "orderedDate": "2010-08-01",
-        "level": "DEFENDANT",
-        "label": "Total imprisonment",
-        "prompts": [
-          {
-            "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-            "label": "Total imprisonment period",
-            "value": "1 Years"
-          }
-        ]
-      },
-      {
-        "id": "709aa1da-35e7-4d73-bfaf-42de02cf60f9",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "6bef1cff-f5d8-4ca7-9da2-0753ba5a8abc",
-        "orderedDate": "2010-08-01",
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "id": "e82e7803-467c-4aaf-85c7-4f7d69025c07",
+        "isAvailableForCourtExtract": true,
+        "label": "Surcharge",
         "level": "CASE",
-        "label": "Collection order",
-        "prompts": []
-      },
-      {
-        "id": "84546703-37b6-4e0e-b7dc-66a910431c7d",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "6bef1cff-f5d8-4ca7-9da2-0753ba5a8abc",
-        "orderedDate": "2010-08-01",
-        "level": "OFFENCE",
-        "label": "Imprisonment",
+        "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+        "orderedDate": "2019-10-04",
         "prompts": [
           {
-            "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-            "label": "Imprisonment Period",
-            "value": "1 Years"
-          },
-          {
-            "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
-            "label": "Prison",
-            "value": "1"
+            "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of surcharge",
+            "promptReference": "AOS",
+            "value": "30"
           }
-        ]
+        ],
+        "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a"
       },
       {
-        "id": "41de0c27-bfdf-4843-9949-bcfa5ff4b31d",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "6bef1cff-f5d8-4ca7-9da2-0753ba5a8abc",
-        "orderedDate": "2010-08-01",
-        "level": "OFFENCE",
-        "label": "Community order England / Wales",
-        "prompts": [
-          {
-            "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
-            "label": "End Date",
-            "value": "01/01/2019"
-          },
-          {
-            "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
-            "label": "Responsible officer",
-            "value": "a probation officer"
-          },
-          {
-            "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
-            "label": "Supervising Court name",
-            "value": "liverpool"
-          }
-        ]
-      },
-      {
-        "id": "5e56ab1d-32dc-4785-a3f6-5e6c3a45334f",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "offenceId": "6bef1cff-f5d8-4ca7-9da2-0753ba5a8abc",
-        "orderedDate": "2010-08-01",
-        "level": "DEFENDANT",
-        "label": "Total imprisonment",
-        "prompts": [
-          {
-            "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-            "label": "Total imprisonment period",
-            "value": "1 Years"
-          }
-        ]
-      },
-      {
-        "id": "8137cac6-d920-421e-9cec-e0098cbfb474",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "offenceId": "c2cce59c-53b8-4ad7-b0e2-5f414ccda86e",
-        "orderedDate": "2010-08-01",
-        "level": "DEFENDANT",
-        "label": "Total imprisonment",
-        "prompts": [
-          {
-            "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-            "label": "Total imprisonment period",
-            "value": "1 Years"
-          }
-        ]
-      },
-      {
-        "id": "bc83ec67-ec25-4822-85c6-3b86228422b7",
-        "caseId": "55ba8232-40f1-4fc7-9819-e797cd1d1bfd",
-        "defendantId": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "offenceId": "c2cce59c-53b8-4ad7-b0e2-5f414ccda86e",
-        "orderedDate": "2010-08-01",
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+        "id": "9ebab147-1877-42be-8dac-6e7ff123a60e",
+        "isAvailableForCourtExtract": true,
+        "label": "Pay by date",
         "level": "CASE",
-        "label": "Collection order",
-        "prompts": []
-      }
-    ],
-    "nows": [
-      {
-        "id": "e95a5110-8e93-461c-b382-3302e045a919",
-        "nowsTypeId": "b4b55110-1d50-11e8-accf-0ed5f89f718b",
-        "defendantId": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "materials": [
+        "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+        "orderedDate": "2019-10-04",
+        "prompts": [
           {
-            "id": "21169b60-9a67-459e-86bc-be89f0876a95",
-            "nowResult": [
-              {
-                "sharedResultId": "8137cac6-d920-421e-9cec-e0098cbfb474",
-                "sequence": 59,
-                "prompts": [
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "19d9d7b4-a55c-4f52-8cca-edf9c63e98e5",
-                    "label": "Total sentence consecutive to what"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "08a993ad-d99a-404e-ac06-04075bfe4dfb",
-                "sequence": 46,
-                "prompts": [
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "321c3fd8-ea44-4ccc-b763-bc693ee6be0f",
-                    "label": "Concurrent"
-                  },
-                  {
-                    "id": "7b5ba551-7adb-4555-93b1-dcb6f027f02f",
-                    "label": "Consecutive to offence number"
-                  },
-                  {
-                    "id": "9637677e-c2d7-4609-a750-ffe90eba9351",
-                    "label": "Where consecutive to an offence on another case - specify that case number"
-                  },
-                  {
-                    "id": "5e307f79-d4ca-466e-8c5c-a7d874c89b39",
-                    "label": "Imprisonment reasons"
-                  },
-                  {
-                    "id": "622aa563-a3db-4102-ba7e-21c21cee0110",
-                    "label": "Reason for custody"
-                  },
-                  {
-                    "id": "7a1eb34a-5141-4b53-99e5-b3a9ad7d8e94",
-                    "label": "Probation team to be notified"
-                  },
-                  {
-                    "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
-                    "label": "Prison"
-                  },
-                  {
-                    "id": "6b8c8f13-b8d1-4f72-85e8-cc9128e5ec71",
-                    "label": "Risk or vulnerability factors"
-                  },
-                  {
-                    "id": "21549bc3-5be9-4a91-abc7-57d8ed1b1676",
-                    "label": "Reason for sentence without PSR"
-                  },
-                  {
-                    "id": "3a0bf7f8-674f-4b5f-998d-aae0e2b2842e",
-                    "label": "Sentenced in absence"
-                  }
-                ]
-              }
-            ],
-            "userGroups": [
-              {
-                "group": "Court Clerks"
-              },
-              {
-                "group": "Youth Offending Service Admin"
-              },
-              {
-                "group": "Victims & Witness Care Admin"
-              },
-              {
-                "group": "Probation Admin"
-              },
-              {
-                "group": "Prison Admin"
-              },
-              {
-                "group": "Police Admin"
-              }
-            ],
-            "amended": false
+            "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+            "isAvailableForCourtExtract": false,
+            "label": "Date to pay in full by",
+            "promptReference": "PBD",
+            "value": "2019-10-27"
           }
-        ]
-      },
-      {
-        "id": "710cd7fe-5efe-46c5-a755-8ceb794a88dd",
-        "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
-        "defendantId": "2dd99908-a493-486e-8990-ebe628791ac7",
-        "materials": [
-          {
-            "id": "c85d8c0d-f045-45f8-8de0-ae24b4f8d3a7",
-            "nowResult": [
-              {
-                "sharedResultId": "bc83ec67-ec25-4822-85c6-3b86228422b7",
-                "sequence": 337,
-                "prompts": []
-              },
-              {
-                "sharedResultId": "cb0c9147-0d71-4d61-835a-fb9b89d0b687",
-                "sequence": 337,
-                "prompts": []
-              }
-            ],
-            "userGroups": [
-              {
-                "group": "Court Clerks"
-              },
-              {
-                "group": "Youth Offending Service Admin"
-              },
-              {
-                "group": "Victims & Witness Care Admin"
-              },
-              {
-                "group": "Probation Admin"
-              },
-              {
-                "group": "Prison Admin"
-              },
-              {
-                "group": "Police Admin"
-              }
-            ],
-            "amended": false
-          }
-        ]
-      },
-      {
-        "id": "29cbcfef-1d61-42e1-951d-b004f21fb637",
-        "nowsTypeId": "b4b55110-1d50-11e8-accf-0ed5f89f718b",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "materials": [
-          {
-            "id": "5cf2a2de-7b1e-4497-84d6-1d8562dd9f6f",
-            "nowResult": [
-              {
-                "sharedResultId": "d50f1a74-fd1b-4199-9e47-abb5a8f530be",
-                "sequence": 46,
-                "prompts": [
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "321c3fd8-ea44-4ccc-b763-bc693ee6be0f",
-                    "label": "Concurrent"
-                  },
-                  {
-                    "id": "7b5ba551-7adb-4555-93b1-dcb6f027f02f",
-                    "label": "Consecutive to offence number"
-                  },
-                  {
-                    "id": "9637677e-c2d7-4609-a750-ffe90eba9351",
-                    "label": "Where consecutive to an offence on another case - specify that case number"
-                  },
-                  {
-                    "id": "5e307f79-d4ca-466e-8c5c-a7d874c89b39",
-                    "label": "Imprisonment reasons"
-                  },
-                  {
-                    "id": "622aa563-a3db-4102-ba7e-21c21cee0110",
-                    "label": "Reason for custody"
-                  },
-                  {
-                    "id": "7a1eb34a-5141-4b53-99e5-b3a9ad7d8e94",
-                    "label": "Probation team to be notified"
-                  },
-                  {
-                    "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
-                    "label": "Prison"
-                  },
-                  {
-                    "id": "6b8c8f13-b8d1-4f72-85e8-cc9128e5ec71",
-                    "label": "Risk or vulnerability factors"
-                  },
-                  {
-                    "id": "21549bc3-5be9-4a91-abc7-57d8ed1b1676",
-                    "label": "Reason for sentence without PSR"
-                  },
-                  {
-                    "id": "3a0bf7f8-674f-4b5f-998d-aae0e2b2842e",
-                    "label": "Sentenced in absence"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "84546703-37b6-4e0e-b7dc-66a910431c7d",
-                "sequence": 46,
-                "prompts": [
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "76f15753-1706-42fb-b922-0d56d01e5706",
-                    "label": "Imprisonment Period"
-                  },
-                  {
-                    "id": "321c3fd8-ea44-4ccc-b763-bc693ee6be0f",
-                    "label": "Concurrent"
-                  },
-                  {
-                    "id": "7b5ba551-7adb-4555-93b1-dcb6f027f02f",
-                    "label": "Consecutive to offence number"
-                  },
-                  {
-                    "id": "9637677e-c2d7-4609-a750-ffe90eba9351",
-                    "label": "Where consecutive to an offence on another case - specify that case number"
-                  },
-                  {
-                    "id": "5e307f79-d4ca-466e-8c5c-a7d874c89b39",
-                    "label": "Imprisonment reasons"
-                  },
-                  {
-                    "id": "622aa563-a3db-4102-ba7e-21c21cee0110",
-                    "label": "Reason for custody"
-                  },
-                  {
-                    "id": "7a1eb34a-5141-4b53-99e5-b3a9ad7d8e94",
-                    "label": "Probation team to be notified"
-                  },
-                  {
-                    "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
-                    "label": "Prison"
-                  },
-                  {
-                    "id": "6b8c8f13-b8d1-4f72-85e8-cc9128e5ec71",
-                    "label": "Risk or vulnerability factors"
-                  },
-                  {
-                    "id": "21549bc3-5be9-4a91-abc7-57d8ed1b1676",
-                    "label": "Reason for sentence without PSR"
-                  },
-                  {
-                    "id": "3a0bf7f8-674f-4b5f-998d-aae0e2b2842e",
-                    "label": "Sentenced in absence"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "c624d60f-e60b-456e-b79e-46c915b673c8",
-                "sequence": 59,
-                "prompts": [
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "19d9d7b4-a55c-4f52-8cca-edf9c63e98e5",
-                    "label": "Total sentence consecutive to what"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "5e56ab1d-32dc-4785-a3f6-5e6c3a45334f",
-                "sequence": 59,
-                "prompts": [
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
-                    "label": "Total imprisonment period"
-                  },
-                  {
-                    "id": "19d9d7b4-a55c-4f52-8cca-edf9c63e98e5",
-                    "label": "Total sentence consecutive to what"
-                  }
-                ]
-              }
-            ],
-            "userGroups": [
-              {
-                "group": "Court Clerks"
-              },
-              {
-                "group": "Youth Offending Service Admin"
-              },
-              {
-                "group": "Victims & Witness Care Admin"
-              },
-              {
-                "group": "Probation Admin"
-              },
-              {
-                "group": "Prison Admin"
-              },
-              {
-                "group": "Police Admin"
-              }
-            ],
-            "amended": false
-          }
-        ]
-      },
-      {
-        "id": "50219f57-34af-4cf5-9868-06727ad7c38f",
-        "nowsTypeId": "c074bff2-1d3e-11e8-accf-0ed5f89f718b",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "materials": [
-          {
-            "id": "fc4bfab2-9fc9-444d-9148-30460f01d3ff",
-            "nowResult": [
-              {
-                "sharedResultId": "68936026-9f68-49c2-817a-6f15d242a65f",
-                "sequence": 5,
-                "prompts": [
-                  {
-                    "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
-                    "label": "End Date"
-                  },
-                  {
-                    "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
-                    "label": "Responsible officer"
-                  },
-                  {
-                    "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
-                    "label": "Supervising Court name"
-                  },
-                  {
-                    "id": "ba48554e-8c77-4dc1-a980-7d97502f37bf",
-                    "label": "Probation team to be notified"
-                  },
-                  {
-                    "id": "73833869-1d5e-47d3-a2f5-dac8a39466b0",
-                    "label": "Persistent offender previously fined"
-                  },
-                  {
-                    "id": "5dbfe1ce-0da9-47ab-9677-66c82ff079a7",
-                    "label": "Judge reserves breach proceedings"
-                  },
-                  {
-                    "id": "e61aa161-8eb6-42c2-ac85-89682ba79b1f",
-                    "label": "Direction that a failure to comply be dealt with by magistrates' court"
-                  }
-                ]
-              },
-              {
-                "sharedResultId": "41de0c27-bfdf-4843-9949-bcfa5ff4b31d",
-                "sequence": 5,
-                "prompts": [
-                  {
-                    "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
-                    "label": "End Date"
-                  },
-                  {
-                    "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
-                    "label": "Responsible officer"
-                  },
-                  {
-                    "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
-                    "label": "Supervising Court name"
-                  },
-                  {
-                    "id": "ba48554e-8c77-4dc1-a980-7d97502f37bf",
-                    "label": "Probation team to be notified"
-                  },
-                  {
-                    "id": "73833869-1d5e-47d3-a2f5-dac8a39466b0",
-                    "label": "Persistent offender previously fined"
-                  },
-                  {
-                    "id": "5dbfe1ce-0da9-47ab-9677-66c82ff079a7",
-                    "label": "Judge reserves breach proceedings"
-                  },
-                  {
-                    "id": "e61aa161-8eb6-42c2-ac85-89682ba79b1f",
-                    "label": "Direction that a failure to comply be dealt with by magistrates' court"
-                  }
-                ]
-              }
-            ],
-            "userGroups": [
-              {
-                "group": "Court Clerks"
-              },
-              {
-                "group": "Youth Offending Service Admin"
-              },
-              {
-                "group": "Victims & Witness Care Admin"
-              },
-              {
-                "group": "Probation Admin"
-              },
-              {
-                "group": "Prison Admin"
-              },
-              {
-                "group": "Police Admin"
-              }
-            ],
-            "amended": false
-          }
-        ]
-      },
-      {
-        "id": "cec76e24-cac5-4f9c-9fe4-fb3ef0613acf",
-        "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
-        "defendantId": "9541afa8-894c-49e3-9bea-5bd11f1f1ab7",
-        "materials": [
-          {
-            "id": "64736d15-0e49-4761-b29d-6d97bbd766b7",
-            "nowResult": [
-              {
-                "sharedResultId": "c031b55d-b9f5-403d-b2fc-1a5c40a3c84f",
-                "sequence": 337,
-                "prompts": []
-              },
-              {
-                "sharedResultId": "709aa1da-35e7-4d73-bfaf-42de02cf60f9",
-                "sequence": 337,
-                "prompts": []
-              }
-            ],
-            "userGroups": [
-              {
-                "group": "Court Clerks"
-              },
-              {
-                "group": "Youth Offending Service Admin"
-              },
-              {
-                "group": "Victims & Witness Care Admin"
-              },
-              {
-                "group": "Probation Admin"
-              },
-              {
-                "group": "Prison Admin"
-              },
-              {
-                "group": "Police Admin"
-              }
-            ],
-            "amended": false
-          }
-        ]
-      }
-    ],
-    "nowTypes": [
-      {
-        "id": "b4b55110-1d50-11e8-accf-0ed5f89f718b",
-        "description": "Imprisonment order",
-        "templateName": "Single template",
-        "rank": 1,
-        "staticText": "Static Text N/A",
-        "welshStaticText": "Welsh Static Text N/A",
-        "priority": "30",
-        "jurisdiction": "B"
-      },
-      {
-        "id": "c074bff2-1d3e-11e8-accf-0ed5f89f718b",
-        "description": "Community order",
-        "templateName": "Single template",
-        "rank": 3,
-        "staticText": "Static Text N/A",
-        "welshStaticText": "Welsh Static Text N/A",
-        "priority": "0",
-        "jurisdiction": "B"
-      },
-      {
-        "id": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
-        "description": "Fine notice",
-        "templateName": "Single template",
-        "rank": 6,
-        "staticText": "Static Text N/A",
-        "welshStaticText": "Welsh Static Text N/A",
-        "priority": "0",
-        "jurisdiction": "B"
+        ],
+        "prosecutionCaseId": "175cd8b0-2963-4e72-aafd-2e2b9af2f41a"
       }
     ]
-  }
+  },
+  "accountNumber": "19000091T",
+  "targets": [
+    {
+      "defendantId": "5275f609-dadd-4630-9ca0-e54868fd8afa",
+      "hearingId": "10316f3a-000d-470f-a67a-2ec8f9598ebf",
+      "offenceId": "7e2e92cc-8a04-49ae-b8f7-e3991dae4f68",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-10-04",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "value": "100",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "22120488-cfc6-41a3-a3b5-70fb3fd1193c",
+          "sharedDate": "2019-10-05"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-10-04",
+          "prompts": [
+            {
+              "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+              "label": "Amount of costs",
+              "value": "200",
+              "welshValue": ""
+            },
+            {
+              "id": "2b0ca749-7ede-4446-ae59-5beec3a72143",
+              "label": "Creditor name",
+              "value": "Transport for London",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "76d43772-0660-4a33-b5c6-8f8ccaf6b4e3",
+          "resultLabel": "Costs",
+          "resultLineId": "0062a6e0-297b-467a-b0d4-96e0e8b2efb9",
+          "sharedDate": "2019-10-05"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-10-04",
+          "prompts": [
+            {
+              "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+              "label": "Amount of compensation",
+              "value": "2",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "ae89b99c-e0e3-47b5-b218-24d4fca3ca53",
+          "resultLabel": "Compensation",
+          "resultLineId": "a58bf376-006a-42cf-beb3-97ab482b1c4a",
+          "sharedDate": "2019-10-05"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-10-04",
+          "prompts": [],
+          "resultDefinitionId": "9ea0d845-5096-44f6-9ce0-8ae801141eac",
+          "resultLabel": "Collection order",
+          "resultLineId": "fd2bfc1e-3b06-4a68-95bf-6a1309002a73",
+          "sharedDate": "2019-10-05"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-10-04",
+          "prompts": [
+            {
+              "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+              "label": "Amount of surcharge",
+              "value": "30",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "e866cd11-6073-4fdf-a229-51c9d694e1d0",
+          "resultLabel": "Surcharge",
+          "resultLineId": "e82e7803-467c-4aaf-85c7-4f7d69025c07",
+          "sharedDate": "2019-10-05"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-10-04",
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "value": "2019-10-27",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "9ebab147-1877-42be-8dac-6e7ff123a60e",
+          "sharedDate": "2019-10-05"
+        }
+      ],
+      "targetId": "e83698a0-e7c0-11e9-aacf-590fb5bba6ef"
+    }
+  ]
 }

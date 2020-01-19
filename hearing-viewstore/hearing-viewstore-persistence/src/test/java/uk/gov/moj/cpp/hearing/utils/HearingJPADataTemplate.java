@@ -18,6 +18,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 
+import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -109,6 +110,8 @@ public final class HearingJPADataTemplate {
                     offence.setPlea(plea);
 
                     offence.getOffenceFacts().setAlcoholReadingAmount(Integer.valueOf(123).toString());
+
+                    offence.setLaidDate(LocalDate.of(2019, 1, 1));
 
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().add(offence);
                 });

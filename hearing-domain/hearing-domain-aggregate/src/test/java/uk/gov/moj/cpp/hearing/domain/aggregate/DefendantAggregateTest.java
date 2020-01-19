@@ -4,6 +4,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -12,18 +13,27 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.eq;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate.computeAllOffencesWithdrawnOrDismissed;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESDecisionConstants;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESNotificationDecisionDelegate;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.nces.Defendant;
+import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithFinancialOrderDetails;
+import uk.gov.moj.cpp.hearing.nces.DocumentContent;
+import uk.gov.moj.cpp.hearing.nces.FinancialOrderForDefendant;
+import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithFinancialOrderDetails;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +48,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -92,6 +103,163 @@ public class DefendantAggregateTest {
                 (CaseDefendantDetailsWithHearings) defendantAggregate.enrichCaseDefendantDetailsWithHearingIds(command.getDefendant()).collect(Collectors.toList()).get(0);
 
         assertThat(result.getHearingIds(), hasItems(previousHearingId));
+    }
+
+    @Test
+    public void testUpdateDefendantWithFinancialOrderDetails_whenFirstShare() {
+
+        runAndVerifyUpdateDefendantWithFinancialOrderDetails(
+                FinancialOrderForDefendant.newBuilder().withResultDefinitionIds(Arrays.asList(
+                        randomUUID(), NCESDecisionConstants.RD_FIDICI, randomUUID()
+                )).build(), true);
+
+        runAndVerifyUpdateDefendantWithFinancialOrderDetails(
+                FinancialOrderForDefendant.newBuilder().withResultDefinitionIds(
+                        null
+                ).build(), false);
+
+        runAndVerifyUpdateDefendantWithFinancialOrderDetails(
+                FinancialOrderForDefendant.newBuilder().withResultDefinitionIds(Collections.emptyList()).build()
+                , false);
+
+        runAndVerifyUpdateDefendantWithFinancialOrderDetails(
+                FinancialOrderForDefendant.newBuilder().withResultDefinitionIds(Arrays.asList(
+                        UUID.randomUUID(), UUID.randomUUID()
+                )).build(), false);
+
+        runAndVerifyUpdateDefendantWithFinancialOrderDetails(
+                FinancialOrderForDefendant.newBuilder().withResultDefinitionIds(Arrays.asList(
+                        NCESDecisionConstants.RD_FIDICI, NCESDecisionConstants.RD_FIDICTI, NCESDecisionConstants.RD_FIDIPI
+                )).build(), true);
+    }
+
+    private void runAndVerifyUpdateDefendantWithFinancialOrderDetails(final FinancialOrderForDefendant financialOrderForDefendant, boolean shouldGenerateMail) {
+        // need junit5
+        runAndVerifyUpdateDefendantWithFinancialOrderDetails(new DefendantAggregate(), financialOrderForDefendant, shouldGenerateMail);
+    }
+
+    @Test
+    public void testUpdateDefendantWithFinancialOrderDetails_whenReShare_shouldMatch() {
+
+        DefendantAggregate defendantAggregate = new DefendantAggregate();
+        Defendant defendant = Defendant.defendant().build();
+        UUID hearingId = randomUUID();
+        defendantAggregate.apply(
+                DefendantUpdateWithFinancialOrderDetails.newBuilder()
+                        .withFinancialOrderForDefendant(FinancialOrderForDefendant.newBuilder()
+                                .withHearingId(hearingId)
+                                .withResultDefinitionIds(Arrays.asList(
+                                        randomUUID(), randomUUID()
+                                ))
+                                .withDocumentContent(DocumentContent.documentContent()
+                                        .withDefendant(defendant)
+                                        .withGobAccountNumber("gobAccountNumber1")
+                                        .withDivisionCode("divisionCode1")
+                                        .withAmendmentType("type1")
+                                        .build())
+                                .build())
+                        .build());
+
+        FinancialOrderForDefendant financialOrderDetailsReshared = FinancialOrderForDefendant.newBuilder()
+                .withHearingId(hearingId)
+                .withResultDefinitionIds(Arrays.asList(
+                        randomUUID(), randomUUID()
+                ))
+                .withDocumentContent(DocumentContent.documentContent()
+                        .withDefendant(defendant)
+                        .withGobAccountNumber("gobAccountNumber2")
+                        .withDivisionCode("divisionCode2")
+                        .withAmendmentType("type2")
+                        .build())
+                .build();
+
+        DefendantUpdateWithFinancialOrderDetails result = runUpdateDefendantWithFinancialOrderDetails(defendantAggregate, financialOrderDetailsReshared);
+
+//        assertEquals(result.isShouldGenerateMail(), true);
+        FinancialOrderForDefendant resultFinancialOrder = result.getFinancialOrderForDefendant();
+        assertEquals(hearingId, resultFinancialOrder.getHearingId());
+        assertEquals("gobAccountNumber1", resultFinancialOrder.getDocumentContent().getOldGobAccountNumber());
+        assertEquals("gobAccountNumber2", resultFinancialOrder.getDocumentContent().getGobAccountNumber());
+        assertEquals("divisionCode1", resultFinancialOrder.getDocumentContent().getOldDivisionCode());
+        assertEquals("divisionCode2", resultFinancialOrder.getDocumentContent().getDivisionCode());
+        assertEquals("Amend result", resultFinancialOrder.getDocumentContent().getAmendmentType());
+        assertEquals(defendant, resultFinancialOrder.getDocumentContent().getDefendant());
+    }
+
+
+    @Test
+    public void testUpdateDefendantWithFinancialOrderDetails_whenReShare_shouldNotMatch() {
+
+        DefendantAggregate defendantAggregate = new DefendantAggregate();
+        Defendant defendant = Defendant.defendant().build();
+        UUID hearingId = randomUUID();
+        defendantAggregate.apply(
+                DefendantUpdateWithFinancialOrderDetails.newBuilder()
+                        .withFinancialOrderForDefendant(FinancialOrderForDefendant.newBuilder()
+                                .withHearingId(hearingId)
+                                .withResultDefinitionIds(Arrays.asList(
+                                        randomUUID(), randomUUID()
+                                ))
+                                .withDocumentContent(DocumentContent.documentContent()
+                                        .withDefendant(defendant)
+                                        .withGobAccountNumber("gobAccountNumber1")
+                                        .withDivisionCode("divisionCode1")
+                                        .withAmendmentType("type1")
+                                        .build())
+                                .build())
+                        .build());
+
+        FinancialOrderForDefendant financialOrderDetailsReshared = FinancialOrderForDefendant.newBuilder()
+                .withHearingId(hearingId)
+                .withResultDefinitionIds(Arrays.asList(
+                        randomUUID(), NCESDecisionConstants.RD_FIDIPI, randomUUID()
+                ))
+                .withDocumentContent(DocumentContent.documentContent()
+                        .withDefendant(defendant)
+                        .withGobAccountNumber("gobAccountNumber2")
+                        .withDivisionCode("divisionCode2")
+                        .withAmendmentType("type2")
+                        .build())
+                .build();
+
+        DefendantUpdateWithFinancialOrderDetails result = runUpdateDefendantWithFinancialOrderDetails(defendantAggregate, financialOrderDetailsReshared);
+
+        FinancialOrderForDefendant resultFinancialOrder = result.getFinancialOrderForDefendant();
+        assertEquals(hearingId, resultFinancialOrder.getHearingId());
+        assertEquals("gobAccountNumber1", resultFinancialOrder.getDocumentContent().getOldGobAccountNumber());
+        assertEquals("gobAccountNumber2", resultFinancialOrder.getDocumentContent().getGobAccountNumber());
+        assertEquals("divisionCode1", resultFinancialOrder.getDocumentContent().getOldDivisionCode());
+        assertEquals("divisionCode2", resultFinancialOrder.getDocumentContent().getDivisionCode());
+        assertEquals("Amend result", resultFinancialOrder.getDocumentContent().getAmendmentType());
+        assertEquals(defendant, resultFinancialOrder.getDocumentContent().getDefendant());
+    }
+
+
+    private void runAndVerifyUpdateDefendantWithFinancialOrderDetails(DefendantAggregate defendantAggregate, FinancialOrderForDefendant financialOrderForDefendant, boolean expectedShouldGenerateMail) {
+
+        DefendantUpdateWithFinancialOrderDetails result = runUpdateDefendantWithFinancialOrderDetails(defendantAggregate, financialOrderForDefendant);
+//        assertEquals(expectedShouldGenerateMail, result.isShouldGenerateMail());
+        if(expectedShouldGenerateMail)
+            financialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(financialOrderForDefendant)
+                    .withDocumentContent(DocumentContent.newBuilderFrom(financialOrderForDefendant.getDocumentContent())
+                            .withAmendmentType("Write off one day deemed served")
+                            .build())
+                    .build();
+        assertEquals(financialOrderForDefendant, result.getFinancialOrderForDefendant());
+    }
+
+    private DefendantUpdateWithFinancialOrderDetails runUpdateDefendantWithFinancialOrderDetails(DefendantAggregate defendantAggregate, final FinancialOrderForDefendant financialOrderForDefendant) {
+        List<Object> results = defendantAggregate.updateDefendantWithFinancialOrder(financialOrderForDefendant)
+                .collect(Collectors.toList());
+
+        try {
+            // ensure aggregate is serializable
+            SerializationUtils.serialize(defendantAggregate);
+        } catch (SerializationException e) {
+            fail("Aggregate should be serializable");
+        }
+        return (DefendantUpdateWithFinancialOrderDetails) results.get(0);
+
     }
 
 

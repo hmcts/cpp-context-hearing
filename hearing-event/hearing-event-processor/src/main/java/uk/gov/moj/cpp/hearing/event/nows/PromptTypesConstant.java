@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
+import static java.util.UUID.fromString;
+import java.util.UUID;
+
 @SuppressWarnings({"squid:S1213"})
 public class PromptTypesConstant {
 
@@ -14,8 +17,13 @@ public class PromptTypesConstant {
     public static final String P_INSTALMENT_START_DATE = "ISTD";
     public static final String P_INSTALMENT_AMOUNT = "IAMT";
     public static final String P_PAY_BY_DATE = "PBD";
-    public static final String P_DAYS_IN_DEFAULT = "DID";
     public static final String P_NON_STANDARD_REASON = "NSR";
+
+
+    public static final String P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE = "PAYMENT_CARD_REQUIRED";
+    public static final String P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE = "PARENT_GAURDIAN_TO_PAY";
+    //the label is "Number of days in default"
+    public static final String P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE = "DID";
 
     // Fixed List for Payment Frequency
     public static final String P_WEEKLY = "weekly";
@@ -42,6 +50,9 @@ public class PromptTypesConstant {
     public static final String TOTAL_AMOUNT_ENFORCED_PROMPT_REFERENCE = "TOTENF";
 
     public static final String AMOUNT_OF_COSTS_PROMPT_REFERENCE = "AOC";
+
+    //For free text capture in ABDC (Benefit deduction)
+    public static final UUID P_DWP_AP_NUMBER = fromString("91687bb9-d0ca-44a7-ada0-b89b71b89b8e");
 
 
     private PromptTypesConstant() {

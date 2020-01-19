@@ -2,16 +2,20 @@ package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.core.courts.NowVariantResult;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.OffenceFacts;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.SharedResultLine;
+import uk.gov.justice.json.schemas.staging.Aliases;
 import uk.gov.justice.json.schemas.staging.Defendant;
 import uk.gov.justice.json.schemas.staging.DocumentLanguage;
 import uk.gov.justice.json.schemas.staging.HearingLanguage;
@@ -26,6 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"squid:S1168"})
 class StagingEnforcementDefendantMapper {
 
     private static final String SPACE = " ";
@@ -72,13 +77,30 @@ class StagingEnforcementDefendantMapper {
                 .withTelephoneNumberMobile(setTelephoneNumberMobile(defendant))
                 .withTitle(setTitle(defendant))
                 .withVehicleMake(null)
-                .withVehicleMake(null)
+                .withVehicleRegistrationMark(setVehicleRegistrationMark(defendant))
                 .withWeeklyIncome(null)
+                .withAliases(setAliases(defendant))
                 .build();
     }
 
     private Title setTitle(final uk.gov.justice.core.courts.Defendant defendant) {
         return nonNull(defendant.getLegalEntityDefendant()) ? Title.CO : convertTitle(defendant.getPersonDefendant().getPersonDetails().getTitle());
+    }
+
+    private String middleNameToInitial(String middleName) {
+        if (middleName == null || middleName.trim().length() == 0) {
+            return null;
+        } else {
+            return middleName.substring(0, 1).toUpperCase();
+        }
+    }
+
+    private List<Aliases> setAliases(final uk.gov.justice.core.courts.Defendant defendant) {
+        if (isEmpty(defendant.getAliases())) {
+            return null;
+        } else {
+            return defendant.getAliases().stream().map(a -> new Aliases(a.getFirstName(), middleNameToInitial(a.getMiddleName()), a.getLastName(), null)).collect(Collectors.toList());
+        }
     }
 
     private Title convertTitle(uk.gov.justice.core.courts.Title title) {
@@ -266,6 +288,18 @@ class StagingEnforcementDefendantMapper {
                 .orElse(null);
 
     }
+
+    private String setVehicleRegistrationMark(uk.gov.justice.core.courts.Defendant defendant) {
+//find first non null vehicle registration on first non null offence facts
+        return defendant.getOffences().stream()
+                .map(Offence::getOffenceFacts)
+                .filter(Objects::nonNull)
+                .map(OffenceFacts::getVehicleRegistration)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
+
 
     private String setEmailAddress1(final uk.gov.justice.core.courts.Defendant defendant) {
         return Optional.ofNullable(defendant)

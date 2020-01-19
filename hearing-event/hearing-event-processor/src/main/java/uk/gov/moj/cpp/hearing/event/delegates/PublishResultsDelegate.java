@@ -255,7 +255,7 @@ public class PublishResultsDelegate {
                                     .withIsAdjournmentResult(resultDefinition.isAdjournment())
                                     .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
                                     .withIsConvictedResult(resultDefinition.isConvicted())
-                                    .withIsFinancialResult(resultDefinition.isFinancial())
+                                    .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))
                                     .withJudicialResultPrompts(buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts()))
                                     .withLabel(resultDefinition.getLabel())
                                     .withLastSharedDateTime(resultLine.getSharedDate() != null ? resultLine.getSharedDate().toString() : LocalDate.now().toString())
