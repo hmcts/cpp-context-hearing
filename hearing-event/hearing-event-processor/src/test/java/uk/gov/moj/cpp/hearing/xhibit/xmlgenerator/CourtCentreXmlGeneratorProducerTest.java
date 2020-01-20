@@ -58,17 +58,4 @@ public class CourtCentreXmlGeneratorProducerTest {
         assertThat(courtCentreXmlGenerator, is(instanceOf(EmptyWebPageCourtCentreXmlGenerator.class)));
     }
 
-    @Test
-    public void shouldThrowException() {
-        exception.expect(GenerationFailedException.class);
-        exception.expectMessage("Unknown xml generator type: PUBLIC_DISPLAY");
-
-        final CurrentCourtStatus currentCourtStatus = mock(CurrentCourtStatus.class);
-
-        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, of(currentCourtStatus), now());
-
-        courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
-
-
-    }
 }

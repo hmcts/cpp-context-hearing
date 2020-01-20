@@ -83,4 +83,10 @@ public class HearingQueryApi {
     public JsonEnvelope getHeringsByCourtCentre(final JsonEnvelope query) {
         return requester.request(query);
     }
+
+
+    @Handles("hearing.hearings-court-centres-for-date")
+    public JsonEnvelope getHearingsForCourtCentreForDate(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

@@ -68,7 +68,7 @@ public class HearingListXhibitResponseTransformer {
                 .map(hearing -> courtRoom()
                         .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
                         .withCases(getCases(hearing))
-                        .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()))
+                        .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
                         .build())
                 .collect(toList());
     }
@@ -84,6 +84,7 @@ public class HearingListXhibitResponseTransformer {
                                 .withHearingType(hearing.getType().getDescription())
                                 .withDefendants(getDefendants(prosecutionCase))
                                 .withJudgeName(getJudgeName(hearing))
+                                .withNotBeforeTime(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().toString())
                                 .build()
                         ));
         return cases().withCasesDetails(caseDetailsList).build();

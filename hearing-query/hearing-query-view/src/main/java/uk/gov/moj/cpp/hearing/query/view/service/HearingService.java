@@ -42,6 +42,7 @@ import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -102,10 +103,24 @@ public class HearingService {
 
     public Optional<CurrentCourtStatus> getHearingsBy(final UUID courtCentreId, final ZonedDateTime lastModifiedTime) {
         final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreId, lastModifiedTime);
-
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingEvents
                 .stream()
                 .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
+                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .collect(toList());
+
+        if (!hearingList.isEmpty()) {
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(hearingEvents, hearingList);
+            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
+        }
+        return empty();
+    }
+
+    public Optional<CurrentCourtStatus> getHearingsByDate(final UUID courtCentreId, final LocalDate localDate) {
+        final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentre(localDate, courtCentreId);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreId, localDate.atStartOfDay(ZoneOffset.UTC));
+        final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
+                .stream()
                 .map(ha -> hearingJPAMapper.fromJPA(ha))
                 .collect(toList());
 

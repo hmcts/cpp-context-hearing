@@ -313,3 +313,25 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get-hearings-by-court-centre+json:
                     example:  !include json/hearing.get-hearings-by-court-centre.json
                     schema:  !include json/schema/hearing.get-hearings-by-court-centre.json
+
+/hearings/court-centres/{courtCentreId}:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.hearings-court-centres-for-date+json
+            name: hearing.hearings-court-centres-for-date
+        ...
+      queryParameters:
+        dateOfHearing:
+          description: date for which to get hearing.
+          type: string
+          required: true
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.hearings-court-centres-for-date+json:
+                    example:  !include json/hearing.get-hearings-by-court-centre.json
+                    schema:  !include json/schema/hearing.get-hearings-by-court-centre.json

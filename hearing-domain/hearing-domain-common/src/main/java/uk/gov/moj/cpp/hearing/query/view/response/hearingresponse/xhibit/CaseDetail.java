@@ -19,13 +19,16 @@ public class CaseDetail implements Serializable {
 
     private String judgeName;
 
-    public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName) {
+    private String notBeforeTime;
+
+    public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime) {
         this.caseNumber = caseNumber;
         this.caseType = caseType;
         this.cppUrn = cppUrn;
         this.defendants = defendants;
         this.hearingType = hearingType;
         this.judgeName = judgeName;
+        this.notBeforeTime = notBeforeTime;
     }
 
     public String getCaseNumber() {
@@ -56,39 +59,52 @@ public class CaseDetail implements Serializable {
         return new CaseDetail.Builder();
     }
 
+    @SuppressWarnings({"squid:S3776", "squid:S00121", "squid:S00122", "pmd:LocalVariableCouldBeFinal"} )
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final CaseDetail that = (CaseDetail) obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        return java.util.Objects.equals(this.caseNumber, that.caseNumber) &&
-                java.util.Objects.equals(this.caseType, that.caseType) &&
-                java.util.Objects.equals(this.cppUrn, that.cppUrn) &&
-                java.util.Objects.equals(this.defendants, that.defendants) &&
-                java.util.Objects.equals(this.judgeName, that.judgeName) &&
-                java.util.Objects.equals(this.hearingType, that.hearingType);
+        CaseDetail that = (CaseDetail) o;
+
+        if (caseNumber != null ? !caseNumber.equals(that.caseNumber) : that.caseNumber != null)
+            return false;
+        if (caseType != null ? !caseType.equals(that.caseType) : that.caseType != null)
+            return false;
+        if (cppUrn != null ? !cppUrn.equals(that.cppUrn) : that.cppUrn != null) return false;
+        if (defendants != null ? !defendants.equals(that.defendants) : that.defendants != null)
+            return false;
+        if (hearingType != null ? !hearingType.equals(that.hearingType) : that.hearingType != null)
+            return false;
+        if (judgeName != null ? !judgeName.equals(that.judgeName) : that.judgeName != null)
+            return false;
+        return notBeforeTime != null ? notBeforeTime.equals(that.notBeforeTime) : that.notBeforeTime == null;
     }
 
+    @SuppressWarnings({"squid:S3776", "squid:S00121", "squid:S00122"} )
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(caseNumber, caseType, cppUrn, defendants, hearingType);
+        int result = caseNumber != null ? caseNumber.hashCode() : 0;
+        result = 31 * result + (caseType != null ? caseType.hashCode() : 0);
+        result = 31 * result + (cppUrn != null ? cppUrn.hashCode() : 0);
+        result = 31 * result + (defendants != null ? defendants.hashCode() : 0);
+        result = 31 * result + (hearingType != null ? hearingType.hashCode() : 0);
+        result = 31 * result + (judgeName != null ? judgeName.hashCode() : 0);
+        result = 31 * result + (notBeforeTime != null ? notBeforeTime.hashCode() : 0);
+        return result;
     }
 
     @Override
     public String toString() {
         return "CaseDetail{" +
-                "caseNumber='" + caseNumber + "'," +
-                "caseType='" + caseType + "'," +
-                "cppUrn='" + cppUrn + "'," +
-                "defendants='" + defendants + "'," +
-                "judgeName='" + judgeName + "'," +
-                "hearingType='" + hearingType + "'" +
-                "}";
+                "caseNumber='" + caseNumber + '\'' +
+                ", caseType='" + caseType + '\'' +
+                ", cppUrn='" + cppUrn + '\'' +
+                ", defendants=" + defendants +
+                ", hearingType='" + hearingType + '\'' +
+                ", judgeName='" + judgeName + '\'' +
+                ", notBeforeTime='" + notBeforeTime + '\'' +
+                '}';
     }
 
     public CaseDetail setCaseNumber(String caseNumber) {
@@ -129,6 +145,8 @@ public class CaseDetail implements Serializable {
 
         private String judgeName;
 
+        private String notBeforeTime;
+
         public CaseDetail.Builder withCaseNumber(final String caseNumber) {
             this.caseNumber = caseNumber;
             return this;
@@ -159,9 +177,13 @@ public class CaseDetail implements Serializable {
             return this;
         }
 
+        public Builder withNotBeforeTime(final String notBeforeTime) {
+            this.notBeforeTime = notBeforeTime;
+            return this;
+        }
 
         public CaseDetail build() {
-            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName);
+            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime);
         }
     }
 }

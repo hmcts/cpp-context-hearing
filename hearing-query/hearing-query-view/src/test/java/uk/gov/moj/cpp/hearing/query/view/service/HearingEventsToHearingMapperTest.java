@@ -38,7 +38,7 @@ public class HearingEventsToHearingMapperTest {
 
         final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(asList(hearingEvent_1, hearingEvent_2), asList(hearing().build()));
 
-        final uk.gov.justice.core.courts.HearingEvent resultHearingEvent = hearingEventsToHearingMapper.getHearingEventBy(hearingId);
+        final uk.gov.justice.core.courts.HearingEvent resultHearingEvent = hearingEventsToHearingMapper.getHearingEventBy(hearingId).get();
 
         assertThat(resultHearingEvent.getLastModifiedTime(), is(expectedlastModifiedTime));
     }

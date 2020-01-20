@@ -4,6 +4,7 @@ import static java.lang.String.format;
 import static javax.xml.XMLConstants.W3C_XML_SCHEMA_NS_URI;
 import static javax.xml.bind.JAXBContext.newInstance;
 import static javax.xml.bind.Marshaller.JAXB_FORMATTED_OUTPUT;
+import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Currentcourtstatus;
@@ -33,12 +34,24 @@ public class XmlUtils {
     private static final String NAME = "currentcourtstatus";
     private final static QName WP_QNAME = new QName("", NAME);
     private static final String WEB_PAGE_XSD_PATH = "xhibit/xsd/iwp/";
+    private static final String PUB_PAGE_XSD_PATH = "xhibit/xsd/dp/";
 
     public String createWebPage(final Currentcourtstatus currentcourtstatus) {
         final JAXBElement<Currentcourtstatus> stringJAXBElement = new JAXBElement<>(WP_QNAME, Currentcourtstatus.class, null, currentcourtstatus);
         final String publicDisplayXmlString = convertToXml(stringJAXBElement);
 
         final String publicDisplayFilePath = WEB_PAGE_XSD_PATH + WEB_PAGE.getSchemaName();
+
+        validate(publicDisplayXmlString, publicDisplayFilePath);
+
+        return publicDisplayXmlString;
+    }
+
+    public String createPublicDisplay(final Currentcourtstatus currentcourtstatus) {
+        final JAXBElement<Currentcourtstatus> stringJAXBElement = new JAXBElement<>(WP_QNAME, Currentcourtstatus.class, null, currentcourtstatus);
+        final String publicDisplayXmlString = convertToXml(stringJAXBElement);
+
+        final String publicDisplayFilePath = PUB_PAGE_XSD_PATH + PUBLIC_DISPLAY.getSchemaName();
 
         validate(publicDisplayXmlString, publicDisplayFilePath);
 

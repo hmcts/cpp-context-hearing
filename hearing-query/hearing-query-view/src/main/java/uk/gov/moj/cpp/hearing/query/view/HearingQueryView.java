@@ -39,6 +39,7 @@ public class HearingQueryView {
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
+    private static final String DATE_OF_HEARING = "dateOfHearing";
     private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_TIME = "startTime";
     private static final String FIELD_END_TIME = "endTime";
@@ -145,6 +146,17 @@ public class HearingQueryView {
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsBy(courtCentreId.get(), parse(lastModifiedTime.get()));
 
         return enveloper.withMetadataFrom(envelope, "hearing.get-hearings-by-court-centre").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
+    }
+
+    @SuppressWarnings("squid:CallToDeprecatedMethod")
+    @Handles("hearing.hearings-court-centres-for-date")
+    public JsonEnvelope getHearingsForCourtCentreForDate(final JsonEnvelope envelope) {
+        final Optional<UUID> courtCentreId = getUUID(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
+        final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
+
+        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsByDate(courtCentreId.get(), LocalDate.parse(dateOfHearing.get()));
+
+        return enveloper.withMetadataFrom(envelope, "hearing.hearings-court-centres-for-date").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }
 }
 

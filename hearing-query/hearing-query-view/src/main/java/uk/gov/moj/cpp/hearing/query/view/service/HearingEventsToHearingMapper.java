@@ -8,6 +8,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings({"squid:S3655"})
@@ -22,15 +23,19 @@ public class HearingEventsToHearingMapper {
         this.hearingList = hearingList;
     }
 
-    public uk.gov.justice.core.courts.HearingEvent getHearingEventBy(final UUID hearingId) {
+    public Optional<uk.gov.justice.core.courts.HearingEvent> getHearingEventBy(final UUID hearingId) {
         final List<HearingEvent> hearingEventList = hearingEvents
                 .stream()
                 .filter(hearingEvent -> hearingEvent.getHearingId().equals(hearingId))
                 .collect(toList());
 
-        return fromJPA(hearingEventList
+        return Optional.ofNullable((hearingEventList
                 .stream()
-                .max(comparing(HearingEvent::getLastModifiedTime)).get());
+                .max(comparing(HearingEvent::getLastModifiedTime)).map(this::mapFromJPA).orElse(null)));
+    }
+
+    private uk.gov.justice.core.courts.HearingEvent mapFromJPA(final HearingEvent hearingEvent)  {
+        return  fromJPA(hearingEvent);
     }
 
     public List<Hearing> getHearingList() {

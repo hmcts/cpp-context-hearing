@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 import static java.lang.String.format;
-import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.exception.GenerationFailedException;
@@ -16,14 +15,20 @@ public class CourtCentreXmlGeneratorProducer {
     private WebPageCourtCentreXmlGenerator webPageCourtCentreXmlGenerator;
 
     @Inject
+    private  PublicDisplayCourtCentreXmlGenerator publicDisplayCourtCentreXmlGenerator;
+
+    @Inject
     private EmptyWebPageCourtCentreXmlGenerator emptyWebPageCourtCentreXmlGenerator;
 
     public CourtCentreXmlGenerator getCourtCentreXmlGenerator(final CourtCentreGeneratorParameters courtCentreGeneratorParameters) {
+
         if (courtCentreGeneratorParameters.getCurrentCourtStatus().isPresent()) {
-            if (courtCentreGeneratorParameters.getXmlProducerType().equals(WEB_PAGE)) {
-                return webPageCourtCentreXmlGenerator;
+            switch (courtCentreGeneratorParameters.getXmlProducerType()) {
+                case WEB_PAGE:
+                    return webPageCourtCentreXmlGenerator;
+                case PUBLIC_DISPLAY : return emptyWebPageCourtCentreXmlGenerator;
+                default: throw new GenerationFailedException(format("Unknown xml generator type: %s", courtCentreGeneratorParameters.getXmlProducerType().name()));
             }
-            throw new GenerationFailedException(format("Unknown xml generator type: %s", courtCentreGeneratorParameters.getXmlProducerType().name()));
         } else {
             return emptyWebPageCourtCentreXmlGenerator;
         }
