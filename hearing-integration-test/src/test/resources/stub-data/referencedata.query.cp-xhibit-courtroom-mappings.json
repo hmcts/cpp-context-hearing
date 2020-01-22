@@ -1,10 +1,10 @@
 {
   "cpXhibitCourtRoomMappings": [
     {
-      "id": "0c5eead7-e337-44a8-9d0e-fa3378b12fc5",
+      "id": "COURT_ROOM1_ID",
       "oucode": "C01BL00",
-      "courtRoomId": 1234,
-      "crestCourtId": "428",
+      "courtRoomId": "328",
+      "crestCourtId": "328",
       "crestCourtSiteId": "000",
       "crestCourtSiteName": "DUMMYCOURTNAME",
       "crestCourtShortName": "DUMMY",
@@ -14,9 +14,9 @@
       "validFrom": "2016-04-08"
     },
     {
-      "id": "bf8f6ec9-0352-4815-a94d-6ee59cea5217",
+      "id": "COURT_ROOM2_ID",
       "oucode": "C43AY00",
-      "courtRoomId": 38,
+      "courtRoomId": "428",
       "crestCourtId": "428",
       "crestCourtSiteId": "000",
       "crestCourtSiteName": "DUMMYCOURTNAME",

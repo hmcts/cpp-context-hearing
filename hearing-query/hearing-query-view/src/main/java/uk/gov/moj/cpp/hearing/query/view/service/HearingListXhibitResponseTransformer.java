@@ -31,7 +31,6 @@ import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-//TODO: crete test
 @ApplicationScoped
 public class HearingListXhibitResponseTransformer {
 
@@ -69,6 +68,7 @@ public class HearingListXhibitResponseTransformer {
                         .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
                         .withCases(getCases(hearing))
                         .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
+                        .withDefenceCouncil(hearing)
                         .build())
                 .collect(toList());
     }

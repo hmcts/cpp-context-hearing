@@ -50,7 +50,7 @@ public class WebPageCourtCentreXmlGeneratorTest {
     private WebPageCourtCentreXmlGenerator webPageCourtCentreXmlGenerator;
 
     @Test
-    public void shouldCretePublicDisplayCourtCentreXml() throws IOException {
+    public void shouldCreatePublicDisplayCourtCentreXml() throws IOException {
 
         final HearingEvent hearingEvent = mock(HearingEvent.class);
         final Currentstatus currentstatus = getCurrentStatus();
@@ -59,8 +59,7 @@ public class WebPageCourtCentreXmlGeneratorTest {
 
         final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
 
-
-        when(eventGenerator.generate(hearingEvent)).thenReturn(currentstatus);
+        when(eventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime);
 

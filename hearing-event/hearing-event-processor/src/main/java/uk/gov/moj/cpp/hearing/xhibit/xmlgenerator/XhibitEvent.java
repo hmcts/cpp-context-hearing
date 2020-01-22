@@ -14,9 +14,15 @@ public enum XhibitEvent {
 
     RESPONDENT_CLOSES("20605"),
 
+    APPELLANT_OPENS("20606"),
+
     APPELLANT_CLOSES("20608"),
 
     BENCH_RETIRES("20609"),
+
+    OPEN_CASE_PROSECUTION("20903"),
+
+    DEFENCE_COUNSEL_OPEN_CASE_DEFENDANT("20906"),
 
     CLOSED_SPEECH_PROSECUTION("20907"),
 
@@ -24,9 +30,13 @@ public enum XhibitEvent {
 
     DEFENCE_GIVES_CLOSING_SPEECH_REGARDING_DEFENDANT("20909"),
 
+    DEFENCE_COUNSEL_CLOSE_CASE_DEFENDANT("20910"),
+
     SUMMING_UP("20911"),
 
     JURY_RETIRES("20914"),
+
+    POINT_OF_LAW_DISCUSSION_PROSECUTION("20916"),
 
     VERDICT("20919"),
 
@@ -40,6 +50,9 @@ public enum XhibitEvent {
         this.value = value;
     }
 
+    public String getValue() {
+        return value;
+    }
 
     public static Optional<XhibitEvent> valueFor(final String value) {
 

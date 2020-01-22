@@ -24,7 +24,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//TODO: Extend this class as part of SCSL-132
 @SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S2221", "squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_PROCESSOR)
 public class CourtCentreHearingEventProcessor  {
@@ -51,8 +50,6 @@ public class CourtCentreHearingEventProcessor  {
 
     @Inject
     private XhibitFileNameGenerator xhibitFileNameGenerator;
-
-
 
 
     @Handles("hearing.event.publish-court-list-requested")

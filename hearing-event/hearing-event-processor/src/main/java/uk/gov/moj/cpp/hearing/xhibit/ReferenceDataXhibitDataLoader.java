@@ -17,6 +17,7 @@ import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
 
 @SuppressWarnings("squid:S1168")
@@ -41,7 +42,7 @@ public class ReferenceDataXhibitDataLoader {
                 .withId(randomUUID())
                 .build();
 
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, NULL);
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, Json.createObjectBuilder().build());
 
         return requester.request(jsonEnvelope, XhibitEventMappingsList.class).payload();
     }

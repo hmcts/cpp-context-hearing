@@ -6,14 +6,13 @@ public class CourtRoomMappings {
 
     private UUID id;
     private String oucode;
-    private String courtRoomId;
+    private Integer courtRoomId;
     private String crestCodeId;
     private String crestCourtSiteId;
     private String crestCourtSiteCode;
     private String crestCourtRoomName;
 
-
-    public CourtRoomMappings(final UUID id, final String oucode, final String courtRoomId, final String crestCodeId, final String crestCourtSiteId, final String crestCourtSiteCode, final String crestCourtRoomName) {
+    public CourtRoomMappings(final UUID id, final String oucode, final Integer courtRoomId, final String crestCodeId, final String crestCourtSiteId, final String crestCourtSiteCode, final String crestCourtRoomName) {
         this.id = id;
         this.oucode = oucode;
         this.courtRoomId = courtRoomId;
@@ -31,7 +30,7 @@ public class CourtRoomMappings {
         return oucode;
     }
 
-    public String getCourtRoomId() {
+    public Integer getCourtRoomId() {
         return courtRoomId;
     }
 

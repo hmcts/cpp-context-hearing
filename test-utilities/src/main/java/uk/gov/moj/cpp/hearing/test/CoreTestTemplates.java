@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.test;
 
-
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.BailStatus.bailStatus;
+import static uk.gov.justice.core.courts.DefenceCounsel.defenceCounsel;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
@@ -70,6 +70,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,16 @@ public class CoreTestTemplates {
                 .withName(STRING.next())
                 .withWelshName(STRING.next())
                 .withRoomId(courtAndRoomId)
+                .withRoomName(courtRoomName)
+                .withWelshRoomName(STRING.next());
+    }
+
+    public static CourtCentre.Builder courtCentreWithArgs(final UUID courtId, final UUID courtRoomId, final String courtRoomName) {
+        return CourtCentre.courtCentre()
+                .withId(courtId)
+                .withName(STRING.next())
+                .withWelshName(STRING.next())
+                .withRoomId(courtRoomId)
                 .withRoomName(courtRoomName)
                 .withWelshRoomName(STRING.next());
     }
@@ -476,6 +487,48 @@ public class CoreTestTemplates {
                 .withCourtCentre(courtCentreWithArgs(courtAndRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withProsecutionCases(
+                        args.structure.entrySet().stream()
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .collect(toList())
+                )
+
+                .withCourtApplications(asList((new HearingFactory().courtApplication().build())));
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+        }
+        return hearingBuilder;
+    }
+
+    public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args, final UUID courtId, final UUID courtRoomId, final String courtRoomName, int year, int month, int day, final UUID defenceCounselId) throws NoSuchAlgorithmException {
+        final Random random = SecureRandom.getInstanceStrong();
+        final int min = 1;
+        final int max = 5;
+        final Hearing.Builder hearingBuilder = Hearing.hearing()
+                .withId(randomUUID())
+                .withType(hearingType().build())
+                .withJurisdictionType(args.jurisdictionType)
+                .withReportingRestrictionReason(STRING.next())
+                .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
+                .withCourtCentre(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
+                .withJudiciary(singletonList(judiciaryRole(args).build()))
+                .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withDefenceCounsels(
+                        singletonList(
+                                defenceCounsel()
+                                        .withId(defenceCounselId)
+                                        .withAttendanceDays(Arrays.asList(LocalDate.now()))
+                                        .withDefendants(Arrays.asList(randomUUID()))
+                                        .withFirstName("John")
+                                        .withLastName("Jones")
+                                        .withTitle("Mr")
+                                        .withStatus("OPEN")
+                                        .build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
                                 .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())

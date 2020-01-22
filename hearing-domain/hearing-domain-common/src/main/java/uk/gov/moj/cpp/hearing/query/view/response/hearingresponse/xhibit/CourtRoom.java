@@ -1,8 +1,13 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class CourtRoom implements Serializable {
     private static final long serialVersionUID = -4151921355339340656L;
@@ -13,10 +18,13 @@ public class CourtRoom implements Serializable {
 
     private HearingEvent hearingEvent;
 
-    public CourtRoom(final String courtRoomName, final Cases cases, final HearingEvent hearingEvent) {
+    private DefenceCounsel defenceCounsel;
+
+    public CourtRoom(final String courtRoomName, final Cases cases, final HearingEvent hearingEvent, final DefenceCounsel defenceCounsel) {
         this.courtRoomName = courtRoomName;
         this.cases = cases;
         this.hearingEvent = hearingEvent;
+        this.defenceCounsel = defenceCounsel;
     }
 
     public String getCourtRoomName() {
@@ -31,10 +39,13 @@ public class CourtRoom implements Serializable {
         return hearingEvent;
     }
 
+    public DefenceCounsel getDefenceCounsel() {
+        return defenceCounsel;
+    }
+
     public static Builder courtRoom() {
         return new CourtRoom.Builder();
     }
-
 
     @Override
     public boolean equals(final Object obj) {
@@ -48,7 +59,8 @@ public class CourtRoom implements Serializable {
 
         return java.util.Objects.equals(this.courtRoomName, that.courtRoomName) &&
                 java.util.Objects.equals(this.hearingEvent, that.hearingEvent) &&
-                java.util.Objects.equals(this.cases, that.cases);
+                java.util.Objects.equals(this.cases, that.cases) &&
+                java.util.Objects.equals(this.defenceCounsel, that.defenceCounsel);
     }
 
     @Override
@@ -62,6 +74,7 @@ public class CourtRoom implements Serializable {
                 "courtRoomName='" + courtRoomName + "'," +
                 "hearingEvent='" + hearingEvent + "'," +
                 "cases='" + cases + "'" +
+                "defenceCounsel='" + defenceCounsel + "'" +
                 "}";
     }
 
@@ -87,6 +100,8 @@ public class CourtRoom implements Serializable {
 
         private HearingEvent hearingEvent;
 
+        private List<DefenceCounsel> defenceCounsels;
+
         public Builder withCourtRoomName(final String courtRoomName) {
             this.courtRoomName = courtRoomName;
             return this;
@@ -103,7 +118,19 @@ public class CourtRoom implements Serializable {
         }
 
         public CourtRoom build() {
-            return new CourtRoom(courtRoomName, cases, hearingEvent);
+            return new CourtRoom(courtRoomName, cases, hearingEvent, getDefenceCounsel());
+        }
+
+        private DefenceCounsel getDefenceCounsel() {
+            return Optional.ofNullable(defenceCounsels).orElse(Collections.emptyList()).stream()
+                    .filter(defenceCounsel -> hearingEvent != null &&
+                            defenceCounsel.getId().equals(hearingEvent.getDefenceCounselId()))
+                    .findFirst().orElse(null);
+        }
+
+        public Builder withDefenceCouncil(final Hearing hearing) {
+            this.defenceCounsels = hearing.getDefenceCounsels();
+            return this;
         }
     }
 }

@@ -109,7 +109,7 @@ public class WebPageCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
         xhibitCourtRoom.setCourtroomname(ccpCourtRoom.getCourtRoomName());
         xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases()));
         xhibitCourtRoom.setDefendants(getDefendants(ccpCourtRoom.getCases()));
-        xhibitCourtRoom.setCurrentstatus(eventGenerator.generate(ccpCourtRoom.getHearingEvent()));
+        xhibitCourtRoom.setCurrentstatus(eventGenerator.generate(ccpCourtRoom));
 
         return xhibitCourtRoom;
     }

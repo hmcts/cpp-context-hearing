@@ -6,9 +6,12 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.HearingEventsIT.hearingDefinitionData;
 import static uk.gov.moj.cpp.hearing.it.HearingEventsIT.hearingDefinitions;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
@@ -18,6 +21,8 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRoomMappings;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXml;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -28,6 +33,9 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -46,18 +54,27 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     private static final ZonedDateTime EVENT_TIME = now().minusMinutes(5l).withZoneSameLocal(ZoneId.of("UTC"));
 
-    private static final String courtCentreId = randomUUID().toString();
+    private String courtCentreId;
+    private String courtRoom1Id;
+    private String courtRoom2Id;
+    private String defenceCounselId;
 
     @Before
     public void initStub() {
+        courtCentreId = randomUUID().toString();
+        courtRoom1Id = randomUUID().toString();
+        courtRoom2Id = randomUUID().toString();
+        defenceCounselId = randomUUID().toString();
         stubExhibitFileUpload();
-        stubGetReferenceDataCourtRoomMappings(courtCentreId);
+        stubGetReferenceDataCourtRoomMappings(courtRoom1Id, courtRoom2Id);
+        stubGetReferenceDataEventMappings();
     }
 
     @Test
-    public void shouldRequestToPublishCourtList() {
+    public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
+        createHearingEvent(courtRoom2Id, defenceCounselId,"Open case prosecution");
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId);
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
@@ -65,30 +82,48 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
 
+        final String filePayload = getSentXml();
+        assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+    }
+
+    @Test
+    public void shouldRequestToPublishCourtListDefenceCouncilOpensCase() throws NoSuchAlgorithmException {
+        createHearingEvent(courtRoom2Id, defenceCounselId,"Defence counsel.name opens case regarding defendant defendant.name");
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "27");
+
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        sendPublishCourtListCommand(publishCourtListJsonObject);
+
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+
+        final String filePayload = getSentXml();
+        assertThat(filePayload, containsString("E20906_Defence_CO_Name>Mr John Jones</E20906_Defence_CO_Name"));
+    }
+
+    @Test
+    public void shouldRequestToPublishCourtList() throws NoSuchAlgorithmException {
+        createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "28");
+
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        sendPublishCourtListCommand(publishCourtListJsonObject);
+
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
     }
 
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
-
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString("0c5eead7-e337-44a8-9d0e-fa3378b12fc5"), "CourtRoom 1", 2019, 7, 5)));
-
-
-        givenAUserHasLoggedInAsACourtClerk(randomUUID());
-
-        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()));
-
-        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, "Start Hearing");
-
-        assertThat(hearingEventDefinition.isAlterable(), is(false));
-
-        logEvent(requestSpec, asDefault(), hearing.it(), hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME);
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), now().minusMinutes(10l));
     }
 
     private void sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject) {
-
         final String updateHearingUrl = String.format("%s/%s", baseUri, format(ENDPOINT_PROPERTIES.getProperty(LISTING_COMMAND_PUBLISH_COURT_LIST)));
         final String request = publishCourtListJsonObject.toString();
 
@@ -100,11 +135,35 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     }
 
 
-    private JsonObject buildPublishCourtListJsonString(final String courtCentreId) {
-        return createObjectBuilder().add("courtCentreId", courtCentreId).add("createdTime", "2019-10-30T16:34:45.132Z").build();
+    private JsonObject buildPublishCourtListJsonString(final String courtCentreId, final String day) {
+        return createObjectBuilder().add("courtCentreId", courtCentreId).add("createdTime", "2019-10-" + day + "T16:34:45.132Z").build();
     }
 
     private static HearingEventDefinition findEventDefinitionWithActionLabel(final HearingEventDefinitionData hearingEventDefinitionData, final String actionLabel) {
         return hearingEventDefinitionData.getEventDefinitions().stream().filter(d -> d.getActionLabel().equals(actionLabel)).findFirst().get();
+    }
+
+    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel) throws NoSuchAlgorithmException {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", 2019, 7, 5, fromString(defenceCounselId))));
+
+        givenAUserHasLoggedInAsACourtClerk(randomUUID());
+
+        final List<HearingEventDefinition> hearingDefinitions = new ArrayList(hearingDefinitions());
+        hearingDefinitions.addAll(
+                Arrays.asList(
+                    new HearingEventDefinition(fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043"), "Appellant opens", INTEGER.next(), STRING.next(), "APPEAL", STRING.next(), INTEGER.next(), false),
+                    new HearingEventDefinition(fromString("e9060336-4821-4f46-969c-e08b33b48071"), "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
+                    new HearingEventDefinition(fromString("a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0"), "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
+                    new HearingEventDefinition(fromString("cc00cca8-39ba-431c-b08f-8c6f9be185d1"), "Defence counsel.name closes case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "CLOSE_CASE", STRING.next(), INTEGER.next(), false),
+                    new HearingEventDefinition(fromString("b335327a-7f58-4f26-a2ef-7e07134ba60b"), "Point of law discussion prosecution", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false)
+                )
+        );
+        final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions));
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, actionLabel);
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(requestSpec, asDefault(), hearing.it(), hearingEventDefinition.getId(), false, fromString(defenceCounselId), EVENT_TIME);
+        return hearing;
     }
 }

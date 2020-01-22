@@ -658,7 +658,7 @@ public class TestTemplates {
                     ).build());
         }
 
-        public static InitiateHearingCommand initiateHearingTemplateWithParam(UUID courtAndRoomId,final String courtRoomName, int year, int month, int day) throws NoSuchAlgorithmException {
+        public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtAndRoomId, final String courtRoomName, int year, int month, int day) throws NoSuchAlgorithmException {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
                                     .setDefendantType(PERSON)
@@ -667,6 +667,17 @@ public class TestTemplates {
                                     .setMinimumAssociatedPerson(true)
                                     .setMinimumDefenceOrganisation(true)
                             , courtAndRoomId, courtRoomName, year, month, day).build());
+        }
+
+        public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtId, final UUID courtRoomId, final String courtRoomName, int year, int month, int day, final UUID defenceCounselId) throws NoSuchAlgorithmException {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
+                                    .setDefendantType(PERSON)
+                                    .setHearingLanguage(ENGLISH)
+                                    .setJurisdictionType(CROWN)
+                                    .setMinimumAssociatedPerson(true)
+                                    .setMinimumDefenceOrganisation(true)
+                            , courtId, courtRoomId, courtRoomName, year, month, day, defenceCounselId).build());
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForDefendantTypeOrganisation() {
