@@ -24,7 +24,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:S1854", "squid:S1481", "squid:S2221", "squid:CommentedOutCodeLine"})
+@SuppressWarnings({"squid:S1854", "squid:S1481","squid:S3457", "squid:S2221", "squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_PROCESSOR)
 public class CourtCentreHearingEventProcessor  {
 

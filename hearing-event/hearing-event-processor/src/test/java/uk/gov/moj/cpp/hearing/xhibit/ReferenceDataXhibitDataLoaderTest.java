@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
@@ -15,7 +17,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,8 +60,39 @@ public class ReferenceDataXhibitDataLoaderTest {
 
     private XhibitEventMappingsList getExhibitEventMappingsList() {
         return new XhibitEventMappingsList(asList(new XhibitEventMapping(EVENT_ID, CREST_COURT_SITE_CODE, "", "", ""), new XhibitEventMapping(randomUUID(), "sdfsdf", "", "", "")));
-
     }
 
+    private List<JsonObject> crownCounts() {
 
+        final JsonArray jsonArrayOrganisationUnits = createArrayBuilder().add(createObjectBuilder()
+                .add("id", randomUUID().toString())
+                .add("oucode", "B60OW00")
+                .add("oucodeL1Code", "B")
+                .add("oucodeL1Name", "Magistrates' Courts")
+                .add("oucodeL3Name", "Wrexham Magistrates' Court")
+                .add("oucodeL3WelshName", "Llys Ynadon Wrecsam")
+                .add("address1", "The Law Courts")
+                .add("address2", "Bodhyfryd")
+                .add("address3", "Wrexham")
+                .add("address4", "Address4")
+                .add("address5", "Address5")
+                .add("postcode", "LL12 7BP")
+                .add("welshAddress1", "Y Llysoedd Barn")
+                .add("welshAddress2", "Wrecsam")
+                .add("welshAddress3", "Wrecsam")
+                .add("welshAddress4", "0")
+                .add("welshAddress5", "0")
+                .add("defaultStartTime", "10:00")
+                .add("defaultDurationHrs", "7").build()).build();
+
+        return convertToList(jsonArrayOrganisationUnits);
+    }
+
+    private List<JsonObject> convertToList(final JsonArray crownCourtsArray) {
+        final List<JsonObject> crownCourts = new ArrayList<>();
+        for (int i = 0; i < crownCourtsArray.size(); i++) {
+            crownCourts.add((JsonObject) crownCourtsArray.get(i));
+        }
+        return crownCourts;
+    }
 }

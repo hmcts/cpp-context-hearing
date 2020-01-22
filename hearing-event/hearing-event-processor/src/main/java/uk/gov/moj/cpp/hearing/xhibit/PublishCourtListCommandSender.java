@@ -27,7 +27,7 @@ public class PublishCourtListCommandSender {
 
     private static final String RECORD_COURT_LIST_EXPORT_SUCCESSFUL = "hearing.command.record-court-list-export-successful";
     private static final String RECORD_COURT_LIST_EXPORT_FAILED = "hearing.command.record-court-list-export-failed";
-
+    private static final String PUBLISH_LIST = "hearing.command.publish-court-list";
 
     @Inject
     @FrameworkComponent("EVENT_PROCESSOR")
@@ -62,11 +62,18 @@ public class PublishCourtListCommandSender {
         sendCommandWith(RECORD_COURT_LIST_EXPORT_FAILED, fromString(courtCentreId), objectBuilder.build());
     }
 
-    private void sendCommandWith(final String commandName, final UUID notificationId, final JsonObject payload) {
+    public void requestToPublishHearingEvents(final String courtCentreId, final String createdTime ){
+        final JsonObjectBuilder objectBuilder = createObjectBuilder()
+                .add(COURT_CENTRE_ID, courtCentreId)
+                .add(CREATED_TIME, createdTime);
+        sendCommandWith(PUBLISH_LIST, fromString(courtCentreId), objectBuilder.build());
+    }
+
+    private void sendCommandWith(final String commandName, final UUID courtCentreId, final JsonObject payload) {
 
         sender.send(envelopeFrom(
                 metadataBuilder()
-                        .withStreamId(notificationId)
+                        .withStreamId(courtCentreId)
                         .createdAt(utcClock.now())
                         .withName(commandName)
                         .withId(randomUUID())

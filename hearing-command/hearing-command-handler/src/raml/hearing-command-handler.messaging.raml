@@ -1,7 +1,7 @@
 #%RAML 0.8
 title: Hearing Command handler
 baseUri:  message://command/handler/message/hearing
-
+#Commands for Commands Handler
 /hearing.handler.command:
   post:
       body:
@@ -289,3 +289,7 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.publish-court-list+json:
             schema: !include json/schema/hearing.command.publish-court-list.json
             example: !include json/hearing.command.publish-court-list.json
+
+        application/vnd.hearing.command.publish-hearing-lists-for-crown-courts+json:
+            schema: !include json/schema/hearing.command.publish-hearing-lists-for-crown-courts.json
+            example: !include json/hearing.command.publish-hearing-lists-for-crown-courts.json
