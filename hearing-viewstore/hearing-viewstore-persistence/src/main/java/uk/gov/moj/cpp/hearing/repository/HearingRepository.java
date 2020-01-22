@@ -25,9 +25,9 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
                                                 @QueryParam("roomId") final UUID roomId);
 
     @Query(value = "SELECT hearing from Hearing hearing inner join hearing.hearingDays day " +
-            "WHERE hearing.courtCentre.id = :courtCentreId and " +
+            "WHERE hearing.courtCentre.id IN :courtCentreList and " +
             "and " +
             "day.date = :date ")
-    public abstract List<Hearing> findHearingsByDateAndCourtCentre(@QueryParam("date") final LocalDate date,
-                                                @QueryParam("courtCentreId") final UUID courtCentreId);
+    public abstract List<Hearing> findHearingsByDateAndCourtCentreList(@QueryParam("date") final LocalDate date,
+                                                                       @QueryParam("courtCentreId") List<UUID> courtCentreList);
 }

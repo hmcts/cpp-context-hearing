@@ -17,7 +17,7 @@ import org.apache.deltaspike.data.api.Query;
 import org.apache.deltaspike.data.api.QueryParam;
 import org.apache.deltaspike.data.api.Repository;
 
-@SuppressWarnings("CdiManagedBeanInconsistencyInspection")
+@SuppressWarnings({"CdiManagedBeanInconsistencyInspection", "squid:S1192"})
 @Repository
 public abstract class HearingEventRepository extends AbstractEntityRepository<HearingEvent, UUID> {
 
@@ -47,6 +47,15 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "hearingEvent.deleted is false and " +
                     "hearingEvent.alterable is false";
 
+    private static final String GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE_LIST =
+            "SELECT hearingEvent FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
+                    "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing " +
+                    "WHERE hearing.id = hearingEvent.hearingId and " +
+                    "hearing.courtCentre.id IN :courtCentreList and " +
+                    "hearingEvent.lastModifiedTime >= :lastModifiedTime and " +
+                    "hearingEvent.deleted is false and " +
+                    "hearingEvent.alterable is false";
+
     public Optional<HearingEvent> findOptionalById(final UUID hearingEventId) {
         final HearingEvent hearingEvent = findBy(hearingEventId);
         return hearingEvent == null ? empty() : Optional.of(hearingEvent);
@@ -69,5 +78,8 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
 
     @Query(value = GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE)
     public abstract List<HearingEvent> findBy(@QueryParam("courtCentreId") final UUID courtCentreId, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime);
+
+    @Query(value = GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE_LIST)
+    public abstract List<HearingEvent> findBy(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime);
 
 }

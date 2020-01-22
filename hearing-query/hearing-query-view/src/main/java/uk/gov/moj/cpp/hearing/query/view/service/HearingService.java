@@ -116,9 +116,9 @@ public class HearingService {
         return empty();
     }
 
-    public Optional<CurrentCourtStatus> getHearingsByDate(final UUID courtCentreId, final LocalDate localDate) {
-        final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentre(localDate, courtCentreId);
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreId, localDate.atStartOfDay(ZoneOffset.UTC));
+    public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
+        final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
                 .stream()
                 .map(ha -> hearingJPAMapper.fromJPA(ha))

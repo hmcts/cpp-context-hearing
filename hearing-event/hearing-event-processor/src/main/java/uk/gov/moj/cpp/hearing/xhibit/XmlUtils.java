@@ -38,7 +38,7 @@ public class XmlUtils {
 
     public String createWebPage(final Currentcourtstatus currentcourtstatus) {
         final JAXBElement<Currentcourtstatus> stringJAXBElement = new JAXBElement<>(WP_QNAME, Currentcourtstatus.class, null, currentcourtstatus);
-        final String publicDisplayXmlString = convertToXml(stringJAXBElement);
+        final String publicDisplayXmlString = convertToXml(stringJAXBElement, "uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp");
 
         final String publicDisplayFilePath = WEB_PAGE_XSD_PATH + WEB_PAGE.getSchemaName();
 
@@ -47,9 +47,9 @@ public class XmlUtils {
         return publicDisplayXmlString;
     }
 
-    public String createPublicDisplay(final Currentcourtstatus currentcourtstatus) {
-        final JAXBElement<Currentcourtstatus> stringJAXBElement = new JAXBElement<>(WP_QNAME, Currentcourtstatus.class, null, currentcourtstatus);
-        final String publicDisplayXmlString = convertToXml(stringJAXBElement);
+    public String createPublicDisplay(final uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentcourtstatus currentcourtstatus) {
+        final JAXBElement<uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentcourtstatus> stringJAXBElement = new JAXBElement<>(WP_QNAME, uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentcourtstatus.class, null, currentcourtstatus);
+        final String publicDisplayXmlString = convertToXml(stringJAXBElement, "uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd");
 
         final String publicDisplayFilePath = PUB_PAGE_XSD_PATH + PUBLIC_DISPLAY.getSchemaName();
 
@@ -58,12 +58,12 @@ public class XmlUtils {
         return publicDisplayXmlString;
     }
 
-    private String convertToXml(final JAXBElement<?> documentRoot) {
+    private String convertToXml(final JAXBElement<?> documentRoot, final String contextPath) {
 
         final StringWriter sw = new StringWriter();
 
         try {
-            final Marshaller jaxbMarshaller = getWpJaxbContext().createMarshaller();
+            final Marshaller jaxbMarshaller = getWpJaxbContext(contextPath).createMarshaller();
 
             jaxbMarshaller.setProperty("com.sun.xml.bind.namespacePrefixMapper", new XhibitNamespacePrefixMapper());
             jaxbMarshaller.setProperty(JAXB_FORMATTED_OUTPUT, true);
@@ -89,7 +89,7 @@ public class XmlUtils {
         }
     }
 
-    private JAXBContext getWpJaxbContext() throws JAXBException {
-        return newInstance("uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp");
+    private JAXBContext getWpJaxbContext(final String contextPath) throws JAXBException {
+        return newInstance(contextPath);
     }
 }

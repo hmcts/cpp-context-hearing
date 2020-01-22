@@ -24,8 +24,11 @@ import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -148,13 +151,15 @@ public class HearingQueryView {
         return enveloper.withMetadataFrom(envelope, "hearing.get-hearings-by-court-centre").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }
 
-    @SuppressWarnings("squid:CallToDeprecatedMethod")
+    @SuppressWarnings({"squid:CallToDeprecatedMethod", "squid:CallToDeprecatedMethod"})
     @Handles("hearing.hearings-court-centres-for-date")
-    public JsonEnvelope getHearingsForCourtCentreForDate(final JsonEnvelope envelope) {
-        final Optional<UUID> courtCentreId = getUUID(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
+    public JsonEnvelope getHearingsForCourtCentresForDate(final JsonEnvelope envelope) {
+        final Optional<String> courtCentreId = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
         final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
 
-        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsByDate(courtCentreId.get(), LocalDate.parse(dateOfHearing.get()));
+        final List<UUID> courtCentreList = Stream.of(courtCentreId.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
+
+        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsByDate(courtCentreList, LocalDate.parse(dateOfHearing.get()));
 
         return enveloper.withMetadataFrom(envelope, "hearing.hearings-court-centres-for-date").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }

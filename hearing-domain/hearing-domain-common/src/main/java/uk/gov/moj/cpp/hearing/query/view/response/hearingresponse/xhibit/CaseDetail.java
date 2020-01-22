@@ -55,6 +55,10 @@ public class CaseDetail implements Serializable {
         return judgeName;
     }
 
+    public String getNotBeforeTime() {
+        return notBeforeTime;
+    }
+
     public static Builder caseDetail() {
         return new CaseDetail.Builder();
     }

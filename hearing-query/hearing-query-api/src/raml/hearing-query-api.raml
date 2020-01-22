@@ -314,7 +314,7 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get-hearings-by-court-centre.json
                     schema:  !include json/schema/hearing.get-hearings-by-court-centre.json
 
-/hearings/court-centres/{courtCentreId}:
+/hearings/court-centres:
     get:
       description: |
         ...
@@ -325,6 +325,10 @@ protocols: [ HTTP, HTTPS ]
       queryParameters:
         dateOfHearing:
           description: date for which to get hearing.
+          type: string
+          required: true
+        courtCentreIds:
+          description: comma separated centre ids.
           type: string
           required: true
 

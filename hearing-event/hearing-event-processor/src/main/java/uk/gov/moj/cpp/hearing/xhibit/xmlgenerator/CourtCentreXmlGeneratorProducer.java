@@ -26,7 +26,7 @@ public class CourtCentreXmlGeneratorProducer {
             switch (courtCentreGeneratorParameters.getXmlProducerType()) {
                 case WEB_PAGE:
                     return webPageCourtCentreXmlGenerator;
-                case PUBLIC_DISPLAY : return emptyWebPageCourtCentreXmlGenerator;
+                case PUBLIC_DISPLAY : return publicDisplayCourtCentreXmlGenerator;
                 default: throw new GenerationFailedException(format("Unknown xml generator type: %s", courtCentreGeneratorParameters.getXmlProducerType().name()));
             }
         } else {
