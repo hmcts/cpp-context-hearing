@@ -33,7 +33,7 @@ public class WebDavStub {
     }
 
     public static String getSentXml() {
-        final List<LoggedRequest> putRequests = findAll(putRequestedFor(urlPathMatching(XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX)));
+        final List<LoggedRequest> putRequests = findAll(putRequestedFor(urlPathMatching("/xhibit-gateway/send-to-xhibit/WebPage.*\\.xml")));
         final LoggedRequest loggedRequest = putRequests.get(putRequests.size() - 1);
 
         return loggedRequest.getBodyAsString();

@@ -65,6 +65,12 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-courtroom-mappings";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-courtroom-mappings+json";
 
+    private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS_URL = "/referencedata-service/query/api/rest/referencedata/organisationunits";
+    private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE = "application/vnd.referencedata.query.organisationunits";
+
+    private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-court-mappings";
+    private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-court-mappings";
+
     private static final String COURT_ROOM_MEDIA_TYPE = "application/vnd.referencedata.query.courtrooms+json";
     private static final String COURT_ROOM_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/courtrooms";
 
@@ -418,6 +424,37 @@ public class ReferenceDataStub {
 
         waitForStubToBeReady(REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL, REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE);
     }
+
+    public static void stubGetReferenceDataCourtXhibitCourtMappings() {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        String payload = getPayload("stub-data/referencedata.query.cp-xhibit-court-mappings.json");
+
+        stubFor(get(urlPathMatching(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL, REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE);
+    }
+
+    public static void stubOrganisationUnit(final String ouId) {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+        String payload = getPayload("stub-data/referencedata.query.organisationunits.json")
+                .replace("OU_ID", ouId);
+
+        stubFor(get(urlPathMatching(REFERENCEDATA_QUERY_ORGANISATION_UNITS_URL))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE)
+                        .withBody(payload)));
+        waitForStubToBeReady(REFERENCEDATA_QUERY_ORGANISATION_UNITS_URL, REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE);
+    }
+
+
+
 
     public static void stubGetReferenceDataEventMappings() {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);

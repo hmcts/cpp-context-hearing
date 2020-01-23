@@ -34,7 +34,7 @@ public class XmlUtils {
     private static final String NAME = "currentcourtstatus";
     private final static QName WP_QNAME = new QName("", NAME);
     private static final String WEB_PAGE_XSD_PATH = "xhibit/xsd/iwp/";
-    private static final String PUB_PAGE_XSD_PATH = "xhibit/xsd/dp/";
+    private static final String PUB_PAGE_XSD_PATH = "xhibit/xsd/pd/";
 
     public String createWebPage(final Currentcourtstatus currentcourtstatus) {
         final JAXBElement<Currentcourtstatus> stringJAXBElement = new JAXBElement<>(WP_QNAME, Currentcourtstatus.class, null, currentcourtstatus);

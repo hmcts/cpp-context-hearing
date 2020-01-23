@@ -51,7 +51,7 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
             "SELECT hearingEvent FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
                     "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing " +
                     "WHERE hearing.id = hearingEvent.hearingId and " +
-                    "hearing.courtCentre.id IN :courtCentreList and " +
+                    "hearing.courtCentre.id IN (:courtCentreList) and " +
                     "hearingEvent.lastModifiedTime >= :lastModifiedTime and " +
                     "hearingEvent.deleted is false and " +
                     "hearingEvent.alterable is false";

@@ -7,6 +7,7 @@ import static uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.XhibitEvent.valueFor;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.time.format.DateTimeFormatter;
@@ -24,9 +25,10 @@ public class PublicDisplayEventGenerator {
     @Inject
     private XhibitEventMapperCache eventMapperCache;
 
-    public Currentstatus generate(final HearingEvent hearingEvent) {
+    public Currentstatus generate(final HearingEvent hearingEvent, final CourtRoom ccpCourtRoom ) {
         final String xhibitEventCode = eventMapperCache.getXhibitEventCodeBy(hearingEvent.getId().toString());
 
+        final  PopulateComplexEventTypeForPublicDisplay populateComplexEventType = new PopulateComplexEventTypeForPublicDisplay();
         final Currentstatus currentstatus = webPageObjectFactory.createCurrentstatus();
 
         if (valueFor(xhibitEventCode).isPresent()){
@@ -36,6 +38,7 @@ public class PublicDisplayEventGenerator {
             event.setDate(hearingEvent.getEventDate());
             event.setFreeText(EMPTY);
             event.setType(xhibitEventCode);
+            populateComplexEventType.addComplexEventType(event, ccpCourtRoom.getDefenceCounsel(), xhibitEventCode);
 
             currentstatus.setEvent(event);
         }

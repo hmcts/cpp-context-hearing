@@ -37,7 +37,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
     private XmlUtils xmlUtils;
 
     @Inject
-    private EventGenerator eventGenerator;
+    private PublicDisplayEventGenerator eventGenerator;
 
     private static final uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory webPageObjectFactory = new uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory();
 
@@ -108,21 +108,21 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         final Courtroom xhibitCourtRoom = webPageObjectFactory.createCourtroom();
 
         xhibitCourtRoom.setCourtroomname(ccpCourtRoom.getCourtRoomName());
-        xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases(), ccpCourtRoom.getHearingEvent()));
+        xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases(), ccpCourtRoom.getHearingEvent(), ccpCourtRoom));
         return xhibitCourtRoom;
     }
 
 
-    private Cases getCases(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases cppCases, final HearingEvent hearingEvent) {
+    private Cases getCases(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases cppCases, final HearingEvent hearingEvent, final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
         final Cases xhibitCases = webPageObjectFactory.createCases();
 
         cppCases.getCasesDetails()
-                .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase, hearingEvent)));
+                .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase, hearingEvent,  ccpCourtRoom)));
         return xhibitCases;
     }
 
 
-    private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail, final HearingEvent hearingEvent) {
+    private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail, final HearingEvent hearingEvent, final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
         final CaseDetails xhibitCaseDetails = new CaseDetails();
 
         xhibitCaseDetails.setCppurn(cppCaseDetail.getCppUrn());
@@ -132,8 +132,10 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
         if(null == hearingEvent) {
             xhibitCaseDetails.setNotbeforetime(cppCaseDetail.getNotBeforeTime());
+        } else {
+            eventGenerator.generate(hearingEvent, ccpCourtRoom);
         }
-        //Generate
+
         return xhibitCaseDetails;
     }
 

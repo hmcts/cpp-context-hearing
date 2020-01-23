@@ -41,6 +41,7 @@ public class HearingQueryView {
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
+    private static final String FIELD_COURT_CENTRE_IDS = "courtCentreIds";
     private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String DATE_OF_HEARING = "dateOfHearing";
     private static final String FIELD_ROOM_ID = "roomId";
@@ -154,7 +155,7 @@ public class HearingQueryView {
     @SuppressWarnings({"squid:CallToDeprecatedMethod", "squid:CallToDeprecatedMethod"})
     @Handles("hearing.hearings-court-centres-for-date")
     public JsonEnvelope getHearingsForCourtCentresForDate(final JsonEnvelope envelope) {
-        final Optional<String> courtCentreId = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
+        final Optional<String> courtCentreId = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_IDS);
         final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
 
         final List<UUID> courtCentreList = Stream.of(courtCentreId.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());

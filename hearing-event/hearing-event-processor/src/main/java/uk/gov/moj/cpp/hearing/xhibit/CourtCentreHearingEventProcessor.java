@@ -59,7 +59,7 @@ public class CourtCentreHearingEventProcessor  {
         try {
             final ZonedDateTime latestCourtListUploadTime = courtListTimeUpdateRetriever.getLatestCourtListUploadTime(envelope, publishCourtListRequestParameters.getCourtCentreId());
             processHearingForXhibitWebPage(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);
-            //Call xhibit display method here.
+            processHearingForXhibitPublicDisplay(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);
         } catch (final Exception e) {
             LOGGER.error("Court List generation failed", e);
             publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), "NONE", e.getMessage());
@@ -83,7 +83,7 @@ public class CourtCentreHearingEventProcessor  {
 
     @SuppressWarnings("squid:UnusedPrivateMethod")
     private void processHearingForXhibitPublicDisplay(final JsonEnvelope envelope, final PublishCourtListRequestParameters publishCourtListRequestParameters, final ZonedDateTime latestCourtListUploadTime) throws ExportFailedException {
-        final Optional<CurrentCourtStatus> hearingData = courtCentreHearingsRetriever.getHearingData(publishCourtListRequestParameters.getCourtCentreId(), latestCourtListUploadTime, envelope);
+        final Optional<CurrentCourtStatus> hearingData = courtCentreHearingsRetriever.getHearingDataForPublicDisplay(publishCourtListRequestParameters.getCourtCentreId(), latestCourtListUploadTime, envelope);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, hearingData, latestCourtListUploadTime);
         final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
