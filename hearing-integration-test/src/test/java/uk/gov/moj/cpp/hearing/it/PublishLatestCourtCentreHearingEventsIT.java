@@ -33,6 +33,7 @@ import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -55,6 +56,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     private static final String MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST = "application/vnd.hearing.publish-court-list+json";
 
     private static final ZonedDateTime EVENT_TIME = now().minusMinutes(5l).withZoneSameLocal(ZoneId.of("UTC"));
+    private static final LocalDate localDate = EVENT_TIME.toLocalDate();
 
     private String courtCentreId;
     private String courtRoom1Id;
@@ -150,7 +152,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     }
 
     private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel) throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", 2020, 1, 23, fromString(defenceCounselId))));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId))));
 
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
 

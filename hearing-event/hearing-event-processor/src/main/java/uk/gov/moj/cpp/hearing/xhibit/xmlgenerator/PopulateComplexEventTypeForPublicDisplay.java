@@ -30,7 +30,7 @@ public class PopulateComplexEventTypeForPublicDisplay {
     }
 
     private void populateE20606(final Event event) {
-        //TODO add Appellant Name
+        //Dont know this
         event.setE20606AppellantCOName("");
     }
 
@@ -46,7 +46,6 @@ public class PopulateComplexEventTypeForPublicDisplay {
 
     private void populateE20916(final Event event) {
         final E20916LegalArgumentOptions e20916LegalArgumentOptions = new E20916LegalArgumentOptions();
-        //is this correct
         final String e20916Opt2JudgesRuling = "E20916_Opt2_Judges_Ruling";
         e20916LegalArgumentOptions.setE20916Opt2JudgesRuling(e20916Opt2JudgesRuling);
         event.setE20916LegalArgumentOptions(e20916LegalArgumentOptions);

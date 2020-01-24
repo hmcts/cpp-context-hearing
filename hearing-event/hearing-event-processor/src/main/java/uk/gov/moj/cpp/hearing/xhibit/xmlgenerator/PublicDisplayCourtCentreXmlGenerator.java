@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSi
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
+import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
@@ -38,6 +39,9 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
 
     @Inject
     private PublicDisplayEventGenerator eventGenerator;
+
+    @Inject
+    private XhibitEventMapperCache eventMapperCache;
 
     private static final uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory webPageObjectFactory = new uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory();
 
@@ -135,8 +139,16 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         } else {
             eventGenerator.generate(hearingEvent, ccpCourtRoom);
         }
-
+        xhibitCaseDetails.setHearingprogress(determineHearingProgress(hearingEvent));
         return xhibitCaseDetails;
+    }
+
+    private BigInteger determineHearingProgress(final HearingEvent hearingEvent) {
+        if(null == hearingEvent) {
+            return BigInteger.ZERO;
+        }
+        // To ask about this ??
+        return BigInteger.valueOf(5);
     }
 
     private Defendants getDefendants(final CaseDetail cases) {
