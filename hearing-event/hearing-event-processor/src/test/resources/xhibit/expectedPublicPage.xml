@@ -20,6 +20,14 @@
                                         <lastname>Jong</lastname>
                                     </defendant>
                                 </defendants>
+                                <currentstatus>
+                                    <event>
+                                        <time>12:30</time>
+                                        <date>12/07/19</date>
+                                        <free_text></free_text>
+                                        <type>102000</type>
+                                    </event>
+                                </currentstatus>
                                 <hearingprogress>5</hearingprogress>
                             </caseDetails>
                         </cases>

@@ -130,3 +130,12 @@ rule "Query - API - hearing.get-hearings-by-court-centre"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.hearings-court-centres-for-date"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.hearings-court-centres-for-date");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

@@ -137,7 +137,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         if (null == hearingEvent) {
             xhibitCaseDetails.setNotbeforetime(cppCaseDetail.getNotBeforeTime());
         } else {
-            eventGenerator.generate(ccpCourtRoom);
+            xhibitCaseDetails.setCurrentstatus(eventGenerator.generate(ccpCourtRoom));
         }
         xhibitCaseDetails.setHearingprogress(determineHearingProgress(hearingEvent));
         return xhibitCaseDetails;
