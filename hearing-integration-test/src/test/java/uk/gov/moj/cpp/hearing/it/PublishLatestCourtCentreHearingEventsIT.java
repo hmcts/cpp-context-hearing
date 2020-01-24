@@ -25,7 +25,8 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
-import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXml;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForWebPage;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -96,8 +97,10 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
 
-        final String filePayload = getSentXml();
+        final String filePayload = getSentXmlForWebPage();
+        final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
         assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+        assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
     }
 
     @Test
@@ -112,7 +115,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
 
-        final String filePayload = getSentXml();
+        final String filePayload = getSentXmlForWebPage();
         assertThat(filePayload, containsString("E20906_Defence_CO_Name>Mr John Jones</E20906_Defence_CO_Name"));
     }
 
@@ -141,7 +144,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
 
-        final String filePayload = getSentXml();
+        final String filePayload = getSentXmlForWebPage();
         assertThat(filePayload, containsString("E20606_Appellant_CO_Name>TomAppellant BradyAppellant</E20606_Appellant_CO_Name"));
     }
 

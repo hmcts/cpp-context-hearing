@@ -6,7 +6,6 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
@@ -24,7 +23,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
-import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXml;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;

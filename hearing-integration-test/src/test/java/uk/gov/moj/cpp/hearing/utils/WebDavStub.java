@@ -22,6 +22,8 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 public class WebDavStub {
 
     public static final String XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/.*\\.xml";
+    public static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/WebPage.*\\.xml";
+    public static final String XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/PD.*\\.xml";
 
     public static void stubExhibitFileUpload() {
         stubFor(put(urlPathMatching(XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX))
@@ -32,8 +34,16 @@ public class WebDavStub {
         waitForPutStubToBeReady("/xhibit-gateway/send-to-xhibit/waitForPutStubToBeReady.xml", APPLICATION_XML, OK);
     }
 
-    public static String getSentXml() {
-        final List<LoggedRequest> putRequests = findAll(putRequestedFor(urlPathMatching("/xhibit-gateway/send-to-xhibit/WebPage.*\\.xml")));
+    public static String getSentXmlForWebPage() {
+        return getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_PATH_REG_EX);
+    }
+
+    public static String getSentXmlForPubDisplay() {
+        return getFileForPath(XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX);
+    }
+
+    private static String getFileForPath(final String filePath) {
+        final List<LoggedRequest> putRequests = findAll(putRequestedFor(urlPathMatching(filePath)));
         final LoggedRequest loggedRequest = putRequests.get(putRequests.size() - 1);
 
         return loggedRequest.getBodyAsString();
