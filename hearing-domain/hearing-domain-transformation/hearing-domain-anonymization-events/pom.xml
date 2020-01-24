@@ -3,7 +3,7 @@
     <parent>
         <artifactId>hearing-domain-transformation</artifactId>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
-        <version>6.4.8-SCSL-SNAPSHOT</version>
+        <version>6.4.9-SCSL-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
