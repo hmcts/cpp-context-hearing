@@ -1,13 +1,13 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit;
 
 import uk.gov.justice.core.courts.DefenceCounsel;
-import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public class CourtRoom implements Serializable {
     private static final long serialVersionUID = -4151921355339340656L;
@@ -20,11 +20,16 @@ public class CourtRoom implements Serializable {
 
     private DefenceCounsel defenceCounsel;
 
-    public CourtRoom(final String courtRoomName, final Cases cases, final HearingEvent hearingEvent, final DefenceCounsel defenceCounsel) {
+    private List<UUID> linkedCaseIds;
+
+    public CourtRoom(final String courtRoomName, final Cases cases,
+                     final HearingEvent hearingEvent, final DefenceCounsel defenceCounsel,
+                     final List<UUID> linkedCaseIds) {
         this.courtRoomName = courtRoomName;
         this.cases = cases;
         this.hearingEvent = hearingEvent;
         this.defenceCounsel = defenceCounsel;
+        this.linkedCaseIds = linkedCaseIds;
     }
 
     public String getCourtRoomName() {
@@ -43,6 +48,10 @@ public class CourtRoom implements Serializable {
         return defenceCounsel;
     }
 
+    public List<UUID> getLinkedCaseIds() {
+        return linkedCaseIds;
+    }
+
     public static Builder courtRoom() {
         return new CourtRoom.Builder();
     }
@@ -59,13 +68,12 @@ public class CourtRoom implements Serializable {
 
         return java.util.Objects.equals(this.courtRoomName, that.courtRoomName) &&
                 java.util.Objects.equals(this.hearingEvent, that.hearingEvent) &&
-                java.util.Objects.equals(this.cases, that.cases) &&
-                java.util.Objects.equals(this.defenceCounsel, that.defenceCounsel);
+                java.util.Objects.equals(this.cases, that.cases);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(courtRoomName, cases);
+        return java.util.Objects.hash(courtRoomName, hearingEvent, cases);
     }
 
     @Override
@@ -75,6 +83,7 @@ public class CourtRoom implements Serializable {
                 "hearingEvent='" + hearingEvent + "'," +
                 "cases='" + cases + "'" +
                 "defenceCounsel='" + defenceCounsel + "'" +
+                "linkedCaseIds='" + linkedCaseIds + "'" +
                 "}";
     }
 
@@ -102,6 +111,8 @@ public class CourtRoom implements Serializable {
 
         private List<DefenceCounsel> defenceCounsels;
 
+        private List<UUID> linkedCaseIds;
+
         public Builder withCourtRoomName(final String courtRoomName) {
             this.courtRoomName = courtRoomName;
             return this;
@@ -118,7 +129,7 @@ public class CourtRoom implements Serializable {
         }
 
         public CourtRoom build() {
-            return new CourtRoom(courtRoomName, cases, hearingEvent, getDefenceCounsel());
+            return new CourtRoom(courtRoomName, cases, hearingEvent, getDefenceCounsel(), linkedCaseIds);
         }
 
         private DefenceCounsel getDefenceCounsel() {
@@ -128,8 +139,13 @@ public class CourtRoom implements Serializable {
                     .findFirst().orElse(null);
         }
 
-        public Builder withDefenceCouncil(final Hearing hearing) {
-            this.defenceCounsels = hearing.getDefenceCounsels();
+        public Builder withDefenceCouncil(final List<DefenceCounsel> defenceCounsels) {
+            this.defenceCounsels = defenceCounsels;
+            return this;
+        }
+
+        public Builder withLinkedCaseIds(final List<UUID> linkedCaseIds) {
+            this.linkedCaseIds = linkedCaseIds;
             return this;
         }
     }

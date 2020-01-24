@@ -12,8 +12,8 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.HearingEvent;
-import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Currentstatus;
-import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Event20903OptionType;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event20903OptionType;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
@@ -31,13 +31,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class EventGeneratorTest {
-
+public class PublicDisplayEventGeneratorTest {
     @Mock
     private XhibitEventMapperCache eventMapperCache;
 
     @InjectMocks
-    private EventGenerator eventGenerator;
+    private PublicDisplayEventGenerator publicDisplayEventGenerator;
 
     private final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
     private final DateTimeFormatter dateFormatter = ofPattern("dd/MM/yy");
@@ -47,10 +46,10 @@ public class EventGeneratorTest {
     @Before
     public void setup() {
         lastModifiedTime = now();
-        final PopulateComplexEventType populateComplexEventType = new PopulateComplexEventType();
+        final PopulateComplexEventTypeForPublicDisplay populateComplexEventTypeForPublicDisplay = new PopulateComplexEventTypeForPublicDisplay();
         final ComplexTypeDataProcessor complexTypeDataProcessor = new ComplexTypeDataProcessor();
-        setField(populateComplexEventType, "complexTypeDataProcessor", complexTypeDataProcessor);
-        setField(eventGenerator, "populateComplexEventType", populateComplexEventType);
+        setField(populateComplexEventTypeForPublicDisplay, "complexTypeDataProcessor", complexTypeDataProcessor);
+        setField(publicDisplayEventGenerator, "populateComplexEventTypeForPublicDisplay", populateComplexEventTypeForPublicDisplay);
     }
 
     @Test
@@ -61,7 +60,7 @@ public class EventGeneratorTest {
 
         when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
 
-        final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
+        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(courtRoom);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
         assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
@@ -77,7 +76,7 @@ public class EventGeneratorTest {
 
         when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
 
-        final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
+        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(courtRoom);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
         assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
@@ -96,7 +95,7 @@ public class EventGeneratorTest {
 
         when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
 
-        final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
+        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(courtRoom);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
         assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));

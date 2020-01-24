@@ -20,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearin
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionProsecutionCases;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRoomMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
@@ -39,6 +40,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -62,6 +64,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     private String courtRoom1Id;
     private String courtRoom2Id;
     private String defenceCounselId;
+    private UUID caseId;
 
     @Before
     public void initStub() {
@@ -69,6 +72,8 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         courtRoom1Id = randomUUID().toString();
         courtRoom2Id = randomUUID().toString();
         defenceCounselId = randomUUID().toString();
+        caseId = randomUUID();
+
         stubExhibitFileUpload();
         stubGetReferenceDataCourtRoomMappings(courtRoom1Id, courtRoom2Id);
 
@@ -76,6 +81,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         stubOrganisationUnit(courtCentreId);
 
         stubGetReferenceDataEventMappings();
+        stubGetProgressionProsecutionCases(caseId);
     }
 
     @Test
@@ -124,6 +130,22 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     }
 
     @Test
+    public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
+        createHearingEvent(courtRoom2Id, defenceCounselId,"Appellant opens");
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "25");
+
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        sendPublishCourtListCommand(publishCourtListJsonObject);
+
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+
+        final String filePayload = getSentXml();
+        assertThat(filePayload, containsString("E20606_Appellant_CO_Name>TomAppellant BradyAppellant</E20606_Appellant_CO_Name"));
+    }
+
+    @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
 
@@ -152,7 +174,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     }
 
     private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel) throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId))));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
 
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
 

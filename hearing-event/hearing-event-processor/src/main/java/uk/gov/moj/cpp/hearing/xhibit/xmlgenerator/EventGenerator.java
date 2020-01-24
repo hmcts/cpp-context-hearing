@@ -22,13 +22,15 @@ public class EventGenerator {
     @Inject
     private XhibitEventMapperCache eventMapperCache;
 
+    @Inject
+    private PopulateComplexEventType populateComplexEventType;
+
     private static final uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.ObjectFactory webPageObjectFactory = new uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.ObjectFactory();
 
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
     private static final DateTimeFormatter dateFormatter = ofPattern("dd/MM/yy");
 
     public Currentstatus generate(final CourtRoom courtRoom) {
-        final PopulateComplexEventType populateComplexEventType = new PopulateComplexEventType();
         final HearingEvent hearingEvent = courtRoom.getHearingEvent();
         final String xhibitEventCode =
                 eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString());
@@ -43,7 +45,7 @@ public class EventGenerator {
             event.setFreeText(EMPTY);
             event.setType(xhibitEventCode);
 
-            populateComplexEventType.addComplexEventType(event, courtRoom.getDefenceCounsel(), xhibitEventCode);
+            populateComplexEventType.addComplexEventType(event, courtRoom, xhibitEventCode);
 
             currentstatus.setEvent(event);
         }

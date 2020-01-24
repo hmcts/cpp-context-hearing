@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.justice.hearing.courts.JurisdictionType.CROWN;
@@ -12,6 +13,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant.defendant;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -25,8 +27,10 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -68,9 +72,15 @@ public class HearingListXhibitResponseTransformer {
                         .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
                         .withCases(getCases(hearing))
                         .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
-                        .withDefenceCouncil(hearing)
+                        .withDefenceCouncil(hearing.getDefenceCounsels())
+                        .withLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()))
                         .build())
                 .collect(toList());
+    }
+
+    private List<UUID> getLinkedCaseIds(final List<CourtApplication> courtApplications) {
+        return ofNullable(courtApplications).orElse(Collections.emptyList())
+                .stream().map(CourtApplication::getLinkedCaseId).collect(toList());
     }
 
     private Cases getCases(final Hearing hearing) {

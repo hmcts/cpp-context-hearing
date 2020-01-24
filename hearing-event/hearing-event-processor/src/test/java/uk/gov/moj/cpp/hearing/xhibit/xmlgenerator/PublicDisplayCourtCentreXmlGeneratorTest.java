@@ -17,9 +17,9 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import static uk.gov.moj.cpp.hearing.xhibit.XmlTestUtils.assertXmlEquals;
 
 import uk.gov.justice.core.courts.HearingEvent;
-import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Currentstatus;
-import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Event;
-import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.ObjectFactory;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
@@ -36,18 +36,17 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class WebPageCourtCentreXmlGeneratorTest {
-
-    private static final String WEB_PAGE_FILE_PATH = "xhibit/expectedWebPage.xml";
+public class PublicDisplayCourtCentreXmlGeneratorTest {
+    private static final String PUBLIC_PAGE_FILE_PATH = "xhibit/expectedPublicPage.xml";
 
     @Spy
     private XmlUtils xmlUtils;
 
     @Mock
-    private EventGenerator eventGenerator;
+    private PublicDisplayEventGenerator publicDisplayEventGenerator;
 
     @InjectMocks
-    private WebPageCourtCentreXmlGenerator webPageCourtCentreXmlGenerator;
+    private PublicDisplayCourtCentreXmlGenerator publicDisplayCourtCentreXmlGenerator;
 
     @Test
     public void shouldCreatePublicDisplayCourtCentreXml() throws IOException {
@@ -59,13 +58,13 @@ public class WebPageCourtCentreXmlGeneratorTest {
 
         final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
 
-        when(eventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0))).thenReturn(currentstatus);
+        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime);
 
-        final String generatedWebPageXml = webPageCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
+        final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
 
-        assertXmlEquals(generatedWebPageXml, WEB_PAGE_FILE_PATH);
+        assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FILE_PATH);
     }
 
     private Currentstatus getCurrentStatus() {

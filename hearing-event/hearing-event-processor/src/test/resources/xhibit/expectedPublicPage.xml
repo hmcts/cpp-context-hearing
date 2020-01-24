@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<currentcourtstatus>
+    <court>
+        <courtname>testCourtName</courtname>
+        <courtsites>
+            <courtsite>
+                <courtsitename>testCourtSiteName</courtsitename>
+                <courtrooms>
+                    <courtroom>
+                        <cases>
+                            <caseDetails>
+                                <cppurn>234</cppurn>
+                                <casenumber>1</casenumber>
+                                <casetype>caseType</casetype>
+                                <hearingtype>hearingType</hearingtype>
+                                <defendants>
+                                    <defendant>
+                                        <firstname>Alexander</firstname>
+                                        <middlename>de</middlename>
+                                        <lastname>Jong</lastname>
+                                    </defendant>
+                                </defendants>
+                                <hearingprogress>5</hearingprogress>
+                            </caseDetails>
+                        </cases>
+                        <courtroomname>courtRoomName</courtroomname>
+                    </courtroom>
+                </courtrooms>
+            </courtsite>
+        </courtsites>
+    </court>
+    <datetimestamp>
+        <dayofweek>Thursday</dayofweek>
+        <date>5</date>
+        <month>December</month>
+        <year>2019</year>
+        <hour>13</hour>
+        <min>50</min>
+    </datetimestamp>
+    <pagename>testcourtname</pagename>
+</currentcourtstatus>

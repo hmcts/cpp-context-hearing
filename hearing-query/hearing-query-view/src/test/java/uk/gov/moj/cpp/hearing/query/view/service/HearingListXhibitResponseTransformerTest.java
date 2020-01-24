@@ -45,12 +45,15 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID hearingId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
         final List<Hearing> hearingList = Arrays.asList(hearing);
+
         when(hearing.getId()).thenReturn(hearingId);
         when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(courtCentreId).build());
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
         when(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(courtCentreId, courtRoomId)).thenReturn("x");
+
         final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+
         assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
         assertThat(currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCourtRoomName(), is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));

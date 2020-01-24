@@ -10,6 +10,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -20,25 +21,30 @@ public class PublicDisplayEventGenerator {
 
     private static final uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory webPageObjectFactory = new uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory();
 
-    private final static DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
+    private static final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
+    private static final DateTimeFormatter dateFormatter = ofPattern("dd/MM/yy");
 
     @Inject
     private XhibitEventMapperCache eventMapperCache;
 
-    public Currentstatus generate(final HearingEvent hearingEvent, final CourtRoom ccpCourtRoom ) {
-        final String xhibitEventCode = eventMapperCache.getXhibitEventCodeBy(hearingEvent.getId().toString());
+    @Inject
+    private PopulateComplexEventTypeForPublicDisplay populateComplexEventTypeForPublicDisplay;
 
-        final  PopulateComplexEventTypeForPublicDisplay populateComplexEventType = new PopulateComplexEventTypeForPublicDisplay();
+    public Currentstatus generate(final CourtRoom ccpCourtRoom ) {
+        final HearingEvent hearingEvent = ccpCourtRoom.getHearingEvent();
+        final String xhibitEventCode =
+                eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString());
+
         final Currentstatus currentstatus = webPageObjectFactory.createCurrentstatus();
 
         if (valueFor(xhibitEventCode).isPresent()){
             final Event event = webPageObjectFactory.createEvent();
 
             event.setTime(hearingEvent.getLastModifiedTime().format(dateTimeFormatter));
-            event.setDate(hearingEvent.getEventDate());
+            event.setDate(LocalDate.parse(hearingEvent.getEventDate()).format(dateFormatter));
             event.setFreeText(EMPTY);
             event.setType(xhibitEventCode);
-            populateComplexEventType.addComplexEventType(event, ccpCourtRoom.getDefenceCounsel(), xhibitEventCode);
+            populateComplexEventTypeForPublicDisplay.addComplexEventType(event, ccpCourtRoom, xhibitEventCode);
 
             currentstatus.setEvent(event);
         }

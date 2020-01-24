@@ -669,7 +669,7 @@ public class TestTemplates {
                             , courtAndRoomId, courtRoomName, year, month, day).build());
         }
 
-        public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtId, final UUID courtRoomId, final String courtRoomName, int year, int month, int day, final UUID defenceCounselId) throws NoSuchAlgorithmException {
+        public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtId, final UUID courtRoomId, final String courtRoomName, int year, int month, int day, final UUID defenceCounselId, final UUID caseId) throws NoSuchAlgorithmException {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
                                     .setDefendantType(PERSON)
@@ -677,7 +677,7 @@ public class TestTemplates {
                                     .setJurisdictionType(CROWN)
                                     .setMinimumAssociatedPerson(true)
                                     .setMinimumDefenceOrganisation(true)
-                            , courtId, courtRoomId, courtRoomName, year, month, day, defenceCounselId).build());
+                            , courtId, courtRoomId, courtRoomName, year, month, day, defenceCounselId, caseId).build());
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForDefendantTypeOrganisation() {

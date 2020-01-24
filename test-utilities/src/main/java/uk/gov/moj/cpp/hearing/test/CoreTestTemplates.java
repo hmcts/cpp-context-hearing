@@ -503,7 +503,13 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args, final UUID courtId, final UUID courtRoomId, final String courtRoomName, int year, int month, int day, final UUID defenceCounselId) throws NoSuchAlgorithmException {
+    public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args,
+                                                   final UUID courtId,
+                                                   final UUID courtRoomId,
+                                                   final String courtRoomName,
+                                                   int year, int month, int day,
+                                                   final UUID defenceCounselId,
+                                                   final UUID caseId) throws NoSuchAlgorithmException {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
@@ -535,7 +541,7 @@ public class CoreTestTemplates {
                                 .collect(toList())
                 )
 
-                .withCourtApplications(asList((new HearingFactory().courtApplication().build())));
+                .withCourtApplications(asList((new HearingFactory().courtApplication().withLinkedCaseId(caseId).build())));
 
         if (args.hearingLanguage == WELSH) {
             hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
