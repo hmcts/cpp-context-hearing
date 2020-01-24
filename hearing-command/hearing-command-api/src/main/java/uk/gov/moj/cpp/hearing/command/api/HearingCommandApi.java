@@ -174,6 +174,6 @@ public class HearingCommandApi {
 
     @Handles("hearing.publish-hearing-lists-for-crown-courts")
     public void publishHearingListsForCrownCourts(final JsonEnvelope envelope){
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.publish-court-list").apply(envelope.payloadAsJsonObject()));
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.publish-hearing-lists-for-crown-courts").apply(envelope.payloadAsJsonObject()));
     }
 }
