@@ -20,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRoomMappings;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
@@ -122,6 +123,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel) throws NoSuchAlgorithmException {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), hearing.getHearing().getHearingLanguage());
 
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
 
