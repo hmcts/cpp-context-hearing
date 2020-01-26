@@ -58,12 +58,12 @@ public class ReferenceDataServiceTest {
         final List<UUID> expectedCourtCentreIds = Arrays.asList(randomUUID(), randomUUID());
 
         final JsonEnvelope returnedResponseEnvelope = generateReferenceDataServiceResponse(expectedCourtCentreIds);
-        when(requester.request(any(JsonEnvelope.class))).thenReturn(returnedResponseEnvelope);
+        when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(returnedResponseEnvelope);
         ArgumentCaptor<JsonEnvelope> argumentCaptorForRequestEnvelope = ArgumentCaptor.forClass(JsonEnvelope.class);
 
         final List<UUID> courtCentreIds = referenceDataService.getAllCrownCourtCentres(inputEnvelope);
 
-        verify(requester).request(argumentCaptorForRequestEnvelope.capture());
+        verify(requester).requestAsAdmin(argumentCaptorForRequestEnvelope.capture());
         final JsonEnvelope requestEnvelope = argumentCaptorForRequestEnvelope.getValue();
         assertThat(requestEnvelope.metadata().name(), is("referencedata.query.courtrooms"));
         final JsonObject expectedPayload = createObjectBuilder()

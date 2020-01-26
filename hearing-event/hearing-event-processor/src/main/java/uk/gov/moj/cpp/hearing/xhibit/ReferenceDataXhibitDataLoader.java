@@ -44,7 +44,7 @@ public class ReferenceDataXhibitDataLoader {
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, Json.createObjectBuilder().build());
 
-        return requester.request(jsonEnvelope, XhibitEventMappingsList.class).payload();
+        return requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
     }
 
     public String getXhibitCourtCentreCodeBy(final String courtCentreId) {
@@ -65,7 +65,7 @@ public class ReferenceDataXhibitDataLoader {
                         .build(),
                 query);
 
-        return requester.request(jsonEnvelope, CourtRoomMappingsList.class).payload();
+        return requester.requestAsAdmin(jsonEnvelope, CourtRoomMappingsList.class).payload();
     }
 }
 

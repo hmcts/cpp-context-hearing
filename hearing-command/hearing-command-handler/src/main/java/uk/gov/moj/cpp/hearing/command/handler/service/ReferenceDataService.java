@@ -34,7 +34,7 @@ public class ReferenceDataService {
                 .add("oucodeL1Code", "C")
                 .build();
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(inputEnvelope, REFERENCEDATA_QUERY_COURT_CENTRES).apply(payload);
-        return requester.request(requestEnvelope).payloadAsJsonObject()
+        return requester.requestAsAdmin(requestEnvelope).payloadAsJsonObject()
                 .getJsonArray("organisationunits")
                 .getValuesAs(JsonObject.class)
                 .stream()

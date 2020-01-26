@@ -50,7 +50,7 @@ public class ReferenceDataXhibitDataLoaderTest {
     public void shouldLoadXhibitCourtCentreCodeByCourtCentreId() {
         final XhibitEventMappingsList courtCentreCourtList = getExhibitEventMappingsList();
 
-        when(requester.request(any(JsonEnvelope.class), eq(XhibitEventMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), eq(XhibitEventMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
 
         final XhibitEventMappingsList xhibitEventMappingsList = referenceDataXhibitDataLoader.getEventMapping();
 
