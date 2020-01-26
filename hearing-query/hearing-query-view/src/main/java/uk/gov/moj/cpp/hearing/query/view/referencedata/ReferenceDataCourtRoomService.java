@@ -60,7 +60,7 @@ public class ReferenceDataCourtRoomService {
                 query);
 
         return requester
-                .request(jsonEnvelope, CourtRoomMappingsList.class)
+                .requestAsAdmin(jsonEnvelope, CourtRoomMappingsList.class)
                 .payload();
     }
 }

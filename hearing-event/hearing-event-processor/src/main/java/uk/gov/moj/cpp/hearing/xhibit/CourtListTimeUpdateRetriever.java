@@ -56,7 +56,7 @@ public class CourtListTimeUpdateRetriever {
         final JsonObject publishCourtListStatus = jsonObject.getJsonObject("publishCourtListStatus");
 
         if (!publishCourtListStatus.isEmpty()) {
-            return publishCourtListStatus.getString(CREATED_TIME);
+            return publishCourtListStatus.getString(CREATED_TIME, EMPTY);
         }
         return EMPTY;
     }
