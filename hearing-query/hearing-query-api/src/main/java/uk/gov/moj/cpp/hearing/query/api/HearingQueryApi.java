@@ -79,7 +79,7 @@ public class HearingQueryApi {
         return requester.request(query);
     }
 
-    @Handles("hearing.get-hearings-by-court-centre")
+    @Handles("hearing.latest-hearings-by-court-centres")
     public JsonEnvelope getHeringsByCourtCentre(final JsonEnvelope query) {
         return requester.request(query);
     }

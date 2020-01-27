@@ -2,8 +2,10 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 
 import static java.time.ZonedDateTime.now;
+import static java.util.Optional.empty;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
@@ -63,6 +65,7 @@ import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -491,9 +494,11 @@ public class HearingServiceTest {
     }
 
     @Test
-    public void shouldReturnHearingByCourtCentreIdAndLatestModifiedTime() {
-        final ZonedDateTime lastModifiedTime = now();
-        final UUID courtCentreId = randomUUID();
+    public void shouldReturnLatestHearingByCourtCentreIdsAndLatestModifiedTime() {
+        final LocalDate now = LocalDate.now();
+        final ZonedDateTime zonedDateTime =  now.atStartOfDay(ZoneOffset.UTC);
+        final List<UUID> courtCentreIds = new ArrayList();
+        courtCentreIds.add(randomUUID()) ;
         final UUID hearingId = randomUUID();
 
         final HearingEvent hearingEvent = hearingEvent().setHearingId(hearingId);
@@ -502,18 +507,14 @@ public class HearingServiceTest {
 
         final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
 
+        final CurrentCourtStatus currentCourtStatus = currentCourtStatus().withPageName("hello").build();
 
-        final CurrentCourtStatus currentCourtStatus = currentCourtStatus()
-                .withPageName("hello")
-                .build();
-
-
-        when(hearingEventRepository.findBy(courtCentreId, lastModifiedTime)).thenReturn(hearingEventList);
+        when(hearingEventRepository.findBy(courtCentreIds, zonedDateTime)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(currentCourtStatus);
 
-        final Optional<CurrentCourtStatus> response = hearingService.getHearingsBy(courtCentreId, lastModifiedTime);
+        final Optional<CurrentCourtStatus> response = hearingService.getLatestHearings(courtCentreIds, now);
 
         assertThat(response.get().getPageName(), is(currentCourtStatus.getPageName()));
     }

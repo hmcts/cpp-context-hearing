@@ -101,8 +101,8 @@ public class HearingService {
 
     private final ZoneId zid = of(UTC.getId());
 
-    public Optional<CurrentCourtStatus> getHearingsBy(final UUID courtCentreId, final ZonedDateTime lastModifiedTime) {
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreId, lastModifiedTime);
+    public Optional<CurrentCourtStatus> getLatestHearings(final List<UUID> courtCentreList, final LocalDate localDate) {
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingEvents
                 .stream()
                 .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))

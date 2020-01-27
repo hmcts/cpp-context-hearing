@@ -293,29 +293,29 @@ protocols: [ HTTP, HTTPS ]
             schema:  !include  json/schema/hearing.court.list.publish.status.json
 
 
-/get-hearings-by-court-centre:
+/get-latest-hearings-by-court-centres:
     get:
       description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.get-hearings-by-court-centre+json
-            name: hearing.get-hearings-by-court-centre
+            responseType: application/vnd.hearing.latest-hearings-by-court-centres+json
+            name: hearing.latest-hearings-by-court-centres
         ...
       queryParameters:
-        courtCentreId:
-          description: court centre id
-          type: string
-          required: true
-        lastModifiedTime:
-          description: Last modified time
-          type: string
-          required: true
+              dateOfHearing:
+                description: date for which to get hearing.
+                type: string
+                required: true
+              courtCentreIds:
+                description: comma separated centre ids.
+                type: string
+                required: true
 
       responses:
             200:
                 description: OK
                 body:
-                  application/vnd.hearing.get-hearings-by-court-centre+json:
+                  application/vnd.hearing.latest-hearings-by-court-centres+json:
                     example:  !include json/hearing.get-hearings-by-court-centre.json
                     schema:  !include json/schema/hearing.get-hearings-by-court-centre.json
 

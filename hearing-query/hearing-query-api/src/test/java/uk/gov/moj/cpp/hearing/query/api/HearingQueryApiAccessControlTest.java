@@ -30,7 +30,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String HEARING_QUERY_SEARCH_BY_MATERIAL_ID = "hearing.query.search-by-material-id";
     private static final String HEARING_QUERY_COURT_LIST_PUBLISH_STATUS = "hearing.court.list.publish.status";
-    private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.get-hearings-by-court-centre";
+    private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.latest-hearings-by-court-centres";
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
 

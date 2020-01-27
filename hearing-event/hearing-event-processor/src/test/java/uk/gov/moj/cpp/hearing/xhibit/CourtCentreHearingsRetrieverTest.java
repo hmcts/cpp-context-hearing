@@ -72,7 +72,7 @@ public class CourtCentreHearingsRetrieverTest {
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(currentCourtStatusEnvelope);
 
-        final Optional<CurrentCourtStatus> courtStatus = courtCentreHearingsRetriever.getHearingData(courtCentreId, latestCourtListUploadTime, currentCourtStatusEnvelope);
+        final Optional<CurrentCourtStatus> courtStatus = courtCentreHearingsRetriever.getHearingDataForWebPage(courtCentreId, latestCourtListUploadTime, currentCourtStatusEnvelope);
 
         assertThat(courtStatus.get().getPageName(), is("testPageName"));
     }
@@ -88,7 +88,7 @@ public class CourtCentreHearingsRetrieverTest {
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(currentCourtStatusEnvelope);
 
-        final Optional<CurrentCourtStatus> courtStatus = courtCentreHearingsRetriever.getHearingData(courtCentreId, latestCourtListUploadTime, currentCourtStatusEnvelope);
+        final Optional<CurrentCourtStatus> courtStatus = courtCentreHearingsRetriever.getHearingDataForWebPage(courtCentreId, latestCourtListUploadTime, currentCourtStatusEnvelope);
 
         assertTrue(!courtStatus.isPresent());
     }
@@ -99,7 +99,7 @@ public class CourtCentreHearingsRetrieverTest {
 
         return envelopeFrom(
                 metadataBuilder().
-                        withName("hearing.get-hearings-by-court-centre").
+                        withName("hearing.latest-hearings-by-court-centres").
                         withId(randomUUID()),
                 jsonObject
         );
@@ -108,7 +108,7 @@ public class CourtCentreHearingsRetrieverTest {
     private JsonEnvelope getEmptyPayloadEnvelope() {
         return envelopeFrom(
                 metadataBuilder().
-                        withName("hearing.get-hearings-by-court-centre").
+                        withName("hearing.latest-hearings-by-court-centres").
                         withId(randomUUID()),
                 createObjectBuilder().build()
         );

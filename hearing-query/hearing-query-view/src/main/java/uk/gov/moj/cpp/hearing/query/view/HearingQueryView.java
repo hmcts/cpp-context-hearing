@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static java.time.ZonedDateTime.parse;
 import static java.util.UUID.fromString;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
@@ -42,7 +41,6 @@ public class HearingQueryView {
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_IDS = "courtCentreIds";
-    private static final String LAST_MODIFIED_TIME = "lastModifiedTime";
     private static final String DATE_OF_HEARING = "dateOfHearing";
     private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_TIME = "startTime";
@@ -142,14 +140,16 @@ public class HearingQueryView {
     }
 
 
-    @Handles("hearing.get-hearings-by-court-centre")
-    public JsonEnvelope getHearingsByCourtCentre(final JsonEnvelope envelope) {
-        final Optional<UUID> courtCentreId = getUUID(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_ID);
-        final Optional<String> lastModifiedTime = getString(envelope.payloadAsJsonObject(), LAST_MODIFIED_TIME);
+    @Handles("hearing.latest-hearings-by-court-centres")
+    public JsonEnvelope getLatestHearingsByCourtCentres(final JsonEnvelope envelope) {
+        final Optional<String> courtCentreIds = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_IDS);
+        final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
 
-        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsBy(courtCentreId.get(), parse(lastModifiedTime.get()));
+        final List<UUID> courtCentreList = Stream.of(courtCentreIds.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
 
-        return enveloper.withMetadataFrom(envelope, "hearing.get-hearings-by-court-centre").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
+        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getLatestHearings(courtCentreList,  LocalDate.parse(dateOfHearing.get()));
+
+        return enveloper.withMetadataFrom(envelope, "hearing.get-latest-hearings-by-court-centres").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }
 
     @SuppressWarnings({"squid:CallToDeprecatedMethod", "squid:CallToDeprecatedMethod"})

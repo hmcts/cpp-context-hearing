@@ -153,7 +153,8 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
-        publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), now().minusMinutes(10l));
+        //publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), now().minusMinutes(10l));
+        publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), LocalDate.now());
     }
 
     private void sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject) {

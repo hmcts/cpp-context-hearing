@@ -122,10 +122,10 @@ rule "Query - API - hearing.court.list.publish.status"
     $outcome.setSuccess(true);
 end
 
-rule "Query - API - hearing.get-hearings-by-court-centre"
+rule "Query - API - hearing.latest-hearings-by-court-centres"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.get-hearings-by-court-centre");
+    $action: Action(name == "hearing.latest-hearings-by-court-centres");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
   then
     $outcome.setSuccess(true);

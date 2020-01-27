@@ -67,14 +67,17 @@ public class CourtCentreHearingEventProcessor  {
     }
 
     private void processHearingForXhibitWebPage(final JsonEnvelope envelope, final PublishCourtListRequestParameters publishCourtListRequestParameters, final ZonedDateTime latestCourtListUploadTime) throws ExportFailedException {
-        final Optional<CurrentCourtStatus> hearingData = courtCentreHearingsRetriever.getHearingData(publishCourtListRequestParameters.getCourtCentreId(), latestCourtListUploadTime, envelope);
+        final Optional<CurrentCourtStatus> hearingData = courtCentreHearingsRetriever.getHearingDataForWebPage(publishCourtListRequestParameters.getCourtCentreId(), latestCourtListUploadTime, envelope);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(WEB_PAGE, hearingData, latestCourtListUploadTime);
         final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 
         final String xhibitXml = courtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
 
-        final String webPageFileName = xhibitFileNameGenerator.generateWebPageFileName(parse(publishCourtListRequestParameters.getCreatedTime()), publishCourtListRequestParameters.getCourtCentreId());
+        final ZonedDateTime createdTime = parse(publishCourtListRequestParameters.getCreatedTime());
+
+
+        final String webPageFileName = xhibitFileNameGenerator.generateWebPageFileName(createdTime, publishCourtListRequestParameters.getCourtCentreId());
 
         xhibitService.sendToXhibit(toInputStream(xhibitXml), webPageFileName);
 

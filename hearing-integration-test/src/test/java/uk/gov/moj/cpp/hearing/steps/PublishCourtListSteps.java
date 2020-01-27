@@ -19,12 +19,13 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 public class PublishCourtListSteps extends AbstractIT {
 
     private static final String MEDIA_TYPE_QUERY_COURT_LIST_STATUS = "application/vnd.hearing.court.list.publish.status+json";
-    private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.get-hearings-by-court-centre+json";
+    private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.latest-hearings-by-court-centres+json";
 
     public void verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(final String courtCentreId) {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
@@ -46,11 +47,11 @@ public class PublishCourtListSteps extends AbstractIT {
                         )));
     }
 
-    public void verifyLatestHearingEvents(final Hearing hearing, final ZonedDateTime modifiedTime) {
+    public void verifyLatestHearingEvents(final Hearing hearing, final LocalDate modifiedTime) {
 
         givenAUserHasLoggedInAsASystemUser(USER_ID_VALUE_AS_ADMIN);
 
-        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearings-by-court-centre"), hearing.getCourtCentre().getId(), modifiedTime);
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), hearing.getCourtCentre().getId(), modifiedTime);
         final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
