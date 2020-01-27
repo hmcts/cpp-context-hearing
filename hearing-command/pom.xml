@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>6.4.15-SCSL-SNAPSHOT</version>
+        <version>6.4.16-SCSL-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-command</artifactId>
     <packaging>pom</packaging>
