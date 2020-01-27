@@ -44,8 +44,7 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "WHERE hearing.id = hearingEvent.hearingId and " +
                     "hearing.courtCentre.id = :courtCentreId and " +
                     "hearingEvent.lastModifiedTime >= :lastModifiedTime and " +
-                    "hearingEvent.deleted is false and " +
-                    "hearingEvent.alterable is false";
+                    "hearingEvent.deleted is false ";
 
     private static final String GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE_LIST =
             "SELECT hearingEvent FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
@@ -53,8 +52,7 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "WHERE hearing.id = hearingEvent.hearingId and " +
                     "hearing.courtCentre.id IN (:courtCentreList) and " +
                     "hearingEvent.lastModifiedTime >= :lastModifiedTime and " +
-                    "hearingEvent.deleted is false and " +
-                    "hearingEvent.alterable is false";
+                    "hearingEvent.deleted is false ";
 
     public Optional<HearingEvent> findOptionalById(final UUID hearingEventId) {
         final HearingEvent hearingEvent = findBy(hearingEventId);
