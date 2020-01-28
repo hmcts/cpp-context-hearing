@@ -1,11 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 
-import static java.time.ZonedDateTime.now;
-import static java.util.Optional.empty;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
@@ -17,7 +14,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent.hearingEvent;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
@@ -47,7 +43,6 @@ import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
@@ -59,6 +54,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
@@ -496,20 +492,19 @@ public class HearingServiceTest {
     @Test
     public void shouldReturnLatestHearingByCourtCentreIdsAndLatestModifiedTime() {
         final LocalDate now = LocalDate.now();
-        final ZonedDateTime zonedDateTime =  now.atStartOfDay(ZoneOffset.UTC);
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID()) ;
-        final UUID hearingId = randomUUID();
 
-        final HearingEvent hearingEvent = hearingEvent().setHearingId(hearingId);
-        final List<HearingEvent> hearingEventList = asList(hearingEvent);
+        final HearingEventPojo hearingEvent = new HearingEventPojo( randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
+
+        final List<HearingEventPojo> hearingEventList = asList(hearingEvent);
         final Hearing hearing = buildHearing();
 
         final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
 
         final CurrentCourtStatus currentCourtStatus = currentCourtStatus().withPageName("hello").build();
 
-        when(hearingEventRepository.findBy(courtCentreIds, zonedDateTime)).thenReturn(hearingEventList);
+        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(currentCourtStatus);

@@ -76,7 +76,6 @@ public class CourtCentreHearingEventProcessor  {
 
         final ZonedDateTime createdTime = parse(publishCourtListRequestParameters.getCreatedTime());
 
-
         final String webPageFileName = xhibitFileNameGenerator.generateWebPageFileName(createdTime, publishCourtListRequestParameters.getCourtCentreId());
 
         xhibitService.sendToXhibit(toInputStream(xhibitXml), webPageFileName);

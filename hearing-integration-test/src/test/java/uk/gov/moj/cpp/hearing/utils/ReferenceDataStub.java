@@ -355,7 +355,7 @@ public class ReferenceDataStub {
                                         .build())
                                 .build())
                         .add(createObjectBuilder()
-                                .add("id", "80921334-2cf0-4609-8a29-0921bf6b3520")
+                                .add("id", courtCentre.getId().toString())
                                 .add("oucode", "B01BE01")
                                 .add("oucodeL1Code", "C")
                                 .add("oucodeL3Name", "Wimbledon")

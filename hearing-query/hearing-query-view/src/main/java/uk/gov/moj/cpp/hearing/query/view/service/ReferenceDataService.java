@@ -14,9 +14,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
+
+import com.google.common.annotations.VisibleForTesting;
 
 public class ReferenceDataService {
     private static final String GET_ALL_CRACKED_INEFFECTIVE_TRIAL_TYPES = "referencedata.query.cracked-ineffective-vacated-trial-types";
+    private static final String REFERENCEDATA_QUERY_COURT_CENTRES = "referencedata.query.courtrooms";
 
     @Inject
     @ServiceComponent(QUERY_VIEW)
@@ -39,5 +43,18 @@ public class ReferenceDataService {
         final JsonEnvelope jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope);
 
         return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), CrackedIneffectiveVacatedTrialTypes.class);
+    }
+
+    public JsonEnvelope getCourtRooms(final JsonEnvelope eventEnvelope) {
+        final JsonObject payload = createObjectBuilder()
+                .add("oucode", "C")
+                .build();
+        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(eventEnvelope, REFERENCEDATA_QUERY_COURT_CENTRES).apply(payload);
+        return requester.request(requestEnvelope);
+    }
+
+    @VisibleForTesting
+    void setEnveloper(final Enveloper enveloper) {
+        this.enveloper = enveloper;
     }
 }

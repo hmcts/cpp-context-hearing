@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
+import static java.util.Random.*;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -38,6 +39,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -55,8 +57,6 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     private static final String HEARING_COMMAND_PUBLISH_HEARING_LIST = "hearing.publish-hearing-lists-for-crown-courts";
     private static final String MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST = "application/vnd.hearing.publish-hearing-lists-for-crown-courts+json";
 
-    private static final ZonedDateTime EVENT_TIME = now().minusMinutes(5l).withZoneSameLocal(ZoneId.of("UTC"));
-    private static final LocalDate localDate = EVENT_TIME.toLocalDate();
 
     private String courtCentreId;
     private String courtRoom1Id;
@@ -80,10 +80,42 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     }
 
     @Test
-    public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
-        createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
+    public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() throws NoSuchAlgorithmException {
+        final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
+        final LocalDate localDate = eventTime.toLocalDate();
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "28");
+        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        createHearingEvent(hearing1, defenceCounselId,"Start Hearing",eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
+        logEvent(requestSpec, asDefault(), hearing1.it(), getHearingEventDefinition("End Hearing").getId(),
+                false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()));
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        createHearingEvent(hearing2, defenceCounselId,"Start Hearing",eventTime.plusMinutes(rand()).plusSeconds(rand()));
+        logEvent(requestSpec, asDefault(), hearing2.it(), getHearingEventDefinition("End Hearing").getId(),
+                false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()));
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);
+
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        sendPublishHearingListCommandFromSchedule(publishCourtListJsonObject);
+
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+    }
+
+    private int rand() {
+        Random rand = new Random();
+        return rand.nextInt((60 - 1) + 1) + 1;
+    }
+
+    @Test
+    public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
+        final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
+        final LocalDate localDate = eventTime.toLocalDate();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        createHearingEvent(hearing, defenceCounselId, "Start Hearing",eventTime);
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
@@ -96,7 +128,10 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
+        final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
+        final LocalDate localDate = eventTime.toLocalDate();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), LocalDate.now());
@@ -113,36 +148,46 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         assertThat(response.getStatus(), equalTo(SC_ACCEPTED));
     }
 
-    private JsonObject buildPublishCourtListJsonString(final String courtCentreId, final String day) {
-        return createObjectBuilder().add("courtCentreId", courtCentreId).add("createdTime", "2019-10-" + day + "T16:34:45.132Z").build();
+    private JsonObject buildPublishCourtListJsonString(final String courtCentreId, final LocalDate eventDate) {
+        return createObjectBuilder().add("courtCentreId", courtCentreId).add("eventDate", eventDate.toString()).build();
     }
 
     private static HearingEventDefinition findEventDefinitionWithActionLabel(final HearingEventDefinitionData hearingEventDefinitionData, final String actionLabel) {
         return hearingEventDefinitionData.getEventDefinitions().stream().filter(d -> d.getActionLabel().equals(actionLabel)).findFirst().get();
     }
 
-    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel) throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+
+    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final CommandHelpers.InitiateHearingCommandHelper hearing,
+                                                                                 final String defenceCounselId, final String actionLabel,
+                                                                                 final ZonedDateTime eventTime) throws NoSuchAlgorithmException {
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), hearing.getHearing().getHearingLanguage());
 
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
 
+
+        final HearingEventDefinition hearingEventDefinition = getHearingEventDefinition(actionLabel);
+
+        logEvent(requestSpec, asDefault(), hearing.it(), hearingEventDefinition.getId(), false, fromString(defenceCounselId), eventTime);
+        return hearing;
+    }
+
+    private HearingEventDefinition getHearingEventDefinition(String actionLabel) {
         final List<HearingEventDefinition> hearingDefinitions = new ArrayList(hearingDefinitions());
         hearingDefinitions.addAll(
                 Arrays.asList(
-                    new HearingEventDefinition(fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043"), "Appellant opens", INTEGER.next(), STRING.next(), "APPEAL", STRING.next(), INTEGER.next(), false),
-                    new HearingEventDefinition(fromString("e9060336-4821-4f46-969c-e08b33b48071"), "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
-                    new HearingEventDefinition(fromString("a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0"), "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
-                    new HearingEventDefinition(fromString("cc00cca8-39ba-431c-b08f-8c6f9be185d1"), "Defence counsel.name closes case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "CLOSE_CASE", STRING.next(), INTEGER.next(), false),
-                    new HearingEventDefinition(fromString("b335327a-7f58-4f26-a2ef-7e07134ba60b"), "Point of law discussion prosecution", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false)
+                        new HearingEventDefinition(fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043"), "Appellant opens", INTEGER.next(), STRING.next(), "APPEAL", STRING.next(), INTEGER.next(), false),
+                        new HearingEventDefinition(fromString("e9060336-4821-4f46-969c-e08b33b48071"), "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
+                        new HearingEventDefinition(fromString("a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0"), "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
+                        new HearingEventDefinition(fromString("cc00cca8-39ba-431c-b08f-8c6f9be185d1"), "Defence counsel.name closes case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "CLOSE_CASE", STRING.next(), INTEGER.next(), false),
+                        new HearingEventDefinition(fromString("b335327a-7f58-4f26-a2ef-7e07134ba60b"), "Point of law discussion prosecution", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false)
                 )
         );
         final HearingEventDefinitionData hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions));
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(hearingEventDefinitionData, actionLabel);
         assertThat(hearingEventDefinition.isAlterable(), is(false));
-
-        logEvent(requestSpec, asDefault(), hearing.it(), hearingEventDefinition.getId(), false, fromString(defenceCounselId), EVENT_TIME);
-        return hearing;
+        return hearingEventDefinition;
     }
+
+
 }
