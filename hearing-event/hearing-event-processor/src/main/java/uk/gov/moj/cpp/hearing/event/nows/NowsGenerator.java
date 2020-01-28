@@ -355,10 +355,12 @@ public class NowsGenerator {
     private Map<UUID, Prompt> id2PromptRef(JsonEnvelope context, List<ResultLine> resultLines4NowIn) {
         final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
         for (final ResultLine resultLine : resultLines4NowIn) {
+            LOGGER.debug("Finding prompts for result definition with ID {}", resultLine.getResultDefinitionId());
             final ResultDefinition resultDefinition = referenceDataService.getResultDefinitionById(context, resultLine.getOrderedDate(),
                     resultLine.getResultDefinitionId());
             if (resultDefinition != null && resultDefinition.getPrompts() != null) {
                 for (final Prompt p : resultDefinition.getPrompts()) {
+                    LOGGER.info("Found prompt {}", p.getId());
                     id2PromptRef.put(p.getId(), p);
                 }
             }

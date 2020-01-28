@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
+import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE;
@@ -230,8 +231,8 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
             final LocalDate localDate = LocalDate.parse(value, fomatter);
             final String result = localDate.format(fomatter);
             isNotEqualToOutgoingFormat = result.equals(value);
-        } catch (DateTimeParseException exp) {
-            LOGGER.error(String.format("Invalid date - %s ", value), exp);
+        } catch (DateTimeParseException e) {
+            LOGGER.trace(format("Invalid date - %s", value), e);
         }
         return isNotEqualToOutgoingFormat;
     }

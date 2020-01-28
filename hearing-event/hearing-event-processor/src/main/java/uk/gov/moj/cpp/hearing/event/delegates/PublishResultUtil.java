@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Locale.ENGLISH;
+
 import uk.gov.moj.cpp.hearing.event.delegates.exception.InvalidDateFormatException;
 
 import java.time.LocalDate;
@@ -9,7 +9,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
-import static java.util.Locale.ENGLISH;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class PublishResultUtil {
 
@@ -50,8 +51,8 @@ public class PublishResultUtil {
             final LocalDate localDate = LocalDate.parse(value, dateTimeFormatter);
             final String result = localDate.format(dateTimeFormatter);
             isNotEqualToOutgoingFormat = !result.equals(value);
-        } catch (DateTimeParseException exp) {
-            LOGGER.error(String.format("Ignore this error (sonar forcing to log error) : Invalid date - %s ", value), exp);
+        } catch (DateTimeParseException e) {
+            LOGGER.trace(String.format("Ignore this error (sonar forcing to log error) : Invalid date - %s", value), e);
         }
         return isNotEqualToOutgoingFormat;
     }

@@ -15,8 +15,10 @@ import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,8 +88,7 @@ public class FinancialResultCalculator {
         FinancialResult result = new FinancialResult();
         long penceTotal =
                 resultLines4Now.stream().flatMap(rl -> rl.getPrompts().stream())
-                        .filter(p -> FINANCIAL_TOTAL_AMOUNT_IMPOSED_PROMPT_REFERENCES.contains(id2PromptRef.get(p.getId()).getReference())
-                        )
+                        .filter(getPromptPredicate(id2PromptRef))
                         .map(uk.gov.justice.core.courts.Prompt::getValue)
                         .map(str -> toPence(str))
                         .reduce(0l, (l1, l2) -> l1 + l2);
@@ -102,9 +103,9 @@ public class FinancialResultCalculator {
                         .orElse(0l);
 
         if (LOGGER.isInfoEnabled()) {
-            String strPromptRefs = id2PromptRef.values().stream().map(p->p.getId().toString() + "/" + p.getLabel() + "/" + p.getReference() + "/")
+            String strPromptRefs = id2PromptRef.values().stream().map(p -> p.getId().toString() + "/" + p.getLabel() + "/" + p.getReference() + "/")
                     .collect(Collectors.joining(" - "));
-            String strPromptValues =  resultLines4Now.stream().flatMap(rl -> rl.getPrompts().stream()).map(p->
+            String strPromptValues = resultLines4Now.stream().flatMap(rl -> rl.getPrompts().stream()).map(p ->
                     p.getId() + "/" + p.getLabel() + "/" + p.getValue()).collect(Collectors.joining(" - "));
             LOGGER.info(String.format("prompt ref: %s  prompt values: %s", strPromptRefs, strPromptValues));
         }
@@ -112,6 +113,24 @@ public class FinancialResultCalculator {
         result.totalAmountImposed = formatPenceAsPounds(penceTotal);
         result.totalBalance = formatPenceAsPounds(penceTotal - alreadyPaid);
         return result;
+    }
+
+    private Predicate<uk.gov.justice.core.courts.Prompt> getPromptPredicate(final Map<UUID, Prompt> id2PromptRef) {
+        return p -> {
+            final UUID promptId = p.getId();
+            final Prompt prompt = id2PromptRef.get(promptId);
+            if (null == prompt) {
+                LOGGER.error("Prompt with ID {} not found", promptId);
+            }
+
+            final String promptReference = prompt.getReference();
+            if (StringUtils.isBlank(promptReference)) {
+                LOGGER.debug("Prompt with ID {} has no reference", promptId);
+            } else {
+                LOGGER.debug("Prompt with ID {} has reference {}", promptId, promptReference);
+            }
+            return FINANCIAL_TOTAL_AMOUNT_IMPOSED_PROMPT_REFERENCES.contains(promptReference);
+        };
     }
 
 }
