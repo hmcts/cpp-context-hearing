@@ -28,14 +28,7 @@
       "properties": {
         "title": {
           "description": "The defendants title.  If the defendant is a company this must be set to Co",
-          "type": "string",
-          "enum": [
-            "Mr",
-            "Mrs",
-            "Ms",
-            "Miss",
-            "Co"
-          ]
+          "type": "string"
         },
         "surname": {
           "description": "Surname/last name/family name of the defendant. Mandatory when the defendant is a person",

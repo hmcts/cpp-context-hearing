@@ -1093,6 +1093,7 @@ public class TestTemplates {
                                             .withAlcoholReadingAmount(INTEGER.next())
                                             .withAlcoholReadingMethodCode(STRING.next())
                                             .withVehicleRegistration(STRING.next())
+                                            .withVehicleMake(STRING.next())
                                             .build())
                                     .withOffenceLegislation(STRING.next())
                                     .withOffenceLegislationWelsh(STRING.next())
