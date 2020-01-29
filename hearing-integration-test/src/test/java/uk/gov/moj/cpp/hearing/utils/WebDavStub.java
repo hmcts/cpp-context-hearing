@@ -7,23 +7,19 @@ import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
-import static javax.ws.rs.core.Response.*;
-import static javax.ws.rs.core.Response.Status;
-import static javax.ws.rs.core.Response.Status.*;
+import static javax.ws.rs.core.Response.Status.OK;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForPutStubToBeReady;
 
 import java.util.List;
 import java.util.UUID;
 
-import javax.ws.rs.core.Response;
-
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
 public class WebDavStub {
 
-    public static final String XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/.*\\.xml";
-    public static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/WebPage.*\\.xml";
-    public static final String XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/PD.*\\.xml";
+    private static final String XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/.*\\.xml";
+    private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/WebPage.*\\.xml";
+    private static final String XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX = "/xhibit-gateway/send-to-xhibit/PublicDisplay.*\\.xml";
 
     public static void stubExhibitFileUpload() {
         stubFor(put(urlPathMatching(XHIBIT_GATEWAY_SEND_TO_XHIBIT_PATH_REG_EX))

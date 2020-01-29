@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static javax.json.JsonObject.NULL;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
@@ -47,9 +46,17 @@ public class ReferenceDataXhibitDataLoader {
         return requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
     }
 
-    public String getXhibitCourtCentreCodeBy(final String courtCentreId) {
+    String getXhibitCrestCourtIdBy(final String courtCentreId) {
         final CourtRoomMappingsList courtRoomMappingsList = getCourtRoomMappingsList(courtCentreId);
-        return courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteCode();
+        /*
+          Note that here, we are calling endpoint
+          referencedata.query.cp-xhibit-courtroom-mappings
+          to get crestCourtId for file name while in listing, we are calling
+          referencedata.query.cp-xhibit-court-mappings
+          instead.
+          We need consistency
+         */
+        return courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtId();
     }
 
     private CourtRoomMappingsList getCourtRoomMappingsList(final String courtCentreId) {

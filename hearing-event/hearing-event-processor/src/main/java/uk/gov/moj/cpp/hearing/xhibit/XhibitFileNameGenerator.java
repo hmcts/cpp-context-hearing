@@ -14,7 +14,7 @@ import javax.inject.Inject;
 public class XhibitFileNameGenerator {
 
     private static final String WEB_PAGE_PREFIX = "WebPage";
-    private static final String PUBLIC_DISPLAY_PAGE_PREFIX = "PD";
+    private static final String PUBLIC_DISPLAY_PAGE_PREFIX = "PublicDisplay";
 
     @Inject
     private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
@@ -35,11 +35,11 @@ public class XhibitFileNameGenerator {
     }
 
     private String getSendDate(final ZonedDateTime createdDate) {
-        final DateTimeFormatter formatter = ofPattern("yyyyMMddHHmmss");
+        final DateTimeFormatter formatter = ofPattern("uuuuMMddHHmmss");
         return createdDate.format(formatter);
     }
 
     private String getCourtCode(final String courtCentreId) {
-        return referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId);
+        return referenceDataXhibitDataLoader.getXhibitCrestCourtIdBy(courtCentreId);
     }
 }

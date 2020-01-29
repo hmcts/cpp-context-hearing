@@ -29,25 +29,25 @@ public class XhibitFileNameGeneratorTest {
     public void shouldGenerateWebPageFileName() {
         final ZonedDateTime requestedTime = now();
         final String courtCentreId = randomUUID().toString();
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuuMMddHHmmss");
 
-        when(referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId)).thenReturn("TEST");
+        when(referenceDataXhibitDataLoader.getXhibitCrestCourtIdBy(courtCentreId)).thenReturn("123");
 
         final String generateWebPageFileName = xhibitFileNameGenerator.generateWebPageFileName(requestedTime, courtCentreId);
 
-        assertThat(generateWebPageFileName, is("WebPage_TEST_".concat(requestedTime.format(formatter).concat(".xml"))));
+        assertThat(generateWebPageFileName, is("WebPage_123_".concat(requestedTime.format(formatter).concat(".xml"))));
     }
 
     @Test
     public void shouldGeneratePublicDisplayFileName() {
         final ZonedDateTime requestedTime = now();
         final String courtCentreId = randomUUID().toString();
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuuMMddHHmmss");
 
-        when(referenceDataXhibitDataLoader.getXhibitCourtCentreCodeBy(courtCentreId)).thenReturn("TEST");
+        when(referenceDataXhibitDataLoader.getXhibitCrestCourtIdBy(courtCentreId)).thenReturn("123");
 
         final String generateWebPageFileName = xhibitFileNameGenerator.generatePublicDisplayFileName(requestedTime, courtCentreId);
 
-        assertThat(generateWebPageFileName, is("PD_TEST_".concat(requestedTime.format(formatter).concat(".xml"))));
+        assertThat(generateWebPageFileName, is("PublicDisplay_123_".concat(requestedTime.format(formatter).concat(".xml"))));
     }
 }

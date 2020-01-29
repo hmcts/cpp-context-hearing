@@ -7,16 +7,16 @@ public class CourtRoomMappings {
     private UUID id;
     private String oucode;
     private Integer courtRoomId;
-    private String crestCodeId;
+    private String crestCourtId;
     private String crestCourtSiteId;
     private String crestCourtSiteCode;
     private String crestCourtRoomName;
 
-    public CourtRoomMappings(final UUID id, final String oucode, final Integer courtRoomId, final String crestCodeId, final String crestCourtSiteId, final String crestCourtSiteCode, final String crestCourtRoomName) {
+    public CourtRoomMappings(final UUID id, final String oucode, final Integer courtRoomId, final String crestCourtId, final String crestCourtSiteId, final String crestCourtSiteCode, final String crestCourtRoomName) {
         this.id = id;
         this.oucode = oucode;
         this.courtRoomId = courtRoomId;
-        this.crestCodeId = crestCodeId;
+        this.crestCourtId = crestCourtId;
         this.crestCourtSiteId = crestCourtSiteId;
         this.crestCourtSiteCode = crestCourtSiteCode;
         this.crestCourtRoomName = crestCourtRoomName;
@@ -34,8 +34,8 @@ public class CourtRoomMappings {
         return courtRoomId;
     }
 
-    public String getCrestCodeId() {
-        return crestCodeId;
+    public String getCrestCourtId() {
+        return crestCourtId;
     }
 
     public String getCrestCourtSiteId() {
