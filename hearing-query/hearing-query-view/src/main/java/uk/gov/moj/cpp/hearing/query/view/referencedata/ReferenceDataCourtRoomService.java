@@ -11,7 +11,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappings;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 
 import java.util.UUID;
@@ -33,14 +33,14 @@ public class ReferenceDataCourtRoomService {
     @Inject
     private UtcClock utcClock;
 
-    public CourtRoomMappings getCourtRoomNameBy(final UUID courtCentreId, final UUID courtRoomId) {
+    public CourtRoomMapping getCourtRoomNameBy(final UUID courtCentreId, final UUID courtRoomId) {
 
         final CourtRoomMappingsList courtRoomMappingsList = getCourtRoomMappingsList(courtCentreId.toString());
 
         return courtRoomMappingsList
                 .getCpXhibitCourtRoomMappings()
                 .stream()
-                .filter(courtRoomMappings -> courtRoomMappings.getId().equals(courtRoomId))
+                .filter(courtRoomMappings -> courtRoomMappings.getCourtRoomUUID().equals(courtRoomId))
                 .findFirst()
                 .orElseThrow(() ->
                         new ExhibitReferenceDataException(format("Unable to find exhibit court room name for CPP court centre id: %s and CPP court room id: %s", courtCentreId.toString(), courtRoomId.toString())));

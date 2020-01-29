@@ -4,13 +4,13 @@ import java.util.List;
 
 public class CourtRoomMappingsList {
 
-   private List<CourtRoomMappings> cpXhibitCourtRoomMappings;
+   private List<CourtRoomMapping> cpXhibitCourtRoomMappings;
 
-    public CourtRoomMappingsList(final List<CourtRoomMappings> cpXhibitCourtRoomMappings) {
+    public CourtRoomMappingsList(final List<CourtRoomMapping> cpXhibitCourtRoomMappings) {
         this.cpXhibitCourtRoomMappings = cpXhibitCourtRoomMappings;
     }
 
-    public List<CourtRoomMappings> getCpXhibitCourtRoomMappings() {
+    public List<CourtRoomMapping> getCpXhibitCourtRoomMappings() {
         return cpXhibitCourtRoomMappings;
     }
 }

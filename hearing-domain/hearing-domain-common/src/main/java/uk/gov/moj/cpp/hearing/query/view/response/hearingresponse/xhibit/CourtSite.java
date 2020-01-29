@@ -2,15 +2,19 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.UUID;
 
 public class CourtSite implements Serializable {
     private static final long serialVersionUID = -4151921355339340656L;
+
+    private UUID id;
 
     private List<CourtRoom> courtRooms;
 
     private String courtSiteName;
 
-    public CourtSite(final List<CourtRoom> courtRooms, final String courtSiteName) {
+    public CourtSite(final List<CourtRoom> courtRooms, final String courtSiteName, final UUID id) {
+        this.id = id;
         this.courtRooms = courtRooms;
         this.courtSiteName = courtSiteName;
     }
@@ -27,31 +31,24 @@ public class CourtSite implements Serializable {
         return new CourtSite.Builder();
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-        if (this == obj){
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()){
-            return false;
-        }
-        final CourtSite that = (CourtSite) obj;
+    public UUID getId() {
+        return id;
+    }
 
-        return java.util.Objects.equals(this.courtRooms, that.courtRooms) &&
-                java.util.Objects.equals(this.courtSiteName, that.courtSiteName);
+    @SuppressWarnings({"squid:S00121", "squid:S00122"})
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CourtSite courtSite = (CourtSite) o;
+
+        return id.equals(courtSite.id);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(courtRooms, courtSiteName);
-    }
-
-    @Override
-    public String toString() {
-        return "CourtSite{" +
-                "courtRooms='" + courtRooms + "'," +
-                "courtSiteName='" + courtSiteName + "'" +
-                "}";
+        return id.hashCode();
     }
 
     public CourtSite setCourtRooms(List<CourtRoom> courtRooms) {
@@ -68,6 +65,7 @@ public class CourtSite implements Serializable {
         private List<CourtRoom> courtRooms;
 
         private String courtSiteName;
+        private UUID id;
 
         public Builder withCourtRooms(final List<CourtRoom> courtRooms) {
             this.courtRooms = courtRooms;
@@ -79,8 +77,14 @@ public class CourtSite implements Serializable {
             return this;
         }
 
+
+        public Builder withId(final UUID id) {
+            this.id = id;
+            return this;
+        }
+
         public CourtSite build() {
-            return new CourtSite(courtRooms, courtSiteName);
+            return new CourtSite(courtRooms, courtSiteName, id);
         }
     }
 }

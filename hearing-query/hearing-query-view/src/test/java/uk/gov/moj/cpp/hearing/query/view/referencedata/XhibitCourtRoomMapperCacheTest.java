@@ -6,7 +6,7 @@ import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappings;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 
 import java.util.UUID;
 
@@ -27,15 +27,15 @@ public class XhibitCourtRoomMapperCacheTest {
 
     @Test
     public void shouldCacheCourtRoom() {
-        final CourtRoomMappings courtRoomMappings = mock(CourtRoomMappings.class);
+        final CourtRoomMapping courtRoomMapping = mock(CourtRoomMapping.class);
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
         final String courtRoomName = "testCourtRoomName";
 
-        when(courtRoomMappings.getCrestCourtRoomName()).thenReturn(courtRoomName);
-        when(referenceDataCourtRoomService.getCourtRoomNameBy(courtCentreId, courtRoomId)).thenReturn(courtRoomMappings);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn(courtRoomName);
+        when(referenceDataCourtRoomService.getCourtRoomNameBy(courtCentreId, courtRoomId)).thenReturn(courtRoomMapping);
 
-        final String xhibitCourtRoomName = xhibitCourtRoomMapperCache.getXhibitCourtRoomName(courtCentreId, courtRoomId);
+        final String xhibitCourtRoomName = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(courtCentreId, courtRoomId).getCrestCourtRoomName();
 
         assertThat(xhibitCourtRoomName, is(courtRoomName));
     }

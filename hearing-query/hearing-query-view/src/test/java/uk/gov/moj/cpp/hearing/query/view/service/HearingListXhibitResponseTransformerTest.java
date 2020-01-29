@@ -3,11 +3,13 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 
@@ -38,6 +40,9 @@ public class HearingListXhibitResponseTransformerTest {
     @InjectMocks
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
+    @Mock
+    private CourtRoomMapping courtRoomMapping;
+
     @Test
     public void shouldTransformFrom() {
         final UUID courtCentreId = randomUUID();
@@ -46,11 +51,14 @@ public class HearingListXhibitResponseTransformerTest {
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
         final List<Hearing> hearingList = Arrays.asList(hearing);
 
+
         when(hearing.getId()).thenReturn(hearingId);
         when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(courtCentreId).build());
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
-        when(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(courtCentreId, courtRoomId)).thenReturn("x");
+        when(xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(any(), any())).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
 
         final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
 

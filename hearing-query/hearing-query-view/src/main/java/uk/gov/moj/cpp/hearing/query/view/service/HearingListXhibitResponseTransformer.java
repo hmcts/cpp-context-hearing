@@ -17,6 +17,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
@@ -28,7 +29,9 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defenda
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,26 +59,47 @@ public class HearingListXhibitResponseTransformer {
     }
 
     private List<CourtSite> getCourtSites(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
+        final Map<UUID, CourtSite> courtSiteMap = new HashMap<>();
         return hearingEventsToHearingMapper.getHearingList()
                 .stream()
-                .map(hearing -> courtSite()
-                        .withCourtSiteName(hearing.getCourtCentre().getName())
-                        .withCourtRooms(getCourtRooms(hearingEventsToHearingMapper))
-                        .build())
+                .map(hearing -> getCourtSite(hearingEventsToHearingMapper, hearing, courtSiteMap))
                 .collect(toList());
     }
 
-    private List<CourtRoom> getCourtRooms(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
+    private CourtSite getCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<UUID, CourtSite> courtSiteMap) {
+        final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+        return courtSiteMap.computeIfAbsent(courtRoomMapping.getCrestCourtSiteUUID(), k -> courtSite()
+                .withId(k)
+                .withCourtSiteName(courtRoomMapping.getCrestCourtSiteName())
+                .withCourtRooms(getCourtRoomsForCourtSite(hearingEventsToHearingMapper, courtRoomMapping.getCrestCourtSiteUUID()))
+                .build());
+
+    }
+
+    private List<CourtRoom> getCourtRoomsForCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final UUID crestCourtSiteId ) {
+        final Map<String, CourtRoom> courtRoomMap = new HashMap<>();
         return hearingEventsToHearingMapper.getHearingList()
                 .stream()
-                .map(hearing -> courtRoom()
-                        .withCourtRoomName(xhibitCourtRoomMapperCache.getXhibitCourtRoomName(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()))
-                        .withCases(getCases(hearing))
-                        .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
-                        .withDefenceCouncil(hearing.getDefenceCounsels())
-                        .withLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()))
-                        .build())
+                .filter(hearing -> isHearingForCourtSite(crestCourtSiteId, hearing))
+                .map(hearing -> getCourtRoom(hearingEventsToHearingMapper, hearing, courtRoomMap ))
                 .collect(toList());
+    }
+
+    private boolean isHearingForCourtSite(final UUID crestCourtSiteId, final Hearing hearing) {
+        return xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()).getCrestCourtSiteUUID().equals(crestCourtSiteId);
+    }
+
+    private CourtRoom getCourtRoom(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<String, CourtRoom> courtRoomMap) {
+        final String courtCentreCourtRoomKey = hearing.getCourtCentre().getId().toString().concat(hearing.getCourtCentre().getRoomId().toString());
+        final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+        return courtRoomMap.computeIfAbsent(courtCentreCourtRoomKey, k -> courtRoom()
+                    .withCourtRoomName(courtRoomMapping.getCrestCourtRoomName())
+                    .withCases(getCases(hearing))
+                    .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
+                    .withDefenceCouncil(hearing.getDefenceCounsels())
+                    .withLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()))
+                    .build());
+
     }
 
     private List<UUID> getLinkedCaseIds(final List<CourtApplication> courtApplications) {
