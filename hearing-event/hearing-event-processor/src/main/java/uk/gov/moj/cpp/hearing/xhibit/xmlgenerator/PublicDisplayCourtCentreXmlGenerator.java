@@ -112,23 +112,24 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         final Courtroom xhibitCourtRoom = webPageObjectFactory.createCourtroom();
 
         xhibitCourtRoom.setCourtroomname(ccpCourtRoom.getCourtRoomName());
-        xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases(), ccpCourtRoom.getHearingEvent(), ccpCourtRoom));
+        xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases(), ccpCourtRoom));
         return xhibitCourtRoom;
     }
 
 
-    private Cases getCases(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases cppCases, final HearingEvent hearingEvent, final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
+    private Cases getCases(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases cppCases,  final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
         final Cases xhibitCases = webPageObjectFactory.createCases();
 
         cppCases.getCasesDetails()
-                .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase, hearingEvent,  ccpCourtRoom)));
+                .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase, ccpCourtRoom)));
         return xhibitCases;
     }
 
 
-    private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail, final HearingEvent hearingEvent, final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
+    @SuppressWarnings("squid:S1172")
+    private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail,  final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
         final CaseDetails xhibitCaseDetails = new CaseDetails();
-
+        final HearingEvent hearingEvent = cppCaseDetail.getHearingEvent();
         xhibitCaseDetails.setCppurn(cppCaseDetail.getCppUrn());
         xhibitCaseDetails.setCasenumber(ONE);
         xhibitCaseDetails.setCasetype(cppCaseDetail.getCaseType());
@@ -136,20 +137,15 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
         if (null == hearingEvent) {
             xhibitCaseDetails.setNotbeforetime(cppCaseDetail.getNotBeforeTime());
+            xhibitCaseDetails.setHearingprogress(BigInteger.ZERO);
         } else {
-            xhibitCaseDetails.setCurrentstatus(eventGenerator.generate(ccpCourtRoom));
+            xhibitCaseDetails.setCurrentstatus(eventGenerator.generate(cppCaseDetail));
         }
-        xhibitCaseDetails.setHearingprogress(determineHearingProgress(hearingEvent));
+
         return xhibitCaseDetails;
     }
 
-    private BigInteger determineHearingProgress(final HearingEvent hearingEvent) {
-        if(null == hearingEvent) {
-            return BigInteger.ZERO;
-        }
-        // To ask about this ??
-        return BigInteger.valueOf(5);
-    }
+
 
     private Defendants getDefendants(final CaseDetail cases) {
         final Defendants exhibitDefendants = webPageObjectFactory.createDefendants();

@@ -58,12 +58,12 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
 
         final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
 
-        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0))).thenReturn(currentstatus);
+        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime);
 
         final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
-
+        System.out.println(generatedPublicPageXml);
         assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FILE_PATH);
     }
 

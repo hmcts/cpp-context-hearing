@@ -7,6 +7,7 @@ import static uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.XhibitEvent.valueFor;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
@@ -30,8 +31,8 @@ public class PublicDisplayEventGenerator {
     @Inject
     private PopulateComplexEventTypeForPublicDisplay populateComplexEventTypeForPublicDisplay;
 
-    public Currentstatus generate(final CourtRoom ccpCourtRoom ) {
-        final HearingEvent hearingEvent = ccpCourtRoom.getHearingEvent();
+    public Currentstatus generate(final CaseDetail cppCaseDetail) {
+        final HearingEvent hearingEvent =  cppCaseDetail.getHearingEvent();
         final String xhibitEventCode =
                 eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString());
 
@@ -44,7 +45,7 @@ public class PublicDisplayEventGenerator {
             event.setDate(LocalDate.parse(hearingEvent.getEventDate()).format(dateFormatter));
             event.setFreeText(EMPTY);
             event.setType(xhibitEventCode);
-            populateComplexEventTypeForPublicDisplay.addComplexEventType(event, ccpCourtRoom, xhibitEventCode);
+            populateComplexEventTypeForPublicDisplay.addComplexEventType(event, cppCaseDetail, xhibitEventCode);
 
             currentstatus.setEvent(event);
         }

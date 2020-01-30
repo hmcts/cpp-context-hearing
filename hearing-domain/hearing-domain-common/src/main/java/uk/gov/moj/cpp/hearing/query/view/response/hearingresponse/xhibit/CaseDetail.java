@@ -1,7 +1,14 @@
 package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit;
 
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.HearingEvent;
+
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings({"squid:S1067"})
 public class CaseDetail implements Serializable {
@@ -21,7 +28,13 @@ public class CaseDetail implements Serializable {
 
     private String notBeforeTime;
 
-    public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime) {
+    private HearingEvent hearingEvent;
+
+    private List<UUID> linkedCaseIds;
+
+    private List<DefenceCounsel> defenceCounsels;
+
+    public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime, final  HearingEvent hearingEvent) {
         this.caseNumber = caseNumber;
         this.caseType = caseType;
         this.cppUrn = cppUrn;
@@ -29,6 +42,7 @@ public class CaseDetail implements Serializable {
         this.hearingType = hearingType;
         this.judgeName = judgeName;
         this.notBeforeTime = notBeforeTime;
+        this.hearingEvent = hearingEvent;
     }
 
     public String getCaseNumber() {
@@ -57,6 +71,30 @@ public class CaseDetail implements Serializable {
 
     public String getNotBeforeTime() {
         return notBeforeTime;
+    }
+
+    public HearingEvent getHearingEvent() {
+        return hearingEvent;
+    }
+
+    @SuppressWarnings("squid:AssignmentInSubExpressionCheck")
+    public List<UUID> getLinkedCaseIds() {
+        return null == linkedCaseIds ? linkedCaseIds = new ArrayList<>() : linkedCaseIds;
+    }
+
+    public void setLinkedCaseIds(List<UUID> linkedCaseIds) {
+        this.linkedCaseIds = linkedCaseIds;
+    }
+
+    public DefenceCounsel getDefenceCounsel() {
+        return Optional.ofNullable(defenceCounsels).orElse(Collections.emptyList()).stream()
+                .filter(defenceCounsel -> hearingEvent != null &&
+                        defenceCounsel.getId().equals(hearingEvent.getDefenceCounselId()))
+                .findFirst().orElse(null);
+    }
+
+    public void setDefenceCounsels(List<DefenceCounsel> defenceCounsels) {
+        this.defenceCounsels = defenceCounsels;
     }
 
     public static Builder caseDetail() {
@@ -151,6 +189,8 @@ public class CaseDetail implements Serializable {
 
         private String notBeforeTime;
 
+        private HearingEvent hearingEvent;
+
         public CaseDetail.Builder withCaseNumber(final String caseNumber) {
             this.caseNumber = caseNumber;
             return this;
@@ -186,8 +226,13 @@ public class CaseDetail implements Serializable {
             return this;
         }
 
+        public Builder withHearingEvent(final HearingEvent hearingEvent) {
+            this.hearingEvent = hearingEvent;
+            return this;
+        }
+
         public CaseDetail build() {
-            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime);
+            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent);
         }
     }
 }

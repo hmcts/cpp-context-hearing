@@ -14,7 +14,7 @@ import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event20903OptionType;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.time.LocalDate;
@@ -56,11 +56,12 @@ public class PublicDisplayEventGeneratorTest {
     public void shouldGenerateCurrentStatus() {
         final HearingEvent hearingEvent = createHearingEvent(null);
         final String type = "10100";
-        final CourtRoom courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).build();
+        CaseDetail caseDetail =  CaseDetail.caseDetail().withHearingEvent(hearingEvent).build();
+
 
         when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
 
-        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(courtRoom);
+        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(caseDetail);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
         assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
@@ -72,11 +73,11 @@ public class PublicDisplayEventGeneratorTest {
     public void shouldGenerateCurrentStatusWithComplexEvent() {
         final HearingEvent hearingEvent = createHearingEvent(null);
         final String type = "20903";
-        final CourtRoom courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).build();
+        final CaseDetail caseDetail =  CaseDetail.caseDetail().withHearingEvent(hearingEvent).build();
 
         when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
 
-        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(courtRoom);
+        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(caseDetail);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
         assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
@@ -91,11 +92,12 @@ public class PublicDisplayEventGeneratorTest {
         final HearingEvent hearingEvent = createHearingEvent(defenceCounselId);
         final String type = "20906";
         final DefenceCounsel defenceCounsel = DefenceCounsel.defenceCounsel().withId(defenceCounselId).withFirstName("Sid").withLastName("Sox").build();
-        final CourtRoom courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).withDefenceCouncil(Collections.singletonList(defenceCounsel)).build();
+        final  CaseDetail caseDetail =  CaseDetail.caseDetail().withHearingEvent(hearingEvent).build();
+        caseDetail.setDefenceCounsels(Collections.singletonList(defenceCounsel));
 
         when(eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString())).thenReturn(type);
 
-        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(courtRoom);
+        final Currentstatus currentstatus = publicDisplayEventGenerator.generate(caseDetail);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
         assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));

@@ -14,7 +14,7 @@ import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.LinkedApplica
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event20903OptionType;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.xhibit.ProgressionCaseRetriever;
 
 import java.util.Collections;
@@ -34,7 +34,7 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
 
     private DefenceCounsel defenseCounsel;
 
-    private CourtRoom courtRoom;
+    private CaseDetail caseDetail;
 
     @Mock
     private ProgressionCaseRetriever progressionCaseRetriever;
@@ -64,7 +64,8 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
     public void shouldAddComplexEventTypeWhenComplexCode20606() {
         event = new Event();
         final UUID caseId = randomUUID();
-        courtRoom = CourtRoom.courtRoom().withLinkedCaseIds(Collections.singletonList(caseId)).build();
+        caseDetail = CaseDetail.caseDetail().build();
+        caseDetail.setLinkedCaseIds(Collections.singletonList(caseId));
         final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
                 .withLinkedApplicationsSummary(Collections.singletonList(
                         LinkedApplicationsSummary.linkedApplicationsSummary()
@@ -75,7 +76,7 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
                 .build();
         when(progressionCaseRetriever.getProsecutionCaseDetails(caseId)).thenReturn(prosecutionCase);
 
-        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, courtRoom, "20606");
+        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, caseDetail, "20606");
         assertThat(event.getE20606AppellantCOName(), is("John Jones"));
         assertThat(event.getE20903ProsecutionCaseOptions(), is(nullValue()));
         assertThat(event.getE20906DefenceCCName(), is(nullValue()));
@@ -100,9 +101,10 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
         final UUID defenceCounselId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().withDefenceCounselId(defenceCounselId).build();
         defenseCounsel = DefenceCounsel.defenceCounsel().withId(defenceCounselId).withFirstName("John").withLastName("Jones").build();
-        courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).withDefenceCouncil(Collections.singletonList(defenseCounsel)).build();
+        caseDetail =  CaseDetail.caseDetail().withHearingEvent(hearingEvent).build();
+        caseDetail.setDefenceCounsels(Collections.singletonList(defenseCounsel));
 
-        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, courtRoom, "20906");
+        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, caseDetail, "20906");
         assertThat(event.getE20606AppellantCOName(), is(nullValue()));
         assertThat(event.getE20903ProsecutionCaseOptions(), is(nullValue()));
         assertThat(event.getE20906DefenceCOName(), is("John Jones"));
@@ -115,9 +117,10 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
         final UUID defenceCounselId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().withDefenceCounselId(defenceCounselId).build();
         defenseCounsel = DefenceCounsel.defenceCounsel().withId(defenceCounselId).withFirstName("John").withLastName("Jones").withTitle("Mr").build();
-        courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).withDefenceCouncil(Collections.singletonList(defenseCounsel)).build();
+        caseDetail =  CaseDetail.caseDetail().withHearingEvent(hearingEvent).build();
+        caseDetail.setDefenceCounsels(Collections.singletonList(defenseCounsel));
 
-        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, courtRoom,"20906");
+        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, caseDetail,"20906");
         assertThat(event.getE20606AppellantCOName(), is(nullValue()));
         assertThat(event.getE20903ProsecutionCaseOptions(), is(nullValue()));
         assertThat(event.getE20906DefenceCOName(), is("Mr John Jones"));
@@ -130,9 +133,12 @@ public class PopulateComplexEventTypeForPublicDisplayTest {
         final UUID defenceCounselId = randomUUID();
         final HearingEvent hearingEvent = HearingEvent.hearingEvent().withDefenceCounselId(defenceCounselId).build();
         defenseCounsel = DefenceCounsel.defenceCounsel().withId(defenceCounselId).withFirstName("John").withLastName("Jones").build();
-        courtRoom = CourtRoom.courtRoom().withHearingEvent(hearingEvent).withDefenceCouncil(Collections.singletonList(defenseCounsel)).build();
+        caseDetail =  CaseDetail.caseDetail().withHearingEvent(hearingEvent).build();
+        caseDetail.setDefenceCounsels(Collections.singletonList(defenseCounsel));
 
-        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, courtRoom, "20916");
+
+
+        populateComplexEventTypeForPublicDisplay.addComplexEventType(event, caseDetail, "20916");
         assertThat(event.getE20606AppellantCOName(), is(nullValue()));
         assertThat(event.getE20903ProsecutionCaseOptions(), is(nullValue()));
         assertThat(event.getE20906DefenceCOName(), is(nullValue()));

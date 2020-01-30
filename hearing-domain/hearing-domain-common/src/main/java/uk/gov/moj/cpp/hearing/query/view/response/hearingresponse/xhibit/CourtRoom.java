@@ -4,6 +4,7 @@ import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.HearingEvent;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,8 @@ import java.util.UUID;
 
 public class CourtRoom implements Serializable {
     private static final long serialVersionUID = -4151921355339340656L;
+
+    private UUID courtRoomId;
 
     private String courtRoomName;
 
@@ -48,43 +51,41 @@ public class CourtRoom implements Serializable {
         return defenceCounsel;
     }
 
+    @SuppressWarnings("squid:AssignmentInSubExpressionCheck")
     public List<UUID> getLinkedCaseIds() {
-        return linkedCaseIds;
+        return null == linkedCaseIds ? linkedCaseIds = new ArrayList<>(): linkedCaseIds;
     }
+
+    public void setCourtRoomId(final UUID courtRoomId){
+        this.courtRoomId = courtRoomId;
+
+    }
+
+
 
     public static Builder courtRoom() {
         return new CourtRoom.Builder();
     }
 
+    @SuppressWarnings({"squid:S00121", "squid:S00122"})
     @Override
-    public boolean equals(final Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final CourtRoom that = (CourtRoom) obj;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        return java.util.Objects.equals(this.courtRoomName, that.courtRoomName) &&
-                java.util.Objects.equals(this.hearingEvent, that.hearingEvent) &&
-                java.util.Objects.equals(this.cases, that.cases);
+        CourtRoom courtRoom = (CourtRoom) o;
+
+        return courtRoomId.equals(courtRoom.courtRoomId);
     }
 
     @Override
     public int hashCode() {
-        return java.util.Objects.hash(courtRoomName, hearingEvent, cases);
+        return courtRoomId.hashCode();
     }
 
-    @Override
-    public String toString() {
-        return "CourtRoom{" +
-                "courtRoomName='" + courtRoomName + "'," +
-                "hearingEvent='" + hearingEvent + "'," +
-                "cases='" + cases + "'" +
-                "defenceCounsel='" + defenceCounsel + "'" +
-                "linkedCaseIds='" + linkedCaseIds + "'" +
-                "}";
+    public UUID getCourtRoomId() {
+
+        return courtRoomId;
     }
 
     public CourtRoom setCourtRoomName(String courtRoomName) {

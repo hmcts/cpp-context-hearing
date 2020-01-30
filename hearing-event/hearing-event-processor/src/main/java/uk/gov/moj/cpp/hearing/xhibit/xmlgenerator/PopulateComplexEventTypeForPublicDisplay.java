@@ -4,6 +4,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.E20903ProsecutionCaseOp
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.E20916LegalArgumentOptions;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event20903OptionType;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 
 import java.util.Optional;
@@ -17,10 +18,10 @@ public class PopulateComplexEventTypeForPublicDisplay {
     @Inject
     private ComplexTypeDataProcessor complexTypeDataProcessor;
 
-    public void addComplexEventType(final Event event, final CourtRoom courtRoom, final String eventCode) {
+    public void addComplexEventType(final Event event, final CaseDetail cppCaseDetail, final String eventCode) {
         if (XhibitEvent.APPELLANT_OPENS.getValue().equals(eventCode) &&
-                CollectionUtils.isNotEmpty(courtRoom.getLinkedCaseIds())) {
-            final Optional<String> appellantDisplayName = complexTypeDataProcessor.getAppellantDisplayName(courtRoom.getLinkedCaseIds());
+                CollectionUtils.isNotEmpty(cppCaseDetail.getLinkedCaseIds())) {
+            final Optional<String> appellantDisplayName = complexTypeDataProcessor.getAppellantDisplayName(cppCaseDetail.getLinkedCaseIds());
             if (appellantDisplayName.isPresent()) {
                 populateE20606(event, appellantDisplayName.get());
             }
@@ -31,8 +32,8 @@ public class PopulateComplexEventTypeForPublicDisplay {
         }
 
         if (XhibitEvent.DEFENCE_COUNSEL_OPEN_CASE_DEFENDANT.getValue().equals(eventCode) &&
-                courtRoom.getDefenceCounsel() != null) {
-            populateE20906(event, complexTypeDataProcessor.getGetDefenceCouncilFullName(courtRoom.getDefenceCounsel()));
+                cppCaseDetail.getDefenceCounsel() != null) {
+            populateE20906(event, complexTypeDataProcessor.getGetDefenceCouncilFullName(cppCaseDetail.getDefenceCounsel()));
         }
 
         if (XhibitEvent.POINT_OF_LAW_DISCUSSION_PROSECUTION.getValue().equals(eventCode)) {
