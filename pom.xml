@@ -30,7 +30,7 @@
         <referencedata.version>2.0.278</referencedata.version>
         <material.version>6.0.1</material.version>
         <notification.notify.version>0.0.38</notification.notify.version>
-        <stagingenforcement.version>0.0.98</stagingenforcement.version>
+        <stagingenforcement.version>0.0.102</stagingenforcement.version>
     </properties>
     <modules>
         <module>hearing-query</module>
