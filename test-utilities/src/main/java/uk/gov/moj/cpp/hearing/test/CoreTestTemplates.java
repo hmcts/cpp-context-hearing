@@ -476,6 +476,9 @@ public class CoreTestTemplates {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
+        if (day == 31){
+            day = 27;
+        }
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
@@ -513,6 +516,9 @@ public class CoreTestTemplates {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
+        if (day == 31){
+            day = 27;
+        }
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
