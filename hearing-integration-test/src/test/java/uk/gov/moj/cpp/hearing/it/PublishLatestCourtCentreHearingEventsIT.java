@@ -100,7 +100,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         final String filePayload = getSentXmlForWebPage();
         final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
         assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
-        assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+        assertThat(filePayloadForPubDisplay, containsString("<cppurn></cppurn>"));
     }
 
     @Test
