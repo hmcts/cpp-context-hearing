@@ -46,6 +46,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -125,17 +126,6 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     }
 
 
-
-    @Test
-    public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
-        final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
-        final LocalDate localDate = eventTime.toLocalDate();
-
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
-
-        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
-        publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), LocalDate.now());
-    }
 
     private void sendPublishHearingListCommandFromSchedule(final JsonObject publishCourtListJsonObject) {
         final String updateHearingUrl = String.format("%s/%s", baseUri, format(ENDPOINT_PROPERTIES.getProperty(HEARING_COMMAND_PUBLISH_HEARING_LIST)));
