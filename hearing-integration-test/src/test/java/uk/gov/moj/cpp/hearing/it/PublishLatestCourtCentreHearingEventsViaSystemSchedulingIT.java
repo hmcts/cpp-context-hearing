@@ -84,12 +84,12 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
         createHearingEvent(hearing1, defenceCounselId,"Start Hearing",eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
         logEvent(requestSpec, asDefault(), hearing1.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()));
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
         createHearingEvent(hearing2, defenceCounselId,"Start Hearing",eventTime.plusMinutes(rand()).plusSeconds(rand()));
         logEvent(requestSpec, asDefault(), hearing2.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()));
@@ -112,7 +112,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
         createHearingEvent(hearing, defenceCounselId, "Start Hearing",eventTime);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);
@@ -131,7 +131,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), LocalDate.now());

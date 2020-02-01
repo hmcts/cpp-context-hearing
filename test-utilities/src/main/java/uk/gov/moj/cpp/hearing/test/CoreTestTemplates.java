@@ -472,21 +472,20 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,final String courtRoomName, int year, int month, int day) throws NoSuchAlgorithmException {
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
-        if (day == 31){
-            day = 27;
-        }
+        final LocalDate dayAfter = localDate.plusDays(1);
+        final LocalDate daybefore = localDate.minusDays(1);
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
+                .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build()))
                 .withCourtCentre(courtCentreWithArgs(courtAndRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
@@ -510,23 +509,23 @@ public class CoreTestTemplates {
                                                    final UUID courtId,
                                                    final UUID courtRoomId,
                                                    final String courtRoomName,
-                                                   int year, int month, int day,
+                                                   final LocalDate localDate,
                                                    final UUID defenceCounselId,
                                                    final UUID caseId) throws NoSuchAlgorithmException {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
-        if (day == 31){
-            day = 27;
-        }
+        final LocalDate dayAfter = localDate.plusDays(1);
+        final LocalDate daybefore = localDate.minusDays(1);
+
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType().build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(    hearingDayWithParam(year, month, day+1,random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(year, month, day,random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(year, month, day-1,random.nextInt((max - min) + 1) + min).build()))
+                .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build()))
                 .withCourtCentre(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))

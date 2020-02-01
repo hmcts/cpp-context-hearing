@@ -804,15 +804,14 @@ public class InitiateHearingIT extends AbstractIT {
 
         UUID courtAndRoomId = UUID.randomUUID();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, 2019, 7, 5)));
-        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, 2019, 7, 4));
-
-        LocalDate localDate = LocalDate.of(2019, 7, 5);
+        final LocalDate fifthJuly = LocalDate.of(2019, 7, 5);
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));
+        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly.minusDays(1)));
 
         Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);
 
-        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, localDate.toString(), "00:00", "23:59", 30,
+        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, fifthJuly.toString(), "00:00", "23:59", 30,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())

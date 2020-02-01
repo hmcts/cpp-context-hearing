@@ -168,7 +168,7 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getEstimatedMinutes, is(59))
                                 .withValue(nh -> nh.getListedStartDateTime().toLocalDate(), START_DATE1)
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
+                                        .withValue(CourtCentre::getId, hearingOne.getHearing().getCourtCentre().getId())
                                         .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_A_ID))
                                 .with(NextHearing::getNextHearingProsecutionCases, first(isBean(NextHearingProsecutionCase.class)
                                         .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
@@ -186,7 +186,7 @@ public class HearingAdjournIT extends AbstractIT {
         publicHearingAdjourned.waitFor();
 
         UseCases.saveDraftResults(requestSpec, with(saveDraftResultCommand, saveDraftCommand -> saveDraftCommand.getTarget()
-                .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
+                    .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
                     resultLine.setResultLabel("Next Hearing")
                             .setResultDefinitionId(primaryResultDefinitionId)
                             .setOrderedDate(orderedDate)
@@ -241,7 +241,7 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
                                 .with(NextHearing::getEstimatedMinutes, is(30))
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                                .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
+                                                .withValue(CourtCentre::getId, hearingOne.getHearing().getCourtCentre().getId())
                                                 .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_B_ID)
                                          /*.with(CourtCentre::getAddress, isBean(Address.class)
                                              .withValue(Address::getAddress1, WIMBLEDON_ADDRESS1)
