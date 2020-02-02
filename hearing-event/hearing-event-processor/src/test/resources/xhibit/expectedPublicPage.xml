@@ -12,6 +12,7 @@
                                 <cppurn>234</cppurn>
                                 <casenumber>1</casenumber>
                                 <casetype>caseType</casetype>
+                                <activecase>0</activecase>
                                 <hearingtype>hearingType</hearingtype>
                                 <defendants>
                                     <defendant>
@@ -26,6 +27,7 @@
                         <courtroomname>courtRoomName</courtroomname>
                     </courtroom>
                 </courtrooms>
+                <floating/>
             </courtsite>
         </courtsites>
     </court>

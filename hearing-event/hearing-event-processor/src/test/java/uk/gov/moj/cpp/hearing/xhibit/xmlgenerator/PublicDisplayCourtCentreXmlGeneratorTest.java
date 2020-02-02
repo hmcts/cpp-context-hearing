@@ -63,7 +63,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime);
 
         final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
-        System.out.println(generatedPublicPageXml);
         assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FILE_PATH);
     }
 

@@ -29,6 +29,15 @@
       <xs:sequence>
         <xs:element name="courtsitename" type="xs:string"/>
         <xs:element ref="courtrooms"/>
+		<xs:element ref="floating"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="floating">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element ref="cases" minOccurs="0"/>
+        <xs:element name="timestatusset" type="xs:string" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -82,6 +91,7 @@
         <xs:element name="cppurn" type="xs:string" minOccurs="0"/>
         <xs:element name="casenumber" type="xs:integer" minOccurs="0"/>
         <xs:element name="casetype" type="xs:string" minOccurs="0"/>
+		<xs:element name="activecase" type="xs:integer"/>
         <xs:element name="hearingtype" type="xs:string"/>
         <xs:element ref="defendants" minOccurs="0"/>
         <xs:element ref="publicnotices" minOccurs="0"/>
@@ -90,6 +100,9 @@
         <xs:element ref="currentstatus" minOccurs="0"/>
         <xs:element name="timestatusset" type="xs:string" minOccurs="0"/>
         <xs:element name="hearingprogress" type="hearingProgressOptions" minOccurs="0"/>
+		<xs:element name="movedfromcourtsitename" type="xs:string" minOccurs="0"/>
+		<xs:element name="movedfromcourtroomname" type="xs:string" minOccurs="0"/>
+		<xs:element name="listcourtroomname" type="xs:string" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -227,7 +240,7 @@
         <xs:element name="min">
           <xs:simpleType>
             <xs:restriction base="xs:integer">
-              <xs:minInclusive value="1"/>
+              <xs:minInclusive value="0"/>
               <xs:maxInclusive value="59"/>
             </xs:restriction>
           </xs:simpleType>

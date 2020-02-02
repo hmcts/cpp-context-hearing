@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Datetimestamp;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.DaysOfWeekType;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Defendant;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Defendants;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Floating;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.MonthsOfYearType;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
@@ -94,6 +95,8 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
             final Courtsite xhibitCourtSite = webPageObjectFactory.createCourtsite();
             xhibitCourtSite.setCourtsitename(courtSite.getCourtSiteName());
             xhibitCourtSite.setCourtrooms(getCourtRooms(courtSite));
+            final Floating floating = webPageObjectFactory.createFloating();
+            xhibitCourtSite.setFloating(floating);
 
             courtsites.getCourtsite().add(xhibitCourtSite);
         });
@@ -133,6 +136,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setCppurn(cppCaseDetail.getCppUrn());
         xhibitCaseDetails.setCasenumber(ONE);
         xhibitCaseDetails.setCasetype(cppCaseDetail.getCaseType());
+        xhibitCaseDetails.setActivecase(BigInteger.ZERO);
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
         if (null == hearingEvent) {
