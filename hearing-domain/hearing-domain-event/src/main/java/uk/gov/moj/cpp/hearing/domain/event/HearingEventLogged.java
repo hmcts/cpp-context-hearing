@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.moj.cpp.hearing.domain.CourtCentre;
 import uk.gov.moj.cpp.hearing.domain.HearingType;
@@ -29,6 +30,7 @@ public class HearingEventLogged implements Serializable {
     private final CourtCentre courtCentre;
     private final HearingType hearingType;
     private final String caseURN;
+    private final JurisdictionType jurisdictionType;
 
     @JsonCreator
     public HearingEventLogged(
@@ -43,7 +45,8 @@ public class HearingEventLogged implements Serializable {
             @JsonProperty("alterable") final boolean alterable,
             @JsonProperty("courtCentre") final CourtCentre courtCentre,
             @JsonProperty("hearingType") final HearingType hearingType,
-            @JsonProperty("caseURN") final String caseURN) {
+            @JsonProperty("caseURN") final String caseURN,
+            @JsonProperty("jurisdictionType") final JurisdictionType jurisdictionType) {
         this.hearingEventId = hearingEventId;
         this.lastHearingEventId = lastHearingEventId;
         this.hearingId = hearingId;
@@ -56,6 +59,7 @@ public class HearingEventLogged implements Serializable {
         this.hearingType = hearingType;
         this.caseURN = caseURN;
         this.defenceCounselId = defenceCounselId;
+        this.jurisdictionType = jurisdictionType;
     }
 
     public UUID getHearingEventId() {
@@ -105,5 +109,7 @@ public class HearingEventLogged implements Serializable {
     public UUID getDefenceCounselId() {
         return defenceCounselId;
     }
+
+    public JurisdictionType getJurisdictionType() { return jurisdictionType; }
 
 }

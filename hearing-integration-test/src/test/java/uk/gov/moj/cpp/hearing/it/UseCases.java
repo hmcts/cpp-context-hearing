@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
+import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -26,6 +27,7 @@ import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
@@ -180,7 +182,8 @@ public class UseCases {
                                            final UUID hearingEventDefinitionId,
                                            final boolean alterable,
                                            final UUID defenceCounselId,
-                                           final ZonedDateTime eventTime) {
+                                           final ZonedDateTime eventTime,
+                                           final String recordedLabel) {
         final LogEventCommand logEvent = with(
                 LogEventCommand.builder()
                         .withHearingEventId(randomUUID())
@@ -188,9 +191,12 @@ public class UseCases {
                         .withHearingId(initiateHearingCommand.getHearing().getId())
                         .withEventTime(eventTime)
                         .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
-                        .withRecordedLabel(STRING.next())
+                        .withRecordedLabel(recordedLabel)
                         .withDefenceCounselId(defenceCounselId)
                 , consumer).build();
+
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
 
         final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
@@ -203,7 +209,7 @@ public class UseCases {
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
-                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
                                 .with(HearingEventDefinition::getHearingEventDefinitionId, is(logEvent.getHearingEventDefinitionId()))
@@ -231,6 +237,16 @@ public class UseCases {
         return logEvent;
     }
 
+    public static LogEventCommand logEvent(final RequestSpecification requestSpec,
+                                           final Consumer<LogEventCommand.Builder> consumer,
+                                           final InitiateHearingCommand initiateHearingCommand,
+                                           final UUID hearingEventDefinitionId,
+                                           final boolean alterable,
+                                           final UUID defenceCounselId,
+                                           final ZonedDateTime eventTime) {
+        return logEvent(requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
+    }
+
     public static LogEventCommand logEventForOverrideCourtRoom(final RequestSpecification requestSpec,
                                                                final Consumer<LogEventCommand.Builder> consumer,
                                                                final InitiateHearingCommand initiateHearingCommand,
@@ -254,6 +270,9 @@ public class UseCases {
                 .add(FIELD_OVERRIDE, override)
                 .build();
 
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
+
         final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
                         .with(PublicHearingEventLogged::getHearingEvent, isBean(uk.gov.moj.cpp.hearing.eventlog.HearingEvent.class)
@@ -265,7 +284,7 @@ public class UseCases {
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
-                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
                                 .with(HearingEventDefinition::getHearingEventDefinitionId, is(logEvent.getHearingEventDefinitionId()))
@@ -305,6 +324,8 @@ public class UseCases {
                         .withRecordedLabel(STRING.next())
                 , consumer).withDefenceCounselId(randomUUID()).build();
 
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
 
         final EventListener publicEventTopic = listenFor("public.hearing.event-timestamp-corrected")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
@@ -317,7 +338,7 @@ public class UseCases {
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
-                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
                                 .with(HearingEventDefinition::getHearingEventDefinitionId, is(logEvent.getHearingEventDefinitionId()))

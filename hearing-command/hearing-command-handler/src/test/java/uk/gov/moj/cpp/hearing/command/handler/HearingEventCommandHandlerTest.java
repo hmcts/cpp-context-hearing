@@ -20,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.print;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -192,7 +193,8 @@ public class HearingEventCommandHandlerTest {
                             .withId(initiateHearingCommand.getHearing().getType().getId())
                             .withDescription(initiateHearingCommand.getHearing().getType().getDescription())
                             .build(),
-                    initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN())); //TODO: GPE-5657 Which case URN is expected to be set?
+                    initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN(),
+                    JurisdictionType.CROWN)); //TODO: GPE-5657 Which case URN is expected to be set?
         }));
 
         final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
@@ -249,7 +251,8 @@ public class HearingEventCommandHandlerTest {
                             .withId(initiateHearingCommand.getHearing().getType().getId())
                             .withDescription(initiateHearingCommand.getHearing().getType().getDescription())
                             .build(),
-                    initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN())); //TODO: GPE-5657 Which case URN is expected to be set?
+                    initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN(),
+                    JurisdictionType.CROWN)); //TODO: GPE-5657 Which case URN is expected to be set?
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"), objectToJsonObjectConverter.convert(correctLogEvenCommand));

@@ -13,4 +13,14 @@ public class HearingStepDefinitions extends AbstractIT {
         setupAsAuthorisedUser(validUserId);
         setLoggedInUser(validUserId);
     }
+
+    public static void givenAUserHasLoggedInAsADefenceCounsel(final UUID validUserId) {
+        setupAsAuthorisedUser(validUserId);
+        setLoggedInUser(validUserId);
+    }
+
+    public static void givenAUserHasLoggedInAsAProsecutionCounsel(final UUID validUserId) {
+        setupAsAuthorisedUser(validUserId);
+        setLoggedInUser(validUserId);
+    }
 }

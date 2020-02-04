@@ -63,6 +63,7 @@ public class LogEventHearingEventProcessor {
                 )
                 .withHearing(Hearing.builder()
                         .withHearingType(hearingEventLogged.getHearingType().getDescription())
+                        .withJurisdictionType(hearingEventLogged.getJurisdictionType().toString())
                         .withCourtCentre(CourtCentre.builder()
                                 .withCourtCentreId(hearingEventLogged.getCourtCentre().getId())
                                 .withCourtCentreName(hearingEventLogged.getCourtCentre().getName())

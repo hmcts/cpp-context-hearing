@@ -1,12 +1,12 @@
 {
-  "defenceCounsel": {
+  "hearingId": "029034d9-0f54-43c5-ba36-e5deadd62474",
+  "prosecutionCounsel": {
     "id": "fab947a3-c50c-4dbb-accf-b2758b1d2d6d",
-    "userId": "4c5845d7-210d-4832-b8f4-dcf350bcb9bc",
     "status": "QC",
     "title": "Mr",
     "firstName": "Eric",
     "lastName": "Ormsby",
-    "defendants": [
+    "prosecutionCases": [
       "0305de0e-eb0e-478f-8ae4-f2c7966961e3",
       "d06f6539-2a7c-4bc8-bca3-A1e5a225471a"
     ],

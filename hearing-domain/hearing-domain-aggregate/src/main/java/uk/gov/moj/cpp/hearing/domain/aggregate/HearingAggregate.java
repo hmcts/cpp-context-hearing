@@ -110,13 +110,17 @@ import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612"})
 public class HearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = 5L;
+
+    private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
     private final HearingAggregateMomento momento = new HearingAggregateMomento();
 
@@ -215,7 +219,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
-        return apply(prosecutionCounselDelegate.addProsecutionCounsel(prosecutionCounsel, hearingId));
+        return apply(prosecutionCounselDelegate.addProsecutionCounsel(prosecutionCounsel, hearingId, hasHearingEnded()));
     }
 
     public Stream<Object> removeProsecutionCounsel(final UUID id, final UUID hearingId) {
@@ -227,7 +231,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
-        return apply(defenceCounselDelegate.addDefenceCounsel(defenceCounsel, hearingId));
+        return apply(defenceCounselDelegate.addDefenceCounsel(defenceCounsel, hearingId, hasHearingEnded()));
     }
 
     public Stream<Object> removeDefenceCounsel(final UUID id, final UUID hearingId) {
@@ -427,5 +431,12 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, List<Marker> markers) {
         return prosecutionCaseDelegate.updateCaseMarkers(hearingId, prosecutionCaseId, markers);
+    }
+
+    private boolean hasHearingEnded() {
+        final Map<UUID, HearingEventDelegate.HearingEvent> events = this.momento.getHearingEvents().entrySet().stream()
+                .filter(hearingEvent -> RECORDED_LABEL_HEARING_END.equalsIgnoreCase(hearingEvent.getValue().getHearingEventLogged().getRecordedLabel()))
+                .collect(Collectors.toMap(hearingEvent -> hearingEvent.getKey(), hearingEvent -> hearingEvent.getValue()));
+        return !events.isEmpty();
     }
 }

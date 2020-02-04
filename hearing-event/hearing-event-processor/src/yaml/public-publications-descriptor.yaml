@@ -89,6 +89,21 @@ subscriptions_descriptor:
         - name: public.hearing.defendant-case-withdrawn-or-dismissed
           schema_uri: http://justice.gov.uk/json/schemas/hearing/public.hearing.defendant-case-withdrawn-or-dismissed.json
 
+      # Defense Counsel
+        - name: public.hearing.defence-counsel-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json
+
+      # Defence Counsel Change Ignored
+        - name: public.hearing.defence-counsel-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-defence-counsel-change-ignored.json
+
+      # Prosecution Counsel
+        - name: public.hearing.prosecution-counsel-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-added.json
+
+      # Prosecution Counsel Change Ignored
+        - name: public.hearing.prosecution-counsel-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-prosecution-counsel-change-ignored.json
       # NCES Notification
         - name: public.hearing.event.nces-notification-requested
           schema_uri: http://justice.gov.uk/hearing/json/schema/event/public-nces-notification-requested.json

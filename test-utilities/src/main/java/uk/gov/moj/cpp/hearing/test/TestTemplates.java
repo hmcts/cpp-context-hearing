@@ -1201,7 +1201,8 @@ public class TestTemplates {
                     STRING.next(),
                     STRING.next(),
                     STRING.next(),
-                    STRING.next()
+                    STRING.next(),
+                    randomUUID()
             );
             return new AddDefenceCounsel(defenceCounsel, hearingId);
         }
@@ -1215,7 +1216,8 @@ public class TestTemplates {
                     STRING.next(),
                     null,
                     STRING.next(),
-                    STRING.next()
+                    STRING.next(),
+                    randomUUID()
             );
             return new AddDefenceCounsel(defenceCounsel, hearingId);
         }
@@ -1238,7 +1240,8 @@ public class TestTemplates {
                     STRING.next(),
                     STRING.next(),
                     STRING.next(),
-                    STRING.next()
+                    STRING.next(),
+                    randomUUID()
             );
             return new UpdateDefenceCounsel(defenceCounsel, hearingId);
         }
@@ -1261,7 +1264,8 @@ public class TestTemplates {
                     STRING.next(),
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
-                    STRING.next()
+                    STRING.next(),
+                    randomUUID()
             );
             return new AddProsecutionCounsel(hearingId, prosecutionCounsel);
         }
@@ -1275,7 +1279,8 @@ public class TestTemplates {
                     null,
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
-                    STRING.next()
+                    STRING.next(),
+                    randomUUID()
             );
             return new AddProsecutionCounsel(hearingId, prosecutionCounsel);
         }
@@ -1335,7 +1340,8 @@ public class TestTemplates {
                     null,
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
-                    STRING.next()
+                    STRING.next(),
+                    randomUUID()
             );
             return new UpdateProsecutionCounsel(hearingId, prosecutionCounsel);
         }

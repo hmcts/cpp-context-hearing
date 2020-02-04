@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public-prosecution-counsel-change-ignored.json",
+  "type": "object",
+  "properties": {
+    "reason": {
+      "type": "string"
+    },
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "prosecutionCounsel": {
+      "$ref": "http://justice.gov.uk/core/courts/prosecutionCounsel.json"
+    },
+    "caseURN": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "reason"
+  ]
+}

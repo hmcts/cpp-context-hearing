@@ -81,7 +81,8 @@ public class DefenceCounselAddedEventListenerTest {
                 STRING.next(),
                 STRING.next(),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
         );
 
         final DefenceCounselAdded defenceCounselAdded = new DefenceCounselAdded(defenceCounsel, randomUUID());
@@ -121,7 +122,8 @@ public class DefenceCounselAddedEventListenerTest {
                 STRING.next(),
                 STRING.next(),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
         );
 
         final DefenceCounselUpdated defenceCounselUpdated = new DefenceCounselUpdated(defenceCounsel, randomUUID());
