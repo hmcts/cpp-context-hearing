@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 
 import static java.math.BigInteger.ONE;
+import static java.util.Optional.ofNullable;
 
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.CaseDetails;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Cases;
@@ -24,6 +25,7 @@ import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -110,7 +112,7 @@ public class WebPageCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
         xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases()));
         xhibitCourtRoom.setDefendants(getDefendants(ccpCourtRoom.getCases()));
         xhibitCourtRoom.setCurrentstatus(eventGenerator.generate(ccpCourtRoom));
-
+        ofNullable(xhibitCourtRoom.getCurrentstatus().getEvent()).ifPresent(x -> xhibitCourtRoom.setTimestatusset(x.getTime()));
         return xhibitCourtRoom;
     }
 

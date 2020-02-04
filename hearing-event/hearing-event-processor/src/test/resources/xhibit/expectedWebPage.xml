@@ -30,6 +30,7 @@
                                 <type>102000</type>
                             </event>
                         </currentstatus>
+                        <timestatusset>12:30</timestatusset>
                         <courtroomname>courtRoomName</courtroomname>
                     </courtroom>
                 </courtrooms>
