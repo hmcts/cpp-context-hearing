@@ -21,6 +21,8 @@
                                         <lastname>Jong</lastname>
                                     </defendant>
                                 </defendants>
+                                <notbeforetime>15:00</notbeforetime>
+                                <timestatusset>15:00</timestatusset>
                                 <hearingprogress>0</hearingprogress>
                             </caseDetails>
                         </cases>

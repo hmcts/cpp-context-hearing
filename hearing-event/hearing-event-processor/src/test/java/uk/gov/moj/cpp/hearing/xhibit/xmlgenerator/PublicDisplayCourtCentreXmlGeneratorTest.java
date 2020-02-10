@@ -97,6 +97,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withHearingType("hearingType")
                                                         .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                                                         .withJudgeName("Mr Lampard")
+                                                        .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
                                                         .build()))
                                                 .build())
                                         .build()))

@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 
 import static java.math.BigInteger.ONE;
+import static java.time.ZonedDateTime.parse;
+import static java.time.format.DateTimeFormatter.ofPattern;
 
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.CaseDetails;
@@ -27,6 +29,7 @@ import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -34,6 +37,9 @@ import javax.inject.Inject;
 
 @ApplicationScoped
 public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
+
+    private static final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
+
 
     @Inject
     private XmlUtils xmlUtils;
@@ -140,10 +146,14 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
         if (null == hearingEvent) {
-            xhibitCaseDetails.setNotbeforetime(cppCaseDetail.getNotBeforeTime());
+            final String dateTime = dateTimeFormatter.format(parse(cppCaseDetail.getNotBeforeTime()));
+            xhibitCaseDetails.setNotbeforetime(dateTime);
+            xhibitCaseDetails.setTimestatusset(dateTime);
             xhibitCaseDetails.setHearingprogress(BigInteger.ZERO);
         } else {
             xhibitCaseDetails.setCurrentstatus(eventGenerator.generate(cppCaseDetail));
+            xhibitCaseDetails.setTimestatusset(hearingEvent.getLastModifiedTime().format(dateTimeFormatter));
+
         }
 
         return xhibitCaseDetails;
