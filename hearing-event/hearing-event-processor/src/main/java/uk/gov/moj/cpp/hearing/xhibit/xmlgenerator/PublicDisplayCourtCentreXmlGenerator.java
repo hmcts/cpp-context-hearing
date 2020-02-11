@@ -152,8 +152,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
             xhibitCaseDetails.setHearingprogress(BigInteger.ZERO);
         } else {
             xhibitCaseDetails.setCurrentstatus(eventGenerator.generate(cppCaseDetail));
-            xhibitCaseDetails.setTimestatusset(hearingEvent.getLastModifiedTime().format(dateTimeFormatter));
-
+            xhibitCaseDetails.setTimestatusset(hearingEvent.getEventTime().format(dateTimeFormatter));
         }
 
         return xhibitCaseDetails;
