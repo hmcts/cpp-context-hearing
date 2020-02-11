@@ -1,12 +1,16 @@
 package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
+import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_FORTNIGHTLY;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_MONTHLY;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAY_BY_DATE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_WEEKLY;
@@ -23,19 +27,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:S1135"})
+@SuppressWarnings({"squid:S1135", "squid:S1612"})
 public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforcementMapper {
 
+    public static final UUID PAYMENT_CARD_REQUIRED_UUID = UUID.fromString("6dbddb7c-007c-4a81-a06d-17b09b68c01a");
     private static final Logger LOGGER = LoggerFactory.getLogger(StagingEnforcementPaymentTermsMapper.class.getName());
+    public static final String Y = "Y";
+    public static final String N = "N";
     private final Map<UUID, UUID> resultLineResultDefinitionIdMap;
 
     private final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts;
@@ -72,10 +81,11 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
                     .withPaymentTermsType(paymentTermsType)
                     .withPayByDate(getPayByDate(paymentTermsType, promptRefs))
                     .withLumpSumAmount(getLumpSumAmount(resultDefinitionId, promptRefs))
-                    .withDefaultDaysInJail(null) //TODO: Not supported in increment 2.4.
+                    .withDefaultDaysInJail(getDefaultDaysInJail(resultDefinitionId, promptRefs)) //TODO: Not supported in increment 2.4.
                     .withInstalmentAmount(getInstalmentAmount(resultDefinitionId, promptRefs))
                     .withInstalmentStartDate(getInstalmentStartDate(resultDefinitionId, promptRefs))
-                    .withParentGuardianToPay(null) //TODO: Not supported in increment 2.4.
+                    .withParentGuardianToPay(getParentGuardianToPay(promptRefs)) //TODO: Not supported in increment 2.4.
+                    .withPaymentCardRequired(getPaymentCardRequired(Arrays.asList(PAYMENT_CARD_REQUIRED_UUID)))
                     .build();
         }
 
@@ -88,26 +98,50 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
 
     }
 
-    private LocalDate getInstalmentStartDate(final UUID resultDefinitionId, final List<UUID> promptRefs) {
-        String promptValue = null;
+    private Optional<String> getPromptValueByReference(final UUID resultDefinitionId, final List<UUID> promptRefs, String promptReference) {
         if (resultDefinitionId.equals(RD_LUMSI) || resultDefinitionId.equals(RD_INSTL)) {
-            promptValue = getPromptValue(promptRefs, P_INSTALMENT_START_DATE);
+            return getPromptValueByReference(promptRefs, promptReference);
+        } else {
+            return Optional.ofNullable(null);
         }
+    }
 
-        if (nonNull(promptValue)) {
-            return LocalDate.parse(reformatDateIfRequired(promptValue));
-        }
+    private Optional<String> getPromptValueByReference(final List<UUID> promptRefs, String promptReference) {
+        return Optional.ofNullable(getPromptValue(promptRefs, promptReference));
+    }
 
-        return null;
+    private LocalDate getInstalmentStartDate(final UUID resultDefinitionId, final List<UUID> promptRefs) {
+        return getPromptValueByReference(resultDefinitionId, promptRefs, P_INSTALMENT_START_DATE)
+                .map(promptValue -> LocalDate.parse(reformatDateIfRequired(promptValue)))
+                .orElse(null);
+    }
+
+    private String getPaymentCardRequired(final List<UUID> promptRefs) {
+        return getPromptValueByReference(promptRefs, P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE)
+                .map(promptValue -> promptValue.toUpperCase().startsWith(Y) || promptValue.toUpperCase().startsWith("T"))
+                .map(result -> {
+                    if (result) { return Y; } else { return N; }
+
+                })
+                .orElse(null);
+    }
+
+    private Boolean getParentGuardianToPay(final List<UUID> promptRefs) {
+        return getPromptValueByReference(promptRefs, P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE)
+                .map(promptValue -> promptValue.toUpperCase().startsWith(Y) || promptValue.toUpperCase().startsWith("T"))
+                .orElse(false);
+    }
+
+    private Integer getDefaultDaysInJail(final UUID resultDefinitionId, final List<UUID> promptRefs) {
+        return getPromptValueByReference(resultDefinitionId, promptRefs, P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE)
+                .map(promptValue -> Integer.parseInt(promptValue.trim()))
+                .orElse(null);
     }
 
     private BigDecimal getInstalmentAmount(final UUID resultDefinitionId, final List<UUID> promptRefs) {
-        String promptValue = null;
-        if (resultDefinitionId.equals(RD_LUMSI) ||
-                resultDefinitionId.equals(RD_INSTL)) {
-            promptValue = getPromptValue(promptRefs, P_INSTALMENT_AMOUNT);
-        }
-        return isNull(promptValue) ? null : getStringAsDecimal(promptValue);
+        return getPromptValueByReference(resultDefinitionId, promptRefs, P_INSTALMENT_AMOUNT)
+                .map(promptValue -> getStringAsDecimal(promptValue))
+                .orElse(null);
     }
 
     private BigDecimal getLumpSumAmount(final UUID resultDefinitionId, final List<UUID> promptRefs) {
@@ -190,15 +224,15 @@ public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforce
         return originalValue;
     }
 
-    private boolean isRequired(final String format,final String value,final Locale locale) {
+    private boolean isRequired(final String format, final String value, final Locale locale) {
         final DateTimeFormatter fomatter = DateTimeFormatter.ofPattern(format, locale);
         boolean isNotEqualToOutgoingFormat = false;
         try {
             final LocalDate localDate = LocalDate.parse(value, fomatter);
             final String result = localDate.format(fomatter);
             isNotEqualToOutgoingFormat = result.equals(value);
-        } catch (DateTimeParseException exp) {
-            LOGGER.error(String.format("Invalid date - %s ", value), exp);
+        } catch (DateTimeParseException e) {
+            LOGGER.trace(format("Invalid date - %s", value), e);
         }
         return isNotEqualToOutgoingFormat;
     }

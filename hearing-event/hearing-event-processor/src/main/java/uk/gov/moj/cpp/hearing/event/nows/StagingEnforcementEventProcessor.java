@@ -83,6 +83,7 @@ public class StagingEnforcementEventProcessor {
             }
 
             this.sender.send(this.enveloper.withMetadataFrom(event, "stagingenforcement.enforce-financial-imposition").apply(enforceFinancialImpositionPayload));
+            LOGGER.info("Sent request to enforce financial imposition for hearing with ID '{}' and NOW request with ID '{}'", hearingId, requestId);
 
         });
     }

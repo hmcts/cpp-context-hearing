@@ -15,16 +15,24 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.SharedResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.json.schemas.staging.EnforceFinancialImposition;
+import uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class EnforceFinancialImpositionMapper {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnforceFinancialImpositionMapper.class.getName());
 
     private final CreateNowsRequest nowsRequest;
 
@@ -81,6 +89,8 @@ public class EnforceFinancialImpositionMapper {
         final Map<UUID, String> sharedResultLineOffenceCodeMap = mapSharedResultWithOffenceCode(
                 defendant, sharedResultLines);
 
+        LOGGER.info("sharedResultLineOffenceCodeMap {}", sharedResultLineOffenceCodeMap);
+
         final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts = targets.stream()
                 .filter(target -> target.getDefendantId().equals(defendant.getId()))
                 .flatMap(target -> target.getResultLines().stream())
@@ -111,6 +121,7 @@ public class EnforceFinancialImpositionMapper {
                 .withMinorCreditor(new StagingEnforcementMinorCreditorMapper().map())//TODO: we do not differentiate major from minor -> prompt 296.  BPO Question concerning how we will deal with minor creditors and the expectation of GOB
                 .withPaymentTerms(new StagingEnforcementPaymentTermsMapper(sharedResultLines, resultLineResultDefinitionIdMap, resultLineIdWithListOfPrompts).map())
                 .withProsecutionAuthorityCode(prosecutionMapper.getAuthorityCode())
+                .withDwpApNumber(getDwpApNumber(resultLineIdWithListOfPrompts))
                 .build();
     }
 
@@ -140,5 +151,14 @@ public class EnforceFinancialImpositionMapper {
                 .filter(defendant -> defendant.getId().equals(defendantId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    private String getDwpApNumber(final Map<UUID, List<Prompt>> resultLineIdWithListOfPrompts) {
+        return resultLineIdWithListOfPrompts.values().stream()
+                .filter(Objects::nonNull)
+                .flatMap(Collection::stream)
+                .filter(prompt -> prompt.getId().equals(PromptTypesConstant.P_DWP_AP_NUMBER))
+                .map(Prompt::getValue)
+                .findFirst().orElse(null);
     }
 }

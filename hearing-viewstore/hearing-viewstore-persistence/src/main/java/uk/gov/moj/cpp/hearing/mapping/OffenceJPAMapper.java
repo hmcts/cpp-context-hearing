@@ -91,6 +91,7 @@ public class OffenceJPAMapper {
             offence.setCtlTimeLimit(null);
             offence.setCtlDaysSpent(null);
         }
+        offence.setLaidDate(pojo.getLaidDate());
 
         return offence;
     }
@@ -128,7 +129,7 @@ public class OffenceJPAMapper {
                 .withPlea(pleaJPAMapper.fromJPA(offenceId, entity.getPlea()))
                 .withVerdict(verdictJPAMapper.fromJPA(offenceId, entity.getVerdict()))
                 .withAllocationDecision(allocationDecisionJPAMapper.fromJPA(offenceId, entity.getAllocationDecision()))
-
+                .withLaidDate(entity.getLaidDate())
                 .build();
     }
 

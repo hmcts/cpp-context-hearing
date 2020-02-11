@@ -182,6 +182,25 @@ subscriptions_descriptor:
         - name: hearing.event.publish-court-list-requested
           schema_uri: http://justice.gov.uk/hearing/event/hearing.event.publish-court-list-requested.json
 
+      # Defense Counsel
+        - name: hearing.defence-counsel-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json
+
+      # Prosecution Counsel
+        - name: hearing.prosecution-counsel-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-added.json
+
+      # Defence Counsel Change Ignored
+        - name: hearing.defence-counsel-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-change-ignored.json
+
+      # Prosecution Counsel Change Ignored
+        - name: hearing.prosecution-counsel-change-ignored
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-change-ignored.json
+      # NCES Notification
+        - name: hearing.event.nces-notification-requested
+          schema_uri: http://justice.gov.uk/hearing/json/schema/event/nces-notification-requested.json
+
       event_source_name: hearing
 
     - name: public event subscription

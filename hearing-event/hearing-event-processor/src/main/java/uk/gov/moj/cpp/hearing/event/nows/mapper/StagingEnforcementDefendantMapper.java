@@ -2,20 +2,24 @@ package uk.gov.moj.cpp.hearing.event.nows.mapper;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Now;
 import uk.gov.justice.core.courts.NowVariantResult;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.SharedResultLine;
+import uk.gov.justice.json.schemas.staging.Aliases;
 import uk.gov.justice.json.schemas.staging.Defendant;
 import uk.gov.justice.json.schemas.staging.DocumentLanguage;
 import uk.gov.justice.json.schemas.staging.HearingLanguage;
-import uk.gov.justice.json.schemas.staging.Title;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -26,9 +30,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
+
+@SuppressWarnings({"squid:S1168"})
 class StagingEnforcementDefendantMapper {
 
     private static final String SPACE = " ";
+    private static final String CO = "Co";
     private final List<SharedResultLine> sharedResultLines;
 
     private final uk.gov.justice.core.courts.Defendant defendant;
@@ -71,38 +79,60 @@ class StagingEnforcementDefendantMapper {
                 .withTelephoneNumberHome(setTelephoneNumberHome(defendant))
                 .withTelephoneNumberMobile(setTelephoneNumberMobile(defendant))
                 .withTitle(setTitle(defendant))
-                .withVehicleMake(null)
-                .withVehicleMake(null)
+                .withVehicleMake(getVehicleMake(defendant))
+                .withVehicleRegistrationMark(getVehicleRegistrationMark(defendant))
                 .withWeeklyIncome(null)
+                .withAliases(setAliases(defendant))
                 .build();
     }
 
-    private Title setTitle(final uk.gov.justice.core.courts.Defendant defendant) {
-        return nonNull(defendant.getLegalEntityDefendant()) ? Title.CO : convertTitle(defendant.getPersonDefendant().getPersonDetails().getTitle());
+
+    private String getVehicleRegistrationMark(final uk.gov.justice.core.courts.Defendant defendant) {
+        if(nonNull(defendant) &&  CollectionUtils.isNotEmpty(defendant.getOffences())) {
+            final Optional<Offence> optionalOffence = defendant.getOffences().stream()
+                    .filter(Objects::nonNull)
+                    .filter(offence -> nonNull(offence.getOffenceFacts()) && isNotEmpty(offence.getOffenceFacts().getVehicleRegistration()))
+                    .findFirst();
+
+           return  optionalOffence.isPresent() ?  optionalOffence.get().getOffenceFacts().getVehicleRegistration() : null ;
+        }
+        return null;
     }
 
-    private Title convertTitle(uk.gov.justice.core.courts.Title title) {
-        return Optional.ofNullable(title)
-                .map(t -> {
-                    switch (t) {
-                        case MR:
-                            return Title.MR;
-                        case MRS:
-                            return Title.MRS;
-                        case MS:
-                            return Title.MS;
-                        case MISS:
-                            return Title.MISS;
-                        default:
-                            return Title.MR;
-                    }
-                })
-                .orElse(Title.MR);
+    private String getVehicleMake(final uk.gov.justice.core.courts.Defendant defendant) {
+        if(nonNull(defendant) &&  CollectionUtils.isNotEmpty(defendant.getOffences())) {
+            final Optional<Offence> optionalOffence = defendant.getOffences().stream()
+                    .filter(Objects::nonNull)
+                    .filter(offence -> nonNull(offence.getOffenceFacts()) && isNotEmpty(offence.getOffenceFacts().getVehicleMake()))
+                    .findFirst();
 
+            return  optionalOffence.isPresent() ?  optionalOffence.get().getOffenceFacts().getVehicleMake() : null ;
+        }
+        return null;
+    }
+
+    private String middleNameToInitial(String middleName) {
+        if (middleName == null || middleName.trim().length() == 0) {
+            return null;
+        } else {
+            return middleName.substring(0, 1).toUpperCase();
+        }
+    }
+
+    private List<Aliases> setAliases(final uk.gov.justice.core.courts.Defendant defendant) {
+        if (isEmpty(defendant.getAliases())) {
+            return null;
+        } else {
+            return defendant.getAliases().stream().map(a -> new Aliases(a.getFirstName(), middleNameToInitial(a.getMiddleName()), a.getLastName(), null)).collect(Collectors.toList());
+        }
+    }
+
+    private String setTitle(final uk.gov.justice.core.courts.Defendant defendant) {
+        return nonNull(defendant.getLegalEntityDefendant()) ? CO : ofNullable(defendant.getPersonDefendant().getPersonDetails()).map(Person::getTitle).orElse(null);
     }
 
     private String setSurname(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getLastName)
@@ -110,12 +140,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setForenames(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Stream.of(Optional.ofNullable(defendant)
+        return Stream.of(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                         .map(PersonDefendant::getPersonDetails)
                         .map(Person::getFirstName)
                         .orElse(null),
-                Optional.ofNullable(defendant)
+                ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                         .map(PersonDefendant::getPersonDetails)
                         .map(Person::getMiddleName)
@@ -125,7 +155,7 @@ class StagingEnforcementDefendantMapper {
     }
 
     private LocalDate setDateOfBirth(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getDateOfBirth)
@@ -133,7 +163,7 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setCompanyName(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                 .map(LegalEntityDefendant::getOrganisation)
                 .map(Organisation::getName)
@@ -142,12 +172,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setAddress1(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getAddress)
                 .map(Address::getAddress1)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getAddress)
@@ -156,12 +186,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setAddress2(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getAddress)
                 .map(Address::getAddress2)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getAddress)
@@ -170,12 +200,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setAddress3(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getAddress)
                 .map(Address::getAddress3)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getAddress)
@@ -184,12 +214,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setAddress4(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getAddress)
                 .map(Address::getAddress4)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getAddress)
@@ -198,12 +228,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setAddress5(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getAddress)
                 .map(Address::getAddress5)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getAddress)
@@ -212,12 +242,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setPostcode(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getAddress)
                 .map(Address::getPostcode)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getAddress)
@@ -226,7 +256,7 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setNationalInsuranceNumber(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getNationalInsuranceNumber)
@@ -234,7 +264,7 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setTelephoneNumberHome(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getContact)
@@ -243,12 +273,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setTelephoneNumberBusiness(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getContact)
                 .map(ContactNumber::getWork)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getContact)
@@ -258,7 +288,7 @@ class StagingEnforcementDefendantMapper {
 
     private String setTelephoneNumberMobile(final uk.gov.justice.core.courts.Defendant defendant) {
 
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getContact)
@@ -268,12 +298,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setEmailAddress1(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getContact)
                 .map(ContactNumber::getPrimaryEmail)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getContact)
@@ -283,12 +313,12 @@ class StagingEnforcementDefendantMapper {
     }
 
     private String setEmailAddress2(final uk.gov.justice.core.courts.Defendant defendant) {
-        return Optional.ofNullable(defendant)
+        return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)
                 .map(PersonDefendant::getPersonDetails)
                 .map(Person::getContact)
                 .map(ContactNumber::getSecondaryEmail)
-                .orElse(Optional.ofNullable(defendant)
+                .orElse(ofNullable(defendant)
                         .map(uk.gov.justice.core.courts.Defendant::getLegalEntityDefendant)
                         .map(LegalEntityDefendant::getOrganisation)
                         .map(Organisation::getContact)

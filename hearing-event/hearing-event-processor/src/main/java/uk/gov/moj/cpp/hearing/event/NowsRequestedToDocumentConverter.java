@@ -47,6 +47,7 @@ import uk.gov.moj.cpp.hearing.domain.notification.Subscription;
 import uk.gov.moj.cpp.hearing.event.nows.EmailNowNotificationChannel;
 import uk.gov.moj.cpp.hearing.event.nows.InvalidNotificationException;
 import uk.gov.moj.cpp.hearing.event.nows.NowsNotificationDocumentState;
+import uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant;
 import uk.gov.moj.cpp.hearing.event.nows.SubscriptionClient;
 import uk.gov.moj.cpp.hearing.event.order.Prompts;
 import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
@@ -56,6 +57,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -669,9 +671,13 @@ public class NowsRequestedToDocumentConverter {
         }
     }
 
+    public final Set<String> EXCLUDED_PROMPT_REFS = new HashSet(Arrays.asList(
+            PromptTypesConstant.P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE, PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE));
+
     private List<Prompts> preparePrompts(final NowVariantResult selectedNowResult, final SharedResultLine sharedResultLine) {
         final List<ResultPrompt> nowResultPrompts = getMatchingPrompts(selectedNowResult, sharedResultLine);
         return nowResultPrompts.stream()
+                .filter(prompt->isEmpty(prompt.getPromptReference()) || !EXCLUDED_PROMPT_REFS.contains(prompt.getPromptReference()))
                 .map(prompt -> new Prompts(prompt.getLabel(), prompt.getValue(), prompt.getWelshLabel(), prompt.getWelshValue()))
                 .collect(toList());
     }

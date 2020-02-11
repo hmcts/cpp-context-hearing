@@ -5,7 +5,6 @@ import static java.util.Objects.nonNull;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantAttendance;
-import uk.gov.justice.core.courts.Title;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 
@@ -24,7 +23,7 @@ public class DefendantDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private final HearingAggregateMomento momento;
+    private HearingAggregateMomento momento;
 
     public DefendantDelegate(final HearingAggregateMomento momento) {
         this.momento = momento;
@@ -40,19 +39,19 @@ public class DefendantDelegate implements Serializable {
 
     public void handleDefendantAttendanceUpdated(final DefendantAttendanceUpdated defendantAttendanceUpdated) {
 
-        List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>();
+        final List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>();
 
-        Map<UUID, DefendantAttendance> defendantAttendanceMap = defendantAttendances.stream()
+        final Map<UUID, DefendantAttendance> defendantAttendanceMap = defendantAttendances.stream()
                 .collect(Collectors.toMap(DefendantAttendance::getDefendantId, Function.identity()));
 
-        DefendantAttendance defendantAttendance = defendantAttendanceMap.computeIfAbsent(defendantAttendanceUpdated.getDefendantId(), id -> DefendantAttendance.defendantAttendance()
+        final DefendantAttendance defendantAttendance = defendantAttendanceMap.computeIfAbsent(defendantAttendanceUpdated.getDefendantId(), id -> DefendantAttendance.defendantAttendance()
                 .withDefendantId(id)
                 .withAttendanceDays(new ArrayList<>())
                 .build());
 
-        Map<LocalDate, AttendanceDay> localDateAttendanceDayMap = defendantAttendance.getAttendanceDays().stream().collect(Collectors.toMap(AttendanceDay::getDay, Function.identity()));
+        final Map<LocalDate, AttendanceDay> localDateAttendanceDayMap = defendantAttendance.getAttendanceDays().stream().collect(Collectors.toMap(AttendanceDay::getDay, Function.identity()));
 
-        AttendanceDay attendanceDay = localDateAttendanceDayMap.computeIfAbsent(defendantAttendanceUpdated.getAttendanceDay().getDay(), date -> AttendanceDay.attendanceDay().withDay(date).build());
+        final AttendanceDay attendanceDay = localDateAttendanceDayMap.computeIfAbsent(defendantAttendanceUpdated.getAttendanceDay().getDay(), date -> AttendanceDay.attendanceDay().withDay(date).build());
 
         attendanceDay.setIsInAttendance(defendantAttendanceUpdated.getAttendanceDay().getIsInAttendance());
 
@@ -70,8 +69,8 @@ public class DefendantDelegate implements Serializable {
                     .findFirst();
 
             if (previouslyStoredDefendant.isPresent() && nonNull(newDefendant.getPersonDefendant()) && nonNull(newDefendant.getPersonDefendant().getPersonDetails())) {
-                final Title storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
-                final Title newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
+                final String storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
+                final String newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
                 if (newTitle == null) {
                     newDefendant.getPersonDefendant().getPersonDetails().setTitle(storedTitle);
                 }
@@ -117,5 +116,9 @@ public class DefendantDelegate implements Serializable {
                 .setWitnessStatement(defendantIn.getWitnessStatement())
                 .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
                 .setProsecutionCaseId(defendantIn.getProsecutionCaseId());
+    }
+
+    public void setHearingAggregateMomento(final HearingAggregateMomento momento) {
+        this.momento = momento;
     }
 }

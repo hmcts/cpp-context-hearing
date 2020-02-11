@@ -6,7 +6,6 @@ import java.util.List;
 
 @SuppressWarnings("squid:S1168")
 class StagingEnforcementMinorCreditorMapper {
-
     public List<MinorCreditor> map() {
         return null;
     }

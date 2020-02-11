@@ -7,12 +7,20 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESNotificationDecisionDelegate;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.nces.ApplicationDetailsForDefendant;
+import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithApplicationDetails;
+import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithFinancialOrderDetails;
+import uk.gov.moj.cpp.hearing.nces.FinancialOrderForDefendant;
+import uk.gov.moj.cpp.hearing.nces.RemoveGrantedApplicationDetailsForDefendant;
+import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,12 +29,19 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings({"squid:S00107", "squid:S1948"})
 public class DefendantAggregate implements Aggregate {
-
-    private static final long serialVersionUID = 3437111723927797319L;
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefendantAggregate.class);
+    private static final long serialVersionUID = 2L;
 
     private List<UUID> hearingIds = new ArrayList<>();
+
+    private DefendantAggregateMomento momento = new DefendantAggregateMomento();
+
+    private NCESNotificationDecisionDelegate ncesNotificationDecisionDelegate = new NCESNotificationDecisionDelegate(momento);
 
     private final Map<UUID, OffenceResult> offenceResults = new HashMap<>();
 
@@ -36,6 +51,9 @@ public class DefendantAggregate implements Aggregate {
         return match(event)
                 .with(
                         when(RegisteredHearingAgainstDefendant.class).apply(defendant -> hearingIds.add(defendant.getHearingId())),
+                        when(DefendantUpdateWithFinancialOrderDetails.class).apply(this::handleUpdateDefendantWithFinancialOrder),
+                        when(DefendantUpdateWithApplicationDetails.class).apply(this::handleUpdateDefendantWithApplicationDetails),
+                        when(RemoveGrantedApplicationDetailsForDefendant.class).apply(this::handleRemoveGrantedApplicationDetailsForDefendant),
                         when(DefendantOffenceResultsUpdated.class).apply(e ->
                                 updateOffenceResults(this.offenceResults, e.getOffenceIds(), e.getResultedOffences())
                         ),
@@ -75,6 +93,38 @@ public class DefendantAggregate implements Aggregate {
                 .withHearingIds(hearingIds)
         ));
     }
+
+    public Stream<Object> updateDefendantWithFinancialOrder(final FinancialOrderForDefendant financialOrderForDefendant) {
+        LOGGER.info("Nces-notification : updateDefendantWithFinancialOrder.............");
+        return apply(ncesNotificationDecisionDelegate.updateDefendantWithFinancialOrder(financialOrderForDefendant));
+    }
+
+    public Stream<Object> updateDefendantWithApplicationDetails(final UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails) {
+        LOGGER.info("Nces-notification : updateDefendantWithApplicationDetails...........");
+        return apply(ncesNotificationDecisionDelegate.updateDefendantWithApplicationDetails(ApplicationDetailsForDefendant.newBuilder()
+                .withApplicationTypeId(updateDefendantWithApplicationDetails.getApplicationTypeId())
+                .withApplicationOutcomeTypeId(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId())
+                .build()));
+    }
+
+    public void handleUpdateDefendantWithFinancialOrder(final DefendantUpdateWithFinancialOrderDetails defendantUpdateWithFinancialOrderDetails) {
+        this.momento.setFinancialOrderForDefendant(defendantUpdateWithFinancialOrderDetails.getFinancialOrderForDefendant());
+    }
+
+    public void handleUpdateDefendantWithApplicationDetails(final DefendantUpdateWithApplicationDetails defendantWithApplicationDetails) {
+        this.momento.setApplicationDetailsForDefendant(defendantWithApplicationDetails.getApplicationDetailsForDefendant());
+    }
+
+    @SuppressWarnings({"squid:S1172"})
+    private void handleRemoveGrantedApplicationDetailsForDefendant(final RemoveGrantedApplicationDetailsForDefendant removeGrantedApplicationDetailsForDefendant) {
+        this.momento.setApplicationDetailsForDefendant(null);
+    }
+
+    public void setMomento(DefendantAggregateMomento momento) {
+        this.momento = momento;
+    }
+
+
 
     public Stream<Object> updateOffenceResults(final UUID defendantId, final UUID caseId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> updatedResults) {
         final Map<UUID, OffenceResult> offenceResultsCopy = new HashMap(this.offenceResults);

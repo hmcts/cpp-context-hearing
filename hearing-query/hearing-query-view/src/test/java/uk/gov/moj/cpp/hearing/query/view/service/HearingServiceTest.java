@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 
 import static java.util.UUID.fromString;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
@@ -46,6 +48,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -54,6 +57,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -165,6 +169,55 @@ public class HearingServiceTest {
     }
 
     @Test
+    public void shouldNotFindHearingListWhenHearingIsEnded() {
+        /*
+         start time is :10:30
+         hearing duration is 2 min
+         so if query at 10:31 it should return hearing
+         */
+        uk.gov.justice.core.courts.ProsecutionCaseIdentifier prosecutionCaseIdentifier = uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                .withCaseURN("8C720B32E45B")
+                .withProsecutionAuthorityCode("AUTH CODE")
+                .withProsecutionAuthorityId(UUID.fromString("1dbab0cf-3822-46ff-b3ea-ddcf99e71ab9"))
+                .withProsecutionAuthorityReference("AUTH REF")
+                .build();
+
+        uk.gov.justice.core.courts.HearingType hearingType = uk.gov.justice.core.courts.HearingType.hearingType()
+                .withId(UUID.fromString("019556b2-a25e-4ea7-b3f1-8c89d14b02e0"))
+                .withDescription("TRIAL")
+                .build();
+
+        uk.gov.justice.core.courts.HearingDay hearingDay = uk.gov.justice.core.courts.HearingDay.hearingDay()
+                .withSittingDay(HearingTestUtils.START_DATE_1) //2018-02-22T10:30:00
+                .withListedDurationMinutes(2)
+                .withListingSequence(5)
+                .build();
+
+        LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
+        final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
+        final Hearing hearingEntity = hearingHelper.it();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())). build();
+        final UUID hearingSummaryId = UUID.randomUUID();
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
+        final UUID hearingEventId = UUID.randomUUID();
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .setId(hearingEventId)
+                .setHearingId(hearingEntity.getId())
+                .setRecordedLabel("Hearing ended");
+
+
+        when(hearingRepository.findHearings(startDateStartOfDay, hearingEntity.getCourtCentre().getId())).thenReturn(asList(hearingEntity));
+        when(hearingEventRepository.findHearingEvents(hearingEntity.getId(), "Hearing ended")).thenReturn(asList(hearingEvent));
+        when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summary(hearingPojo)).thenReturn(hearingSummariesBuilder);
+
+        final GetHearings response = hearingService.getHearings(HearingTestUtils.START_DATE_1.toLocalDate(),
+                "10:30", "14:30", hearingEntity.getCourtCentre().getId(), null);
+
+        assertEquals(0, response.getHearingSummaries().size());
+    }
+
+    @Test
     public void shouldFindHearingListWhenStartDateIsBeforeAndEndDateIsAfterSittingDate() {
 
         uk.gov.justice.core.courts.ProsecutionCaseIdentifier prosecutionCaseIdentifier = uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
@@ -186,7 +239,7 @@ public class HearingServiceTest {
                 .build();
 
         LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
-        final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
+        final HearingTestUtils.HearingHelper hearingHelper = helper(buildHearing());
         final Hearing hearingEntity = hearingHelper.it();
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
         final UUID hearingSummaryId = randomUUID();

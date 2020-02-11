@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
 
 import uk.gov.justice.core.courts.ApplicationJurisdictionType;
 import uk.gov.justice.core.courts.ApplicationStatus;
@@ -8,6 +9,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationRespondent;
 import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -60,29 +62,43 @@ public class HearingFactory {
                 .build();
     }
 
-    public CourtApplicationParty.Builder courtApplicationParty() {
+    public Defendant defendant() {
+        return defendant(randomUUID(), randomUUID());
+    }
+
+    public Defendant defendant(UUID defendantId, UUID caseId) {
+        return Defendant.defendant()
+                .withId(defendantId)
+                .withProsecutionCaseId(caseId)
+                .build();
+    }
+
+    public CourtApplicationParty.Builder courtApplicationDefendant(UUID defendantId, UUID caseId) {
         return CourtApplicationParty.courtApplicationParty()
-                .withId(UUID.randomUUID())
-                .withOrganisation(organisation())
-                .withPersonDetails(person().build())
-                ;
+                .withDefendant(defendant(defendantId, caseId))
+                .withId(randomUUID())
+                .withPersonDetails(person().build());
+    }
+
+    public CourtApplicationParty.Builder courtApplicationParty() {
+        return courtApplicationParty(person().build());
     }
 
     public CourtApplicationParty.Builder courtApplicationParty2() {
-        return CourtApplicationParty.courtApplicationParty()
-                .withOrganisation(organisation())
-                .withId(UUID.randomUUID())
-                .withPersonDetails(person2().build())
-                ;
+        return courtApplicationParty(person2().build());
     }
 
     public CourtApplicationParty.Builder courtApplicationParty3() {
+        return courtApplicationParty(person3().build());
+    }
+
+    public CourtApplicationParty.Builder courtApplicationParty(Person person) {
         return CourtApplicationParty.courtApplicationParty()
                 .withOrganisation(organisation())
-                .withId(UUID.randomUUID())
-                .withPersonDetails(person3().build())
-                ;
+                .withId(randomUUID())
+                .withPersonDetails(person);
     }
+
 
     public CourtApplicationRespondent.Builder courtApplicationRespondant1() {
         return CourtApplicationRespondent.courtApplicationRespondent()
@@ -90,9 +106,9 @@ public class HearingFactory {
                 .withPartyDetails(courtApplicationParty3().build());
     }
 
-    public CourtApplicationType.Builder courtApplicationType() {
+    public CourtApplicationType.Builder courtApplicationType(final UUID id) {
         return CourtApplicationType.courtApplicationType()
-                .withId(UUID.randomUUID())
+                .withId(id)
                 .withApplicationType("applicationType")
                 .withApplicationCode("appCode")
                 .withApplicationLegislation("appLegislation")
@@ -101,14 +117,29 @@ public class HearingFactory {
                 .withApplicationJurisdictionType(ApplicationJurisdictionType.EITHER);
     }
 
+    public CourtApplicationType.Builder courtApplicationType() {
+        return courtApplicationType(randomUUID());
+    }
+
     public CourtApplication.Builder courtApplication() {
+        return courtApplication(courtApplicationParty().build());
+    }
+
+    public CourtApplication.Builder courtApplicationWithDefendantParty(final UUID defendantId, final UUID caseId, final UUID courtApplicationTypeId) {
+        return courtApplication(courtApplicationDefendant(defendantId, caseId).build(), courtApplicationTypeId);
+    }
+
+    public CourtApplication.Builder courtApplication(CourtApplicationParty party) {
+        return courtApplication(party, randomUUID());
+    }
+
+    public CourtApplication.Builder courtApplication(final CourtApplicationParty party, final UUID courtApplicationTypeId) {
 
         return CourtApplication.courtApplication()
-                .withId(UUID.randomUUID())
-                .withApplicant(courtApplicationParty().build())
+                .withId(randomUUID())
+                .withApplicant(party)
                 .withApplicationReceivedDate(LocalDate.now())
-                .withType(courtApplicationType()
-                        .build())
+                .withType(courtApplicationType(courtApplicationTypeId).build())
                 .withRespondents(asList(courtApplicationRespondant1().build(),
                         courtApplicationRespondant1().build()
                 ))
@@ -116,10 +147,11 @@ public class HearingFactory {
                 .withApplicationStatus(ApplicationStatus.DRAFT);
 
     }
+
     public CourtApplication.Builder linkedCourtApplication(final UUID linkedCaseId) {
 
         return CourtApplication.courtApplication()
-                .withId(UUID.randomUUID())
+                .withId(randomUUID())
                 .withApplicant(courtApplicationParty().build())
                 .withApplicationReceivedDate(LocalDate.now())
                 .withType(courtApplicationType()
@@ -132,10 +164,11 @@ public class HearingFactory {
                 .withLinkedCaseId(linkedCaseId);
 
     }
+
     public CourtApplication.Builder standAloneChildCourtApplication(final UUID parentApplicationId) {
 
         return CourtApplication.courtApplication()
-                .withId(UUID.randomUUID())
+                .withId(randomUUID())
                 .withApplicant(courtApplicationParty().build())
                 .withApplicationReceivedDate(LocalDate.now())
                 .withType(courtApplicationType()
@@ -148,10 +181,11 @@ public class HearingFactory {
                 .withParentApplicationId(parentApplicationId);
 
     }
+
     public HearingType.Builder standaloneApplicationHearingType() {
         return HearingType.hearingType()
                 .withDescription("Application")
-                .withId(UUID.randomUUID());
+                .withId(randomUUID());
 
     }
 
@@ -189,7 +223,7 @@ public class HearingFactory {
 
     public Hearing.Builder createStandaloneApplicationHearing() {
         return Hearing.hearing()
-                .withId(UUID.randomUUID())
+                .withId(randomUUID())
                 .withType(standaloneApplicationHearingType().build())
                 .withHearingDays(asList(hearingDay().build()))
                 .withProsecutionCases(asList(prosecutionCase().build()))

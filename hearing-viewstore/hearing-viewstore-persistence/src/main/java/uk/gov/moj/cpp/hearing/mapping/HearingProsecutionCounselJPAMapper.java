@@ -4,6 +4,7 @@ import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -59,8 +61,12 @@ public class HearingProsecutionCounselJPAMapper {
                 .add("status", pojo.getStatus())
                 .add("id", pojo.getId().toString())
                 .add("title", pojo.getTitle());
+
         if (pojo.getMiddleName() != null) {
             payLoad.add(MIDDLE_NAME, pojo.getMiddleName());
+        }
+        if(pojo.getUserId() != null ){
+            payLoad.add("userId", pojo.getUserId().toString());
         }
         final JsonNode jsonNode = mapper.valueToTree(payLoad.build());
         hearingProsecutionCounsel.setPayload(jsonNode);
@@ -73,6 +79,7 @@ public class HearingProsecutionCounselJPAMapper {
         }
 
         final JsonObject entityPayload = jsonFromString(entity.getPayload().toString());
+        final String userId = entityPayload.getString("userId", null);
         return uk.gov.justice.core.courts.ProsecutionCounsel.prosecutionCounsel()
                 .withId(entity.getId().getId())
                 .withFirstName(entityPayload.getString("firstName"))
@@ -80,6 +87,7 @@ public class HearingProsecutionCounselJPAMapper {
                 .withMiddleName(entityPayload.getString(MIDDLE_NAME, null))
                 .withStatus(entityPayload.getString("status"))
                 .withTitle(entityPayload.getString("title"))
+                .withUserId(!isEmpty(userId)?UUID.fromString(userId) : null)
                 .withProsecutionCases(entityPayload.getJsonArray("prosecutionCases")
                         .stream()
                         .map(e -> fromString(((JsonString) e).getString()))

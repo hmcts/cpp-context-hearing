@@ -33,10 +33,18 @@ public class ProsecutionCounselDelegate implements Serializable {
         final ProsecutionCounsel prosecutionCounsel = prosecutionCounselUpdated.getProsecutionCounsel();
         this.momento.getProsecutionCounsels().put(prosecutionCounsel.getId(), prosecutionCounsel);
     }
-    public Stream<Object> addProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
+    public Stream<Object> addProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId, boolean isHearingEnded) {
+        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
         if (this.momento.getProsecutionCounsels().containsKey(prosecutionCounsel.getId())) {
-            return Stream.of(new ProsecutionCounselChangeIgnored(String.format("Provided ProsecutionCounsel already exists, payload [%s]", prosecutionCounsel.toString())));
+            return Stream.of(new ProsecutionCounselChangeIgnored(
+                    String.format("Provided ProsecutionCounsel already exists, payload [%s]", prosecutionCounsel.toString()),
+                    prosecutionCounsel, hearingId, caseRef));
+        } else if (isHearingEnded) {
+            return Stream.of(new ProsecutionCounselChangeIgnored(
+                    String.format("Hearing Ended. Failed to check-in , payload [%s]", prosecutionCounsel.toString()),
+                    prosecutionCounsel, hearingId, caseRef));
         }
+
         return Stream.of(new ProsecutionCounselAdded(prosecutionCounsel, hearingId));
     }
 
@@ -47,10 +55,16 @@ public class ProsecutionCounselDelegate implements Serializable {
     public Stream<Object> updateProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
 
         final Map<UUID, ProsecutionCounsel> prosecutionCounsels = this.momento.getProsecutionCounsels();
+        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
+
         if (!(prosecutionCounsels.containsKey(prosecutionCounsel.getId()))) {
-            return Stream.of(new ProsecutionCounselChangeIgnored(String.format("Provided ProsecutionCounsel does not exists, payload [%s]", prosecutionCounsel.toString())));
+            return Stream.of(new ProsecutionCounselChangeIgnored(
+                    String.format("Provided ProsecutionCounsel does not exists, payload [%s]", prosecutionCounsel.toString()),
+                    prosecutionCounsel, hearingId, caseRef));
         }else if (prosecutionCounsels.get(prosecutionCounsel.getId()).equals(prosecutionCounsel)){
-            return Stream.of(new ProsecutionCounselChangeIgnored(String.format("No change in provided ProsecutionCounsel, payload [%s]", prosecutionCounsel.toString())));
+            return Stream.of(new ProsecutionCounselChangeIgnored(
+                    String.format("No change in provided ProsecutionCounsel, payload [%s]", prosecutionCounsel.toString()),
+                    prosecutionCounsel, hearingId, caseRef));
         }
         return Stream.of(new ProsecutionCounselUpdated(prosecutionCounsel, hearingId));
     }

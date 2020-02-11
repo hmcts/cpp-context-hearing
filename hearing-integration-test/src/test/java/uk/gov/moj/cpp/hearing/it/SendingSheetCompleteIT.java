@@ -10,7 +10,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -45,7 +45,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
         Utilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.caseId", is(caseID))));
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 new StringToJsonObjectConverter().convert(eventPayloadString),
                 metadataOf(randomUUID(), eventName)
@@ -73,7 +73,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
         Utilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))));
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 new StringToJsonObjectConverter().convert(eventPayloadString),
                 metadataOf(randomUUID(), eventName)
@@ -128,7 +128,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
         Utilities.EventListener publicEventTopic = listenFor("public.mags.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.caseId", is(caseId.toString()))));
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 new StringToJsonObjectConverter().convert(eventPayloadString),
                 metadataOf(randomUUID(), eventName)

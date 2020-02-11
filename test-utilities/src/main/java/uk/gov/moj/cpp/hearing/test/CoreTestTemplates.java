@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
+
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -59,7 +61,6 @@ import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.core.courts.Title;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 
@@ -217,7 +218,9 @@ public class CoreTestTemplates {
         return OffenceFacts.offenceFacts()
                 .withAlcoholReadingAmount(INTEGER.next())
                 .withAlcoholReadingMethodCode(STRING.next())
+                .withVehicleMake(STRING.next())
                 .withVehicleRegistration(STRING.next());
+
     }
 
     public static Offence.Builder offence(CoreTemplateArguments args, UUID offenceId) {
@@ -255,6 +258,7 @@ public class CoreTestTemplates {
                 .withWordingWelsh(STRING.next())
                 .withModeOfTrial(STRING.next())
                 .withOrderIndex(INTEGER.next())
+                .withLaidDate(PAST_LOCAL_DATE.next())
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
@@ -309,13 +313,13 @@ public class CoreTestTemplates {
 
         if (args.isMinimumPerson()) {
             return Person.person()
-                    .withTitle(RandomGenerator.values(Title.values()).next())
+                    .withTitle("Mr")
                     .withLastName(STRING.next())
                     .withGender(RandomGenerator.values(Gender.values()).next());
         }
 
         return Person.person()
-                .withTitle(RandomGenerator.values(Title.values()).next())
+                .withTitle("Lieutanant")
                 .withContact(contactNumber().build())
                 .withAdditionalNationalityCode(STRING.next())
                 .withAdditionalNationalityId(randomUUID())

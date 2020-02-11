@@ -3,7 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
-import static java.time.ZonedDateTime.*;
+import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -19,15 +19,15 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
-import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.hearing.courts.AddApplicantCounsel;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
@@ -35,7 +35,7 @@ import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
 import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;
-
+import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
 import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
 import uk.gov.justice.hearing.courts.RemoveInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
@@ -44,22 +44,13 @@ import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
 import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
-import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
-import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
-import uk.gov.justice.hearing.courts.RemoveProsecutionCounsel;
-import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
-import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
-import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
-import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.TrialType;
-
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -95,7 +86,6 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.ReadContext;
 import com.jayway.restassured.response.Header;
@@ -116,8 +106,17 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
+        return initiateHearing(requestSpec, initiateHearing, true);
+    }
+
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, boolean includeApplication) {
+
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString()))));
+
+        if (!includeApplication) {
+            initiateHearing.getHearing().setCourtApplications(null);
+        }
 
         makeCommand(requestSpec, "hearing.initiate")
                 .ofType("application/vnd.hearing.initiate+json")
@@ -183,17 +182,21 @@ public class UseCases {
                                            final UUID hearingEventDefinitionId,
                                            final boolean alterable,
                                            final UUID defenceCounselId,
-                                           final ZonedDateTime eventTime) {
+                                           final ZonedDateTime eventTime,
+                                           final String recordedLabel) {
         final LogEventCommand logEvent = with(
                 LogEventCommand.builder()
                         .withHearingEventId(randomUUID())
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withHearingId(initiateHearingCommand.getHearing().getId())
                         .withEventTime(eventTime)
-                        .withLastModifiedTime(now().withZoneSameLocal(ZoneId.of("UTC")))
-                        .withRecordedLabel(STRING.next())
+                        .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
+                        .withRecordedLabel(recordedLabel)
                         .withDefenceCounselId(defenceCounselId)
                 , consumer).build();
+
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
 
         final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
@@ -206,7 +209,7 @@ public class UseCases {
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
-                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
                                 .with(HearingEventDefinition::getHearingEventDefinitionId, is(logEvent.getHearingEventDefinitionId()))
@@ -234,6 +237,16 @@ public class UseCases {
         return logEvent;
     }
 
+    public static LogEventCommand logEvent(final RequestSpecification requestSpec,
+                                           final Consumer<LogEventCommand.Builder> consumer,
+                                           final InitiateHearingCommand initiateHearingCommand,
+                                           final UUID hearingEventDefinitionId,
+                                           final boolean alterable,
+                                           final UUID defenceCounselId,
+                                           final ZonedDateTime eventTime) {
+        return logEvent(requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
+    }
+
     public static LogEventCommand logEventForOverrideCourtRoom(final RequestSpecification requestSpec,
                                                                final Consumer<LogEventCommand.Builder> consumer,
                                                                final InitiateHearingCommand initiateHearingCommand,
@@ -257,6 +270,9 @@ public class UseCases {
                 .add(FIELD_OVERRIDE, override)
                 .build();
 
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
+
         final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
                         .with(PublicHearingEventLogged::getHearingEvent, isBean(uk.gov.moj.cpp.hearing.eventlog.HearingEvent.class)
@@ -268,7 +284,7 @@ public class UseCases {
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
-                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
                                 .with(HearingEventDefinition::getHearingEventDefinitionId, is(logEvent.getHearingEventDefinitionId()))
@@ -308,6 +324,8 @@ public class UseCases {
                         .withRecordedLabel(STRING.next())
                 , consumer).withDefenceCounselId(randomUUID()).build();
 
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
 
         final EventListener publicEventTopic = listenFor("public.hearing.event-timestamp-corrected")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
@@ -320,7 +338,7 @@ public class UseCases {
 
                         )
                         .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
-                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()))
+                                .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
                                 .with(HearingEventDefinition::getHearingEventDefinitionId, is(logEvent.getHearingEventDefinitionId()))
@@ -469,6 +487,10 @@ public class UseCases {
     }
 
     private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
+        return sharedResultsCommandResultLineStream(target, null);
+    }
+
+    private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target, final CourtApplicationOutcome courtApplicationOutcome) {
         return target.getResultLines().stream().map(resultLineIn ->
                 new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
@@ -490,15 +512,23 @@ public class UseCases {
                         resultLineIn.getAmendmentDate(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
-                        resultLineIn.getIsDeleted(),null));
+                        resultLineIn.getIsDeleted(),
+                        courtApplicationOutcome));
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
 
+        return shareResults(requestSpec, hearingId, shareResultsCommand, targets, null);
+    }
+
+    public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets, final CourtApplicationOutcome courtApplicationOutcome) {
+
         // TODO GPE-6699
         shareResultsCommand.setResultLines(
-                targets.stream().flatMap(target -> sharedResultsCommandResultLineStream(target)).collect(Collectors.toList())
-        );
+                targets.stream()
+                        .flatMap(target -> sharedResultsCommandResultLineStream(target, courtApplicationOutcome))
+                        .collect(Collectors.toList()));
+
 
         makeCommand(requestSpec, "hearing.share-results")
                 .ofType("application/vnd.hearing.share-results+json")
@@ -613,7 +643,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
                         .add("defendant",
@@ -636,7 +666,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(jsonValueAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 jsonObject,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
@@ -652,7 +682,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(hearingDetailsUpdateCommand), JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 jsonObject,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
@@ -781,7 +811,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
                         .add("foooo", "to test additional properties")
@@ -801,7 +831,7 @@ public class UseCases {
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
                         .add("courtApplication", uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build())
@@ -878,7 +908,7 @@ public class UseCases {
                 .add("caseMarkers", arrayBuilder)
                 .build();
         sendMessage(
-                publicEvents.createProducer(),
+                getPublicTopicInstance().createProducer(),
                 eventName,
                 payload,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());

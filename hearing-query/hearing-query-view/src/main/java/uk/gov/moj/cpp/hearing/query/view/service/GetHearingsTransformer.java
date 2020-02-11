@@ -25,6 +25,7 @@ public class GetHearingsTransformer {
         return HearingSummaries.hearingSummaries()
                 .withType(hearing.getType())
                 .withId(hearing.getId())
+                .withCourtCentre(hearing.getCourtCentre())
                 .withReportingRestrictionReason(hearing.getReportingRestrictionReason())
                 .withHearingLanguage(hearing.getHearingLanguage().name())
                 .withJurisdictionType(jurisdictionType(hearing.getJurisdictionType()))

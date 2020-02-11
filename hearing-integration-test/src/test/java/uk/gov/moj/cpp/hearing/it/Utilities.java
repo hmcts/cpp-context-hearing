@@ -7,7 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -37,6 +37,8 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.StringDescription;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Utilities {
 
@@ -54,19 +56,25 @@ public class Utilities {
 
     public static class EventListener {
 
+        private static final Logger LOGGER = LoggerFactory.getLogger(EventListener.class);
+        static final int DEFAULT_TIMEOUT = 30000;
         private MessageConsumer messageConsumer;
         private String eventType;
         private Matcher<?> matcher;
         private long timeout;
 
         public EventListener(final String eventType) {
-            this(eventType, 30000);
+            this(eventType, DEFAULT_TIMEOUT);
         }
 
         public EventListener(final String eventType, long timeout) {
             this.eventType = eventType;
-            this.messageConsumer = publicEvents.createConsumer(eventType);
+            this.messageConsumer = getPublicTopicInstance().createConsumer(eventType);
             this.timeout = timeout;
+        }
+
+        public void expectNone() {
+            expectNoneWithin(timeout);
         }
 
         public void expectNoneWithin(long timeout) {
@@ -85,7 +93,6 @@ public class Utilities {
             JsonPath message = retrieveMessage(messageConsumer, timeout);
             StringDescription description = new StringDescription();
 
-            //System.out.println("****\r\n" + message.prettify());
             while (message != null && !this.matcher.matches(message.prettify())) {
                 description = new StringDescription();
                 description.appendText("Expected ");
@@ -99,7 +106,7 @@ public class Utilities {
             if (message == null) {
                 fail("Expected '" + eventType + "' message to emit on the public.event topic: " + description.toString());
             } else {
-                System.out.println("message:" + message.prettify());
+                LOGGER.info("message:" + message.prettify());
             }
 
             return message;
@@ -178,6 +185,8 @@ public class Utilities {
     }
 
     public static class CommandBuilder {
+        private static final Logger LOGGER = LoggerFactory.getLogger(CommandBuilder.class);
+
         private RequestSpecification requestSpec;
         private String endpoint;
         private String type;
@@ -201,8 +210,7 @@ public class Utilities {
 
         public CommandBuilder withPayload(final String payload) {
             this.payloadAsString = payload;
-            System.out.println("Command Payload: ");
-            System.out.println(this.payloadAsString);
+            LOGGER.info("Command Payload: {}", payloadAsString);
             return this;
         }
 
@@ -217,8 +225,7 @@ public class Utilities {
 
                 this.payloadAsString = JsonUtil.toJsonString(payload);
 
-                System.out.println("Command Payload: ");
-                System.out.println(this.payloadAsString);
+                LOGGER.info("Command Payload: {}", payloadAsString);
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
             }
@@ -228,8 +235,7 @@ public class Utilities {
         public void executeSuccessfully() {
 
             String url = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty(endpoint), arguments);
-            System.out.println("Command Url: ");
-            System.out.println(url);
+            LOGGER.info("Command url: {}", url);
 
             Response writeResponse = given().spec(requestSpec).and()
                     .contentType(type)

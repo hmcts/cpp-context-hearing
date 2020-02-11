@@ -25,10 +25,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @SuppressWarnings("WeakerAccess")
 @ServiceComponent(EVENT_LISTENER)
 public class HearingLogEventListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingLogEventListener.class.getName());
     private final HearingEventDefinitionRepository hearingEventDefinitionRepository;
     private final HearingEventRepository hearingEventRepository;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -43,6 +47,9 @@ public class HearingLogEventListener {
 
     @Handles("hearing.hearing-event-definitions-created")
     public void hearingEventDefinitionsCreated(final JsonEnvelope event) {
+
+        LOGGER.info("hearing.hearing-event-definitions-created {} ", event.payloadAsJsonObject());
+
         final HearingEventDefinitionsCreated eventDefinitionsCreated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDefinitionsCreated.class);
 
         eventDefinitionsCreated.getEventDefinitions().stream()
@@ -54,6 +61,9 @@ public class HearingLogEventListener {
 
     @Handles("hearing.hearing-event-definitions-deleted")
     public void hearingEventDefinitionsDeleted(final JsonEnvelope event) {
+
+        LOGGER.info("hearing.hearing-event-definitions-deleted {} ", event.payloadAsJsonObject());
+
         final List<HearingEventDefinition> activeEventDefinitions = hearingEventDefinitionRepository.findAllActive();
 
         activeEventDefinitions.stream()
@@ -63,6 +73,7 @@ public class HearingLogEventListener {
 
     @Handles("hearing.hearing-event-logged")
     public void hearingEventLogged(final JsonEnvelope event) {
+        LOGGER.info("hearing.hearing-event-logged {} ", event.payloadAsJsonObject());
         final HearingEventLogged hearingEventLogged = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventLogged.class);
 
         final ZonedDateTime eventTimeUTC = hearingEventLogged.getEventTime().withZoneSameInstant(ZoneId.of("UTC"));
@@ -83,6 +94,9 @@ public class HearingLogEventListener {
 
     @Handles("hearing.hearing-event-deleted")
     public void hearingEventDeleted(final JsonEnvelope event) {
+
+        LOGGER.info("hearing.hearing-event-deleted {} ", event.payloadAsJsonObject());
+
         final HearingEventDeleted hearingEventDeleted = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDeleted.class);
 
         final Optional<HearingEvent> optionalHearingEvent = hearingEventRepository.findOptionalById(hearingEventDeleted.getHearingEventId());
@@ -91,6 +105,9 @@ public class HearingLogEventListener {
 
     @Handles("hearing.hearing-events-updated")
     public void hearingEventsUpdated(final JsonEnvelope event) {
+
+        LOGGER.info("hearing.hearing-events-updated {} ", event.payloadAsJsonObject());
+
         final HearingEventsUpdated hearingEventsUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventsUpdated.class);
 
         final Map<UUID, HearingEvent> hearingEventIdToHearingEvent = hearingEventRepository

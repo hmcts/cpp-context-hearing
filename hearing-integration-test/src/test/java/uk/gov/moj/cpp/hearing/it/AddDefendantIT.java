@@ -1,15 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static org.hamcrest.Matchers.is;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
-
+import org.junit.Test;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
@@ -24,8 +15,17 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.ZonedDateTime;
 
-import org.junit.Test;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 
+@SuppressWarnings({"squid:S2699"})
 public class AddDefendantIT extends AbstractIT {
 
     @Test
@@ -55,5 +55,7 @@ public class AddDefendantIT extends AbstractIT {
                                 .with(ProsecutionCase::getDefendants, second(isBean(Defendant.class)
 
                                 ))))));
+
+
     }
 }

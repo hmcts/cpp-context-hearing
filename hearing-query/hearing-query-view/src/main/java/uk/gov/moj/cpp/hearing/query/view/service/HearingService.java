@@ -39,6 +39,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -154,17 +155,26 @@ public class HearingService {
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
 
-        if (null == date || null == courtCentreId || null == roomId) {
+        if (null == date || null == courtCentreId ) {
             return new GetHearings(null);
         }
-        final List<Hearing> source = hearingRepository.findByFilters(date, courtCentreId, roomId);
+
+        List<Hearing> source;
+        if(null == roomId){
+            source = hearingRepository.findHearings(date, courtCentreId);
+        } else {
+            source = hearingRepository.findByFilters(date, courtCentreId, roomId);
+        }
         if (CollectionUtils.isEmpty(source)) {
             return new GetHearings(null);
         }
 
         final ZonedDateTime from = getDateWithTime(date, startTime);
         final ZonedDateTime to = getDateWithTime(date, endTime);
-        final List<Hearing> filteredHearings = filterHearings(source, from, to);
+        List<Hearing> filteredHearings = filterHearings(source, from, to);
+        if(null == roomId){
+            filteredHearings = filterNonEndedHearings(filteredHearings);
+        }
 
         //sorting listSequence for hearing day
         filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
@@ -351,6 +361,16 @@ public class HearingService {
 
     private boolean hasHearingDayMatched(final Hearing hearing, final ZonedDateTime from, final ZonedDateTime to) {
         return hearing.getHearingDays().stream().anyMatch(hearingDay -> isBetween(hearingDay.getDateTime(), from, to));
+    }
+
+    private List<Hearing> filterNonEndedHearings(final List<Hearing> hearings) {
+        //if hearing is not ended yet then only display
+        return hearings.stream().filter( hearing -> isHearingNotEndedYet(hearing.getId())).collect(Collectors.toList());
+    }
+
+    private boolean isHearingNotEndedYet(final UUID hearingId) {
+        final List<HearingEvent>  hearingEvents = hearingEventRepository.findHearingEvents(hearingId, "Hearing ended");
+        return hearingEvents.isEmpty();
     }
 
     private boolean isBetween(final ZonedDateTime sittingDay, final ZonedDateTime from, final ZonedDateTime to) {

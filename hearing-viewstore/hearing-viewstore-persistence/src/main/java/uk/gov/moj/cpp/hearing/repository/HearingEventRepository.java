@@ -100,6 +100,9 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                                                          @QueryParam("roomId") final UUID roomId,
                                                          @QueryParam("date") final LocalDate date);
 
+    @Query(value = "from HearingEvent he where he.deleted is false and he.hearingId = :hearingId and he.recordedLabel = :recordedLabel")
+    public abstract List<HearingEvent> findHearingEvents(@QueryParam("hearingId") final UUID hearingId, @QueryParam("recordedLabel") final String recordedLabel);
+
     @Query(value = GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE)
     public abstract List<HearingEvent> findBy(@QueryParam("courtCentreId") final UUID courtCentreId, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime);
 

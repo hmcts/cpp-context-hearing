@@ -21,9 +21,13 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsWildcardUserBelongingToAllGroups;
 
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
+import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeArea;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
@@ -36,6 +40,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -57,7 +62,7 @@ import org.junit.Before;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class  AbstractIT {
+public class AbstractIT {
 
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
@@ -200,6 +205,7 @@ public class  AbstractIT {
         setRequestSpecification();
         setupAsAuthorisedUser(USER_ID_VALUE);
         setupAsSystemUser(USER_ID_VALUE_AS_ADMIN);
+        setupAsWildcardUserBelongingToAllGroups();
         stubEnableAllCapabilities();
         mockMaterialUpload();
         mockUpdateHmpsMaterialStatus();
@@ -219,6 +225,15 @@ public class  AbstractIT {
 
     protected void stubLjaDetails(final UUID courtCentreId) {
         final String ljaCode = String.format("%04d", Integer.valueOf(Double.valueOf(Math.random() * 10000).intValue()));
+
+        final EnforcementAreaBacs enforcementAreaBacs = EnforcementAreaBacs.enforcementAreaBacs()
+                .withBankAccntName("account name")
+                .withBankAccntNum(1)
+                .withBankAccntSortCode("867878")
+                .withBankAddressLine1("address1")
+                .withRemittanceAdviceEmailAddress("test@test.com")
+                .build();
+
         final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
                 .withOucode(ljaCode)
                 .withLja(ljaCode)
@@ -229,11 +244,13 @@ public class  AbstractIT {
                 .withWelshAddress3("address3 " + ljaCode)
                 .withWelshAddress4("address4 " + ljaCode)
                 .withOucodeL3WelshName("OucodeL3WelshName")
+                .withEnforcementArea(enforcementAreaBacs)
                 .build();
 
         final EnforcementArea enforcementArea = EnforcementArea.enforcementArea()
                 .withLocalJusticeArea(LocalJusticeArea.localJusticeArea()
                         .withName("ljaName" + ljaCode)
+                        .withNationalCourtCode("123")
                         .build())
                 .withAccountDivisionCode(5673)
                 .withEmail("enforcement" + ljaCode + "@gov.com")
@@ -243,11 +260,24 @@ public class  AbstractIT {
                 .withAddress3("address3 " + ljaCode)
                 .withAddress4("address4 " + ljaCode)
                 .withPostcode("AL4 9LG")
+                .withPhone("123456789")
+                .withNationalPaymentPhone("12344566")
+                .build();
+
+        LocalJusticeAreasResult localJusticeAreasResult = LocalJusticeAreasResult.localJusticeAreasResult()
+                .withLocalJusticeAreas(Arrays.asList(
+                        LocalJusticeAreas.localJusticeAreas()
+                                .withNationalCourtCode("123")
+                                .withWelshName("testetestetes")
+                                .build()
+                ))
                 .build();
 
         ReferenceDataStub.stub(organisationalUnit);
 
         ReferenceDataStub.stub(enforcementArea, ljaCode);
+
+        ReferenceDataStub.stub(localJusticeAreasResult, "123");
 
     }
 

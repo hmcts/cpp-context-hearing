@@ -59,6 +59,9 @@
         "hasSharedResults": {
           "description": "Indicates that the hearing has at least one result shared",
           "type": "boolean"
+        },
+        "courtCentre": {
+          "$ref": "http://justice.gov.uk/core/courts/courtCentre.json"
         }
       },
       "required": [

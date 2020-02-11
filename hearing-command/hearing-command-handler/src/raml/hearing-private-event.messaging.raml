@@ -140,6 +140,12 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.subscriptions-uploaded.json
                     example: !include json/hearing.subscriptions-uploaded.json
 
+# Nces notification requested
+                application/vnd.hearing.event.nces-notification-requested+json:
+                    schema: !include json/schema/hearing.event.nces-notification-requested.json
+                    example: !include json/hearing.event.nces-notification-requested.json
+
+
 # Defendant offences
                 application/vnd.hearing.event.defendant-offence-results-updated+json:
                     schema: !include json/schema/hearing.event.defendant-offence-results-updated.json

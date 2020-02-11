@@ -34,6 +34,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utility class for setting stubs.
@@ -51,7 +53,10 @@ public class WireMockStubUtils {
     private static final String BASE_URI = "http://" + HOST + ":8080";
 
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WireMockStubUtils.class);
+
     static {
+        LOGGER.info("Configuring and reseting wiremock");
         configureFor(HOST, 8080);
         reset();
     }
@@ -80,6 +85,18 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
+    public static void setupAsWildcardUserBelongingToAllGroups() {
+        stubPingFor("usersgroups-service");
+
+        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-all-groups-by-user.json"))));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
         stubPingFor("progression-service");
 
@@ -96,9 +113,9 @@ public class WireMockStubUtils {
         stubPingFor("material-service");
 
         stubFor(post(urlMatching(MATERIAL_UPLOAD_COMMAND))
-                        .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
-                                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                                        .withBody("")));
+                .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody("")));
     }
 
     public static final void mockUpdateHmpsMaterialStatus() {
@@ -114,7 +131,7 @@ public class WireMockStubUtils {
         waitForStubToBeReady(resource, mediaType, Status.OK);
     }
 
-    private static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
+    static void waitForStubToBeReady(final String resource, final String mediaType, final Status expectedStatus) {
         poll(requestParams(format("{0}/{1}", getBaseUri(), resource), mediaType).build())
                 .until(status().is(expectedStatus));
     }

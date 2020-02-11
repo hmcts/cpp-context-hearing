@@ -102,6 +102,9 @@ public class Offence {
     @Column(name = "mode_of_trial")
     private String modeOfTrial;
 
+    @Column(name = "laid_date")
+    private LocalDate laidDate;
+
     public HearingSnapshotKey getId() {
         return id;
     }
@@ -302,22 +305,6 @@ public class Offence {
         this.allocationDecision = allocationDecision;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.id);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (null == o || getClass() != o.getClass()) {
-            return false;
-        }
-        return Objects.equals(this.id, ((Offence) o).id);
-    }
-
     public Integer getCtlDaysSpent() {
         return ctlDaysSpent;
     }
@@ -332,5 +319,29 @@ public class Offence {
 
     public void setCtlTimeLimit(LocalDate ctlTimeLimit) {
         this.ctlTimeLimit = ctlTimeLimit;
+    }
+
+    public LocalDate getLaidDate() {
+        return laidDate;
+    }
+
+    public void setLaidDate(LocalDate laidDate) {
+        this.laidDate = laidDate;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.id);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(this.id, ((Offence) o).id);
     }
 }

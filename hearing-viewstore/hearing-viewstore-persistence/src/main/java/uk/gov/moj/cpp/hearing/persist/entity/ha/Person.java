@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
 import uk.gov.justice.core.courts.Gender;
-import uk.gov.justice.core.courts.Title;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -79,8 +78,7 @@ public class Person {
     private String specificRequirements;
 
     @Column(name = "title")
-    @Enumerated(EnumType.STRING)
-    private Title title;
+    private String title;
 
     @Embedded
     private Ethnicity ethnicity;
@@ -233,11 +231,11 @@ public class Person {
         this.specificRequirements = specificRequirements;
     }
 
-    public Title getTitle() {
+    public String getTitle() {
         return title;
     }
 
-    public void setTitle(Title title) {
+    public void setTitle(String title) {
         this.title = title;
     }
 

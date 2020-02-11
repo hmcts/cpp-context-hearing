@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/ncesDetails.json",
+  "type": "object",
+  "properties": {
+    "accountNumber": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "accountNumber"
+  ],
+  "additionalProperties": false
+}

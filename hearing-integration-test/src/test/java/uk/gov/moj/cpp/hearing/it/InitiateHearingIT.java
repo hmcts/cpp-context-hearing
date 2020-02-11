@@ -113,6 +113,7 @@ public class InitiateHearingIT extends AbstractIT {
                                                 .with(Offence::getStartDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getStartDate()))
                                                 .with(Offence::getOrderIndex, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOrderIndex()))
                                                 .with(Offence::getCount, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getCount()))
+                                                .with(Offence::getLaidDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getLaidDate()))
                                         ))
                                 ))
                         ))

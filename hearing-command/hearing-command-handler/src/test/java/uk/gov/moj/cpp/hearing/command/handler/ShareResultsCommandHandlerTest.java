@@ -127,7 +127,9 @@ public class ShareResultsCommandHandlerTest {
                 STRING.next(),
                 Arrays.asList(UUID.randomUUID()),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
+
         );
         prosecutionCounselAdded = new ProsecutionCounselAdded(prosecutionCounsel, randomUUID());
 
@@ -139,7 +141,8 @@ public class ShareResultsCommandHandlerTest {
                 STRING.next(),
                 STRING.next(),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
         );
         defenceCounselUpsert = new DefenceCounselAdded(defenceCounsel, randomUUID());
 

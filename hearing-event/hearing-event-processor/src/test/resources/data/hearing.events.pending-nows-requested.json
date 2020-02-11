@@ -440,6 +440,13 @@
             "label": "Amount of fine",
             "promptReference": "AOF",
             "value": "138"
+          },
+          {
+            "id" : "6dbddb7c-007c-4a81-a06d-17b09b68c01a",
+            "isAvailableForCourtExtract" : false,
+            "label" : "Payment card required",
+            "promptReference" : "PAYMENT_CARD_REQUIRED",
+            "value" : "true"
           }
         ],
         "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"

@@ -84,7 +84,8 @@ public class ProsecutionCounselEventListenerTest {
                 null,
                 Arrays.asList(UUID.randomUUID()),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
         );
 
         final ProsecutionCounselAdded prosecutionCounselAdded = new ProsecutionCounselAdded(prosecutionCounsel, randomUUID());
@@ -124,7 +125,8 @@ public class ProsecutionCounselEventListenerTest {
                 null,
                 Arrays.asList(UUID.randomUUID()),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
         );
 
         final ProsecutionCounselUpdated prosecutionCounselUpdated = new ProsecutionCounselUpdated(prosecutionCounsel, randomUUID());
@@ -164,7 +166,8 @@ public class ProsecutionCounselEventListenerTest {
                 null,
                 Arrays.asList(UUID.randomUUID()),
                 STRING.next(),
-                STRING.next()
+                STRING.next(),
+                randomUUID()
         );
 
         final ProsecutionCounselRemoved prosecutionCounselRemoved = new ProsecutionCounselRemoved(randomUUID(), prosecutionCounsel.getId());

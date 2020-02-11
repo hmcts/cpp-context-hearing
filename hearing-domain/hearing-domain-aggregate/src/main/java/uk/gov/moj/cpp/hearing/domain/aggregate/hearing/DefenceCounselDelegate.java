@@ -32,10 +32,18 @@ public class DefenceCounselDelegate implements Serializable {
         final DefenceCounsel defenceCounsel = defenceCounselUpdated.getDefenceCounsel();
         this.momento.getDefenceCounsels().put(defenceCounsel.getId(), defenceCounsel);
     }
-    public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
+    public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, boolean isHearingEnded) {
+        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
         if (this.momento.getDefenceCounsels().containsKey(defenceCounsel.getId())) {
-            return Stream.of(new DefenceCounselChangeIgnored(String.format("Provided DefenceCounsel already exists, payload [%s]", defenceCounsel.toString())));
+            return Stream.of(new DefenceCounselChangeIgnored(
+                    String.format("Provided DefenceCounsel already exists, payload [%s]", defenceCounsel.toString()),
+                    defenceCounsel, hearingId,  caseRef));
+        } else if (isHearingEnded) {
+            return Stream.of(new DefenceCounselChangeIgnored(
+                    String.format("Hearing Ended. Failed to check-in , payload [%s]", defenceCounsel.toString()),
+                    defenceCounsel, hearingId, caseRef));
         }
+
         return Stream.of(new DefenceCounselAdded(defenceCounsel, hearingId));
     }
 
@@ -46,10 +54,16 @@ public class DefenceCounselDelegate implements Serializable {
     public Stream<Object> updateDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId) {
 
         final Map<UUID, DefenceCounsel> defenceCounsels = this.momento.getDefenceCounsels();
+        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
+
         if (!(defenceCounsels.containsKey(defenceCounsel.getId()))) {
-            return Stream.of(new DefenceCounselChangeIgnored(String.format("Provided DefenceCounsel does not exists, payload [%s]", defenceCounsel.toString())));
+            return Stream.of(new DefenceCounselChangeIgnored(
+                    String.format("Provided DefenceCounsel does not exists, payload [%s]", defenceCounsel.toString()),
+                    defenceCounsel, hearingId, caseRef));
         }else if (defenceCounsels.get(defenceCounsel.getId()).equals(defenceCounsel)){
-            return Stream.of(new DefenceCounselChangeIgnored(String.format("No change in provided DefenceCounsel, payload [%s]", defenceCounsel.toString())));
+            return Stream.of(new DefenceCounselChangeIgnored(
+                    String.format("No change in provided DefenceCounsel, payload [%s]", defenceCounsel.toString()),
+                    defenceCounsel, hearingId, caseRef));
         }
         return Stream.of(new DefenceCounselUpdated(defenceCounsel, hearingId));
     }

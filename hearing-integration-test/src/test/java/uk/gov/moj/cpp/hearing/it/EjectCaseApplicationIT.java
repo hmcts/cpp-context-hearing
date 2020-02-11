@@ -8,22 +8,15 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.QueueUtil.publicEvents;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.HearingLanguage;
-import uk.gov.justice.core.courts.HearingType;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
-import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.moj.cpp.hearing.command.eject.EjectCaseOrApplicationCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -104,7 +97,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
 
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 commandJson,
                 metadataOf(randomUUID(), eventName)
@@ -132,7 +125,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
 
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 eventName,
                 commandJson,
                 metadataOf(randomUUID(), eventName)
@@ -160,7 +153,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                 .build();
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(command);
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 ejectEventName,
                 commandJson,
                 metadataOf(randomUUID(), ejectEventName)
@@ -187,7 +180,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                 .build();
         final JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(command);
 
-        sendMessage(publicEvents.createProducer(),
+        sendMessage(getPublicTopicInstance().createProducer(),
                 ejectEventName,
                 commandJson,
                 metadataOf(randomUUID(), ejectEventName)

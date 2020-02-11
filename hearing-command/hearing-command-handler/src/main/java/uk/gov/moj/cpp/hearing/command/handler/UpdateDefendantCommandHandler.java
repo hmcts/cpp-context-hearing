@@ -13,6 +13,8 @@ import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
+import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithFinancialOrderDetails;
 
 import java.util.UUID;
 
@@ -64,4 +66,36 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
 
         }
     }
+
+    @Handles("hearing.command.update-defendant-with-financial-order")
+    public void updateCaseDefendantWithFinancialOrderDetails(final JsonEnvelope envelope) throws EventStreamException {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-defendant-with-financial-order command received {}", envelope.payload());
+        }
+
+        final UpdateDefendantWithFinancialOrderDetails updateDefendantWithFinancialOrderDetails
+                = convertToObject(envelope.payloadAsJsonObject(), UpdateDefendantWithFinancialOrderDetails.class);
+
+        aggregate(DefendantAggregate.class, updateDefendantWithFinancialOrderDetails.getFinancialOrderForDefendant().getDefendantId(), envelope,
+                defendantAggregate -> defendantAggregate.updateDefendantWithFinancialOrder(updateDefendantWithFinancialOrderDetails.getFinancialOrderForDefendant()));
+
+    }
+
+    @Handles("hearing.command.update-defendant-with-application-details")
+    public void updateCaseDefendantWithApplicationDetails(final JsonEnvelope envelope) throws EventStreamException {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-defendant-with-application-details event received {}", envelope.payload());
+        }
+        final UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails = convertToObject(envelope.payloadAsJsonObject(), UpdateDefendantWithApplicationDetails.class);
+
+        aggregate(DefendantAggregate.class,
+                updateDefendantWithApplicationDetails.getDefendantId(),
+                envelope,
+                defendantAggregate -> defendantAggregate.updateDefendantWithApplicationDetails(updateDefendantWithApplicationDetails));
+
+    }
+
+
 }

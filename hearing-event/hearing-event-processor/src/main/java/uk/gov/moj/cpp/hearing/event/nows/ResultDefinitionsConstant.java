@@ -26,11 +26,15 @@ public final class ResultDefinitionsConstant {
     public static final UUID RD_COLLECTIONORDER = fromString("9ea0d845-5096-44f6-9ce0-8ae801141eac");
     public static final UUID RD_ABCD = fromString("f7dfefd2-64c6-11e8-adc0-fa7ae01bbebc");
     public static final UUID RD_AEOC = fromString("bdb32555-8d55-4dc1-b4b6-580db5132496");
+    public static final UUID RD_FIDICI = fromString("de946ddc-ad77-44b1-8480-8bbc251cdcfb");
+    public static final UUID RD_FIDICTI = fromString("5c023b16-e79c-4eb5-9673-e23accbeb35b");
+    public static final UUID RD_FIDIPI = fromString("0e390ae0-8f3c-4735-8c0d-c16e8962537a");
+
 
     public static final List<UUID> PAYMENT_TERMS_RESULT_DEFINITIONS = asList(
             RD_PDATE, RD_LUMSI, RD_LUMSI, RD_INSTL,
             RD_FINE, RD_COSTSTOCROWNPROSECUTIONSERVICE, RD_SURCHARGE, RD_VEHICLEEXCISEBACKDUTY,
-            RD_COSTS, RD_COMPENSATION, RD_ABCD, RD_AEOC);
+            RD_COSTS, RD_COMPENSATION, RD_ABCD, RD_AEOC, RD_FIDICI, RD_FIDICTI, RD_FIDIPI);
 
     public static final UUID BENEFIT_DEDUCTIONS_RESULT_DEFINITION_ID = RD_ABCD;
     public static final UUID ATTACHMENT_OF_EARNINGS_RESULT_DEFINITION_ID = RD_AEOC;

@@ -1,17 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.nows;
 
-import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DAYS_IN_DEFAULT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
-import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAY_BY_DATE;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_INSTL;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_LUMSI;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_PDATE;
-
+import org.junit.Before;
+import org.junit.Test;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
@@ -21,8 +11,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.Arrays.asList;
+import static org.junit.Assert.assertEquals;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_AMOUNT;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_INSTALMENT_START_DATE;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_LUMP_SUM_AMOUNT;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAYMENT_FREQUENCY;
+import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PAY_BY_DATE;
+import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_INSTL;
+import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_LUMSI;
+import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.RD_PDATE;
 
 public class PaymentTermsCalculatorTest {
 
@@ -48,12 +47,37 @@ public class PaymentTermsCalculatorTest {
                         .withPrompts(Collections.singletonList(
                                 uk.gov.justice.core.courts.Prompt.prompt()
                                         .withId(payByDatePromptId)
-                                        .withValue("2019-06-01").build()))
+                                        .withValue("2019-12-31").build()))
                         .build());
 
-        final String expected = "Date to pay in full by 01-Jun-2019";
+        final String expected = "Date to pay in full by 31-Dec-2019";
 
-        String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
+        final String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
+
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void calculatePaymentTermsWithResultAsPayByDateWelsh() {
+
+        final UUID payByDatePromptId = UUID.randomUUID();
+
+        final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
+
+        id2PromptRef.put(payByDatePromptId, Prompt.prompt().setId(payByDatePromptId).setReference(P_PAY_BY_DATE));
+
+        final List<ResultLine> resultLines4Now = Collections.singletonList(
+                ResultLine.resultLine()
+                        .withResultDefinitionId(RD_PDATE)
+                        .withPrompts(Collections.singletonList(
+                                uk.gov.justice.core.courts.Prompt.prompt()
+                                        .withId(payByDatePromptId)
+                                        .withValue("2019-12-31").build()))
+                        .build());
+
+        final String expected = "Rhaid talu'r swm llawn erbyn 31-12-2019";
+
+        final String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, true);
 
         assertEquals(expected, actual);
     }
@@ -68,7 +92,7 @@ public class PaymentTermsCalculatorTest {
         final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
 
         id2PromptRef.put(payByDatePromptId, Prompt.prompt().setId(payByDatePromptId).setReference(P_PAY_BY_DATE));
-        id2PromptRef.put(daysInDefaultPromptId, Prompt.prompt().setId(daysInDefaultPromptId).setReference(P_DAYS_IN_DEFAULT));
+        id2PromptRef.put(daysInDefaultPromptId, Prompt.prompt().setId(daysInDefaultPromptId).setReference(P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE));
 
         final List<ResultLine> resultLines4Now = Collections.singletonList(
                 ResultLine.resultLine()
@@ -85,11 +109,10 @@ public class PaymentTermsCalculatorTest {
 
         final String expected = "Date to pay in full by 01-Jun-2019 Number of days in default 5";
 
-        String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
+        final String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
 
         assertEquals(expected, actual);
     }
-
 
     @Test
     public void calculatePaymentTermsWithResultAsLumpSum() {
@@ -102,7 +125,7 @@ public class PaymentTermsCalculatorTest {
 
         final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
         id2PromptRef.put(promptId1, Prompt.prompt().setId(promptId1).setReference(P_PAYMENT_FREQUENCY));
-        id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DAYS_IN_DEFAULT));
+        id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE));
         id2PromptRef.put(promptId3, Prompt.prompt().setId(promptId3).setReference(P_INSTALMENT_START_DATE));
         id2PromptRef.put(promptId4, Prompt.prompt().setId(promptId4).setReference(P_LUMP_SUM_AMOUNT));
         id2PromptRef.put(promptId6, Prompt.prompt().setId(promptId6).setReference(P_INSTALMENT_AMOUNT));
@@ -132,7 +155,7 @@ public class PaymentTermsCalculatorTest {
 
         final String expected = "Lump sum amount £100 Instalment amount £10 Payment frequency monthly Instalment start date 02-Feb-2019 Number of days in default 2";
 
-        String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
+        final String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
 
         assertEquals(expected, actual);
     }
@@ -146,7 +169,7 @@ public class PaymentTermsCalculatorTest {
 
         final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
         id2PromptRef.put(promptId1, Prompt.prompt().setId(promptId1).setReference(P_PAYMENT_FREQUENCY));
-        id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DAYS_IN_DEFAULT));
+        id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE));
         id2PromptRef.put(promptId3, Prompt.prompt().setId(promptId3).setReference(P_INSTALMENT_START_DATE));
         id2PromptRef.put(promptId4, Prompt.prompt().setId(promptId4).setReference(P_INSTALMENT_AMOUNT));
 
@@ -169,7 +192,7 @@ public class PaymentTermsCalculatorTest {
 
         final String expected = "Instalment amount £100 Payment frequency monthly Instalment start date 02-Feb-2019";
 
-        String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
+        final String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, false);
 
         assertEquals(expected, actual);
     }
@@ -183,7 +206,7 @@ public class PaymentTermsCalculatorTest {
 
         final Map<UUID, Prompt> id2PromptRef = new HashMap<>();
         id2PromptRef.put(promptId1, Prompt.prompt().setId(promptId1).setReference(P_PAYMENT_FREQUENCY));
-        id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DAYS_IN_DEFAULT));
+        id2PromptRef.put(promptId2, Prompt.prompt().setId(promptId2).setReference(P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE));
         id2PromptRef.put(promptId3, Prompt.prompt().setId(promptId3).setReference(P_INSTALMENT_START_DATE));
         id2PromptRef.put(promptId4, Prompt.prompt().setId(promptId4).setReference(P_INSTALMENT_AMOUNT));
 
@@ -206,7 +229,7 @@ public class PaymentTermsCalculatorTest {
 
         final String expected = "Swm y rhandaliad £100 Amlder y taliadau yn fisol Dyddiad cychwyn talu rhandaliadau 02-02-2019";
 
-        String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, true);
+        final String actual = paymentTermsCalculator.calculatePaymentTerms(id2PromptRef, resultLines4Now, true);
 
         assertEquals(expected, actual);
     }

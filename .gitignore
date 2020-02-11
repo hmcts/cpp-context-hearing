@@ -10,3 +10,5 @@ target/
 
 # Misc.
 **/.DS_Store
+/hearing-parent.ipr
+/hearing-parent.iws

@@ -51,6 +51,9 @@
           "items": {
             "$ref": "#/definitions/prosecutionCaseSummary"
           }
+        },
+        "courtCentre": {
+          "$ref": "http://justice.gov.uk/core/courts/courtCentre.json"
         }
       }
     },

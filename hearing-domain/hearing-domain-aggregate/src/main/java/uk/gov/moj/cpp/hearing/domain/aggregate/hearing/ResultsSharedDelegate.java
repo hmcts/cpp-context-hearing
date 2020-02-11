@@ -199,7 +199,7 @@ public class ResultsSharedDelegate implements Serializable {
         if (this.momento.getHearing().getCourtApplications() != null) {
             final List<CourtApplication> courtApplications = momento.getHearing().getCourtApplications();
             final Map<UUID, CourtApplicationOutcome> courtApplicationOutcomeMap =
-                    resultLines.stream().map(SharedResultsCommandResultLine::getCourtApplicationOutcome).filter(Objects::nonNull).collect(Collectors.toMap(CourtApplicationOutcome::getApplicationId, courtApplicationOutcome -> courtApplicationOutcome, (courtApplicationOutcome1, courtApplicationOutcome2) -> courtApplicationOutcome1));
+                    resultLines.stream().map(SharedResultsCommandResultLine::getApplicationOutcome).filter(Objects::nonNull).collect(Collectors.toMap(CourtApplicationOutcome::getApplicationId, courtApplicationOutcome -> courtApplicationOutcome, (courtApplicationOutcome1, courtApplicationOutcome2) -> courtApplicationOutcome1));
             for (final CourtApplication courtApplication : courtApplications) {
                 if (courtApplicationOutcomeMap.containsKey(courtApplication.getId()) && !courtApplicationOutcomeMap.get(courtApplication.getId()).equals(courtApplication.getApplicationOutcome())) {
                     applicationChanged = Stream.concat(checkAndUpdateApplicationOutcomes(courtApplicationOutcomeMap, courtApplication), applicationChanged);

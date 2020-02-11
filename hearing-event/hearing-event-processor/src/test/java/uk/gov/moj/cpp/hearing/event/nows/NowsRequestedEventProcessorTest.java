@@ -9,6 +9,24 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.generateNowsRequestTemplate;
+
+import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.Now;
+import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.delegates.NcesNotificationDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
+import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
+import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,22 +36,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.core.courts.CreateNowsRequest;
-import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
-import uk.gov.moj.cpp.hearing.nows.events.NowsMaterialStatusUpdated;
-import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
-
-import java.util.List;
-import java.util.UUID;
-
-import javax.print.DocFlavor;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NowsRequestedEventProcessorTest {
@@ -50,6 +52,9 @@ public class NowsRequestedEventProcessorTest {
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<NowsRequested> nowsRequestedArgumentCaptor;
 
     @Captor
     private ArgumentCaptor<CreateNowsRequest> nowsRequestArgumentCaptor;
@@ -74,6 +79,9 @@ public class NowsRequestedEventProcessorTest {
     @InjectMocks
     private NowsRequestedEventProcessor nowsRequestedEventProcessor;
 
+    @Mock
+    private NcesNotificationDelegate ncesNotificationDelegate;
+
 
     @Test
     public void testProcessNowsRequested_shouldCallNowsDelegate() {
@@ -90,9 +98,17 @@ public class NowsRequestedEventProcessorTest {
         );
         nowsRequestedEventProcessor.processNowsRequested(envelope);
 
+        verify(ncesNotificationDelegate).updateDefendantWithFinancialOrder(eq(sender), eq(envelope), nowsRequestedArgumentCaptor.capture(), eq(requestId));
+
         verify(nowsDelegate).sendNows(eq(sender), eq(envelope), nowsRequestArgumentCaptor.capture(), targetsArgumentCaptor.capture());
 
+
         final CreateNowsRequest capturedNowsRequest = nowsRequestArgumentCaptor.getValue();
+
+        for (Now now: capturedNowsRequest.getNows()) {
+            assertThat(now.getFinancialOrders().getAccountReference(), is(nowsRequested.getAccountNumber()));
+        }
+
         assertThat(capturedNowsRequest.getNows().get(0).getId().toString(), is(nowsRequest.getNows().get(0).getId().toString()));
         assertThat(capturedNowsRequest.getNowTypes().get(0).getId().toString(), is(nowsRequest.getNowTypes().get(0).getId().toString()));
         assertThat(capturedNowsRequest.getSharedResultLines().get(0).getId().toString(), is(nowsRequest.getSharedResultLines().get(0).getId().toString()));

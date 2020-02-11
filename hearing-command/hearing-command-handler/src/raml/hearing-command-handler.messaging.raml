@@ -30,6 +30,7 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.register-hearing-against-defendant.json
             example: !include json/hearing.command.register-hearing-against-defendant.json
 
+
         application/vnd.hearing.command.register-hearing-against-case+json:
             schema: !include json/schema/hearing.command.register-hearing-against-case.json
             example: !include json/hearing.command.register-hearing-against-case.json
@@ -40,7 +41,7 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.log-hearing-event.json
         application/vnd.hearing.command.update-hearing-events+json:
             example: !include json/hearing.command.update-hearing-events.json
-            schema: !include json/schema/hearing.command.update-hearing-events.json			
+            schema: !include json/schema/hearing.command.update-hearing-events.json
 
         application/vnd.hearing.create-hearing-event-definitions+json:
             example: !include json/hearing.create-hearing-event-definitions.json
@@ -263,6 +264,14 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.set-trial-type+json:
             schema: !include json/schema/hearing.command.set-trial-type.json
             example: !include json/hearing.command.set-trial-type.json
+
+#NCES Notification
+        application/vnd.hearing.command.update-defendant-with-financial-order+json:
+            schema: !include json/schema/hearing.command.update-defendant-with-financial-order.json
+            example: !include json/hearing.command.update-defendant-with-financial-order.json
+        application/vnd.hearing.command.update-defendant-with-application-details+json:
+            schema: !include json/schema/hearing.command.update-defendant-with-application-details.json
+            example: !include json/hearing.command.update-defendant-with-application-details.json
 
 # Update offence results for a defendant
         application/vnd.hearing.command.handler.update-offence-results+json:

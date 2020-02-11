@@ -1,0 +1,674 @@
+{
+  "createNowsRequest": {
+    "courtClerk": {
+      "firstName": "Erica",
+      "lastName": "Wilson",
+      "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+    },
+    "hearing": {
+      "courtCentre": {
+        "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "name": "Lavender Hill Magistrates' Court",
+        "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "roomName": "Courtroom 01"
+      },
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 20,
+          "listingSequence": 0,
+          "sittingDay": "2019-06-17T09:00:00.000Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "9a62c7c1-66d0-4bcc-b713-7d88dd85ec69",
+      "judiciary": [
+        {
+          "firstName": "Andrew Peter",
+          "isBenchChairman": true,
+          "isDeputy": false,
+          "judicialId": "3644a684-f98e-38fe-a23c-713b77189a77",
+          "judicialRoleType": {
+            "judicialRoleTypeId": "3644a684-f98e-38fe-a23c-713b77189a77",
+            "judiciaryType": "Magistrate"
+          },
+          "lastName": "Adshead",
+          "title": "Mr"
+        },
+        {
+          "firstName": "Amit",
+          "isBenchChairman": false,
+          "isDeputy": true,
+          "judicialId": "ec8ce6ab-b3e9-32a8-9b85-51ba726a1227",
+          "judicialRoleType": {
+            "judicialRoleTypeId": "ec8ce6ab-b3e9-32a8-9b85-51ba726a1227",
+            "judiciaryType": "Magistrate"
+          },
+          "lastName": "Alagh",
+          "title": "Mr"
+        },
+        {
+          "firstName": "Julie",
+          "isBenchChairman": false,
+          "isDeputy": true,
+          "judicialId": "94f6d7e0-4a4d-3520-b530-0f18b984988c",
+          "judicialRoleType": {
+            "judicialRoleTypeId": "94f6d7e0-4a4d-3520-b530-0f18b984988c",
+            "judiciaryType": "Magistrate"
+          },
+          "lastName": "Ashby Ellis",
+          "title": "Mrs"
+        }
+      ],
+      "jurisdictionType": "MAGISTRATES",
+      "prosecutionCases": [
+        {
+          "caseStatus": "SJP_REFERRAL",
+          "defendants": [
+            {
+              "id": "2b634c72-2016-4f1d-9965-a046c37cee22",
+              "numberOfPreviousConvictionsCited": 2,
+              "offences": [
+                {
+                  "chargeDate": "2019-04-12",
+                  "convictionDate": "2019-06-17",
+                  "count": 1,
+                  "id": "46504255-ba42-444b-ad02-e56dbc28812e",
+                  "modeOfTrial": "SNONIMP",
+                  "notifiedPlea": {
+                    "notifiedPleaDate": "2019-06-17",
+                    "notifiedPleaValue": "NO_NOTIFICATION",
+                    "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e"
+                  },
+                  "offenceCode": "PS90003",
+                  "offenceDefinitionId": "032fc289-5f44-43c4-a2c9-4830bc1beedd",
+                  "offenceLegislation": "Contrary to regulation 6(1)(m) of the Public Service Vehicles (Conduct of Drivers, Inspectors, Conductors and Passengers) Regulations 1990 and section 25(3) of the Public Passenger Vehicles Act 1981.",
+                  "offenceLegislationWelsh": "",
+                  "offenceTitle": "Passenger on a public service vehicle intentionally interfere with equipment",
+                  "offenceTitleWelsh": "",
+                  "orderIndex": 1,
+                  "startDate": "2019-03-27",
+                  "verdict": {
+                    "jurors": {
+                      "numberOfJurors": 12,
+                      "numberOfSplitJurors": 0,
+                      "unanimous": true
+                    },
+                    "lesserOrAlternativeOffence": {
+                      "offenceCode": "PS90003",
+                      "offenceDefinitionId": "032fc289-5f44-43c4-a2c9-4830bc1beedd",
+                      "offenceLegislation": "Contrary to regulation 6(1)(m) of the Public Service Vehicles (Conduct of Drivers, Inspectors, Conductors and Passengers) Regulations 1990 and section 25(3) of the Public Passenger Vehicles Act 1981.",
+                      "offenceTitle": "Passenger on a public service vehicle intentionally interfere with equipment"
+                    },
+                    "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+                    "originatingHearingId": "9a62c7c1-66d0-4bcc-b713-7d88dd85ec69",
+                    "verdictDate": "2019-06-17",
+                    "verdictType": {
+                      "category": "Guilty",
+                      "categoryType": "GUILTY_BY_JURY_CONVICTED",
+                      "verdictTypeId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                    }
+                  },
+                  "wording": "On 02/07/2015 At threadneedle street EC2 Being a passenger on a Public service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares where the vehicle was being operated by a Driver without a Conductor did not as directed by the Driver an Inspector or a Notice displayed on the vehicle pay the fare for the journey in accordance with the direction "
+                }
+              ],
+              "personDefendant": {
+                "personDetails": {
+                  "address": {
+                    "address1": "Flat 1, Armageddon House",
+                    "address2": "13 Old Road",
+                    "address3": "Giggleswick",
+                    "address4": "Merton",
+                    "postcode": "EX8 1AB"
+                  },
+                  "contact": {
+
+                  },
+                  "dateOfBirth": "1966-05-28",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "firstName": "Aiden",
+                  "gender": "FEMALE",
+                  "lastName": "Morgan",
+                  "title": "MR"
+                }
+              },
+              "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+            }
+          ],
+          "id": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a",
+          "initiationCode": "J",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "31af405e-7b60-4dd8-a244-c24c2d3fa595",
+            "prosecutionAuthorityReference": "TFL36757727LX"
+          },
+          "statementOfFacts": "An incident took place at GREEN PARK station whereby you were spoken to by a member of London Underground staff regarding your train journey and the associated fare.The facts of this incidents are now being considered and I must advise you that legal proceedings may be initiated against you regarding this matter in accordance with the LU prosecution policy"
+        }
+      ],
+      "type": {
+        "description": "Plea",
+        "id": "511fe0a3-1391-4954-8158-6b10eed0dad9"
+      }
+    },
+    "nowTypes": [
+      {
+        "description": "Notice of Financial Penalty",
+        "id": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "jurisdiction": "B",
+        "priority": "0",
+        "rank": 30,
+        "requiresBulkPrinting": true,
+        "requiresEnforcement": false,
+        "staticText": "<h3>If the court has made a Deduction from Benefits order or an Attachment of Earnings order, please see further down.</h3> <h3>How to pay</h3> <p>Allow 5 days for payment to reach us.</p> <p><strong>Online:</strong> <a href=\"http://www.gov.uk/pay-court-fine-online\">www.gov.uk/pay-court-fine-online</a></p> <p><strong>By phone:</strong> 0300 790 9901</p> <p><strong>When paying online or by phone:</strong></p> <ul> <li>you can pay 24 hours a day with a credit or debit card (Visa, Mastercard or Maestro)</li> <li>you must quote your division number and account number as stated at the top of this notice</li> <li>you&rsquo;ll be given an authorisation number when you pay - keep this as proof along with the date and amount. The court won&rsquo;t issue you a receipt.</li> </ul> <p><strong>If you are granted time to pay, you can either:</strong></p> <ul> <li>ask for a payment card which you can use at a Post Office or PayPoint Outlets</li> <li>set up a direct debit</li> </ul> <p><strong>Paying other parties</strong></p> <p>You can only make your payment to HM Courts and Tribunals Service.</p> <p>If you pay anyone else, for example, the prosecutor or victims, there&rsquo;ll be no record and we may have to take action against you for non-payment.</p> <p>We&rsquo;ll pay any amounts owed to other parties once we&rsquo;ve received your payment.</p> <p><strong>Fraud and scams</strong></p> <p>There are several fake websites offering to let you pay your court fines, often with a discount.</p> <p>You can only use the official website, or telephone line, as above. If you use any other site or number to pay, we can&rsquo;t accept it and you&rsquo;ll still be liable to pay the debt.</p> <p>&nbsp;</p> <p><strong>For any questions NOT relating to financial penalties</strong></p> <p>Contact the Service Centre:</p><p><strong>Telephone:</strong> 0300 303 0656 Monday to Friday 9am to 5pm</p> <p>&nbsp;</p> <p><strong>If you&rsquo;re having difficulty paying or to discuss alternative ways to pay:</strong></p> <p>Contact the Fines Team:</p>",
+        "subTemplateName": "Noticefine",
+        "templateName": "NoticeOrderWarrants",
+        "welshStaticText": ""
+      }
+    ],
+    "nows": [
+      {
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "documentationLanguage": "ENGLISH",
+        "financialOrders": {
+          "accountReference": "TBC",
+          "isCrownCourt": false,
+          "paymentTerms": "Lump sum amount £200 Pay within days null Instalment amount £197.90 Payment frequency monthly Instalment start date 27-Jul-2019",
+          "totalAmountImposed": "397.90",
+          "totalBalance": "397.90"
+        },
+        "id": "dc8ac2c7-56c4-4518-a733-0e4f4ea3b1e0",
+        "ljaDetails": {
+          "accountDivisionCode": "77",
+          "bacsAccountNumber": "27049175",
+          "bacsBankName": "HMCTS LCCC",
+          "bacsSortCode": "56-00-33",
+          "enforcementAddress": {
+            "address1": "LCCC Enforcement Unit",
+            "address2": "P.O. Box 31089",
+            "address3": "London",
+            "postcode": "SW1P 3WT"
+          },
+          "enforcementEmail": "LCCCCollectionUnit@hmcts.gsi.gov.uk",
+          "enforcementPhoneNumber": "020 7556 8500",
+          "ljaCode": "2577",
+          "ljaName": "South West London Magistrates' Court"
+        },
+        "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "referenceDate": "2019-06-17",
+        "requestedMaterials": [
+          {
+            "description": "Notice of Financial Penalty",
+            "isAmended": false,
+            "isRemotePrintingRequired": true,
+            "key": {
+              "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+              "hearingId": "9a62c7c1-66d0-4bcc-b713-7d88dd85ec69",
+              "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+              "usergroups": [
+                "Court Clerks",
+                "Legal Advisers"
+              ]
+            },
+            "materialId": "7c757303-0ca6-472b-b934-1b5514497396",
+            "nowResults": [
+              {
+                "promptRefs": [
+                  "11ba492a-e2ad-11e8-9f32-f2801f1b9fd1",
+                  "37909b32-aff3-469e-9ed2-9c5fc0aae4e7",
+                  "fb4f761c-29d0-4a8e-a947-3debf281dab0",
+                  "b76870fe-634b-11e8-adc0-fa7ae01bbebc",
+                  "e57dd7e2-edbe-11e8-8eb2-f2801f1b9fd1"
+                ],
+                "sequence": 552,
+                "sharedResultId": "80062e5f-c533-4381-a9d7-0c21580f0b0f"
+              },
+              {
+                "promptRefs": [
+                  "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+                  "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
+                  "f6f953b6-e369-11e8-9f32-f2801f1b9fd1"
+                ],
+                "sequence": 76,
+                "sharedResultId": "ee8b7042-0682-4746-ae17-6bfcf20321ad"
+              },
+              {
+                "promptRefs": [
+                  "7cd1472f-2379-4f5b-9e67-98a43d86e122"
+                ],
+                "sequence": 71,
+                "sharedResultId": "5eaaf894-8b4b-42d5-8a57-9b98cd340fbd"
+              },
+              {
+                "promptRefs": [
+                  "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+                  "2b0ca749-7ede-4446-ae59-5beec3a72143"
+                ],
+                "sequence": 556,
+                "sharedResultId": "b787bd82-23f0-49e3-aeac-7885d4a02fa6"
+              },
+              {
+                "nowVariantResultText": {
+                  "collOrd": "<h4>COLLECTION ORDER</h4> <p><strong>A collection order has been made, which means the court has powers to collect the money</strong></p> <p><strong>See above for how to pay</strong></p> <p>If you don&rsquo;t pay, we may:</p> <ul> <li>take money from your earnings or benefits</li> <li>increase your fine</li> <li>issue a warrant to seize your possessions which will mean extra costs</li> <li>log this in the Register of Judgements, Orders and Fines, making it harder for you to get credit</li> <li>apply to the court for a warrant for your arrest to bring you to court</li> </ul> <p><strong>If you still don’t pay, you could be sent to prison for non-payment.</strong></p>",
+                  "collOrd.welsh": "<h4>COLLECTION ORDER</h4> <p><strong>A collection order has been made, which means the court has powers to collect the money</strong></p> <p><strong>See above for how to pay</strong></p> <p>If you don&rsquo;t pay, we may:</p> <ul> <li>take money from your earnings or benefits</li> <li>increase your fine</li> <li>issue a warrant to seize your possessions which will mean extra costs</li> <li>log this in the Register of Judgements, Orders and Fines, making it harder for you to get credit</li> <li>apply to the court for a warrant for your arrest to bring you to court</li> </ul> <p><strong>If you still don’t pay, you could be sent to prison for non-payment.</strong></p>"
+                },
+                "promptRefs": [
+                  "6b36e5ff-e116-4dc3-b438-8c02d493959e",
+                  "369b6e22-4678-4b04-9fe9-5bb53bed5067",
+                  "dc44f589-6dd2-4a8d-9164-c1796c6b0e36",
+                  "16ade3fb-9f0f-4ce4-a6c8-fa96277e1519"
+                ],
+                "sequence": 451,
+                "sharedResultId": "50aca993-314a-4558-ab0e-37f831f0bd8d"
+              },
+              {
+                "promptRefs": [
+                  "629a971e-9d7a-4526-838d-0a4cb922b5cb"
+                ],
+                "sequence": 68,
+                "sharedResultId": "dbcde05d-184d-4a85-9276-b84beb14b0cc"
+              }
+            ],
+            "nowVariantAddressee": {
+              "address": {
+                "address1": "Flat 1, Armageddon House",
+                "address2": "13 Old Road",
+                "address3": "Giggleswick",
+                "address4": "Merton",
+                "postcode": "EX8 1AB"
+              },
+              "name": "Aiden Morgan"
+            },
+            "nowVariantDefendant": {
+              "address": {
+                "address1": "Flat 1, Armageddon House",
+                "address2": "13 Old Road",
+                "address3": "Giggleswick",
+                "address4": "Merton",
+                "postcode": "EX8 1AB"
+              },
+              "dateOfBirth": "1966-05-28",
+              "name": "Aiden Morgan"
+            },
+            "status": "requesting",
+            "subTemplateName": "Noticefine",
+            "templateName": "NoticeOrderWarrants"
+          }
+        ]
+      }
+    ],
+    "sharedResultLines": [
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "b787bd82-23f0-49e3-aeac-7885d4a02fa6",
+        "isAvailableForCourtExtract": true,
+        "label": "Costs",
+        "level": "CASE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prompts": [
+          {
+            "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of costs",
+            "promptReference": "AOC",
+            "value": "225"
+          },
+          {
+            "id": "2b0ca749-7ede-4446-ae59-5beec3a72143",
+            "isAvailableForCourtExtract": false,
+            "label": "Creditor name",
+            "promptReference": "CREDNAME",
+            "value": "Transport for London"
+          }
+        ],
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "dbcde05d-184d-4a85-9276-b84beb14b0cc",
+        "isAvailableForCourtExtract": true,
+        "label": "surcharge",
+        "level": "CASE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prompts": [
+          {
+            "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of surcharge",
+            "promptReference": "AOS",
+            "value": "30"
+          },
+          {
+            "id": "91687bb9-d0ca-44a7-ada0-b89b71b89b8e",
+            "label": "DWP AP number",
+            "value": "APITEST_DWP123456789. Disability allowance MC100 on case"
+          }
+        ],
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "50aca993-314a-4558-ab0e-37f831f0bd8d",
+        "isAvailableForCourtExtract": true,
+        "label": "Collection order",
+        "level": "CASE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prompts": [
+          {
+            "id": "369b6e22-4678-4b04-9fe9-5bb53bed5067",
+            "isAvailableForCourtExtract": false,
+            "label": "Reason for not making an attachment of earnings order or deduction from benefit application",
+            "value": "AEO  pay quicker"
+          }
+        ],
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "80062e5f-c533-4381-a9d7-0c21580f0b0f",
+        "isAvailableForCourtExtract": true,
+        "label": "Lump sum plus instalments",
+        "level": "CASE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prompts": [
+          {
+            "id": "11ba492a-e2ad-11e8-9f32-f2801f1b9fd1",
+            "isAvailableForCourtExtract": false,
+            "label": "Lump sum amount",
+            "promptReference": "LSA",
+            "value": "200"
+          },
+          {
+            "id": "37909b32-aff3-469e-9ed2-9c5fc0aae4e7",
+            "isAvailableForCourtExtract": false,
+            "label": "Instalment amount",
+            "promptReference": "IAMT",
+            "value": " -1 9 . 9 0 "
+          },
+          {
+            "id": "fb4f761c-29d0-4a8e-a947-3debf281dab0",
+            "isAvailableForCourtExtract": false,
+            "label": "Payment frequency following lump sum",
+            "promptReference": "PF",
+            "value": "monthly"
+          },
+          {
+            "id": "b76870fe-634b-11e8-adc0-fa7ae01bbebc",
+            "isAvailableForCourtExtract": false,
+            "label": "Instalment start date",
+            "promptReference": "ISTD",
+            "value": "2019-07-27"
+          }
+        ],
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "5eaaf894-8b4b-42d5-8a57-9b98cd340fbd",
+        "isAvailableForCourtExtract": true,
+        "label": "Fine",
+        "level": "OFFENCE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prompts": [
+          {
+            "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of fine",
+            "promptReference": "AOF",
+            "value": "138"
+          },
+          {
+            "id" : "6dbddb7c-007c-4a81-a06d-17b09b68c01a",
+            "isAvailableForCourtExtract" : false,
+            "label" : "Payment card required",
+            "promptReference" : "PAYMENT_CARD_REQUIRED",
+            "value" : "true"
+          }
+        ],
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "ee8b7042-0682-4746-ae17-6bfcf20321ad",
+        "isAvailableForCourtExtract": true,
+        "label": "compensation",
+        "level": "OFFENCE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prompts": [
+          {
+            "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of compensation",
+            "promptReference": "AOCOM",
+            "value": "4.90"
+          },
+          {
+            "id": "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
+            "isAvailableForCourtExtract": false,
+            "label": "Major creditor name",
+            "promptReference": "CREDNAME",
+            "value": "Transport for London"
+          }
+        ],
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+        "id": "0db8e76f-b598-4c3b-a100-9758d2782c93",
+        "isAvailableForCourtExtract": true,
+        "label": "Guilty plea taken into account",
+        "level": "OFFENCE",
+        "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+        "orderedDate": "2019-06-17",
+        "prosecutionCaseId": "e0db12e7-3d84-4312-bcd6-fa3e1432bb7a"
+      }
+    ]
+  },
+  "targets": [
+    {
+      "defendantId": "2b634c72-2016-4f1d-9965-a046c37cee22",
+      "hearingId": "9a62c7c1-66d0-4bcc-b713-7d88dd85ec69",
+      "offenceId": "46504255-ba42-444b-ad02-e56dbc28812e",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+              "label": "Amount of costs",
+              "value": "225",
+              "welshValue": ""
+            },
+            {
+              "id": "2b0ca749-7ede-4446-ae59-5beec3a72143",
+              "label": "Creditor name",
+              "value": "Transport for London",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "76d43772-0660-4a33-b5c6-8f8ccaf6b4e3",
+          "resultLabel": "Costs",
+          "resultLineId": "b787bd82-23f0-49e3-aeac-7885d4a02fa6",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+              "label": "Amount of surcharge",
+              "value": "30",
+              "welshValue": ""
+            },
+            {
+              "id": "91687bb9-d0ca-44a7-ada0-b89b71b89b8e",
+              "label": "DWP AP number",
+              "value": "APITEST_DWP123456789. Disability allowance MC100 on case",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "e866cd11-6073-4fdf-a229-51c9d694e1d0",
+          "resultLabel": "surcharge",
+          "resultLineId": "dbcde05d-184d-4a85-9276-b84beb14b0cc",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "369b6e22-4678-4b04-9fe9-5bb53bed5067",
+              "label": "Reason for not making an attachment of earnings order or deduction from benefit application",
+              "value": "AEO  pay quicker",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "9ea0d845-5096-44f6-9ce0-8ae801141eac",
+          "resultLabel": "Collection order",
+          "resultLineId": "50aca993-314a-4558-ab0e-37f831f0bd8d",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "11ba492a-e2ad-11e8-9f32-f2801f1b9fd1",
+              "label": "Lump sum amount",
+              "value": "200",
+              "welshValue": ""
+            },
+            {
+              "id": "37909b32-aff3-469e-9ed2-9c5fc0aae4e7",
+              "label": "Instalment amount",
+              "value": "197.90",
+              "welshValue": ""
+            },
+            {
+              "id": "fb4f761c-29d0-4a8e-a947-3debf281dab0",
+              "label": "Payment frequency following lump sum",
+              "value": "monthly",
+              "welshValue": ""
+            },
+            {
+              "id": "b76870fe-634b-11e8-adc0-fa7ae01bbebc",
+              "label": "Instalment start date",
+              "value": "2019-07-27",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "272d1ec2-634b-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Lump sum plus instalments",
+          "resultLineId": "80062e5f-c533-4381-a9d7-0c21580f0b0f",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "value": "138",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "5eaaf894-8b4b-42d5-8a57-9b98cd340fbd",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+            {
+              "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+              "label": "Amount of compensation",
+              "value": "4.90",
+              "welshValue": ""
+            },
+            {
+              "id": "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
+              "label": "Major creditor name",
+              "value": "Transport for London",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "ae89b99c-e0e3-47b5-b218-24d4fca3ca53",
+          "resultLabel": "compensation",
+          "resultLineId": "ee8b7042-0682-4746-ae17-6bfcf20321ad",
+          "sharedDate": "2019-06-17"
+        },
+        {
+          "isComplete": true,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-06-17",
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "9161f3cb-e821-44e5-a9ee-4680b358a037",
+          "resultLabel": "Guilty plea taken into account",
+          "resultLineId": "0db8e76f-b598-4c3b-a100-9758d2782c93",
+          "sharedDate": "2019-06-17"
+        }
+      ],
+      "targetId": "6ff5b070-90df-11e9-ab1f-6dc4ffa907a7"
+    }
+  ]
+}

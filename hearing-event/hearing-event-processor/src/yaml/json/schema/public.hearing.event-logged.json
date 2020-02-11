@@ -91,6 +91,9 @@
         },
         "hearingType": {
           "type": "string"
+        },
+        "jurisdictionType": {
+          "type": "string"
         }
       },
       "additionalProperties": false,

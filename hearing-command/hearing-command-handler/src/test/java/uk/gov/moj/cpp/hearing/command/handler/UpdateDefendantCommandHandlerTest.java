@@ -33,10 +33,14 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithApplicationDetails;
+import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithFinancialOrderDetails;
+import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
 
 import java.util.UUID;
 
@@ -49,13 +53,16 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"squid:S2699"})
 public class UpdateDefendantCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             DefendantDetailsUpdated.class,
             CaseDefendantDetailsWithHearings.class,
-            RegisteredHearingAgainstDefendant.class);
+            RegisteredHearingAgainstDefendant.class,
+			DefendantUpdateWithApplicationDetails.class,
+            DefendantUpdateWithFinancialOrderDetails.class);
 
     @Mock
     private EventStream eventStream;
@@ -75,6 +82,13 @@ public class UpdateDefendantCommandHandlerTest {
     @InjectMocks
     private UpdateDefendantCommandHandler changeDefendantDetailsCommandHandler;
 
+    @Mock
+    private DefendantAggregate defendantAggregate;
+
+    @Spy
+    private DefendantAggregateMomento defendantAggregateMomento;
+
+    @Test
     @Before
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
@@ -127,6 +141,40 @@ public class UpdateDefendantCommandHandlerTest {
                                         withJsonPath("$.defendant.personDefendant.personDetails.title", is(caseDefendantDetailsWithHearingsEvent.getDefendant().getPersonDefendant().getPersonDetails().getTitle().toString()))
                                 )
                         ))));
+
+    }
+
+    @Test
+    public void testNotifyNcesViaResultsShared() throws EventStreamException {
+        DefendantAggregate defendantAggregate = new DefendantAggregate();
+		UUID applicationOutcomeTypeId = randomUUID();
+		UUID defendantId = randomUUID();
+		UUID applicationTypeId = randomUUID();
+
+		UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails = UpdateDefendantWithApplicationDetails.newBuilder()
+				.withApplicationTypeId(applicationTypeId)
+				.withDefendantId(defendantId)
+				.withApplicationOutcomeTypeId(applicationOutcomeTypeId)
+				.build();
+
+        defendantAggregate.apply(updateDefendantWithApplicationDetails);
+        setupMockedEventStream(updateDefendantWithApplicationDetails.getDefendantId(), this.eventStream, defendantAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-defendant-with-application-details"), objectToJsonObjectConverter.convert(updateDefendantWithApplicationDetails));
+        defendantAggregate.setMomento(defendantAggregateMomento);
+
+        changeDefendantDetailsCommandHandler.updateCaseDefendantWithApplicationDetails(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.event.defendant-update-with-application"),
+                        payloadIsJson(
+                                allOf(
+                                        withJsonPath("$.applicationDetailsForDefendant.applicationTypeId", is(updateDefendantWithApplicationDetails.getApplicationTypeId().toString())),
+                                        withJsonPath("$.applicationDetailsForDefendant.applicationOutcomeTypeId", is(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId().toString())),
+                                        withJsonPath("$.applicationDetailsForDefendant.applicationOutcomeTypeId", is(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId().toString()))
+                                )
+                        ))));
+
 
     }
 
