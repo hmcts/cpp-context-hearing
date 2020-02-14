@@ -21,7 +21,7 @@ public class NCESNotificationRequested implements Serializable {
     }
 
     public static Builder newBuilder(final NCESNotificationRequested copy) {
-        Builder builder = new Builder();
+        final Builder builder = new Builder();
         builder.financialOrderForDefendant = copy.getFinancialOrderForDefendant();
         return builder;
     }

@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesCha
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -41,7 +42,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                 )
         ));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -81,7 +82,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                 )
         ));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -96,6 +97,10 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                                                 .with(Offence::getEndDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getEndDate()))
                                                 .with(Offence::getCount, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getCount()))
                                                 .with(Offence::getConvictionDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getConvictionDate()))
+                                                .with(Offence::getLaaApplnReference, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getLaaApplnReference()))
+                                                .with(Offence::getIsDiscontinued, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIsDiscontinued()))
+                                                .with(Offence::getIsIntroduceAfterInitialProceedings, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIsIntroduceAfterInitialProceedings()))
+                                                .with(Offence::getProceedingsConcluded, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getProceedingsConcluded()))
 
                                         ))
                                 ))
@@ -119,7 +124,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                 )
         ));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)

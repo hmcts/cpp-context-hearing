@@ -21,6 +21,8 @@ import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenera
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingLanguage;
@@ -156,7 +158,7 @@ public class HearingAdjournIT extends AbstractIT {
         }));
 
         hearingOne.getHearing();
-        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", 60000)
+        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
                         .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
@@ -230,7 +232,7 @@ public class HearingAdjournIT extends AbstractIT {
                             ));
                 })))));
 
-        final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", 30000)
+        final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
                         .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)

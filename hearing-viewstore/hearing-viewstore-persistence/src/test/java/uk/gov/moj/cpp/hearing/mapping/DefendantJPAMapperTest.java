@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static uk.gov.moj.cpp.hearing.mapping.AssociatedPersonJPAMapperTest.whenFirstAssociatedPerson;
 import static uk.gov.moj.cpp.hearing.mapping.OffenceJPAMapperTest.whenFirstOffence;
 import static uk.gov.moj.cpp.hearing.mapping.OrganisationJPAMapperTest.whenOrganization;
@@ -9,15 +10,14 @@ import static uk.gov.moj.cpp.hearing.mapping.PersonDefendantJPAMapperTest.whenPe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedDefenceOrganisation;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceOrganisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
@@ -25,13 +25,15 @@ import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
 import java.util.UUID;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 public class DefendantJPAMapperTest {
 
     private DefendantJPAMapper defendantJPAMapper = JPACompositeMappers.DEFENDANT_JPA_MAPPER;
     private uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity;
     private uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation organisation;
     private HearingSnapshotKey hearingSnapshotKey;
-
 
 
     @Test
@@ -65,31 +67,33 @@ public class DefendantJPAMapperTest {
     }
 
     public static BeanMatcher<Defendant> whenDefendant(final BeanMatcher<Defendant> m,
-            final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant entity) {
+                                                       final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant entity) {
 
         return //m.with(Defendant::getAliases, is(entity.getAliases()))
                 m.with(Defendant::getAssociatedPersons,
                         whenFirstAssociatedPerson(isBean(AssociatedPerson.class), entity.getAssociatedPersons().iterator().next()))
 
-                .with(Defendant::getDefenceOrganisation, 
-                        whenOrganization(isBean(Organisation.class), entity.getDefenceOrganisation()))
+                        .with(Defendant::getDefenceOrganisation,
+                                whenOrganization(isBean(Organisation.class), entity.getDefenceOrganisation()))
 
-                .with(Defendant::getId, is(entity.getId().getId()))
+                        .with(Defendant::getId, is(entity.getId().getId()))
 
-                .with(Defendant::getLegalEntityDefendant, isBean(LegalEntityDefendant.class)
-                        .with(LegalEntityDefendant::getOrganisation, whenOrganization(isBean(Organisation.class), entity.getLegalEntityOrganisation())))
+                        .with(Defendant::getLegalEntityDefendant, isBean(LegalEntityDefendant.class)
+                                .with(LegalEntityDefendant::getOrganisation, whenOrganization(isBean(Organisation.class), entity.getLegalEntityOrganisation())))
 
-                .with(Defendant::getOffences, 
-                        whenFirstOffence(isBean(Offence.class), (entity.getOffences().iterator().next())))
+                        .with(Defendant::getOffences,
+                                whenFirstOffence(isBean(Offence.class), (entity.getOffences().iterator().next())))
 
-                .with(Defendant::getPersonDefendant, 
-                        whenPersonDefendant(isBean(PersonDefendant.class), entity.getPersonDefendant()))
+                        .with(Defendant::getPersonDefendant,
+                                whenPersonDefendant(isBean(PersonDefendant.class), entity.getPersonDefendant()))
 
-                .with(Defendant::getProsecutionAuthorityReference, is(entity.getProsecutionAuthorityReference()))
-                .with(Defendant::getProsecutionCaseId, is(entity.getProsecutionCaseId()))
-                .with(Defendant::getWitnessStatement, is(entity.getWitnessStatement()))
-                .with(Defendant::getPncId, is(entity.getPncId()))
-                .with(Defendant::getWitnessStatementWelsh, is(entity.getWitnessStatementWelsh()));
+                        .with(Defendant::getProsecutionAuthorityReference, is(entity.getProsecutionAuthorityReference()))
+                        .with(Defendant::getProsecutionCaseId, is(entity.getProsecutionCaseId()))
+                        .with(Defendant::getWitnessStatement, is(entity.getWitnessStatement()))
+                        .with(Defendant::getPncId, is(entity.getPncId()))
+                        .with(Defendant::getWitnessStatementWelsh, is(entity.getWitnessStatementWelsh()))
+                        .with(Defendant::getLegalAidStatus, is("Granted"))
+                        .with(Defendant::getProceedingsConcluded, is(true));
     }
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant> whenDefendant(
@@ -99,19 +103,19 @@ public class DefendantJPAMapperTest {
 //                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getAssociatedPersons,
 //                        whenFirstAssociatedPerson(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson.class), pojo.getAssociatedPersons().get(0)))
 
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getDefenceOrganisation, 
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getDefenceOrganisation,
                         whenOrganization(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation.class), pojo.getDefenceOrganisation()))
-                 
+
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getId, isBean(HearingSnapshotKey.class)
                         .with(HearingSnapshotKey::getId, is(pojo.getId())))
-                
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getLegalEntityOrganisation, 
+
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getLegalEntityOrganisation,
                         whenOrganization(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation.class), pojo.getLegalEntityDefendant().getOrganisation()))
 
 //                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getOffences,
 //                        whenFirstOffence(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence.class), (pojo.getOffences().get(0))))
 
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getPersonDefendant, 
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getPersonDefendant,
                         whenPersonDefendant(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant.class), pojo.getPersonDefendant()))
 
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getProsecutionAuthorityReference, is(pojo.getProsecutionAuthorityReference()))
@@ -139,10 +143,31 @@ public class DefendantJPAMapperTest {
         defendantEntity.setPersonDefendant(personDefendant);
         Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
         Assert.assertNull(results.getLegalEntityDefendant());
-        Assert.assertNotNull(results.getPersonDefendant());
+        assertNotNull(results.getPersonDefendant());
     }
 
-    private void setupTestData(){
+    @Test
+    public void testFromJPAMapWithAssociatedDefenceOrganisation() {
+        setupTestData();
+        final DefenceOrganisation defenceOrganisation = new DefenceOrganisation();
+        defenceOrganisation.setName("ABC LTD");
+        defenceOrganisation.setLaaContractNumber("LAA123123");
+        defenceOrganisation.setIncorporationNumber("INC001");
+        defenceOrganisation.setRegisteredCharityNumber("Charity001");
+        final AssociatedDefenceOrganisation associatedDefenceOrganisation = new AssociatedDefenceOrganisation();
+        associatedDefenceOrganisation.setDefenceOrganisation(defenceOrganisation);
+
+        defendantEntity.setAssociatedDefenceOrganisation(associatedDefenceOrganisation);
+        final Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
+        assertNotNull(results.getAssociatedDefenceOrganisation());
+        assertNotNull(results.getAssociatedDefenceOrganisation().getDefenceOrganisation());
+
+        final uk.gov.justice.core.courts.DefenceOrganisation defenceOrganisationPojo = results.getAssociatedDefenceOrganisation().getDefenceOrganisation();
+        Assert.assertEquals("ABC LTD", defenceOrganisationPojo.getOrganisation().getName());
+        Assert.assertEquals("LAA123123", defenceOrganisationPojo.getLaaContractNumber());
+    }
+
+    private void setupTestData() {
         defendantEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
         hearingSnapshotKey = new HearingSnapshotKey();
         hearingSnapshotKey.setId(UUID.randomUUID());

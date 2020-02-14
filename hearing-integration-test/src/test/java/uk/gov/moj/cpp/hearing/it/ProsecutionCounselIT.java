@@ -25,6 +25,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommand
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddProsecutionCounselCommandTemplates.addProsecutionCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateProsecutionCounselCommandTemplates.updateProsecutionCounselCommandTemplate;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
@@ -77,7 +78,7 @@ public class ProsecutionCounselIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -136,7 +137,7 @@ public class ProsecutionCounselIT extends AbstractIT {
         ProsecutionCounsel firstProsecutionCounsel = firstProsecutionCounselCommand.getProsecutionCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -189,7 +190,7 @@ public class ProsecutionCounselIT extends AbstractIT {
         ProsecutionCounsel firstProsecutionCounselUpdated = firstProsecutionCounselUpdateCommand.getProsecutionCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

@@ -26,6 +26,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommand
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.addDefenceCounselCommandTemplateWithoutMiddleName;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefenceCounselCommandTemplates.updateDefenceCounselCommandTemplate;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.hearing.courts.AddDefenceCounsel;
@@ -77,7 +78,7 @@ public class DefenceCounselIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -105,7 +106,7 @@ public class DefenceCounselIT extends AbstractIT {
         DefenceCounsel firstDefenceCounsel = firstDefenceCounselCommand.getDefenceCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -167,7 +168,7 @@ public class DefenceCounselIT extends AbstractIT {
         DefenceCounsel firstDefenceCounselUpdated = firstDefenceCounselReAddCommand.getDefenceCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -203,7 +204,7 @@ public class DefenceCounselIT extends AbstractIT {
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -226,7 +227,7 @@ public class DefenceCounselIT extends AbstractIT {
         DefenceCounsel secondDefenceCounsel = secondDefenceCounselCommand.getDefenceCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -272,7 +273,7 @@ public class DefenceCounselIT extends AbstractIT {
         DefenceCounsel firstDefenceCounselUpdated = firstDefenceCounselReAddCommand.getDefenceCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -296,7 +297,7 @@ public class DefenceCounselIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -324,7 +325,7 @@ public class DefenceCounselIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

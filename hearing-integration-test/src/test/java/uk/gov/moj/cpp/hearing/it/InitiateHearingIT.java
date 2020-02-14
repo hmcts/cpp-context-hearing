@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -70,7 +71,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final JudicialRole judicialRole = hearing.getJudiciary().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getType, isBean(HearingType.class)
@@ -164,7 +165,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final JudicialRole judicialRole = hearing.getJudiciary().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getType, isBean(HearingType.class)
@@ -255,7 +256,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final ContactNumber employerContact = employerOrganisation.getContact();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(HearingDetailsResponse.class)
                         .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId()))
@@ -490,7 +491,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final NotifiedPlea notifiedPlea = offence.getNotifiedPlea();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(HearingDetailsResponse.class)
                         .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId()))
@@ -691,7 +692,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final OffenceFacts offenceFacts = offence.getOffenceFacts();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(HearingDetailsResponse.class)
                         .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId()))
@@ -811,7 +812,7 @@ public class InitiateHearingIT extends AbstractIT {
         Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);
 
-        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, localDate.toString(), "00:00", "23:59", 30,
+        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, localDate.toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())

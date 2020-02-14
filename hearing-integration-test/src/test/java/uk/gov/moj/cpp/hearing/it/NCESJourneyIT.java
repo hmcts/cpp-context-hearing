@@ -58,6 +58,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaD
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.requestIssuedForStagingEnforcementForNowsId;
 import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.stubEnforceFinancialImposition;
 import static uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub.findNowsIdForGivenHearingIdFromSystemMapper;
@@ -294,7 +295,7 @@ public class NCESJourneyIT extends AbstractIT {
 
         testApplicationDraftResult(applicationDraftResultCommand, hearingCommandHelper.getHearing());
 
-        getHearingPollForMatch(hearingId, 10, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getCourtApplications, hasItem(isBean(CourtApplication.class)
@@ -317,7 +318,7 @@ public class NCESJourneyIT extends AbstractIT {
     }
 
     private void extendHearingWithApplicationLinkedToDefendant(UUID defendantId, UUID caseId, UUID applicationId, UUID hearingId, ApplicationType applicationType, Optional<ApplicationOutcome> optionalApplicationOutcome) throws JsonProcessingException {
-        getHearingPollForMatch(hearingId, 10, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getCourtApplications, nullValue())
@@ -343,7 +344,7 @@ public class NCESJourneyIT extends AbstractIT {
                         .build()
         );
 
-        getHearingPollForMatch(hearingId, 10, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getCourtApplications, notNullValue())

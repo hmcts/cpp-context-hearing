@@ -2,19 +2,27 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
+import static uk.gov.justice.core.courts.PleaValue.AUTREFOIS_CONVICT;
+import static uk.gov.justice.core.courts.PleaValue.CHANGE_TO_GUILTY_AFTER_SWORN_IN;
+import static uk.gov.justice.core.courts.PleaValue.CHANGE_TO_GUILTY_MAGISTRATES_COURT;
+import static uk.gov.justice.core.courts.PleaValue.CHANGE_TO_GUILTY_NO_SWORN_IN;
+import static uk.gov.justice.core.courts.PleaValue.CONSENTS;
 import static uk.gov.justice.core.courts.PleaValue.GUILTY;
+import static uk.gov.justice.core.courts.PleaValue.MCA_GUILTY;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
 
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
+import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -73,7 +81,7 @@ public class PleaDelegate implements Serializable {
 
 
         if (nonNull(plea)) {
-            events.add(plea.getPleaValue() == GUILTY ?
+            events.add(isPleaTypeGuilty(plea.getPleaValue()) ?
                     convictionDateAdded()
                             .setCaseId(prosecutionCase.getId())
                             .setHearingId(hearingId)
@@ -111,5 +119,15 @@ public class PleaDelegate implements Serializable {
         if (nonNull(pleaModel.getAllocationDecision())) {
             pleaModel.getAllocationDecision().setOriginatingHearingId(hearingId);
         }
+    }
+
+    private boolean isPleaTypeGuilty(PleaValue pleaValue) {
+        return Arrays.asList(GUILTY,
+                MCA_GUILTY,
+                AUTREFOIS_CONVICT,
+                CONSENTS,
+                CHANGE_TO_GUILTY_AFTER_SWORN_IN,
+                CHANGE_TO_GUILTY_NO_SWORN_IN,
+                CHANGE_TO_GUILTY_MAGISTRATES_COURT).contains(pleaValue);
     }
 }

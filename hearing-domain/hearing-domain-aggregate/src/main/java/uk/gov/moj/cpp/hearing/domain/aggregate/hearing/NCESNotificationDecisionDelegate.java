@@ -41,7 +41,7 @@ public class NCESNotificationDecisionDelegate implements Serializable {
     public Stream<Object> updateDefendantWithApplicationDetails(final ApplicationDetailsForDefendant applicationDetailsForDefendant) {
         LOGGER.info("NCESNotification-requested : updateDefendantWithApplicationDetails ....");
 
-        Optional<String> sharedAndApplicationRefusedWithDrawn = checkSharedAndApplicationRefused(applicationDetailsForDefendant);
+        final Optional<String> sharedAndApplicationRefusedWithDrawn = checkSharedAndApplicationRefused(applicationDetailsForDefendant);
         // Application refused and was shared before
         if (sharedAndApplicationRefusedWithDrawn.isPresent()) {
             LOGGER.info("NCESNotification-requested : Application refused and was shared before (NCESNotificationRequested) ");
@@ -59,7 +59,7 @@ public class NCESNotificationDecisionDelegate implements Serializable {
         LOGGER.info("NCESNotification-requested : Results shared for first time ...");
         if (hasDeemedServedResults(financialOrderForDefendant)) {
             LOGGER.info("NCESNotification-requested :Results shared and hasDeemedServedResults (NCESNotificationRequested) ");
-            FinancialOrderForDefendant newFinancialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(financialOrderForDefendant)
+            final FinancialOrderForDefendant newFinancialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(financialOrderForDefendant)
                     .withDocumentContent(
                             DocumentContent.newBuilderFrom(financialOrderForDefendant.getDocumentContent())
                                     .withAmendmentType("Write off one day deemed served")
@@ -80,7 +80,7 @@ public class NCESNotificationDecisionDelegate implements Serializable {
         LOGGER.info("NCESNotification-requested : Results re-shared ....");
 
         // Re-shared currently  and Application Granted after shared
-        Stream<Object> result = handleReshareIfApplicationExists(resharedFinancialOrderForDefendant);
+        final Stream<Object> result = handleReshareIfApplicationExists(resharedFinancialOrderForDefendant);
         if (result != null) {
             return result;
         }
@@ -100,7 +100,7 @@ public class NCESNotificationDecisionDelegate implements Serializable {
         } else {
             // Re-shared currently and No DeemedServedResults when shared
             LOGGER.info("NCESNotification-requested : re-shared currently ,was shared without DeemedServedResults (NCESNotificationRequested)");
-            FinancialOrderForDefendant newFinancialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(resharedFinancialOrderForDefendant)
+            final FinancialOrderForDefendant newFinancialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(resharedFinancialOrderForDefendant)
                     .withDocumentContent(
                             newDocumentWithOld(resharedFinancialOrderForDefendant).withAmendmentType("Amend result").build()
                     ).build();
@@ -113,12 +113,12 @@ public class NCESNotificationDecisionDelegate implements Serializable {
         if (this.momento.getApplicationDetailsForDefendant() != null) {
             LOGGER.info("NCESNotification-requested : re-shared currently ,ApplicationDetailsForDefendant added... ");
 
-            ApplicationDetailsForDefendant applicationDetailsForDefendant = this.momento.getApplicationDetailsForDefendant();
-            Optional<String> result = getAllScenariosWithGranted(applicationDetailsForDefendant);
+            final ApplicationDetailsForDefendant applicationDetailsForDefendant = this.momento.getApplicationDetailsForDefendant();
+            final Optional<String> result = getAllScenariosWithGranted(applicationDetailsForDefendant);
 
             if (result.isPresent()) {
                 LOGGER.info("NCESNotification-requested : re-shared currently ,and Application Granted after shared ");
-                FinancialOrderForDefendant newFinancialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(resharedFinancialOrderForDefendant)
+                final FinancialOrderForDefendant newFinancialOrderForDefendant = FinancialOrderForDefendant.newBuilderFrom(resharedFinancialOrderForDefendant)
                         .withDocumentContent(
                                 newDocumentWithOld(resharedFinancialOrderForDefendant)
                                         .withAmendmentType(result.get())

@@ -20,6 +20,7 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
@@ -27,6 +28,7 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -589,6 +591,36 @@ public class HearingAggregateTest {
 
         final HearingEventLogged startHearingEventLogged = (HearingEventLogged) events.get(0);
         assertHearingEventLogged(startHearingEventLogged, logEventCommand, initiateHearingCommand);
+    }
+
+    @Test
+    public void shouldNotRaiseEvent_whenHearingResult_hasAlreadyShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.TRUE);
+        hearingAggregate.apply(new HearingInitiated(hearing));
+        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
+                hearingAggregate.updateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
+                        .findFirst()
+                        .orElse(null);
+        assertThat(caseDefendantsUpdatedForHearing, nullValue());
+    }
+
+    @Test
+    public void shouldRaiseEvent_whenHearingResult_hasNotAlreadyShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.FALSE);
+
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
+                hearingAggregate.updateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
+                        .findFirst()
+                        .orElse(null);
+        assertThat(caseDefendantsUpdatedForHearing.getHearingId(), is(hearing.getId()));
     }
 
     private void assertHearingEventLogged(final HearingEventLogged hearingEventLogged, final LogEventCommand logEventCommand, final InitiateHearingCommand initiateHearingCommand) {

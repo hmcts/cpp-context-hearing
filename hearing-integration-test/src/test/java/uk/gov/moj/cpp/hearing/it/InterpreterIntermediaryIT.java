@@ -13,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.addInterpreterIntermediaryCommandTemplate;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Attendant;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
@@ -39,7 +40,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -64,7 +65,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         createInterpreterIntermediary(hearingOne, attendant);
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -90,7 +91,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         InterpreterIntermediary firstInterpreterIntermediary = createInterpreterIntermediary(hearingOne, attendant);
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -101,7 +102,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -111,7 +112,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         createInterpreterIntermediary(hearingOne, anotherAttendant);
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -140,7 +141,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         InterpreterIntermediary firstInterpreterIntermediaryUpdated = firstInterpreterIntermediaryUpdateCommand.getInterpreterIntermediary();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

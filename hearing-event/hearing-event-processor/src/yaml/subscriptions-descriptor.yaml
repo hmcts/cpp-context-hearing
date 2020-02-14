@@ -70,11 +70,11 @@ subscriptions_descriptor:
         - name: hearing.hearing-offence-plea-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-plea-updated.json
 
-      #enrich Plea
+        #enrich Plea
         - name: hearing.events.enrich-update-plea-with-associated-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/enrich-update-plea-with-associated-hearings.json
 
-      #enrich Verdict
+        #enrich Verdict
         - name: hearing.events.enrich-update-verdict-with-associated-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/enrich-update-verdict-with-associated-hearings.json
 
@@ -142,39 +142,39 @@ subscriptions_descriptor:
         - name: hearing.events.pending-nows-requested
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/pending-nows-requested.json
 
-      # Attendees
+        # Attendees
         - name: hearing.events.attendee-deleted
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/attendee-deleted.json
 
-      # Hearing Detail Change
+        # Hearing Detail Change
         - name: hearing.change-hearing-detail
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/change-hearing-detail.json
 
-      # Hearing Adjourn
+        # Hearing Adjourn
         - name: hearing.event.hearing-adjourned
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-adjourned.json
 
-      # Update Defendant Attendance
+        # Update Defendant Attendance
         - name: hearing.defendant-attendance-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-attendance-updated.json
 
-      # application response
+        # application response
         - name: hearing.application-response-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-response-saved.json
 
-      # New Defendant added
+        # New Defendant added
         - name: hearing.defendant-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-added.json
 
-      # Company Representative Change Ignored
+        # Company Representative Change Ignored
         - name: hearing.company-representative-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/company-representative-change-ignored.json
 
-      # Defendant case withdrawn or dismissed
+        # Defendant case withdrawn or dismissed
         - name: hearing.event.defendant-case-withdrawn-or-dismissed
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.event.defendant-case-withdrawn-or-dismissed.json
 
-      # Case Marker
+        # Case Marker
         - name: hearing.events.case-markers-enriched-with-associated-hearings
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.case-markers-enriched-with-associated-hearings.json
 
@@ -196,6 +196,14 @@ subscriptions_descriptor:
       # NCES Notification
         - name: hearing.event.nces-notification-requested
           schema_uri: http://justice.gov.uk/hearing/json/schema/event/nces-notification-requested.json
+
+        # Defendant Legal Aid Status Updated
+        - name: hearing.defendant-legalaid-status-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.defendant-legalaid-status-updated.json
+
+        # Case Defendants Updated
+        - name: hearing.case-defendants-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.case-defendants-updated.json
 
       event_source_name: hearing
 
@@ -241,5 +249,13 @@ subscriptions_descriptor:
       # Case Markers updated
         - name: public.progression.case-markers-updated
           schema_uri: http://justice.gov.uk/progression/courts/public.progression.case-markers-updated.json
+
+        # Progression Legal Aid Status Updated
+        - name: public.progression.defendant-legalaid-status-updated
+          schema_uri: http://justice.gov.uk/progression/courts/defendant-legalaid-status-updated.json
+
+        # Progression Hearing Resulted Case Updated
+        - name: public.progression.hearing-resulted-case-updated
+          schema_uri: http://justice.gov.uk/core/courts/hearing-resulted-case-updated.json
 
       event_source_name: public.event.source

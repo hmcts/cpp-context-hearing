@@ -17,6 +17,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -62,7 +63,7 @@ public class VerdictIT extends AbstractIT {
 
         publicEventConvictionDateChangedListener.waitFor();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -124,7 +125,7 @@ public class VerdictIT extends AbstractIT {
 
         publicEventOffenceConvictionDateRemovedListener.waitFor();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -180,7 +181,7 @@ public class VerdictIT extends AbstractIT {
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                         TestTemplates.VerdictCategoryType.GUILTY), t -> h(t).getFirstVerdict().setVerdictDate(currentConvictionDate))));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -216,7 +217,7 @@ public class VerdictIT extends AbstractIT {
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                         TestTemplates.VerdictCategoryType.GUILTY), t -> h(t).getFirstVerdict().setVerdictDate(currentConvictionDate))));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -231,7 +232,7 @@ public class VerdictIT extends AbstractIT {
                 toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
         )));
 
-        Queries.getHearingPollForMatch(hearingTwo.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingTwo.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingTwo.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)

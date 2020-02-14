@@ -29,6 +29,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -108,7 +109,7 @@ public class HearingEventsIT extends AbstractIT {
 
         poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
                 "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         print(),

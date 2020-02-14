@@ -79,6 +79,8 @@ public final class HearingJPADataTemplate {
                     defendant.setLegalEntityOrganisation(legalEntityOrganisation);
                     defendant.setPersonDefendant(personDefendant);
                     defendant.setProsecutionCaseId(hearingEntity.getProsecutionCases().iterator().next().getId().getId());
+                    defendant.setLegalaidStatus("Granted");
+                    defendant.setProceedingsConcluded(true);
 
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().add(defendant);
                 });
@@ -104,6 +106,10 @@ public final class HearingJPADataTemplate {
                     offence.setIndicatedPlea(indicatedPlea);
 
                     offence.setAllocationDecision(allocationDecision);
+
+                    offence.setIntroduceAfterInitialProceedings(true);
+                    offence.setProceedingsConcluded(true);
+                    offence.setIntroduceAfterInitialProceedings(true);
 
                     final Plea plea = aNewEnhancedRandom().nextObject(uk.gov.moj.cpp.hearing.persist.entity.ha.Plea.class);
 

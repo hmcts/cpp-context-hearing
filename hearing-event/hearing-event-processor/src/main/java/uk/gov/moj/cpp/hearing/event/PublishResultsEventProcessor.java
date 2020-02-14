@@ -105,8 +105,8 @@ public class PublishResultsEventProcessor {
 
         final ResultsShared resultsShared = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
-        Hearing hearing = resultsShared.getHearing();
-        List<CourtApplication> courtApplications = hearing.getCourtApplications();
+        final Hearing hearing = resultsShared.getHearing();
+        final List<CourtApplication> courtApplications = hearing.getCourtApplications();
 
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
@@ -323,7 +323,7 @@ public class PublishResultsEventProcessor {
     private void processOrderWithNonFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest,
                                               final List<Target> targets) {
 
-        List<Now> nowsToSendToSendDirect = nowsRequest.getNows().stream()
+        final List<Now> nowsToSendToSendDirect = nowsRequest.getNows().stream()
                 .filter(now -> isNull(now.getFinancialOrders()) || isNull(now.getFinancialOrders().getAccountReference())
                 )
                 .collect(Collectors.toList());

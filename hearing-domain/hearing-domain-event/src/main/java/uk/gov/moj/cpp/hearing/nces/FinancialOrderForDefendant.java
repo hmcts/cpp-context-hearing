@@ -90,8 +90,12 @@ public class FinancialOrderForDefendant implements Serializable {
     @Override
     @SuppressWarnings({"squid:S1067", "squid:S00121"})
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof FinancialOrderForDefendant)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof FinancialOrderForDefendant)) {
+            return false;
+        }
         final FinancialOrderForDefendant that = (FinancialOrderForDefendant) o;
         return
                 Objects.equals(caseId, that.caseId) &&

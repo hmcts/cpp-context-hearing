@@ -130,6 +130,37 @@
         }
       },
       "employerPayrollReference": "payyou1234"
+    },
+    "associatedDefenceOrganisation": {
+      "defenceOrganisation": {
+        "organisation": {
+          "address": {
+            "address1": "defenceOrganisation",
+            "address2": "225",
+            "address3": "FuseRoad",
+            "address4": "East Croydon",
+            "address5": "SouthLondon",
+            "postcode": "LN72 9NG"
+          },
+          "contact": {
+            "fax": "765997700",
+            "home": "759019681",
+            "mobile": "1444010616",
+            "primaryEmail": "zdivwdsblf@gxvm7kqbh4.duzrohmbtt",
+            "secondaryEmail": "dusl1j0oxw@0rzelb2mln.rvjnuth3ar",
+            "work": "584591171"
+          },
+          "incorporationNumber": "cegH7rIgdX",
+          "name": "Test",
+          "registeredCharityNumber": "TestCharity"
+        },
+        "laaContractNumber": "LAA44569"
+      },
+      "associationStartDate": "2019-09-12",
+      "associationEndDate": "2019-12-12",
+      "fundingType": "REPRESENTATION_ORDER",
+      "isAssociatedByLAA": true,
+      "applicationReference" : "REF0001"
     }
   },
   "hearingId": "a8448a33-68ab-4b9b-84c2-59cee4fe36f4"

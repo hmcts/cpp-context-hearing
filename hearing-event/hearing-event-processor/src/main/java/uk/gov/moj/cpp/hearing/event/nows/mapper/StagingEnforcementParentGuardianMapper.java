@@ -40,7 +40,7 @@ public class StagingEnforcementParentGuardianMapper {
         if (isNull(associatedPersons) || associatedPersons.isEmpty()) {
             return Optional.empty();
         }
-        Optional<AssociatedPerson> parentAssociatedPerson = associatedPersons.stream()
+        final Optional<AssociatedPerson> parentAssociatedPerson = associatedPersons.stream()
                 .filter(associatedPerson ->
                         associatedPerson.getPerson() != null && parent.equalsIgnoreCase(associatedPerson.getRole()))
                 .findFirst();

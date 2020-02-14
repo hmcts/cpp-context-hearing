@@ -100,7 +100,7 @@ public class DocumentContent implements Serializable {
     }
 
     public static Builder newBuilderFrom(DocumentContent documentContent) {
-        Builder builder = new Builder();
+        final Builder builder = new Builder();
         if (documentContent != null) {
             builder.withAdjustmentDetails(documentContent.getAdjustmentDetails())
                     .withAmendmentDate(documentContent.getAmendmentDate())
@@ -120,8 +120,13 @@ public class DocumentContent implements Serializable {
     @Override
     @SuppressWarnings({"squid:S1067", "squid:S00121"})
     public boolean equals(final Object o) {
-        if (this == o) return true;
-        if (!(o instanceof DocumentContent)) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof DocumentContent)) {
+            return false;
+        }
         final DocumentContent that = (DocumentContent) o;
         return Objects.equals(adjustmentDetails, that.adjustmentDetails) &&
                 Objects.equals(amendmentDate, that.amendmentDate) &&

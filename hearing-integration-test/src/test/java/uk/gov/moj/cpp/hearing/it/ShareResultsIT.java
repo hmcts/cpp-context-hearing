@@ -42,6 +42,7 @@ import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenera
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -143,7 +144,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final uk.gov.justice.core.courts.Hearing hearing = hearingOne.getHearing();
 
-        getDraftResultsPollForMatch(hearing.getId(), 30, isBean(TargetListResponse.class)
+        getDraftResultsPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
                 .with(TargetListResponse::getTargets, is(empty())));
     }
 
@@ -791,7 +792,7 @@ public class ShareResultsIT extends AbstractIT {
         final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultCommandTemplate(hearingOne.getHearingId());
 
         testApplicationDraftResult(applicationDraftResultCommand, hearing);
-        Queries.getApplicationDraftResultsPollForMatch(hearing.getId(), 30, isBean(ApplicationTargetListResponse.class)
+        Queries.getApplicationDraftResultsPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(ApplicationTargetListResponse.class)
                 .with(response -> response.getHearingId(), is(hearing.getId())));
     }
 
@@ -807,7 +808,7 @@ public class ShareResultsIT extends AbstractIT {
         final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultWithOutcomeCommandTemplate(hearingOne.getHearingId(), applicationId, applicationOutcome);
 
         testApplicationDraftResult(applicationDraftResultCommand, hearing);
-        Queries.getApplicationDraftResultsPollForMatch(hearing.getId(), 30, isBean(ApplicationTargetListResponse.class)
+        Queries.getApplicationDraftResultsPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(ApplicationTargetListResponse.class)
                 .with(response -> response.getHearingId(), is(hearing.getId())));
 
         Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
@@ -965,7 +966,7 @@ public class ShareResultsIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)

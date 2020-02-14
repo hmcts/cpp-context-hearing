@@ -24,6 +24,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.ran
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -80,7 +81,7 @@ public class HearingCaseNoteIT extends AbstractIT {
         final JsonObject hearingCaseNoteCommand = command.getJsonObject("hearingCaseNote");
         poll(requestParams(getURL("hearing.get.hearing", hearingId),
                 "application/vnd.hearing.get.hearing+json").withHeader(USER_ID, getLoggedInUser()))
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         print(),

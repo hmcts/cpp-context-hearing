@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -41,7 +42,7 @@ public class CaseMarkerIT extends AbstractIT {
         final List<Marker> markers = hearingOne.getFirstCase().getCaseMarkers();
         updateCaseMarkers(prosecutionCaseId, hearingId, markers);
         // Matching Hearing Object with Case Marker
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 40, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getCaseMarkers, first(isBean(Marker.class)
@@ -53,7 +54,7 @@ public class CaseMarkerIT extends AbstractIT {
 
         // Remove all the case markers which available in the prosecution case
         updateCaseMarkers(prosecutionCaseId, hearingId, new ArrayList<>());
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)

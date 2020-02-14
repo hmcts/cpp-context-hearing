@@ -26,6 +26,7 @@ import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
@@ -63,6 +64,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeAdded;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
@@ -75,6 +77,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -213,6 +216,8 @@ public class HearingAggregate implements Aggregate {
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
                 when(CaseMarkersUpdated.class).apply(prosecutionCaseDelegate::handleCaseMarkersUpdated),
+                when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate ::onDefendantLegalaidStatusTobeUpdatedForHearing),
+                when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate ::onCaseDefendantUpdatedForHearing),
                 otherwiseDoNothing()
         );
 
@@ -439,4 +444,25 @@ public class HearingAggregate implements Aggregate {
                 .collect(Collectors.toMap(hearingEvent -> hearingEvent.getKey(), hearingEvent -> hearingEvent.getValue()));
         return !events.isEmpty();
     }
+
+    public Stream<Object> updateDefendantLegalAidStatusForHearing(final UUID hearingId, final UUID defendantId, final String legalAidStatus ) {
+            return apply(Stream.of(DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
+                    .withHearingId(hearingId)
+                    .withDefendantId(defendantId)
+                    .withLegalAidStatus(legalAidStatus)
+                    .build()));
+
+    }
+
+    public Stream<Object> updateCaseDefendantsForHearing(final UUID hearingId, final ProsecutionCase prosecutionCase) {
+        if(this.momento.getHearing().getHasSharedResults().equals(Boolean.TRUE)) {
+            return Stream.empty();
+        }
+        return apply(Stream.of(CaseDefendantsUpdatedForHearing.caseDefendantsUpdatedForHearing()
+                .withHearingId(hearingId)
+                .withProsecutionCase(prosecutionCase)
+                .build()));
+    }
+
+
 }

@@ -8,6 +8,8 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefendantAttendanc
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.DefendantAttendance;
@@ -33,7 +35,7 @@ public class DefendantAttendanceIT extends AbstractIT {
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
         final LocalDate dateOfAttendance = hearingOne.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate();
 
-        final Utilities.EventListener publicDefendantAttendanceUpdated = listenFor("public.hearing.defendant-attendance-updated", 30000)
+        final Utilities.EventListener publicDefendantAttendanceUpdated = listenFor("public.hearing.defendant-attendance-updated", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(DefendantAttendanceUpdated.class, isBean(DefendantAttendanceUpdated.class)
                         .with(DefendantAttendanceUpdated::getHearingId, is(hearingId))
                         .with(DefendantAttendanceUpdated::getDefendantId, is(defendantId))
@@ -45,7 +47,7 @@ public class DefendantAttendanceIT extends AbstractIT {
 
         publicDefendantAttendanceUpdated.waitFor();
 
-        Queries.getHearingPollForMatch(hearingId, 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)

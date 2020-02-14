@@ -151,7 +151,7 @@ public class NcesNotificationDelegate {
     }
 
     private String getUrn(ProsecutionCase prosecutionCase) {
-        ProsecutionCaseIdentifier prosecutionCaseIdentifier = prosecutionCase.getProsecutionCaseIdentifier();
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = prosecutionCase.getProsecutionCaseIdentifier();
         return Optional.ofNullable(prosecutionCaseIdentifier.getCaseURN())
                 .orElse(prosecutionCaseIdentifier.getProsecutionAuthorityReference());
     }
@@ -241,7 +241,7 @@ public class NcesNotificationDelegate {
             final List<Offence> offences = caseOffencesMap.get(caseRef);
             if (nonNull(offences)) {
                 offences.forEach(offence -> {
-                    List<Result> results = offenceResults.get(offence.getId());
+                    final List<Result> results = offenceResults.get(offence.getId());
                     defendantCaseOffencesByCaseRef.add(createDefendantCaseOffence(results, offence));
                 });
             }
@@ -274,8 +274,8 @@ public class NcesNotificationDelegate {
     }
 
     private DefendantCaseOffence createDefendantCaseOffence(List<Result> results, Offence offence) {
-        LocalDate convictionDate = offence.getConvictionDate();
-        LocalDate startDate = offence.getStartDate();
+        final LocalDate convictionDate = offence.getConvictionDate();
+        final LocalDate startDate = offence.getStartDate();
         return DefendantCaseOffence.defendantCaseOffence()
                 .withConvictionDate(nonNull(convictionDate) ? convictionDate.toString() : "")
                 .withStartDate(nonNull(startDate) ? startDate.toString() : "")

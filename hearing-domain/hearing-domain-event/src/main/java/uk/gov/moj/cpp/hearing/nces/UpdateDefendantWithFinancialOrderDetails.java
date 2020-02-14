@@ -7,10 +7,6 @@ public class UpdateDefendantWithFinancialOrderDetails implements Serializable {
 
     private FinancialOrderForDefendant financialOrderForDefendant;
 
-    public FinancialOrderForDefendant getFinancialOrderForDefendant() {
-        return financialOrderForDefendant;
-    }
-
     public UpdateDefendantWithFinancialOrderDetails(FinancialOrderForDefendant financialOrderForDefendant) {
         this.financialOrderForDefendant = financialOrderForDefendant;
     }
@@ -21,6 +17,9 @@ public class UpdateDefendantWithFinancialOrderDetails implements Serializable {
         }
     }
 
+    public FinancialOrderForDefendant getFinancialOrderForDefendant() {
+        return financialOrderForDefendant;
+    }
     public static Builder newBuilder() {
         return new Builder();
     }

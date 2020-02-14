@@ -11,6 +11,7 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
@@ -55,7 +56,7 @@ public class NotepadHearingIT extends AbstractIT {
         final String promptMediaType = "application/vnd.hearing.notepad.parse-result-prompt+json";
 
         poll(requestParams(promptUrl, promptMediaType).withHeader(USER_ID, USER_ID_VALUE).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -75,7 +76,7 @@ public class NotepadHearingIT extends AbstractIT {
         String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -94,7 +95,7 @@ public class NotepadHearingIT extends AbstractIT {
         String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, USER_ID_VALUE).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(

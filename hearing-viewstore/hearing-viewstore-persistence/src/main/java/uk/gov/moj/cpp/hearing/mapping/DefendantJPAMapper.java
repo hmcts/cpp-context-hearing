@@ -1,21 +1,20 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import static java.util.Objects.isNull;
-
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import static java.util.Objects.isNull;
 
 @ApplicationScoped
 public class DefendantJPAMapper {
@@ -24,16 +23,19 @@ public class DefendantJPAMapper {
     private OrganisationJPAMapper organisationJPAMapper;
     private OffenceJPAMapper offenceJPAMapper;
     private PersonDefendantJPAMapper personDefendantJPAMapper;
+    private AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper;
 
     @Inject
     public DefendantJPAMapper(final AssociatedPersonJPAMapper associatedPersonJPAMapper,
                               OrganisationJPAMapper organisationJPAMapper,
                               OffenceJPAMapper offenceJPAMapper,
-                              PersonDefendantJPAMapper personDefendantJPAMapper) {
+                              PersonDefendantJPAMapper personDefendantJPAMapper,
+                              final AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper) {
         this.associatedPersonJPAMapper = associatedPersonJPAMapper;
         this.organisationJPAMapper = organisationJPAMapper;
         this.offenceJPAMapper = offenceJPAMapper;
         this.personDefendantJPAMapper = personDefendantJPAMapper;
+        this.associatedDefenceOrganisationJPAMapper = associatedDefenceOrganisationJPAMapper;
     }
 
     //To keep cditester happy
@@ -73,7 +75,14 @@ public class DefendantJPAMapper {
         defendant.setWitnessStatement(pojo.getWitnessStatement());
         defendant.setWitnessStatementWelsh(pojo.getWitnessStatementWelsh());
         defendant.setPncId(pojo.getPncId());
-        defendant.setIsYouth(pojo.getIsYouth());
+        if(null != pojo.getIsYouth()) {
+            defendant.setIsYouth(pojo.getIsYouth());
+        }
+        defendant.setLegalaidStatus(pojo.getLegalAidStatus());
+        if(null != pojo.getProceedingsConcluded()) {
+            defendant.setProceedingsConcluded(pojo.getProceedingsConcluded());
+        }
+        defendant.setAssociatedDefenceOrganisation(associatedDefenceOrganisationJPAMapper.toJPA(pojo.getAssociatedDefenceOrganisation()));
         return defendant;
     }
 
@@ -106,6 +115,9 @@ public class DefendantJPAMapper {
                 .withWitnessStatementWelsh(pojo.getWitnessStatementWelsh())
                 .withProsecutionCaseId(pojo.getProsecutionCaseId())
                 .withIsYouth(pojo.getIsYouth())
+                .withLegalAidStatus(pojo.getLegalaidStatus())
+                .withProceedingsConcluded(pojo.isProceedingsConcluded())
+                .withAssociatedDefenceOrganisation(associatedDefenceOrganisationJPAMapper.fromJPA(pojo.getAssociatedDefenceOrganisation()))
                 .build();
     }
 

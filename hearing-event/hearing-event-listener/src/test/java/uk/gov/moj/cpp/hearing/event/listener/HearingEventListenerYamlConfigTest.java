@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -11,10 +10,12 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
@@ -98,7 +99,9 @@ public class HearingEventListenerYamlConfigTest {
             CompanyRepresentativeChangeIgnored.class.getAnnotation(Event.class).value(),
             DefendantOffenceResultsUpdated.class.getAnnotation(Event.class).value(),
             DefendantCaseWithdrawnOrDismissed.class.getAnnotation(Event.class).value(),
-            CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value()
+            CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value(),
+            DefendantLegalAidStatusUpdated.class.getAnnotation(Event.class).value(),
+            CaseDefendantsUpdated.class.getAnnotation(Event.class).value()
     );
 
     private Map<String, String> handlerNames = new HashMap<>();
@@ -130,6 +133,8 @@ public class HearingEventListenerYamlConfigTest {
                 CourtApplicationEjectedEventListener.class,
                 InterpreterIntermediaryEventListener.class,
                 CompanyRepresentativeEventListener.class,
+                DefendantLegalAidStatusUpdateEventListener.class,
+                CaseDefendantsUpdateListener.class,
                 CaseMarkerEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();

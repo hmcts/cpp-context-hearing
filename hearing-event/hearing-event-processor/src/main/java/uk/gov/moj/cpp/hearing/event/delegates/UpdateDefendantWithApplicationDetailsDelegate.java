@@ -51,9 +51,9 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
     }
 
     private UpdateDefendantWithApplicationDetails getUpdateDefendantWithApplicationDetails(final CourtApplication courtApplication) {
-        Optional<UUID> applicationTypeId = getApplicationTypeId(courtApplication);
-        Optional<UUID> applicationOutcomeTypeId = getApplicationOutcomeTypeId(courtApplication);
-        Optional<UUID> defendantId = getDefendantId(courtApplication);
+        final Optional<UUID> applicationTypeId = getApplicationTypeId(courtApplication);
+        final Optional<UUID> applicationOutcomeTypeId = getApplicationOutcomeTypeId(courtApplication);
+        final Optional<UUID> defendantId = getDefendantId(courtApplication);
 
         if (applicationTypeId.isPresent()
                 && applicationOutcomeTypeId.isPresent()
@@ -101,8 +101,8 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
 
 
     private void sendNotify(Sender sender, JsonEnvelope event, UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails) {
-        JsonObject jsonObject = this.objectToJsonObjectConverter.convert(updateDefendantWithApplicationDetails);
-        Function<Object, JsonEnvelope> objectJsonEnvelopeFunction = this.enveloper.withMetadataFrom(event, "hearing.command.update-defendant-with-application-details");
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(updateDefendantWithApplicationDetails);
+        final Function<Object, JsonEnvelope> objectJsonEnvelopeFunction = this.enveloper.withMetadataFrom(event, "hearing.command.update-defendant-with-application-details");
         sender.sendAsAdmin(objectJsonEnvelopeFunction.apply(jsonObject));
     }
 }

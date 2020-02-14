@@ -8,6 +8,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -30,19 +31,23 @@ public class OffenceJPAMapper {
 
     private AllocationDecisionJPAMapper allocationDecisionJPAMapper;
 
+    private LaaApplnReferenceJPAMapper laaApplnReferenceJPAMapper;
+
     @Inject
     public OffenceJPAMapper(final NotifiedPleaJPAMapper notifiedPleaJPAMapper,
                             final IndicatedPleaJPAMapper indicatedPleaJPAMapper,
                             final PleaJPAMapper pleaJPAMapper,
                             final OffenceFactsJPAMapper offenceFactsJPAMapper,
                             final VerdictJPAMapper verdictJPAMapper,
-                            final AllocationDecisionJPAMapper allocationDecisionJPAMapper) {
+                            final AllocationDecisionJPAMapper allocationDecisionJPAMapper,
+                            final LaaApplnReferenceJPAMapper laaApplnReferenceJPAMapper) {
         this.notifiedPleaJPAMapper = notifiedPleaJPAMapper;
         this.indicatedPleaJPAMapper = indicatedPleaJPAMapper;
         this.pleaJPAMapper = pleaJPAMapper;
         this.offenceFactsJPAMapper = offenceFactsJPAMapper;
         this.verdictJPAMapper = verdictJPAMapper;
         this.allocationDecisionJPAMapper = allocationDecisionJPAMapper;
+        this.laaApplnReferenceJPAMapper = laaApplnReferenceJPAMapper;
     }
 
     //To keep cditester happy
@@ -93,6 +98,16 @@ public class OffenceJPAMapper {
         }
         offence.setLaidDate(pojo.getLaidDate());
 
+        offence.setLaaApplnReference(laaApplnReferenceJPAMapper.toJpa(pojo.getLaaApplnReference()));
+        if(Objects.nonNull(pojo.getIsDiscontinued())) {
+            offence.setDiscontinued(pojo.getIsDiscontinued());
+        }
+        if(Objects.nonNull(pojo.getIsIntroduceAfterInitialProceedings())) {
+            offence.setIntroduceAfterInitialProceedings(pojo.getIsIntroduceAfterInitialProceedings());
+        }
+        if(Objects.nonNull(pojo.getProceedingsConcluded())) {
+            offence.setProceedingsConcluded(pojo.getProceedingsConcluded());
+        }
         return offence;
     }
 
@@ -129,6 +144,10 @@ public class OffenceJPAMapper {
                 .withPlea(pleaJPAMapper.fromJPA(offenceId, entity.getPlea()))
                 .withVerdict(verdictJPAMapper.fromJPA(offenceId, entity.getVerdict()))
                 .withAllocationDecision(allocationDecisionJPAMapper.fromJPA(offenceId, entity.getAllocationDecision()))
+                .withLaaApplnReference(laaApplnReferenceJPAMapper.fromJpa(entity.getLaaApplnReference()))
+                .withProceedingsConcluded(entity.isProceedingsConcluded())
+                .withIsDiscontinued(entity.isDiscontinued())
+                .withIsIntroduceAfterInitialProceedings(entity.isIntroduceAfterInitialProceedings())
                 .withLaidDate(entity.getLaidDate())
                 .build();
     }
