@@ -22,7 +22,7 @@ public class HearingEventDefinitionsIT extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(this.userId);
 
         final HearingEventDefinitionData eventDefinitions = hearingEventDefinitionsWithPauseAndResumeEvents();
-        andHearingEventDefinitionsAreAvailable(eventDefinitions);
+        andHearingEventDefinitionsAreAvailable(eventDefinitions, userId);
 
         thenHearingEventDefinitionsAreRecorded(eventDefinitions);
     }

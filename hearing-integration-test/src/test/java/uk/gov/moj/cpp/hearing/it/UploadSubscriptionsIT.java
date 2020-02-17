@@ -7,13 +7,13 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 
 import java.time.LocalDate;
@@ -33,15 +33,14 @@ public class UploadSubscriptionsIT extends AbstractIT {
 
         final String nowTypeId = command.getSubscriptions().get(0).getNowTypeIds().get(0).toString();
 
-        makeCommand(requestSpec, "hearing.upload-subscriptions")
+        makeCommand(getRequestSpec(), "hearing.upload-subscriptions")
                 .ofType("application/vnd.hearing.upload-subscriptions+json")
                 .withPayload(command)
                 .withArgs(referenceDate)
                 .executeSuccessfully();
 
         poll(requestParams(getURL("hearing.retrieve-subscriptions", referenceDate, nowTypeId), "application/vnd.hearing.retrieve-subscriptions+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

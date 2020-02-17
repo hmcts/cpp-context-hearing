@@ -19,7 +19,6 @@ public class AuthorisationServiceStub {
 
     private static final String CAPABILITY_ENABLEMENT_QUERY_URL = "/authorisation-service-server/rest/capabilities/%s";
     private static final String CAPABILITY_ENABLEMENT_QUERY_MEDIA_TYPE = "application/vnd.authorisation.capability+json";
-    private static final String AUTHORISATION_SERVICE_SERVER = "authorisation-service-server";
 
     public static void stubSetStatusForCapability(String capabilityName, boolean statusToReturn) {
         String url = format(CAPABILITY_ENABLEMENT_QUERY_URL, capabilityName);
@@ -33,7 +32,6 @@ public class AuthorisationServiceStub {
 
     private static void stubEnableCapabilities(String stubUrl, boolean statusToReturn) {
         String responsePayload = createObjectBuilder().add("enabled", statusToReturn).build().toString();
-        InternalEndpointMockUtils.stubPingFor(AUTHORISATION_SERVICE_SERVER);
 
         stubFor(get(urlMatching(stubUrl))
                 .willReturn(aResponse().withStatus(SC_OK)

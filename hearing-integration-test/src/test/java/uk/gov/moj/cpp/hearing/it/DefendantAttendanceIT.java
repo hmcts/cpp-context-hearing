@@ -29,7 +29,7 @@ public class DefendantAttendanceIT extends AbstractIT {
     @Test
     public void updateDefendantAttendance() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final UUID hearingId = hearingOne.getHearingId();
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
@@ -43,7 +43,7 @@ public class DefendantAttendanceIT extends AbstractIT {
                                 .with(AttendanceDay::getDay, is(dateOfAttendance))
                                 .with(AttendanceDay::getIsInAttendance, is(Boolean.TRUE)))));
 
-        h(UseCases.updateDefendantAttendance(requestSpec, updateDefendantAttendanceTemplate(hearingId, defendantId, dateOfAttendance, Boolean.TRUE)));
+        h(UseCases.updateDefendantAttendance(getRequestSpec(), updateDefendantAttendanceTemplate(hearingId, defendantId, dateOfAttendance, Boolean.TRUE)));
 
         publicDefendantAttendanceUpdated.waitFor();
 

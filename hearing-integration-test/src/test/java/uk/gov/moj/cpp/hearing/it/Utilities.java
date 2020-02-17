@@ -5,10 +5,11 @@ import static java.util.Optional.ofNullable;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
-import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
@@ -29,6 +30,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.restassured.path.json.JsonPath;
+import com.jayway.restassured.response.Header;
 import com.jayway.restassured.response.Response;
 import com.jayway.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
@@ -57,14 +59,13 @@ public class Utilities {
     public static class EventListener {
 
         private static final Logger LOGGER = LoggerFactory.getLogger(EventListener.class);
-        static final int DEFAULT_TIMEOUT = 30000;
         private MessageConsumer messageConsumer;
         private String eventType;
         private Matcher<?> matcher;
         private long timeout;
 
         public EventListener(final String eventType) {
-            this(eventType, DEFAULT_TIMEOUT);
+            this(eventType, DEFAULT_POLL_TIMEOUT_IN_MILLIS);
         }
 
         public EventListener(final String eventType, long timeout) {
@@ -241,7 +242,7 @@ public class Utilities {
                     .contentType(type)
                     .accept(type)
                     .body(ofNullable(this.payloadAsString).orElse(""))
-                    .header(CPP_UID_HEADER).when()
+                    .header(new Header(USER_ID, AbstractIT.getLoggedInUser().toString())).when()
                     .post(url)
                     .then().extract().response();
             assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));

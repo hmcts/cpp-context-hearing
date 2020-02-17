@@ -33,7 +33,7 @@ public class ChangeApplicationDetailIT extends AbstractIT {
         final CourtApplication existingCourtApplication = extendHearingCommand.getCourtApplication();
 
         //when progression announced application change
-        final CourtApplication applicationChangeRequest = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate())).getHearing().getCourtApplications().get(0);
+        final CourtApplication applicationChangeRequest = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate())).getHearing().getCourtApplications().get(0);
         applicationChangeRequest.setId(existingCourtApplication.getId());
         UseCases.sendPublicApplicationChangedMessage(applicationChangeRequest);
 
@@ -53,7 +53,7 @@ public class ChangeApplicationDetailIT extends AbstractIT {
 
     private ExtendHearingCommand addApplication() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication initialCourtApplication = hearing.getCourtApplications().get(0);

@@ -23,6 +23,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class UpdateOffencesForDefendantIT extends AbstractIT {
@@ -30,7 +31,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_addOffenceToExistingHearing() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceAdded = h(UseCases.updateOffences(
                 addOffencesForDefendantTemplate(
@@ -70,7 +71,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_updateExistingOffence() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceUpdates = h(UseCases.updateOffences(
                 updateOffencesForDefendantTemplate(
@@ -112,7 +113,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_deleteExistingOffence() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         h(UseCases.updateOffences(
                 deleteOffencesForDefendantTemplate(

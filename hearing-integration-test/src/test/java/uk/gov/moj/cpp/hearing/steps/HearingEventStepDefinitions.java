@@ -7,6 +7,9 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -20,19 +23,22 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.getLoggedInUser;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.getRequestSpec;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.it.AbstractIT;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -45,12 +51,15 @@ import com.google.common.collect.Ordering;
 import com.jayway.restassured.response.Response;
 import org.hamcrest.Matcher;
 
-public class HearingEventStepDefinitions extends AbstractIT {
+public class HearingEventStepDefinitions {
 
+    public static final String SEQUENCE_TYPE_PAUSE_RESUME = "PAUSE_RESUME";
+    public static final String SEQUENCE_TYPE_NOT_REGISTERED = "NOT_REGISTERED";
+    public static final String RECORDED_LABEL_START_HEARING = "Start Hearing";
+    public static final String RECORDED_LABEL_END_HEARING = "Hearing ended";
     private static final String MEDIA_TYPE_CREATE_EVENT_LOG = "application/vnd.hearing.log-hearing-event+json";
     private static final String MEDIA_TYPE_CREATE_EVENT_DEFINITIONS = "application/vnd.hearing.create-hearing-event-definitions+json";
     private static final String MEDIA_TYPE_QUERY_EVENT_DEFINITIONS = "application/vnd.hearing.hearing-event-definitions+json";
-
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_RECORDED_LABEL = "recordedLabel";
@@ -64,32 +73,20 @@ public class HearingEventStepDefinitions extends AbstractIT {
     private static final String FIELD_GROUP_LABEL = "groupLabel";
     private static final String FIELD_ALTERABLE = "alterable";
     private static final String FIELD_ACTION_LABEL = "actionLabel";
+    private static final UUID START_HEARING_EVENT_DEFINITION_ID = fromString("b71e7d2a-d3b3-4a55-a393-6d451767fc05");
+    private static final UUID RESUME_HEARING_EVENT_DEFINITION_ID = fromString("64476e43-2138-46d5-b58b-848582cf9b07");
+    private static final UUID PAUSE_HEARING_EVENT_DEFINITION_ID = fromString("160ecb51-29ee-4954-bbbf-daab18a24fbb");
+    private static final UUID END_HEARING_EVENT_DEFINITION_ID = fromString("0df93f18-0a21-40f5-9fb3-da4749cd70fe");
 
-    private static final String SEQUENCE_TYPE_PAUSE_RESUME = "PAUSE_RESUME";
-    private static final String SEQUENCE_TYPE_NOT_REGISTERED = "NOT_REGISTERED";
+    private static HearingEventDefinitionData hearingEventDefinitionData;
 
-    public static Response whenUserAttemptsToLogAHearingEvent(final HearingEvent hearingEvent) {
-        final String createEventLogEndPoint = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.log-hearing-event"), hearingEvent.getHearingId());
-
-        final JsonObjectBuilder hearingEventPayloadBuilder = createObjectBuilder()
-                .add(FIELD_HEARING_EVENT_ID, hearingEvent.getId().toString())
-                .add(FIELD_HEARING_EVENT_DEFINITION_ID, hearingEvent.getHearingEventDefinitionId().toString())
-                .add(FIELD_RECORDED_LABEL, hearingEvent.getRecordedLabel())
-                .add(FIELD_LAST_MODIFIED_TIME, ZonedDateTimes.toString(hearingEvent.getLastModifiedTime()));
-
-        if (hearingEvent.getEventTime() != null) {
-            hearingEventPayloadBuilder.add(FIELD_EVENT_TIME, ZonedDateTimes.toString(hearingEvent.getEventTime()));
-        }
-
-        return given().spec(requestSpec)
-                .and().contentType(MEDIA_TYPE_CREATE_EVENT_LOG)
-                .and().header(USER_ID, getLoggedInUser())
-                .and().body(hearingEventPayloadBuilder.build().toString())
-                .when().post(createEventLogEndPoint)
-                .then().extract().response();
+    public static void stubHearingEventDefinitions() {
+        UUID userId = randomUUID();
+        givenAUserHasLoggedInAsACourtClerk(userId);
+        hearingEventDefinitionData = andHearingEventDefinitionsAreAvailable(hearingDefinitionData(hearingDefinitions()), getLoggedInUser());
     }
 
-    public static HearingEventDefinitionData andHearingEventDefinitionsAreAvailable(final HearingEventDefinitionData hearingEventDefinitions) {
+    public static HearingEventDefinitionData andHearingEventDefinitionsAreAvailable(final HearingEventDefinitionData hearingEventDefinitions, final UUID userId) {
         final String createEventDefinitionsEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.create-hearing-event-definitions");
 
         final JsonArrayBuilder eventDefinitionsArrayBuilder = createArrayBuilder();
@@ -126,9 +123,9 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 .add(FIELD_GENERIC_ID, hearingEventDefinitions.getId().toString())
                 .add(FIELD_EVENT_DEFINITIONS, eventDefinitionsArrayBuilder);
 
-        final Response response = given().spec(requestSpec)
+        final Response response = given().spec(getRequestSpec())
                 .and().contentType(MEDIA_TYPE_CREATE_EVENT_DEFINITIONS)
-                .and().header(USER_ID, getLoggedInUser())
+                .and().header(USER_ID, userId)
                 .and().body(hearingEventDefinitionsPayloadBuilder.build().toString())
                 .when().post(createEventDefinitionsEndPoint)
                 .then().extract().response();
@@ -137,7 +134,7 @@ public class HearingEventStepDefinitions extends AbstractIT {
 
         final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl();
 
-        poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, getLoggedInUser()))
+        poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, userId))
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -146,6 +143,30 @@ public class HearingEventStepDefinitions extends AbstractIT {
                 );
 
         return hearingEventDefinitions;
+    }
+
+    private static HearingEventDefinitionData hearingDefinitionData(final List<HearingEventDefinition> hearingEventDefinitions) {
+        return new HearingEventDefinitionData(randomUUID(), hearingEventDefinitions);
+    }
+
+    private static List<HearingEventDefinition> hearingDefinitions() {
+        return asList(
+                new HearingEventDefinition(randomUUID(), RECORDED_LABEL_START_HEARING, INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(randomUUID(), RECORDED_LABEL_END_HEARING, INTEGER.next(), RECORDED_LABEL_END_HEARING, "SENTENCING", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID, "Start Hearing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(randomUUID(), "Identify defendant", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
+                new HearingEventDefinition(randomUUID(), "Take Plea", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
+                new HearingEventDefinition(randomUUID(), "Prosecution Opening", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
+                new HearingEventDefinition(randomUUID(), "<counsel.name>", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
+                new HearingEventDefinition(randomUUID(), "Sentencing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
+                new HearingEventDefinition(END_HEARING_EVENT_DEFINITION_ID, "End Hearing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(PAUSE_HEARING_EVENT_DEFINITION_ID, "Pause", INTEGER.next(), STRING.next(), "PAUSE_RESUME", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(RESUME_HEARING_EVENT_DEFINITION_ID, "Resume", INTEGER.next(), STRING.next(), "PAUSE_RESUME", STRING.next(), INTEGER.next(), false)
+        );
+    }
+
+    public static HearingEventDefinition findEventDefinitionWithActionLabel(final String actionLabel) {
+        return hearingEventDefinitionData.getEventDefinitions().stream().filter(d -> d.getActionLabel().equals(actionLabel)).findFirst().get();
     }
 
     private static Matcher[] getMatchers(final HearingEventDefinitionData hearingEventDefinitions) {

@@ -34,7 +34,7 @@ public class CaseMarkerIT extends AbstractIT {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingDay hearingDay = initiateHearingCommand.getHearing().getHearingDays().get(0);
         hearingDay.setSittingDay(now().plusDays(1));
-        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(requestSpec, initiateHearingCommand));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearingCommand));
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID prosecutionCaseId = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getId();
 

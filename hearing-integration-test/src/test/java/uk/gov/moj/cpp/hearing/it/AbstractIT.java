@@ -4,7 +4,6 @@ import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -13,14 +12,11 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsWildcardUserBelongingToAllGroups;
 
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
@@ -28,10 +24,10 @@ import uk.gov.justice.hearing.courts.referencedata.LocalJusticeArea;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
-import uk.gov.justice.services.test.utils.core.http.RequestParams;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
-import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
+import uk.gov.moj.cpp.hearing.utils.StubPerExecution;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,30 +54,53 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AbstractIT {
 
-    protected static final UUID USER_ID_VALUE = randomUUID();
-    protected static final UUID USER_ID_VALUE_AS_ADMIN = randomUUID();
-    protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
-    protected static final Header CPP_UID_HEADER_AS_ADMIN = new Header(USER_ID, USER_ID_VALUE_AS_ADMIN.toString());
-    protected static final Properties ENDPOINT_PROPERTIES = new Properties();
-    protected static final String PUBLIC_EVENT_TOPIC = "public.event";
+    public static final Properties ENDPOINT_PROPERTIES = new Properties();
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
-    private static final ThreadLocal<UUID> USER_CONTEXT = new ThreadLocal<>();
-    protected static RequestSpecification requestSpec;
-    protected static String baseUri;
-    protected static RestClient restClient = new RestClient();
+    /**
+     * todo this is not a good pattern, only for fixing parallel runs without changing existing
+     * codes too much
+     */
+    private static final ThreadLocal<UUID> USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
+    private static final ThreadLocal<UUID> ADMIN_USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
+    private static String baseUri;
+    private static RequestSpecification requestSpec;
 
-    protected static UUID getLoggedInUser() {
-        return USER_CONTEXT.get();
+    /**
+     * In case of Single Test executions, initiation of Stubs Per Execution
+     */
+    static {
+        if (Boolean.FALSE.toString().equalsIgnoreCase(
+                System.getProperty("stubPerExecution", "false")))
+            StubPerExecution.stubWireMock();
+        setUpJvm();
+    }
+
+    public static UUID getLoggedInUser() {
+        return USER_ID_CONTEXT.get();
     }
 
     protected static void setLoggedInUser(final UUID userId) {
-        USER_CONTEXT.set(userId);
+        USER_ID_CONTEXT.set(userId);
+    }
+
+    public static UUID getLoggedInAdminUser() {
+        return ADMIN_USER_ID_CONTEXT.get();
+    }
+
+    protected static void setLoggedInAdminUser(final UUID userId) {
+        ADMIN_USER_ID_CONTEXT.set(userId);
+    }
+
+
+    public static Header getLoggedIdUserHeader() {
+        return new Header(USER_ID, getLoggedInUser().toString());
     }
 
     protected static MultivaluedMap<String, Object> getLoggedInHeader() {
@@ -188,20 +207,28 @@ public class AbstractIT {
         };
     }
 
-    protected static RequestParams requestParameters(final String url, final String contentType) {
-        return requestParams(url, contentType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build();
+    /**
+     * Per Jvm Setup
+     */
+    public static void setUpJvm() {
+        readConfig();
+        setRequestSpecification();
+        stubHearingEventDefinitions();
+    }
+
+    @BeforeClass
+    public static void setUpClass() {
+
+    }
+
+    public static RequestSpecification getRequestSpec() {
+        return requestSpec;
     }
 
     @Before
-    public void setUp() {
-        readConfig();
-        setRequestSpecification();
-        setupAsAuthorisedUser(USER_ID_VALUE);
-        setupAsSystemUser(USER_ID_VALUE_AS_ADMIN);
-        setupAsWildcardUserBelongingToAllGroups();
-        stubEnableAllCapabilities();
-        mockMaterialUpload();
-        mockUpdateHmpsMaterialStatus();
+    public void setUpPerTest() {
+        setupAsAuthorisedUser(getLoggedInUser());
+        setupAsSystemUser(getLoggedInAdminUser());
     }
 
     protected JSONObject getExistingHearing(final String hearingId) {
@@ -211,7 +238,7 @@ public class AbstractIT {
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.hearing+json";
 
-        final String payload = poll(requestParams(url, mediaType).withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+        final String payload = poll(requestParams(url, mediaType).withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .until(status().is(OK)).getPayload();
         return new JSONObject(payload);
     }

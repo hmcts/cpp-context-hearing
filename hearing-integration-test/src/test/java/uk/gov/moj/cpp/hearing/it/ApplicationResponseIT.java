@@ -30,11 +30,11 @@ public class ApplicationResponseIT extends AbstractIT {
 
     @Test
     public void saveApplicationResponse() throws Exception {
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication initialCourtApplication = hearing.getCourtApplications().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
@@ -60,7 +60,7 @@ public class ApplicationResponseIT extends AbstractIT {
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.application-response-saved")
                 .withFilter(isJson(withJsonPath("$.courtApplicationResponse.originatingHearingId", Is.is(hearing.getId().toString()))));
 
-        makeCommand(requestSpec, "hearing.save-application-response")
+        makeCommand(getRequestSpec(), "hearing.save-application-response")
                 .withArgs(hearing.getId())
                 .ofType("application/vnd.hearing.save-application-response+json")
                 .withPayload(saveApplicationResponseCommand)

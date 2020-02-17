@@ -33,7 +33,7 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
     @Test
     public void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared() throws Exception {
         updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
-        }, 0);
+        }, 3);
     }
 
 //    @Test
@@ -46,7 +46,7 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
 
     private void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(Consumer<CaseDefendantDetails> caseDefendantDetailsConsumer, long waitTime) throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final CommandHelpers.CaseDefendantDetailsHelper defendantUpdates = h(UseCases.updateDefendants(
                 with(caseDefendantDetailsChangedCommandTemplate(), template -> {

@@ -41,10 +41,10 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(
-                UseCases.initiateHearing(requestSpec,
+                UseCases.initiateHearing(getRequestSpec(),
                         with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(null))));
 
         final EventListener publicEventConvictionDateChangedListener = listenFor(
@@ -54,7 +54,7 @@ public class VerdictIT extends AbstractIT {
                         withJsonPath("$.caseId", is(hearingOne.getHearing().getProsecutionCases().get(0).getId().toString()))
                 )));
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -104,10 +104,10 @@ public class VerdictIT extends AbstractIT {
 
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() {
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne =
-                h(UseCases.initiateHearing(requestSpec,
+                h(UseCases.initiateHearing(getRequestSpec(),
                         with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next()))));
 
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor(
@@ -116,7 +116,7 @@ public class VerdictIT extends AbstractIT {
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.it().getHearing().getProsecutionCases().get(0).getId().toString())))));
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -167,15 +167,15 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsGuilty_shouldNotUpdateConvictionDate() {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
         final LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(),
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
                 i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(previousConvictionDate))));
 
-        h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 with(updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -202,16 +202,16 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void shouldInheritVerdict() {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
 
         final LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(),
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
                 i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(previousConvictionDate))));
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 with(updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -228,7 +228,7 @@ public class VerdictIT extends AbstractIT {
                                                         .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
                                                         .with(Verdict::getOriginatingHearingId, is(hearingOne.getHearingId())))))))))));
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(requestSpec, customStructureInitiateHearingTemplate(
+        final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(getRequestSpec(), customStructureInitiateHearingTemplate(
                 toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
         )));
 

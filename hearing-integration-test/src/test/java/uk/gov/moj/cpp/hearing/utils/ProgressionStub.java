@@ -24,7 +24,6 @@ public class ProgressionStub {
     public static final String COMMAND_MEDIA_TYPE = "application/vnd.progression.generate-nows+json";
 
     public static void stubProgressionGenerateNows() {
-        InternalEndpointMockUtils.stubPingFor("progression-service");
 
         stubFor(post(urlPathMatching(COMMAND_URL + ".*"))
                 .withHeader(CONTENT_TYPE, equalTo(COMMAND_MEDIA_TYPE))

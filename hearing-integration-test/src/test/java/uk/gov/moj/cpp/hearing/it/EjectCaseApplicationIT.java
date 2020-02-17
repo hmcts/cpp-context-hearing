@@ -41,7 +41,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
     @Test
     public void shouldEjectCaseAndApplication() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
         // Hearing initiated with standalone application
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication standAloneApplication = hearing.getCourtApplications().get(0);
@@ -65,7 +65,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
         // Eject case will also eject linked application
         ejectCaseWithLinkedApplication(hearing.getId(), prosecutionCaseId, standAloneApplicationId);
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(),
-                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
+                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .withValue(h -> h.getHearingSummaries().size(), 1)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
@@ -77,7 +77,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
         // Eject standalone application
         ejectStandAloneApplication(hearing,hearing.getId(), standAloneApplicationId);
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(),
-                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
+                hearing.getHearingDays().get(0).getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         // all applications ejected now including child and linked
                         .withValue(h -> h.getHearingSummaries().size(), 0)
@@ -106,7 +106,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getCourtApplications().size(), 3)
@@ -134,7 +134,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getCourtApplications().size(), 2)
@@ -161,7 +161,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                         .withUserId(randomUUID().toString())
                         .build()
         );
-        Queries.getHearingPollForMatch(hearingId, 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .withValue(h -> h.getProsecutionCases().size(), 0)
@@ -188,7 +188,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                         .withUserId(randomUUID().toString())
                         .build()
         );
-        Queries.getHearingPollForMatch(hearingId, 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .withValue(Hearing::getCourtApplications, null)

@@ -34,7 +34,7 @@ public class ChangeHearingDetailIT extends AbstractIT {
     @Test
     public void shouldUpdateHearing() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         HearingDetailsUpdateCommand hearingDetailsUpdateCommand = UseCases.updateHearing(HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()
                 .setHearing(uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing.hearing()

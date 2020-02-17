@@ -1,16 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Ignore;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-import java.util.UUID;
-
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -22,6 +11,19 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.UUID;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.junit.Ignore;
+
 public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
 
     private final String defendantLegalAidStatusUpdatedEvent = "public.progression.defendant-legalaid-status-updated";
@@ -31,7 +33,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
     @Ignore
     public void updateDefendantLegalAidStatus() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final UUID hearingId = hearingOne.getHearingId();
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
@@ -55,8 +57,8 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getProsecutionCases, hasItem(isBean(ProsecutionCase.class)
-                        .with(ProsecutionCase ::  getDefendants, hasItem(isBean(Defendant.class)))
-                        .withValue(d->  d.getDefendants().get(0).getLegalAidStatus(), "Granted")))
+                                .with(ProsecutionCase::getDefendants, hasItem(isBean(Defendant.class)))
+                                .withValue(d -> d.getDefendants().get(0).getLegalAidStatus(), "Granted")))
                 )
         );
 
