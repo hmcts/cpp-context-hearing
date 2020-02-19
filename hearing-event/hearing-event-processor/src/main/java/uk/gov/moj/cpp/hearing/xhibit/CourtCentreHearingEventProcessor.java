@@ -88,7 +88,7 @@ public class CourtCentreHearingEventProcessor  {
     private void processHearingForXhibitPublicDisplay(final JsonEnvelope envelope, final PublishCourtListRequestParameters publishCourtListRequestParameters, final ZonedDateTime latestCourtListUploadTime) throws ExportFailedException {
         final Optional<CurrentCourtStatus> hearingData = courtCentreHearingsRetriever.getHearingDataForPublicDisplay(publishCourtListRequestParameters.getCourtCentreId(), latestCourtListUploadTime, envelope);
 
-        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, hearingData, latestCourtListUploadTime);
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, hearingData, latestCourtListUploadTime, envelope);
         final CourtCentreXmlGenerator courtCentreXmlGenerator = courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(courtCentreGeneratorParameters);
 
         final String xhibitXml = courtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
