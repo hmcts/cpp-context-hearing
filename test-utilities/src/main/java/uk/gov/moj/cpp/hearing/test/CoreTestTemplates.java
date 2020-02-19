@@ -449,6 +449,7 @@ public class CoreTestTemplates {
                 .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
                 .withStatementOfFacts(STRING.next())
                 .withStatementOfFactsWelsh(STRING.next())
+                .withClassOfCase("Class 1")
                 .withCaseMarkers(buildCaseMarkers())
                 .withDefendants(
                         structure.getV().entrySet().stream()

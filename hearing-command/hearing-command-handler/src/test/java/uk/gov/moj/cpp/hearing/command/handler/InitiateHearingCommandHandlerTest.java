@@ -243,6 +243,7 @@ public class InitiateHearingCommandHandlerTest {
                                 .with(ProsecutionCase::getId, is(prosecutionCase.getId()))
                                 .with(ProsecutionCase::getCaseStatus, is(prosecutionCase.getCaseStatus()))
                                 .with(ProsecutionCase::getInitiationCode, is(prosecutionCase.getInitiationCode()))
+                                .with(ProsecutionCase::getClassOfCase, is(prosecutionCase.getClassOfCase()))
                                 .with(ProsecutionCase::getOriginatingOrganisation, is(prosecutionCase.getOriginatingOrganisation()))
                                 .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
                                         .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCaseIdentifier.getCaseURN()))
