@@ -53,7 +53,7 @@ public class DefendantLegalAidStatusUpdateIT extends AbstractIT {
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, 20, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, 0, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
                         .with(Hearing::getProsecutionCases, hasItem(isBean(ProsecutionCase.class)
