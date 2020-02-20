@@ -58,6 +58,7 @@ public class CourtCentreHearingEventProcessor  {
         final PublishCourtListRequestParameters publishCourtListRequestParameters = publishCourtListRequestParametersParser.parse(envelope);
         try {
             final ZonedDateTime latestCourtListUploadTime = courtListTimeUpdateRetriever.getLatestCourtListUploadTime(envelope, publishCourtListRequestParameters.getCourtCentreId());
+
             processHearingForXhibitWebPage(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);
             processHearingForXhibitPublicDisplay(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);
         } catch (final Exception e) {

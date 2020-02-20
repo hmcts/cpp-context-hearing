@@ -122,6 +122,7 @@ public class HearingQueryViewTest {
         assertThat(results.payloadAsJsonObject().getString("pageName"), is(testPageName));
     }
 
+
     @Test
     public void shouldReturnEmptyResult() {
         final String courtCentreId1 = "ebdaeb99-8952-4c07-99c4-d27c39d3e63a";

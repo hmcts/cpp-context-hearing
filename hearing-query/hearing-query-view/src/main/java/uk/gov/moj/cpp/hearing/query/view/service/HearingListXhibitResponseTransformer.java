@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.math.BigInteger.valueOf;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -28,12 +29,14 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSi
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -100,10 +103,13 @@ public class HearingListXhibitResponseTransformer {
         final UUID courtRoomKey = hearing.getCourtCentre().getRoomId();
         final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
         CourtRoom courtRoom = courtRoomMap.get(courtRoomKey) ;
+        final Set<UUID> activeHearingIds = hearingEventsToHearingMapper.getActiveHearingIds();
+        final BigInteger isActiveHearing = activeHearingIds.contains(hearing.getId()) ? valueOf(1) : valueOf(0);
         if(courtRoom == null) {
+            final Cases cases = getCases(hearing, hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null), isActiveHearing);
             courtRoom = courtRoom()
                     .withCourtRoomName(courtRoomMapping.getCrestCourtRoomName())
-                    .withCases(getCases(hearing, hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null)))
+                    .withCases(cases)
                     .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
                     .withDefenceCouncil(hearing.getDefenceCounsels())
                     .withLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()))
@@ -111,7 +117,10 @@ public class HearingListXhibitResponseTransformer {
             courtRoom.setCourtRoomId(courtRoomKey);
             courtRoomMap.put(courtRoomKey, courtRoom);
         } else {
-            courtRoom.getCases().getCasesDetails().addAll(getCases(hearing, hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null)).getCasesDetails());
+            final Optional<HearingEvent> hearingEventBy = hearingEventsToHearingMapper.getHearingEventBy(hearing.getId());
+            final List<CaseDetail> casesDetails = getCases(hearing, hearingEventBy.orElse(null), isActiveHearing).getCasesDetails();
+
+            courtRoom.getCases().getCasesDetails().addAll(casesDetails);
             courtRoom.getLinkedCaseIds().addAll(getLinkedCaseIds(hearing.getCourtApplications()));
         }
         return courtRoom;
@@ -122,19 +131,21 @@ public class HearingListXhibitResponseTransformer {
                 .stream().map(CourtApplication::getLinkedCaseId).collect(toList());
     }
 
-    private Cases getCases(final Hearing hearing, final HearingEvent hearingEvent) {
-        final List<CaseDetail> caseDetailsList = new ArrayList<>();
+    private Cases getCases(final Hearing hearing,
+                           final HearingEvent hearingEvent,
+                           final BigInteger isActiveHearing) {
 
+        final List<CaseDetail> caseDetailsList = new ArrayList<>();
         hearing.getProsecutionCases()
                 .forEach(prosecutionCase ->
-                        caseDetailsList.add(buildCaseDetail(hearing, hearingEvent, prosecutionCase)
-                        ));
+                        caseDetailsList.add(buildCaseDetail(hearing, hearingEvent, prosecutionCase, isActiveHearing)));
         return cases().withCasesDetails(caseDetailsList).build();
     }
 
     @SuppressWarnings("squid:S3655")
-    private CaseDetail buildCaseDetail(Hearing hearing, HearingEvent hearingEvent, ProsecutionCase prosecutionCase) {
+    private CaseDetail buildCaseDetail(final Hearing hearing, final HearingEvent hearingEvent, final ProsecutionCase prosecutionCase, final BigInteger activecase) {
         final CaseDetail caseDetail  = caseDetail()
+                .withActivecase(activecase)
                 .withCppUrn(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
                 .withHearingType(hearing.getType().getDescription())

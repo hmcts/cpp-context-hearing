@@ -4,6 +4,7 @@ import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.HearingEvent;
 
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.UUID;
 @SuppressWarnings({"squid:S1067"})
 public class CaseDetail implements Serializable {
     private static final long serialVersionUID = -4951785613141170679L;
+
+    private BigInteger activeCase;
 
     private String caseNumber;
 
@@ -34,7 +37,9 @@ public class CaseDetail implements Serializable {
 
     private List<DefenceCounsel> defenceCounsels;
 
-    public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime, final  HearingEvent hearingEvent) {
+    public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime,
+                      final HearingEvent hearingEvent,
+                      final BigInteger activecase) {
         this.caseNumber = caseNumber;
         this.caseType = caseType;
         this.cppUrn = cppUrn;
@@ -43,6 +48,11 @@ public class CaseDetail implements Serializable {
         this.judgeName = judgeName;
         this.notBeforeTime = notBeforeTime;
         this.hearingEvent = hearingEvent;
+        this.activeCase = activecase;
+    }
+
+    public BigInteger getActivecase() {
+        return activeCase;
     }
 
     public String getCaseNumber() {
@@ -105,49 +115,68 @@ public class CaseDetail implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof CaseDetail)) return false;
 
         CaseDetail that = (CaseDetail) o;
 
-        if (caseNumber != null ? !caseNumber.equals(that.caseNumber) : that.caseNumber != null)
+        if (activeCase != null ? !activeCase.equals(that.activeCase) : that.activeCase != null)
             return false;
-        if (caseType != null ? !caseType.equals(that.caseType) : that.caseType != null)
+        if (getCaseNumber() != null ? !getCaseNumber().equals(that.getCaseNumber()) : that.getCaseNumber() != null)
             return false;
-        if (cppUrn != null ? !cppUrn.equals(that.cppUrn) : that.cppUrn != null) return false;
-        if (defendants != null ? !defendants.equals(that.defendants) : that.defendants != null)
+        if (getCaseType() != null ? !getCaseType().equals(that.getCaseType()) : that.getCaseType() != null)
             return false;
-        if (hearingType != null ? !hearingType.equals(that.hearingType) : that.hearingType != null)
+        if (getCppUrn() != null ? !getCppUrn().equals(that.getCppUrn()) : that.getCppUrn() != null)
             return false;
-        if (judgeName != null ? !judgeName.equals(that.judgeName) : that.judgeName != null)
+        if (getDefendants() != null ? !getDefendants().equals(that.getDefendants()) : that.getDefendants() != null)
             return false;
-        return notBeforeTime != null ? notBeforeTime.equals(that.notBeforeTime) : that.notBeforeTime == null;
+        if (getHearingType() != null ? !getHearingType().equals(that.getHearingType()) : that.getHearingType() != null)
+            return false;
+        if (getJudgeName() != null ? !getJudgeName().equals(that.getJudgeName()) : that.getJudgeName() != null)
+            return false;
+        if (getNotBeforeTime() != null ? !getNotBeforeTime().equals(that.getNotBeforeTime()) : that.getNotBeforeTime() != null)
+            return false;
+        if (getHearingEvent() != null ? !getHearingEvent().equals(that.getHearingEvent()) : that.getHearingEvent() != null)
+            return false;
+        if (getLinkedCaseIds() != null ? !getLinkedCaseIds().equals(that.getLinkedCaseIds()) : that.getLinkedCaseIds() != null)
+            return false;
+        return defenceCounsels != null ? defenceCounsels.equals(that.defenceCounsels) : that.defenceCounsels == null;
     }
 
     @SuppressWarnings({"squid:S3776", "squid:S00121", "squid:S00122"} )
     @Override
     public int hashCode() {
-        int result = caseNumber != null ? caseNumber.hashCode() : 0;
-        result = 31 * result + (caseType != null ? caseType.hashCode() : 0);
-        result = 31 * result + (cppUrn != null ? cppUrn.hashCode() : 0);
-        result = 31 * result + (defendants != null ? defendants.hashCode() : 0);
-        result = 31 * result + (hearingType != null ? hearingType.hashCode() : 0);
-        result = 31 * result + (judgeName != null ? judgeName.hashCode() : 0);
-        result = 31 * result + (notBeforeTime != null ? notBeforeTime.hashCode() : 0);
+        int result = activeCase != null ? activeCase.hashCode() : 0;
+        result = 31 * result + (getCaseNumber() != null ? getCaseNumber().hashCode() : 0);
+        result = 31 * result + (getCaseType() != null ? getCaseType().hashCode() : 0);
+        result = 31 * result + (getCppUrn() != null ? getCppUrn().hashCode() : 0);
+        result = 31 * result + (getDefendants() != null ? getDefendants().hashCode() : 0);
+        result = 31 * result + (getHearingType() != null ? getHearingType().hashCode() : 0);
+        result = 31 * result + (getJudgeName() != null ? getJudgeName().hashCode() : 0);
+        result = 31 * result + (getNotBeforeTime() != null ? getNotBeforeTime().hashCode() : 0);
+        result = 31 * result + (getHearingEvent() != null ? getHearingEvent().hashCode() : 0);
+        result = 31 * result + (getLinkedCaseIds() != null ? getLinkedCaseIds().hashCode() : 0);
+        result = 31 * result + (defenceCounsels != null ? defenceCounsels.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "CaseDetail{" +
-                "caseNumber='" + caseNumber + '\'' +
+                "activeCase=" + activeCase +
+                ", caseNumber='" + caseNumber + '\'' +
                 ", caseType='" + caseType + '\'' +
                 ", cppUrn='" + cppUrn + '\'' +
                 ", defendants=" + defendants +
                 ", hearingType='" + hearingType + '\'' +
                 ", judgeName='" + judgeName + '\'' +
                 ", notBeforeTime='" + notBeforeTime + '\'' +
+                ", hearingEvent=" + hearingEvent +
+                ", linkedCaseIds=" + linkedCaseIds +
+                ", defenceCounsels=" + defenceCounsels +
                 '}';
     }
+
+
 
     public CaseDetail setCaseNumber(String caseNumber) {
         this.caseNumber = caseNumber;
@@ -175,6 +204,9 @@ public class CaseDetail implements Serializable {
     }
 
     public static class Builder {
+
+        private BigInteger activecase;
+
         private String caseNumber;
 
         private String caseType;
@@ -231,8 +263,13 @@ public class CaseDetail implements Serializable {
             return this;
         }
 
+        public Builder withActivecase(final BigInteger activecase) {
+            this.activecase = activecase;
+            return this;
+        }
+
         public CaseDetail build() {
-            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent);
+            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent, activecase);
         }
     }
 }

@@ -100,6 +100,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         final String filePayload = getSentXmlForWebPage();
         final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
         assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+        assertThat(filePayloadForPubDisplay, containsString("activecase>1</activecase"));
         assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
     }
 
@@ -153,7 +154,6 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId,"Start Hearing");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
-        //publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), now().minusMinutes(10l));
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), LocalDate.now());
     }
 

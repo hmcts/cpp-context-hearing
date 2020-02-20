@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
 import static java.time.ZonedDateTime.parse;
 import static java.util.Optional.of;
+import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 import static uk.gov.moj.cpp.hearing.xhibit.XmlTestUtils.assertXmlEquals;

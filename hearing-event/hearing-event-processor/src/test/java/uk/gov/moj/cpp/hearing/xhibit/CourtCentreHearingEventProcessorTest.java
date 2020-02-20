@@ -30,7 +30,6 @@ public class CourtCentreHearingEventProcessorTest {
     @Mock
     private JsonEnvelope jsonEnvelope;
 
-
     @Mock
     private CourtCentreXmlGenerator courtCentreXmlGenerator;
 

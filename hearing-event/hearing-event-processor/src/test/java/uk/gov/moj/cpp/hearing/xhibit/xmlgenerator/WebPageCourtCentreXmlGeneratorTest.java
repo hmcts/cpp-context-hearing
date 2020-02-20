@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 import static java.time.ZonedDateTime.parse;
 import static java.util.Arrays.asList;
 import static java.util.Optional.of;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -27,6 +28,7 @@ import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

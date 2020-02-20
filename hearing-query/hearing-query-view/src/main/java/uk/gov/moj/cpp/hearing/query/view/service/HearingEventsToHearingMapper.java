@@ -7,8 +7,10 @@ import static uk.gov.moj.cpp.hearing.mapping.HearingEventJPAMapper.fromJPA;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @SuppressWarnings({"squid:S3655"})
@@ -17,10 +19,16 @@ public class HearingEventsToHearingMapper {
 
     private List<HearingEvent> hearingEvents;
     private List<Hearing> hearingList;
+    private Set<UUID> activeHearingIds = new HashSet<>();
 
-    public HearingEventsToHearingMapper(final List<HearingEvent> hearingEvents, final List<Hearing> hearingList) {
+    public HearingEventsToHearingMapper(final List<HearingEvent> hearingEvents,
+                                        final List<Hearing> hearingList) {
         this.hearingEvents = hearingEvents;
         this.hearingList = hearingList;
+        for (final HearingEvent hearingEvent : hearingEvents) {
+            final UUID hearingId = hearingEvent.getHearingId();
+            activeHearingIds.add(hearingId);
+        }
     }
 
     public Optional<uk.gov.justice.core.courts.HearingEvent> getHearingEventBy(final UUID hearingId) {
@@ -40,5 +48,9 @@ public class HearingEventsToHearingMapper {
 
     public List<Hearing> getHearingList() {
         return hearingList;
+    }
+
+    public Set<UUID> getActiveHearingIds() {
+        return activeHearingIds;
     }
 }

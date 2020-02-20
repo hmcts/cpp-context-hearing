@@ -39,7 +39,6 @@ import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -95,9 +94,9 @@ public class HearingService {
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
+
     @Inject
     private ReferenceDataService referenceDataService;
-
     @Inject
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
@@ -111,6 +110,7 @@ public class HearingService {
                 .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
                 .map(ha -> hearingJPAMapper.fromJPA(ha))
                 .collect(toList());
+
 
         if (!hearingList.isEmpty()) {
             final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(hearingEvents, hearingList);
@@ -139,15 +139,17 @@ public class HearingService {
 
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
                 .stream()
                 .map(ha -> hearingJPAMapper.fromJPA(ha))
                 .collect(toList());
 
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
+
         if (!hearingList.isEmpty()) {
             final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(hearingEvents, hearingList);
-            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
+            final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+            return Optional.of(currentCourtStatus);
         }
         return empty();
     }

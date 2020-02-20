@@ -57,5 +57,4 @@ public class CourtCentreXmlGeneratorProducerTest {
 
         assertThat(courtCentreXmlGenerator, is(instanceOf(EmptyWebPageCourtCentreXmlGenerator.class)));
     }
-
 }

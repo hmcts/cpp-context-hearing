@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
-
 import static java.math.BigInteger.ONE;
+import static java.math.BigInteger.valueOf;
 import static java.time.ZonedDateTime.parse;
 import static java.time.format.DateTimeFormatter.ofPattern;
 
@@ -40,7 +40,6 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
 
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
 
-
     @Inject
     private XmlUtils xmlUtils;
 
@@ -74,7 +73,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         datetimestamp.setDayofweek(DaysOfWeekType.valueOf(latestCourtListUploadTime.getDayOfWeek().name()));
         datetimestamp.setDate(latestCourtListUploadTime.getDayOfMonth());
         datetimestamp.setMonth(MonthsOfYearType.valueOf(latestCourtListUploadTime.getMonth().name()));
-        datetimestamp.setYear(BigInteger.valueOf(latestCourtListUploadTime.getYear()));
+        datetimestamp.setYear(valueOf(latestCourtListUploadTime.getYear()));
         datetimestamp.setHour(latestCourtListUploadTime.getHour());
         datetimestamp.setMin(latestCourtListUploadTime.getMinute());
 
@@ -121,28 +120,28 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         final Courtroom xhibitCourtRoom = webPageObjectFactory.createCourtroom();
 
         xhibitCourtRoom.setCourtroomname(ccpCourtRoom.getCourtRoomName());
-        xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases(), ccpCourtRoom));
+        xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases()));
         return xhibitCourtRoom;
     }
 
 
-    private Cases getCases(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases cppCases,  final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
+    private Cases getCases(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases cppCases) {
         final Cases xhibitCases = webPageObjectFactory.createCases();
 
         cppCases.getCasesDetails()
-                .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase, ccpCourtRoom)));
+                .forEach(xhibitCase -> xhibitCases.getCaseDetails().add(addCaseDetails(xhibitCase)));
         return xhibitCases;
     }
 
 
     @SuppressWarnings("squid:S1172")
-    private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail,  final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom ccpCourtRoom) {
+    private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail) {
         final CaseDetails xhibitCaseDetails = new CaseDetails();
         final HearingEvent hearingEvent = cppCaseDetail.getHearingEvent();
         xhibitCaseDetails.setCppurn(cppCaseDetail.getCppUrn());
         xhibitCaseDetails.setCasenumber(ONE);
         xhibitCaseDetails.setCasetype(cppCaseDetail.getCaseType());
-        xhibitCaseDetails.setActivecase(BigInteger.ZERO);
+        xhibitCaseDetails.setActivecase(cppCaseDetail.getActivecase());
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
         if (null == hearingEvent) {
