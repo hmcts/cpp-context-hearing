@@ -297,6 +297,7 @@ class StagingEnforcementDefendantMapper {
 
     }
 
+
     private String setEmailAddress1(final uk.gov.justice.core.courts.Defendant defendant) {
         return ofNullable(defendant)
                 .map(uk.gov.justice.core.courts.Defendant::getPersonDefendant)

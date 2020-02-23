@@ -42,7 +42,7 @@ public class DefendantOffenceResultsUpdated {
     }
 
     public static Builder newBuilder(final DefendantOffenceResultsUpdated copy) {
-        Builder builder = new Builder();
+        final Builder builder = new Builder();
         builder.defendantId = copy.getDefendantId();
         builder.offenceIds = copy.getOffenceIds();
         builder.resultedOffences = copy.getResultedOffences();

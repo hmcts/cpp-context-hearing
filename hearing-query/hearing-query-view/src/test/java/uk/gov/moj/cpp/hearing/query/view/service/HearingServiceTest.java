@@ -1,26 +1,14 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anySet;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
-import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -54,6 +42,8 @@ import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
+import javax.json.JsonObject;
+import javax.json.JsonString;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
@@ -64,17 +54,26 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.json.JsonObject;
-import javax.json.JsonString;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -481,6 +480,45 @@ public class HearingServiceTest {
                 "09:00", "17:00", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId());
         assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
         assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+    }
+
+    @Test
+    public void shouldFindHearingListWhenJudicialUserIsMatched() {
+
+        LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+        final UUID hearingSummaryId = UUID.randomUUID();
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(buildHearingAndHearingDays());
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder);
+
+        final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
+               hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
+        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
+        assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+    }
+
+    @Test
+    public void shouldNotFindHearingListWhenJudicialUserIsNotMatched() {
+
+        LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+        final UUID hearingSummaryId = UUID.randomUUID();
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(buildHearingAndHearingDays());
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summary(hearingPojo)).thenReturn(hearingSummariesBuilder);
+
+        final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
+                UUID.randomUUID());
+        assertNull("response is empty", response.getHearingSummaries());
     }
 
     @Test

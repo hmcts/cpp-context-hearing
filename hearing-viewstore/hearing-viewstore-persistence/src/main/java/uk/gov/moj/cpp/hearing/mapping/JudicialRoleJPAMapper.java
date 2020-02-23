@@ -32,6 +32,7 @@ public class JudicialRoleJPAMapper {
         judicialRole.setBenchChairman(pojo.getIsBenchChairman());
         judicialRole.setDeputy(pojo.getIsDeputy());
         judicialRole.setHearing(hearing);
+        judicialRole.setUserId(pojo.getUserId());
         return judicialRole;
     }
 
@@ -50,6 +51,7 @@ public class JudicialRoleJPAMapper {
                         .build())
                 .withIsBenchChairman(entity.getBenchChairman())
                 .withIsDeputy(entity.getDeputy())
+                .withUserId(entity.getUserId())
                 .build();
     }
 

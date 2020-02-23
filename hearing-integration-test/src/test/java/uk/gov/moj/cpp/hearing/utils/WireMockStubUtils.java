@@ -86,13 +86,23 @@ public class WireMockStubUtils {
 
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
 
-        stubFor(get(urlPathEqualTo(format("/progression-service/query/api/rest/progression/cases/{0}", caseId)))
+        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
-                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS)
-                        .withBody(getProgressionCaseJson(caseId, caseUrn).toString())));
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-all-groups-by-user.json"))));
 
-        waitForStubToBeReady(format("/progression-service/query/api/rest/progression/cases/{0}", caseId), CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS);
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
+    public static void setupAsMagistrateUser(final UUID userId) {
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-magistrateuser-groups-by-user.json"))));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static final void mockMaterialUpload() {

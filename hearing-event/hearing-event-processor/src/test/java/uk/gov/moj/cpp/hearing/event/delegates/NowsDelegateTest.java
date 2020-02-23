@@ -50,6 +50,7 @@ import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.NowsRequestedToDocumentConverter;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -71,6 +72,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.json.JsonObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.benas.randombeans.EnhancedRandomBuilder;
@@ -99,7 +102,7 @@ public class NowsDelegateTest {
     @Mock
     private CourtHouseReverseLookup courtHouseReverseLookup;
     @Captor
-    private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+    private ArgumentCaptor<Envelope<JsonObject>> envelopeArgumentCaptor;
     @Mock
     private Sender sender;
     @InjectMocks
@@ -343,9 +346,9 @@ public class NowsDelegateTest {
 
         verify(sender).sendAsAdmin(envelopeArgumentCaptor.capture());
 
-        final List<JsonEnvelope> outgoingMessages = envelopeArgumentCaptor.getAllValues();
+        final List<Envelope<JsonObject>> outgoingMessages = envelopeArgumentCaptor.getAllValues();
 
-        final JsonEnvelope nowDocumentRequestPayload = outgoingMessages.get(0);
+        final JsonEnvelope nowDocumentRequestPayload = envelopeFrom(outgoingMessages.get(0).metadata(), outgoingMessages.get(0).payload());
 
         Assert.assertThat(nowDocumentRequestPayload, jsonEnvelope(
                 metadata().withName("public.hearing.now-document-requested"),

@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
 import static java.time.ZonedDateTime.parse;
+import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.at;
 
@@ -40,7 +41,7 @@ public class HearingTestUtils {
     public static final ZonedDateTime END_DATE_1 = parse("2018-02-24T15:45:00Z");
 
     public static Hearing buildHearing() {
-        final UUID hearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
         final Defendant defendant1 = buildDefendant1(hearingId);
         final Defendant defendant2 = buildDefendant2(hearingId);
         final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
@@ -55,8 +56,8 @@ public class HearingTestUtils {
 
     public static JudicialRole buildJudgeJudicialRole(UUID hearingId) {
         final JudicialRole judicialRole = new JudicialRole();
-        judicialRole.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
-        judicialRole.setJudicialId(UUID.randomUUID());
+        judicialRole.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        judicialRole.setJudicialId(randomUUID());
         judicialRole.setJudicialRoleType(CoreTestTemplates.magistrate().getJudiciaryType());
         judicialRole.setFirstName("Alan");
         judicialRole.setMiddleName("Mathison");
@@ -64,10 +65,10 @@ public class HearingTestUtils {
         judicialRole.setTitle("HHJ");
         judicialRole.setBenchChairman(true);
         judicialRole.setDeputy(false);
+        judicialRole.setUserId(randomUUID());
         return judicialRole;
     }
 
-    //TODO remove hand coded UUIDs
     public static Hearing buildHearing1(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
                                         Set<ProsecutionCase> cases) {
         Hearing hearing = new Hearing();
@@ -75,7 +76,7 @@ public class HearingTestUtils {
         hearing.setProsecutionCases(cases);
         hearing.setHearingLanguage(HearingLanguage.ENGLISH);
         final HearingType hearingType = new HearingType();
-        hearingType.setId(UUID.fromString("019556b2-a25e-4ea7-b3f1-8c89d14b02e0"));
+        hearingType.setId(randomUUID());
         hearingType.setDescription("TRIAL");
         hearing.setHearingType(hearingType);
         hearing.setJurisdictionType(JurisdictionType.CROWN);
@@ -84,26 +85,15 @@ public class HearingTestUtils {
         hearing.setHearingDays(asSet(buildHearingDate(hearingId, startDateTime), buildHearingDate(hearingId, endDateTime)));
 
         final CourtCentre courtCentre = new CourtCentre();
-        courtCentre.setId(UUID.fromString("e8821a38-546d-4b56-9992-ebdd772a561f"));
+        courtCentre.setId(randomUUID());
         courtCentre.setName("Liverpool Crown Court");
-        courtCentre.setRoomId(UUID.fromString("e7721a38-546d-4b56-9992-ebdd772a561b"));
+        courtCentre.setRoomId(randomUUID());
         courtCentre.setRoomName("3-1");
 
         hearing.setCourtCentre(courtCentre);
 
         return hearing;
     }
-
-    /*public static ProsecutionAdvocate buildProsecutionAdvocate(final Hearing hearing) {
-        return ProsecutionAdvocate.builder()
-                .withId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), hearing.getId()))
-                .withPersonId(UUID.fromString("35f4d841-a0eb-4a32-b75c-91d241bf83d3"))
-                .withFirstName("Brian J.")
-                .withLastName("Fox")
-                .withTitle("MR")
-                .withStatus("QC")
-                .build();
-    }*/
 
     public static Defendant buildDefendant1(final UUID hearingId) {
         Defendant defendant = new Defendant();
@@ -176,7 +166,7 @@ public class HearingTestUtils {
     public static ProsecutionCase buildLegalCase1(final UUID hearingId, final Set<Defendant> defendants) {
         // TODO add more fields
         ProsecutionCase prosecutionCase = new ProsecutionCase();
-        prosecutionCase.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        prosecutionCase.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         prosecutionCase.setDefendants(defendants);
         prosecutionCase.setProsecutionCaseIdentifier(buildProsecutionCaseIdentifier());
 
@@ -219,7 +209,7 @@ public class HearingTestUtils {
         hearingDay.setListingSequence(5);
         hearingDay.setDateTime(startDate);
         hearingDay.setDate(startDate.toLocalDate());
-        hearingDay.setId(new HearingSnapshotKey(UUID.randomUUID(), ahearingId));
+        hearingDay.setId(new HearingSnapshotKey(randomUUID(), ahearingId));
         return hearingDay;
     }
 
@@ -266,19 +256,19 @@ public class HearingTestUtils {
 
         // Hearing 1
         final Hearing hearing1 = new Hearing();
-        hearing1.setId(UUID.randomUUID());
+        hearing1.setId(randomUUID());
         Set<HearingDay> hearingDays1 = generateHearingDays(hearing1.getId(), 2019, 7, 1, 3);//3
         hearing1.setHearingDays(hearingDays1);
 
         //Hearing 2
         final Hearing hearing2 = new Hearing();
-        hearing2.setId(UUID.randomUUID());
+        hearing2.setId(randomUUID());
         Set<HearingDay> hearingDays2 = generateHearingDays(hearing1.getId(),2019, 7, 4, 1); //5
         hearing2.setHearingDays(hearingDays2);
 
         //Hearing 3
         final Hearing hearing3 = new Hearing();
-        hearing3.setId(UUID.randomUUID());
+        hearing3.setId(randomUUID());
         Set<HearingDay> hearingDays3 = generateHearingDays(hearing1.getId(),2019, 7, 2, 4); //1
         hearing3.setHearingDays(hearingDays3);
 
@@ -310,7 +300,7 @@ public class HearingTestUtils {
 
     private static HearingDay getHearingDay(UUID hearingId, int year, int month, int day, int sequence) {
         HearingDay hearingDay = new HearingDay();
-        hearingDay.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        hearingDay.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         hearingDay.setListingSequence(sequence);
 
         ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));

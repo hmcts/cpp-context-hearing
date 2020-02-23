@@ -23,6 +23,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String ACTION_NAME_GET_HEARING = "hearing.get.hearing";
     private static final String ACTION_NAME_GET_HEARINGS = "hearing.get.hearings";
+    private static final String ACTION_NAME_GET_HEARINGS_FOR_TODAY = "hearing.get.hearings-for-today";
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
     private static final String ACTION_NAME_GET_APPLICATION_DRAFT_RESULT = "hearing.get-application-draft-result";
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
@@ -54,6 +55,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsByDateV2() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetHearingsForToday() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_FOR_TODAY, "Magistrates");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetHearingsForToday() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARINGS_FOR_TODAY, "Magistrates");
     }
 
     @Test

@@ -1,16 +1,21 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getURL;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -33,6 +38,20 @@ import org.hamcrest.Matchers;
 
 @SuppressWarnings({"squid:S2925"})
 public class Queries {
+
+    public static void getHearingForTodayPollForMatch(final UUID userId, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-for-today"), "application/vnd.hearing.get.hearings-for-today+json")
+                .withHeader(HeaderConstants.USER_ID, userId)
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
+         poll(requestParams)
+                .timeout(timeout, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        expectedConditions
+                );
+    }
 
     public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
         getHearingPollForMatch(hearingId, timeout, 3, resultMatcher);

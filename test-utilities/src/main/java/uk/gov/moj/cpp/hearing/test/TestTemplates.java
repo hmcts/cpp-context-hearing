@@ -132,7 +132,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"squid:S1188", "squid:S1135", "squid:S1314"})
+@SuppressWarnings({"squid:S1188", "squid:S1135", "squid:S1314", "squid:S1192"})
 public class TestTemplates {
 
     private static final String DAVID = "David";

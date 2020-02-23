@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE;
@@ -71,16 +72,6 @@ public class EnforceFinancialImpositionMapperTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
 
         nowsRequest = generateNowsRequestTemplate(defendantId);
-
-       /* UUID lumpSumResultDefinition = UUID.randomUUID();
-
-        nowsRequest.getSharedResultLines().add(
-                SharedResultLine.sharedResultLine()
-                        .withId(lumpSumResultDefinition)
-                        .build()
-
-        );
-*/
 
         mapper = new EnforceFinancialImpositionMapper(requestId, nowsRequest, targets);
     }

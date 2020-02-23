@@ -1,13 +1,12 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -15,12 +14,16 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListRespons
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
+import static java.time.LocalDate.now;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
@@ -51,6 +54,16 @@ public class HearingQueryView {
                 .apply(hearingListResponse);
     }
 
+    @Handles("hearing.get.hearings-for-today")
+    @SuppressWarnings({"squid:S3655"})
+    public Envelope<GetHearings> findHearingsForToday(final JsonEnvelope envelope) {
+        final GetHearings hearingListResponse = hearingService.getHearingsForToday(now(), fromString(envelope.metadata().userId().get()));
+
+        return envelop(hearingListResponse)
+                .withName("hearing.get.hearings-for-today")
+                .withMetadataFrom(envelope);
+    }
+
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
@@ -61,14 +74,14 @@ public class HearingQueryView {
 
     @Handles("hearing.get-draft-result")
     public JsonEnvelope getDraftResult(final JsonEnvelope envelope) {
-        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final TargetListResponse targetListResponse = hearingService.getTargets(hearingId);
         return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result").apply(targetListResponse);
     }
 
     @Handles("hearing.get-application-draft-result")
     public JsonEnvelope getApplicationDraftResult(final JsonEnvelope envelope) {
-        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final ApplicationTargetListResponse applicationTargetListResponse = hearingService.getApplicationTargets(hearingId);
         return enveloper.withMetadataFrom(envelope, "hearing.get-application-draft-result").apply(applicationTargetListResponse);
     }

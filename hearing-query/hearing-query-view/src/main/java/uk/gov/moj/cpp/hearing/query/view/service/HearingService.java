@@ -130,6 +130,27 @@ public class HearingService {
                 .build();
     }
 
+    @Transactional
+    public GetHearings getHearingsForToday(final LocalDate date,  final UUID userId) {
+
+        if (null == date || null == userId) {
+            return new GetHearings(null);
+        }
+        final List<Hearing> filteredHearings = hearingRepository.findByUserFilters(date, userId);
+        if (CollectionUtils.isEmpty(filteredHearings)) {
+            return new GetHearings(null);
+        }
+
+        filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(filteredHearings.stream()
+                        .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .map(h -> getHearingTransformer.summaryForHearingsForToday(h).build())
+                        .collect(toList()))
+                .build();
+    }
+
 
     @Transactional
     public HearingDetailsResponse getHearingById(final UUID hearingId) {

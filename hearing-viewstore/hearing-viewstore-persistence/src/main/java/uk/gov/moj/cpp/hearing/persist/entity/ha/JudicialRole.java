@@ -45,6 +45,9 @@ public class JudicialRole {
     @Column(name = "is_bench_chairman")
     private Boolean isBenchChairman;
 
+    @Column(name = "user_id")
+    private UUID userId;
+
     public JudicialRole() {
         //For JPA
     }
@@ -127,6 +130,14 @@ public class JudicialRole {
 
     public void setJudicialRoleType(String judicialRoleType) {
         this.judicialRoleType = judicialRoleType;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public void setUserId(final UUID userId) {
+        this.userId = userId;
     }
 
     @Override
