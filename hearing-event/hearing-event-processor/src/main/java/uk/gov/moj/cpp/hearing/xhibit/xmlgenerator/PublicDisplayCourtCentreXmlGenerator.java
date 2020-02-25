@@ -208,7 +208,8 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
             if (hearingDetailsResponseOptional.isPresent()) {
                 hearingDetailsResponseOptional.get().getHearing().getJudiciary()
                         .stream()
-                        .filter(judicialRole -> Objects.nonNull(judicialRole.getJudicialRoleType()) &&  !JudicialRoleTypeEnum.MAGISTRATE.toString().equals(judicialRole.getJudicialRoleType().getJudiciaryType()))
+                        .filter(judicialRole -> Objects.nonNull(judicialRole.getJudicialRoleType()))
+                        .filter(judicialRole -> !JudicialRoleTypeEnum.MAGISTRATE.toString().equalsIgnoreCase(judicialRole.getJudicialRoleType().getJudiciaryType()))
                         .map(Optional::ofNullable)
                         .findFirst().ifPresent(judicialRolePresent -> {
                             final JsonObject judiciary = xhibitReferenceDataService.getJudiciary(envelope, judicialRolePresent.get().getJudicialId());

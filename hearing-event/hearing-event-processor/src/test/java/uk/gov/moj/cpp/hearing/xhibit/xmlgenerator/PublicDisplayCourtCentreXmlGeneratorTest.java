@@ -25,7 +25,6 @@ import static uk.gov.moj.cpp.hearing.xhibit.XmlTestUtils.assertXmlEquals;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.justice.core.courts.JudicialRoleType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -38,6 +37,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.test.FileUtil;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
@@ -63,9 +63,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PublicDisplayCourtCentreXmlGeneratorTest {
+
     private static final String PUBLIC_PAGE_FILE_PATH = "xhibit/expectedPublicPage.xml";
     private static final String PUBLIC_PAGE_FOR_ACTIVE_CASES_FILE_PATH = "xhibit/expectedPublicPageForActiveCases.xml";
     private static final String PUBLIC_PAGE_WITHOUT_JUDGE_NAME_FILE_PATH = "xhibit/expectedPublicPageWithoutJudgeName.xml";
+    private static final String MAGISTRATE_JUDICIAL_ROLE_TYPE = "Magistrate";
 
     @Spy
     private XmlUtils xmlUtils;
@@ -293,8 +295,8 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
 
     private JsonEnvelope getHearingEnvelopeJustWithMagistrate() {
         Hearing hearing = new HearingFactory().createStandaloneApplicationHearing()
-                .withJudiciary(Arrays.asList(judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(JudicialRoleTypeEnum.MAGISTRATE.toString()).build()),
-                                             judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(JudicialRoleTypeEnum.MAGISTRATE.toString()).build())))
+                .withJudiciary(Arrays.asList(judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(MAGISTRATE_JUDICIAL_ROLE_TYPE).build()),
+                                             judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(MAGISTRATE_JUDICIAL_ROLE_TYPE).build())))
                 .build();
 
         HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse();
