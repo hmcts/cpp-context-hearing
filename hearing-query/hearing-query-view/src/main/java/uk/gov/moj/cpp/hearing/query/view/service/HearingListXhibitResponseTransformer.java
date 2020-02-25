@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.math.BigInteger.valueOf;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -13,6 +12,11 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite.courtSite;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant.defendant;
+import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
+import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.INACTIVE;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.FINISHED;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.INPROGRESS;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.STARTED;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
@@ -99,26 +103,39 @@ public class HearingListXhibitResponseTransformer {
         return xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()).getCrestCourtSiteUUID().equals(crestCourtSiteId);
     }
 
-    private CourtRoom getCourtRoom(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<UUID, CourtRoom> courtRoomMap) {
+    private CourtRoom getCourtRoom(final HearingEventsToHearingMapper hearingEventsToHearingMapper,
+                                   final Hearing hearing,
+                                   final Map<UUID, CourtRoom> courtRoomMap) {
         final UUID courtRoomKey = hearing.getCourtCentre().getRoomId();
         final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
         CourtRoom courtRoom = courtRoomMap.get(courtRoomKey) ;
+
         final Set<UUID> activeHearingIds = hearingEventsToHearingMapper.getActiveHearingIds();
-        final BigInteger isActiveHearing = activeHearingIds.contains(hearing.getId()) ? valueOf(1) : valueOf(0);
+
+        final BigInteger isActiveHearing = activeHearingIds.contains(hearing.getId()) ? ACTIVE.getStatusCode() : INACTIVE.getStatusCode();
+
+        BigInteger hearingprogessValue = ACTIVE.getStatusCode().equals(isActiveHearing) ? INPROGRESS.getProgressCode() : STARTED.getProgressCode();
+
+        final Map<UUID, UUID> hearingIdAndEventDefinitionIds = hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds();
+        final UUID hearingEventDefinitionId = hearingIdAndEventDefinitionIds.get(hearing.getId());
+        final boolean finishedHearingDefinitionsId = EventDefinitions.FINISHED.getEventDefinitionsId().equals(hearingEventDefinitionId);
+
+        hearingprogessValue = finishedHearingDefinitionsId ? FINISHED.getProgressCode() : hearingprogessValue;
+
         if(courtRoom == null) {
-            final Cases cases = getCases(hearing, hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null), isActiveHearing);
+            final Cases cases = getCases(hearing, hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId()).orElse(null), isActiveHearing, hearingprogessValue);
             courtRoom = courtRoom()
                     .withCourtRoomName(courtRoomMapping.getCrestCourtRoomName())
                     .withCases(cases)
-                    .withHearingEvent(hearingEventsToHearingMapper.getHearingEventBy(hearing.getId()).orElse(null))
+                    .withHearingEvent(hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId()).orElse(null))
                     .withDefenceCouncil(hearing.getDefenceCounsels())
                     .withLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()))
                     .build();
             courtRoom.setCourtRoomId(courtRoomKey);
             courtRoomMap.put(courtRoomKey, courtRoom);
         } else {
-            final Optional<HearingEvent> hearingEventBy = hearingEventsToHearingMapper.getHearingEventBy(hearing.getId());
-            final List<CaseDetail> casesDetails = getCases(hearing, hearingEventBy.orElse(null), isActiveHearing).getCasesDetails();
+            final Optional<HearingEvent> hearingEventBy = hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId());
+            final List<CaseDetail> casesDetails = getCases(hearing, hearingEventBy.orElse(null), isActiveHearing, hearingprogessValue).getCasesDetails();
 
             courtRoom.getCases().getCasesDetails().addAll(casesDetails);
             courtRoom.getLinkedCaseIds().addAll(getLinkedCaseIds(hearing.getCourtApplications()));
@@ -133,19 +150,22 @@ public class HearingListXhibitResponseTransformer {
 
     private Cases getCases(final Hearing hearing,
                            final HearingEvent hearingEvent,
-                           final BigInteger isActiveHearing) {
+                           final BigInteger isActiveHearing,
+                           final BigInteger hearingprogessValue) {
 
         final List<CaseDetail> caseDetailsList = new ArrayList<>();
         hearing.getProsecutionCases()
                 .forEach(prosecutionCase ->
-                        caseDetailsList.add(buildCaseDetail(hearing, hearingEvent, prosecutionCase, isActiveHearing)));
+                        caseDetailsList.add(buildCaseDetail(hearing, hearingEvent, prosecutionCase, isActiveHearing, hearingprogessValue)));
         return cases().withCasesDetails(caseDetailsList).build();
     }
 
     @SuppressWarnings("squid:S3655")
-    private CaseDetail buildCaseDetail(final Hearing hearing, final HearingEvent hearingEvent, final ProsecutionCase prosecutionCase, final BigInteger activecase) {
+    private CaseDetail buildCaseDetail(final Hearing hearing, final HearingEvent hearingEvent, final ProsecutionCase prosecutionCase,
+                                       final BigInteger activecase, final BigInteger hearingprogessValue) {
         final CaseDetail caseDetail  = caseDetail()
                 .withActivecase(activecase)
+                .withHearingprogress(hearingprogessValue)
                 .withCppUrn(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
                 .withHearingType(hearing.getType().getDescription())

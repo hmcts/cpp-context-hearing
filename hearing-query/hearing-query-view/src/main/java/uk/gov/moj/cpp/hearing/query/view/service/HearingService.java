@@ -104,8 +104,8 @@ public class HearingService {
 
     public Optional<CurrentCourtStatus> getLatestHearings(final List<UUID> courtCentreList, final LocalDate localDate) {
         final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate);
-        final List<HearingEvent> hearingEvents = getHearingEvents(hearingEventPojos);
-        final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingEvents
+        final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
+        final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
                 .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
                 .map(ha -> hearingJPAMapper.fromJPA(ha))
@@ -113,7 +113,7 @@ public class HearingService {
 
 
         if (!hearingList.isEmpty()) {
-            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(hearingEvents, hearingList);
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, new ArrayList<>());
             return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
         }
         return empty();
@@ -138,16 +138,19 @@ public class HearingService {
     }
 
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
+        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate);
+        final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
+
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
                 .stream()
                 .map(ha -> hearingJPAMapper.fromJPA(ha))
                 .collect(toList());
 
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
+        final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
 
         if (!hearingList.isEmpty()) {
-            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(hearingEvents, hearingList);
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList,allHearingEvents);
             final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
             return Optional.of(currentCourtStatus);
         }

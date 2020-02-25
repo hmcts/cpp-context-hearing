@@ -15,6 +15,8 @@ import java.util.UUID;
 public class CaseDetail implements Serializable {
     private static final long serialVersionUID = -4951785613141170679L;
 
+    private BigInteger hearingprogress;
+
     private BigInteger activeCase;
 
     private String caseNumber;
@@ -39,7 +41,8 @@ public class CaseDetail implements Serializable {
 
     public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime,
                       final HearingEvent hearingEvent,
-                      final BigInteger activecase) {
+                      final BigInteger activecase,
+                      final BigInteger hearingprogress) {
         this.caseNumber = caseNumber;
         this.caseType = caseType;
         this.cppUrn = cppUrn;
@@ -49,10 +52,15 @@ public class CaseDetail implements Serializable {
         this.notBeforeTime = notBeforeTime;
         this.hearingEvent = hearingEvent;
         this.activeCase = activecase;
+        this.hearingprogress = hearingprogress;
     }
 
     public BigInteger getActivecase() {
         return activeCase;
+    }
+
+    public BigInteger getHearingprogress() {
+        return hearingprogress;
     }
 
     public String getCaseNumber() {
@@ -119,6 +127,8 @@ public class CaseDetail implements Serializable {
 
         CaseDetail that = (CaseDetail) o;
 
+        if (getHearingprogress() != null ? !getHearingprogress().equals(that.getHearingprogress()) : that.getHearingprogress() != null)
+            return false;
         if (activeCase != null ? !activeCase.equals(that.activeCase) : that.activeCase != null)
             return false;
         if (getCaseNumber() != null ? !getCaseNumber().equals(that.getCaseNumber()) : that.getCaseNumber() != null)
@@ -145,7 +155,8 @@ public class CaseDetail implements Serializable {
     @SuppressWarnings({"squid:S3776", "squid:S00121", "squid:S00122"} )
     @Override
     public int hashCode() {
-        int result = activeCase != null ? activeCase.hashCode() : 0;
+        int result = getHearingprogress() != null ? getHearingprogress().hashCode() : 0;
+        result = 31 * result + (activeCase != null ? activeCase.hashCode() : 0);
         result = 31 * result + (getCaseNumber() != null ? getCaseNumber().hashCode() : 0);
         result = 31 * result + (getCaseType() != null ? getCaseType().hashCode() : 0);
         result = 31 * result + (getCppUrn() != null ? getCppUrn().hashCode() : 0);
@@ -162,7 +173,8 @@ public class CaseDetail implements Serializable {
     @Override
     public String toString() {
         return "CaseDetail{" +
-                "activeCase=" + activeCase +
+                "hearingprogress=" + hearingprogress +
+                ", activeCase=" + activeCase +
                 ", caseNumber='" + caseNumber + '\'' +
                 ", caseType='" + caseType + '\'' +
                 ", cppUrn='" + cppUrn + '\'' +
@@ -175,8 +187,6 @@ public class CaseDetail implements Serializable {
                 ", defenceCounsels=" + defenceCounsels +
                 '}';
     }
-
-
 
     public CaseDetail setCaseNumber(String caseNumber) {
         this.caseNumber = caseNumber;
@@ -204,6 +214,8 @@ public class CaseDetail implements Serializable {
     }
 
     public static class Builder {
+
+        private BigInteger hearingprogress;
 
         private BigInteger activecase;
 
@@ -268,8 +280,13 @@ public class CaseDetail implements Serializable {
             return this;
         }
 
+        public Builder withHearingprogress(final BigInteger hearingprogress) {
+            this.hearingprogress = hearingprogress;
+            return this;
+        }
+
         public CaseDetail build() {
-            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent, activecase);
+            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent, activecase, hearingprogress);
         }
     }
 }
