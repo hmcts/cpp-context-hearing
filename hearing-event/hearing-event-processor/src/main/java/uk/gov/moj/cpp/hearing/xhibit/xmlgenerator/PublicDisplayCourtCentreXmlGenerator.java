@@ -176,6 +176,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         final HearingEvent hearingEvent = cppCaseDetail.getHearingEvent();
         xhibitCaseDetails.setCppurn(cppCaseDetail.getCppUrn());
         xhibitCaseDetails.setCasenumber(ONE);
+        xhibitCaseDetails.setHearingprogress(cppCaseDetail.getHearingprogress());
         xhibitCaseDetails.setCasetype(cppCaseDetail.getCaseType());
         xhibitCaseDetails.setActivecase(cppCaseDetail.getActivecase());
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());

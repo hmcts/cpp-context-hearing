@@ -252,6 +252,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         return caseDetail()
                 .withActivecase(valueOf(0))
                 .withCaseNumber("1")
+                .withHearingprogress(valueOf(5))
                 .withCaseType("caseType")
                 .withCppUrn("234")
                 .withHearingType("hearingType")
@@ -264,6 +265,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
     private CaseDetail caseDetail3() {
         return caseDetail()
                 .withActivecase(valueOf(1))
+                .withHearingprogress(valueOf(5))
                 .withCaseNumber("1")
                 .withCaseType("caseType")
                 .withCppUrn("235")

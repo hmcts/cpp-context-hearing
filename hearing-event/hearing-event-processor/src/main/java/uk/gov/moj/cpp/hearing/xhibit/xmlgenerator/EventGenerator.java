@@ -32,22 +32,24 @@ public class EventGenerator {
 
     public Currentstatus generate(final CourtRoom courtRoom) {
         final HearingEvent hearingEvent = courtRoom.getHearingEvent();
-        final String xhibitEventCode =
-                eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString());
-
         final Currentstatus currentstatus = webPageObjectFactory.createCurrentstatus();
+        if (hearingEvent != null) {
+            final String xhibitEventCode =
+                    eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString());
 
-        if (valueFor(xhibitEventCode).isPresent()) {
-            final Event event = webPageObjectFactory.createEvent();
 
-            event.setTime(hearingEvent.getLastModifiedTime().format(dateTimeFormatter));
-            event.setDate(LocalDate.parse(hearingEvent.getEventDate()).format(dateFormatter));
-            event.setFreeText(EMPTY);
-            event.setType(xhibitEventCode);
+            if (valueFor(xhibitEventCode).isPresent()) {
+                final Event event = webPageObjectFactory.createEvent();
 
-            populateComplexEventType.addComplexEventType(event, courtRoom, xhibitEventCode);
+                event.setTime(hearingEvent.getLastModifiedTime().format(dateTimeFormatter));
+                event.setDate(LocalDate.parse(hearingEvent.getEventDate()).format(dateFormatter));
+                event.setFreeText(EMPTY);
+                event.setType(xhibitEventCode);
 
-            currentstatus.setEvent(event);
+                populateComplexEventType.addComplexEventType(event, courtRoom, xhibitEventCode);
+
+                currentstatus.setEvent(event);
+            }
         }
         return currentstatus;
     }
