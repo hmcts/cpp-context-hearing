@@ -37,7 +37,6 @@ public class EventGenerator {
             final String xhibitEventCode =
                     eventMapperCache.getXhibitEventCodeBy(hearingEvent.getHearingEventDefinitionId().toString());
 
-
             if (valueFor(xhibitEventCode).isPresent()) {
                 final Event event = webPageObjectFactory.createEvent();
 

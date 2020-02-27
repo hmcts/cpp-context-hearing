@@ -106,7 +106,7 @@ public class HearingQueryViewTest {
                 .build());
 
         final LocalDate now = LocalDate.now();
-        when(hearingService.getLatestHearings(courtCentreIds, now)).thenReturn(currentCourtStatus);
+        when(hearingService.getHearingsForWebPage(courtCentreIds, now)).thenReturn(currentCourtStatus);
 
         final JsonEnvelope query = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.latest-hearings-by-court-centres"),
@@ -136,7 +136,7 @@ public class HearingQueryViewTest {
         courtCentreIds.add(fromString(courtCentreId2));
 
         final LocalDate now = LocalDate.now();
-        when(hearingService.getLatestHearings(courtCentreIds, now)).thenReturn(currentCourtStatus);
+        when(hearingService.getHearingsForWebPage(courtCentreIds, now)).thenReturn(currentCourtStatus);
 
         final JsonEnvelope query = envelopeFrom(
                 metadataBuilder().withId(randomUUID()).withName("hearing.get-latest-hearings-by-court-centres"),

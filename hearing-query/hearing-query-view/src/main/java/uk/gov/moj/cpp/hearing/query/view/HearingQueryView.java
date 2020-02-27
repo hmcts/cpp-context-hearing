@@ -147,7 +147,7 @@ public class HearingQueryView {
 
         final List<UUID> courtCentreList = Stream.of(courtCentreIds.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
 
-        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getLatestHearings(courtCentreList,  LocalDate.parse(dateOfHearing.get()));
+        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsForWebPage(courtCentreList,  LocalDate.parse(dateOfHearing.get()));
 
         return enveloper.withMetadataFrom(envelope, "hearing.get-latest-hearings-by-court-centres").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }

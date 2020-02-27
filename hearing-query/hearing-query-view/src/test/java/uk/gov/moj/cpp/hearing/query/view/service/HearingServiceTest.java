@@ -574,7 +574,7 @@ public class HearingServiceTest {
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
 
-        final Optional<CurrentCourtStatus> response = hearingService.getLatestHearings(courtCentreIds, now);
+        final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now);
 
         assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
     }

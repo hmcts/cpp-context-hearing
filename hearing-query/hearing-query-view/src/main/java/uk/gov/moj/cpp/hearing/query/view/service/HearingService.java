@@ -102,7 +102,7 @@ public class HearingService {
 
     private final ZoneId zid = of(UTC.getId());
 
-    public Optional<CurrentCourtStatus> getLatestHearings(final List<UUID> courtCentreList, final LocalDate localDate) {
+    public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList, final LocalDate localDate) {
         final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
@@ -113,28 +113,10 @@ public class HearingService {
 
 
         if (!hearingList.isEmpty()) {
-            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, new ArrayList<>());
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, activeHearingEventList);
             return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
         }
         return empty();
-    }
-
-    private List<HearingEvent> getHearingEvents(final List<HearingEventPojo> hearingEventPojos) {
-        final List<HearingEvent> hearingEvents  = new ArrayList();
-        for(final HearingEventPojo hearingEventPojo: hearingEventPojos){
-            final HearingEvent hearingEvent = new HearingEvent();
-            hearingEvent.setHearingId(hearingEventPojo.getHearingId());
-            hearingEvent.setId(hearingEventPojo.getId());
-            hearingEvent.setHearingEventDefinitionId(hearingEventPojo.getHearingEventDefinitionId());
-            hearingEvent.setLastModifiedTime(hearingEventPojo.getLastModifiedTime());
-            hearingEvent.setRecordedLabel(hearingEventPojo.getRecordedLabel());
-            hearingEvent.setEventTime(hearingEventPojo.getEventTime());
-            hearingEvent.setEventDate(hearingEventPojo.getEventDate());
-            hearingEvent.setDeleted(hearingEventPojo.getDeleted());
-            hearingEvent.setDefenceCounselId(hearingEventPojo.getDefenceCounselId());
-            hearingEvents.add(hearingEvent);
-        }
-        return hearingEvents;
     }
 
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
@@ -150,7 +132,7 @@ public class HearingService {
         final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
 
         if (!hearingList.isEmpty()) {
-            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList,allHearingEvents);
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, allHearingEvents);
             final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
             return Optional.of(currentCourtStatus);
         }
@@ -339,6 +321,24 @@ public class HearingService {
                                 .setApplicationId(dr.getApplicationId())
                                 .setTargetId(dr.getId())
                 ).collect(toList()));
+    }
+
+    private List<HearingEvent> getHearingEvents(final List<HearingEventPojo> hearingEventPojos) {
+        final List<HearingEvent> hearingEvents  = new ArrayList();
+        for(final HearingEventPojo hearingEventPojo: hearingEventPojos){
+            final HearingEvent hearingEvent = new HearingEvent();
+            hearingEvent.setHearingId(hearingEventPojo.getHearingId());
+            hearingEvent.setId(hearingEventPojo.getId());
+            hearingEvent.setHearingEventDefinitionId(hearingEventPojo.getHearingEventDefinitionId());
+            hearingEvent.setLastModifiedTime(hearingEventPojo.getLastModifiedTime());
+            hearingEvent.setRecordedLabel(hearingEventPojo.getRecordedLabel());
+            hearingEvent.setEventTime(hearingEventPojo.getEventTime());
+            hearingEvent.setEventDate(hearingEventPojo.getEventDate());
+            hearingEvent.setDeleted(hearingEventPojo.getDeleted());
+            hearingEvent.setDefenceCounselId(hearingEventPojo.getDefenceCounselId());
+            hearingEvents.add(hearingEvent);
+        }
+        return hearingEvents;
     }
 
     private Function<Subscription, uk.gov.moj.cpp.hearing.domain.notification.Subscription> populateHearing() {
