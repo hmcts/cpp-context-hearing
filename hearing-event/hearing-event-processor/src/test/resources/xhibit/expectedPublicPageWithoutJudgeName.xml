@@ -21,6 +21,7 @@
                                         <lastname>Jong</lastname>
                                     </defendant>
                                 </defendants>
+                                <notbeforetime>15:00</notbeforetime>
                                 <currentstatus>
                                     <event>
                                         <time>12:30</time>

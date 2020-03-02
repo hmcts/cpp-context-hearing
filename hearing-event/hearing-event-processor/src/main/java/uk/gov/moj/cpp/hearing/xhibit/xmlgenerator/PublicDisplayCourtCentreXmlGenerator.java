@@ -181,10 +181,10 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setActivecase(cppCaseDetail.getActivecase());
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
+        final String dateTime = dateTimeFormatter.format(parse(cppCaseDetail.getNotBeforeTime()));
+        xhibitCaseDetails.setNotbeforetime(dateTime);
 
         if (null == hearingEvent) {
-            final String dateTime = dateTimeFormatter.format(parse(cppCaseDetail.getNotBeforeTime()));
-            xhibitCaseDetails.setNotbeforetime(dateTime);
             xhibitCaseDetails.setTimestatusset(dateTime);
             xhibitCaseDetails.setHearingprogress(BigInteger.ZERO);
         } else {
