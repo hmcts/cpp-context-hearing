@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -20,9 +21,11 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddProsecutionCounselCommandTemplates.addProsecutionCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateProsecutionCounselCommandTemplates.updateProsecutionCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
@@ -41,12 +44,18 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import com.jayway.restassured.path.json.JsonPath;
+
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("unchecked")
 public class ProsecutionCounselIT extends AbstractIT {
 
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProsecutionCounselIT.class);
 
     public static ProsecutionCounsel createFirstProsecutionCounsel(final InitiateHearingCommandHelper hearingOne) {
         final Utilities.EventListener publicProsecutionCounselAdded = listenFor("public.hearing.prosecution-counsel-added")
@@ -257,7 +266,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addProsecutionCounsel_failedCheckin() throws Exception {
+    public void addProsecutionCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() throws Exception {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -276,8 +285,40 @@ public class ProsecutionCounselIT extends AbstractIT {
                 addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
         );
 
-        publicProsecutionCounselAdded.waitFor();
+        JsonPath jsonPath = publicProsecutionCounselAdded.waitFor();
+        String caseURN = hearingOne.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN();
 
+        assertThat(jsonPath.getString("caseURN"), is(caseURN));
+        assertThat(jsonPath.getString("prosecutionAuthorityReference"), isEmptyOrNullString());
+    }
+
+    @Test
+    public void addProsecutionCounsel_failedCheckin_SJPCases_wherePARisPopulated() throws Exception {
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
+
+        givenAUserHasLoggedInAsAProsecutionCounsel(randomUUID());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
+
+        final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING);
+
+        //Add Prosecution Counsel
+        final Utilities.EventListener publicProsecutionCounselAdded = listenFor("public.hearing.prosecution-counsel-change-ignored")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
+
+        final AddProsecutionCounsel firstProsecutionCounselReAddCommand = UseCases.addProsecutionCounsel(getRequestSpec(), hearingOne.getHearingId(),
+                addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
+        );
+
+        JsonPath jsonPath = publicProsecutionCounselAdded.waitFor();
+
+        String caseURN = hearingOne.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN();
+        String prosecutionAuthorityReference = hearingOne.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference();
+
+        assertThat(jsonPath.getString("caseURN"), is(prosecutionAuthorityReference));
+        assertThat(caseURN, isEmptyOrNullString());
     }
 
     private HearingEventDefinitionData hearingDefinitionData(final List<HearingEventDefinition> hearingEventDefinitions) {

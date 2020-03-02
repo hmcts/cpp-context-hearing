@@ -6,7 +6,9 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -21,6 +23,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.addDefenceCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.AddDefenceCounselCommandTemplates.addDefenceCounselCommandTemplateWithoutMiddleName;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefenceCounselCommandTemplates.updateDefenceCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
@@ -41,6 +44,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
 
 @SuppressWarnings("unchecked")
@@ -336,7 +340,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addDefenceCounsel_failedCheckin() throws Exception {
+    public void addDefenceCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() throws Exception {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -355,7 +359,38 @@ public class DefenceCounselIT extends AbstractIT {
                 addDefenceCounselCommandTemplate(hearingOne.getHearingId())
         );
 
-        publicDefenceCounselAdded.waitFor();
+        JsonPath jsonPath = publicDefenceCounselAdded.waitFor();
+        String caseURN = hearingOne.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN();
 
+        assertThat(jsonPath.getString("caseURN"), is(caseURN));
+        assertThat(jsonPath.getString("prosecutionAuthorityReference"), isEmptyOrNullString());
+    }
+
+    @Test
+    public void addDefenceCounsel_failedCheckin_SJPCases_wherePARisPopulated() throws Exception {
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
+
+        givenAUserHasLoggedInAsADefenceCounsel(randomUUID());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
+
+        final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING);
+
+        //Add Defence Counsel
+        final Utilities.EventListener publicDefenceCounselAdded = listenFor("public.hearing.defence-counsel-change-ignored")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
+
+        final AddDefenceCounsel firstDefenceCounselCommand = UseCases.addDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
+                addDefenceCounselCommandTemplate(hearingOne.getHearingId())
+        );
+
+        JsonPath jsonPath = publicDefenceCounselAdded.waitFor();
+        String caseURN = hearingOne.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN();
+        String prosecutionAuthorityReference = hearingOne.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference();
+
+        assertThat(jsonPath.getString("caseURN"), is(prosecutionAuthorityReference));
+        assertThat(caseURN, isEmptyOrNullString());
     }
 }
