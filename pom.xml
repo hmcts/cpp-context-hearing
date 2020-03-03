@@ -10,7 +10,7 @@
 
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>6.4.24-SCSL-SNAPSHOT</version>
+    <version>6.4.25-SCSL-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
