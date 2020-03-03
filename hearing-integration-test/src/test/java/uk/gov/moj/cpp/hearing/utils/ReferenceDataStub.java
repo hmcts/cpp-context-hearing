@@ -81,6 +81,9 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-hearing-event-mappings";
     private static final String REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-hearing-event-mappings+json";
 
+    private static final String REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE = "application/vnd.reference-data.judiciaries+json";
+    private static final String REFERENCE_DATA_JUDICIARIES_URL = "/referencedata-service/query/api/rest/referencedata/judiciaries";
+
     public static void stubForReferenceDataResults() {
         stubGetReferenceDataResultDefinitionsForFirstDay();
         stubGetReferenceDataResultDefinitionsKeywordsForFirstDay();
@@ -476,5 +479,20 @@ public class ReferenceDataStub {
                         .withBody(payload)));
 
         waitForStubToBeReady(REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_QUERY_URL, REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_MEDIA_TYPE);
+    }
+
+    public static void stubGetReferenceDataJudiciaries() {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        String payload = getPayload("stub-data/referencedata.judiciaries.json");
+
+        stubFor(get(urlPathMatching(REFERENCE_DATA_JUDICIARIES_URL))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(REFERENCE_DATA_JUDICIARIES_URL, REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE);
     }
 }

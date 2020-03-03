@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
-import static java.util.Random.*;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -24,6 +23,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
@@ -46,7 +46,6 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,6 +77,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         stubGetReferenceDataCourtXhibitCourtMappings();
         stubOrganisationUnit(courtCentreId);
         stubGetReferenceDataEventMappings();
+        stubGetReferenceDataJudiciaries();
     }
 
     @Test

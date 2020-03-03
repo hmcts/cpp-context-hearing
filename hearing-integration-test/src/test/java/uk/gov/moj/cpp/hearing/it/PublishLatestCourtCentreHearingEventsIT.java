@@ -24,6 +24,7 @@ import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionPro
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRoomMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForWebPage;
@@ -83,6 +84,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
         stubGetReferenceDataEventMappings();
         stubGetProgressionProsecutionCases(caseId);
+        stubGetReferenceDataJudiciaries();
     }
 
     @Test
