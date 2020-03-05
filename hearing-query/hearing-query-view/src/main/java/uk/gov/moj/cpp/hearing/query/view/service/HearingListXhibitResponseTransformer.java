@@ -46,6 +46,8 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+
 @ApplicationScoped
 public class HearingListXhibitResponseTransformer {
 
@@ -169,7 +171,7 @@ public class HearingListXhibitResponseTransformer {
                 .withCppUrn(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
                 .withHearingType(hearing.getType().getDescription())
-                .withDefendants(getDefendants(prosecutionCase))
+                .withDefendants(getDefendants(prosecutionCase, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason())))
                 .withJudgeName(getJudgeName(hearing))
                 .withHearingEvent(hearingEvent)
                 .withNotBeforeTime(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().getSittingDay().toString())
@@ -192,10 +194,11 @@ public class HearingListXhibitResponseTransformer {
         return EMPTY;
     }
 
-    private List<Defendant> getDefendants(final ProsecutionCase prosecutionCase) {
+    private List<Defendant> getDefendants(final ProsecutionCase prosecutionCase, final boolean needToBeOmitted) {
+
         return prosecutionCase.getDefendants()
                 .stream()
-                .map(prosecutionCaseDefendant -> defendant()
+                .map(prosecutionCaseDefendant -> needToBeOmitted ? defendant().build() : defendant()
                         .withFirstName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getFirstName())
                         .withMiddleName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getMiddleName())
                         .withLastName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getLastName())

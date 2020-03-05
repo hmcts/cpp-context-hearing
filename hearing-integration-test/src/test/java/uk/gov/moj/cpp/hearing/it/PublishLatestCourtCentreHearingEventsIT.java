@@ -101,8 +101,19 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
         final String filePayload = getSentXmlForWebPage();
         final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
+
+        final String expectedDefendantXMLValueForWeb = "<defendants>\n" +
+                "                            <defendant/>\n" +
+                "                        </defendants>";
+
+        final String expectedDefendantXMLValueForPublic = "<defendants>\n" +
+                "                                    <defendant/>\n" +
+                "                                </defendants>";
+
         assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+        assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));
         assertThat(filePayloadForPubDisplay, containsString("activecase>1</activecase"));
+        assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForPublic));
         assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
     }
 

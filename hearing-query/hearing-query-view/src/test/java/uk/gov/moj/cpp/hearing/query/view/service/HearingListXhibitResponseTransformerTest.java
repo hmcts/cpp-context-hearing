@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -267,6 +268,7 @@ public class HearingListXhibitResponseTransformerTest {
         when(hearing.getId()).thenReturn(hearingId);
         when(hearing.getType()).thenReturn(HearingType.hearingType().withDescription("hearingTypeDescription").build());
         when(hearing.getProsecutionCases()).thenReturn(prosecutionCases);
+        when(hearing.getReportingRestrictionReason()).thenReturn("Automatic anonymity under the Sexual Offences (Amendment) Act 1992");
         when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(courtCentreId).build());
         when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
         when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
@@ -283,6 +285,10 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
         assertThat(caseDetail.getActivecase(), is(INACTIVE.getStatusCode()));
         assertThat(caseDetail.getHearingprogress(), is(FINISHED.getProgressCode()));
+        assertThat(caseDetail.getDefendants().size(), is(1));
+        assertThat(caseDetail.getDefendants().get(0).getFirstName(), nullValue());
+        assertThat(caseDetail.getDefendants().get(0).getMiddleName(), nullValue());
+        assertThat(caseDetail.getDefendants().get(0).getLastName(), nullValue());
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
     }
