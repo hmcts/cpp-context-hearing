@@ -40,10 +40,10 @@ public class NCESNotificationRequestedEventProcessor {
             LOGGER.debug("hearing.event.nces-notification-requested event received {}", event.toObfuscatedDebugString());
         }
 
-        JsonObject jsonObject = event.payloadAsJsonObject().getJsonObject("financialOrderForDefendant");
-        FinancialOrderForDefendant  financialOrderForDefendant=this.jsonObjectToObjectConverter.convert(jsonObject, FinancialOrderForDefendant.class);
+        final JsonObject jsonObject = event.payloadAsJsonObject().getJsonObject("financialOrderForDefendant");
+        final FinancialOrderForDefendant  financialOrderForDefendant=this.jsonObjectToObjectConverter.convert(jsonObject, FinancialOrderForDefendant.class);
 
-        FinancialOrderForDefendant  publicFinancialOrderForDefendant= FinancialOrderForDefendant.newBuilder()
+        final FinancialOrderForDefendant  publicFinancialOrderForDefendant= FinancialOrderForDefendant.newBuilder()
                 .withCaseId(financialOrderForDefendant.getCaseId())
                 .withDefendantId(financialOrderForDefendant.getDefendantId())
                 .withDocumentContent(financialOrderForDefendant.getDocumentContent())

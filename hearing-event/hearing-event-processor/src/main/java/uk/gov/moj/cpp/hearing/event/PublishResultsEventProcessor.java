@@ -105,8 +105,8 @@ public class PublishResultsEventProcessor {
 
         final ResultsShared resultsShared = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
-        Hearing hearing = resultsShared.getHearing();
-        List<CourtApplication> courtApplications = hearing.getCourtApplications();
+        final Hearing hearing = resultsShared.getHearing();
+        final List<CourtApplication> courtApplications = hearing.getCourtApplications();
 
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
@@ -146,9 +146,7 @@ public class PublishResultsEventProcessor {
                         final CreateNowsRequest nowsRequest = nowsDelegate.generateNows(event, nowsList, resultsSharedFiltered);
 
                         final Set<UUID> nowTypeIds = nowsRequest.getNows().stream()
-                                .filter(now ->
-                                        (now.getNowsTypeId().equals(NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID) ||
-                                                now.getNowsTypeId().equals(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID)))
+                                .filter(this::isFinancialNow)
                                 .map(Now::getNowsTypeId)
                                 .collect(Collectors.toSet());
 
@@ -161,7 +159,6 @@ public class PublishResultsEventProcessor {
                         processOrderWithFinancial(event, nowsRequest, nowTypeIds, targets);
 
                     }
-
                 });
             }
         }
@@ -173,6 +170,11 @@ public class PublishResultsEventProcessor {
         publishResultsDelegate.shareResults(event, sender, resultsShared);
 
         updateResultLineStatusDelegate.updateResultLineStatus(sender, event, resultsShared);
+    }
+
+    private boolean isFinancialNow(Now now) {
+        return now.getNowsTypeId().equals(NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID) ||
+                now.getNowsTypeId().equals(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID);
     }
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
@@ -287,7 +289,7 @@ public class PublishResultsEventProcessor {
 
             final List<Now> financialPenaltyWithAttachmentOfEarningsOrder = nowsRequest.getNows()
                     .stream()
-                    .filter(now -> nowTypeIds.contains(now.getNowsTypeId()))
+                    .filter(this::isFinancialNow)
                     .collect(Collectors.toList());
 
             nowsDelegate.sendPendingNows(sender, event, createNowsRequest(nowsRequest, financialPenaltyWithAttachmentOfEarningsOrder), targets);
@@ -323,14 +325,14 @@ public class PublishResultsEventProcessor {
     private void processOrderWithNonFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest,
                                               final List<Target> targets) {
 
-        List<Now> nowsToSendToSendDirect = nowsRequest.getNows().stream()
-                .filter(now -> isNull(now.getFinancialOrders()) || isNull(now.getFinancialOrders().getAccountReference())
-                )
-                .collect(Collectors.toList());
+        final List<Now> nowsToSendDirect = nowsRequest.getNows().stream()
+                .filter(now -> isNull(now.getFinancialOrders())
+                        || isNull(now.getFinancialOrders().getAccountReference()))
+                .filter(now -> !isFinancialNow(now)) //attachment of earnings now.getFinancialOrders() is null but is financial
+                .collect(toList());
 
-
-        if (!nowsToSendToSendDirect.isEmpty()) {
-            nowsDelegate.sendNows(sender, event, createNowsRequest(nowsRequest, nowsToSendToSendDirect), targets);
+        if (!nowsToSendDirect.isEmpty()) {
+            nowsDelegate.sendNows(sender, event, createNowsRequest(nowsRequest, nowsToSendDirect), targets);
         }
     }
 

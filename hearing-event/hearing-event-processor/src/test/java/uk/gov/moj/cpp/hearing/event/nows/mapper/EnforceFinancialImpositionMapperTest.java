@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_DEFAULT_DAYS_IN_JAIL_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.nows.PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE;
@@ -71,16 +72,6 @@ public class EnforceFinancialImpositionMapperTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
 
         nowsRequest = generateNowsRequestTemplate(defendantId);
-
-       /* UUID lumpSumResultDefinition = UUID.randomUUID();
-
-        nowsRequest.getSharedResultLines().add(
-                SharedResultLine.sharedResultLine()
-                        .withId(lumpSumResultDefinition)
-                        .build()
-
-        );
-*/
 
         mapper = new EnforceFinancialImpositionMapper(requestId, nowsRequest, targets);
     }
@@ -293,10 +284,7 @@ public class EnforceFinancialImpositionMapperTest {
         assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress4(), enforceFinancialImposition.getEmployer().getEmployerAddress4());
         assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getAddress5(), enforceFinancialImposition.getEmployer().getEmployerAddress5());
         assertEquals(nowsRequest.getNows().get(0).getFinancialOrders().getEmployerOrganisation().getAddress().getPostcode(), enforceFinancialImposition.getEmployer().getEmployerPostcode());
-
-
         assertNull(enforceFinancialImposition.getMinorCreditor());
-
         assertEquals(nowsRequest.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityCode(), enforceFinancialImposition.getProsecutionAuthorityCode());
 
         Aliases aliasOut = enforceFinancialImposition.getDefendant().getAliases().get(0);

@@ -80,6 +80,15 @@ public class Offence {
     @Column(name = "ctl_time_limit")
     private LocalDate ctlTimeLimit;
 
+    @Column(name = "proceedings_concluded")
+    private boolean proceedingsConcluded;
+
+    @Column(name = "is_discontinued")
+    private boolean isDiscontinued;
+
+    @Column(name = "is_introduce_after_initial_proceedings")
+    private boolean isIntroduceAfterInitialProceedings;
+
 
     @Embedded
     private NotifiedPlea notifiedPlea;
@@ -98,6 +107,9 @@ public class Offence {
 
     @Embedded
     private AllocationDecision allocationDecision;
+
+    @Embedded
+    private LaaApplnReference laaApplnReference;
 
     @Column(name = "mode_of_trial")
     private String modeOfTrial;
@@ -303,6 +315,38 @@ public class Offence {
 
     public void setAllocationDecision(final AllocationDecision allocationDecision) {
         this.allocationDecision = allocationDecision;
+    }
+
+    public LaaApplnReference getLaaApplnReference() {
+        return laaApplnReference;
+    }
+
+    public void setLaaApplnReference(final LaaApplnReference laaApplnReference) {
+        this.laaApplnReference = laaApplnReference;
+    }
+
+    public boolean isProceedingsConcluded() {
+        return proceedingsConcluded;
+    }
+
+    public void setProceedingsConcluded(final boolean proceedingsConcluded) {
+        this.proceedingsConcluded = proceedingsConcluded;
+    }
+
+    public boolean isDiscontinued() {
+        return isDiscontinued;
+    }
+
+    public void setDiscontinued(final boolean discontinued) {
+        isDiscontinued = discontinued;
+    }
+
+    public boolean isIntroduceAfterInitialProceedings() {
+        return isIntroduceAfterInitialProceedings;
+    }
+
+    public void setIntroduceAfterInitialProceedings(final boolean introduceAfterInitialProceedings) {
+        isIntroduceAfterInitialProceedings = introduceAfterInitialProceedings;
     }
 
     public Integer getCtlDaysSpent() {

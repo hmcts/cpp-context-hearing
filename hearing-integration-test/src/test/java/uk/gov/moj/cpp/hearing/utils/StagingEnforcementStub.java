@@ -26,7 +26,6 @@ public class StagingEnforcementStub {
 
     public static void stubEnforceFinancialImposition() {
 
-        InternalEndpointMockUtils.stubPingFor(SERVICE_NAME);
 
         stubFor(post(urlPathEqualTo(ENFORCE_FINANCIAL_IMPOSITION_PATH))
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)

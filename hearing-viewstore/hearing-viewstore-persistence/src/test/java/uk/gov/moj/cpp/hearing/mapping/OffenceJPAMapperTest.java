@@ -11,8 +11,6 @@ import static uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapperTest.whenVerdict;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
-import org.junit.Test;
-
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.IndicatedPlea;
@@ -26,6 +24,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
+
+import org.junit.Test;
 
 public class OffenceJPAMapperTest {
 
@@ -64,19 +64,22 @@ public class OffenceJPAMapperTest {
                 .with(Offence::getCount, is(entity.getCount()))
                 .with(Offence::getEndDate, is(entity.getEndDate()))
                 .with(Offence::getId, is(entity.getId().getId()))
+                .with(Offence::getIsDiscontinued, is(entity.isDiscontinued()))
+                .with(Offence::getIsIntroduceAfterInitialProceedings, is(entity.isIntroduceAfterInitialProceedings()))
+                .with(Offence::getProceedingsConcluded, is(entity.isProceedingsConcluded()))
 
-                .with(Offence::getIndicatedPlea, 
+                .with(Offence::getIndicatedPlea,
                         whenIndicatedPlea(isBean(IndicatedPlea.class), entity.getId().getId(), entity.getIndicatedPlea()))
 
                 .with(Offence::getModeOfTrial, is(entity.getModeOfTrial()))
 
-                .with(Offence::getNotifiedPlea, 
+                .with(Offence::getNotifiedPlea,
                         whenNotifiedPlea(isBean(NotifiedPlea.class), entity.getId().getId(), entity.getNotifiedPlea()))
 
                 .with(Offence::getOffenceCode, is(entity.getOffenceCode()))
                 .with(Offence::getOffenceDefinitionId, is(entity.getOffenceDefinitionId()))
 
-                .with(Offence::getOffenceFacts, 
+                .with(Offence::getOffenceFacts,
                         whenOffenceFacts(isBean(OffenceFacts.class), entity.getOffenceFacts()))
 
                 .with(Offence::getOffenceLegislation, is(entity.getOffenceLegislation()))
@@ -85,17 +88,17 @@ public class OffenceJPAMapperTest {
                 .with(Offence::getOffenceTitleWelsh, is(entity.getOffenceTitleWelsh()))
                 .with(Offence::getOrderIndex, is(entity.getOrderIndex()))
 
-                .with(Offence::getPlea, 
+                .with(Offence::getPlea,
                         whenPlea(isBean(Plea.class), entity.getId().getId(), entity.getPlea()))
 
                 .with(Offence::getStartDate, is(entity.getStartDate()))
                 .with(Offence::getWording, is(entity.getWording()))
                 .with(Offence::getWordingWelsh, is(entity.getWordingWelsh()))
-                
-                .with(Offence::getVerdict, 
+
+                .with(Offence::getVerdict,
                         whenVerdict(isBean(Verdict.class), entity.getId().getId(), entity.getVerdict()))
                 .with(Offence::getAllocationDecision,
-                            whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()))
+                        whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()))
                 .with(Offence::getCustodyTimeLimit,
                         whenCustodyTimeLimit(isBean(CustodyTimeLimit.class), entity))
                 ;
@@ -106,7 +109,6 @@ public class OffenceJPAMapperTest {
         return m.with(CustodyTimeLimit::getDaysSpent, is(entity.getCtlDaysSpent()))
                 .with(CustodyTimeLimit::getTimeLimit, is(entity.getCtlTimeLimit()));
     }
-
 
 
     public static BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.Offence> whenOffence(
@@ -132,7 +134,7 @@ public class OffenceJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getOffenceCode, is(pojo.getOffenceCode()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getOffenceDefinitionId, is(pojo.getOffenceDefinitionId()))
 
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getOffenceFacts,  whenOffenceFacts(
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getOffenceFacts, whenOffenceFacts(
                         isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.OffenceFacts.class), pojo.getOffenceFacts()))
 
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getOffenceLegislation, is(pojo.getOffenceLegislation()))
@@ -149,6 +151,9 @@ public class OffenceJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getWordingWelsh, is(pojo.getWordingWelsh()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlDaysSpent, is(pojo.getCustodyTimeLimit().getDaysSpent()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlTimeLimit, is(pojo.getCustodyTimeLimit().getTimeLimit()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isDiscontinued, is(pojo.getIsDiscontinued()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isIntroduceAfterInitialProceedings, is(pojo.getIsIntroduceAfterInitialProceedings()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isProceedingsConcluded, is(pojo.getProceedingsConcluded()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getLaidDate, is(pojo.getLaidDate()))
                 ;
     }

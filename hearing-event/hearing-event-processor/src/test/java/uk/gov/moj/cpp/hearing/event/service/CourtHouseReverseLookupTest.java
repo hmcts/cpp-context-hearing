@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
-import static java.lang.Integer.parseInt;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;

@@ -5,8 +5,10 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.core.courts.Marker;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
@@ -50,6 +52,7 @@ public class CaseAggregate implements Aggregate {
                         .withHearingId(hearingId)
                         .build()));
     }
+
     public Stream<Object> ejectCase(final UUID prosecutionCaseId, final List<UUID> hearingIds){
         if(hearingIds.isEmpty() && !this.hearingIds.isEmpty()) {
             return apply(Stream.of(CaseEjected.aCaseEjected().withHearingIds(this.hearingIds).withProsecutionCaseId(prosecutionCaseId).build()));
@@ -58,6 +61,14 @@ public class CaseAggregate implements Aggregate {
         }
         else {
             return apply(Stream.of(CaseEjected.aCaseEjected().withHearingIds(hearingIds).withProsecutionCaseId(prosecutionCaseId).build()));
+        }
+    }
+
+    public Stream<Object> caseDefendantsUpdated(final ProsecutionCase prosecutionCase){
+        if(!this.hearingIds.isEmpty()) {
+            return apply(Stream.of(CaseDefendantsUpdated.caseDefendantsUpdatd().withHearingIds(hearingIds).withProsecutionCase(prosecutionCase).build()));
+        } else {
+            return apply(Stream.empty());
         }
     }
     public List<UUID> getHearingIds() {

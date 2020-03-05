@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselRemoved;
@@ -33,15 +34,16 @@ public class DefenceCounselDelegate implements Serializable {
         this.momento.getDefenceCounsels().put(defenceCounsel.getId(), defenceCounsel);
     }
     public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, boolean isHearingEnded) {
-        final String caseRef = this.momento.getHearing() != null ? this.momento.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
+        final Hearing hearing = this.momento.getHearing();
+
         if (this.momento.getDefenceCounsels().containsKey(defenceCounsel.getId())) {
             return Stream.of(new DefenceCounselChangeIgnored(
                     String.format("Provided DefenceCounsel already exists, payload [%s]", defenceCounsel.toString()),
-                    defenceCounsel, hearingId,  caseRef));
+                    defenceCounsel, hearingId,  getCaseReference(hearing)));
         } else if (isHearingEnded) {
             return Stream.of(new DefenceCounselChangeIgnored(
                     String.format("Hearing Ended. Failed to check-in , payload [%s]", defenceCounsel.toString()),
-                    defenceCounsel, hearingId, caseRef));
+                    defenceCounsel, hearingId, getCaseReference(hearing)));
         }
 
         return Stream.of(new DefenceCounselAdded(defenceCounsel, hearingId));
@@ -66,5 +68,11 @@ public class DefenceCounselDelegate implements Serializable {
                     defenceCounsel, hearingId, caseRef));
         }
         return Stream.of(new DefenceCounselUpdated(defenceCounsel, hearingId));
+    }
+
+    private String getCaseReference(Hearing hearing){
+        final String prosecutionCaseURN = hearing!= null ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN():null;
+        final String prosecutionAuthorityReference = hearing!= null ? hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference():null;
+        return prosecutionCaseURN != null ? prosecutionCaseURN : prosecutionAuthorityReference;
     }
 }

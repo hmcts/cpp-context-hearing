@@ -1,0 +1,145 @@
+{
+  "hearingSummaries": [
+    {
+      "courtApplicationSummaries": [
+        {
+          "applicant": {
+            "firstName": "Bryce",
+            "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+            "lastName": "Hammes",
+            "middleName": "Test",
+            "organisationName": "Testing Organisation Name",
+            "synonym": "Attendees"
+          },
+          "applicationReference": "46YE772132",
+          "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
+          "respondents": [
+            {
+              "firstName": "America",
+              "id": "421b0a0a-a7f1-46f9-b142-f85d5d3e95a2",
+              "lastName": "Ryan",
+              "organisationName": "Responding Organisation Name"
+            }
+          ]
+        }
+      ],
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-25T07:19:59.780Z"
+        },
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-26T07:19:59.780Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "9cae7e41-aeac-11e9-9acc-7f31ecb97c4e",
+      "courtCentreId": "9cae7e41-aeac-11e9-9acc-7f31ecb97c4f",
+      "roomId": "9cae7e41-aeac-11e9-9acc-7f31ecb97c4g",
+      "jurisdictionType": "CROWN",
+      "prosecutionCaseSummaries": [
+        {
+          "defendants": [
+            {
+              "firstName": "Lee",
+              "id": "9cae7e40-aeac-11e9-9acc-7f31ecb97c4e",
+              "dateOfBirth": "1969-11-27",
+              "lastName": "Pestelli",
+              "middleName": "",
+              "organisationName": "TestNameLei",
+              "offences": [
+                {
+                  "id": "f5ef75f5-d502-4ce3-b2a6-cdfdf832262a",
+                  "offenceTitle": "OFFENCE TITLE",
+                  "wording": "OFFENCE WORDING"
+                }
+              ],
+              "synonym": "is this from aliases ?"
+            }
+          ],
+          "id": "9caea551-aeac-11e9-9acc-7f31ecb97c4e",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "9caea553-aeac-11e9-9acc-7f31ecb97c4e",
+            "caseURN": "82SK912711"
+          }
+        }
+      ],
+      "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+      "type": {
+        "description": "82SK912711",
+        "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+      }
+    },
+    {
+      "courtApplicationSummaries": [
+        {
+          "applicant": {
+            "firstName": "Bryce",
+            "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+            "lastName": "Hammes",
+            "middleName": "Test",
+            "organisationName": "Testing Organisation Name",
+            "synonym": "Attendees"
+          },
+          "applicationReference": "19YO356897",
+          "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
+          "respondents": [
+            {
+              "firstName": "America",
+              "id": "421b0a0a-a7f1-46f9-b142-f85d5d3e95a2",
+              "lastName": "Ryan",
+              "organisationName": "Responding Organisation Name"
+            }
+          ]
+        }
+      ],
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-24T10:06:44.893Z"
+        },
+        {
+          "listedDurationMinutes": 40,
+          "listingSequence": 1,
+          "sittingDay": "2019-07-25T10:06:44.892Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "bdc7adc1-adfa-11e9-aa34-2f0cc588bb24",
+      "jurisdictionType": "CROWN",
+      "prosecutionCaseSummaries": [
+        {
+          "defendants": [
+            {
+              "firstName": "Connor",
+              "id": "bdc7adc0-adfa-11e9-aa34-2f0cc588bb24",
+              "lastName": "Berry",
+              "middleName": "",
+              "organisationName": "TestNameLei",
+              "synonym": "is this from aliases ?",
+              "dateOfBirth": "2014-05-17"
+            }
+          ],
+          "id": "bdc7fbe0-adfa-11e9-aa34-2f0cc588bb24",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "bdc7fbe2-adfa-11e9-aa34-2f0cc588bb24",
+            "caseURN": "59XC279180"
+          }
+        }
+      ],
+      "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+      "type": {
+        "description": "59XC279180",
+        "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+      }
+    }
+  ]
+}

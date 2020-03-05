@@ -18,11 +18,11 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTempl
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCourtRoomsForWelshValues;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
-import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.stubEnforceFinancialImposition;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -45,9 +45,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
-import uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub;
-import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
-import uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -56,7 +53,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
+import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
 
 public class NowDocumentRequestedIT extends AbstractIT {
@@ -67,15 +64,6 @@ public class NowDocumentRequestedIT extends AbstractIT {
                     "ce23a452-9015-4619-968f-1628d7a271c9"));
     private static final String DOCUMENT_TEXT = "someDocumentText";
     private static final String BOTH_JURISDICTIONS = "B";
-    private static final UUID TRAIL_TYPE_ID_1 = randomUUID();
-
-    @Before
-    public void begin() {
-        stubProgressionGenerateNows();
-        SystemIdMapperStub.stubAddMapping();
-        stubEnforceFinancialImposition();
-        ReferenceDataStub.stubRelistReferenceDataResults();
-    }
 
     @Test
     public void shouldRequestNowDocument() {
@@ -123,13 +111,11 @@ public class NowDocumentRequestedIT extends AbstractIT {
                 .withModeOfTrial(STRING.next())
                 .withOrderIndex(INTEGER.next()).build());
 
-        final InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(requestSpec, initiateHearingCommand));
+        final InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
 
         final Hearing hearing = hearingCommandHelper.getHearing();
 
-        stubGetReferenceDataCourtRooms(hearing.getCourtCentre(), hearing.getHearingLanguage());
         stubCourtRoomsForWelshValues(hearing.getCourtCentre().getId());
-        stubFixedListForWelshValues();
         stubLjaDetails(hearing.getCourtCentre().getId());
 
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
@@ -149,19 +135,13 @@ public class NowDocumentRequestedIT extends AbstractIT {
                 .withId(guiltyResultDefinitionPrompt.getId())
                 .build()));
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
-        DocumentGeneratorStub.stubDocumentCreate(DOCUMENT_TEXT);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
                 .withUserId(UUID.randomUUID()).build();
 
-        UseCases.shareResults(requestSpec, hearingCommandHelper.getHearingId(), with(
-                basicShareResultsCommandTemplate(),
-                command -> command.setCourtClerk(courtClerk1)
-        ), targets);
-
-        final EventListener publicNowDocumentRequested = listenFor("public.hearing.now-document-requested", 50000)
+        final EventListener publicNowDocumentRequested = listenFor("public.hearing.now-document-requested", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(NowDocumentRequest.class, isBean(NowDocumentRequest.class)
                                 .with(NowDocumentRequest::getNowContent, isBean(NowDocumentContent.class)
                                         .with(NowDocumentContent::getWelshCourtCentreName, is("Welsh Name"))
@@ -174,6 +154,11 @@ public class NowDocumentRequestedIT extends AbstractIT {
                                 )
                         )
                 );
+
+        UseCases.shareResults(getRequestSpec(), hearingCommandHelper.getHearingId(), with(
+                basicShareResultsCommandTemplate(),
+                command -> command.setCourtClerk(courtClerk1)
+        ), targets);
 
         publicNowDocumentRequested.waitFor();
     }
@@ -235,7 +220,7 @@ public class NowDocumentRequestedIT extends AbstractIT {
 
     private AllNowsReferenceDataHelper setupNowsReferenceData(final LocalDate referenceDate, final AllNows data) {
         final AllNowsReferenceDataHelper allNows = h(data);
-        ReferenceDataStub.stubGetAllNowsMetaData(referenceDate, allNows.it());
+        stubGetAllNowsMetaData(referenceDate, allNows.it());
         return allNows;
     }
 
@@ -268,7 +253,7 @@ public class NowDocumentRequestedIT extends AbstractIT {
                         ).collect(Collectors.toList())
                 ));
 
-        ReferenceDataStub.stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
+        stubGetAllResultDefinitions(referenceDate, allResultDefinitions.it());
         return allResultDefinitions;
     }
 

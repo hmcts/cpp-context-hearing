@@ -105,6 +105,9 @@ public class NowsRequestedToDocumentConverter {
     public static final String WELSH_LJA_NAME = "welshName";
     public static final String WELSH = "welsh";
 
+    public final Set<String> excludedPromptRefs = new HashSet(Arrays.asList(
+            PromptTypesConstant.P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE, PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE));
+
     private final SubscriptionClient subscriptionClient;
     private final CourtHouseReverseLookup courtHouseReverseLookup;
     private final ReferenceDataService referenceDataService;
@@ -671,13 +674,10 @@ public class NowsRequestedToDocumentConverter {
         }
     }
 
-    public final Set<String> EXCLUDED_PROMPT_REFS = new HashSet(Arrays.asList(
-            PromptTypesConstant.P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE, PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE));
-
     private List<Prompts> preparePrompts(final NowVariantResult selectedNowResult, final SharedResultLine sharedResultLine) {
         final List<ResultPrompt> nowResultPrompts = getMatchingPrompts(selectedNowResult, sharedResultLine);
         return nowResultPrompts.stream()
-                .filter(prompt->isEmpty(prompt.getPromptReference()) || !EXCLUDED_PROMPT_REFS.contains(prompt.getPromptReference()))
+                .filter(prompt->isEmpty(prompt.getPromptReference()) || !excludedPromptRefs.contains(prompt.getPromptReference()))
                 .map(prompt -> new Prompts(prompt.getLabel(), prompt.getValue(), prompt.getWelshLabel(), prompt.getWelshValue()))
                 .collect(toList());
     }

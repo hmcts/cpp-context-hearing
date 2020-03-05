@@ -1,16 +1,21 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.it.AbstractIT.CPP_UID_HEADER;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getURL;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -34,12 +39,26 @@ import org.hamcrest.Matchers;
 @SuppressWarnings({"squid:S2925"})
 public class Queries {
 
+    public static void getHearingForTodayPollForMatch(final UUID userId, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearings-for-today"), "application/vnd.hearing.get.hearings-for-today+json")
+                .withHeader(HeaderConstants.USER_ID, userId)
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
+         poll(requestParams)
+                .timeout(timeout, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        expectedConditions
+                );
+    }
+
     public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
-        getHearingPollForMatch(hearingId, timeout, 0, resultMatcher);
+        getHearingPollForMatch(hearingId, timeout, 3, resultMatcher);
 
     }
 
-    public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final long waitTime ,final BeanMatcher<HearingDetailsResponse> resultMatcher) {
+    public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final long waitTime, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
 
         /*
         You might be wondering why I don't use the Framework's poll stuff.  Its because that stuff polls and if the matcher
@@ -52,7 +71,7 @@ public class Queries {
         waitForFewSeconds(waitTime);
 
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearing", hearingId), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
+               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher));
@@ -74,7 +93,7 @@ public class Queries {
     public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearings", date, startTime, endTime, courtCentreId, roomId), "application/vnd.hearing.get.hearings+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
+               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
@@ -96,7 +115,7 @@ public class Queries {
     public static void getDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<TargetListResponse> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get-draft-result", hearingId), "application/vnd.hearing.get-draft-result+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
+               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
@@ -119,7 +138,7 @@ public class Queries {
     public static void getApplicationDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<ApplicationTargetListResponse> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get-application-draft-result", hearingId), "application/vnd.hearing.get-application-draft-result+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue())
+               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(ApplicationTargetListResponse.class, resultMatcher));
@@ -141,7 +160,7 @@ public class Queries {
 
     private static void sleep() {
         try {
-            Thread.sleep(200);
+            Thread.sleep(1000);
         } catch (InterruptedException e) {
             //ignore
         }
@@ -150,7 +169,7 @@ public class Queries {
     public static void waitForFewSeconds(long numberOfSeconds) {
         try {
             TimeUnit.SECONDS.sleep(numberOfSeconds);
-        }catch (InterruptedException ex) {
+        } catch (InterruptedException ex) {
             //ignore
         }
     }

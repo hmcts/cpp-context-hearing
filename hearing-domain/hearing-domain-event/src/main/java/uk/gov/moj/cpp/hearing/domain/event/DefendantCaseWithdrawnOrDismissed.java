@@ -38,7 +38,7 @@ public class DefendantCaseWithdrawnOrDismissed {
     }
 
     public static Builder newBuilder(final DefendantCaseWithdrawnOrDismissed copy) {
-        Builder builder = new Builder();
+        final Builder builder = new Builder();
         builder.caseId = copy.getCaseId();
         builder.defendantId = copy.getDefendantId();
         builder.resultedOffences = copy.getResultedOffences();

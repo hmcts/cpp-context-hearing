@@ -371,7 +371,7 @@ public class NowsDelegate {
                     .withName("public.hearing.now-document-requested")
                     .withMetadataFrom(event);
             LOGGER.info("Raising public.hearing.now-document-requested {}", nowsDocumentOrderJson);
-            sender.sendAsAdmin(envelopeFrom(envelope.metadata(), envelope.payload()));
+            sender.sendAsAdmin(envelope);
         });
     }
 

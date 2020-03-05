@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -63,7 +64,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_withOnlyMandatoryFields() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
@@ -72,7 +73,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final JudicialRole judicialRole = hearing.getJudiciary().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getType, isBean(HearingType.class)
@@ -120,7 +121,7 @@ public class InitiateHearingIT extends AbstractIT {
                 )
         );
 //TODO court applications
-        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -156,7 +157,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_ApplicationOnly() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);
@@ -166,7 +167,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final JudicialRole judicialRole = hearing.getJudiciary().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getType, isBean(HearingType.class)
@@ -190,7 +191,7 @@ public class InitiateHearingIT extends AbstractIT {
                 )
         );
 //TODO court applications
-        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", 30,
+        Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .with(HearingSummaries::getId, is(hearing.getId()))
@@ -215,7 +216,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_shouldInitiateHearing_whenDefendantTypeIsPerson() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
 
@@ -257,7 +258,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final ContactNumber employerContact = employerOrganisation.getContact();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(HearingDetailsResponse.class)
                         .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId()))
@@ -448,7 +449,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_shouldInitiateHearing_whenDefendantTypeIsOrganisation() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateForDefendantTypeOrganisation()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForDefendantTypeOrganisation()));
 
         final Hearing hearing = hearingOne.getHearing();
 
@@ -492,7 +493,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final NotifiedPlea notifiedPlea = offence.getNotifiedPlea();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(HearingDetailsResponse.class)
                         .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId()))
@@ -661,7 +662,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_shouldInitiateHearing_whenJurisdictionTypeIsMagistrates() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateForMagistrates()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
         final Hearing hearing = hearingOne.getHearing();
 
@@ -693,7 +694,7 @@ public class InitiateHearingIT extends AbstractIT {
 
         final OffenceFacts offenceFacts = offence.getOffenceFacts();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30,
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(HearingDetailsResponse.class)
                         .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId()))
@@ -796,7 +797,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void ignoreInitiateHearing_whenOffenceCountMissingForCrownCourtHearing() {
 
-        UseCases.verifyIgnoreInitiateHearing(requestSpec, initiateHearingTemplateForCrownCourtOffenceCountNull());
+        UseCases.verifyIgnoreInitiateHearing(getRequestSpec(), initiateHearingTemplateForCrownCourtOffenceCountNull());
 
     }
 
@@ -806,13 +807,13 @@ public class InitiateHearingIT extends AbstractIT {
         UUID courtAndRoomId = UUID.randomUUID();
 
         final LocalDate fifthJuly = LocalDate.of(2019, 7, 5);
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));
-        UseCases.initiateHearing(requestSpec, initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly.minusDays(1)));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));
+        UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly.minusDays(1)));
 
         Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);
 
-        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, fifthJuly.toString(), "00:00", "23:59", 30,
+        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, fifthJuly.toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())

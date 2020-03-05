@@ -28,25 +28,25 @@ public class HearingEventDataFactory {
     private static List<HearingEventDefinition> HEARING_EVENT_DEFINITIONS;
 
     private static final String ID_1 = "b71e7d2a-d3b3-4a55-a393-6d451767fc05";
-    private static final String RECORDED_LABEL_1 = "Hearing Started";
-    private static final String ACTION_LABEL_1 = "Start";
+    private static final String RECORDED_LABEL_1 = "Hearing Started-1";
+    private static final String ACTION_LABEL_1 = "Start-1";
     private static final Integer ACTION_SEQUENCE_1 = 1;
-    private static final String GROUP_LABEL_1 = "Recording";
+    private static final String GROUP_LABEL_1 = "Recording1";
     private static final Integer GROUP_SEQUENCE_1 = 1;
 
     private static final String ID_2 = "0df93f18-0a21-40f5-9fb3-da4749cd70fe";
-    private static final String RECORDED_LABEL_2 = "Hearing Ended";
-    private static final String ACTION_LABEL_2 = "End";
+    private static final String RECORDED_LABEL_2 = "Hearing Ended-1";
+    private static final String ACTION_LABEL_2 = "End-2";
     private static final Integer ACTION_SEQUENCE_2 = 2;
 
     private static final String ID_3 = "160ecb51-29ee-4954-bbbf-daab18a24fbb";
-    private static final String RECORDED_LABEL_3 = "Hearing Paused";
-    private static final String ACTION_LABEL_3 = "Pause";
+    private static final String RECORDED_LABEL_3 = "Hearing Paused-3";
+    private static final String ACTION_LABEL_3 = "Pause-3";
     private static final Integer ACTION_SEQUENCE_3 = 3;
 
     private static final String ID_4 = "64476e43-2138-46d5-b58b-848582cf9b07";
-    private static final String RECORDED_LABEL_4 = "Hearing Resumed";
-    private static final String ACTION_LABEL_4 = "Resume";
+    private static final String RECORDED_LABEL_4 = "Hearing Resumed-4";
+    private static final String ACTION_LABEL_4 = "Resume-4";
     private static final Integer ACTION_SEQUENCE_4 = 4;
 
     private static final boolean ALTERABLE = BOOLEAN.next();

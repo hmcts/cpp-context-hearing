@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.util.UUID.randomUUID;
+import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -17,9 +19,11 @@ import static uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated.builder;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
@@ -28,9 +32,12 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
@@ -188,4 +195,29 @@ public class OffenceAggregateTest {
         assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getDelegatedPowers().getLastName(), is(delegatedPowers.getLastName()));
     }
 
+    @Test
+    public void shouldReturn_emptyStream_whenEditOffence_hearingIds_notFound() {
+        Stream<Object> objectStream = offenceAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Offence.offence().build());
+        assertThat(objectStream.findAny(), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldReturn_stream_whenEditOffence_hearingIds_areFound() {
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+        Stream<Object> objectStream = offenceAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Offence.offence().build());
+        assertTrue(objectStream.findAny().isPresent());
+    }
+
+    @Test
+    public void shouldReturn_emptyStream_whenDeleteOffence_hearingIds_notFound() {
+        Stream<Object> objectStream = offenceAggregate.lookupHearingsForDeleteOffenceOnOffence(randomUUID());
+        assertThat(objectStream.findAny(), is(Optional.empty()));
+    }
+
+    @Test
+    public void shouldReturn_stream_whenDeleteOffence_hearingIds_areFound() {
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+        Stream<Object> objectStream = offenceAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Offence.offence().build());
+        assertTrue(objectStream.findAny().isPresent());
+    }
 }

@@ -19,6 +19,11 @@ public class HearingQueryApi {
         return this.requester.request(query);
     }
 
+    @Handles("hearing.get.hearings-for-today")
+    public JsonEnvelope findHearingsForToday(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope query) {
         return this.requester.request(query);

@@ -50,6 +50,7 @@ import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Jurors;
+import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Now;
@@ -131,7 +132,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"squid:S1188", "squid:S1135", "squid:S1314"})
+@SuppressWarnings({"squid:S1188", "squid:S1135", "squid:S1314", "squid:S1192"})
 public class TestTemplates {
 
     private static final String DAVID = "David";
@@ -560,6 +561,7 @@ public class TestTemplates {
                 .withFirstName("Steve")
                 .withLastName("Walsh")
                 .build()));
+        defendant.setAssociatedDefenceOrganisation(CoreTestTemplates.associatedDefenceOrganisation().build());
 
         return defendant;
     }
@@ -1106,6 +1108,13 @@ public class TestTemplates {
                                             .withAllocationDecisionDate(FUTURE_LOCAL_DATE.next())
                                             .withSequenceNumber(INTEGER.next())
                                             .build())
+                                    .withLaaApplnReference(LaaReference.laaReference()
+                                            .withStatusDate(LocalDate.now())
+                                            .withApplicationReference(STRING.next())
+                                            .withStatusId(UUID.randomUUID())
+                                            .withStatusCode(STRING.next())
+                                            .withStatusDescription(STRING.next())
+                                            .build())
                                     .withModeOfTrial(STRING.next())
                                     .withOffenceCode(STRING.next())
                                     .withOffenceDefinitionId(randomUUID())
@@ -1123,6 +1132,9 @@ public class TestTemplates {
                                     .withStartDate(PAST_LOCAL_DATE.next())
                                     .withWording(STRING.next())
                                     .withWordingWelsh(STRING.next())
+                                    .withProceedingsConcluded(true)
+                                    .withIsDiscontinued(true)
+                                    .withIsIntroduceAfterInitialProceedings(true)
                                     .build())
                             .collect(Collectors.toList())
                     );

@@ -10,6 +10,8 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import org.hamcrest.Matchers;
 import org.junit.Test;
@@ -29,7 +31,7 @@ public class CompanyRepresentativeIT extends AbstractIT {
     @Test
     public void shouldAddCompanyRepresentative() {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         // Add the first company representative
         CompanyRepresentative firstCompanyRepresentative = createFirstCompanyRepresentative(hearingOne);
@@ -39,11 +41,11 @@ public class CompanyRepresentativeIT extends AbstractIT {
 
         // Duplicate company representative should not be added.
         // Public event 'public.hearing.company-representative-change-ignored' should be emitted in case of duplicate company representative is added.
-        final Utilities.EventListener publicCompanyRepresentativeChangeIgnored = listenFor("public.hearing.company-representative-change-ignored", 30000)
+        final Utilities.EventListener publicCompanyRepresentativeChangeIgnored = listenFor("public.hearing.company-representative-change-ignored", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(CompanyRepresentativeChangeIgnored.class, isBean(CompanyRepresentativeChangeIgnored.class)
                         .with(CompanyRepresentativeChangeIgnored::getReason, Matchers.containsString("Provided company representative already exists"))));
 
-        final AddCompanyRepresentative firstCompanyRepresentativeCommandAddedAgain = UseCases.addCompanyRepresentative(requestSpec, hearingOne.getHearingId(),
+        final AddCompanyRepresentative firstCompanyRepresentativeCommandAddedAgain = UseCases.addCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 addCompanyRepresentativeCommandTemplate(hearingOne.getHearingId(), firstCompanyRepresentative)
         );
 
@@ -54,7 +56,7 @@ public class CompanyRepresentativeIT extends AbstractIT {
     @Test
     public void shouldUpdateCompanyRepresentative() {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         // Add company representative
         CompanyRepresentative companyRepresentative = createFirstCompanyRepresentative(hearingOne);
@@ -65,13 +67,13 @@ public class CompanyRepresentativeIT extends AbstractIT {
         companyRepresentative.setLastName("UpdatedLastName");
         companyRepresentative.setPosition(Position.SECRETARY);
 
-        final UpdateCompanyRepresentative updateCompanyRepresentativeCommand = UseCases.updateCompanyRepresentative(requestSpec, hearingOne.getHearingId(),
+        final UpdateCompanyRepresentative updateCompanyRepresentativeCommand = UseCases.updateCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 updateCompanyRepresentativeCommandTemplate(hearingOne.getHearingId(), companyRepresentative)
         );
 
         CompanyRepresentative updatedCompanyRepresentative = updateCompanyRepresentativeCommand.getCompanyRepresentative();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
                         .with(Hearing::getCompanyRepresentatives, first(isBean(CompanyRepresentative.class)
@@ -84,29 +86,29 @@ public class CompanyRepresentativeIT extends AbstractIT {
     @Test
     public void shouldRemoveCompanyRepresentativeIfCompanyRepresentativeIsAvailableInHearing() {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         // Add the first company representative
         CompanyRepresentative companyRepresentative = createFirstCompanyRepresentative(hearingOne);
 
         //remove company representative
-        UseCases.removeCompanyRepresentative(requestSpec, hearingOne.getHearingId(),
+        UseCases.removeCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveCompanyRepresentative(hearingOne.getHearingId(), companyRepresentative.getId())
         );
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
                         .with(Hearing::getCompanyRepresentatives, Matchers.hasSize(is(0)))));
 
         // Remove same company representative which was removed already.
         // Public event 'public.hearing.company-representative-change-ignored' should be emitted in case of company representative which is already removed.
-        final Utilities.EventListener publicCompanyRepresentativeChangeIgnored = listenFor("public.hearing.company-representative-change-ignored", 30000)
+        final Utilities.EventListener publicCompanyRepresentativeChangeIgnored = listenFor("public.hearing.company-representative-change-ignored", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(CompanyRepresentativeChangeIgnored.class, isBean(CompanyRepresentativeChangeIgnored.class)
                         .with(CompanyRepresentativeChangeIgnored::getReason, Matchers.containsString("Provided company representative does not exists"))));
 
         //remove company representative again
-        UseCases.removeCompanyRepresentative(requestSpec, hearingOne.getHearingId(),
+        UseCases.removeCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveCompanyRepresentative(hearingOne.getHearingId(), companyRepresentative.getId())
         );
 
@@ -116,11 +118,11 @@ public class CompanyRepresentativeIT extends AbstractIT {
 
 
     private static CompanyRepresentative createFirstCompanyRepresentative(final InitiateHearingCommandHelper hearingOne) {
-        final AddCompanyRepresentative companyRepresentativeCommand = UseCases.addCompanyRepresentative(requestSpec, hearingOne.getHearingId(),
+        final AddCompanyRepresentative companyRepresentativeCommand = UseCases.addCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 addCompanyRepresentativeCommandTemplate(hearingOne.getHearingId())
         );
         CompanyRepresentative companyRepresentative = companyRepresentativeCommand.getCompanyRepresentative();
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
                         .with(Hearing::getCompanyRepresentatives, first(isBean(CompanyRepresentative.class)
@@ -132,11 +134,11 @@ public class CompanyRepresentativeIT extends AbstractIT {
     }
 
     private CompanyRepresentative createSecondCompanyRepresentative(final InitiateHearingCommandHelper hearingOne, final CompanyRepresentative firstCompanyRepresentative) {
-        final AddCompanyRepresentative companyRepresentativeCommand = UseCases.addCompanyRepresentative(requestSpec, hearingOne.getHearingId(),
+        final AddCompanyRepresentative companyRepresentativeCommand = UseCases.addCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 addCompanyRepresentativeCommandTemplate(hearingOne.getHearingId())
         );
         CompanyRepresentative secondCompanyRepresentative = companyRepresentativeCommand.getCompanyRepresentative();
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
                         .with(Hearing::getCompanyRepresentatives, first(isBean(CompanyRepresentative.class)

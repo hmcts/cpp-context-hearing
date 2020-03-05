@@ -744,6 +744,18 @@
         "$.courtApplication.respondents[*].partyDetails.defendant.offences[*].judicialResults[*].nextHearing.category",
         "$.courtApplication.respondents[*].partyDetails.defendant.offences[*].judicialResults[*].nextHearing.hearingLanguage"
       ]
+    },
+    {
+      "eventName": "hearing.defendant-legalaid-status-updated",
+      "fieldsToBeIgnored" : [
+        "$.legalAidStatus"
+      ]
+    },
+    {
+      "eventName": "hearing.defendant-legalaid-status-updated-for-hearing",
+      "fieldsToBeIgnored" : [
+        "$.legalAidStatus"
+      ]
     }
 
   ]

@@ -12,6 +12,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.mapping.AssociatedDefenceOrganisationJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson;
@@ -39,6 +40,8 @@ public class CaseDefendantDetailsUpdatedEventListener {
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
+    @Inject
+    private AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper;
 
     @Transactional
     @Handles("hearing.defendant-details-updated")
@@ -51,7 +54,6 @@ public class CaseDefendantDetailsUpdatedEventListener {
         final UUID hearingId = defendantDetailsToBeUpdated.getHearingId();
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantIn.getId(), hearingId));
-
 
         if (defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
             defendant.setNumberOfPreviousConvictionsCited(defendantIn.getNumberOfPreviousConvictionsCited());
@@ -86,6 +88,8 @@ public class CaseDefendantDetailsUpdatedEventListener {
                                 .map(associatedPerson -> setAssociatedPerson(hearingId, defendant, associatedPerson))
                                 .collect(Collectors.toList()));
             }
+
+            setAssociatedDefendantOrganisation(defendantIn, defendant);
 
             defendantRepository.save(defendant);
         }
@@ -169,5 +173,9 @@ public class CaseDefendantDetailsUpdatedEventListener {
             addressJpa.setAddress5(addressPojo.getAddress5());
             addressJpa.setPostCode(addressPojo.getPostcode());
         }
+    }
+
+    private void setAssociatedDefendantOrganisation(final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantIn, final Defendant defendant) {
+        defendant.setAssociatedDefenceOrganisation(associatedDefenceOrganisationJPAMapper.toJPA(defendantIn.getAssociatedDefenceOrganisation()));
     }
 }

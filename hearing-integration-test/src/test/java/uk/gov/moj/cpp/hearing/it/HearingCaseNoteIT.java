@@ -15,7 +15,8 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
@@ -24,6 +25,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.ran
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.NoteType;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -47,9 +49,9 @@ public class HearingCaseNoteIT extends AbstractIT {
     @Test
     public void shouldSaveHearingCaseNote() throws Exception {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final String hearingId = hearing.getHearingId().toString();
         final JsonObjectBuilder hearingCaseNote = createObjectBuilder()
@@ -68,7 +70,7 @@ public class HearingCaseNoteIT extends AbstractIT {
                 .build();
 
         final String commandUrl = MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.save-hearing-case-note"), hearingId);
-        final Response response = given().spec(requestSpec)
+        final Response response = given().spec(getRequestSpec())
                 .and().contentType("application/vnd.hearing.save-hearing-case-note+json")
                 .and().header(USER_ID, getLoggedInUser())
                 .and().body(command.toString())
@@ -80,7 +82,7 @@ public class HearingCaseNoteIT extends AbstractIT {
         final JsonObject hearingCaseNoteCommand = command.getJsonObject("hearingCaseNote");
         poll(requestParams(getURL("hearing.get.hearing", hearingId),
                 "application/vnd.hearing.get.hearing+json").withHeader(USER_ID, getLoggedInUser()))
-                .timeout(30, TimeUnit.SECONDS)
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
                         print(),

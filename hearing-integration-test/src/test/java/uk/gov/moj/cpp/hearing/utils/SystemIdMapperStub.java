@@ -27,12 +27,10 @@ import com.jayway.restassured.path.json.JsonPath;
 
 public class SystemIdMapperStub {
 
-    private static final String SERVICE_NAME = "system-id-mapper-api";
+    public static final String SERVICE_NAME = "system-id-mapper-api";
     private static final String ADD_MAPPING_PATH = "/" + SERVICE_NAME + "/rest/systemid/mappings";
 
     public static void stubAddMapping() {
-
-        InternalEndpointMockUtils.stubPingFor(SERVICE_NAME);
 
         stubFor(post(urlPathEqualTo(ADD_MAPPING_PATH))
                 .willReturn(aResponse().withStatus(SC_OK)
@@ -42,8 +40,6 @@ public class SystemIdMapperStub {
     }
 
     public static void stubMappingForNowsRequestId(String nowIdAsSource, String hearingIdAsTarget) {
-        InternalEndpointMockUtils.stubPingFor(SERVICE_NAME);
-
         stubFor(get(urlPathEqualTo(ADD_MAPPING_PATH))
                 .withQueryParam("sourceId", equalTo(nowIdAsSource))
                 .willReturn(aResponse().withStatus(SC_OK)

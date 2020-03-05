@@ -36,6 +36,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -49,6 +50,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -132,7 +134,10 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offences"), objectToJsonObjectConverter.convert(caseDefendantOffencesChanged.it()));
 
-        setupMockedEventStream(caseDefendantOffencesChanged.getFirstOffenceFromUpdatedOffences().getId(), this.eventStream, new OffenceAggregate());
+        final OffenceAggregate offenceAggregate = new OffenceAggregate();
+        final UUID hearingId = randomUUID();
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(hearingId));
+        setupMockedEventStream(caseDefendantOffencesChanged.getFirstOffenceFromUpdatedOffences().getId(), this.eventStream, offenceAggregate);
 
         updateOffencesForDefendantCommandHandler.updateOffencesForDefendant(envelope);
 
@@ -152,8 +157,11 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
                 }));
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.update-case-defendant-offences"), objectToJsonObjectConverter.convert(caseDefendantOffencesChanged.it()));
+        final OffenceAggregate offenceAggregate = new OffenceAggregate();
+        final UUID hearingId = randomUUID();
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(hearingId));
 
-        setupMockedEventStream(caseDefendantOffencesChanged.getFirstOffenceIdFromDeletedOffences(), this.eventStream, new OffenceAggregate());
+        setupMockedEventStream(caseDefendantOffencesChanged.getFirstOffenceIdFromDeletedOffences(), this.eventStream, offenceAggregate);
 
         updateOffencesForDefendantCommandHandler.updateOffencesForDefendant(envelope);
 

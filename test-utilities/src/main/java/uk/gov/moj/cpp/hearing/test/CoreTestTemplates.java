@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.BailStatus.bailStatus;
+import static uk.gov.justice.core.courts.FundingType.REPRESENTATION_ORDER;
 import static uk.gov.justice.core.courts.DefenceCounsel.defenceCounsel;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
@@ -22,11 +23,13 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
+import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
@@ -233,7 +236,10 @@ public class CoreTestTemplates {
                     .withOffenceCode(STRING.next())
                     .withCount(INTEGER.next())
                     .withWording(STRING.next())
-                    .withOrderIndex(INTEGER.next());
+                    .withOrderIndex(INTEGER.next())
+                    .withIsIntroduceAfterInitialProceedings(true)
+                    .withIsDiscontinued(true)
+                    .withProceedingsConcluded(true);
         }
 
 
@@ -258,6 +264,9 @@ public class CoreTestTemplates {
                 .withWordingWelsh(STRING.next())
                 .withModeOfTrial(STRING.next())
                 .withOrderIndex(INTEGER.next())
+                .withProceedingsConcluded(true)
+                .withIsDiscontinued(true)
+                .withIsIntroduceAfterInitialProceedings(true)
                 .withLaidDate(PAST_LOCAL_DATE.next())
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
@@ -380,6 +389,38 @@ public class CoreTestTemplates {
                 .withOrganisation(organisation(args).build());
     }
 
+    public static AssociatedDefenceOrganisation.Builder associatedDefenceOrganisation() {
+        return AssociatedDefenceOrganisation.associatedDefenceOrganisation()
+                .withApplicationReference("application-reference")
+                .withAssociationStartDate(LocalDate.parse("2019-09-12"))
+                .withAssociationEndDate(LocalDate.parse("2019-12-12"))
+                .withDefenceOrganisation(DefenceOrganisation.defenceOrganisation()
+                        .withLaaContractNumber("LAA44569")
+                        .withOrganisation(Organisation.organisation()
+                                .withIncorporationNumber("cegH7rIgdX")
+                                .withName("Test")
+                                .withRegisteredCharityNumber("TestCharity")
+                                .withContact(ContactNumber.contactNumber()
+                                        .withPrimaryEmail("zdivwdsblf@gxvm7kqbh4.duzrohmbtt")
+                                        .withSecondaryEmail("dusl1j0oxw@0rzelb2mln.rvjnuth3ar")
+                                        .withWork("584591171")
+                                        .withMobile("1444010616")
+                                        .withFax("765997700")
+                                        .withHome("759019681")
+                                        .build())
+                                .withAddress(Address.address()
+                                        .withAddress1("defenceOrganisation")
+                                        .withAddress2("225")
+                                        .withAddress3("FuseRoad")
+                                        .withAddress4("East Croydon")
+                                        .withPostcode("LN72 9NG")
+                                        .build())
+                                .build())
+                        .build())
+                .withFundingType(REPRESENTATION_ORDER)
+                .withIsAssociatedByLAA(true);
+    }
+
     public static Defendant.Builder defendant(UUID prosecutionCaseId, CoreTemplateArguments args, Pair<UUID, List<UUID>> structure) {
 
         return Defendant.defendant()
@@ -396,7 +437,9 @@ public class CoreTestTemplates {
                 .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : null)
                 .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
                 .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
-                .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null);
+                .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null)
+                .withProceedingsConcluded(Boolean.FALSE);
+
     }
 
     public static Marker.Builder marker(Pair<UUID, List<UUID>> structure) {
@@ -418,6 +461,7 @@ public class CoreTestTemplates {
                 .withInitiationCode(RandomGenerator.values(InitiationCode.values()).next())
                 .withStatementOfFacts(STRING.next())
                 .withStatementOfFactsWelsh(STRING.next())
+                .withClassOfCase("Class 1")
                 .withCaseMarkers(buildCaseMarkers())
                 .withDefendants(
                         structure.getV().entrySet().stream()

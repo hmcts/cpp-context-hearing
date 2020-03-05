@@ -9,13 +9,12 @@ public class DefendantUpdateWithFinancialOrderDetails implements Serializable {
 
     private FinancialOrderForDefendant financialOrderForDefendant;
 
+    public DefendantUpdateWithFinancialOrderDetails(final FinancialOrderForDefendant financialOrderForDefendant) {
+        this.financialOrderForDefendant = financialOrderForDefendant;
+    }
 
     public FinancialOrderForDefendant getFinancialOrderForDefendant() {
         return financialOrderForDefendant;
-    }
-
-    public DefendantUpdateWithFinancialOrderDetails(final FinancialOrderForDefendant financialOrderForDefendant) {
-        this.financialOrderForDefendant = financialOrderForDefendant;
     }
 
     public static Builder newBuilder() {

@@ -35,6 +35,8 @@ import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertTrue;
+
 public class PleaDelegateTest {
 
     private PleaDelegate pleaDelegate;
@@ -274,6 +276,414 @@ public class PleaDelegateTest {
         assertThat(convictionDateRemoved.getOffenceId(), is(offenceId));
         assertThat(convictionDateRemoved.getHearingId(), is(hearingId));
         assertThat(convictionDateRemoved.getCaseId(), is(prosecutionCaseId));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaGuilty() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withDefendantId(offenceId)
+                .withOffenceId(offenceId)
+                .withAllocationDecision(AllocationDecision.allocationDecision()
+                        .withOffenceId(offenceId)
+                        .build())
+                .withPlea(Plea.plea()
+                        .withPleaDate(pleaDate)
+                        .withPleaValue(PleaValue.GUILTY)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertThat(pleaUpsert.getHearingId(), is(hearingId));
+
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        assertThat(convictionDateAdded, is(notNullValue()));
+        assertThat(convictionDateAdded.getOffenceId(), is(offenceId));
+        assertThat(convictionDateAdded.getHearingId(), is(hearingId));
+        assertThat(convictionDateAdded.getCaseId(), is(prosecutionCaseId));
+        assertThat(convictionDateAdded.getConvictionDate(), is(pleaDate));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaMcaGuilty() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.MCA_GUILTY)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaAutrefoisConvict() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.AUTREFOIS_CONVICT)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaConsent() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.CONSENTS)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaChangeToGuiltyAfterSwornIn() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.CHANGE_TO_GUILTY_AFTER_SWORN_IN)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaChangeToGuiltyNoSwornIn() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.CHANGE_TO_GUILTY_NO_SWORN_IN)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaChangeToGuiltyMagistratesCourt() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.CHANGE_TO_GUILTY_MAGISTRATES_COURT)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaNotGuilty() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withDefendantId(offenceId)
+                .withOffenceId(offenceId)
+                .withAllocationDecision(AllocationDecision.allocationDecision()
+                        .withOffenceId(offenceId)
+                        .build())
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.NOT_GUILTY)
+                        .build()
+                )
+                .build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertThat(pleaUpsert.getHearingId(), is(hearingId));
+
+        final ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) events.get(1);
+        assertThat(convictionDateRemoved, is(notNullValue()));
+        assertThat(convictionDateRemoved.getOffenceId(), is(offenceId));
+        assertThat(convictionDateRemoved.getHearingId(), is(hearingId));
+        assertThat(convictionDateRemoved.getCaseId(), is(prosecutionCaseId));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaUnfit() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.UNFIT_TO_PLEAD)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaAutrefois() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.AUTREFOIS_ACQUIT)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaOpposes() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.OPPOSES)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaNoPlea() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.NO_PLEA)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaChangeToNotGuilty() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.CHANGE_TO_NOT_GUILTY)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaPardon() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.PARDON)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
     }
 
     private Hearing getHearing(final UUID offenceId, final UUID prosecutionCaseId, final UUID hearingId) {

@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Hearing;
@@ -32,12 +33,12 @@ public class ChangeApplicationDetailIT extends AbstractIT {
         final CourtApplication existingCourtApplication = extendHearingCommand.getCourtApplication();
 
         //when progression announced application change
-        final CourtApplication applicationChangeRequest = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate())).getHearing().getCourtApplications().get(0);
+        final CourtApplication applicationChangeRequest = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate())).getHearing().getCourtApplications().get(0);
         applicationChangeRequest.setId(existingCourtApplication.getId());
         UseCases.sendPublicApplicationChangedMessage(applicationChangeRequest);
 
         //then application should  updated
-        Queries.getHearingPollForMatch(extendHearingCommand.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(extendHearingCommand.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(extendHearingCommand.getHearingId()))
                         .withValue(h -> h.getCourtApplications().size(), 2)
@@ -52,12 +53,12 @@ public class ChangeApplicationDetailIT extends AbstractIT {
 
     private ExtendHearingCommand addApplication() throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
         final CourtApplication initialCourtApplication = hearing.getCourtApplications().get(0);
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .with(Hearing::getCourtApplications, first(isBean(CourtApplication.class)
@@ -83,7 +84,7 @@ public class ChangeApplicationDetailIT extends AbstractIT {
                         .build()
         );
 
-        Queries.getHearingPollForMatch(hearing.getId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearing.getId()))
                         .withValue(h -> h.getCourtApplications().size(), 2)

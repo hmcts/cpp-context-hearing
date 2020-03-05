@@ -15,6 +15,16 @@ rule "Query - API - hearing.get.hearings"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get.hearings-for-today"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.hearings-for-today");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Magistrates"));
+  then
+    $outcome.setSuccess(true);
+end
+
+
 rule "Query - API - hearing.get.hearing"
   when
     $outcome: Outcome();

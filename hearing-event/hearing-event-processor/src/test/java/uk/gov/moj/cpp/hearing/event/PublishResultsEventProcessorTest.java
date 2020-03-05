@@ -6,10 +6,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.CreateNowsRequest.createNowsRequest;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -20,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.basicNowsTemplate;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
 import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplateForSendingResultSharedForOffence;
+import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID;
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.FinancialOrderDetails;
@@ -42,6 +45,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.SaveNowVariantsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
+import uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
@@ -146,7 +150,7 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
-        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
 
         when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
 
@@ -226,7 +230,7 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
-        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
 
         when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
 
@@ -263,7 +267,7 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
-        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
 
         final ResultLine resultLine = resultsShared.getTargets().stream()
                 .flatMap(target -> target.getResultLines().stream())
@@ -313,7 +317,7 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
-        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
 
         final ResultLine resultLine = resultsShared.getTargets().stream()
                 .flatMap(target -> target.getResultLines().stream())
@@ -363,7 +367,7 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
-        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
 
         final ResultLine resultLine = resultsShared.getTargets().stream()
                 .flatMap(target -> target.getResultLines().stream())
@@ -413,7 +417,7 @@ public class PublishResultsEventProcessorTest {
 
         when(saveNowVariantsDelegate.saveNowsVariants(sender, event, nows, resultsShared)).thenReturn(resultsShared.getVariantDirectory());
 
-        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(CreateNowsRequest.createNowsRequest().withNows(nows).build());
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
 
         final ResultLine resultLine = resultsShared.getTargets().stream()
                 .flatMap(target -> target.getResultLines().stream())
@@ -459,4 +463,25 @@ public class PublishResultsEventProcessorTest {
 
     }
 
+    @Test
+    public void shouldNotSendDirectlyWhenNowsIsAttachmentOfEarnings() {
+
+        final ResultsShared resultsShared = resultsSharedTemplate();
+
+        final List<Now> nows = basicNowsTemplate();
+        nows.get(0).setNowsTypeId(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID);
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(nowsGenerator.createNows(eq(event), Mockito.any(), Mockito.any())).thenReturn(nows);
+
+        when(nowsDelegate.generateNows(event, nows, resultsShared)).thenReturn(createNowsRequest().withNows(nows).build());
+
+        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verify(nowsDelegate, never()).sendNows(any(),any(),any(),any());
+    }
 }

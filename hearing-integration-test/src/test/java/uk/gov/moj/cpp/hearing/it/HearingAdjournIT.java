@@ -17,10 +17,8 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingLanguage;
@@ -53,7 +51,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings({"squid:S1607"})
@@ -76,13 +73,6 @@ public class HearingAdjournIT extends AbstractIT {
     private static final String COURT_ROOM_LABEL = "CourtRoom";
     private static final String COURT_CENTRE_LABEL = "Courthouse name";
 
-    @Before
-    public void setup() {
-        stubProgressionGenerateNows();
-        stubForReferenceDataResults();
-
-    }
-
     @Test
     public void shouldRaiseHearingAdjournedEvent() {
 
@@ -90,18 +80,16 @@ public class HearingAdjournIT extends AbstractIT {
         UUID resultLineId = randomUUID();
 
         final UUID primaryResultDefinitionId = UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
-        DocumentGeneratorStub.stubDocumentCreate("N/A");
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         hearingOne.getHearing().setHearingLanguage(HearingLanguage.ENGLISH);
         stubReferenceData(orderedDate, primaryResultDefinitionId, randomUUID(), hearingOne.getHearing().getCourtCentre().getId());
         stubGetReferenceDataCourtRooms(hearingOne.getHearing().getCourtCentre(), hearingOne.getHearing().getHearingLanguage());
-        stubFixedListForWelshValues();
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final List<Target> targets = new ArrayList<>();
 
-        SaveDraftResultCommand saveDraftResultCommand = UseCases.saveDraftResults(requestSpec, with(standardSaveDraftTemplate(hearingOne.getHearingId(),
+        SaveDraftResultCommand saveDraftResultCommand = UseCases.saveDraftResults(getRequestSpec(), with(standardSaveDraftTemplate(hearingOne.getHearingId(),
                 hearingOne.getFirstDefendantForFirstCase().getId(),
                 hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                 resultLineId
@@ -156,7 +144,7 @@ public class HearingAdjournIT extends AbstractIT {
         }));
 
         hearingOne.getHearing();
-        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", 60000)
+        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
                         .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
@@ -168,7 +156,7 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getEstimatedMinutes, is(59))
                                 .withValue(nh -> nh.getListedStartDateTime().toLocalDate(), START_DATE1)
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, hearingOne.getHearing().getCourtCentre().getId())
+                                        .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
                                         .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_A_ID))
                                 .with(NextHearing::getNextHearingProsecutionCases, first(isBean(NextHearingProsecutionCase.class)
                                         .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
@@ -181,12 +169,12 @@ public class HearingAdjournIT extends AbstractIT {
 
         ShareResultsCommand shareResultsCommand = standardShareResultsCommandTemplate(hearingOne.getHearingId());
 
-        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
+        UseCases.shareResults(getRequestSpec(), hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
 
         publicHearingAdjourned.waitFor();
 
-        UseCases.saveDraftResults(requestSpec, with(saveDraftResultCommand, saveDraftCommand -> saveDraftCommand.getTarget()
-                    .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
+        UseCases.saveDraftResults(getRequestSpec(), with(saveDraftResultCommand, saveDraftCommand -> saveDraftCommand.getTarget()
+                .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
                     resultLine.setResultLabel("Next Hearing")
                             .setResultDefinitionId(primaryResultDefinitionId)
                             .setOrderedDate(orderedDate)
@@ -230,7 +218,7 @@ public class HearingAdjournIT extends AbstractIT {
                             ));
                 })))));
 
-        final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", 30000)
+        final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
                         .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
@@ -241,7 +229,7 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
                                 .with(NextHearing::getEstimatedMinutes, is(30))
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                                .withValue(CourtCentre::getId, hearingOne.getHearing().getCourtCentre().getId())
+                                                .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
                                                 .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_B_ID)
                                          /*.with(CourtCentre::getAddress, isBean(Address.class)
                                              .withValue(Address::getAddress1, WIMBLEDON_ADDRESS1)
@@ -259,7 +247,7 @@ public class HearingAdjournIT extends AbstractIT {
                         ))));
 
 
-        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
+        UseCases.shareResults(getRequestSpec(), hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
 
         publicHearingAdjourned2.waitFor();
     }
@@ -271,18 +259,17 @@ public class HearingAdjournIT extends AbstractIT {
         UUID resultLineId = randomUUID();
 
         final UUID primaryResultDefinitionId = UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
-        DocumentGeneratorStub.stubDocumentCreate("N/A");
 
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, initiateHearingCommand));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
         hearingOne.getHearing().setHearingLanguage(HearingLanguage.ENGLISH);
         stubReferenceData(orderedDate, primaryResultDefinitionId, randomUUID(), hearingOne.getHearing().getCourtCentre().getId());
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final List<Target> targets = new ArrayList<>();
 
-        UseCases.saveDraftResultsApplication(requestSpec, with(standardSaveDraftTemplate(hearingOne.getHearingId(),
+        UseCases.saveDraftResultsApplication(getRequestSpec(), with(standardSaveDraftTemplate(hearingOne.getHearingId(),
                 null,
                 null,
                 resultLineId
@@ -354,7 +341,7 @@ public class HearingAdjournIT extends AbstractIT {
                 ));
 
 
-        UseCases.shareResults(requestSpec, hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
+        UseCases.shareResults(getRequestSpec(), hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
 
         publicHearingAdjourned.waitFor();
 
@@ -414,7 +401,6 @@ public class HearingAdjournIT extends AbstractIT {
         );
 
         ReferenceDataStub.stubGetAllResultDefinitions(referenceDate, allResultDefinitions);
-        ReferenceDataStub.stubRelistReferenceDataResults();
 
         stubLjaDetails(courtCentreId);
 

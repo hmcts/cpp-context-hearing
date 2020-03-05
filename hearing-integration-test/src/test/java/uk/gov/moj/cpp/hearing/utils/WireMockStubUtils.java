@@ -4,7 +4,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.reset;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -17,14 +16,13 @@ import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils.stubPingFor;
 import static uk.gov.justice.services.common.http.HeaderConstants.ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.rest.ResteasyClientBuilderFactory.clientBuilder;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import java.util.UUID;
 
@@ -58,11 +56,9 @@ public class WireMockStubUtils {
     static {
         LOGGER.info("Configuring and reseting wiremock");
         configureFor(HOST, 8080);
-        reset();
     }
 
     public static void setupAsAuthorisedUser(final UUID userId) {
-        stubPingFor("usersgroups-service");
 
         stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
@@ -74,7 +70,6 @@ public class WireMockStubUtils {
     }
 
     public static void setupAsSystemUser(final UUID userId) {
-        stubPingFor("usersgroups-service");
 
         stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
@@ -86,7 +81,6 @@ public class WireMockStubUtils {
     }
 
     public static void setupAsWildcardUserBelongingToAllGroups() {
-        stubPingFor("usersgroups-service");
 
         stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
@@ -98,19 +92,27 @@ public class WireMockStubUtils {
     }
 
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
-        stubPingFor("progression-service");
 
-        stubFor(get(urlPathEqualTo(format("/progression-service/query/api/rest/progression/cases/{0}", caseId)))
+        stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
                 .willReturn(aResponse().withStatus(OK.getStatusCode())
                         .withHeader(ID, randomUUID().toString())
-                        .withHeader(CONTENT_TYPE, CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS)
-                        .withBody(getProgressionCaseJson(caseId, caseUrn).toString())));
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-all-groups-by-user.json"))));
 
-        waitForStubToBeReady(format("/progression-service/query/api/rest/progression/cases/{0}", caseId), CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS);
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
+    public static void setupAsMagistrateUser(final UUID userId) {
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-magistrateuser-groups-by-user.json"))));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
     public static final void mockMaterialUpload() {
-        stubPingFor("material-service");
 
         stubFor(post(urlMatching(MATERIAL_UPLOAD_COMMAND))
                 .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
@@ -119,7 +121,6 @@ public class WireMockStubUtils {
     }
 
     public static final void mockUpdateHmpsMaterialStatus() {
-        stubPingFor("resultinghmps-service");
         stubFor(post(urlMatching(
                 MATERIAL_STATUS_UPLOAD_COMMAND))
                 .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)

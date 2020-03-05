@@ -12,6 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESNotificationDecisionD
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
@@ -28,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static java.util.stream.Stream.empty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +61,8 @@ public class DefendantAggregate implements Aggregate {
                                 updateOffenceResults(this.offenceResults, e.getOffenceIds(), e.getResultedOffences())
                         ),
                         when(DefendantCaseWithdrawnOrDismissed.class).apply(e -> {
+                        }),
+                        when(DefendantLegalAidStatusUpdated.class).apply(e -> {
                         }),
                         otherwiseDoNothing()
                 );
@@ -94,6 +99,20 @@ public class DefendantAggregate implements Aggregate {
         ));
     }
 
+    public Stream<Object> updateDefendantLegalAidStatus(final UUID defendantId, final String legalAidStatus) {
+        if(!hearingIds.isEmpty()) {
+            return apply(Stream.of(DefendantLegalAidStatusUpdated.defendantLegalAidStatusUpdatedBuilder()
+                    .withDefendantId(defendantId)
+                    .withLegalAidStatus(legalAidStatus)
+                    .withHearingIds(hearingIds)
+                    .build()
+
+            ));
+        } else {
+            return empty();
+        }
+    }
+
     public Stream<Object> updateDefendantWithFinancialOrder(final FinancialOrderForDefendant financialOrderForDefendant) {
         LOGGER.info("Nces-notification : updateDefendantWithFinancialOrder.............");
         return apply(ncesNotificationDecisionDelegate.updateDefendantWithFinancialOrder(financialOrderForDefendant));
@@ -123,8 +142,6 @@ public class DefendantAggregate implements Aggregate {
     public void setMomento(DefendantAggregateMomento momento) {
         this.momento = momento;
     }
-
-
 
     public Stream<Object> updateOffenceResults(final UUID defendantId, final UUID caseId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> updatedResults) {
         final Map<UUID, OffenceResult> offenceResultsCopy = new HashMap(this.offenceResults);

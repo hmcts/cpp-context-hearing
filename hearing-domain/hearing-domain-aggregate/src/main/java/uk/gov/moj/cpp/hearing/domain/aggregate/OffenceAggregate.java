@@ -101,14 +101,14 @@ public class OffenceAggregate implements Aggregate {
     }
 
     public Stream<Object> lookupHearingsForEditOffenceOnOffence(final UUID defendantId, final Offence offence) {
-        return apply(Stream.of(FoundHearingsForEditOffence.foundHearingsForEditOffence()
+        return this.hearingIds.isEmpty() ? Stream.empty() : apply(Stream.of(FoundHearingsForEditOffence.foundHearingsForEditOffence()
                 .withHearingIds(hearingIds)
                 .withDefendantId(defendantId)
                 .withOffence(offence)));
     }
 
     public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final UUID offenceId) {
-        return apply(Stream.of(FoundHearingsForDeleteOffence.builder()
+        return this.hearingIds.isEmpty() ? Stream.empty() :apply(Stream.of(FoundHearingsForDeleteOffence.builder()
                 .withId(offenceId)
                 .withHearingIds(hearingIds)
                 .build()));

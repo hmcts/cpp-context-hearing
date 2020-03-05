@@ -6,7 +6,8 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -19,6 +20,7 @@ import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.hearing.courts.AttendantType;
 import uk.gov.justice.hearing.courts.RemoveInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
@@ -35,11 +37,11 @@ public class InterpreterIntermediaryIT extends AbstractIT {
 
         final InterpreterIntermediary interpreterIntermediary = addInterpreterIntermediaryCommandTemplate(attendant);
 
-        UseCases.addInterpreterIntermediary(requestSpec, hearingOne.getHearingId(), interpreterIntermediary);
+        UseCases.addInterpreterIntermediary(getRequestSpec(), hearingOne.getHearingId(), interpreterIntermediary);
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -59,12 +61,12 @@ public class InterpreterIntermediaryIT extends AbstractIT {
     @Test
     public void addInterpreterIntermediary_shouldAdd() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
         createInterpreterIntermediary(hearingOne, attendant);
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -74,8 +76,8 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         createInterpreterIntermediary(hearingOne, secondattendant);
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -85,23 +87,23 @@ public class InterpreterIntermediaryIT extends AbstractIT {
     @Test
     public void removeInterpreterIntermediary_shouldRemove() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
         InterpreterIntermediary firstInterpreterIntermediary = createInterpreterIntermediary(hearingOne, attendant);
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearing.intermediaries", hasSize(1)))));
         //remove first InterIntermediary
-        UseCases.removeInterpreterIntermediary(requestSpec, hearingOne.getHearingId(),
+        UseCases.removeInterpreterIntermediary(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveInterpreterIntermediary(hearingOne.getHearingId(), firstInterpreterIntermediary.getId())
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -110,8 +112,8 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         Attendant anotherAttendant = new Attendant(AttendantType.DEFENDANTS, UUID.randomUUID(), null);
         createInterpreterIntermediary(hearingOne, anotherAttendant);
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -122,7 +124,7 @@ public class InterpreterIntermediaryIT extends AbstractIT {
     @Test
     public void updateInterpreterIntermediary_shouldUpdate() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
         InterpreterIntermediary firstInterpreterIntermediary = createInterpreterIntermediary(hearingOne, attendant);
 
@@ -133,14 +135,14 @@ public class InterpreterIntermediaryIT extends AbstractIT {
         firstInterpreterIntermediary.setAttendanceDays(Arrays.asList(LocalDate.now().plusDays(1)));
         firstInterpreterIntermediary.setAttendant(Attendant.attendant().withAttendantType(AttendantType.DEFENDANTS).withDefendantId(UUID.randomUUID()).build());
 
-        final UpdateInterpreterIntermediary firstInterpreterIntermediaryUpdateCommand = UseCases.updateInterpreterIntermediary(requestSpec, hearingOne.getHearingId(),
+        final UpdateInterpreterIntermediary firstInterpreterIntermediaryUpdateCommand = UseCases.updateInterpreterIntermediary(getRequestSpec(), hearingOne.getHearingId(),
                 TestTemplates.UpdateInterpreterIntermediaryCommandTemplates.updateInterpreterIntermediaryCommandTemplate(hearingOne.getHearingId(), firstInterpreterIntermediary)
         );
 
         InterpreterIntermediary firstInterpreterIntermediaryUpdated = firstInterpreterIntermediaryUpdateCommand.getInterpreterIntermediary();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(

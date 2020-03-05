@@ -1,0 +1,159 @@
+package uk.gov.moj.cpp.hearing.command.handler;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.aggregate.AggregateService;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.eventsourcing.source.core.EventSource;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.util.Arrays;
+import java.util.UUID;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.core.AllOf.allOf;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+
+@RunWith(MockitoJUnitRunner.class)
+public class UpdateCaseDefendantsHandlerTest {
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(
+            CaseDefendantsUpdated.class,
+            CaseDefendantsUpdatedForHearing.class);
+
+    @Mock
+    private EventStream eventStream;
+
+    @Mock
+    private EventStream hearingEventStream;
+
+    @Mock
+    private EventSource eventSource;
+
+    @Mock
+    private AggregateService aggregateService;
+
+    @InjectMocks
+    private UpdateCaseDefendantsHandler updateCaseDefendantsHandler;
+
+
+    private HearingAggregate hearingAggregate;
+
+    private CaseAggregate caseAggregate;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    private static InitiateHearingCommand initiateHearingCommand;
+
+
+    @Before
+    public void setup() {
+        caseAggregate = new CaseAggregate();
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        initiateHearingCommand = standardInitiateHearingTemplate();
+        hearingAggregate = new HearingAggregate() ;
+    }
+
+    @Test
+    public void testCaseDefendantsUpdated() throws EventStreamException{
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID hearingId = randomUUID();
+        setupMockedEventStream(caseId, this.eventStream, caseAggregate);
+
+        caseAggregate.registerHearingId(caseId, hearingId);
+
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withCaseStatus("CLOSED")
+                .withId(caseId)
+                .withDefendants(Arrays.asList(Defendant.defendant()
+                        .withId(defendantId)
+                        .withProceedingsConcluded(true).build()))
+                .build();
+        final JsonObject commandPayload = Json.createObjectBuilder()
+                .add("prosecutionCase",objectToJsonObjectConverter.convert(prosecutionCase))
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-case-defendants"), commandPayload);
+        updateCaseDefendantsHandler.updateCaseDefendants(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.case-defendants-updated"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingIds[0]", is(hearingId.toString()))))
+                )));
+
+    }
+
+    @Test
+    public void testCaseDefendantsForHearingUpdated() throws EventStreamException{
+        final UUID caseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID hearingId = randomUUID();
+        setupMockedEventStream(hearingId, this.hearingEventStream, hearingAggregate);
+        hearingAggregate.initiate(initiateHearingCommand.getHearing());
+
+        final JsonObject commandPayload = Json.createObjectBuilder()
+                .add("prosecutionCase",Json.createObjectBuilder()
+                    .add("caseStatus", "CLOSED")
+                    .add("id", caseId.toString())
+                    .add("defendants", Json.createArrayBuilder()
+                        .add(Json.createObjectBuilder()
+                          .add("id",defendantId.toString())
+                          .add("proceedingsConcluded", true)
+                          .build()).build())
+                .build())
+                .add("hearingId",hearingId.toString())
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-case-defendants-for-hearing"), commandPayload);
+        updateCaseDefendantsHandler.updateCaseDefendantsForHearing(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.case-defendants-updated-for-hearing"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString()))))
+                )));
+
+    }
+
+    private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
+        when(this.eventSource.getStreamById(id)).thenReturn(eventStream);
+        Class<T> clz = (Class<T>) aggregate.getClass();
+        when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
+    }
+}

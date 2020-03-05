@@ -9,6 +9,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
@@ -31,7 +32,7 @@ public class PublishCourtListSteps extends AbstractIT {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
         final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.court.list.publish.status"), courtCentreId);
-        final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
+        final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_COURT_LIST_STATUS).withHeader(USER_ID, getLoggedInUser())).timeout(30, SECONDS)
                 .until(
@@ -52,7 +53,7 @@ public class PublishCourtListSteps extends AbstractIT {
         givenAUserHasLoggedInAsASystemUser(USER_ID_VALUE_AS_ADMIN);
 
         final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), hearing.getCourtCentre().getId(), modifiedTime);
-        final String searchCourtListUrl = String.format("%s/%s", baseUri, queryPart);
+        final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
                 .until(status().is(OK),

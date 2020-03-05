@@ -17,6 +17,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -40,10 +41,10 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(
-                UseCases.initiateHearing(requestSpec,
+                UseCases.initiateHearing(getRequestSpec(),
                         with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(null))));
 
         final EventListener publicEventConvictionDateChangedListener = listenFor(
@@ -53,7 +54,7 @@ public class VerdictIT extends AbstractIT {
                         withJsonPath("$.caseId", is(hearingOne.getHearing().getProsecutionCases().get(0).getId().toString()))
                 )));
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -62,7 +63,7 @@ public class VerdictIT extends AbstractIT {
 
         publicEventConvictionDateChangedListener.waitFor();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -103,10 +104,10 @@ public class VerdictIT extends AbstractIT {
 
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() {
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne =
-                h(UseCases.initiateHearing(requestSpec,
+                h(UseCases.initiateHearing(getRequestSpec(),
                         with(standardInitiateHearingTemplate(), i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next()))));
 
         final EventListener publicEventOffenceConvictionDateRemovedListener = listenFor(
@@ -115,7 +116,7 @@ public class VerdictIT extends AbstractIT {
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.it().getHearing().getProsecutionCases().get(0).getId().toString())))));
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
@@ -124,7 +125,7 @@ public class VerdictIT extends AbstractIT {
 
         publicEventOffenceConvictionDateRemovedListener.waitFor();
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -166,21 +167,21 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsGuilty_shouldNotUpdateConvictionDate() {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
         final LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(),
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
                 i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(previousConvictionDate))));
 
-        h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 with(updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                         TestTemplates.VerdictCategoryType.GUILTY), t -> h(t).getFirstVerdict().setVerdictDate(currentConvictionDate))));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -201,22 +202,22 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void shouldInheritVerdict() {
 
-        givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();
 
         final LocalDate currentConvictionDate = PAST_LOCAL_DATE.next();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, with(standardInitiateHearingTemplate(),
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
                 i -> h(i).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(previousConvictionDate))));
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(requestSpec, hearingOne.getHearingId(),
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                 with(updateVerdictTemplate(
                         hearingOne.getHearingId(),
                         hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                         TestTemplates.VerdictCategoryType.GUILTY), t -> h(t).getFirstVerdict().setVerdictDate(currentConvictionDate))));
 
-        Queries.getHearingPollForMatch(hearingOne.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -227,11 +228,11 @@ public class VerdictIT extends AbstractIT {
                                                         .with(Verdict::getVerdictDate, is(updateVerdict.getFirstVerdict().getVerdictDate()))
                                                         .with(Verdict::getOriginatingHearingId, is(hearingOne.getHearingId())))))))))));
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(requestSpec, customStructureInitiateHearingTemplate(
+        final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(getRequestSpec(), customStructureInitiateHearingTemplate(
                 toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
         )));
 
-        Queries.getHearingPollForMatch(hearingTwo.getHearingId(), 30, isBean(HearingDetailsResponse.class)
+        Queries.getHearingPollForMatch(hearingTwo.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingTwo.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)

@@ -30,7 +30,7 @@ public class Defendant {
     @JoinColumns({
             @JoinColumn(name = "prosecution_case_id", insertable = false, updatable = false, referencedColumnName = "id"),
             @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
-     private ProsecutionCase prosecutionCase;
+    private ProsecutionCase prosecutionCase;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "defendant", orphanRemoval = true)
     private Set<Offence> offences = new HashSet<>();
@@ -112,6 +112,25 @@ public class Defendant {
     })
     @Embedded
     private PersonDefendant personDefendant;
+    @AttributeOverrides({
+            @AttributeOverride(name = "defenceOrganisation.name", column = @Column(name = "org_name")),
+            @AttributeOverride(name = "defenceOrganisation.incorporationNumber", column = @Column(name = "org_inc_no")),
+            @AttributeOverride(name = "defenceOrganisation.registeredCharityNumber", column = @Column(name = "org_reg_charity_no")),
+            @AttributeOverride(name = "defenceOrganisation.address.address1", column = @Column(name = "associate_org_address_1")),
+            @AttributeOverride(name = "defenceOrganisation.address.address2", column = @Column(name = "associate_org_address_2")),
+            @AttributeOverride(name = "defenceOrganisation.address.address3", column = @Column(name = "associate_org_address_3")),
+            @AttributeOverride(name = "defenceOrganisation.address.address4", column = @Column(name = "associate_org_address_4")),
+            @AttributeOverride(name = "defenceOrganisation.address.address5", column = @Column(name = "associate_org_address_5")),
+            @AttributeOverride(name = "defenceOrganisation.address.postCode", column = @Column(name = "associate_org_post_code")),
+            @AttributeOverride(name = "defenceOrganisation.contact.home", column = @Column(name = "associate_org_contact_home")),
+            @AttributeOverride(name = "defenceOrganisation.contact.work", column = @Column(name = "associate_org_contact_work")),
+            @AttributeOverride(name = "defenceOrganisation.contact.mobile", column = @Column(name = "associate_org_contact_mobile")),
+            @AttributeOverride(name = "defenceOrganisation.contact.primaryEmail", column = @Column(name = "associate_org_contact_primary_email")),
+            @AttributeOverride(name = "defenceOrganisation.contact.secondaryEmail", column = @Column(name = "associate_org_contact_secondary_email")),
+            @AttributeOverride(name = "defenceOrganisation.contact.fax", column = @Column(name = "associate_org_contact_fax")),
+    })
+    @Embedded
+    private AssociatedDefenceOrganisation associatedDefenceOrganisation;
 
     @Column(name = "prosecution_case_id")
     private UUID prosecutionCaseId;
@@ -140,6 +159,11 @@ public class Defendant {
     @Column(name = "is_youth")
     private Boolean isYouth;
 
+    @Column(name = "legalaid_status")
+    private String legalaidStatus;
+
+    @Column(name = "proceedingsConcluded")
+    private boolean proceedingsConcluded;
 
     public Defendant() {
         //For JPA
@@ -271,6 +295,30 @@ public class Defendant {
 
     public void setIsYouth(final Boolean youth) {
         isYouth = youth;
+    }
+
+    public String getLegalaidStatus() {
+        return legalaidStatus;
+    }
+
+    public void setLegalaidStatus(String legalaidStatus) {
+        this.legalaidStatus = legalaidStatus;
+    }
+
+    public boolean isProceedingsConcluded() {
+        return proceedingsConcluded;
+    }
+
+    public void setProceedingsConcluded(boolean proceedingsConcluded) {
+        this.proceedingsConcluded = proceedingsConcluded;
+    }
+
+    public AssociatedDefenceOrganisation getAssociatedDefenceOrganisation() {
+        return associatedDefenceOrganisation;
+    }
+
+    public void setAssociatedDefenceOrganisation(final AssociatedDefenceOrganisation associatedDefenceOrganisation) {
+        this.associatedDefenceOrganisation = associatedDefenceOrganisation;
     }
 
     @Override

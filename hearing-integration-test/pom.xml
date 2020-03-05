@@ -2,7 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
@@ -10,6 +9,11 @@
     </parent>
 
     <artifactId>hearing-integration-test</artifactId>
+
+    <properties>
+        <maven-failsafe-plugin.version>2.22.2</maven-failsafe-plugin.version>
+        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+    </properties>
 
     <dependencies>
         <!-- Test dependencies-->
@@ -87,14 +91,46 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>${exec-maven-plugin.version}</version>
+                        <executions>
+                            <execution>
+                                <id>pre-integration</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        uk.gov.moj.cpp.hearing.utils.StubPerExecution
+                                    </mainClass>
+                                    <classpathScope>test</classpathScope>
+                                    <cleanupDaemonThreads>false</cleanupDaemonThreads>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>${maven-failsafe-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>integration-test</id>
                                 <goals>
                                     <goal>integration-test</goal>
                                 </goals>
+                                <configuration>
+                                    <threadCount>1</threadCount>
+                                    <parallel>classesAndMethods</parallel>
+                                    <systemProperties>
+                                        <property>
+                                            <name>stubPerExecution</name>
+                                            <value>true</value>
+                                        </property>
+                                    </systemProperties>
+                                </configuration>
                             </execution>
                             <execution>
                                 <id>verify</id>

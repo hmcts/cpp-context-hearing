@@ -189,6 +189,25 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearings.json
                     schema:  !include  json/schema/hearing.get.hearings.json
 
+
+/hearings-for-today:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearings-for-today+json
+            name: hearing.get.hearings-for-today
+        ...
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearings-for-today+json:
+                    example:  !include json/hearing.get.hearings-for-today.json
+                    schema:  !include  json/schema/hearing.get.hearings-for-today.json
+
+
 /search:
    get:
       description: |

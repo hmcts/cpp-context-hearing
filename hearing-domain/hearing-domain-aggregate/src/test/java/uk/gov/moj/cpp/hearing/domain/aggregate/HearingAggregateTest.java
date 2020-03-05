@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -12,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -20,6 +22,8 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
@@ -27,7 +31,9 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
@@ -35,9 +41,13 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +60,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.internal.matchers.NotNull;
 
 public class HearingAggregateTest {
 
@@ -591,6 +602,36 @@ public class HearingAggregateTest {
         assertHearingEventLogged(startHearingEventLogged, logEventCommand, initiateHearingCommand);
     }
 
+    @Test
+    public void shouldNotRaiseEvent_whenHearingResult_hasAlreadyShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.TRUE);
+        hearingAggregate.apply(new HearingInitiated(hearing));
+        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
+                hearingAggregate.updateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
+                        .findFirst()
+                        .orElse(null);
+        assertThat(caseDefendantsUpdatedForHearing, nullValue());
+    }
+
+    @Test
+    public void shouldRaiseEvent_whenHearingResult_hasNotAlreadyShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.FALSE);
+
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
+                hearingAggregate.updateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
+                        .findFirst()
+                        .orElse(null);
+        assertThat(caseDefendantsUpdatedForHearing.getHearingId(), is(hearing.getId()));
+    }
+
     private void assertHearingEventLogged(final HearingEventLogged hearingEventLogged, final LogEventCommand logEventCommand, final InitiateHearingCommand initiateHearingCommand) {
         assertThat(hearingEventLogged.getHearingEventId(), is(logEventCommand.getHearingEventId()));
         assertThat(hearingEventLogged.getLastHearingEventId(), is(nullValue()));
@@ -632,7 +673,204 @@ public class HearingAggregateTest {
         final List<Object> events = HEARING_AGGREGATE.addDefenceCounsel(defenceCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
         final DefenceCounselAdded defenceCounselAdded = (DefenceCounselAdded) events.get(0);
 
-        assertNotNull(events);
+        assertThat(events, notNullValue());
         assertThat(defenceCounselAdded.getHearingId(), is(logEventCommand.getHearingId()));
+    }
+
+    @Test
+    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSPICases(){
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing ended")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(),new ArrayList<>(),
+                "Leigh",randomUUID(),"Ann","H","Y","Ms", randomUUID());
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
+
+        assertThat(events, notNullValue());
+        assertThat(defenceCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(defenceCounselChangeIgnored.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
+    }
+
+    @Test
+    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSJPCases(){
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
+
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing ended")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(),new ArrayList<>(),
+                "Leigh",randomUUID(),"Ann","H","Y","Ms", randomUUID());
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
+
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
+
+        assertThat(events, notNullValue());
+        assertThat(defenceCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(defenceCounselChangeIgnored.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference()));
+    }
+
+    @Test
+    public void addProsecutionCounsel_beforeHearingEnded(){
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing Started")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+                Arrays.asList(LocalDate.now()),
+                STRING.next(),
+                randomUUID(),
+                STRING.next(),
+                STRING.next(),
+                Arrays.asList(UUID.randomUUID()),
+                STRING.next(),
+                STRING.next(),
+                randomUUID()
+
+        );
+
+        final List<Object> events = HEARING_AGGREGATE.addProsecutionCounsel(prosecutionCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final ProsecutionCounselAdded prosecutionCounselAdded = (ProsecutionCounselAdded) events.get(0);
+
+        assertThat(events, notNullValue());
+        assertThat(prosecutionCounselAdded.getHearingId(), is(logEventCommand.getHearingId()));
+    }
+
+    @Test
+    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSPICases(){
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing ended")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+                Arrays.asList(LocalDate.now()),
+                STRING.next(),
+                randomUUID(),
+                STRING.next(),
+                STRING.next(),
+                Arrays.asList(UUID.randomUUID()),
+                STRING.next(),
+                STRING.next(),
+                randomUUID()
+
+        );
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
+
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
+
+        assertThat(events, notNullValue());
+        assertThat(prosecutionCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(prosecutionCounselChangeIgnored.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN()));
+    }
+
+    @Test
+    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSJPCases(){
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
+
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel("Hearing ended")
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+                Arrays.asList(LocalDate.now()),
+                STRING.next(),
+                randomUUID(),
+                STRING.next(),
+                STRING.next(),
+                Arrays.asList(UUID.randomUUID()),
+                STRING.next(),
+                STRING.next(),
+                randomUUID()
+
+        );
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
+
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
+
+        assertThat(events, notNullValue());
+        assertThat(prosecutionCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(prosecutionCounselChangeIgnored.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference()));
     }
 }

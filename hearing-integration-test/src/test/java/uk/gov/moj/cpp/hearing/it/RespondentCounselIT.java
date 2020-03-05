@@ -7,7 +7,8 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -20,6 +21,7 @@ import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
 import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.LocalDate;
@@ -34,7 +36,7 @@ public class RespondentCounselIT extends AbstractIT {
     @Test
     public void addRespondentCounsel_shouldAdd() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
 
@@ -43,8 +45,8 @@ public class RespondentCounselIT extends AbstractIT {
         firstRespondentCounsel.setLastName("DummyLastName");
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -63,15 +65,15 @@ public class RespondentCounselIT extends AbstractIT {
     @Test
     public void removeRespondentCounsel_shouldRemove() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        final AddRespondentCounsel firstRespondentCounselCommand = UseCases.addRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final AddRespondentCounsel firstRespondentCounselCommand = UseCases.addRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 addRespondentCounselCommandTemplateWithoutMiddleName(hearingOne.getHearingId())
         );
         RespondentCounsel firstRespondentCounsel = firstRespondentCounselCommand.getRespondentCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -85,15 +87,15 @@ public class RespondentCounselIT extends AbstractIT {
                         )));
 
         //remove first DC
-        UseCases.removeRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        UseCases.removeRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveRespondentCounsel(hearingOne.getHearingId(), firstRespondentCounsel.getId())
         );
-        final AddRespondentCounsel secondRespondentCounselCommand = UseCases.addRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final AddRespondentCounsel secondRespondentCounselCommand = UseCases.addRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 addRespondentCounselCommandTemplate(hearingOne.getHearingId())
         );
         RespondentCounsel secondRespondentCounsel = secondRespondentCounselCommand.getRespondentCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -113,7 +115,7 @@ public class RespondentCounselIT extends AbstractIT {
     @Test
     public void updateRespondentCounsel_shouldUpdate() throws Exception {
 
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
 
@@ -126,14 +128,14 @@ public class RespondentCounselIT extends AbstractIT {
         firstRespondentCounsel.setMiddleName("DummyMiddleName");
         firstRespondentCounsel.setAttendanceDays(Arrays.asList(LocalDate.now().plusDays(1)));
 
-        final UpdateRespondentCounsel firstRespondentCounselReAddCommand = UseCases.updateRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final UpdateRespondentCounsel firstRespondentCounselReAddCommand = UseCases.updateRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateRespondentCounselCommandTemplate(hearingOne.getHearingId(), firstRespondentCounsel)
         );
 
         RespondentCounsel firstRespondentCounselUpdated = firstRespondentCounselReAddCommand.getRespondentCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -151,23 +153,23 @@ public class RespondentCounselIT extends AbstractIT {
 
     @Test
     public void testUpdateRespondentCounselWhenRespondentCounselIsRemovedThenRespondentCounselShouldNotBeUpdated() throws Exception {
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
 
         RespondentCounsel secondRespondentCounsel = createSecondRespondentCounsel(hearingOne, firstRespondentCounsel);
 
 
-        UseCases.removeRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        UseCases.removeRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveRespondentCounsel(hearingOne.getHearingId(), firstRespondentCounsel.getId())
         );
 
         firstRespondentCounsel.setLastName("DummyLastName");
-        final UpdateRespondentCounsel firstRespondentCounselUpdatedCommand = UseCases.updateRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final UpdateRespondentCounsel firstRespondentCounselUpdatedCommand = UseCases.updateRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateRespondentCounselCommandTemplate(hearingOne.getHearingId(), firstRespondentCounsel)
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -184,12 +186,12 @@ public class RespondentCounselIT extends AbstractIT {
     }
 
     private RespondentCounsel createSecondRespondentCounsel(final InitiateHearingCommandHelper hearingOne, final RespondentCounsel firstRespondentCounsel) {
-        final AddRespondentCounsel secondRespondentCounselCommand = UseCases.addRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final AddRespondentCounsel secondRespondentCounselCommand = UseCases.addRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 addRespondentCounselCommandTemplate(hearingOne.getHearingId())
         );
         RespondentCounsel secondRespondentCounsel = secondRespondentCounselCommand.getRespondentCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -214,7 +216,7 @@ public class RespondentCounselIT extends AbstractIT {
 
     @Test
     public void testUpdateRespondentCounselWithPreviouslySetValues() throws Exception {
-        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(requestSpec, standardInitiateHearingTemplate()));
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
 
@@ -228,14 +230,14 @@ public class RespondentCounselIT extends AbstractIT {
         firstRespondentCounsel.setMiddleName("DummyMiddleName");
         firstRespondentCounsel.setAttendanceDays(Arrays.asList(LocalDate.now().plusDays(1)));
 
-        final UpdateRespondentCounsel firstRespondentCounselReAddCommand = UseCases.updateRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final UpdateRespondentCounsel firstRespondentCounselReAddCommand = UseCases.updateRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateRespondentCounselCommandTemplate(hearingOne.getHearingId(), firstRespondentCounsel)
         );
 
         RespondentCounsel firstRespondentCounselUpdated = firstRespondentCounselReAddCommand.getRespondentCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -251,15 +253,15 @@ public class RespondentCounselIT extends AbstractIT {
         //UpdateFirstRespondentCounsel second time with Original values
         firstRespondentCounselUpdated.setFirstName(tempFirstRespondentCounsel);
 
-        final UpdateRespondentCounsel thirdTimeUpdateCommand = UseCases.updateRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final UpdateRespondentCounsel thirdTimeUpdateCommand = UseCases.updateRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateRespondentCounselCommandTemplate(hearingOne.getHearingId(), firstRespondentCounselUpdated));
 
 
         RespondentCounsel thirdUpdateWithFirst = thirdTimeUpdateCommand.getRespondentCounsel();
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
@@ -275,14 +277,14 @@ public class RespondentCounselIT extends AbstractIT {
     }
 
     public static RespondentCounsel createFirstRespondentCounsel(final InitiateHearingCommandHelper hearingOne) {
-        final AddRespondentCounsel firstRespondentCounselCommand = UseCases.addRespondentCounsel(requestSpec, hearingOne.getHearingId(),
+        final AddRespondentCounsel firstRespondentCounselCommand = UseCases.addRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 addRespondentCounselCommandTemplate(hearingOne.getHearingId())
         );
         RespondentCounsel firstRespondentCounsel = firstRespondentCounselCommand.getRespondentCounsel();
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(CPP_UID_HEADER.getName(), CPP_UID_HEADER.getValue()).build())
-                .timeout(30, TimeUnit.SECONDS)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
                         payload().isJson(allOf(
