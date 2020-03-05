@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsASystemUser;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
@@ -34,7 +35,8 @@ public class PublishCourtListSteps extends AbstractIT {
         final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.court.list.publish.status"), courtCentreId);
         final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
-        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_COURT_LIST_STATUS).withHeader(USER_ID, getLoggedInUser())).timeout(30, SECONDS)
+        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_COURT_LIST_STATUS).withHeader(USER_ID, getLoggedInUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -56,6 +58,7 @@ public class PublishCourtListSteps extends AbstractIT {
         final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
                 .until(status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.court.courtName", equalTo(hearing.getCourtCentre().getName())),
