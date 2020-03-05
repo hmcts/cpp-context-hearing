@@ -22,7 +22,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
 
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
+import java.util.UUID;
 
 public class PublishCourtListSteps extends AbstractIT {
 
@@ -50,11 +50,12 @@ public class PublishCourtListSteps extends AbstractIT {
                         )));
     }
 
-    public void verifyLatestHearingEvents(final Hearing hearing, final LocalDate modifiedTime) {
+    public void verifyLatestHearingEvents(final Hearing hearing, final LocalDate hearingEventDate,
+                                          final UUID expectedHearingEventId) {
 
         givenAUserHasLoggedInAsASystemUser(USER_ID_VALUE_AS_ADMIN);
 
-        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), hearing.getCourtCentre().getId(), modifiedTime);
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), hearing.getCourtCentre().getId(), hearingEventDate);
         final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
@@ -62,7 +63,8 @@ public class PublishCourtListSteps extends AbstractIT {
                 .until(status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.court.courtName", equalTo(hearing.getCourtCentre().getName())),
-                                withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomName", equalTo(hearing.getCourtCentre().getRoomName()))
+                                withJsonPath("$.court.courtSites[0].courtRooms[0].courtRoomName", equalTo(hearing.getCourtCentre().getRoomName())),
+                                withJsonPath("$.court.courtSites[0].courtRooms[0].hearingEvent.id", equalTo(expectedHearingEventId.toString()))
                         )));
     }
 }

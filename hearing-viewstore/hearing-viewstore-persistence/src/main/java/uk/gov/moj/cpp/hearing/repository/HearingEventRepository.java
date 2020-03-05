@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import org.apache.deltaspike.data.api.AbstractEntityRepository;
@@ -74,7 +75,8 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "from uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent2, " +
                     "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing2 " +
                     "WHERE hearing2.id = hearingEvent2.hearingId and " +
-                    "hearing2.courtCentre.roomId = hearing.courtCentre.roomId " +
+                    "hearing2.courtCentre.roomId = hearing.courtCentre.roomId and " +
+                    "hearingEvent2.hearingEventDefinitionId IN (:cppHearingEventIds) " +
                     "group by hearing2.courtCentre.roomId) and  " +
                     "hearingEvent.eventDate = :eventDate and " +
                     "hearingEvent.deleted is false " +
@@ -110,5 +112,6 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     public abstract List<HearingEvent> findBy(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime);
 
     @Query(value = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST)
-    public abstract List<HearingEventPojo> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate);
+    public abstract List<HearingEventPojo> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
+
 }

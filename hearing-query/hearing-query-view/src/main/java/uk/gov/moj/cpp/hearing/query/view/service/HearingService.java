@@ -26,6 +26,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -100,10 +102,15 @@ public class HearingService {
     @Inject
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
+    @Inject
+    private XhibitEventMapperCache xhibitEventMapperCache;
+
     private final ZoneId zid = of(UTC.getId());
 
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList, final LocalDate localDate) {
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate);
+        final Set<UUID> cppHearingEventIds = xhibitEventMapperCache.getCppHearingEventIds();
+
+        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
@@ -120,7 +127,9 @@ public class HearingService {
     }
 
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate);
+        final Set<UUID> cppHearingEventIds = xhibitEventMapperCache.getCppHearingEventIds();
+
+        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
 
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);

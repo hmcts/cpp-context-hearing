@@ -64,6 +64,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -162,6 +163,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
+
+    @Mock
+    private XhibitEventMapperCache xhibitEventMapperCache;
 
     @InjectMocks
     private HearingService hearingService;
@@ -628,7 +632,11 @@ public class HearingServiceTest {
 
         final CurrentCourtStatus expectedCurrentCourtStatus = currentCourtStatus().withPageName("hello").build();
 
-        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now)).thenReturn(hearingEventList);
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet();
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(hearingEventRequiredDefinitionsIds);
+        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
@@ -654,9 +662,13 @@ public class HearingServiceTest {
 
         final List<Hearing> hearings = new ArrayList<>();
         hearings.add(hearing);
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet<>();
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(hearingEventRequiredDefinitionsIds);
 
         when(hearingRepository.findHearingsByDateAndCourtCentreList(now, courtCentreIds)).thenReturn(hearings);
-        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now)).thenReturn(hearingEventList);
+        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEventPojo.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
 

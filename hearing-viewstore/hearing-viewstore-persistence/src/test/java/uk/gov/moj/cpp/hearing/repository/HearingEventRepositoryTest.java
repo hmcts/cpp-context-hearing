@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
 import static java.util.UUID.randomUUID;
@@ -16,10 +17,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -251,6 +256,65 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvent.getEventTime(), is(EVENT_TIME));
         assertThat(hearingEvent.getLastModifiedTime(), is(LAST_MODIFIED_TIME));
         assertThat(hearingEvent.isDeleted(), is(false));
+    }
+
+    @Test
+    public void shouldGetLatestHearingsForCourtCentreList() {
+        givenHearingExistsWithCourtCentre();
+        givenHearingEventsExistWithNotRequiredEventDefinitions();
+        final List<UUID> courtCentreIds = new ArrayList();
+        courtCentreIds.add(COURT_CENTRE_ID);
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet();
+        hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_1);
+        hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_2);
+
+        final List<HearingEventPojo> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, EVENT_TIME.toLocalDate(),hearingEventRequiredDefinitionsIds);
+        assertThat(hearingEvents.size(), is(1));
+
+        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvents.get(0).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_2));
+        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID_2));
+        assertThat(hearingEvents.get(0).getRecordedLabel(), is(RECORDED_LABEL_2));
+        assertThat(hearingEvents.get(0).getEventTime(), is(EVENT_TIME_2));
+        assertThat(hearingEvents.get(0).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
+    }
+
+    private void givenHearingEventsExistWithNotRequiredEventDefinitions() {
+        final List<HearingEvent> hearingEvents = newArrayList(
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_1)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_1)
+                        .setRecordedLabel(RECORDED_LABEL)
+                        .setEventDate(EVENT_TIME.toLocalDate())
+                        .setEventTime(EVENT_TIME)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME)
+                        .setAlterable(ALTERABLE),
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_2)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_2)
+                        .setRecordedLabel(RECORDED_LABEL_2)
+                        .setEventDate(EVENT_TIME_2.toLocalDate())
+                        .setEventTime(EVENT_TIME_2)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_2)
+                        .setAlterable(ALTERABLE) ,
+
+                HearingEvent.hearingEvent()
+                        .setId(HEARING_EVENT_ID_3)
+                        .setHearingId(HEARING_ID_1)
+                        .setHearingEventDefinitionId(HEARING_EVENT_DEFINITION_ID_3)
+                        .setRecordedLabel(RECORDED_LABEL_3)
+                        .setEventDate(EVENT_TIME_3.toLocalDate())
+                        .setEventTime(EVENT_TIME_3)
+                        .setLastModifiedTime(LAST_MODIFIED_TIME_3)
+                        .setAlterable(ALTERABLE)
+                        .setDeleted(false)
+        );
+
+        hearingEvents.forEach(hearingEvent -> hearingEventRepository.save(hearingEvent));
+
+        assertThat(hearingEventRepository.findAll(), hasSize(3));
     }
 
     private void givenHearingEventsExistWithDeletedOnes() {

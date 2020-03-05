@@ -81,7 +81,7 @@ public class AbstractIT {
     private static final ThreadLocal<UUID> USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     private static final ThreadLocal<UUID> ADMIN_USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     private static String baseUri;
-    private static RequestSpecification requestSpec;
+    protected static RequestSpecification requestSpec;
 
     /**
      * In case of Single Test executions, initiation of Stubs Per Execution
