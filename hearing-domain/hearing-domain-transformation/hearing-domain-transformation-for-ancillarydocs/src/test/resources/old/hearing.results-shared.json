@@ -1,0 +1,400 @@
+{
+  "hearingId": "13c1898a-b19b-47fc-9f93-1172be5f959c",
+  "sharedTime": "2019-03-02T14:37:34.302Z",
+  "courtClerk": {
+    "firstName": "Marion",
+    "id": "10e850ec-6602-48e7-b216-c0891f7dc981",
+    "lastName": "Martin"
+  },
+  "hearing": {
+    "courtCentre": {
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defenceCounsels": [
+      {
+        "attendanceDays": [
+          "2019-03-02"
+        ],
+        "defendants": [
+          "4e01f75b-29f5-449d-9988-40dd40d02859"
+        ],
+        "firstName": "Jonathan",
+        "id": "aefd829d-5adc-403d-a500-0d58253076b5",
+        "lastName": "Reddy",
+        "middleName": "",
+        "status": "Junior",
+        "title": ""
+      }
+    ],
+    "defendantAttendance": [
+      {
+        "attendanceDays": [
+          {
+            "day": "2019-03-02",
+            "isInAttendance": true
+          }
+        ],
+        "defendantId": "4e01f75b-29f5-449d-9988-40dd40d02859"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 50,
+        "listingSequence": 0,
+        "sittingDay": "2019-03-02T10:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "13c1898a-b19b-47fc-9f93-1172be5f959c",
+    "judiciary": [
+      {
+        "firstName": "Julie",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "a9b7ba70-783b-317e-9998-dc4dd82eb3c5",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "a9b7ba70-783b-317e-9998-dc4dd82eb3c5",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Clark",
+        "title": "Mrs"
+      },
+      {
+        "firstName": "Ramesh Kumar",
+        "isBenchChairman": false,
+        "isDeputy": true,
+        "judicialId": "e816c635-cad8-3a60-babd-6b97b03cbcc9",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "e816c635-cad8-3a60-babd-6b97b03cbcc9",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Farmah",
+        "title": "Mr"
+      },
+      {
+        "firstName": "Beatriz",
+        "isBenchChairman": false,
+        "isDeputy": true,
+        "judicialId": "532b81fa-223a-3b1e-8741-39a5b8151d12",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "532b81fa-223a-3b1e-8741-39a5b8151d12",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Redondo",
+        "title": "Miss"
+      }
+    ],
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "SJP_REFERRAL",
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "additionalNationalityCode": "GBR",
+                  "additionalNationalityDescription": "British",
+                  "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                  "address": {
+                    "address1": "253",
+                    "address2": "23874 Torey Crescent",
+                    "address3": "Steuberchester",
+                    "address4": "CD",
+                    "address5": "Japan",
+                    "postcode": "SW11 1JU"
+                  },
+                  "contact": {
+                    "fax": "588.241.8509",
+                    "home": "(027) 950-4211",
+                    "mobile": "686-441-2249",
+                    "primaryEmail": "alan.johnson@gmail.com",
+                    "secondaryEmail": "jadyn.kunze@yahoo.com",
+                    "work": "765.615.8779"
+                  },
+                  "dateOfBirth": "1994-03-02",
+                  "disabilityStatus": "0zRnyEUb2W",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "ethnicityCode": "W1",
+                  "ethnicityDescription": "British",
+                  "ethnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "firstName": "Trinity",
+                  "gender": "FEMALE",
+                  "interpreterLanguageNeeds": "1OcCKRuWiO",
+                  "lastName": "Ledner",
+                  "middleName": "Test",
+                  "nationalInsuranceNumber": "LB523206D",
+                  "nationalityCode": "GBR",
+                  "nationalityDescription": "British",
+                  "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                  "occupation": "Pcl1Y7cvjo",
+                  "occupationCode": "mVssgZqxkU",
+                  "specificRequirements": "m3d9tOnk22",
+                  "title": "MISS"
+                },
+                "role": "Br0dZ1ZPLF"
+              }
+            ],
+            "defenceOrganisation": {
+              "address": {
+                "address1": "253",
+                "address2": "23874 Torey Crescent",
+                "address3": "Steuberchester",
+                "address4": "CD",
+                "address5": "Japan",
+                "postcode": "SW11 1JU"
+              },
+              "contact": {
+                "fax": "588.241.8509",
+                "home": "(027) 950-4211",
+                "mobile": "686-441-2249",
+                "primaryEmail": "alan.johnson@gmail.com",
+                "secondaryEmail": "jadyn.kunze@yahoo.com",
+                "work": "765.615.8779"
+              },
+              "incorporationNumber": "cz35u7dp6F",
+              "name": "8YDjIQqx1J",
+              "registeredCharityNumber": "267xhsZIXz"
+            },
+            "id": "4e01f75b-29f5-449d-9988-40dd40d02859",
+            "legalEntityDefendant": {
+              "organisation": {
+                "address": {
+                  "address1": "253",
+                  "address2": "23874 Torey Crescent",
+                  "address3": "Steuberchester",
+                  "address4": "CD",
+                  "address5": "Japan",
+                  "postcode": "SW11 1JU"
+                },
+                "contact": {
+                  "fax": "588.241.8509",
+                  "home": "(027) 950-4211",
+                  "mobile": "686-441-2249",
+                  "primaryEmail": "alan.johnson@gmail.com",
+                  "secondaryEmail": "jadyn.kunze@yahoo.com",
+                  "work": "765.615.8779"
+                },
+                "incorporationNumber": "cz35u7dp6F",
+                "name": "8YDjIQqx1J",
+                "registeredCharityNumber": "267xhsZIXz"
+              }
+            },
+            "mitigation": "6cxkp5ZbSo",
+            "mitigationWelsh": "QCDKkdoAhQ",
+            "numberOfPreviousConvictionsCited": 1,
+            "offences": [
+              {
+                "arrestDate": "2019-02-02",
+                "chargeDate": "2019-02-02",
+                "convictionDate": "2019-03-02",
+                "count": 1,
+                "endDate": "2018-11-02",
+                "id": "e01eb658-179c-4684-9999-b2111d89922b",
+                "modeOfTrial": "IND",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2019-02-10",
+                  "notifiedPleaValue": "NOTIFIED_GUILTY",
+                  "offenceId": "e01eb658-179c-4684-9999-b2111d89922b"
+                },
+                "offenceCode": "OF61016A",
+                "offenceDefinitionId": "5abe3e81-1de0-4c42-b0d2-2dc38f5c44c7",
+                "offenceFacts": {
+                  "alcoholReadingAmount": "fpSjYAxtdC",
+                  "alcoholReadingMethod": "lofNcuDHCv",
+                  "vehicleRegistration": "JuBntSeZG9"
+                },
+                "offenceLegislation": "Contrary to section 1(1)    of the Criminal Attempts Act 1981.",
+                "offenceLegislationWelsh": "Yn groes i Adran 1(1) Deddf Ymgeisiau i Droseddu 1981.",
+                "offenceTitle": "Section 18 - attempt    wounding with intent",
+                "offenceTitleWelsh": "Adran 18 - ymgais i glwyfo gan fwriadu",
+                "orderIndex": 1,
+                "plea": {
+                  "offenceId": "e01eb658-179c-4684-9999-b2111d89922b",
+                  "originatingHearingId": "13c1898a-b19b-47fc-9f93-1172be5f959c",
+                  "pleaDate": "2019-03-02",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2018-05-02",
+                "wording": "Wound / inflict grievous bodily harm without intent",
+                "wordingWelsh": "No Travel Card In Welsh"
+              }
+            ],
+            "personDefendant": {
+              "aliases": [
+                "subueYzwsK"
+              ],
+              "arrestSummonsNumber": "2am7SBBedr",
+              "bailStatus": "IN_CUSTODY",
+              "custodyTimeLimit": "2018-12-02",
+              "driverNumber": "Vux8bY8DoF",
+              "employerOrganisation": {
+                "address": {
+                  "address1": "253",
+                  "address2": "23874 Torey Crescent",
+                  "address3": "Steuberchester",
+                  "address4": "CD",
+                  "address5": "Japan",
+                  "postcode": "SW11 1JU"
+                },
+                "contact": {
+                  "fax": "588.241.8509",
+                  "home": "(027) 950-4211",
+                  "mobile": "686-441-2249",
+                  "primaryEmail": "alan.johnson@gmail.com",
+                  "secondaryEmail": "jadyn.kunze@yahoo.com",
+                  "work": "765.615.8779"
+                },
+                "incorporationNumber": "cz35u7dp6F",
+                "name": "8YDjIQqx1J",
+                "registeredCharityNumber": "267xhsZIXz"
+              },
+              "employerPayrollReference": "gN6D3QxJz1",
+              "observedEthnicityCode": "W1",
+              "observedEthnicityDescription": "British",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "perceivedBirthYear": 1991,
+              "personDetails": {
+                "additionalNationalityCode": "GBR",
+                "additionalNationalityDescription": "British",
+                "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                "address": {
+                  "address1": "253",
+                  "address2": "23874 Torey Crescent",
+                  "address3": "Steuberchester",
+                  "address4": "CD",
+                  "address5": "Japan",
+                  "postcode": "SW11 1JU"
+                },
+                "contact": {
+                  "fax": "588.241.8509",
+                  "home": "(027) 950-4211",
+                  "mobile": "686-441-2249",
+                  "primaryEmail": "alan.johnson@gmail.com",
+                  "secondaryEmail": "jadyn.kunze@yahoo.com",
+                  "work": "765.615.8779"
+                },
+                "dateOfBirth": "1994-03-02",
+                "disabilityStatus": "0zRnyEUb2W",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicityCode": "W1",
+                "ethnicityDescription": "British",
+                "ethnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                "firstName": "Trinity",
+                "gender": "FEMALE",
+                "interpreterLanguageNeeds": "1OcCKRuWiO",
+                "lastName": "Ledner",
+                "middleName": "Test",
+                "nationalInsuranceNumber": "LB523206D",
+                "nationalityCode": "GBR",
+                "nationalityDescription": "British",
+                "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+                "occupation": "Pcl1Y7cvjo",
+                "occupationCode": "mVssgZqxkU",
+                "specificRequirements": "m3d9tOnk22",
+                "title": "MISS"
+              },
+              "pncId": "8skX5u13xz",
+              "selfDefinedEthnicityCode": "W1",
+              "selfDefinedEthnicityDescription": "British",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "prosecutionAuthorityReference": "TFL8753193",
+            "prosecutionCaseId": "980e6776-7df4-493f-a3de-d9541fc017c9",
+            "witnessStatement": "3rtc5Kweaz",
+            "witnessStatementWelsh": "FdycpPXmDl"
+          }
+        ],
+        "id": "980e6776-7df4-493f-a3de-d9541fc017c9",
+        "initiationCode": "C",
+        "originatingOrganisation": "zCT8iVH3Ij",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "TFL",
+          "prosecutionAuthorityId": "31af405e-7b60-4dd8-a244-c24c2d3fa595",
+          "prosecutionAuthorityReference": "TFL8753193"
+        },
+        "statementOfFacts": "3TyDhXS1rZ",
+        "statementOfFactsWelsh": "6t2bH8JzF7"
+      }
+    ],
+    "prosecutionCounsels": [
+      {
+        "attendanceDays": [
+          "2019-03-02"
+        ],
+        "firstName": "Jonathan",
+        "id": "9cea8020-984d-487b-8e98-61208a608bc6",
+        "lastName": "Reddy",
+        "middleName": "",
+        "prosecutionCases": [
+          "980e6776-7df4-493f-a3de-d9541fc017c9"
+        ],
+        "status": "QC",
+        "title": ""
+      }
+    ],
+    "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+    "targets": [
+      {
+        "defendantId": "4e01f75b-29f5-449d-9988-40dd40d02859",
+        "hearingId": "13c1898a-b19b-47fc-9f93-1172be5f959c",
+        "offenceId": "e01eb658-179c-4684-9999-b2111d89922b",
+        "resultLines": [
+          {
+            "isComplete": true,
+            "isModified": false,
+            "level": "OFFENCE",
+            "orderedDate": "2019-03-02",
+            "prompts": [
+              {
+                "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+                "label": "Protected person",
+                "value": "Ramesh's person",
+                "welshValue": ""
+              },
+              {
+                "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+                "label": "Protected person's address",
+                "value": "his address",
+                "welshValue": ""
+              },
+              {
+                "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+                "label": "Order details",
+                "value": "and other details are loaded here",
+                "welshValue": ""
+              },
+              {
+                "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+                "label": "Period of order",
+                "value": "1 Years, 2 Months, 1 Weeks",
+                "welshValue": ""
+              },
+              {
+                "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+                "label": "Conviction / acquittal",
+                "value": "Convicted",
+                "welshValue": ""
+              }
+            ],
+            "resultDefinitionId": "b81ac80b-81a9-48b6-87b0-cc34610eec97",
+            "resultLabel": "Restraining order for period",
+            "resultLineId": "f1d72fbf-8957-40e4-9c3a-284a03995adc",
+            "sharedDate": "2019-03-02"
+          }
+        ],
+        "targetId": "9bc02e50-3cf8-11e9-a74f-ffdd9ebacbe8"
+      }
+    ],
+    "type": {
+      "description": "Bail Application",
+      "id": "633224da-6db3-4df5-8097-62cee52f7a61"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {}
+}

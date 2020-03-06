@@ -47,7 +47,7 @@ public class DefendantAttendanceEventListener {
             defendantAttendance.setDefendantId(defendantAttendanceUpdated.getDefendantId());
             defendantAttendance.setDay(defendantAttendanceUpdated.getAttendanceDay().getDay());
         }
-        defendantAttendance.setInAttendance(defendantAttendanceUpdated.getAttendanceDay().getIsInAttendance());
+        defendantAttendance.setAttendanceType(defendantAttendanceUpdated.getAttendanceDay().getAttendanceType());
         defendantAttendanceRepository.save(defendantAttendance);
     }
 }

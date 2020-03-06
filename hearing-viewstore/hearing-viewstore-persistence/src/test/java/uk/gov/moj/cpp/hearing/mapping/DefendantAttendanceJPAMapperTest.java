@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.mapping;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+import uk.gov.justice.core.courts.AttendanceType;
+import uk.gov.justice.hearing.courts.AttendantType;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 
@@ -21,7 +23,7 @@ public class DefendantAttendanceJPAMapperTest {
     @Test
     public void testFromJPA() {
 
-        final DefendantAttendance defendantAttendanceEntity1 = createDefendantAttendance(UUID.randomUUID(), UUID.randomUUID(), UUID.fromString("e830fa5a-0a90-4f4a-a68c-3e782d16832c"), LocalDate.of(2018, 8, 9), true);
+        final DefendantAttendance defendantAttendanceEntity1 = createDefendantAttendance(UUID.randomUUID(), UUID.randomUUID(), UUID.fromString("e830fa5a-0a90-4f4a-a68c-3e782d16832c"), LocalDate.of(2018, 8, 9), AttendanceType.IN_PERSON);
         Set<DefendantAttendance> defendantAttendanceEntities = new HashSet<>();
         defendantAttendanceEntities.add(defendantAttendanceEntity1);
 
@@ -29,15 +31,15 @@ public class DefendantAttendanceJPAMapperTest {
 
         assertThat(defendantAttendances.get(0).getDefendantId(), is(defendantAttendanceEntity1.getDefendantId()));
         assertThat(defendantAttendances.get(0).getAttendanceDays().get(0).getDay(), is(defendantAttendanceEntity1.getDay()));
-        assertThat(defendantAttendances.get(0).getAttendanceDays().get(0).getIsInAttendance(), is(defendantAttendanceEntity1.getInAttendance()));
+        assertThat(defendantAttendances.get(0).getAttendanceDays().get(0).getAttendanceType(), is(defendantAttendanceEntity1.getAttendanceType()));
     }
 
-    private DefendantAttendance createDefendantAttendance(final UUID id, final UUID hearingId, final UUID defendantId, LocalDate day, boolean attendance) {
+    private DefendantAttendance createDefendantAttendance(final UUID id, final UUID hearingId, final UUID defendantId, LocalDate day, AttendanceType attendance) {
         DefendantAttendance defendantAttendance = new DefendantAttendance();
         defendantAttendance.setId(new HearingSnapshotKey(id, hearingId));
         defendantAttendance.setDefendantId(defendantId);
         defendantAttendance.setDay(day);
-        defendantAttendance.setInAttendance(attendance);
+        defendantAttendance.setAttendanceType(attendance);
         return defendantAttendance;
     }
 }

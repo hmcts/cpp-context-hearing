@@ -33,6 +33,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.Attendant;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -1563,13 +1564,13 @@ public class TestTemplates {
         private UpdateDefendantAttendanceCommandTemplates() {
         }
 
-        public static UpdateDefendantAttendanceCommand updateDefendantAttendanceTemplate(final UUID hearingId, final UUID defendantId, final LocalDate attendanceDate, final Boolean isInAttendance) {
+        public static UpdateDefendantAttendanceCommand updateDefendantAttendanceTemplate(final UUID hearingId, final UUID defendantId, final LocalDate attendanceDate, final AttendanceType attendanceType) {
             return UpdateDefendantAttendanceCommand.updateDefendantAttendanceCommand()
                     .setHearingId(hearingId)
                     .setDefendantId(defendantId)
                     .setAttendanceDay(AttendanceDay.attendanceDay()
                             .withDay(attendanceDate)
-                            .withIsInAttendance(isInAttendance)
+                            .withAttendanceType(attendanceType)
                             .build());
         }
     }

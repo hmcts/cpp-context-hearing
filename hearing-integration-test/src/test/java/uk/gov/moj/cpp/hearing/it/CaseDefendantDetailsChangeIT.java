@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.caseDefendantDetailsChangedCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
@@ -13,6 +16,7 @@ import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.CustodialEstablishment;
 import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -21,8 +25,10 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.util.function.Consumer;
 
@@ -46,7 +52,14 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
 
     private void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(Consumer<CaseDefendantDetails> caseDefendantDetailsConsumer, long waitTime) throws Exception {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(),
+                InitiateHearingCommand.initiateHearingCommand()
+                        .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                                .setPutCustodialEstablishment(false)
+                                .setDefendantType(PERSON)
+                                .setHearingLanguage(ENGLISH)
+                                .setJurisdictionType(CROWN)
+                        ).build())));
 
         final CommandHelpers.CaseDefendantDetailsHelper defendantUpdates = h(UseCases.updateDefendants(
                 with(caseDefendantDetailsChangedCommandTemplate(), template -> {
@@ -96,6 +109,9 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
 //                                                .with(PersonDefendant::getPncId, is(defendantUpdates.getFirstDefendant().getPersonDefendant().getPncId()))
 //                                                .with(PersonDefendant::getSelfDefinedEthnicityCode, is(defendantUpdates.getFirstDefendant().getPersonDefendant().getSelfDefinedEthnicityCode()))
 //                                                .with(PersonDefendant::getSelfDefinedEthnicityId, is(defendantUpdates.getFirstDefendant().getPersonDefendant().getSelfDefinedEthnicityId()))
+                                                        .with(PersonDefendant::getCustodialEstablishment, isBean(CustodialEstablishment.class)
+                                                                .with(CustodialEstablishment::getId, is(defendantUpdates.getFirstDefendant().getPersonDefendant().getCustodialEstablishment().getId()))
+                                                        )
                                                         .with(PersonDefendant::getPersonDetails, isBean(Person.class)
                                                                 .with(Person::getFirstName, is(defendantUpdates.getFirstDefendant().getPersonDefendant().getPersonDetails().getFirstName()))
                                                                 .with(Person::getLastName, is(defendantUpdates.getFirstDefendant().getPersonDefendant().getPersonDetails().getLastName()))

@@ -13,7 +13,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.mapping.AssociatedDefenceOrganisationJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
+import uk.gov.moj.cpp.hearing.mapping.CustodialEstablishmentJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
@@ -38,7 +38,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
     @Inject
     private DefendantRepository defendantRepository;
     @Inject
-    private CourtApplicationsSerializer courtApplicationsSerializer;
+    private CustodialEstablishmentJPAMapper custodialEstablishmentJPAMapper;
 
     @Inject
     private AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper;
@@ -76,6 +76,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
                             personDefendantJpa.setDriverNumber(personDefendantPojo.getDriverNumber());
                             personDefendantJpa.setEmployerPayrollReference(personDefendantPojo.getEmployerPayrollReference());
                             personDefendantJpa.setPerceivedBirthYear(personDefendantPojo.getPerceivedBirthYear());
+                            personDefendantJpa.setCustodialEstablishment(custodialEstablishmentJPAMapper.toJPA(personDefendantPojo.getCustodialEstablishment()));
                             with(personDefendantJpa.getEmployerOrganisation(), personDefendantPojo.getEmployerOrganisation(), this::setOrganisation);
                             with(personDefendantJpa.getPersonDetails(), personDefendantPojo.getPersonDetails(), this::setPerson);
                         }

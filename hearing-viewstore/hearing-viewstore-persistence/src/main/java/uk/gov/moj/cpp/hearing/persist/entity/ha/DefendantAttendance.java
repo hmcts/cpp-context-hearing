@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import uk.gov.justice.core.courts.AttendanceType;
+
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
@@ -7,6 +9,8 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -28,8 +32,9 @@ public class DefendantAttendance {
     @Column(name = "day", nullable = false)
     private LocalDate day;
 
-    @Column(name = "is_in_attendance")
-    private Boolean isInAttendance;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "attendance_type")
+    private AttendanceType attendanceType;
 
     public DefendantAttendance() {
         //For JPA
@@ -67,12 +72,12 @@ public class DefendantAttendance {
         this.day = day;
     }
 
-    public Boolean getInAttendance() {
-        return isInAttendance;
+    public AttendanceType getAttendanceType() {
+        return attendanceType;
     }
 
-    public void setInAttendance(Boolean inAttendance) {
-        isInAttendance = inAttendance;
+    public void setAttendanceType(final AttendanceType attendanceType) {
+        this.attendanceType = attendanceType;
     }
 
     @Override

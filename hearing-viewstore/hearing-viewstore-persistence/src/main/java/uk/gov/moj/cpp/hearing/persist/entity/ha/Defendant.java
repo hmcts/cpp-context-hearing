@@ -108,7 +108,10 @@ public class Defendant {
             @AttributeOverride(name = "personDetails.contact.mobile", column = @Column(name = "defendant_contact_mobile")),
             @AttributeOverride(name = "personDetails.contact.primaryEmail", column = @Column(name = "defendant_contact_primary_email")),
             @AttributeOverride(name = "personDetails.contact.secondaryEmail", column = @Column(name = "defendant_contact_secondary_email")),
-            @AttributeOverride(name = "personDetails.contact.fax", column = @Column(name = "defendant_contact_fax"))
+            @AttributeOverride(name = "personDetails.contact.fax", column = @Column(name = "defendant_contact_fax")),
+            @AttributeOverride(name = "custodialEstablishment.custody", column = @Column(name = "custodial_establishment_custody")),
+            @AttributeOverride(name = "custodialEstablishment.id", column = @Column(name = "custodial_establishment_id")),
+            @AttributeOverride(name = "custodialEstablishment.name", column = @Column(name = "custodial_establishment_name"))
     })
     @Embedded
     private PersonDefendant personDefendant;

@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -27,6 +26,7 @@ import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
+import uk.gov.justice.core.courts.CustodialEstablishment;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
@@ -368,8 +368,21 @@ public class CoreTestTemplates {
                 .withDriverNumber(STRING.next())
                 .withPerceivedBirthYear(INTEGER.next())
                 .withEmployerOrganisation(organisation(args).build())
+                .withCustodialEstablishment(custodialEstablishment(args))
                 .withEmployerPayrollReference(STRING.next())
                 .withCustodyTimeLimit(PAST_LOCAL_DATE.next());
+    }
+
+    public static CustodialEstablishment custodialEstablishment(final CoreTemplateArguments args) {
+        if (args.isPutCustodialEstablishment()) {
+            return CustodialEstablishment.custodialEstablishment()
+                    .withName(STRING.next())
+                    .withId(randomUUID())
+                    .withCustody(STRING.next())
+                    .build();
+        } else {
+            return null;
+        }
     }
 
     public static LegalEntityDefendant.Builder legalEntityDefendant(CoreTemplateArguments args) {
@@ -586,6 +599,62 @@ public class CoreTestTemplates {
                 .withJudiciaryType(JudicialRoleTypeEnum.MAGISTRATE.name()).build();
     }
 
+    public static Target.Builder targetForDocumentIsDeleted(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
+        return Target.target()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult(JSON_STRING)
+                .withResultLines(new ArrayList<>(asList(resultLineForDocumentIsDeleted(resultLineId))));
+    }
+
+    public static ResultLine resultLineForDocumentIsDeleted(UUID resultLineId) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(randomUUID())
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.CASE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
+                .withIsDeleted(true)
+                .build();
+    }
+
+    public static Target.Builder targetForOffenceResultShared(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId, UUID resultDefinitionId) {
+        return Target.target()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult(JSON_STRING)
+                .withResultLines(new ArrayList<>(asList(resultLineForOffenceResultShared(resultLineId, resultDefinitionId))));
+    }
+
+    public static ResultLine resultLineForOffenceResultShared(UUID resultLineId, UUID resultDefinitionId) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(resultDefinitionId)
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.OFFENCE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
+                .build();
+    }
 
     public enum DefendantType {
         PERSON, ORGANISATION
@@ -609,6 +678,7 @@ public class CoreTestTemplates {
         private boolean convicted = false;
         private boolean isOffenceCountNull = false;
         private boolean isAllocationDecision = true;
+        private boolean putCustodialEstablishment = true;
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
@@ -707,63 +777,14 @@ public class CoreTestTemplates {
             return this;
         }
 
-    }
+        public boolean isPutCustodialEstablishment() {
+            return putCustodialEstablishment;
+        }
 
-    public static Target.Builder targetForDocumentIsDeleted(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
-        return Target.target()
-                .withTargetId(randomUUID())
-                .withHearingId(hearingId)
-                .withDefendantId(defendantId)
-                .withOffenceId(offenceId)
-                .withDraftResult(JSON_STRING)
-                .withResultLines(new ArrayList<>(asList(resultLineForDocumentIsDeleted(resultLineId))));
-    }
-
-    public static ResultLine resultLineForDocumentIsDeleted(UUID resultLineId) {
-        return ResultLine.resultLine()
-                .withResultDefinitionId(randomUUID())
-                .withResultLineId(resultLineId)
-                .withResultLabel(STRING.next())
-                .withLevel(Level.CASE)
-                .withOrderedDate(PAST_LOCAL_DATE.next())
-                .withSharedDate(PAST_LOCAL_DATE.next())
-                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
-                        .withId(randomUUID())
-                        .build()))
-                )
-                .withDelegatedPowers(null)
-                .withIsComplete(true)
-                .withIsModified(false)
-                .withIsDeleted(true)
-                .build();
-    }
-
-    public static Target.Builder targetForOffenceResultShared(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId, UUID resultDefinitionId) {
-        return Target.target()
-                .withTargetId(randomUUID())
-                .withHearingId(hearingId)
-                .withDefendantId(defendantId)
-                .withOffenceId(offenceId)
-                .withDraftResult(JSON_STRING)
-                .withResultLines(new ArrayList<>(asList(resultLineForOffenceResultShared(resultLineId, resultDefinitionId))));
-    }
-
-    public static ResultLine resultLineForOffenceResultShared(UUID resultLineId, UUID resultDefinitionId) {
-        return ResultLine.resultLine()
-                .withResultDefinitionId(resultDefinitionId)
-                .withResultLineId(resultLineId)
-                .withResultLabel(STRING.next())
-                .withLevel(Level.OFFENCE)
-                .withOrderedDate(PAST_LOCAL_DATE.next())
-                .withSharedDate(PAST_LOCAL_DATE.next())
-                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
-                        .withId(randomUUID())
-                        .build()))
-                )
-                .withDelegatedPowers(null)
-                .withIsComplete(true)
-                .withIsModified(false)
-                .build();
+        public CoreTemplateArguments setPutCustodialEstablishment(final boolean putCustodialEstablishment) {
+            this.putCustodialEstablishment = putCustodialEstablishment;
+            return this;
+        }
     }
 
 }

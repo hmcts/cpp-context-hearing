@@ -6,6 +6,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 
+import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance;
@@ -64,13 +65,13 @@ public class DefendantAttendanceRepositoryTest {
         final UUID hearingId = hearing.getId();
         final UUID defendantId = randomUUID();
         final LocalDate date = LocalDate.of(2017, 12, 13);
-        final Boolean isInAttendance = Boolean.FALSE;
+        final AttendanceType isInAttendance = AttendanceType.NOT_PRESENT;
 
         DefendantAttendance defendantAttendance = new DefendantAttendance();
         defendantAttendance.setId(new HearingSnapshotKey(id, hearingId));
         defendantAttendance.setDefendantId(defendantId);
         defendantAttendance.setDay(date);
-        defendantAttendance.setInAttendance(isInAttendance);
+        defendantAttendance.setAttendanceType(isInAttendance);
 
         this.defendantAttendanceRepository.saveAndFlush(defendantAttendance);
 
@@ -79,7 +80,7 @@ public class DefendantAttendanceRepositoryTest {
         assertThat(entity.getId().getHearingId(), is(hearingId));
         assertThat(entity.getDefendantId(), is(defendantId));
         assertThat(entity.getDay(), is(date));
-        assertThat(entity.getInAttendance(), is(isInAttendance));
+        assertThat(entity.getAttendanceType(), is(isInAttendance));
 
     }
 }

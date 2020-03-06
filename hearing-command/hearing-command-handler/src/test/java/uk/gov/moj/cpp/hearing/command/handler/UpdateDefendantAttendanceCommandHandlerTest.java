@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -79,7 +80,7 @@ public class UpdateDefendantAttendanceCommandHandlerTest {
                 .setDefendantId(defendantId)
                 .setAttendanceDay(AttendanceDay.attendanceDay()
                         .withDay(dateOfAttendance)
-                        .withIsInAttendance(true)
+                        .withAttendanceType(AttendanceType.IN_PERSON)
                         .build());
 
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
@@ -98,7 +99,7 @@ public class UpdateDefendantAttendanceCommandHandlerTest {
         assertThat(asPojo(events.get(0), DefendantAttendanceUpdated.class), isBean(DefendantAttendanceUpdated.class)
                 .with(DefendantAttendanceUpdated::getAttendanceDay, isBean(AttendanceDay.class)
                         .with(AttendanceDay::getDay, Matchers.is(dateOfAttendance))
-                        .with(AttendanceDay::getIsInAttendance, Matchers.is(true)))
+                        .with(AttendanceDay::getAttendanceType, Matchers.is(AttendanceType.IN_PERSON)))
                 .with(DefendantAttendanceUpdated::getDefendantId, Matchers.is(defendantId))
                 .with(DefendantAttendanceUpdated::getHearingId, Matchers.is(hearingId)));
 

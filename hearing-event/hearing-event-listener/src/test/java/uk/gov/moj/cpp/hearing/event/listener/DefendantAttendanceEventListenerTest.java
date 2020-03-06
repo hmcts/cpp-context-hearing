@@ -10,6 +10,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -63,14 +64,14 @@ public class DefendantAttendanceEventListenerTest {
                 .setDefendantId(defendantId)
                 .setAttendanceDay(AttendanceDay.attendanceDay()
                         .withDay(attendanceDay)
-                        .withIsInAttendance(false)
+                        .withAttendanceType(AttendanceType.NOT_PRESENT)
                         .build());
 
         final DefendantAttendance defendantAttendance = new DefendantAttendance();
         defendantAttendance.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
         defendantAttendance.setDefendantId(defendantId);
         defendantAttendance.setDay(attendanceDay);
-        defendantAttendance.setInAttendance(false);
+        defendantAttendance.setAttendanceType(AttendanceType.NOT_PRESENT);
 
         when(defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, attendanceDay)).thenReturn(null);
         when(defendantAttendanceRepository.saveAndFlush(any(DefendantAttendance.class))).thenReturn(any(DefendantAttendance.class));
@@ -87,12 +88,12 @@ public class DefendantAttendanceEventListenerTest {
         assertThat(hearingIdArgumentCaptor.getValue(), is(hearingId));
         assertThat(defendantIdArgumentCaptor.getValue(), is(defendantId));
         assertThat(attendanceDateArgumentCaptor.getValue(), is(attendanceDay));
-        assertThat(defendantAttendance.getInAttendance(), is(false));
+        assertThat(defendantAttendance.getAttendanceType(), is(AttendanceType.NOT_PRESENT));
     }
 
 
     @Test
-    public void shouldUpdateDefendantAttendanceFromNotPresentToPresent() throws Exception {
+    public void shouldUpdateDefendantAttendanceFromNotPresentToInPerson() throws Exception {
 
         final UUID hearingId = UUID.randomUUID();
         final UUID defendantId = UUID.randomUUID();
@@ -103,14 +104,14 @@ public class DefendantAttendanceEventListenerTest {
                 .setDefendantId(defendantId)
                 .setAttendanceDay(AttendanceDay.attendanceDay()
                         .withDay(attendanceDay)
-                        .withIsInAttendance(true)
+                        .withAttendanceType(AttendanceType.IN_PERSON)
                         .build());
 
         final DefendantAttendance defendantAttendance = new DefendantAttendance();
         defendantAttendance.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
         defendantAttendance.setDefendantId(defendantId);
         defendantAttendance.setDay(attendanceDay);
-        defendantAttendance.setInAttendance(false);
+        defendantAttendance.setAttendanceType(AttendanceType.NOT_PRESENT);
 
         when(defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(hearingId, defendantId, attendanceDay)).thenReturn(defendantAttendance);
         when(defendantAttendanceRepository.saveAndFlush(defendantAttendance)).thenReturn(defendantAttendance);
@@ -127,6 +128,6 @@ public class DefendantAttendanceEventListenerTest {
         assertThat(hearingIdArgumentCaptor.getValue(), is(hearingId));
         assertThat(defendantIdArgumentCaptor.getValue(), is(defendantId));
         assertThat(attendanceDateArgumentCaptor.getValue(), is(attendanceDay));
-        assertThat(defendantAttendance.getInAttendance(), is(true));
+        assertThat(defendantAttendance.getAttendanceType(), is(AttendanceType.IN_PERSON));
     }
 }

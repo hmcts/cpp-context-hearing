@@ -12,8 +12,11 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MIL
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
+import uk.gov.justice.core.courts.CustodialEstablishment;
 import uk.gov.justice.core.courts.DefendantAttendance;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -29,7 +32,15 @@ public class DefendantAttendanceIT extends AbstractIT {
     @Test
     public void updateDefendantAttendance() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
+        initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0)
+                .getPersonDefendant().setCustodialEstablishment(
+                CustodialEstablishment.custodialEstablishment()
+                        .withCustody("POLICE")
+                        .withName("East Croydon Police Station")
+                        .withId(UUID.randomUUID())
+                        .build());
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearing));
 
         final UUID hearingId = hearingOne.getHearingId();
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
@@ -41,11 +52,12 @@ public class DefendantAttendanceIT extends AbstractIT {
                         .with(DefendantAttendanceUpdated::getDefendantId, is(defendantId))
                         .with(DefendantAttendanceUpdated::getAttendanceDay, isBean(AttendanceDay.class)
                                 .with(AttendanceDay::getDay, is(dateOfAttendance))
-                                .with(AttendanceDay::getIsInAttendance, is(Boolean.TRUE)))));
+                                .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON)))));
 
-        h(UseCases.updateDefendantAttendance(getRequestSpec(), updateDefendantAttendanceTemplate(hearingId, defendantId, dateOfAttendance, Boolean.TRUE)));
+        h(UseCases.updateDefendantAttendance(getRequestSpec(), updateDefendantAttendanceTemplate(hearingId, defendantId, dateOfAttendance, AttendanceType.IN_PERSON)));
 
         publicDefendantAttendanceUpdated.waitFor();
+
 
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -54,7 +66,8 @@ public class DefendantAttendanceIT extends AbstractIT {
                                 .with(DefendantAttendance::getDefendantId, is(defendantId))
                                 .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
                                         .with(AttendanceDay::getDay, is(dateOfAttendance))
-                                        .with(AttendanceDay::getIsInAttendance, is(true))))))));
+                                        .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))));
 
     }
+
 }
