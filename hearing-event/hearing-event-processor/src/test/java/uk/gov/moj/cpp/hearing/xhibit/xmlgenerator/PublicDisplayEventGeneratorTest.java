@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 
-import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -18,6 +17,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDet
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -38,14 +38,14 @@ public class PublicDisplayEventGeneratorTest {
     @InjectMocks
     private PublicDisplayEventGenerator publicDisplayEventGenerator;
 
-    private final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
-    private final DateTimeFormatter dateFormatter = ofPattern("dd/MM/yy");
+    private final DateTimeFormatter timeFormatter = ofPattern("HH:mm");
+    private static final ZoneId localZoneId = ZoneId.of("Europe/London");
     private String eventDate = LocalDate.of(2020, 03, 19).toString();
     private ZonedDateTime lastModifiedTime;
 
     @Before
     public void setup() {
-        lastModifiedTime = now();
+        lastModifiedTime = ZonedDateTime.parse("2020-03-30T15:00Z");
         final PopulateComplexEventTypeForPublicDisplay populateComplexEventTypeForPublicDisplay = new PopulateComplexEventTypeForPublicDisplay();
         final ComplexTypeDataProcessor complexTypeDataProcessor = new ComplexTypeDataProcessor();
         setField(populateComplexEventTypeForPublicDisplay, "complexTypeDataProcessor", complexTypeDataProcessor);
@@ -64,7 +64,7 @@ public class PublicDisplayEventGeneratorTest {
         final Currentstatus currentstatus = publicDisplayEventGenerator.generate(caseDetail);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
-        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
         assertThat(currentstatus.getEvent().getType(), is(type));
         assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
     }
@@ -80,7 +80,7 @@ public class PublicDisplayEventGeneratorTest {
         final Currentstatus currentstatus = publicDisplayEventGenerator.generate(caseDetail);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
-        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
         assertThat(currentstatus.getEvent().getType(), is(type));
         assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
         assertThat(currentstatus.getEvent().getE20903ProsecutionCaseOptions().getE20903PCOType(), is(Event20903OptionType.E_20903_PROSECUTION_OPENING));
@@ -100,7 +100,7 @@ public class PublicDisplayEventGeneratorTest {
         final Currentstatus currentstatus = publicDisplayEventGenerator.generate(caseDetail);
 
         assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
-        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
         assertThat(currentstatus.getEvent().getType(), is(type));
         assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
         assertThat(currentstatus.getEvent().getE20906DefenceCOName(), is("Sid Sox"));
@@ -109,7 +109,7 @@ public class PublicDisplayEventGeneratorTest {
     private HearingEvent createHearingEvent(final UUID defenceCounselId) {
         final UUID hearingEventId = randomUUID();
         final UUID hearingEventDefinitionId = randomUUID();
-        final ZonedDateTime lastModifiedTime = now();
+        final ZonedDateTime lastModifiedTime = ZonedDateTime.parse("2020-03-30T15:00Z");
 
         return hearingEvent()
                 .withLastModifiedTime(lastModifiedTime)

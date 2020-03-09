@@ -3,8 +3,6 @@ package uk.gov.moj.cpp.hearing.xhibit.xmlgenerator;
 import static java.lang.String.format;
 import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.valueOf;
-import static java.time.ZonedDateTime.parse;
-import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Optional.ofNullable;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
@@ -34,6 +32,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.utils.DateUtils;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.XhibitReferenceDataService;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
@@ -41,7 +40,6 @@ import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,7 +54,6 @@ import org.apache.commons.lang3.StringUtils;
 @ApplicationScoped
 public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
 
-    private static final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
     private static final String TITLE_PREFIX = "titlePrefix";
     private static final String TITLE_SUFFIX = "titleSuffix";
     private static final String FORENAMES = "forenames";
@@ -169,7 +166,6 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         return xhibitCases;
     }
 
-
     @SuppressWarnings("squid:S1172")
     private CaseDetails addCaseDetails(final uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail cppCaseDetail, final JsonEnvelope envelope) {
         final CaseDetails xhibitCaseDetails = new CaseDetails();
@@ -181,7 +177,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setActivecase(cppCaseDetail.getActivecase());
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
-        final String dateTime = dateTimeFormatter.format(parse(cppCaseDetail.getNotBeforeTime()));
+        final String dateTime  = DateUtils.convertToLocalTime(cppCaseDetail.getNotBeforeTime());
         xhibitCaseDetails.setNotbeforetime(dateTime);
 
         if (null == hearingEvent) {
@@ -189,7 +185,7 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
             xhibitCaseDetails.setHearingprogress(BigInteger.ZERO);
         } else {
             xhibitCaseDetails.setCurrentstatus(eventGenerator.generate(cppCaseDetail));
-            xhibitCaseDetails.setTimestatusset(hearingEvent.getEventTime().format(dateTimeFormatter));
+            xhibitCaseDetails.setTimestatusset(DateUtils.convertZonedDateTimeToLocalTime(hearingEvent.getEventTime()));
             exposeJudgeNameIfPresent(hearingEvent.getHearingId(), xhibitCaseDetails, envelope);
         }
 

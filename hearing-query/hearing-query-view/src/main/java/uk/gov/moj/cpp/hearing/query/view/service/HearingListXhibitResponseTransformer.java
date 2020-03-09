@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -34,6 +35,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant;
 
 import java.math.BigInteger;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -53,6 +55,8 @@ public class HearingListXhibitResponseTransformer {
 
     @Inject
     private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
+
+    private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
 
     public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return currentCourtStatus()
@@ -174,7 +178,7 @@ public class HearingListXhibitResponseTransformer {
                 .withDefendants(getDefendants(prosecutionCase, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason())))
                 .withJudgeName(getJudgeName(hearing))
                 .withHearingEvent(hearingEvent)
-                .withNotBeforeTime(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().getSittingDay().toString())
+                .withNotBeforeTime(dateTimeFormatter.format(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().getSittingDay()))
                 .build();
         caseDetail.setLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()));
         caseDetail.setDefenceCounsels(hearing.getDefenceCounsels());

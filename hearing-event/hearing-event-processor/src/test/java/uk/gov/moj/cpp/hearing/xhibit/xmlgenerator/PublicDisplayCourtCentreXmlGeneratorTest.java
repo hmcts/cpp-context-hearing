@@ -65,6 +65,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class PublicDisplayCourtCentreXmlGeneratorTest {
 
     private static final String PUBLIC_PAGE_FILE_PATH = "xhibit/expectedPublicPage.xml";
+    private static final String PUBLIC_PAGE_FOR_SUMMER_TIME_FILE_PATH = "xhibit/expectedPublicPageForSummerTime.xml";
     private static final String PUBLIC_PAGE_FOR_ACTIVE_CASES_FILE_PATH = "xhibit/expectedPublicPageForActiveCases.xml";
     private static final String PUBLIC_PAGE_WITHOUT_JUDGE_NAME_FILE_PATH = "xhibit/expectedPublicPageWithoutJudgeName.xml";
     private static final String MAGISTRATE_JUDICIAL_ROLE_TYPE = "Magistrate";
@@ -130,6 +131,36 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
 
         assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FILE_PATH);
+    }
+
+    @Test
+    public void shouldCreatePublicDisplayCourtCentreXmlWithSummerTime() throws IOException {
+        final ZonedDateTime lastUpdatedTime = parse("2020-03-30T13:50:00Z");
+
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .withId(UUID.randomUUID())
+                .withHearingId(UUID.randomUUID())
+                .withEventTime(lastUpdatedTime)
+                .build();
+        final Currentstatus currentstatus = getCurrentStatus();
+
+        final Optional<CurrentCourtStatus> currentCourtStatus = of(getCurrentCourtStatusWithSummerTime(hearingEvent));
+
+        final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
+        final JsonEnvelope hearingEnvelope = getHearingEnvelope();
+        when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
+        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
+
+        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
+        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
+
+        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
+
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
+
+        final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
+
+        assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FOR_SUMMER_TIME_FILE_PATH);
     }
 
     @Test
@@ -225,7 +256,34 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withHearingEvent(hearingEvent)
                                                         .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                                                         .withJudgeName("Mr Lampard")
-                                                        .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
+                                                        .withNotBeforeTime("2020-02-09T15:00Z")
+                                                        .build()))
+                                                .build())
+                                        .build()))
+                                .build()))
+                        .build()).build();
+    }
+
+    private CurrentCourtStatus getCurrentCourtStatusWithSummerTime(final HearingEvent hearingEvent) {
+        return currentCourtStatus()
+                .withCourt(court()
+                        .withCourtName("testCourtName")
+                        .withCourtSites(asList(courtSite()
+                                .withCourtSiteName("testCourtSiteName")
+                                .withCourtRooms(asList(courtRoom()
+                                        .withCourtRoomName("courtRoomName")
+                                        .withHearingEvent(hearingEvent)
+                                        .withCases(cases()
+                                                .withCasesDetails(asList(caseDetail()
+                                                        .withActivecase(valueOf(0))
+                                                        .withCaseNumber("123")
+                                                        .withCaseType("caseType")
+                                                        .withCppUrn("234")
+                                                        .withHearingType("hearingType")
+                                                        .withHearingEvent(hearingEvent)
+                                                        .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
+                                                        .withJudgeName("Mr Lampard")
+                                                        .withNotBeforeTime("2020-03-30T15:00Z")
                                                         .build()))
                                                 .build())
                                         .build()))
@@ -258,7 +316,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                 .withHearingType("hearingType")
                 .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                 .withJudgeName("Mr Lampard")
-                .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
+                .withNotBeforeTime("2020-02-09T15:00Z")
                 .build();
     }
 
@@ -272,7 +330,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                 .withHearingType("hearingType")
                 .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                 .withJudgeName("Mr Lampard")
-                .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
+                .withNotBeforeTime("2020-02-09T15:00Z")
                 .build();
     }
 
