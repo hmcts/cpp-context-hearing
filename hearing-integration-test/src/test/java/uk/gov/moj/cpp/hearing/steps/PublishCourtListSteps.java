@@ -16,7 +16,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsASystemUser;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
@@ -29,6 +28,9 @@ public class PublishCourtListSteps extends AbstractIT {
     private static final String MEDIA_TYPE_QUERY_COURT_LIST_STATUS = "application/vnd.hearing.court.list.publish.status+json";
     private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.latest-hearings-by-court-centres+json";
 
+    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC = 60*5;
+    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL = 2;
+
     public void verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(final String courtCentreId) {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);
 
@@ -36,7 +38,8 @@ public class PublishCourtListSteps extends AbstractIT {
         final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_COURT_LIST_STATUS).withHeader(USER_ID, getLoggedInUser()))
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
+                .timeout(PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
+                .pollInterval(PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL, SECONDS)
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
@@ -59,7 +62,8 @@ public class PublishCourtListSteps extends AbstractIT {
         final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
         poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
+                .timeout(PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
+                .pollInterval(PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL, SECONDS)
                 .until(status().is(OK),
                         payload().isJson(allOf(
                                 withJsonPath("$.court.courtName", equalTo(hearing.getCourtCentre().getName())),
