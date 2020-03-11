@@ -630,6 +630,16 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(List<CourtApplication>  courtApplications) {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN))
+                    .withCourtApplications(courtApplications)
+                    .build());
+        }
+
         public static InitiateHearingCommand welshInitiateHearingTemplate() {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()

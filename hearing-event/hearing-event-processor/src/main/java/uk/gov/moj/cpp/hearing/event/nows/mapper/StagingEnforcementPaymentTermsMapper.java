@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S1135", "squid:S1612"})
 public class StagingEnforcementPaymentTermsMapper extends AbstractStagingEnforcementMapper {
 
-    public static final UUID PAYMENT_CARD_REQUIRED_UUID = UUID.fromString("6dbddb7c-007c-4a81-a06d-17b09b68c01a");
+    public static final UUID PAYMENT_CARD_REQUIRED_UUID = UUID.fromString("d0f08c9c-e1e5-46eb-b573-f1728bc51414");
     private static final Logger LOGGER = LoggerFactory.getLogger(StagingEnforcementPaymentTermsMapper.class.getName());
     public static final String Y = "Y";
     public static final String N = "N";

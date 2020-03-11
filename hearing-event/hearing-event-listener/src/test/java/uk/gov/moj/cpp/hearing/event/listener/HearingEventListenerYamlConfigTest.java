@@ -9,8 +9,8 @@ import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
@@ -35,7 +35,6 @@ import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
@@ -81,7 +80,6 @@ public class HearingEventListenerYamlConfigTest {
             FoundHearingsForDeleteOffence.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstOffence.class.getAnnotation(Event.class).value(),
             RegisteredHearingAgainstCase.class.getAnnotation(Event.class).value(),
-            RegisteredHearingAgainstApplication.class.getAnnotation(Event.class).value(),
             NowsVariantsSavedEvent.class.getAnnotation(Event.class).value(),
             HearingAdjourned.class.getAnnotation(Event.class).value(),
             ProsecutionCounselChangeIgnored.class.getAnnotation(Event.class).value(),

@@ -293,3 +293,29 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get-cracked-ineffective-reason+json:
                     example:  !include json/hearing.get-cracked-ineffective-reason.json
                     schema:  !include json/schema/hearing.get-cracked-ineffective-reason.json
+                    
+/timeline/{id}:
+  uriParameters:
+    id:
+      description: ID of the case | ID of the application
+      type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.case.timeline+json
+            name: hearing.case.timeline
+        (mapping):
+            responseType: application/vnd.hearing.application.timeline+json
+            name: hearing.application.timeline
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.case.timeline+json:
+                    example:  !include json/hearing.timeline.json
+                    schema:  !include json/schema/hearing.timeline.json
+                  application/vnd.hearing.application.timeline+json:
+                    example:  !include json/hearing.timeline.json
+                    schema:  !include json/schema/hearing.timeline.json

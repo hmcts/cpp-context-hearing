@@ -57,52 +57,44 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class HearingEventQueryViewTest {
 
+    public static final ZonedDateTime HEARING_DATE = parse("2018-02-22T10:30:00Z");
     private static final String ID_1 = "b71e7d2a-d3b3-4a55-a393-6d451767fc05";
     private static final String RECORDED_LABEL_1 = "Hearing Started";
     private static final String ACTION_LABEL_1 = "Start";
     private static final Integer ACTION_SEQUENCE_1 = 1;
     private static final String GROUP_LABEL_1 = "Recording";
     private static final Integer GROUP_SEQUENCE_1 = 1;
-
     private static final String ID_2 = "0df93f18-0a21-40f5-9fb3-da4749cd70fe";
     private static final String RECORDED_LABEL_2 = "Hearing Ended";
     private static final String ACTION_LABEL_2 = "End";
     private static final Integer ACTION_SEQUENCE_2 = 2;
-
     private static final String ID_3 = "160ecb51-29ee-4954-bbbf-daab18a24fbb";
     private static final String RECORDED_LABEL_3 = "Hearing Paused";
     private static final String ACTION_LABEL_3 = "Pause";
     private static final Integer ACTION_SEQUENCE_3 = 3;
-
     private static final String ID_5 = "ffd6bb0d-8702-428c-a7bd-570570fa8d0a";
     private static final String RECORDED_LABEL_5 = "Proceedings in chambers";
     private static final String ACTION_LABEL_5 = "In chambers";
     private static final Integer ACTION_SEQUENCE_5 = 5;
-
     private static final String ID_6 = "c0b15e38-52ce-4d9d-9ffa-d76c7793cff6";
     private static final String RECORDED_LABEL_6 = "Open Court";
     private static final String ACTION_LABEL_6 = "Open court";
     private static final Integer ACTION_SEQUENCE_6 = 6;
-
     private static final String ID_7 = "c3edf650-13c4-4ecb-9f85-6100ad8e4ffc";
     private static final String RECORDED_LABEL_7 = "Defendant Arraigned";
     private static final String ACTION_LABEL_7 = "Arraign defendant.name";
     private static final Integer ACTION_SEQUENCE_7 = 1;
     private static final String GROUP_LABEL_2 = "Defendant";
     private static final Integer GROUP_SEQUENCE_2 = 2;
-
     private static final String ID_8 = "75c8c5eb-c661-40be-a5bf-07b7b8c0463a";
     private static final String RECORDED_LABEL_8 = "Defendant Rearraigned";
     private static final String ACTION_LABEL_8 = "Rearraign defendant.name";
     private static final Integer ACTION_SEQUENCE_8 = 2;
-
     private static final boolean ALTERABLE = BOOLEAN.next();
-
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM = "hearing.get-active-hearings-for-court-room";
-
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
     private static final String FIELD_DEFENCE_COUNSEL_ID = "defenceCounselId";
@@ -125,16 +117,13 @@ public class HearingEventQueryViewTest {
     private static final String FIELD_HAS_ACTIVE_HEARING = "hasActiveHearing";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_EVENT_DATE = "eventDate";
-
     private static final UUID HEARING_ID_1 = randomUUID();
     private static final UUID HEARING_ID_2 = randomUUID();
-
     private static final UUID HEARING_EVENT_ID_1 = randomUUID();
     private static final UUID DEFENCE_COUNSEL_ID = randomUUID();
     private static final UUID START_HEARING_EVENT_DEFINITION_ID = fromString("b71e7d2a-d3b3-4a55-a393-6d451767fc05");
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next();
     private static final ZonedDateTime LAST_MODIFIED_TIME = PAST_ZONED_DATE_TIME.next();
-
     private static final UUID HEARING_EVENT_ID_2 = randomUUID();
     private static final UUID HEARING_EVENT_ID_3 = randomUUID();
     private static final UUID HEARING_EVENT_ID_4 = randomUUID();
@@ -145,17 +134,13 @@ public class HearingEventQueryViewTest {
     private static final ZonedDateTime EVENT_TIME_2 = EVENT_TIME.plusMinutes(1);
     private static final ZonedDateTime LAST_MODIFIED_TIME_2 = PAST_ZONED_DATE_TIME.next();
     private static final boolean ALTERABLE_2 = BOOLEAN.next();
-
     private static final List<String> CASE_ATTRIBUTES = newArrayList("defendant.name", "counsel.name");
     private static final UUID PERSON_ID = randomUUID();
     private static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID PERSON_ID_2 = randomUUID();
     private static final UUID DEFENDANT_ID_2 = randomUUID();
-
     private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final UUID COURT_ROOM_ID = randomUUID();
-    public static final ZonedDateTime HEARING_DATE = parse("2018-02-22T10:30:00Z");
-
     @Spy
     private final Enveloper enveloper = createEnveloper();
 
@@ -553,7 +538,7 @@ public class HearingEventQueryViewTest {
     }
 
     private List<HearingEvent> mockActiveHearingEvents(final UUID... ids) {
-        List<HearingEvent> hearingEvents = new ArrayList<>();
+        final List<HearingEvent> hearingEvents = new ArrayList<>();
         return Arrays.stream(ids)
                 .map(id -> new HearingEvent()
                         .setId(HEARING_EVENT_ID_1)
@@ -563,33 +548,33 @@ public class HearingEventQueryViewTest {
     }
 
     private List<HearingEvent> mockActiveHearingEventsWithSameNumberOfPausesAndResumes() {
-        List<HearingEvent> hearingEvents = new ArrayList<>();
+        final List<HearingEvent> hearingEvents = new ArrayList<>();
 
-        HearingEvent hearingEvent1 = new HearingEvent()
+        final HearingEvent hearingEvent1 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_1)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(START_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent1);
 
-        HearingEvent hearingEvent2 = new HearingEvent()
+        final HearingEvent hearingEvent2 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_2)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(PAUSE_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent2);
 
-        HearingEvent hearingEvent3 = new HearingEvent()
+        final HearingEvent hearingEvent3 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_3)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(RESUME_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent3);
 
-        HearingEvent hearingEvent4 = new HearingEvent()
+        final HearingEvent hearingEvent4 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_4)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(PAUSE_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent4);
 
-        HearingEvent hearingEvent5 = new HearingEvent()
+        final HearingEvent hearingEvent5 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_5)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(RESUME_HEARING_EVENT_DEFINITION_ID);
@@ -599,27 +584,27 @@ public class HearingEventQueryViewTest {
     }
 
     private List<HearingEvent> mockActiveHearingEventsWithMoreNumberOfPausesThanResumes() {
-        List<HearingEvent> hearingEvents = new ArrayList<>();
+        final List<HearingEvent> hearingEvents = new ArrayList<>();
 
-        HearingEvent hearingEvent1 = new HearingEvent()
+        final HearingEvent hearingEvent1 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_1)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(START_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent1);
 
-        HearingEvent hearingEvent2 = new HearingEvent()
+        final HearingEvent hearingEvent2 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_2)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(PAUSE_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent2);
 
-        HearingEvent hearingEvent3 = new HearingEvent()
+        final HearingEvent hearingEvent3 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_3)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(RESUME_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent3);
 
-        HearingEvent hearingEvent4 = new HearingEvent()
+        final HearingEvent hearingEvent4 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_4)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(PAUSE_HEARING_EVENT_DEFINITION_ID);
@@ -629,15 +614,15 @@ public class HearingEventQueryViewTest {
     }
 
     private List<HearingEvent> mockActiveHearingEventsWithStartAndEndEvent() {
-        List<HearingEvent> hearingEvents = new ArrayList<>();
+        final List<HearingEvent> hearingEvents = new ArrayList<>();
 
-        HearingEvent hearingEvent1 = new HearingEvent()
+        final HearingEvent hearingEvent1 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_1)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(START_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent1);
 
-        HearingEvent hearingEvent2 = new HearingEvent()
+        final HearingEvent hearingEvent2 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_2)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(END_HEARING_EVENT_DEFINITION_ID);
@@ -647,27 +632,27 @@ public class HearingEventQueryViewTest {
     }
 
     private List<HearingEvent> mockActiveHearingEventsWithEndHearingEvents() {
-        List<HearingEvent> hearingEvents = new ArrayList<>();
+        final List<HearingEvent> hearingEvents = new ArrayList<>();
 
-        HearingEvent hearingEvent1 = new HearingEvent()
+        final HearingEvent hearingEvent1 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_1)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(START_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent1);
 
-        HearingEvent hearingEvent2 = new HearingEvent()
+        final HearingEvent hearingEvent2 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_2)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(PAUSE_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent2);
 
-        HearingEvent hearingEvent3 = new HearingEvent()
+        final HearingEvent hearingEvent3 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_3)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(RESUME_HEARING_EVENT_DEFINITION_ID);
         hearingEvents.add(hearingEvent3);
 
-        HearingEvent hearingEvent4 = new HearingEvent()
+        final HearingEvent hearingEvent4 = new HearingEvent()
                 .setId(HEARING_EVENT_ID_4)
                 .setHearingId(HEARING_ID_2)
                 .setHearingEventDefinitionId(END_HEARING_EVENT_DEFINITION_ID);

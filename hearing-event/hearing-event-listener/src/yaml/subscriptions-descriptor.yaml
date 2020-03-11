@@ -22,6 +22,9 @@ subscriptions_descriptor:
         - name: hearing.events.inherited-verdict-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/inherited-verdict-added.json
 
+        - name: hearing.events.registered-hearing-against-application
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/registered-hearing-against-application.json
+
       # Update Verdict
         - name: hearing.hearing-offence-verdict-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-verdict-updated.json

@@ -78,4 +78,14 @@ public class HearingQueryApi {
     public JsonEnvelope getCrackedIneffectiveTrialReason(final JsonEnvelope query) {
         return this.requester.request(query);
     }
+
+    @Handles("hearing.case.timeline")
+    public JsonEnvelope getCaseTimeline(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
+
+    @Handles("hearing.application.timeline")
+    public JsonEnvelope getApplicationTimeline(final JsonEnvelope query) {
+        return this.requester.request(query);
+    }
 }

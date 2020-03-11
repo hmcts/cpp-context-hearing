@@ -447,7 +447,7 @@
             "value": "138"
           },
           {
-            "id" : "6dbddb7c-007c-4a81-a06d-17b09b68c01a",
+            "id" : "d0f08c9c-e1e5-46eb-b573-f1728bc51414",
             "isAvailableForCourtExtract" : false,
             "label" : "Payment card required",
             "promptReference" : "PAYMENT_CARD_REQUIRED",

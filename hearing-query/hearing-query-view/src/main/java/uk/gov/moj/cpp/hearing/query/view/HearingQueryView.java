@@ -1,5 +1,10 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.time.LocalDate.now;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
@@ -8,22 +13,19 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
-import static java.time.LocalDate.now;
-import static java.util.UUID.fromString;
-import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import javax.inject.Inject;
+import javax.json.JsonObject;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
@@ -36,6 +38,8 @@ public class HearingQueryView {
     private static final String FIELD_START_TIME = "startTime";
     private static final String FIELD_END_TIME = "endTime";
     private static final String FIELD_QUERY = "q";
+    private static final String FIELD_ID = "id";
+
     @Inject
     private HearingService hearingService;
     @Inject
@@ -118,5 +122,19 @@ public class HearingQueryView {
 
         return enveloper.withMetadataFrom(envelope, "hearing.get-cracked-ineffective-reason")
                 .apply(hearingService.getCrackedIneffectiveTrial(trialTypeId.get()));
+    }
+
+    @Handles("hearing.case.timeline")
+    public JsonEnvelope getTimeline(final JsonEnvelope envelope) {
+        final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
+        final Timeline timeline = hearingService.getTimeLineByCaseId(caseId.get());
+        return enveloper.withMetadataFrom(envelope, "hearing.timeline").apply(timeline);
+    }
+
+    @Handles("hearing.application.timeline")
+    public JsonEnvelope getTimelineByApplicationId(final JsonEnvelope envelope) {
+        final Optional<UUID> applicationId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
+        final Timeline timeline = hearingService.getTimeLineByApplicationId(applicationId.get());
+        return enveloper.withMetadataFrom(envelope, "hearing.timeline").apply(timeline);
     }
 }

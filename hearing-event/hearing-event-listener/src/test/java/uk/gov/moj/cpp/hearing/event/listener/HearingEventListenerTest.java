@@ -33,6 +33,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
@@ -42,7 +43,9 @@ import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -71,6 +74,8 @@ public class HearingEventListenerTest {
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Captor
     ArgumentCaptor<Hearing> saveHearingCaptor;
+    @Captor
+    ArgumentCaptor<HearingApplication> saveHearingApplicationCaptor;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
@@ -86,6 +91,8 @@ public class HearingEventListenerTest {
     private HearingJPAMapper hearingJPAMapper;
     @Mock
     private ApplicationDraftResultJPAMapper applicationDraftResultJPAMapper;
+    @Mock
+    private HearingApplicationRepository hearingApplicationRepository;
 
     @Before
     public void setUp() {
@@ -173,6 +180,22 @@ public class HearingEventListenerTest {
                 .with(Hearing::getHasSharedResults, is(true))
                 .with(Hearing::getId, is(resultsShared.getHearingId()))
         );
+    }
+
+    @Test
+    public void shouldRegisterHearingAgainstApplication() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID applicationId = UUID.randomUUID();
+        final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = new RegisteredHearingAgainstApplication(applicationId, hearingId);
+
+        hearingEventListener.registerHearingAgainstApplication(envelopeFrom(metadataWithRandomUUID("hearing.events.registered-hearing-against-application"),
+                objectToJsonObjectConverter.convert(registeredHearingAgainstApplication)
+        ));
+
+        verify(this.hearingApplicationRepository).save(saveHearingApplicationCaptor.capture());
+
+        assertThat(saveHearingApplicationCaptor.getValue().getId().getApplicationId(), is(applicationId));
+        assertThat(saveHearingApplicationCaptor.getValue().getId().getHearingId(), is(hearingId));
     }
 
     private ResultsShared resultsSharedTemplate() {
