@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -26,6 +27,7 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitHearingTypesCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
@@ -57,6 +59,12 @@ public class HearingListXhibitResponseTransformer {
     private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
 
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
+
+    @Inject
+    private XhibitHearingTypesCache xhibitHearingTypesCache;
+
+    @Inject
+    private ReferenceDataService referenceDataService;
 
     public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return currentCourtStatus()
@@ -169,12 +177,17 @@ public class HearingListXhibitResponseTransformer {
     @SuppressWarnings("squid:S3655")
     private CaseDetail buildCaseDetail(final Hearing hearing, final HearingEvent hearingEvent, final ProsecutionCase prosecutionCase,
                                        final BigInteger activecase, final BigInteger hearingprogessValue) {
+
+        //get the hearingType by hearingType id from cache
+        final String exhibitHearingTypeDescription = xhibitHearingTypesCache.getHearingTypeDescription(hearing.getType().getId());
+
+
         final CaseDetail caseDetail  = caseDetail()
                 .withActivecase(activecase)
                 .withHearingprogress(hearingprogessValue)
                 .withCppUrn(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
-                .withHearingType(hearing.getType().getDescription())
+                .withHearingType(exhibitHearingTypeDescription)
                 .withDefendants(getDefendants(prosecutionCase, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason())))
                 .withJudgeName(getJudgeName(hearing))
                 .withHearingEvent(hearingEvent)

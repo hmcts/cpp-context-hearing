@@ -13,6 +13,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.referencedata.HearingTypeMappingList;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 
@@ -26,6 +27,7 @@ public class ReferenceDataService {
     private static final String GET_ALL_CRACKED_INEFFECTIVE_TRIAL_TYPES = "referencedata.query.cracked-ineffective-vacated-trial-types";
     private static final String REFERENCEDATA_QUERY_COURT_CENTRES = "referencedata.query.courtrooms";
     private static final String XHIBIT_EVENT_MAPPINGS = "referencedata.query.cp-xhibit-hearing-event-mappings";
+    private static final String REFERENCE_DATA_HEARING_TYPES = "referencedata.query.hearing-types";
 
     @Inject
     @ServiceComponent(QUERY_VIEW)
@@ -70,6 +72,18 @@ public class ReferenceDataService {
                 .build();
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(eventEnvelope, REFERENCEDATA_QUERY_COURT_CENTRES).apply(payload);
         return requester.request(requestEnvelope);
+    }
+
+    public HearingTypeMappingList getXhibitHearingType() {
+        final JsonEnvelope requestEnvelope = envelopeFrom(
+                metadataBuilder().
+                        withId(randomUUID()).
+                        withName(REFERENCE_DATA_HEARING_TYPES),
+                createObjectBuilder());
+
+        final JsonEnvelope jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope);
+
+        return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), HearingTypeMappingList.class);
     }
 
     @VisibleForTesting

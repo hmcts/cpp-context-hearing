@@ -26,6 +26,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitHearingTypesCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -49,6 +50,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class HearingListXhibitResponseTransformerTest {
     private static final String COURT_NAME = "Court 1";
 
+    private UUID hearingTypeId;
+
     @Mock
     private HearingDay hearingDay;
 
@@ -68,10 +71,16 @@ public class HearingListXhibitResponseTransformerTest {
     private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
 
     @Mock
+    private XhibitHearingTypesCache xhibitHearingTypesCache;
+
+    @Mock
     private HearingEventsToHearingMapper hearingEventsToHearingMapper;
 
     @Mock
     private Hearing hearing;
+
+    @Mock
+    private HearingType hearingType;
 
     @Mock
     private CourtRoomMapping courtRoomMapping;
@@ -81,7 +90,6 @@ public class HearingListXhibitResponseTransformerTest {
 
     @InjectMocks
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
-
 
     @Test
     public void shouldTransformFrom() {
@@ -122,6 +130,10 @@ public class HearingListXhibitResponseTransformerTest {
         when(xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(any(), any())).thenReturn(courtRoomMapping);
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
         when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        mockHearingTypeId();
+
+        when(xhibitHearingTypesCache.getHearingTypeDescription(hearingTypeId)).thenReturn("Plea");
 
         final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
         final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
@@ -173,6 +185,10 @@ public class HearingListXhibitResponseTransformerTest {
         when(xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(any(), any())).thenReturn(courtRoomMapping);
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
         when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        mockHearingTypeId();
+
+        when(xhibitHearingTypesCache.getHearingTypeDescription(hearingTypeId)).thenReturn("Plea");
 
         final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
         final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
@@ -227,6 +243,10 @@ public class HearingListXhibitResponseTransformerTest {
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
         when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
 
+        mockHearingTypeId();
+
+        when(xhibitHearingTypesCache.getHearingTypeDescription(hearingTypeId)).thenReturn("Plea");
+
         final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
         final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
         final CaseDetail caseDetail = courtRoom.getCases().getCasesDetails().get(0);
@@ -277,6 +297,10 @@ public class HearingListXhibitResponseTransformerTest {
         when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
         when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
 
+        mockHearingTypeId();
+
+        when(xhibitHearingTypesCache.getHearingTypeDescription(hearingTypeId)).thenReturn("Plea");
+
         final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
         final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
         final CaseDetail caseDetail = courtRoom.getCases().getCasesDetails().get(0);
@@ -291,5 +315,11 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getDefendants().get(0).getLastName(), nullValue());
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+    }
+
+    private void mockHearingTypeId() {
+        hearingTypeId = UUID.randomUUID();
+        when(hearing.getType()).thenReturn(hearingType);
+        when(hearingType.getId()).thenReturn(hearingTypeId);
     }
 }

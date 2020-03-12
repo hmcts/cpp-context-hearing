@@ -78,6 +78,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -486,9 +487,9 @@ public class CoreTestTemplates {
                 .withWelshDescription("welshDescription");
     }
 
-    public static HearingType.Builder hearingType() {
+    public static HearingType.Builder hearingType(final Optional<UUID> hearingTypeId) {
         return HearingType.hearingType()
-                .withId(randomUUID())
+                .withId(hearingTypeId.orElseGet(UUID::randomUUID))
                 .withDescription(STRING.next())
                 .withWelshDescription(STRING.next());
     }
@@ -496,7 +497,7 @@ public class CoreTestTemplates {
     public static Hearing.Builder hearing(CoreTemplateArguments args) {
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
-                .withType(hearingType().build())
+                .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(hearingDay().build()))
@@ -520,7 +521,7 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId,final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
@@ -528,7 +529,7 @@ public class CoreTestTemplates {
         final LocalDate daybefore = localDate.minusDays(1);
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
-                .withType(hearingType().build())
+                .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
@@ -559,7 +560,8 @@ public class CoreTestTemplates {
                                                    final String courtRoomName,
                                                    final LocalDate localDate,
                                                    final UUID defenceCounselId,
-                                                   final UUID caseId) throws NoSuchAlgorithmException {
+                                                   final UUID caseId,
+                                                   final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
@@ -568,7 +570,7 @@ public class CoreTestTemplates {
 
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
-                .withType(hearingType().build())
+                .withType(hearingType(hearingTypeId).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),

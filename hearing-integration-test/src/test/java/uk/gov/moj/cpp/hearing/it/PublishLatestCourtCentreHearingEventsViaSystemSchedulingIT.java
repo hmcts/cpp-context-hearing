@@ -10,11 +10,8 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.andHearingEventDefinitionsAreAvailable;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -30,16 +27,13 @@ import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -86,12 +80,12 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, Optional.empty())));
         createHearingEvent(hearing1, defenceCounselId,"Start Hearing",eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing1.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()));
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, Optional.empty())));
         createHearingEvent(hearing2, defenceCounselId,"Start Hearing",eventTime.plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing2.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()));
@@ -114,7 +108,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, Optional.empty())));
         createHearingEvent(hearing, defenceCounselId, "Start Hearing",eventTime);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);

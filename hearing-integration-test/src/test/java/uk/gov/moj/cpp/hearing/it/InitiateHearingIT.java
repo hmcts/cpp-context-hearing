@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static java.util.UUID.fromString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;

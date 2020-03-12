@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
+import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -22,6 +23,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataXhibitHearingTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForWebPage;
@@ -36,12 +38,14 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,6 +71,13 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     private String courtRoom2Id;
     private String defenceCounselId;
     private UUID caseId;
+    private static UUID hearingTypeId;
+
+    @BeforeClass
+    public static void setUp(){
+        hearingTypeId = randomUUID();
+        stubGetReferenceDataXhibitHearingTypes(hearingTypeId.toString());
+    }
 
     @Before
     public void initStub() {
@@ -89,7 +100,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
-        createHearingEvent(courtRoom2Id, defenceCounselId, OPEN_CASE_PROSECUTION);
+        createHearingEvent(courtRoom2Id, defenceCounselId, OPEN_CASE_PROSECUTION, of(hearingTypeId));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
@@ -119,7 +130,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldRequestToPublishCourtListDefenceCouncilOpensCase() throws NoSuchAlgorithmException {
-        createHearingEvent(courtRoom2Id, defenceCounselId, DEFENCE_COUNCIL_NAME_OPENS);
+        createHearingEvent(courtRoom2Id, defenceCounselId, DEFENCE_COUNCIL_NAME_OPENS, of(hearingTypeId));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "27");
 
@@ -135,7 +146,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldRequestToPublishCourtList() throws NoSuchAlgorithmException {
-        createHearingEvent(courtRoom1Id, defenceCounselId, START_HEARING);
+        createHearingEvent(courtRoom1Id, defenceCounselId, START_HEARING, of(hearingTypeId));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "28");
 
@@ -148,7 +159,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     @Test
     public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
-        createHearingEvent(courtRoom2Id, defenceCounselId, APPELLANT_OPENS);
+        createHearingEvent(courtRoom2Id, defenceCounselId, APPELLANT_OPENS, of(hearingTypeId));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "25");
 
@@ -165,7 +176,8 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
         final UUID expectedHearingEventId = randomUUID();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId, START_HEARING, EVENT_TIME);
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(courtRoom1Id, defenceCounselId, START_HEARING, EVENT_TIME, of(hearingTypeId));
+
         logEvent(randomUUID(), requestSpec, asDefault(), hearing.it(), fromString(APPELLANT_OPENS_ID), false, fromString(defenceCounselId), EVENT_TIME.plusMinutes(5));
         logEvent(expectedHearingEventId, requestSpec, asDefault(), hearing.it(), fromString(OPEN_CASE_PROSECUTION_ID), false, fromString(defenceCounselId), EVENT_TIME.plusMinutes(10));
         logEvent(randomUUID(), requestSpec, asDefault(), hearing.it(), fromString(RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER), false, fromString(defenceCounselId), EVENT_TIME.plusMinutes(15));
@@ -189,8 +201,8 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         return createObjectBuilder().add("courtCentreId", courtCentreId).add("createdTime", "2019-10-" + day + "T16:34:45.132Z").build();
     }
 
-    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel, final ZonedDateTime eventTime) throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId)));
+    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
 
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
 
@@ -201,7 +213,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         return hearing;
     }
 
-    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel) throws NoSuchAlgorithmException {
-        return createHearingEvent(courtRoomId, defenceCounselId, actionLabel, EVENT_TIME);
+    private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final String courtRoomId, final String defenceCounselId, final String actionLabel, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+        return createHearingEvent(courtRoomId, defenceCounselId, actionLabel, EVENT_TIME, hearingTypeId);
     }
 }
