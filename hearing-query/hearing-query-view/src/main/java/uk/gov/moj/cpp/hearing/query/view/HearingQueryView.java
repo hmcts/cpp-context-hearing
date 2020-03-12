@@ -5,6 +5,7 @@ import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
@@ -46,7 +47,7 @@ public class HearingQueryView {
     private Enveloper enveloper;
 
     @Handles("hearing.get.hearings")
-    public JsonEnvelope findHearings(final JsonEnvelope envelope) {
+    public Envelope<GetHearings> findHearings(final JsonEnvelope envelope) {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
         final UUID courtCentreId = UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID));
@@ -54,8 +55,10 @@ public class HearingQueryView {
         final String startTime = payload.containsKey(FIELD_START_TIME) ? payload.getString(FIELD_START_TIME) : "00:00";
         final String endTime = payload.containsKey(FIELD_END_TIME) ? payload.getString(FIELD_END_TIME) : "23:59";
         final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId);
-        return enveloper.withMetadataFrom(envelope, "hearing.get.hearings")
-                .apply(hearingListResponse);
+
+        return envelop(hearingListResponse)
+                .withName("hearing.get.hearings")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.get.hearings-for-today")
@@ -69,25 +72,33 @@ public class HearingQueryView {
     }
 
     @Handles("hearing.get.hearing")
-    public JsonEnvelope findHearing(final JsonEnvelope envelope) {
+    public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingById(hearingId.get());
-        return enveloper.withMetadataFrom(envelope, "hearing.get-hearing")
-                .apply(hearingDetailsResponse);
+
+        return envelop(hearingDetailsResponse)
+                .withName("hearing.get-hearing")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.get-draft-result")
-    public JsonEnvelope getDraftResult(final JsonEnvelope envelope) {
+    public Envelope<TargetListResponse> getDraftResult(final JsonEnvelope envelope) {
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final TargetListResponse targetListResponse = hearingService.getTargets(hearingId);
-        return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result").apply(targetListResponse);
+
+        return envelop(targetListResponse)
+                .withName("hearing.get-draft-result")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.get-application-draft-result")
-    public JsonEnvelope getApplicationDraftResult(final JsonEnvelope envelope) {
+    public Envelope<ApplicationTargetListResponse> getApplicationDraftResult(final JsonEnvelope envelope) {
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final ApplicationTargetListResponse applicationTargetListResponse = hearingService.getApplicationTargets(hearingId);
-        return enveloper.withMetadataFrom(envelope, "hearing.get-application-draft-result").apply(applicationTargetListResponse);
+
+        return envelop(applicationTargetListResponse)
+                .withName("hearing.get-application-draft-result")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.query.search-by-material-id")
@@ -108,33 +119,41 @@ public class HearingQueryView {
     }
 
     @Handles("hearing.get.nows")
-    public JsonEnvelope findNows(final JsonEnvelope envelope) {
+    public Envelope<NowListResponse> findNows(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
         final NowListResponse nowListResponse = hearingService.getNows(hearingId.get());
-        return enveloper.withMetadataFrom(envelope, "hearing.get-nows")
-                .apply(nowListResponse);
+
+        return envelop(nowListResponse)
+                .withName("hearing.get-nows")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.get-cracked-ineffective-reason")
-    public JsonEnvelope getCrackedIneffectiveTrialReason(final JsonEnvelope envelope) {
+    public Envelope<CrackedIneffectiveTrial> getCrackedIneffectiveTrialReason(final JsonEnvelope envelope) {
+
 
         final Optional<UUID> trialTypeId = getUUID(envelope.payloadAsJsonObject(), "trialTypeId");
-
-        return enveloper.withMetadataFrom(envelope, "hearing.get-cracked-ineffective-reason")
-                .apply(hearingService.getCrackedIneffectiveTrial(trialTypeId.get()));
+        return envelop(hearingService.getCrackedIneffectiveTrial(trialTypeId.get()))
+                .withName("hearing.get-cracked-ineffective-reason")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.case.timeline")
-    public JsonEnvelope getTimeline(final JsonEnvelope envelope) {
+    public Envelope<Timeline> getTimeline(final JsonEnvelope envelope) {
         final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
         final Timeline timeline = hearingService.getTimeLineByCaseId(caseId.get());
-        return enveloper.withMetadataFrom(envelope, "hearing.timeline").apply(timeline);
+
+        return envelop(timeline)
+                .withName("hearing.timeline")
+                .withMetadataFrom(envelope);
     }
 
     @Handles("hearing.application.timeline")
-    public JsonEnvelope getTimelineByApplicationId(final JsonEnvelope envelope) {
+    public Envelope<Timeline> getTimelineByApplicationId(final JsonEnvelope envelope) {
         final Optional<UUID> applicationId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
         final Timeline timeline = hearingService.getTimeLineByApplicationId(applicationId.get());
-        return enveloper.withMetadataFrom(envelope, "hearing.timeline").apply(timeline);
+        return envelop(timeline)
+                .withName("hearing.timeline")
+                .withMetadataFrom(envelope);
     }
 }
