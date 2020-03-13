@@ -48,16 +48,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import com.tngtech.java.junit.dataprovider.DataProvider;
+import com.tngtech.java.junit.dataprovider.DataProviderRunner;
+import com.tngtech.java.junit.dataprovider.UseDataProvider;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(DataProviderRunner.class)
 public class NowsRequestedToDocumentConverterTest {
 
     @Spy
@@ -80,14 +83,15 @@ public class NowsRequestedToDocumentConverterTest {
 
     @Before
     public void setup() {
+        MockitoAnnotations.initMocks(this);
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-        CourtCentreOrganisationUnit courtCentreOrganisationUnit = new CourtCentreOrganisationUnit(null,null,null,null,
-                null,null,null,null,
-                "1234",false,null,null,null,
-                null,null,null,null,null,
-                null,null,null,null,null);
-        when(courtHouseReverseLookup.getCourtCentreById(any(),any())).thenReturn(Optional.of(courtCentreOrganisationUnit));
+        CourtCentreOrganisationUnit courtCentreOrganisationUnit = new CourtCentreOrganisationUnit(null, null, null, null,
+                null, null, null, null,
+                "1234", false, null, null, null,
+                null, null, null, null, null,
+                null, null, null, null, null);
+        when(courtHouseReverseLookup.getCourtCentreById(any(), any())).thenReturn(Optional.of(courtCentreOrganisationUnit));
     }
 
     @Test
@@ -259,5 +263,48 @@ public class NowsRequestedToDocumentConverterTest {
                 .with(NowDocumentContent::getNowText, is(input.getNowTypes().get(0).getStaticText()))
         );
 
+    }
+
+    @DataProvider
+    public static Object[][] welshWordings() {
+        return new Object[][]{
+                {null, "English Wording", "English Wording"},
+                {"N/A", "English Wording", "English Wording"},
+                {"Welsh Wording", "English Wording", "Welsh Wording"}
+        };
+    }
+
+
+    @UseDataProvider("welshWordings")
+    @Test
+    public void shouldSetWelshWordingWithEnglishWordingWhenItIsEmpty(String welshWording, String englishWording, String expectedWording) {
+        final CreateNowsRequest input = TestTemplates.generateNowsRequestTemplateWithConditionalText(UUID.randomUUID(), JurisdictionType.MAGISTRATES, true);
+        final Hearing hearing = input.getHearing();
+
+        hearing.getProsecutionCases().stream()
+                .flatMap(a -> a.getDefendants().stream())
+                .flatMap(a -> a.getOffences().stream())
+                .forEach((a) -> {
+                    a.setWordingWelsh(welshWording);
+                    a.setWording(englishWording);
+                });
+
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.events.nows-requested"),
+                objectToJsonObjectConverter.convert(input)
+        );
+
+        Subscriptions subscriptions = mock(Subscriptions.class);
+        when(subscriptionClient.getAll(Mockito.any(JsonEnvelope.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(subscriptions);
+
+        final List<NowDocumentRequest> nowDocumentResult = nowsRequestedToDocumentConverter.convert(envelope, input);
+        final NowDocumentContent nowDocumentContent = nowDocumentResult.get(0).getNowContent();
+
+        final uk.gov.justice.core.courts.ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
+        assertThat(nowDocumentContent, isBean(NowDocumentContent.class)
+                .with(NowDocumentContent::getCases, first(isBean(ProsecutionCase.class)
+                        .with(ProsecutionCase::getDefendantCaseOffences, first(isBean(DefendantCaseOffence.class)
+                                .withValue(DefendantCaseOffence::getWelshWording, expectedWording)
+                        )))));
     }
 }
