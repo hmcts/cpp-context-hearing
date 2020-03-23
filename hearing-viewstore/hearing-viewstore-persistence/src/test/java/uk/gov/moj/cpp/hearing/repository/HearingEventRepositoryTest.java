@@ -279,6 +279,35 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.get(0).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
     }
 
+    @Test
+    public void shouldGetActiveHearingsForCourtCentreList() {
+        givenHearingExistsWithCourtCentre();
+        givenHearingEventsExistWithNotRequiredEventDefinitions();
+        final List<UUID> courtCentreIds = new ArrayList();
+        courtCentreIds.add(COURT_CENTRE_ID);
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet();
+        hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_1);
+        hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_2);
+
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findBy(courtCentreIds, EVENT_TIME,hearingEventRequiredDefinitionsIds);
+        assertThat(hearingEvents.size(), is(2));
+
+        assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvents.get(0).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_1));
+        assertThat(hearingEvents.get(0).getId(), is(HEARING_EVENT_ID_1));
+        assertThat(hearingEvents.get(0).getRecordedLabel(), is(RECORDED_LABEL));
+        assertThat(hearingEvents.get(0).getEventTime(), is(EVENT_TIME));
+        assertThat(hearingEvents.get(0).getLastModifiedTime(), is(LAST_MODIFIED_TIME));
+
+
+        assertThat(hearingEvents.get(1).getHearingId(), is(HEARING_ID_1));
+        assertThat(hearingEvents.get(1).getHearingEventDefinitionId(), is(HEARING_EVENT_DEFINITION_ID_2));
+        assertThat(hearingEvents.get(1).getId(), is(HEARING_EVENT_ID_2));
+        assertThat(hearingEvents.get(1).getRecordedLabel(), is(RECORDED_LABEL_2));
+        assertThat(hearingEvents.get(1).getEventTime(), is(EVENT_TIME_2));
+        assertThat(hearingEvents.get(1).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
+    }
+
     private void givenHearingEventsExistWithNotRequiredEventDefinitions() {
         final List<HearingEvent> hearingEvents = newArrayList(
                 HearingEvent.hearingEvent()

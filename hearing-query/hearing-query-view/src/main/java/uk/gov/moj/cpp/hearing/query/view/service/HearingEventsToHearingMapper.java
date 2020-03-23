@@ -3,8 +3,6 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.moj.cpp.hearing.mapping.HearingEventJPAMapper.fromJPA;
-import static uk.gov.moj.cpp.hearing.query.view.service.EventDefinitions.FINISHED;
-
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 

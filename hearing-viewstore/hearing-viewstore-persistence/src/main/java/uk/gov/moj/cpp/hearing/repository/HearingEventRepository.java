@@ -53,7 +53,8 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "WHERE hearing.id = hearingEvent.hearingId and " +
                     "hearing.courtCentre.id IN (:courtCentreList) and " +
                     "hearingEvent.eventTime >= :lastModifiedTime and " +
-                    "hearingEvent.deleted is false ";
+                    "hearingEvent.deleted is false and " +
+                    "hearingEvent.hearingEventDefinitionId IN (:cppHearingEventIds)";
 
 
     private static final String GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST =
@@ -109,7 +110,7 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     public abstract List<HearingEvent> findBy(@QueryParam("courtCentreId") final UUID courtCentreId, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime);
 
     @Query(value = GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE_LIST)
-    public abstract List<HearingEvent> findBy(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime);
+    public abstract List<HearingEvent> findBy(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
 
     @Query(value = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST)
     public abstract List<HearingEventPojo> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);

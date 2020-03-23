@@ -138,7 +138,7 @@ public class HearingService {
                 .map(ha -> hearingJPAMapper.fromJPA(ha))
                 .collect(toList());
 
-        final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC));
+        final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC), cppHearingEventIds);
 
         if (!hearingList.isEmpty()) {
             final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, allHearingEvents);
