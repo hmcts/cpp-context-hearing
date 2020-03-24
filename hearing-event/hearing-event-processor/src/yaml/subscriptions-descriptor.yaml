@@ -178,6 +178,10 @@ subscriptions_descriptor:
         - name: hearing.events.case-markers-enriched-with-associated-hearings
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.events.case-markers-enriched-with-associated-hearings.json
 
+       # Publish court list
+        - name: hearing.event.publish-court-list-requested
+          schema_uri: http://justice.gov.uk/hearing/event/hearing.event.publish-court-list-requested.json
+
       # Defense Counsel
         - name: hearing.defence-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json

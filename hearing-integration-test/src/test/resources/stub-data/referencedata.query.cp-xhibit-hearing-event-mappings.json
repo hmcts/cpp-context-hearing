@@ -1,0 +1,40 @@
+{
+  "cpXhibitHearingEventMappings": [
+    {
+      "cpHearingEventId": "b71e7d2a-d3b3-4a55-a393-6d451767fc05",
+      "xhibitHearingEventCode": "10200",
+      "xhibitHearingEventDescription": "Start Hearing",
+      "validFrom": "2016-04-08"
+    },
+    {
+      "cpHearingEventId": "50fb4a64-943d-4a2a-afe6-4b5c9e99e043",
+      "xhibitHearingEventCode": "20606",
+      "xhibitHearingEventDescription": "Appellant opens",
+      "validFrom": "2016-04-08"
+    },
+    {
+      "cpHearingEventId": "e9060336-4821-4f46-969c-e08b33b48071",
+      "xhibitHearingEventCode": "20903",
+      "xhibitHearingEventDescription": "Open case prosecution",
+      "validFrom": "2016-04-08"
+    },
+    {
+      "cpHearingEventId": "a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0",
+      "xhibitHearingEventCode": "20906",
+      "xhibitHearingEventDescription": "Defence counsel.name opens case regarding defendant defendant.name",
+      "validFrom": "2016-04-08"
+    },
+    {
+      "cpHearingEventId": "cc00cca8-39ba-431c-b08f-8c6f9be185d1",
+      "xhibitHearingEventCode": "20910",
+      "xhibitHearingEventDescription": "Defence counsel.name closes case regarding defendant defendant.name",
+      "validFrom": "2016-04-08"
+    },
+    {
+      "cpHearingEventId": "b335327a-7f58-4f26-a2ef-7e07134ba60b",
+      "xhibitHearingEventCode": "20916",
+      "xhibitHearingEventDescription": "Point of law discussion prosecution",
+      "validFrom": "2016-04-08"
+    }
+  ]
+}

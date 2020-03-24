@@ -1,0 +1,52 @@
+{
+  "cpXhibitCourtMappings": [
+    {
+      "id": "0a43a1dd-9ba7-33d9-a306-554784e5b116",
+      "oucode": "C04PR00",
+      "crestCourtId": "448",
+      "crestCourtSiteId": "751",
+      "crestCourtSiteName": "BARROW-IN-FURNESS",
+      "crestCourtName": "PRESTON",
+      "crestCourtShortName": "PREST",
+      "crestCourtFullName": "PRESTON",
+      "crestCourtSiteCode": "C",
+      "courtType": "CROWN_COURT"
+    },
+    {
+      "id": "26767ef5-5441-32d1-bf5e-baf746936b37",
+      "oucode": "C04PR00",
+      "crestCourtId": "448",
+      "crestCourtSiteId": "448",
+      "crestCourtSiteName": "PRESTON",
+      "crestCourtName": "PRESTON",
+      "crestCourtShortName": "PREST",
+      "crestCourtFullName": "PRESTON",
+      "crestCourtSiteCode": "A",
+      "courtType": "CROWN_COURT"
+    },
+    {
+      "id": "e2afcfff-48f3-3647-9ead-a06dcba4bb47",
+      "oucode": "C04PR00",
+      "crestCourtId": "448",
+      "crestCourtSiteId": "448",
+      "crestCourtSiteName": "PRESTON [THE SESSIONS HOUSE]",
+      "crestCourtName": "PRESTON",
+      "crestCourtShortName": "PREST",
+      "crestCourtFullName": "PRESTON",
+      "crestCourtSiteCode": "B",
+      "courtType": "CROWN_COURT"
+    },
+    {
+      "id": "cadfb7e2-f293-36a6-b466-3875d88ba6e4",
+      "oucode": "C04PR00",
+      "crestCourtId": "448",
+      "crestCourtSiteId": "768",
+      "crestCourtSiteName": "LANCASTER",
+      "crestCourtName": "PRESTON",
+      "crestCourtShortName": "PREST",
+      "crestCourtFullName": "PRESTON",
+      "crestCourtSiteCode": "D",
+      "courtType": "CROWN_COURT"
+    }
+  ]
+}

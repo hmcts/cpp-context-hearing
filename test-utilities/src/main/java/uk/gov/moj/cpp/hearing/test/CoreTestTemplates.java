@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.BailStatus.bailStatus;
 import static uk.gov.justice.core.courts.FundingType.REPRESENTATION_ORDER;
+import static uk.gov.justice.core.courts.DefenceCounsel.defenceCounsel;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
@@ -73,9 +74,11 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -115,13 +118,23 @@ public class CoreTestTemplates {
                 .withWelshRoomName(STRING.next());
     }
 
-    public static CourtCentre.Builder courtCentreWithArgs(UUID courtAndRoomId) {
+    public static CourtCentre.Builder courtCentreWithArgs(final UUID courtAndRoomId, final String courtRoomName) {
         return CourtCentre.courtCentre()
                 .withId(courtAndRoomId)
                 .withName(STRING.next())
                 .withWelshName(STRING.next())
                 .withRoomId(courtAndRoomId)
-                .withRoomName(STRING.next())
+                .withRoomName(courtRoomName)
+                .withWelshRoomName(STRING.next());
+    }
+
+    public static CourtCentre.Builder courtCentreWithArgs(final UUID courtId, final UUID courtRoomId, final String courtRoomName) {
+        return CourtCentre.courtCentre()
+                .withId(courtId)
+                .withName(STRING.next())
+                .withWelshName(STRING.next())
+                .withRoomId(courtRoomId)
+                .withRoomName(courtRoomName)
                 .withWelshRoomName(STRING.next());
     }
 
@@ -487,9 +500,9 @@ public class CoreTestTemplates {
                 .withWelshDescription("welshDescription");
     }
 
-    public static HearingType.Builder hearingType() {
+    public static HearingType.Builder hearingType(final Optional<UUID> hearingTypeId) {
         return HearingType.hearingType()
-                .withId(randomUUID())
+                .withId(hearingTypeId.orElseGet(UUID::randomUUID))
                 .withDescription(STRING.next())
                 .withWelshDescription(STRING.next());
     }
@@ -497,7 +510,7 @@ public class CoreTestTemplates {
     public static Hearing.Builder hearing(CoreTemplateArguments args) {
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
-                .withType(hearingType().build())
+                .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
                 .withHearingDays(asList(hearingDay().build()))
@@ -521,19 +534,21 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
-    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, int year, int month, int day) throws NoSuchAlgorithmException {
+    public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
         final Random random = SecureRandom.getInstanceStrong();
         final int min = 1;
         final int max = 5;
+        final LocalDate dayAfter = localDate.plusDays(1);
+        final LocalDate daybefore = localDate.minusDays(1);
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
-                .withType(hearingType().build())
+                .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(hearingDayWithParam(year, month, day + 1, random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(year, month, day, random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(year, month, day - 1, random.nextInt((max - min) + 1) + min).build()))
-                .withCourtCentre(courtCentreWithArgs(courtAndRoomId).build())
+                .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build()))
+                .withCourtCentre(courtCentreWithArgs(courtAndRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
@@ -552,6 +567,57 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
+    public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args,
+                                                   final UUID courtId,
+                                                   final UUID courtRoomId,
+                                                   final String courtRoomName,
+                                                   final LocalDate localDate,
+                                                   final UUID defenceCounselId,
+                                                   final UUID caseId,
+                                                   final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+        final Random random = SecureRandom.getInstanceStrong();
+        final int min = 1;
+        final int max = 5;
+        final LocalDate dayAfter = localDate.plusDays(1);
+        final LocalDate daybefore = localDate.minusDays(1);
+
+        final Hearing.Builder hearingBuilder = Hearing.hearing()
+                .withId(randomUUID())
+                .withType(hearingType(hearingTypeId).build())
+                .withJurisdictionType(args.jurisdictionType)
+                .withReportingRestrictionReason(STRING.next())
+                .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build()))
+                .withCourtCentre(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
+                .withJudiciary(singletonList(judiciaryRole(args).build()))
+                .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withDefenceCounsels(
+                        singletonList(
+                                defenceCounsel()
+                                        .withId(defenceCounselId)
+                                        .withAttendanceDays(Arrays.asList(LocalDate.now()))
+                                        .withDefendants(Arrays.asList(randomUUID()))
+                                        .withFirstName("John")
+                                        .withLastName("Jones")
+                                        .withTitle("Mr")
+                                        .withStatus("OPEN")
+                                        .build()))
+                .withProsecutionCases(
+                        args.structure.entrySet().stream()
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .collect(toList())
+                )
+
+                .withCourtApplications(asList((new HearingFactory().courtApplication().withLinkedCaseId(caseId).build())));
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+        }
+        return hearingBuilder;
+    }
 
     public static String generateRandomEmail() {
         return STRING.next().toLowerCase() + "@" + STRING.next().toLowerCase() + "." + STRING.next().toLowerCase();

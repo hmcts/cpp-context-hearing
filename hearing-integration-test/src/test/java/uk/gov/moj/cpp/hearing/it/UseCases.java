@@ -176,7 +176,8 @@ public class UseCases {
         return hearingUpdateVerdictCommand;
     }
 
-    public static LogEventCommand logEvent(final RequestSpecification requestSpec,
+    public static LogEventCommand logEvent(final UUID hearingEventId,
+                                           final RequestSpecification requestSpec,
                                            final Consumer<LogEventCommand.Builder> consumer,
                                            final InitiateHearingCommand initiateHearingCommand,
                                            final UUID hearingEventDefinitionId,
@@ -186,7 +187,7 @@ public class UseCases {
                                            final String recordedLabel) {
         final LogEventCommand logEvent = with(
                 LogEventCommand.builder()
-                        .withHearingEventId(randomUUID())
+                        .withHearingEventId(hearingEventId)
                         .withHearingEventDefinitionId(hearingEventDefinitionId)
                         .withHearingId(initiateHearingCommand.getHearing().getId())
                         .withEventTime(eventTime)
@@ -237,6 +238,18 @@ public class UseCases {
         return logEvent;
     }
 
+
+    public static LogEventCommand logEvent(final UUID hearingEventId,
+                                           final RequestSpecification requestSpec,
+                                           final Consumer<LogEventCommand.Builder> consumer,
+                                           final InitiateHearingCommand initiateHearingCommand,
+                                           final UUID hearingEventDefinitionId,
+                                           final boolean alterable,
+                                           final UUID defenceCounselId,
+                                           final ZonedDateTime eventTime) {
+        return logEvent(hearingEventId,requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
+    }
+
     public static LogEventCommand logEvent(final RequestSpecification requestSpec,
                                            final Consumer<LogEventCommand.Builder> consumer,
                                            final InitiateHearingCommand initiateHearingCommand,
@@ -244,8 +257,10 @@ public class UseCases {
                                            final boolean alterable,
                                            final UUID defenceCounselId,
                                            final ZonedDateTime eventTime) {
-        return logEvent(requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
+        return logEvent(randomUUID(),requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
     }
+
+
 
     public static LogEventCommand logEventForOverrideCourtRoom(final RequestSpecification requestSpec,
                                                                final Consumer<LogEventCommand.Builder> consumer,

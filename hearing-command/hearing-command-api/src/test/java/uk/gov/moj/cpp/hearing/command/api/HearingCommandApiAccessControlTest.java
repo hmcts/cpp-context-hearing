@@ -41,6 +41,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_REMOVE_APPLICANT_COUNSEL = "hearing.remove-applicant-counsel";
     private static final String ACTION_NAME_UPDATE_APPLICANT_COUNSEL = "hearing.update-applicant-counsel";
     private static final String ACTION_NAME_ADD_DEFENCE_COUNSEL = "hearing.add-defence-counsel";
+    private static final String ACTION_NAME_COURT_LIST_PUBLISH_STATUS = "hearing.publish-court-list";
+    private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS = "hearing.publish-hearing-lists-for-crown-courts";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -496,6 +498,45 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     public void shouldNotAllowUnauthorisedUserToUpdateRespondentCounsel() {
         final Action action = createActionFor(ACTION_NAME_UPDATE_RESPONDENT_COUNSEL);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        final Action action = createActionFor(ACTION_NAME_COURT_LIST_PUBLISH_STATUS);
+        given(this.userAndGroupProvider.isSystemUser(action))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        final Action action = createActionFor(ACTION_NAME_COURT_LIST_PUBLISH_STATUS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group"))
+                .willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourts() {
+        final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS);
+        given(this.userAndGroupProvider.isSystemUser(action))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourts() {
+        final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group"))
+                .willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);

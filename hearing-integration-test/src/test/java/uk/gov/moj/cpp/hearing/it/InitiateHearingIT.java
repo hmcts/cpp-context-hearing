@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static java.util.UUID.fromString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
@@ -58,6 +59,8 @@ import java.util.UUID;
 import org.junit.Test;
 
 public class InitiateHearingIT extends AbstractIT {
+
+    private static final String COURT_ROOM_NAME = "Room 1";
 
     @Test
     public void initiateHearing_withOnlyMandatoryFields() {
@@ -804,15 +807,14 @@ public class InitiateHearingIT extends AbstractIT {
 
         UUID courtAndRoomId = UUID.randomUUID();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, 2019, 7, 5)));
-        UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, 2019, 7, 4));
-
-        LocalDate localDate = LocalDate.of(2019, 7, 5);
+        final LocalDate fifthJuly = LocalDate.of(2019, 7, 5);
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));
+        UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly.minusDays(1)));
 
         Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);
 
-        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, localDate.toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
+        Queries.getHearingsByDatePollForMatch(courtAndRoomId, courtAndRoomId, fifthJuly.toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
                                 .withValue(HearingSummaries::getHearingLanguage, HearingLanguage.ENGLISH.name())

@@ -1,9 +1,12 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.Boolean.TRUE;
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZoneOffset.of;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.empty;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -25,6 +28,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
@@ -34,7 +38,10 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
@@ -52,6 +59,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -95,10 +103,57 @@ public class HearingService {
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
+
     @Inject
     private ReferenceDataService referenceDataService;
     @Inject
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
+    @Inject
+    private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
+
+    @Inject
+    private XhibitEventMapperCache xhibitEventMapperCache;
+
+    public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList, final LocalDate localDate) {
+        final Set<UUID> cppHearingEventIds = xhibitEventMapperCache.getCppHearingEventIds();
+
+        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
+        final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
+                .stream()
+                .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
+                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .collect(toList());
+
+
+        if (!hearingList.isEmpty()) {
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, activeHearingEventList);
+            return Optional.of(hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper));
+        }
+        return empty();
+    }
+
+    public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
+        final Set<UUID> cppHearingEventIds = xhibitEventMapperCache.getCppHearingEventIds();
+
+        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
+
+        final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
+        final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
+                .stream()
+                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .collect(toList());
+
+        final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC), cppHearingEventIds);
+
+        if (!hearingList.isEmpty()) {
+            final HearingEventsToHearingMapper hearingEventsToHearingMapper = new HearingEventsToHearingMapper(activeHearingEventList, hearingList, allHearingEvents);
+            final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+            return Optional.of(currentCourtStatus);
+        }
+        return empty();
+    }
 
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
@@ -343,6 +398,24 @@ public class HearingService {
                 .stream()
                 .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, applicationId))
                 .collect(toList());
+    }
+
+    private List<HearingEvent> getHearingEvents(final List<HearingEventPojo> hearingEventPojos) {
+        final List<HearingEvent> hearingEvents  = new ArrayList();
+        for(final HearingEventPojo hearingEventPojo: hearingEventPojos){
+            final HearingEvent hearingEvent = new HearingEvent();
+            hearingEvent.setHearingId(hearingEventPojo.getHearingId());
+            hearingEvent.setId(hearingEventPojo.getId());
+            hearingEvent.setHearingEventDefinitionId(hearingEventPojo.getHearingEventDefinitionId());
+            hearingEvent.setLastModifiedTime(hearingEventPojo.getLastModifiedTime());
+            hearingEvent.setRecordedLabel(hearingEventPojo.getRecordedLabel());
+            hearingEvent.setEventTime(hearingEventPojo.getEventTime());
+            hearingEvent.setEventDate(hearingEventPojo.getEventDate());
+            hearingEvent.setDeleted(hearingEventPojo.getDeleted());
+            hearingEvent.setDefenceCounselId(hearingEventPojo.getDefenceCounselId());
+            hearingEvents.add(hearingEvent);
+        }
+        return hearingEvents;
     }
 
     private Function<Subscription, uk.gov.moj.cpp.hearing.domain.notification.Subscription> populateHearing() {

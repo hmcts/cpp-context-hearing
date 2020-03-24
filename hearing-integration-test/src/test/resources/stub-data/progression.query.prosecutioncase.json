@@ -1,0 +1,585 @@
+{
+  "prosecutionCase": {
+    "defendants": [
+      {
+        "aliases": [
+          {
+            "firstName": "PersonGivenName11",
+            "lastName": "PersonFamilyName2",
+            "middleName": "PersonGivenName21 PersonGivenName31",
+            "title": "MR"
+          }
+        ],
+        "associatedPersons": [
+          {
+            "person": {
+              "address": {
+                "address1": "56saon",
+                "address2": "56Police House",
+                "address3": "StreetDescriptionG",
+                "address4": "Locality2G",
+                "address5": "Town2G",
+                "postcode": "TW14 9XD"
+              },
+              "contact": {
+                "home": "19998021888",
+                "mobile": "19998021889",
+                "primaryEmail": "Gvishnu@gmail.com",
+                "secondaryEmail": "Gilja@gmail.com"
+              },
+              "dateOfBirth": "2009-09-09",
+              "ethnicity": {
+                "observedEthnicityCode": "4",
+                "observedEthnicityDescription": "Asian",
+                "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+                "selfDefinedEthnicityCode": "A1",
+                "selfDefinedEthnicityDescription": "Indian",
+                "selfDefinedEthnicityId": "30b9df3f-5067-44b5-82ff-7cd8a525aaa3"
+              },
+              "firstName": "GPersonGivenName11",
+              "gender": "MALE",
+              "lastName": "GPersonFamilyName2",
+              "middleName": "GPersonGivenName21 GPersonGivenName31",
+              "title": "MR"
+            },
+            "role": "ParentGuardian"
+          }
+        ],
+        "id": "0d464949-fd93-4014-abef-38306ac9dfea",
+        "isYouth": true,
+        "offences": [
+          {
+            "arrestDate": "2006-05-04",
+            "chargeDate": "2006-05-30",
+            "convictionDate": "2019-10-16",
+            "count": 0,
+            "endDate": "2005-05-05",
+            "id": "47ece016-0113-4910-ab68-7fa64eb53787",
+            "modeOfTrial": "Summary",
+            "offenceCode": "CA03014",
+            "offenceDefinitionId": "d6bd72ad-37bf-330d-bcc6-215728949d3e",
+            "offenceFacts": {
+              "alcoholReadingAmount": 500,
+              "alcoholReadingMethodCode": "A",
+              "vehicleRegistration": "TE4654"
+            },
+            "offenceTitle": "Fail / refuse give assistance to person executing Communications Act search warrant",
+            "orderIndex": 500,
+            "startDate": "1996-05-04",
+            "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+          }
+        ],
+        "personDefendant": {
+          "arrestSummonsNumber": "TFLA",
+          "bailStatus": {
+            "code": "C",
+            "description": "Custody or remanded into custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          },
+          "driverNumber": "ABCDE0,0010BCFAA",
+          "perceivedBirthYear": 2006,
+          "personDetails": {
+            "address": {
+              "address1": "56saon",
+              "address2": "56Police House",
+              "address3": "StreetDescription1",
+              "address4": "Locality1",
+              "address5": "Town2",
+              "postcode": "TW14 9XD"
+            },
+            "contact": {
+              "home": "09998021888",
+              "mobile": "09998021889",
+              "primaryEmail": "robert@gmail.com",
+              "secondaryEmail": "ormsby@gmail.com",
+              "work": "0917894278022"
+            },
+            "dateOfBirth": "2008-08-08",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "4",
+              "observedEthnicityDescription": "Asian",
+              "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+              "selfDefinedEthnicityCode": "A1",
+              "selfDefinedEthnicityDescription": "Indian",
+              "selfDefinedEthnicityId": "30b9df3f-5067-44b5-82ff-7cd8a525aaa3"
+            },
+            "firstName": "John",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "LanguageNeeds0",
+            "lastName": "Ormsby",
+            "middleName": "Dyas PersonGivenName30A",
+            "nationalityCode": "214",
+            "nationalityDescription": "Italian",
+            "nationalityId": "0185fd77-b422-44fc-aaf1-d60d7fbaff27",
+            "occupation": "Occupation0",
+            "occupationCode": "50",
+            "specificRequirements": "SpecialNeeds0",
+            "title": "MR"
+          }
+        },
+        "prosecutionCaseId": "8ce8633a-9e62-419f-8b5b-d11a25f73bf3"
+      },
+      {
+        "aliases": [
+          {
+            "firstName": "PersonGivenName11",
+            "lastName": "PersonFamilyName2",
+            "middleName": "PersonGivenName21 PersonGivenName31",
+            "title": "MR"
+          }
+        ],
+        "associatedPersons": [
+          {
+            "person": {
+              "address": {
+                "address1": "56saon",
+                "address2": "56Police House",
+                "address3": "StreetDescriptionG",
+                "address4": "Locality2G",
+                "address5": "Town2G",
+                "postcode": "TW14 9XD"
+              },
+              "contact": {
+                "home": "19998021888",
+                "mobile": "19998021889",
+                "primaryEmail": "Gvishnu@gmail.com",
+                "secondaryEmail": "Gilja@gmail.com"
+              },
+              "dateOfBirth": "2009-09-09",
+              "ethnicity": {
+                "observedEthnicityCode": "4",
+                "observedEthnicityDescription": "Asian",
+                "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+                "selfDefinedEthnicityCode": "A1",
+                "selfDefinedEthnicityDescription": "Indian",
+                "selfDefinedEthnicityId": "30b9df3f-5067-44b5-82ff-7cd8a525aaa3"
+              },
+              "firstName": "GPersonGivenName11",
+              "gender": "MALE",
+              "lastName": "GPersonFamilyName2",
+              "middleName": "GPersonGivenName21 GPersonGivenName31",
+              "title": "MR"
+            },
+            "role": "ParentGuardian"
+          }
+        ],
+        "id": "caa72f38-cdb7-4f3e-87bd-cbe100a0eb8b",
+        "isYouth": true,
+        "offences": [
+          {
+            "arrestDate": "2006-05-04",
+            "chargeDate": "2008-05-30",
+            "convictionDate": "2019-10-16",
+            "count": 0,
+            "endDate": "2005-05-05",
+            "id": "a0a4e76f-d0d8-4348-bfc6-90638a9a9c56",
+            "modeOfTrial": "Summary",
+            "offenceCode": "CA03013",
+            "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ef",
+            "offenceFacts": {
+              "alcoholReadingAmount": 500,
+              "alcoholReadingMethodCode": "A",
+              "vehicleRegistration": "TE4654"
+            },
+            "offenceTitle": "Obstruct person executing search warrant for TV receiver",
+            "orderIndex": 500,
+            "startDate": "1996-05-04",
+            "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+          }
+        ],
+        "personDefendant": {
+          "arrestSummonsNumber": "TFLV",
+          "bailStatus": {
+            "code": "C",
+            "description": "Custody or remanded into custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          },
+          "driverNumber": "ABCDE0,0010BCFAA",
+          "perceivedBirthYear": 2006,
+          "personDetails": {
+            "address": {
+              "address1": "56saon",
+              "address2": "56Police House",
+              "address3": "StreetDescription1",
+              "address4": "Locality1",
+              "address5": "Town2",
+              "postcode": "TW14 9XD"
+            },
+            "contact": {
+              "home": "09998021888",
+              "mobile": "09998021889",
+              "primaryEmail": "robert@gmail.com",
+              "secondaryEmail": "ormsby@gmail.com",
+              "work": "0917894278022"
+            },
+            "dateOfBirth": "2008-08-08",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "4",
+              "observedEthnicityDescription": "Asian",
+              "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+              "selfDefinedEthnicityCode": "A1",
+              "selfDefinedEthnicityDescription": "Indian",
+              "selfDefinedEthnicityId": "30b9df3f-5067-44b5-82ff-7cd8a525aaa3"
+            },
+            "firstName": "Robert",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "LanguageNeeds0",
+            "lastName": "Ormsby",
+            "middleName": "PersonGivenName20A PersonGivenName30A",
+            "nationalityCode": "214",
+            "nationalityDescription": "Italian",
+            "nationalityId": "0185fd77-b422-44fc-aaf1-d60d7fbaff27",
+            "occupation": "Occupation0",
+            "occupationCode": "50",
+            "specificRequirements": "SpecialNeeds0",
+            "title": "MR"
+          }
+        },
+        "prosecutionCaseId": "8ce8633a-9e62-419f-8b5b-d11a25f73bf3"
+      }
+    ],
+    "id": "8ce8633a-9e62-419f-8b5b-d11a25f73bf3",
+    "initiationCode": "C",
+    "originatingOrganisation": "B01BH00",
+    "prosecutionCaseIdentifier": {
+      "prosecutionAuthorityCode": "DVL2",
+      "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e",
+      "caseURN": "78GXADS3851"
+    },
+    "statementOfFacts": "Prosecution fact text"
+  },
+  "courtDocuments": [],
+  "linkedApplicationsSummary": [
+    {
+      "applicationId": "f5315623-f62b-4c66-ad92-4ee5dcd4c21a",
+      "applicationTitle": "Appeal against conviction",
+      "applicationReference": "78GXADS3851-1",
+      "applicationStatus": "LISTED",
+      "applicantDisplayName": "DVL2",
+      "isAppeal": true
+    },
+    {
+      "applicationId": "789a04c3-368f-4174-9b95-ad87b684b578",
+      "applicationTitle": "Appeal against conviction",
+      "applicationReference": "78GXADS3851-2",
+      "applicationStatus": "DRAFT",
+      "applicantDisplayName": "TomAppellant BradyAppellant",
+      "respondentDisplayNames": [
+        "DVL2"
+      ],
+      "isAppeal": true
+    }
+  ],
+  "caseAtAGlance": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "bcdca7df-ab21-45f6-bc19-f883cf3d407e",
+          "prosecutingAuthority": {
+            "prosecutionAuthorityCode": "DVL2",
+            "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e"
+          }
+        },
+        "applicationReceivedDate": "2020-01-22",
+        "applicationReference": "78GXADS3851-1",
+        "applicationStatus": "LISTED",
+        "id": "f5315623-f62b-4c66-ad92-4ee5dcd4c21a",
+        "linkedCaseId": "8ce8633a-9e62-419f-8b5b-d11a25f73bf3",
+        "type": {
+          "applicantSynonym": "Appellant",
+          "applicationCategory": "CC",
+          "applicationJurisdictionType": "CROWN",
+          "applicationLegislation": "section 108 of the Magistrates’ Courts Act 1980",
+          "applicationType": "Appeal against conviction",
+          "id": "57810183-a5c2-3195-8748-c6b97eda1ebd",
+          "isAppealApplication": true,
+          "isBreachApplication": false,
+          "linkType": "LINKED",
+          "respondentSynonym": "Respondent"
+        }
+      },
+      {
+        "applicant": {
+          "id": "8162fedb-0fd6-474b-a94a-109e1d834a2a",
+          "personDetails": {
+            "address": {
+              "address1": "100",
+              "address2": "Park ave,",
+              "postcode": "wc1v 7aa"
+            },
+            "contact": {
+              "primaryEmail": "appellant@foobar.com"
+            },
+            "firstName": "TomAppellant",
+            "gender": "NOT_SPECIFIED",
+            "lastName": "BradyAppellant"
+          }
+        },
+        "applicationReceivedDate": "2020-01-22",
+        "applicationReference": "78GXADS3851-2",
+        "applicationStatus": "DRAFT",
+        "id": "789a04c3-368f-4174-9b95-ad87b684b578",
+        "linkedCaseId": "8ce8633a-9e62-419f-8b5b-d11a25f73bf3",
+        "respondents": [
+          {
+            "partyDetails": {
+              "id": "a8600c03-79e7-4b79-8262-385899d30c74",
+              "prosecutingAuthority": {
+                "prosecutionAuthorityCode": "DVL2",
+                "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e"
+              }
+            }
+          }
+        ],
+        "type": {
+          "applicantSynonym": "Appellant",
+          "applicationCategory": "CC",
+          "applicationJurisdictionType": "CROWN",
+          "applicationLegislation": "section 108 of the Magistrates’ Courts Act 1980",
+          "applicationType": "Appeal against conviction",
+          "id": "57810183-a5c2-3195-8748-c6b97eda1ebd",
+          "isAppealApplication": true,
+          "isBreachApplication": false,
+          "linkType": "LINKED",
+          "respondentSynonym": "Respondent"
+        }
+      }
+    ],
+    "defendantHearings": [
+      {
+        "defendantId": "0d464949-fd93-4014-abef-38306ac9dfea",
+        "defendantName": "John Dyas PersonGivenName30A Ormsby",
+        "hearingIds": [
+          "89420adb-7a67-459d-b63a-af093630c343",
+          "41d610d9-2158-4e5b-98bd-82069b29e7d3"
+        ]
+      },
+      {
+        "defendantId": "caa72f38-cdb7-4f3e-87bd-cbe100a0eb8b",
+        "defendantName": "Robert PersonGivenName20A PersonGivenName30A Ormsby",
+        "hearingIds": [
+          "89420adb-7a67-459d-b63a-af093630c343",
+          "41d610d9-2158-4e5b-98bd-82069b29e7d3"
+        ]
+      }
+    ],
+    "hearings": [
+      {
+        "courtCentre": {
+          "address": {
+            "address1": "QEII Law Courts",
+            "address2": "Derby Square",
+            "address3": "Liverpool",
+            "address4": "",
+            "address5": "",
+            "postcode": "L2 1XA"
+          },
+          "id": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+          "name": "Liverpool Crown Court",
+          "roomId": "7cb09222-49e1-3622-a5a6-ad253d2b3c39",
+          "roomName": "Crown Court 3-1"
+        },
+        "defendants": [
+          {
+            "address": {
+              "address1": "56saon",
+              "address2": "56Police House",
+              "address3": "StreetDescription1",
+              "address4": "Locality1",
+              "address5": "Town2",
+              "postcode": "TW14 9XD"
+            },
+            "age": "11",
+            "courtApplications": [],
+            "dateOfBirth": "2008-08-08",
+            "defenceOrganisation": {
+              "defenceCounsels": [],
+              "defendantId": "0d464949-fd93-4014-abef-38306ac9dfea"
+            },
+            "id": "0d464949-fd93-4014-abef-38306ac9dfea",
+            "judicialResults": [],
+            "name": "John Dyas PersonGivenName30A Ormsby",
+            "offences": [
+              {
+                "count": 0,
+                "endDate": "2005-05-05",
+                "id": "47ece016-0113-4910-ab68-7fa64eb53787",
+                "judicialResults": [],
+                "offenceCode": "CA03014",
+                "offenceDefinitionId": "d6bd72ad-37bf-330d-bcc6-215728949d3e",
+                "offenceTitle": "Fail / refuse give assistance to person executing Communications Act search warrant",
+                "pleas": [],
+                "startDate": "1996-05-04",
+                "verdicts": [],
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              }
+            ]
+          },
+          {
+            "address": {
+              "address1": "56saon",
+              "address2": "56Police House",
+              "address3": "StreetDescription1",
+              "address4": "Locality1",
+              "address5": "Town2",
+              "postcode": "TW14 9XD"
+            },
+            "age": "11",
+            "courtApplications": [],
+            "dateOfBirth": "2008-08-08",
+            "defenceOrganisation": {
+              "defenceCounsels": [],
+              "defendantId": "caa72f38-cdb7-4f3e-87bd-cbe100a0eb8b"
+            },
+            "id": "caa72f38-cdb7-4f3e-87bd-cbe100a0eb8b",
+            "judicialResults": [],
+            "name": "Robert PersonGivenName20A PersonGivenName30A Ormsby",
+            "offences": [
+              {
+                "count": 0,
+                "endDate": "2005-05-05",
+                "id": "a0a4e76f-d0d8-4348-bfc6-90638a9a9c56",
+                "judicialResults": [],
+                "offenceCode": "CA03013",
+                "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ef",
+                "offenceTitle": "Obstruct person executing search warrant for TV receiver",
+                "pleas": [],
+                "startDate": "1996-05-04",
+                "verdicts": [],
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              }
+            ]
+          }
+        ],
+        "hasResultAmended": false,
+        "hearingDays": [
+          {
+            "listedDurationMinutes": 20,
+            "listingSequence": 0,
+            "sittingDay": "2019-10-16T09:01:00.000Z"
+          }
+        ],
+        "hearingListingStatus": "HEARING_INITIALISED",
+        "id": "41d610d9-2158-4e5b-98bd-82069b29e7d3",
+        "jurisdictionType": "CROWN",
+        "type": {
+          "description": "First hearing",
+          "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+        }
+      },
+      {
+        "courtCentre": {
+          "address": {
+            "address1": "QEII Law Courts",
+            "address2": "Derby Square",
+            "address3": "Liverpool",
+            "address4": "",
+            "address5": "",
+            "postcode": "L2 1XA"
+          },
+          "id": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+          "name": "Liverpool Crown Court",
+          "roomId": "7cb09222-49e1-3622-a5a6-ad253d2b3c39",
+          "roomName": "Crown Court 3-1"
+        },
+        "defendants": [
+          {
+            "address": {
+              "address1": "56saon",
+              "address2": "56Police House",
+              "address3": "StreetDescription1",
+              "address4": "Locality1",
+              "address5": "Town2",
+              "postcode": "TW14 9XD"
+            },
+            "age": "11",
+            "courtApplications": [],
+            "dateOfBirth": "2008-08-08",
+            "defenceOrganisation": {
+              "defenceCounsels": [],
+              "defendantId": "0d464949-fd93-4014-abef-38306ac9dfea"
+            },
+            "id": "0d464949-fd93-4014-abef-38306ac9dfea",
+            "judicialResults": [],
+            "name": "John Dyas PersonGivenName30A Ormsby",
+            "offences": [
+              {
+                "convictionDate": "2019-10-16",
+                "count": 0,
+                "endDate": "2005-05-05",
+                "id": "47ece016-0113-4910-ab68-7fa64eb53787",
+                "judicialResults": [],
+                "offenceCode": "CA03014",
+                "offenceDefinitionId": "d6bd72ad-37bf-330d-bcc6-215728949d3e",
+                "offenceTitle": "Fail / refuse give assistance to person executing Communications Act search warrant",
+                "pleas": [],
+                "startDate": "1996-05-04",
+                "verdicts": [],
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              }
+            ]
+          },
+          {
+            "address": {
+              "address1": "56saon",
+              "address2": "56Police House",
+              "address3": "StreetDescription1",
+              "address4": "Locality1",
+              "address5": "Town2",
+              "postcode": "TW14 9XD"
+            },
+            "age": "11",
+            "courtApplications": [],
+            "dateOfBirth": "2008-08-08",
+            "defenceOrganisation": {
+              "defenceCounsels": [],
+              "defendantId": "caa72f38-cdb7-4f3e-87bd-cbe100a0eb8b"
+            },
+            "id": "caa72f38-cdb7-4f3e-87bd-cbe100a0eb8b",
+            "judicialResults": [],
+            "name": "Robert PersonGivenName20A PersonGivenName30A Ormsby",
+            "offences": [
+              {
+                "convictionDate": "2019-10-16",
+                "count": 0,
+                "endDate": "2005-05-05",
+                "id": "a0a4e76f-d0d8-4348-bfc6-90638a9a9c56",
+                "judicialResults": [],
+                "offenceCode": "CA03013",
+                "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ef",
+                "offenceTitle": "Obstruct person executing search warrant for TV receiver",
+                "pleas": [],
+                "startDate": "1996-05-04",
+                "verdicts": [],
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              }
+            ]
+          }
+        ],
+        "hasResultAmended": false,
+        "hearingDays": [
+          {
+            "listedDurationMinutes": 20,
+            "listingSequence": 0,
+            "sittingDay": "2020-01-22T11:11:00.000Z"
+          }
+        ],
+        "hearingListingStatus": "HEARING_INITIALISED",
+        "id": "89420adb-7a67-459d-b63a-af093630c343",
+        "jurisdictionType": "CROWN",
+        "type": {
+          "description": "Application",
+          "id": "3449743b-95d6-4836-8941-57f588b52068"
+        }
+      }
+    ],
+    "id": "8ce8633a-9e62-419f-8b5b-d11a25f73bf3",
+    "prosecutionCaseIdentifier": {
+      "prosecutionAuthorityCode": "DVL2",
+      "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e",
+      "caseURN": "78GXADS3851"
+    }
+  }
+}

@@ -88,4 +88,20 @@ public class HearingQueryApi {
     public JsonEnvelope getApplicationTimeline(final JsonEnvelope query) {
         return this.requester.request(query);
     }
+
+    @Handles("hearing.court.list.publish.status")
+    public JsonEnvelope publishCourtListStatus(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
+    @Handles("hearing.latest-hearings-by-court-centres")
+    public JsonEnvelope getHeringsByCourtCentre(final JsonEnvelope query) {
+        return requester.request(query);
+    }
+
+
+    @Handles("hearing.hearings-court-centres-for-date")
+    public JsonEnvelope getHearingsForCourtCentreForDate(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

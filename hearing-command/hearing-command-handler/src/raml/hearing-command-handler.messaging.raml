@@ -305,3 +305,21 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.update-case-defendants-for-hearing+json:
             schema: !include json/schema/hearing.command.update-case-defendants-for-hearing.json
             example: !include json/hearing.command.update-case-defendants-for-hearing.json
+
+
+#  Export court list to exhibit
+        application/vnd.hearing.command.record-court-list-export-successful+json:
+            schema: !include json/schema/hearing.command.record-court-list-export-successful.json
+            example: !include json/hearing.command.record-court-list-export-successful.json
+
+        application/vnd.hearing.command.record-court-list-export-failed+json:
+            schema: !include json/schema/hearing.command.record-court-list-export-failed.json
+            example: !include json/hearing.command.record-court-list-export-failed.json
+
+        application/vnd.hearing.command.publish-court-list+json:
+            schema: !include json/schema/hearing.command.publish-court-list.json
+            example: !include json/hearing.command.publish-court-list.json
+
+        application/vnd.hearing.command.publish-hearing-lists-for-crown-courts+json:
+            schema: !include json/schema/hearing.command.publish-hearing-lists-for-crown-courts.json
+            example: !include json/hearing.command.publish-hearing-lists-for-crown-courts.json

@@ -324,3 +324,39 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
       responses:
             202:
                 description: OK
+
+/publish-court-list:
+  post:
+    description: |
+      Publish court list
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.publish-court-list+json
+        name: hearing.publish-court-list
+      ...
+    body:
+      application/vnd.hearing.publish-court-list+json:
+        schema: !include json/schema/hearing.publish-court-list.json
+        example: !include json/hearing.publish-court-list.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/publishHearingListsForCrownCourts:
+  post:
+    description: |
+      Publish hearing lists for all crown courts:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.publish-hearing-lists-for-crown-courts+json
+        name: hearing.publish-hearing-lists-for-crown-courts
+      ...
+    body:
+      application/vnd.hearing.publish-hearing-lists-for-crown-courts+json:
+        schema: !include json/schema/hearing.publish-hearing-lists-for-crown-courts.json
+        example: !include json/hearing.publish-hearing-lists-for-crown-courts.json
+
+    responses:
+      202:
+        description: Request accepted

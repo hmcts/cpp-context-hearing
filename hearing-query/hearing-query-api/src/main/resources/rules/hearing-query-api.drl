@@ -141,3 +141,30 @@ rule "Query - API - hearing.application.timeline"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.court.list.publish.status"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.court.list.publish.status");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers","System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.latest-hearings-by-court-centres"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.latest-hearings-by-court-centres");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.hearings-court-centres-for-date"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.hearings-court-centres-for-date");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

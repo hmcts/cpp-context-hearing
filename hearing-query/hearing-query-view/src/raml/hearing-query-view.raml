@@ -293,7 +293,7 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get-cracked-ineffective-reason+json:
                     example:  !include json/hearing.get-cracked-ineffective-reason.json
                     schema:  !include json/schema/hearing.get-cracked-ineffective-reason.json
-                    
+
 /timeline/{id}:
   uriParameters:
     id:
@@ -319,3 +319,73 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.application.timeline+json:
                     example:  !include json/hearing.timeline.json
                     schema:  !include json/schema/hearing.timeline.json
+
+/court-list-publish-status/{courtCentreId}:
+  description: get status of latest publish court list document
+  get:
+    description: |
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.court.list.publish.status+json
+          name: hearing.court.list.publish.status
+      ...
+    responses:
+      200:
+        body:
+          application/vnd.hearing.court.list.publish.status+json:
+            example:  !include json/hearing.court.list.publish.status.json
+            schema:  !include  json/schema/hearing.court.list.publish.status.json
+
+
+/get-latest-hearings-by-court-centres:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.latest-hearings-by-court-centres+json
+            name: hearing.latest-hearings-by-court-centres
+        ...
+      queryParameters:
+              dateOfHearing:
+                description: date for which to get hearing.
+                type: string
+                required: true
+              courtCentreIds:
+                description: comma separated centre ids.
+                type: string
+                required: true
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.latest-hearings-by-court-centres+json:
+                    example:  !include json/hearing.get-hearings-by-court-centre.json
+                    schema:  !include json/schema/hearing.get-hearings-by-court-centre.json
+
+
+/hearings/court-centres:
+    get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.hearings-court-centres-for-date+json
+            name: hearing.hearings-court-centres-for-date
+        ...
+      queryParameters:
+        dateOfHearing:
+          description: date for which to get hearing.
+          type: string
+          required: true
+        courtCentreIds:
+          description: comma separated centre ids.
+          type: string
+          required: true
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.hearings-court-centres-for-date+json:
+                    example:  !include json/hearing.get-hearings-by-court-centre.json
+                    schema:  !include json/schema/hearing.get-hearings-by-court-centre.json

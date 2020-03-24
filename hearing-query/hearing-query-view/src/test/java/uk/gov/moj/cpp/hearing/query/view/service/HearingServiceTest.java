@@ -24,6 +24,45 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import static java.math.BigInteger.valueOf;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail.caseDetail;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases.cases;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court.court;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom.courtRoom;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite.courtSite;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant.defendant;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -44,6 +83,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
@@ -52,23 +92,34 @@ import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 import java.time.LocalDate;
 import java.time.Month;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -90,10 +141,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class HearingServiceTest {
 
     @Mock
-    private HearingRepository hearingRepository;
+    private uk.gov.justice.core.courts.HearingEvent hearingEvent;
 
     @Mock
-    private HearingEventRepository hearingEventRepository;
+    private HearingRepository hearingRepository;
 
     @Mock
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
@@ -124,6 +175,15 @@ public class HearingServiceTest {
 
     @Mock
     private ReferenceDataService referenceDataService;
+
+    @Mock
+    private HearingEventRepository hearingEventRepository;
+
+    @Mock
+    private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
+
+    @Mock
+    private XhibitEventMapperCache xhibitEventMapperCache;
 
     @InjectMocks
     private HearingService hearingService;
@@ -635,6 +695,120 @@ public class HearingServiceTest {
 
     }
 
+    @Test
+    public void shouldReturnLatestHearingByCourtCentreIdsAndLatestModifiedTime() {
+        final LocalDate now = LocalDate.now();
+        final List<UUID> courtCentreIds = new ArrayList();
+        courtCentreIds.add(randomUUID()) ;
+
+        final HearingEventPojo hearingEvent = new HearingEventPojo( randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
+
+        final List<HearingEventPojo> hearingEventList = asList(hearingEvent);
+        final Hearing hearing = buildHearing();
+
+        final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final CurrentCourtStatus expectedCurrentCourtStatus = currentCourtStatus().withPageName("hello").build();
+
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet();
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(hearingEventRequiredDefinitionsIds);
+        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
+        when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
+        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
+        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
+
+        final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now);
+
+        assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
+    }
+
+    @Test
+    public void shouldReturnHearingsByDate() {
+        final LocalDate now = LocalDate.now();
+        final List<UUID> courtCentreIds = new ArrayList();
+        courtCentreIds.add(randomUUID());
+
+        final HearingEventPojo hearingEventPojo = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
+        final List<HearingEventPojo> hearingEventList = asList(hearingEventPojo);
+        final Hearing hearing = buildHearing();
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = mock(uk.gov.justice.core.courts.Hearing.class);
+        final Set<UUID> activeHearingIds = new HashSet<>();
+        activeHearingIds.add(randomUUID());
+
+        final List<Hearing> hearings = new ArrayList<>();
+        hearings.add(hearing);
+        final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet<>();
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        hearingEventRequiredDefinitionsIds.add(randomUUID());
+        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(hearingEventRequiredDefinitionsIds);
+
+        when(hearingRepository.findHearingsByDateAndCourtCentreList(now, courtCentreIds)).thenReturn(hearings);
+        when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
+        when(hearingRepository.findBy(hearingEventPojo.getHearingId())).thenReturn(hearing);
+        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
+
+        final CurrentCourtStatus expectedCurrentCourtStatus = getCurrentCourtStatusWithMultipleCases(hearingEvent);
+        when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
+
+        final Optional<CurrentCourtStatus> response = hearingService.getHearingsByDate(courtCentreIds, now);
+        assertCurrentCourtStatus(response.get(), expectedCurrentCourtStatus);
+        assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
+    }
+
+
+    private void assertCurrentCourtStatus(final CurrentCourtStatus actual, final CurrentCourtStatus expected) {
+        final Court actualCourt = actual.getCourt();
+        final Court expectedCourt = expected.getCourt();
+        assertCourt(actualCourt, expectedCourt);
+    }
+
+    private void assertCourt(final Court actualCourt, final Court expectedCourt) {
+        assertThat(actualCourt.getCourtName(), is(expectedCourt.getCourtName()));
+        final List<CourtSite> actualCourtCourtSites = actualCourt.getCourtSites();
+        final List<CourtSite> expectedCourtSites = expectedCourt.getCourtSites();
+        for (int i = 0; i < expectedCourtSites.size(); i++) {
+            final CourtSite actualCourtSite = actualCourtCourtSites.get(i);
+            final CourtSite expectedCourtSite = expectedCourtSites.get(i);
+            assertThat(actualCourtSite.getCourtSiteName(), is(expectedCourtSite.getCourtSiteName()));
+            assertThat(actualCourtSite.getId(), is(expectedCourtSite.getId()));
+            assertCourtRooms(actualCourtSite, expectedCourtSite);
+        }
+    }
+
+    private void assertCourtRooms(final CourtSite actualCourtSite, CourtSite expectedCourtSite) {
+        final List<CourtRoom> actualCourtRooms = actualCourtSite.getCourtRooms();
+        final List<CourtRoom> expectedCourtRooms = expectedCourtSite.getCourtRooms();
+        for (int i = 0; i < expectedCourtRooms.size(); i++) {
+            final CourtRoom actualCourtRoom = actualCourtRooms.get(i);
+            final CourtRoom expectedCourtRoom = expectedCourtRooms.get(i);
+            assertThat(actualCourtRoom.getCourtRoomName(), is(expectedCourtRoom.getCourtRoomName()));
+            assertThat(actualCourtRoom.getCourtRoomId(), is(expectedCourtRoom.getCourtRoomId()));
+            assertCourtCases(actualCourtRoom, expectedCourtRoom);
+        }
+    }
+
+    private void assertCourtCases(final CourtRoom actualCourtRoom, final CourtRoom expectedCourtRoom) {
+        final List<CaseDetail> actualCaseDetails = actualCourtRoom.getCases().getCasesDetails();
+        final List<CaseDetail> expectedCaseDetails = expectedCourtRoom.getCases().getCasesDetails();
+        for (int i = 0; i < expectedCaseDetails.size(); i++) {
+            final CaseDetail actualCaseDetail = actualCaseDetails.get(i);
+            final CaseDetail expectedCaseDetail = expectedCaseDetails.get(i);
+            assertThat(actualCaseDetail.getCaseType(), is(expectedCaseDetail.getCaseType()));
+            assertThat(actualCaseDetail.getCppUrn(), is(expectedCaseDetail.getCppUrn()));
+            assertThat(actualCaseDetail.getHearingType(), is(expectedCaseDetail.getHearingType()));
+            assertThat(actualCaseDetail.getCaseNumber(), is(expectedCaseDetail.getCaseNumber()));
+            assertThat(actualCaseDetail.getActivecase(), is(expectedCaseDetail.getActivecase()));
+            assertThat(actualCaseDetail.getDefenceCounsel(), is(expectedCaseDetail.getDefenceCounsel()));
+            assertThat(actualCaseDetail.getNotBeforeTime(), is(expectedCaseDetail.getNotBeforeTime()));
+            assertThat(actualCaseDetail.getHearingEvent(), is(expectedCaseDetail.getHearingEvent()));
+            assertThat(actualCaseDetail.getLinkedCaseIds(), is(expectedCaseDetail.getLinkedCaseIds()));
+            assertThat(actualCaseDetail.getDefendants(), is(expectedCaseDetail.getDefendants()));
+        }
+    }
+
     private Document buildDocument() {
 
         final Document document = new Document();
@@ -670,5 +844,49 @@ public class HearingServiceTest {
         trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
+    }
+
+
+    private CurrentCourtStatus getCurrentCourtStatusWithMultipleCases(uk.gov.justice.core.courts.HearingEvent hearingEvent) {
+        return currentCourtStatus()
+                .withCourt(court()
+                        .withCourtName("testCourtName")
+                        .withCourtSites(Arrays.asList(courtSite()
+                                .withId(randomUUID())
+                                .withCourtSiteName("testCourtSiteName")
+                                .withCourtRooms(Arrays.asList(courtRoom()
+                                        .withCourtRoomName("courtRoomName")
+                                        .withHearingEvent(hearingEvent)
+                                        .withCases(cases().withCasesDetails(Arrays.asList(caseDetail2(), caseDetail3()))
+                                                .build())
+                                        .build()))
+                                .build()))
+                        .build()).build();
+    }
+
+    private CaseDetail caseDetail2() {
+        return caseDetail()
+                .withActivecase(valueOf(0))
+                .withCaseNumber("1")
+                .withCaseType("caseType")
+                .withCppUrn("234")
+                .withHearingType("hearingType")
+                .withDefendants(Arrays.asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
+                .withJudgeName("Mr Lampard")
+                .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
+                .build();
+    }
+
+    private CaseDetail caseDetail3() {
+        return caseDetail()
+                .withActivecase(valueOf(1))
+                .withCaseNumber("1")
+                .withCaseType("caseType")
+                .withCppUrn("235")
+                .withHearingType("hearingType")
+                .withDefendants(Arrays.asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
+                .withJudgeName("Mr Lampard")
+                .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
+                .build();
     }
 }

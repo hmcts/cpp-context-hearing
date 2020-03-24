@@ -50,6 +50,8 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,6 +135,7 @@ public class HearingEventListenerYamlConfigTest {
                 CompanyRepresentativeEventListener.class,
                 DefendantLegalAidStatusUpdateEventListener.class,
                 CaseDefendantsUpdateListener.class,
+                PublishCourtListEventListener.class,
                 CaseMarkerEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
@@ -149,7 +152,9 @@ public class HearingEventListenerYamlConfigTest {
                 "uk.gov.moj.cpp.hearing.domain.event",
                 "uk.gov.moj.cpp.hearing.nows.events",
                 "uk.gov.justice.hearing.courts",
-                "uk.gov.moj.cpp.hearing.subscription.events")
+                "uk.gov.moj.cpp.hearing.subscription.events",
+                "uk.gov.moj.cpp.hearing.publishing.events")
+
                 .scan().getNamesOfClassesWithAnnotation(Event.class)
                 .stream().map(className -> {
                     try {

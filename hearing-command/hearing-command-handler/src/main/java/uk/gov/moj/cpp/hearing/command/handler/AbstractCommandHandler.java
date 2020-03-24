@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static uk.gov.justice.services.core.enveloper.Enveloper.toEnvelopeWithMetadataFrom;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -9,6 +11,9 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static javax.json.JsonValue.NULL;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +57,11 @@ abstract class AbstractCommandHandler {
         final JsonEnvelope jsonEnvelope = JsonEnvelope.envelopeFrom(envelope.metadata(), JsonValue.NULL);
         eventStream.append(function.apply(aggregate).map(enveloper.withMetadataFrom(jsonEnvelope)));
         return aggregate;
+    }
+
+    protected void appendEventsToStream(final Envelope<?> envelope, final EventStream eventStream, final Stream<Object> events) throws EventStreamException {
+        final JsonEnvelope jsonEnvelope = envelopeFrom(envelope.metadata(), NULL);
+        eventStream.append(events.map(toEnvelopeWithMetadataFrom(jsonEnvelope)));
     }
 
     protected <T> T convertToObject(final JsonEnvelope envelope, final Class<T> clazz) {

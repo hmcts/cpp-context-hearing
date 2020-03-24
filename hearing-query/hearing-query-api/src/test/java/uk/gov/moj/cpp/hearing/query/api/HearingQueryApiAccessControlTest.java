@@ -33,6 +33,8 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String HEARING_QUERY_GET_CASE_TIMELINE = "hearing.case.timeline";
     private static final String HEARING_QUERY_GET_APPLICATION_TIMELINE = "hearing.application.timeline";
 
+    private static final String HEARING_QUERY_COURT_LIST_PUBLISH_STATUS = "hearing.court.list.publish.status";
+    private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.latest-hearings-by-court-centres";
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
 
@@ -148,6 +150,26 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToToGetApplicationTimeline() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers","System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToSearchForHearingByCourtCentreId() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID, "System Users");
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToSearchForHearingByCourtCentreId() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID, "System Users");
     }
 
     @Override

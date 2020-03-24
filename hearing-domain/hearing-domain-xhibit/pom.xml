@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>uk.gov.moj.cpp.hearing</groupId>
+        <artifactId>hearing-domain</artifactId>
+        <version>6.4.18-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>hearing-domain-xhibit</artifactId>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-web-page</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-XautoNameResolution</arg>
+                            </args>
+                            <schemaDirectory>src/main/resources/xhibit/xsd/iwp</schemaDirectory>
+                            <strict>false</strict>
+                            <bindingDirectory>src/main/resources/xhibit/bindings
+                            </bindingDirectory>
+                            <generatePackage>uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp
+                            </generatePackage>
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc-iwp
+                            </generateDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>generate-public-display</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <args>
+                                <arg>-XautoNameResolution</arg>
+                            </args>
+                            <schemaDirectory>src/main/resources/xhibit/xsd/pd</schemaDirectory>
+                            <strict>false</strict>
+                            <bindingDirectory>src/main/resources/xhibit/bindings
+                            </bindingDirectory>
+                            <generatePackage>uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd
+                            </generatePackage>
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc-pd
+                            </generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
