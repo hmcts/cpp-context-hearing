@@ -54,7 +54,7 @@ public class DefendantDelegate implements Serializable {
 
         final AttendanceDay attendanceDay = localDateAttendanceDayMap.computeIfAbsent(defendantAttendanceUpdated.getAttendanceDay().getDay(), date -> AttendanceDay.attendanceDay().withDay(date).build());
 
-        attendanceDay.setIsInAttendance(defendantAttendanceUpdated.getAttendanceDay().getIsInAttendance());
+        attendanceDay.setAttendanceType(defendantAttendanceUpdated.getAttendanceDay().getAttendanceType());
 
         defendantAttendance.setAttendanceDays(new ArrayList<>(localDateAttendanceDayMap.values()));
 
@@ -90,7 +90,7 @@ public class DefendantDelegate implements Serializable {
         if (!this.momento.isPublished()) {
             final AttendanceDay attendanceDay = AttendanceDay.attendanceDay()
                     .withDay(attendanceDayP.getDay())
-                    .withIsInAttendance(attendanceDayP.getIsInAttendance())
+                    .withAttendanceType(attendanceDayP.getAttendanceType())
                     .build();
             return Stream.of(DefendantAttendanceUpdated.defendantAttendanceUpdated()
                     .setHearingId(hearingId)

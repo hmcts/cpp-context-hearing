@@ -18,7 +18,7 @@ final class JPACompositeMappers {
             new ContactNumberJPAMapper(), new EthnicityJPAMapper());
     public static final AssociatedPersonJPAMapper ASSOCIATED_PERSON_JPA_MAPPER = new AssociatedPersonJPAMapper(PERSON_JPA_MAPPER);
     public static final PersonDefendantJPAMapper PERSON_DEFENDANT_JPA_MAPPER = new PersonDefendantJPAMapper(
-            ORGANISATION_JPA_MAPPER, PERSON_JPA_MAPPER);
+            ORGANISATION_JPA_MAPPER, PERSON_JPA_MAPPER,new CustodialEstablishmentJPAMapper());
     public static final DefenceOrganisationJPAMapper DEFENCE_ORGANISATION_JPA_MAPPER = new DefenceOrganisationJPAMapper(new AddressJPAMapper(), new ContactNumberJPAMapper());
     public static final AssociatedDefenceOrganisationJPAMapper ASSOCIATED_DEFENCE_ORGANISATION_JPA_MAPPER = new AssociatedDefenceOrganisationJPAMapper(DEFENCE_ORGANISATION_JPA_MAPPER);
     public static final DefendantJPAMapper DEFENDANT_JPA_MAPPER = new DefendantJPAMapper(ASSOCIATED_PERSON_JPA_MAPPER,

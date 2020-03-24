@@ -30,6 +30,9 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String HEARING_QUERY_SEARCH_BY_MATERIAL_ID = "hearing.query.search-by-material-id";
+    private static final String HEARING_QUERY_GET_CASE_TIMELINE = "hearing.case.timeline";
+    private static final String HEARING_QUERY_GET_APPLICATION_TIMELINE = "hearing.application.timeline";
+
     private static final String HEARING_QUERY_COURT_LIST_PUBLISH_STATUS = "hearing.court.list.publish.status";
     private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.latest-hearings-by-court-centres";
     @Mock
@@ -127,6 +130,26 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToSearchByMaterialId() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_MATERIAL_ID, "System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetCaseTimeline() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToToGetCaseTimeline() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToGetApplicationTimeline() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToToGetApplicationTimeline() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
     }
 
     @Test

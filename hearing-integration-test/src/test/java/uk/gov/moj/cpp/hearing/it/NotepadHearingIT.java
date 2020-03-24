@@ -11,8 +11,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;

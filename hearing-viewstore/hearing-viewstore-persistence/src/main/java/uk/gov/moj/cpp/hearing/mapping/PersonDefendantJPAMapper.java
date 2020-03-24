@@ -11,11 +11,15 @@ public class PersonDefendantJPAMapper {
 
     private OrganisationJPAMapper organisationJPAMapper;
     private PersonJPAMapper personJPAMapper;
+    private CustodialEstablishmentJPAMapper custodialEstablishmentJPAMapper;
 
     @Inject
-    public PersonDefendantJPAMapper(final OrganisationJPAMapper organisationJPAMapper, final PersonJPAMapper personJPAMapper) {
+    public PersonDefendantJPAMapper(final OrganisationJPAMapper organisationJPAMapper,
+                                    final PersonJPAMapper personJPAMapper,
+                                    final CustodialEstablishmentJPAMapper custodialEstablishmentJPAMapper) {
         this.organisationJPAMapper = organisationJPAMapper;
         this.personJPAMapper = personJPAMapper;
+        this.custodialEstablishmentJPAMapper = custodialEstablishmentJPAMapper;
     }
 
     //To keep cditester happy
@@ -39,6 +43,7 @@ public class PersonDefendantJPAMapper {
         personDefendant.setEmployerPayrollReference(pojo.getEmployerPayrollReference());
         personDefendant.setPerceivedBirthYear(pojo.getPerceivedBirthYear());
         personDefendant.setPersonDetails(personJPAMapper.toJPA(pojo.getPersonDetails()));
+        personDefendant.setCustodialEstablishment(custodialEstablishmentJPAMapper.toJPA(pojo.getCustodialEstablishment()));
         return personDefendant;
     }
 
@@ -54,13 +59,14 @@ public class PersonDefendantJPAMapper {
                 .withEmployerOrganisation(organisationJPAMapper.fromJPA(pojo.getEmployerOrganisation()))
                 .withEmployerPayrollReference(pojo.getEmployerPayrollReference())
                 .withPerceivedBirthYear(pojo.getPerceivedBirthYear())
-                .withPersonDetails(personJPAMapper.fromJPA(pojo.getPersonDetails()));
+                .withPersonDetails(personJPAMapper.fromJPA(pojo.getPersonDetails()))
+                .withCustodialEstablishment(custodialEstablishmentJPAMapper.fromJPA(pojo.getCustodialEstablishment()));
         return personDetailsBuilder
                 .build();
     }
 
     private BailStatus extractBailStatus(final PersonDefendant pojo) {
-        if (pojo.getBailStatusCode()==null &&  pojo.getBailStatusId()==null &&  pojo.getBailStatusDesc()==null)  {
+        if (pojo.getBailStatusCode() == null && pojo.getBailStatusId() == null && pojo.getBailStatusDesc() == null) {
             return null;
         } else {
             return BailStatus.bailStatus().withId(pojo.getBailStatusId()).withCode(pojo.getBailStatusCode()).withDescription(pojo.getBailStatusDesc()).build();

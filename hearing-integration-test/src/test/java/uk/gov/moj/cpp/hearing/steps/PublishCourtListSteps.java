@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.steps;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -28,8 +29,8 @@ public class PublishCourtListSteps extends AbstractIT {
     private static final String MEDIA_TYPE_QUERY_COURT_LIST_STATUS = "application/vnd.hearing.court.list.publish.status+json";
     private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.latest-hearings-by-court-centres+json";
 
-    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC = 60*10;
-    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL = 3;
+    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC = 60*7;
+    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL = 1;
 
     public void verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(final String courtCentreId) {
         givenAUserHasLoggedInAsACourtClerk(USER_ID_VALUE);

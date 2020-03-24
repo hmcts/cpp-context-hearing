@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="87" author="hearing"
+               logicalFilePath="087-add-custody-establishment-to-defendant.xml">
+
+        <addColumn tableName="ha_defendant">
+            <column name="custodial_establishment_custody" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+            <column name="custodial_establishment_id" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+            <column name="custodial_establishment_name" type="VARCHAR(255)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -6,8 +6,10 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.Defendant;
@@ -623,7 +625,7 @@ public class NowsRequestedToDocumentConverter {
                             .withTitle(offence.getOffenceTitle())
                             .withWelshTitle(offence.getOffenceTitleWelsh())
                             .withWording(offence.getWording())
-                            .withWelshWording(offence.getWordingWelsh())
+                            .withWelshWording(ofNullable(offence.getWordingWelsh()).filter(a -> isNotBlank(a) && !"N/A".equalsIgnoreCase(a)).orElse(offence.getWording()))
                             .withResults(offenceResults.get(offence.getId()))
                             .build());
                 });

@@ -162,7 +162,6 @@ public class HearingEventStepDefinitions {
                 new HearingEventDefinition(END_HEARING_EVENT_DEFINITION_ID, "End Hearing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(PAUSE_HEARING_EVENT_DEFINITION_ID, "Pause", INTEGER.next(), STRING.next(), "PAUSE_RESUME", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(RESUME_HEARING_EVENT_DEFINITION_ID, "Resume", INTEGER.next(), STRING.next(), "PAUSE_RESUME", STRING.next(), INTEGER.next(), false),
-
                 new HearingEventDefinition(fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043"), "Appellant opens", INTEGER.next(), STRING.next(), "APPEAL", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(fromString("e9060336-4821-4f46-969c-e08b33b48071"), "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(fromString("a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0"), "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),

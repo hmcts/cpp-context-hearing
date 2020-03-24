@@ -99,6 +99,11 @@
             "primaryEmail": "harry.kanejunior@spurs.co.uk",
             "secondaryEmail": "harry.kanejunior@hotmail.com",
             "fax": "3425678"
+          },
+          "custodyEstablishment": {
+            "name": "Croydon Police Station",
+            "id": "48b24416-3b64-4552-b0b1-1e879e564eee",
+            "custody": "Police"
           }
         },
         "bailStatus": "inCustody",

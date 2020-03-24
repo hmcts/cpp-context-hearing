@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+
+    <changeSet id="86" author="hearing"
+               logicalFilePath="086-change-column-is_in_attendance-to-attendanceType.xml">
+
+        <addColumn tableName="ha_defendant_attendance">
+            <column name="attendance_type" type="TEXT">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+
+        <update tableName="ha_defendant_attendance">
+            <column name="attendance_type" type="TEXT" value="IN_PERSON"/>
+            <where>is_in_attendance = true</where>
+        </update>
+        <update tableName="ha_defendant_attendance">
+            <column name="attendance_type" type="TEXT" value="NOT_PRESENT"/>
+            <where>is_in_attendance = false</where>
+        </update>
+
+        <addNotNullConstraint
+                columnName="attendance_type"
+                tableName="ha_defendant_attendance"/>
+
+        <dropColumn tableName="ha_defendant_attendance" columnName="is_in_attendance"/>
+    </changeSet>
+
+</databaseChangeLog>

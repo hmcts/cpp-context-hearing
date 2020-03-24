@@ -11,6 +11,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -18,6 +19,9 @@ import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
+import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import javax.inject.Inject;
@@ -44,6 +48,9 @@ public class HearingEventListener {
 
     @Inject
     private HearingJPAMapper hearingJPAMapper;
+
+    @Inject
+    private HearingApplicationRepository hearingApplicationRepository;
 
     @Handles("hearing.draft-result-saved")
     public void draftResultSaved(final JsonEnvelope event) {
@@ -156,5 +163,19 @@ public class HearingEventListener {
             hearing.setTrialTypeId(null);
             hearingRepository.save(hearing);
         }
+    }
+
+    @Handles("hearing.events.registered-hearing-against-application")
+    public void registerHearingAgainstApplication(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.registered-hearing-against-application event received {}", event.toObfuscatedDebugString());
+        }
+
+        final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), RegisteredHearingAgainstApplication.class);
+
+        final HearingApplication hearingApplication = new HearingApplication();
+        hearingApplication.setId(new HearingApplicationKey(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId()));
+        hearingApplicationRepository.save(hearingApplication);
     }
 }

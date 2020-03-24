@@ -21,7 +21,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCourtRoomsForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -53,7 +52,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
 
 public class NowDocumentRequestedIT extends AbstractIT {

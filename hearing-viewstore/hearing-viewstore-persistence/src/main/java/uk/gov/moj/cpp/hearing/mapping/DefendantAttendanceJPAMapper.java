@@ -53,7 +53,7 @@ public class DefendantAttendanceJPAMapper {
     private uk.gov.justice.core.courts.AttendanceDay createAttendanceDays(DefendantAttendance v) {
         return uk.gov.justice.core.courts.AttendanceDay.attendanceDay()
                 .withDay(v.getDay())
-                .withIsInAttendance(v.getInAttendance())
+                .withAttendanceType(v.getAttendanceType())
                 .build();
     }
 }

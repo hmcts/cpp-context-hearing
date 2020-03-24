@@ -1,0 +1,32 @@
+{
+  "hearingSummaries": [
+    {
+      "hearingId": "56fac3f0-7149-491b-838d-21dba91eb4c7",
+      "hearingDate": "DD MMM YYYY",
+      "hearingType": "Trial",
+      "courtHouse": "Court House Name",
+      "courtRoom": "Court Room Name",
+      "hearingTime": "hearing time",
+      "estimatedDuration": "estimated duration",
+      "defendants": [
+        "defendant one",
+        "defendant two"
+      ],
+      "outcome": "Cracked or ineffective"
+    },
+    {
+      "hearingId": "5f25702a-b02f-4513-a5da-3333d1ac8ce5",
+      "hearingDate": "DD MMM YYYY",
+      "hearingType": "Application",
+      "courtHouse": "Court House Name",
+      "courtRoom": "Court Room Name",
+      "hearingTime": "hearing time",
+      "estimatedDuration": "estimated duration",
+      "defendants": [
+        "defendant one",
+        "defendant two"
+      ],
+      "outcome": "Cracked or ineffective"
+    }
+  ]
+}

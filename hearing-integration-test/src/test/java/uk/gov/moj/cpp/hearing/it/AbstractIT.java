@@ -247,10 +247,10 @@ public class AbstractIT {
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
 
-        setupAsWildcardUserBelongingToAllGroups();
-        stubEnableAllCapabilities();
-        mockMaterialUpload();
-        mockUpdateHmpsMaterialStatus();
+       setupAsWildcardUserBelongingToAllGroups();
+       stubEnableAllCapabilities();
+       mockMaterialUpload();
+       mockUpdateHmpsMaterialStatus();
     }
 
     protected JSONObject getExistingHearing(final String hearingId) {

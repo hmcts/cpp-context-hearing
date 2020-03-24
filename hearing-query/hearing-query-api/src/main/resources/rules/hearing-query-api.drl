@@ -123,6 +123,25 @@ rule "Query - API - hearing.get-cracked-ineffective-reason"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.case.timeline"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.case.timeline");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge"))
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.application.timeline"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.application.timeline");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge"))
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.court.list.publish.status"
   when
     $outcome: Outcome();

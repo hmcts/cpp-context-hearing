@@ -43,6 +43,9 @@ public class PersonDefendant {
     @Embedded
     private Person personDetails;
 
+    @Embedded
+    private CustodialEstablishment custodialEstablishment;
+
     public String getAliases() {
         return aliases;
     }
@@ -129,5 +132,13 @@ public class PersonDefendant {
 
     public void setBailStatusCode(String bailStatusCode) {
         this.bailStatusCode = bailStatusCode;
+    }
+
+    public CustodialEstablishment getCustodialEstablishment() {
+        return custodialEstablishment;
+    }
+
+    public void setCustodialEstablishment(final CustodialEstablishment custodialEstablishment) {
+        this.custodialEstablishment = custodialEstablishment;
     }
 }

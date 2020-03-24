@@ -18,7 +18,7 @@ public class RegisteredHearingAgainstApplication implements Serializable {
     private final UUID hearingId;
 
     @JsonCreator
-    private RegisteredHearingAgainstApplication(@JsonProperty("applicationId") UUID applicationId,
+    public RegisteredHearingAgainstApplication(@JsonProperty("applicationId") UUID applicationId,
                                                 @JsonProperty("hearingId") UUID hearingId) {
         this.applicationId = applicationId;
         this.hearingId = hearingId;

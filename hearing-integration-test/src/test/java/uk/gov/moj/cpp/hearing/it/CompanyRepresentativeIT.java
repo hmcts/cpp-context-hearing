@@ -13,8 +13,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
@@ -24,6 +22,9 @@ import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import org.hamcrest.Matchers;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class CompanyRepresentativeIT extends AbstractIT {

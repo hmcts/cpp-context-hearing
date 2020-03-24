@@ -18,5 +18,6 @@
         <module>hearing-domain-transformation-for-MOT</module>
         <module>hearing-domain-transformation-anonymise</module>
         <module>hearing-domain-transformation-for-ctl</module>
+        <module>hearing-domain-transformation-for-ancillarydocs</module>
     </modules>
 </project>

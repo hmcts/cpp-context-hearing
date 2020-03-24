@@ -93,6 +93,9 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingInterpreterIntermediary> hearingInterpreterIntermediaries = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingApplication> hearingApplications = new HashSet<>();
+
     @Column(name = "trial_type_id")
     private UUID trialTypeId;
 
@@ -327,6 +330,13 @@ public class Hearing {
         this.hearingCompanyRepresentatives = jpa;
     }
 
+    public Set<HearingApplication> getHearingApplications() {
+        return hearingApplications;
+    }
+
+    public void setHearingApplications(final Set<HearingApplication> hearingApplications) {
+        this.hearingApplications = hearingApplications;
+    }
 
     @Override
     public int hashCode() {

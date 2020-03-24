@@ -45,4 +45,13 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
             "( hearing.isBoxHearing is null or hearing.isBoxHearing != true)")
     public abstract List<Hearing> findByUserFilters(@QueryParam("date") final LocalDate date,
                                                     @QueryParam("userId") final UUID userId);
+
+    @Query(value = "SELECT hearing from Hearing hearing inner join hearing.prosecutionCases prosecutionCase " +
+            "WHERE prosecutionCase.id.id = :caseId)")
+    public abstract List<Hearing> findByCaseId(@QueryParam("caseId") final UUID caseId);
+
+    @Query(value = "SELECT hearing from Hearing hearing inner join hearing.hearingApplications hearingApplication " +
+            "WHERE hearingApplication.id.applicationId = :applicationId)")
+    public abstract List<Hearing> findAllHearingsByApplicationId(@QueryParam("applicationId") final UUID applicationId);
+
 }

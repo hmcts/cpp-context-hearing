@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.FundingType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -18,6 +19,8 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.mapping.CustodialEstablishmentJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CustodialEstablishment;
 import uk.gov.moj.cpp.hearing.mapping.AssociatedDefenceOrganisationJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
@@ -27,6 +30,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceOrganisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -71,6 +76,7 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
         setField(this.courtApplicationsSerializer, "objectToJsonObjectConverter", objectToJsonObjectConverter);
+        setField(this.caseDefendantDetailsUpdatedEventListener, "custodialEstablishmentJPAMapper", new CustodialEstablishmentJPAMapper());
     }
 
     @Test
@@ -102,6 +108,17 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
         verify(defendantRepository).save(defendantexArgumentCaptor.capture());
 
+        assertThat(defendantexArgumentCaptor.getValue(), isBean(Defendant.class)
+                                         .with(defendant1 -> defendant.getId().getId(), is(defendantDetailsUpdated.getDefendant().getId()))
+                                         .with(Defendant::getPersonDefendant, isBean(PersonDefendant.class)
+                                                                                      .with(PersonDefendant::getCustodialEstablishment, isBean(CustodialEstablishment.class)
+                                                                                                                                                .with(CustodialEstablishment::getCustody, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getCustody()))
+                                                                                                                                                .with(CustodialEstablishment::getId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getId()))
+                                                                                                                                                .with(CustodialEstablishment::getName, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getName()))
+
+                                                                                      )
+                                         )
+        );
         assertAssociatedDefenceOrganisation(defendant, defendantexArgumentCaptor);
     }
 
@@ -146,6 +163,10 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         final Defendant defendant = new Defendant();
         defendant.setProsecutionCase(prosecutionCase);
         defendant.setId(new HearingSnapshotKey(defendantDetailsUpdated.getDefendant().getId(), hearingId));
+        PersonDefendant personDefendant = new PersonDefendant();
+        personDefendant.setPersonDetails(new Person());
+
+        defendant.setPersonDefendant(personDefendant);
         return defendant;
     }
 
