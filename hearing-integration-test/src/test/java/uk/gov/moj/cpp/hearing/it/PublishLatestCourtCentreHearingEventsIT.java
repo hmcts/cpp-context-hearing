@@ -46,6 +46,7 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -128,6 +129,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
     }
 
+    @Ignore("To be fixed in SCSL-466")
     @Test
     public void shouldRequestToPublishCourtListDefenceCouncilOpensCase() throws NoSuchAlgorithmException {
         createHearingEvent(courtRoom2Id, defenceCounselId, DEFENCE_COUNCIL_NAME_OPENS, of(hearingTypeId));
@@ -173,6 +175,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         assertThat(filePayload, containsString("E20606_Appellant_CO_Name>TomAppellant BradyAppellant</E20606_Appellant_CO_Name"));
     }
 
+    @Ignore("To be fixed in SCSL-466")
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
         final UUID expectedHearingEventId = randomUUID();
