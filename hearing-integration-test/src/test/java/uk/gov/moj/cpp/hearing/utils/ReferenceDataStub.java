@@ -468,11 +468,11 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL, REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE);
     }
 
-    public static void stubGetReferenceDataXhibitHearingTypes(final String hearingTypeId){
+    public static void stubGetReferenceDataXhibitHearingTypes(){
 
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
-        String payload = getPayload("stub-data/referencedata.query.hearing-types.json").replace("HEARING_TYPE_ID", hearingTypeId);
+        String payload = getPayload("stub-data/referencedata.query.hearing-types.json");
 
         stubFor(get(urlPathMatching(REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_URL))
                 .willReturn(aResponse()

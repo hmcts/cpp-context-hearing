@@ -1,7 +1,7 @@
 {
   "hearingTypes": [
     {
-      "id": "HEARING_TYPE_ID",
+      "id": "8dd41e45-b594-4ba6-906e-1a4626b08fed",
       "seqId": 1,
       "hearingCode": "PTP",
       "hearingDescription": "Plea & Trial Preparation",

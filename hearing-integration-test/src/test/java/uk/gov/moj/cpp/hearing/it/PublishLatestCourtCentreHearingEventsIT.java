@@ -75,8 +75,8 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     @BeforeClass
     public static void setUp(){
-        hearingTypeId = randomUUID();
-        stubGetReferenceDataXhibitHearingTypes(hearingTypeId.toString());
+        hearingTypeId = UUID.fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed");
+        stubGetReferenceDataXhibitHearingTypes();
     }
 
     @Before
