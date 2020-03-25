@@ -99,6 +99,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         stubGetReferenceDataJudiciaries();
     }
 
+    @Ignore("To be fixed in SCSL-466")
     @Test
     public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
         createHearingEvent(courtRoom2Id, defenceCounselId, OPEN_CASE_PROSECUTION, of(hearingTypeId));
@@ -159,6 +160,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
     }
 
+    @Ignore("To be fixed in SCSL-466")
     @Test
     public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
         createHearingEvent(courtRoom2Id, defenceCounselId, APPELLANT_OPENS, of(hearingTypeId));
