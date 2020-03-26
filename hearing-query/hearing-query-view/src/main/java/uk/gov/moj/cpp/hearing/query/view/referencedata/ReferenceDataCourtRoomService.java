@@ -14,6 +14,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -40,6 +41,7 @@ public class ReferenceDataCourtRoomService {
         return courtRoomMappingsList
                 .getCpXhibitCourtRoomMappings()
                 .stream()
+                .filter(courtRoomMappings -> Objects.nonNull(courtRoomMappings.getCourtRoomUUID()))
                 .filter(courtRoomMappings -> courtRoomMappings.getCourtRoomUUID().equals(courtRoomId))
                 .findFirst()
                 .orElseThrow(() ->
