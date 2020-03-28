@@ -128,6 +128,18 @@
           "items": {
             "$ref": "http://justice.gov.uk/core/courts/courtApplicationOutcome.json"
           }
+        },
+        "childResultLineIds": {
+          "type": "array",
+          "items": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          }
+        },
+        "parentResultLineIds": {
+          "type": "array",
+          "items": {
+            "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          }
         }
       },
       "required": [

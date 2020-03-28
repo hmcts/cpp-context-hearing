@@ -528,7 +528,7 @@ public class UseCases {
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
-                        courtApplicationOutcome));
+                        courtApplicationOutcome, null, null));
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {

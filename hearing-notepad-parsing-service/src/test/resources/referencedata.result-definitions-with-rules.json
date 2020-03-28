@@ -1,0 +1,263 @@
+{
+  "resultDefinitions": [
+    {
+      "id": "b81ac80b-81a9-48b6-87b0-cc34610eec97",
+      "label": "Restraining order for period",
+      "shortCode": "RESTRAOP",
+      "level": "O",
+      "rank": 1,
+      "terminatesOffenceProceedings": true,
+      "lifeDuration": true,
+      "resultDefinitionRules": [
+        {
+          "childResultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "ruleType": "mandatory"
+        },
+        {
+          "childResultDefinitionId": "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
+          "ruleType": "mandatory"
+        },
+        {
+          "childResultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "ruleType": "optional"
+        }
+      ],
+      "publishedAsAPrompt": true,
+      "excludedFromResults": true,
+      "alwaysPublished": true,
+      "urgent": true,
+      "d20": true,
+      "wordGroups": [
+        {
+          "wordGroup": [
+            "Restraining",
+            "Order",
+            "Period"
+          ]
+        },
+        {
+          "wordGroup": [
+            "RESTRAOP"
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc69",
+          "label": "Protected person",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 1,
+          "durationSequence": 1
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
+          "label": "Protected person's address",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 2,
+          "durationSequence": 2
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
+          "label": "Order details",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 3,
+          "durationSequence": 3
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
+          "label": "Period of order",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 4,
+          "duration": "Years",
+          "wordGroup": [
+            "Years"
+          ]
+        },
+        {
+          "id": "f3af8d27-a795-40e6-8aab-18ec9d95f01e",
+          "label": "Period of order",
+          "resultPromptRule": "mandatory",
+          "sequence": 5,
+          "type": "INT",
+          "duration": "Months",
+          "wordGroup": [
+            "Months"
+          ]
+        },
+        {
+          "id": "20ce037d-c853-45c8-bce0-a35861e99ad0",
+          "label": "Period of order",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 6,
+          "duration": "Weeks",
+          "wordGroup": [
+            "Weeks"
+          ]
+        },
+        {
+          "id": "cb660abe-0ec0-49c0-b3e3-8371a0b59cec",
+          "label": "Period of order",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 7,
+          "duration": "Days",
+          "wordGroup": [
+            "Days"
+          ]
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db0",
+          "label": "Conviction / acquittal",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 8,
+          "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
+        },
+        {
+          "id": "5aeb14be-6fe6-44c2-a827-5b8fb4a716b8",
+          "label": "Contractor",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 8,
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b"
+        },
+        {
+          "id": "ea26f773-0a91-4526-b4ad-84d07b5bf940",
+          "label": "Reason",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 9
+        },
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc79",
+          "label": "Court Centre",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 10,
+          "reference": "HCHOUSE"
+        },
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-9966bcd2fc79",
+          "label": "Hearing Type",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 11,
+          "reference": "HTYPE"
+        }
+      ],
+      "startDate": "2017-07-24",
+      "endDate": "2018-12-31"
+    },
+    {
+      "id": "b81ac80b-81a9-48b6-87b0-cc34610eec10",
+      "label": "Restraining order for period",
+      "shortCode": "RESTRAOP",
+      "level": "O",
+      "rank": 1,
+      "wordGroups": [
+        {
+          "wordGroup": [
+            "RESTRAOP"
+          ]
+        },
+        {
+          "wordGroup": [
+            "Restraining",
+            "Order",
+            "Period"
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "id": "abc9bb61-cb5b-4cf7-be24-8866bcd2fc62",
+          "label": "Protected1 person",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 1
+        },
+        {
+          "id": "3054909b-15b6-499f-b44f-67b2b1215c72",
+          "label": "Protected1 person's address",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 2
+        },
+        {
+          "id": "8df0ec7e-5985-4998-af1a-5da293d9cb32",
+          "label": "Order1 details",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "sequence": 3
+        },
+        {
+          "id": "a20665cc-6877-40f4-b85e-d4c87e629872",
+          "label": "Period1 of order",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 4,
+          "duration": "Years",
+          "wordGroup": [
+            "Years"
+          ]
+        },
+        {
+          "id": "f3af8d27-a795-40e6-8aab-18ec9d95f012",
+          "label": "Period11of order",
+          "resultPromptRule": "mandatory",
+          "sequence": 5,
+          "type": "INT",
+          "duration": "Months",
+          "wordGroup": [
+            "Months"
+          ]
+        },
+        {
+          "id": "20ce037d-c853-45c8-bce0-a35861e99ad2",
+          "label": "Period2 of order",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 6,
+          "duration": "Weeks",
+          "wordGroup": [
+            "Weeks"
+          ]
+        },
+        {
+          "id": "cb660abe-0ec0-49c0-b3e3-8371a0b59ce2",
+          "label": "Period22 of order",
+          "resultPromptRule": "mandatory",
+          "type": "INT",
+          "sequence": 7,
+          "duration": "Days",
+          "wordGroup": [
+            "Days"
+          ]
+        },
+        {
+          "id": "47337f1c-e343-4093-884f-035ba96c4db2",
+          "label": "Conviction2 / acquittal",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 8,
+          "duration": "Days",
+          "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
+        },
+        {
+          "id": "ea26f773-0a91-4526-b4ad-84d07b5bf942",
+          "label": "Reason",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 9
+        }
+      ],
+      "startDate": "2017-07-24",
+      "endDate": "2018-12-31"
+    }
+  ]
+}

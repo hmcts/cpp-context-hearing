@@ -48,23 +48,23 @@ public class FileResultLoader implements ResultLoader {
 
     @Override
     public List<ResultPrompt> loadResultPrompt(final LocalDate hearingDate) {
-        Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
+        final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList();
 
-        StringToResultPromptConverter resultPromptConverter = new StringToResultPromptConverter(resultPromptFixedListMap);
+        final StringToResultPromptConverter resultPromptConverter = new StringToResultPromptConverter(resultPromptFixedListMap);
 
-        List<String> lines = new ResourceFileReader().getLines("/file-store/result-prompts.tdf", true);
-        ResultPromptsProcessor resultPromptsProcessor = new ResultPromptsProcessor(resultPromptConverter);
-        Map<String, List<ResultPrompt>> promptsGroupedByResultDefinition = resultPromptsProcessor.groupByResultDefinition(lines);
+        final List<String> lines = new ResourceFileReader().getLines("/file-store/result-prompts.tdf", true);
+        final ResultPromptsProcessor resultPromptsProcessor = new ResultPromptsProcessor(resultPromptConverter);
+        final Map<String, List<ResultPrompt>> promptsGroupedByResultDefinition = resultPromptsProcessor.groupByResultDefinition(lines);
         LOGGER.debug("promptsGroupedByResultDefinition:" + promptsGroupedByResultDefinition);
 
-        Map<String, List<ResultPrompt>> orderedResultPrompts = resultPromptsProcessor.order(promptsGroupedByResultDefinition);
+        final Map<String, List<ResultPrompt>> orderedResultPrompts = resultPromptsProcessor.order(promptsGroupedByResultDefinition);
         LOGGER.debug("orderedResultPrompts:" + orderedResultPrompts);
 
         return orderedResultPrompts.values().stream().flatMap(List::stream).filter(Objects::nonNull).collect(toList());
     }
 
     private Map<String, Set<String>> loadResultPromptFixedList() {
-        StringToResultPromptFixedListConverter resultPromptFixedListConverter = new StringToResultPromptFixedListConverter();
+        final StringToResultPromptFixedListConverter resultPromptFixedListConverter = new StringToResultPromptFixedListConverter();
         final List<ResultPromptFixedList> resultPromptFixedLists = unmodifiableList(new ResourceFileReader().getLines("/file-store/result-prompt-fixed-list.tdf", true)
                 .stream().map(resultPromptFixedListConverter::convert).filter(Objects::nonNull).collect(toList()));
 
@@ -73,8 +73,9 @@ public class FileResultLoader implements ResultLoader {
 
     @Override
     public List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate hearingDate) {
-        StringToResultPromptSynonymConverter converter = new StringToResultPromptSynonymConverter();
+        final StringToResultPromptSynonymConverter converter = new StringToResultPromptSynonymConverter();
         return unmodifiableList(new ResourceFileReader().getLines("/file-store/result-prompt-synonyms.tdf", true)
                 .stream().map(converter::convert).filter(Objects::nonNull).collect(toList()));
     }
+
 }

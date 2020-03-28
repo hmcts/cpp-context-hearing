@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/courtroomOuCode.json",
+  "properties": {
+    "ouCourtRoomCodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ouCodes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

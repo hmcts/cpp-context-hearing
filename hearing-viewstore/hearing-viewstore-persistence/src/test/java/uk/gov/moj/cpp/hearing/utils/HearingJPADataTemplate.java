@@ -49,7 +49,7 @@ public final class HearingJPADataTemplate {
         //
         Stream.generate(() -> new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote()).limit(1)
                 .forEach(hearingCaseNote -> {
-                    hearingCaseNote.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingEntity.getId()));
+                    hearingCaseNote.setId(new HearingSnapshotKey(randomUUID(), hearingEntity.getId()));
                     hearingCaseNote.setHearing(hearingEntity);
                     hearingEntity.getHearingCaseNotes().add(hearingCaseNote);
                 });
@@ -182,7 +182,7 @@ public final class HearingJPADataTemplate {
     }
 
     private static HearingSnapshotKey aNewHearingSnapshotKey(final UUID hearingId) {
-        return new HearingSnapshotKey(UUID.randomUUID(), hearingId);
+        return new HearingSnapshotKey(randomUUID(), hearingId);
     }
 
     public static HearingJPADataTemplate aNewHearingJPADataTemplate() {

@@ -20,6 +20,8 @@ public class Prompt {
 
     private Boolean mandatory;
 
+    private String resultPromptRule;
+
     private String type;
 
     private Integer sequence;
@@ -32,7 +34,13 @@ public class Prompt {
 
     private UUID fixedListId;
 
+    private String qual;
+
     private String reference;
+
+    private String courtExtract;
+
+    private Integer durationSequence;
 
     private boolean isAvailableForCourtExtract;
 
@@ -64,6 +72,15 @@ public class Prompt {
 
     public Prompt setMandatory(Boolean mandatory) {
         this.mandatory = mandatory;
+        return this;
+    }
+
+    public String getResultPromptRule() {
+        return this.resultPromptRule;
+    }
+
+    public Prompt setResultPromptRule(final String resultPromptRule) {
+        this.resultPromptRule = resultPromptRule;
         return this;
     }
 
@@ -139,12 +156,39 @@ public class Prompt {
         return this;
     }
 
+    public String getCourtExtract() {
+        return courtExtract;
+    }
+
+    public Prompt setCourtExtract(final String courtExtract) {
+        this.courtExtract = courtExtract;
+        return this;
+    }
+
     public String getWelshLabel() {
         return welshLabel;
     }
 
     public Prompt setWelshLabel(String welshLabel) {
         this.welshLabel = welshLabel;
+        return this;
+    }
+
+    public String getQual() {
+        return qual;
+    }
+
+    public Prompt setQual(final String qual) {
+        this.qual = qual;
+        return this;
+    }
+
+    public Integer getDurationSequence() {
+        return durationSequence;
+    }
+
+    public Prompt setDurationSequence(final Integer durationSequence) {
+        this.durationSequence = durationSequence;
         return this;
     }
 }
