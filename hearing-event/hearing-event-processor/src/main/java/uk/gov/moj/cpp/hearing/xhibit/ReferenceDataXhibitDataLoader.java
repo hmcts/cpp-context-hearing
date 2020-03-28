@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
@@ -13,10 +14,10 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
+import uk.gov.moj.cpp.hearing.xhibit.exception.ReferenceDataNotFoundException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
 
 @SuppressWarnings("squid:S1168")
@@ -41,9 +42,15 @@ public class ReferenceDataXhibitDataLoader {
                 .withId(randomUUID())
                 .build();
 
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, createObjectBuilder().build());
 
-        return requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
+        final XhibitEventMappingsList payload = requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
+
+        if (payload == null || isEmpty(payload.getCpXhibitHearingEventMappings())) {
+            throw new ReferenceDataNotFoundException(jsonEnvelope);
+        }
+
+        return payload;
     }
 
     String getXhibitCrestCourtIdBy(final String courtCentreId) {
@@ -56,7 +63,9 @@ public class ReferenceDataXhibitDataLoader {
           instead.
           We need consistency
          */
+
         return courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtId();
+
     }
 
     private CourtRoomMappingsList getCourtRoomMappingsList(final String courtCentreId) {
@@ -72,7 +81,13 @@ public class ReferenceDataXhibitDataLoader {
                         .build(),
                 query);
 
-        return requester.requestAsAdmin(jsonEnvelope, CourtRoomMappingsList.class).payload();
+        final CourtRoomMappingsList payload = requester.requestAsAdmin(jsonEnvelope, CourtRoomMappingsList.class).payload();
+
+        if (payload == null || isEmpty(payload.getCpXhibitCourtRoomMappings())) {
+            throw new ReferenceDataNotFoundException(jsonEnvelope);
+        }
+
+        return payload;
     }
 }
 

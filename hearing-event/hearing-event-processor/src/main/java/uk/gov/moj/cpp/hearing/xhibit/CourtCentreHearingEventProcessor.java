@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.io.IOUtils.toInputStream;
+import static org.apache.commons.lang3.exception.ExceptionUtils.getMessage;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.PUBLIC_DISPLAY;
 import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
@@ -63,7 +64,7 @@ public class CourtCentreHearingEventProcessor  {
             processHearingForXhibitPublicDisplay(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);
         } catch (final Exception e) {
             LOGGER.error("Court List generation failed", e);
-            publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), "NONE", e.getMessage());
+            publishCourtListCommandSender.recordCourtListExportFailed(publishCourtListRequestParameters.getCourtCentreId(), "NONE", getMessage(e));
         }
     }
 

@@ -139,11 +139,11 @@ public class XhibitReferenceDataService {
         return new CourtLocation(
                 jsonObject.getString("oucode"),
                 jsonObject.getString("crestCourtId"),
-                jsonObject.getString("crestCourtSiteId"),
-                jsonObject.getString("crestCourtName"),
-                jsonObject.getString("crestCourtShortName"),
-                jsonObject.getString("crestCourtSiteName"),
-                jsonObject.getString("crestCourtSiteCode"),
-                jsonObject.getString("courtType"));
+                jsonObject.getString("crestCourtSiteId", null),
+                jsonObject.getString("crestCourtName", null),
+                jsonObject.getString("crestCourtShortName", null),
+                jsonObject.getString("crestCourtSiteName", null),
+                jsonObject.getString("crestCourtSiteCode", null),
+                jsonObject.getString("courtType", null));
     }
 }

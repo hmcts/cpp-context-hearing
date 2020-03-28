@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.xhibit;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.lang3.StringUtils.trimToEmpty;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
@@ -57,7 +58,7 @@ public class PublishCourtListCommandSender {
                 .add(COURT_CENTRE_ID, courtCentreId)
                 .add(COURT_LIST_FILE_NAME, courtListFileName)
                 .add(CREATED_TIME, ZonedDateTimes.toString(utcClock.now()))
-                .add(ERROR_MESSAGE, errorMessage);
+                .add(ERROR_MESSAGE, trimToEmpty(errorMessage));
 
         sendCommandWith(RECORD_COURT_LIST_EXPORT_FAILED, fromString(courtCentreId), objectBuilder.build());
     }
