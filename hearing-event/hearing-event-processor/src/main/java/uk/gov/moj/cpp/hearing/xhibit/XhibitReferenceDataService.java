@@ -1,11 +1,16 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.core.enveloper.Enveloper.toEnvelopeWithMetadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -48,8 +53,11 @@ public class XhibitReferenceDataService {
 
         final JsonObject queryParameters = createObjectBuilder().build();
 
-        return requester.request(envelop(queryParameters).withName(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS)
-                .withMetadataFrom(envelope))
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(queryParameters)
+                .withName(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS)
+                .withMetadataFrom(envelope);
+
+        return requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
                 .payloadAsJsonObject().getJsonArray("cpXhibitCourtMappings").getValuesAs(JsonObject.class)
                 .stream()
                 .filter(court -> court.getString("crestCourtId").equals(crownCourtCrestId))
@@ -58,11 +66,13 @@ public class XhibitReferenceDataService {
     }
 
     private UUID getOrganisationUnitId(final Envelope envelope, final String ouCode) {
-
         final JsonObject queryParameters = createObjectBuilder().add("oucode", ouCode).build();
 
-        final JsonObject organisationUnit = requester.request(envelop(queryParameters).withName(REFERENCEDATA_QUERY_ORGANISATION_UNITS)
-                .withMetadataFrom(envelope))
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(queryParameters)
+                .withName(REFERENCEDATA_QUERY_ORGANISATION_UNITS)
+                .withMetadataFrom(envelope);
+
+        final JsonObject organisationUnit = requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
                 .payloadAsJsonObject().getJsonArray("organisationunits").getValuesAs(JsonObject.class)
                 .stream().findFirst().orElseThrow(() -> new RuntimeException(format("Cannot find organisation unit with code %s", ouCode)));
 
@@ -70,11 +80,13 @@ public class XhibitReferenceDataService {
     }
 
     public CourtLocation getCourtDetails(final Envelope envelope, final UUID courtCentreId) {
-
         final JsonObject queryParameters = createObjectBuilder().add("ouId", courtCentreId.toString()).build();
 
-        final JsonObject court = requester.request(envelop(queryParameters).withName(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS)
-                .withMetadataFrom(envelope))
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(queryParameters)
+                .withName(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS)
+                .withMetadataFrom(envelope);
+
+        final JsonObject court = requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
                 .payloadAsJsonObject().getJsonArray("cpXhibitCourtMappings").getValuesAs(JsonObject.class)
                 .stream().findFirst().orElseThrow(() -> new RuntimeException(format("Cannot find court details with courtCentre %s", courtCentreId)));
 
@@ -85,8 +97,11 @@ public class XhibitReferenceDataService {
 
         final JsonObject queryParameters = createObjectBuilder().add("id", courtCentreId.toString()).build();
 
-        final JsonObject courtRoom = requester.request(envelop(queryParameters).withName(REFERENCEDATA_QUERY_COURTROOM)
-                .withMetadataFrom(envelope))
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(queryParameters)
+                .withName(REFERENCEDATA_QUERY_COURTROOM)
+                .withMetadataFrom(envelope);
+
+        final JsonObject courtRoom = requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
                 .payloadAsJsonObject().getJsonArray("courtrooms").getValuesAs(JsonObject.class)
                 .stream().filter(c -> UUID.fromString(c.getString("id")).equals(courtRoomId))
                 .findFirst()
@@ -99,18 +114,21 @@ public class XhibitReferenceDataService {
 
         final JsonObject queryParameters = createObjectBuilder().add("ids", judiciaryId.toString()).build();
 
-        return requester.request(envelop(queryParameters)
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(queryParameters)
                 .withName(REFERENCEDATA_QUERY_JUDICIARIES)
-                .withMetadataFrom(envelope))
+                .withMetadataFrom(envelope);
+
+        return requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
                 .payloadAsJsonObject().getJsonArray("judiciaries")
                 .getValuesAs(JsonObject.class).get(0);
     }
 
     public JsonObject getXhibitHearingType(final JsonEnvelope envelope, final UUID cppHearingTypeId) {
-
-        return requester.request(envelop(createObjectBuilder().build())
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(createObjectBuilder().build())
                 .withName(REFERENCE_DATA_HEARING_TYPES)
-                .withMetadataFrom(envelope))
+                .withMetadataFrom(envelope);
+
+        return requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
                 .payloadAsJsonObject()
                 .getJsonArray("hearingTypes").getValuesAs(JsonObject.class).stream()
                 .filter(h -> UUID.fromString(h.getString("id")).equals(cppHearingTypeId))

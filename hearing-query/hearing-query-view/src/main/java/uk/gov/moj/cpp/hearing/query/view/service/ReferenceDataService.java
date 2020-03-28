@@ -11,6 +11,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.HearingTypeMappingList;
@@ -70,8 +71,12 @@ public class ReferenceDataService {
         final JsonObject payload = createObjectBuilder()
                 .add("oucode", "C")
                 .build();
-        final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(eventEnvelope, REFERENCEDATA_QUERY_COURT_CENTRES).apply(payload);
-        return requester.request(requestEnvelope);
+
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(payload)
+                .withName(REFERENCEDATA_QUERY_COURT_CENTRES)
+                .withMetadataFrom(eventEnvelope);
+
+        return requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()));
     }
 
     public HearingTypeMappingList getXhibitHearingType() {
