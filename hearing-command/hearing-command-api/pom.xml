@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-command</artifactId>
-        <version>6.4.29-SCSL-SNAPSHOT</version>
+        <version>6.4.30-SCSL-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-command-api</artifactId>
     <packaging>war</packaging>
