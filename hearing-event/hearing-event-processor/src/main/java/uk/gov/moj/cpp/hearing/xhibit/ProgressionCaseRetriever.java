@@ -42,6 +42,6 @@ public class ProgressionCaseRetriever {
                         .build(),
                 query);
 
-        return requester.request(jsonEnvelope, ProsecutionCase.class).payload();
+        return requester.requestAsAdmin(jsonEnvelope, ProsecutionCase.class).payload();
     }
 }

@@ -49,7 +49,7 @@ public class ProgressionCaseRetrieverTest {
     public void shouldRetrieveProsecutionCaseByCaseId() {
         final ProsecutionCase prosecutionCase = getProsecutionCase();
 
-        when(requester.request(any(JsonEnvelope.class), eq(ProsecutionCase.class)).payload()).thenReturn(prosecutionCase);
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), eq(ProsecutionCase.class)).payload()).thenReturn(prosecutionCase);
 
         final ProsecutionCase retrievedProsecutionCase = prosecutionCaseRetriever.getProsecutionCaseDetails(CASE_ID);
 
@@ -60,7 +60,7 @@ public class ProgressionCaseRetrieverTest {
         assertThat(retrievedProsecutionCase.getLinkedApplicationsSummary().get(1).getApplicantDisplayName(), is(APPELLANT_NAME_2));
         assertThat(retrievedProsecutionCase.getLinkedApplicationsSummary().get(1).getIsAppeal(), is(Boolean.TRUE));
         assertThat(retrievedProsecutionCase.getLinkedApplicationsSummary().get(1).getRespondentDisplayNames(), is(nullValue()));
-        verify(requester, times(1)).request(any(JsonEnvelope.class), eq(ProsecutionCase.class));
+        verify(requester, times(1)).requestAsAdmin(any(JsonEnvelope.class), eq(ProsecutionCase.class));
     }
 
     private ProsecutionCase getProsecutionCase() {
