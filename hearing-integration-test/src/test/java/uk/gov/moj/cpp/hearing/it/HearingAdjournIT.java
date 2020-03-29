@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({"squid:S1607"})
@@ -72,6 +73,7 @@ public class HearingAdjournIT extends AbstractIT {
     private static final String COURT_ROOM_LABEL = "CourtRoom";
     private static final String COURT_CENTRE_LABEL = "Courthouse name";
 
+    @Ignore("GPE-13308")
     @Test
     public void shouldRaiseHearingAdjournedEvent() {
 

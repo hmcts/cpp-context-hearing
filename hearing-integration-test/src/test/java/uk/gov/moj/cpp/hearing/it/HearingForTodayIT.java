@@ -1,17 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.InitiationCode;
-import uk.gov.justice.hearing.courts.GetHearings;
-import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.UUID;
-
 import static java.time.LocalDate.now;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -39,6 +27,20 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
 
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.InitiationCode;
+import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
 public class HearingForTodayIT extends AbstractIT {
 
     private static final String OFFENCE_TITLE = "OFFENCE TITLE";
@@ -48,6 +50,7 @@ public class HearingForTodayIT extends AbstractIT {
     private static final LocalDate DEFENDANT_DOB = LocalDate.now().minusYears(50);
 
 
+    @Ignore("GPE-13308")
     @Test
     public void shouldRetrieveHearingForTodayForLoggedOnUser() {
         final UUID userId = randomUUID();

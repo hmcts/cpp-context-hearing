@@ -25,11 +25,13 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.ZonedDateTime;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({"squid:S2699"})
 public class AddDefendantIT extends AbstractIT {
 
+    @Ignore("GPE-13308")
     @Test
     public void shouldAddNewDefendant() throws Exception {
 
