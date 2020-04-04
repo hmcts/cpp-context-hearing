@@ -8,12 +8,14 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.INACTIVE;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.FINISHED;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.INPROGRESS;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.STARTED;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -24,14 +26,19 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitHearingTypesCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.test.FileUtil;
 
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,10 +47,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -90,6 +99,19 @@ public class HearingListXhibitResponseTransformerTest {
 
     @InjectMocks
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
+
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @InjectMocks
+    private CourtApplicationsSerializer courtApplicationsSerializer;
+
+
+    @Before
+    public void setUp() {
+        setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+    }
 
     @Test
     public void shouldTransformFrom() {
@@ -313,6 +335,55 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getDefendants().get(0).getFirstName(), nullValue());
         assertThat(caseDetail.getDefendants().get(0).getMiddleName(), nullValue());
         assertThat(caseDetail.getDefendants().get(0).getLastName(), nullValue());
+        assertThat(courtRoomName, is("x"));
+        assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+    }
+
+    @Test
+    public void shouldTransformFromForStandaloneApplication() {
+        final UUID courtCentreId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent().build();
+        final List<Hearing> hearingList = asList(hearing);
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(FileUtil.getPayload("court-applications.json"));
+        final List<HearingDay> hearingDays = asList(hearingDay);
+
+        final Set<UUID> activeHearingIds = new HashSet<>();
+
+        final Map<UUID, UUID> eventDefinitionsIds = new HashMap<>();
+        final UUID eventDefinitionsId = randomUUID();
+        eventDefinitionsIds.putIfAbsent(hearingId, eventDefinitionsId);
+        when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
+        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
+        when(hearing.getHearingDays()).thenReturn(hearingDays);
+        when(hearingDay.getSittingDay()).thenReturn(ZonedDateTime.now());
+        when(hearing.getId()).thenReturn(hearingId);
+        when(hearing.getType()).thenReturn(HearingType.hearingType().withDescription("hearingTypeDescription").build());
+        when(hearing.getCourtApplications()).thenReturn(courtApplications);
+        when(hearing.getProsecutionCases()).thenReturn(Collections.emptyList());
+        when(hearing.getCourtCentre()).thenReturn(CourtCentre.courtCentre().withName(COURT_NAME).withRoomId(courtRoomId).withId(courtCentreId).build());
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
+        when(xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(any(), any())).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        mockHearingTypeId();
+
+        when(xhibitHearingTypesCache.getHearingTypeDescription(hearingTypeId)).thenReturn("Application");
+
+        final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+        final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
+        final CaseDetail caseDetail = courtRoom.getCases().getCasesDetails().get(0);
+        final String courtRoomName = courtRoom.getCourtRoomName();
+
+        assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
+        assertThat(caseDetail.getDefendants().size(), is(1));
+        assertThat(caseDetail.getDefendants().get(0).getFirstName(), is(courtApplications.get(0).getApplicant().getPersonDetails().getFirstName()));
+        assertThat(caseDetail.getDefendants().get(0).getMiddleName(), is(courtApplications.get(0).getApplicant().getPersonDetails().getMiddleName()));
+        assertThat(caseDetail.getDefendants().get(0).getLastName(), is(courtApplications.get(0).getApplicant().getPersonDetails().getLastName()));
+        assertThat(caseDetail.getCppUrn(), is(courtApplications.get(0).getApplicationReference()));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
     }

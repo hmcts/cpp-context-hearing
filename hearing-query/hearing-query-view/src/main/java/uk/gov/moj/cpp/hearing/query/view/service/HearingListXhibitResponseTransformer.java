@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +51,7 @@ import java.util.UUID;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 @ApplicationScoped
@@ -167,34 +169,78 @@ public class HearingListXhibitResponseTransformer {
                            final BigInteger isActiveHearing,
                            final BigInteger hearingprogessValue) {
 
+        if (CollectionUtils.isEmpty(hearing.getProsecutionCases())) {
+            return cases().withCasesDetails(buildCaseDetailsForStandaloneApplication(hearing, hearingEvent, isActiveHearing, hearingprogessValue)).build();
+        }
+
+        return cases().withCasesDetails(buildCaseDetailsForProsecutionCases(hearing, hearingEvent, isActiveHearing, hearingprogessValue)).build();
+    }
+
+    private List<CaseDetail> buildCaseDetailsForProsecutionCases(final Hearing hearing, final HearingEvent hearingEvent, final BigInteger isActiveHearing, final BigInteger hearingprogessValue) {
         final List<CaseDetail> caseDetailsList = new ArrayList<>();
         hearing.getProsecutionCases()
-                .forEach(prosecutionCase ->
-                        caseDetailsList.add(buildCaseDetail(hearing, hearingEvent, prosecutionCase, isActiveHearing, hearingprogessValue)));
-        return cases().withCasesDetails(caseDetailsList).build();
+                .forEach(prosecutionCase -> {
+                    final List<Defendant> defendants = getDefendants(prosecutionCase, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
+                    caseDetailsList.add(buildCaseDetail(hearing,
+                            hearingEvent,
+                            isActiveHearing,
+                            defendants,
+                            prosecutionCase.getProsecutionCaseIdentifier().getCaseURN(),
+                            hearingprogessValue));
+                });
+
+        return caseDetailsList;
+    }
+
+    private List<CaseDetail> buildCaseDetailsForStandaloneApplication(final Hearing hearing, final HearingEvent hearingEvent, final BigInteger isActiveHearing, final BigInteger hearingprogessValue) {
+        final List<CaseDetail> caseDetailList = new ArrayList<>();
+
+        hearing.getCourtApplications()
+                .forEach(courtApplication -> {
+                    final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
+                    caseDetailList.add(buildCaseDetail(hearing,
+                                        hearingEvent,
+                                        isActiveHearing, defendants,
+                                        courtApplication.getApplicationReference(),
+                                        hearingprogessValue));
+                });
+
+        return caseDetailList;
+    }
+
+    private List<Defendant> getDefendantsForStandaloneApplication(final CourtApplication courtApplication, final boolean needToBeOmitted) {
+        return (needToBeOmitted || Objects.isNull(courtApplication.getApplicant().getPersonDetails())) ? asList(defendant().build()) :
+                asList(defendant()
+                        .withFirstName(courtApplication.getApplicant().getPersonDetails().getFirstName())
+                        .withMiddleName(courtApplication.getApplicant().getPersonDetails().getMiddleName())
+                        .withLastName(courtApplication.getApplicant().getPersonDetails().getLastName()).build());
     }
 
     @SuppressWarnings("squid:S3655")
-    private CaseDetail buildCaseDetail(final Hearing hearing, final HearingEvent hearingEvent, final ProsecutionCase prosecutionCase,
-                                       final BigInteger activecase, final BigInteger hearingprogessValue) {
-
+    private CaseDetail buildCaseDetail(final Hearing hearing,
+                                       final HearingEvent hearingEvent,
+                                       final BigInteger activecase,
+                                       final List<Defendant> defendants,
+                                       final String cppUrn,
+                                       final BigInteger hearingprogessValue) {
         //get the hearingType by hearingType id from cache
         final String exhibitHearingTypeDescription = xhibitHearingTypesCache.getHearingTypeDescription(hearing.getType().getId());
-
 
         final CaseDetail caseDetail  = caseDetail()
                 .withActivecase(activecase)
                 .withHearingprogress(hearingprogessValue)
-                .withCppUrn(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
+                .withCppUrn(cppUrn)
                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
                 .withHearingType(exhibitHearingTypeDescription)
-                .withDefendants(getDefendants(prosecutionCase, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason())))
+                .withDefendants(defendants)
                 .withJudgeName(getJudgeName(hearing))
                 .withHearingEvent(hearingEvent)
                 .withNotBeforeTime(dateTimeFormatter.format(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().getSittingDay()))
                 .build();
+
         caseDetail.setLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()));
         caseDetail.setDefenceCounsels(hearing.getDefenceCounsels());
+
         return caseDetail;
     }
 
