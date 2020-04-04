@@ -5,8 +5,8 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.BailStatus.bailStatus;
-import static uk.gov.justice.core.courts.DefenceCounsel.defenceCounsel;
 import static uk.gov.justice.core.courts.FundingType.REPRESENTATION_ORDER;
+import static uk.gov.justice.core.courts.DefenceCounsel.defenceCounsel;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
@@ -147,6 +147,7 @@ public class CoreTestTemplates {
                 .withRoomName(STRING.next())
                 .withWelshRoomName(STRING.next());
     }
+
 
     public static JudicialRole.Builder judiciaryRole(CoreTemplateArguments args) {
         return JudicialRole.judicialRole()

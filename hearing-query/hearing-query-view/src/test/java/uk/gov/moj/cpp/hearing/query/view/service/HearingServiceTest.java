@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.math.BigInteger.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -17,6 +16,37 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import static java.math.BigInteger.valueOf;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
@@ -53,15 +83,16 @@ import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
-import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -87,6 +118,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -113,9 +145,6 @@ public class HearingServiceTest {
 
     @Mock
     private HearingRepository hearingRepository;
-
-    @Mock
-    private HearingEventRepository hearingEventRepository;
 
     @Mock
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
@@ -146,6 +175,9 @@ public class HearingServiceTest {
 
     @Mock
     private ReferenceDataService referenceDataService;
+
+    @Mock
+    private HearingEventRepository hearingEventRepository;
 
     @Mock
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
@@ -538,7 +570,7 @@ public class HearingServiceTest {
         when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder);
 
         final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
-                hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
+               hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
         assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
         assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
     }
@@ -667,9 +699,9 @@ public class HearingServiceTest {
     public void shouldReturnLatestHearingByCourtCentreIdsAndLatestModifiedTime() {
         final LocalDate now = LocalDate.now();
         final List<UUID> courtCentreIds = new ArrayList();
-        courtCentreIds.add(randomUUID());
+        courtCentreIds.add(randomUUID()) ;
 
-        final HearingEventPojo hearingEvent = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
+        final HearingEventPojo hearingEvent = new HearingEventPojo( randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
 
         final List<HearingEventPojo> hearingEventList = asList(hearingEvent);
         final Hearing hearing = buildHearing();

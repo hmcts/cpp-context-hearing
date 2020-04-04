@@ -1,0 +1,24 @@
+{
+  "hearingId": "7b9d86eb-a3f5-425b-af18-9ca7d5b98f20",
+  "verdict": {
+    "jurors": {
+      "numberOfJurors": 12,
+      "numberOfSplitJurors": 0,
+      "unanimous": true
+    },
+    "lesserOrAlternativeOffence": {
+      "offenceCode": "TR11012",
+      "offenceDefinitionId": "ba7fa9e0-99cf-404f-a453-cbc74a3305cd",
+      "offenceLegislation": "Contrary to Byelaws 3(10) and 2(3) of the Gatwick Airport - London Byelaws 1996 and sections 63 and 64 of the Airports Act 1986.",
+      "offenceTitle": "Allow a vehicle / an animal to be on Gatwick Airport after being forbidden to do so by a PC / airport official"
+    },
+    "offenceId": "ba7fa9e0-99cf-404f-a453-cbc74a3305cd",
+    "originatingHearingId": "7b9d86eb-a3f5-425b-af18-9ca7d5b98f20",
+    "verdictDate": "2019-05-01",
+    "verdictType": {
+      "category": "Guilty but of lesser offence by jury",
+      "categoryType": "GUILTY_BUT_OF_LESSER_OFFENCE_BY_JURY_CONVICTED",
+      "verdictTypeId": "8f14e45f-ceea-367a-9a36-dedd4bea2543"
+    }
+  }
+}

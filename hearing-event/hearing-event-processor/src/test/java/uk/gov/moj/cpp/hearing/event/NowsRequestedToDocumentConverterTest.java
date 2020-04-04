@@ -2,9 +2,9 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static com.google.common.io.Resources.getResource;
 import static java.nio.charset.Charset.defaultCharset;
+import static junit.framework.TestCase.assertNull;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -55,12 +55,12 @@ public class NowsRequestedToDocumentConverterTest {
 
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-        CourtCentreOrganisationUnit courtCentreOrganisationUnit = new CourtCentreOrganisationUnit(null, null, null, null,
-                null, null, null, null,
-                "1234", false, null, null, null,
-                null, null, null, null, null,
-                null, null, null, null, null, null);
-        when(courtHouseReverseLookup.getCourtCentreById(any(), any())).thenReturn(Optional.of(courtCentreOrganisationUnit));
+        CourtCentreOrganisationUnit courtCentreOrganisationUnit = new CourtCentreOrganisationUnit(null,null,null,null,
+                null,null,null,null,
+                "1234",false,null,null,null,
+                null,null,null,null,null,
+                null,null,null,null,null);
+        when(courtHouseReverseLookup.getCourtCentreById(any(),any())).thenReturn(Optional.of(courtCentreOrganisationUnit));
     }
 
 

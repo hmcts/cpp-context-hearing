@@ -6,9 +6,6 @@
     "id": {
       "type": "string"
     },
-    "lja" : {
-      "type": "string"
-    },
     "oucode": {
       "type": "string"
     },

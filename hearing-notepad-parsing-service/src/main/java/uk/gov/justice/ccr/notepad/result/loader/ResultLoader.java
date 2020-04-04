@@ -18,4 +18,7 @@ public interface ResultLoader {
     List<ResultPrompt> loadResultPrompt(final LocalDate orderedDate);
 
     List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate orderedDate);
+
+
+
 }

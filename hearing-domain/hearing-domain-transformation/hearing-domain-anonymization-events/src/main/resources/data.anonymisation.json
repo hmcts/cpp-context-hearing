@@ -1,0 +1,441 @@
+{
+  "events": [
+    {
+      "eventName" : "hearing.results-shared",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"defenceOrganisation" : "StringAnonymisedString"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"address5" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
+        {"value" : "StringAnonymisedString"},
+        {"welshValue" : "StringAnonymisedString"},
+        {"statementOfFacts" : "StringAnonymisedString"},
+        {"statementOfFactsWelsh" : "StringAnonymisedString"},
+        {"name" : "StringAnonymisedString"},
+        {"fax" :  "StringAnonymisedPhoneNumber"},
+        {"home" :  "StringAnonymisedPhoneNumber"},
+        {"mobile" :  "StringAnonymisedPhoneNumber"},
+        {"work" :  "StringAnonymisedPhoneNumber"},
+        {"primaryEmail" : "StringAnonymisedEmail"},
+        {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
+        {"perceivedBirthYear" :  "DummyNumber1000"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.initiated",
+      "fieldsToBeAnonymised": [
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"address5" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"fax" :  "StringAnonymisedPhoneNumber"},
+        {"home" :  "StringAnonymisedPhoneNumber"},
+        {"mobile" :  "StringAnonymisedPhoneNumber"},
+        {"work" :  "StringAnonymisedPhoneNumber"},
+        {"primaryEmail" : "StringAnonymisedEmail"},
+        {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
+        {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
+        {"nationalityCode" : "StringAnonymisedString"},
+        {"nationalityDescription" : "StringAnonymisedString"},
+        {"occupation" : "StringAnonymisedString"},
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"},
+        {"statementOfFacts" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.update-case-defendant-details-enriched-with-hearing-ids",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"address5" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"fax" :  "StringAnonymisedPhoneNumber"},
+        {"home" :  "StringAnonymisedPhoneNumber"},
+        {"mobile" :  "StringAnonymisedPhoneNumber"},
+        {"work" :  "StringAnonymisedPhoneNumber"},
+        {"primaryEmail" : "StringAnonymisedEmail"},
+        {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"wording" : "StringAnonymisedString"},
+        {"nationalityCode" : "StringAnonymisedString"},
+        {"nationalityDescription" : "StringAnonymisedString"},
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.nows-requested",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"address5" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"wording" : "StringAnonymisedString"},
+        {"nationalityCode" : "StringAnonymisedString"},
+        {"nationalityDescription" : "StringAnonymisedString"},
+        {"description" : "StringAnonymisedString"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"statementOfFacts" : "StringAnonymisedString"},
+        {"statementOfFactsWelsh" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.newdefence-counsel-added",
+      "fieldsToBeAnonymised": [
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.newdefence-counsel-added",
+      "fieldsToBeAnonymised": [
+        {"wording" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.hearing-case-note-saved",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.offence-added",
+      "fieldsToBeAnonymised": [
+        {"wording" : "StringAnonymisedString"},
+        {"vehicleRegistration" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.offence-updated",
+      "fieldsToBeAnonymised": [
+        {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.prosecution-counsel-updated",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.sending-sheet-recorded",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"wording" : "StringAnonymisedString"},
+        {"nationality" : "StringAnonymisedString"},
+        {"description" : "StringAnonymisedString"},
+        {"bailStatus" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"},
+        {"draftResult" :"StringAnonymisedParsedData"}
+      ]
+    },
+    {
+      "eventName" : "hearing.mags-court-hearing-recorded",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"wording" : "StringAnonymisedString"},
+        {"nationality" : "StringAnonymisedString"},
+        {"description" : "StringAnonymisedString"},
+        {"bailStatus" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.defence-counsel-updated",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.defendant-details-updated",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"address5" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"work" :  "StringAnonymisedPhoneNumber"},
+        {"nationalityCode" : "StringAnonymisedString"},
+        {"nationalityDescription" : "StringAnonymisedString"},
+        {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
+        {"primaryEmail" : "StringAnonymisedEmail"},
+        {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+
+      ]
+    },
+    {
+      "eventName" : "hearing.events.pending-nows-requested",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"address5" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"occupation" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"primaryEmail" : "StringAnonymisedEmail"},
+        {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"fax" :  "StringAnonymisedPhoneNumber"},
+        {"home" :  "StringAnonymisedPhoneNumber"},
+        {"mobile" :  "StringAnonymisedPhoneNumber"},
+        {"work" :  "StringAnonymisedPhoneNumber"},
+        {"enforcementPhoneNumber" : "StringAnonymisedPhoneNumber"},
+        {"enforcementEmail" : "StringAnonymisedEmail"},
+        {"nationalInsuranceNumber" :  "StringAnonymisedNI"},
+        {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"statementOfFacts" : "StringAnonymisedString"},
+        {"statementOfFactsWelsh" : "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.result-lines-status-updated",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.result-lines-status-updated",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.prosecution-counsel-added",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.defence-counsel-added",
+      "fieldsToBeAnonymised": [
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"middleName" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.results-shared",
+      "fieldsToBeAnonymised": [
+        {"name" : "StringAnonymisedString"},
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"gender" : "StringAnonymisedString"},
+        {"dateOfBirth" : "StringAnonymisedDOB"},
+        {"address1" : "StringAnonymisedString"},
+        {"address2" : "StringAnonymisedString"},
+        {"address3" : "StringAnonymisedString"},
+        {"address4" : "StringAnonymisedString"},
+        {"postcode" : "StringAnonymisedPostcode"},
+        {"wording" : "StringAnonymisedString"},
+        {"wordingWelsh" : "StringAnonymisedString"},
+        {"nationalityCode" : "StringAnonymisedString"},
+        {"nationalityDescription" : "StringAnonymisedString"},
+        {"work" : "StringAnonymisedPhoneNumber"},
+        {"home" : "StringAnonymisedPhoneNumber"},
+        {"mobile" : "StringAnonymisedPhoneNumber"},
+        {"primaryEmail" : "StringAnonymisedEmail"},
+        {"secondaryEmail" : "StringAnonymisedEmail"},
+        {"accountNumber" : "StringAnonymisedString"},
+        {"accountDivisionCode" : "StringAnonymisedString"},
+        {"bacsAccountNumber" : "StringAnonymisedString"},
+        {"bacsBankName" : "StringAnonymisedString"},
+        {"bacsSortCode" : "StringAnonymisedString"},
+        {"specificRequirements" : "StringAnonymisedString"},
+        {"statementOfFacts" : "StringAnonymisedString"},
+        {"statementOfFactsWelsh" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" : "StringAnonymisedString"},
+        {"draftResult" :"StringAnonymisedParsedData"}
+      ]
+    },
+    {
+      "eventName" : "hearing.event.hearing-adjourned",
+      "fieldsToBeAnonymised": [
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.event.detail-changed",
+      "fieldsToBeAnonymised": [
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" : "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.enrich-update-plea-with-associated-hearings",
+      "fieldsToBeAnonymised": [
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.found-hearings-for-edit-offence",
+      "fieldsToBeAnonymised": [
+        {"wording" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.events.found-hearings-for-new-offence",
+      "fieldsToBeAnonymised": [
+        {"wording" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.hearing-offence-plea-updated",
+      "fieldsToBeAnonymised": [
+        {"title" : "StringAnonymisedString"},
+        {"firstName" : "StringAnonymisedString"},
+        {"lastName" : "StringAnonymisedString"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    },
+    {
+      "eventName" : "hearing.subscriptions-uploaded",
+      "fieldsToBeAnonymised": [
+        {"fromAddress" : "StringAnonymisedEmail"},
+        {"destination" : "StringAnonymisedEmail"},
+        {"reportingRestrictionReason" :  "StringAnonymisedString"}
+      ]
+    }
+
+  ]
+}

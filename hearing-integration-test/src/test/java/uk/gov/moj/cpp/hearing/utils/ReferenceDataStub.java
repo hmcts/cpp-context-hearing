@@ -52,14 +52,13 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_KEYWORDS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-word-synonyms?on=%s";
     private static final String REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/fixed-list?on=%s";
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-prompt-word-synonyms?on=%s";
-    private static final String REFERENCE_DATA_RESULT_DEFINITIONS_RULE_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definition-rule?on=%s";
 
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/withdrawn";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/next-hearing";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/nows-metadata";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/organisation-units";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/enforcement-area";
-    private static final String REFERENCE_DATA_RESULT_BAIL_STATUSES_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/bail-statuses";
+
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cracked-ineffective-vacated-trial-types";
     private static final String REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/local-justice-areas";
 
@@ -71,11 +70,9 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-word-synonyms+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_FIXED_LISTS_MEDIA_TYPE = "application/vnd.referencedata.get-all-fixed-list+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-prompt-word-synonyms+json";
-    private static final String REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definition-rules+json";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit.v2+json";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE = "application/vnd.referencedata.query.enforcement-area+json";
-    private static final String REFERENCE_DATA_RESULT_BAIL_STATUSES_MEDIA_TYPE = "application/vnd.referencedata.bail-statuses+json";
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-courtroom-mappings";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-courtroom-mappings+json";
@@ -110,8 +107,8 @@ public class ReferenceDataStub {
         return new ArrayList<>(jsonObject.getJsonArray("organisationunits"));
     }
 
+
     public static void stubForReferenceDataResults() {
-        stubGetReferenceDataResultDefinitionRules();
         stubGetReferenceDataResultDefinitionsForFirstDay();
         stubGetReferenceDataResultDefinitionsKeywordsForFirstDay();
         stubGetReferenceDataResultPromptWordSynonymsForFirstDay();
@@ -121,7 +118,7 @@ public class ReferenceDataStub {
         stubGetReferenceDataResultDefinitionsKeywordsForSecondDay();
         stubGetReferenceDataResultPromptWordSynonymsForSecondDay();
         stubGetReferenceDataResultPromptFixedListsForSecondDay();
-        stubGetReferenceDataResultBailStatuses();
+
         stubDynamicPromptFixedList();
     }
 
@@ -136,7 +133,6 @@ public class ReferenceDataStub {
     public static void stubRelistReferenceDataResults() {
         stubGetReferenceDataResultDefinitionsWithdrawn();
         stubGetReferenceDataResultDefinitionsNextHearing();
-        stubGetReferenceDataResultBailStatuses();
     }
 
     private static void stubGetReferenceDataResultDefinitionsWithdrawn() {
@@ -163,16 +159,12 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL, REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_MEDIA_TYPE);
     }
 
-    public static void stubGetAllNowsMetaData(final LocalDate referenceDate, final AllNows allNows) {
+    public static void stubGetAllNowsMetaData(LocalDate referenceDate, AllNows allNows) {
         stub(allNows, REFERENCE_DATA_RESULT_NOWS_METADATA_QUERY_URL, REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE, "on", referenceDate.toString());
     }
 
-    public static void stubGetAllResultDefinitions(final LocalDate referenceDate, final AllResultDefinitions allResultDefinitions) {
+    public static void stubGetAllResultDefinitions(LocalDate referenceDate, AllResultDefinitions allResultDefinitions) {
         stub(allResultDefinitions, REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL_WITHOUT_DATE, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE, referenceDate);
-    }
-
-    public static void stubGetAllResultDefinitions(final AllResultDefinitions allResultDefinitions) {
-        stub(allResultDefinitions, REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL_WITHOUT_DATE, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE);
     }
 
     public static void stub(final OrganisationalUnit organisationalUnit) {
@@ -198,11 +190,11 @@ public class ReferenceDataStub {
                 REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE);
     }
 
-    private static void stub(final Object result, final String queryUrl, final String mediaType) {
-        final String strPayload;
+    private static void stub(Object result, String queryUrl, String mediaType) {
+        String strPayload;
         try {
             strPayload = Utilities.JsonUtil.toJsonString(result);
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
 
@@ -216,17 +208,17 @@ public class ReferenceDataStub {
                 .until(status().is(Response.Status.OK));
     }
 
-    private static void stub(final Object result, final String queryUrl, final String mediaType, final LocalDate referenceDate) {
+    private static void stub(Object result, String queryUrl, String mediaType, LocalDate referenceDate) {
         final String strValue = referenceDate.toString();
         final String strKey = "on";
         stub(result, queryUrl, mediaType, strKey, strValue);
     }
 
     private static void stub(final Object result, final String queryUrl, final String mediaType, final String strKey, final String strValue) {
-        final String strPayload;
+        String strPayload;
         try {
             strPayload = Utilities.JsonUtil.toJsonString(result);
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
 
@@ -241,20 +233,8 @@ public class ReferenceDataStub {
                 .until(status().is(Response.Status.OK));
     }
 
-    public static void stubGetReferenceDataResultBailStatuses() {
-        stubGetReferenceDataResultBailStatuses(LocalDate.now(), "referencedata.bail-statuses.json");
-    }
-
     private static void stubGetReferenceDataResultPromptWordSynonymsForFirstDay() {
         stubGetReferenceDataResultPromptWordSynonyms(LocalDate.now(), "referencedata.result-prompt-word-synonyms.json");
-    }
-
-    private static void stubGetReferenceDataResultDefinitionRules() {
-        stubGetReferenceDataResultDefinitionRules(LocalDate.now(), "referencedata.result-definition-rules.json");
-    }
-
-    public static void stubGetReferenceDataResultDefinitionRules(final LocalDate referenceDate) {
-        stubGetReferenceDataResultDefinitionRules(referenceDate, "referencedata.result-definition-rules.json");
     }
 
     private static void stubGetReferenceDataResultPromptFixedListsForFirstDay() {
@@ -350,32 +330,6 @@ public class ReferenceDataStub {
         );
 
         waitForStubToBeReady(fixedListPath, fixedListCT);
-    }
-
-    private static void stubGetReferenceDataResultDefinitionRules(final LocalDate orderedDate, final String responsePath) {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
-
-        final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_RULE_QUERY_URL, orderedDate.toString());
-        stubFor(get(urlPathEqualTo(urlPath))
-                .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
-                        .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE)
-                        .withBody(getPayload(responsePath))));
-
-        waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE);
-    }
-
-    private static void stubGetReferenceDataResultBailStatuses(final LocalDate orderedDate, final String responsePath) {
-        InternalEndpointMockUtils.stubPingFor("referencedata-service");
-
-        final String urlPath = format(REFERENCE_DATA_RESULT_BAIL_STATUSES_QUERY_URL, orderedDate.toString());
-        stubFor(get(urlPathEqualTo(urlPath))
-                .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
-                        .withHeader("Content-Type", REFERENCE_DATA_RESULT_BAIL_STATUSES_MEDIA_TYPE)
-                        .withBody(getPayload(responsePath))));
-
-        waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_BAIL_STATUSES_MEDIA_TYPE);
     }
 
     private static void stubDynamicPromptFixedList() {

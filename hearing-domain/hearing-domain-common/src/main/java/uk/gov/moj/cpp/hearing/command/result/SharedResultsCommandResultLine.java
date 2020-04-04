@@ -34,8 +34,7 @@ public class SharedResultsCommandResultLine implements Serializable {
     private LocalDate approvedDate;
     private boolean isDeleted;
     private CourtApplicationOutcome courtApplicationOutcome;
-    private List<UUID> childResultLineIds;
-    private List<UUID> parentResultLineIds;
+
 
     @SuppressWarnings({"squid:S2384"})
     @JsonCreator
@@ -60,9 +59,7 @@ public class SharedResultsCommandResultLine implements Serializable {
             @JsonProperty("fourEyesApproval") final DelegatedPowers fourEyesApproval,
             @JsonProperty("approvedDate") final LocalDate approvedDate,
             @JsonProperty("isDeleted") final boolean isDeleted,
-            @JsonProperty("applicationOutcome") final CourtApplicationOutcome courtApplicationOutcome,
-            @JsonProperty("childResultLineIds") final List<UUID> childResultLineIds,
-            @JsonProperty("parentResultLineIds") final List<UUID>  parentResultLineIds
+            @JsonProperty("applicationOutcome") final CourtApplicationOutcome courtApplicationOutcome
     ) {
         this.delegatedPowers = delegatedPowers;
         this.orderedDate = orderedDate;
@@ -85,8 +82,7 @@ public class SharedResultsCommandResultLine implements Serializable {
         this.approvedDate = approvedDate;
         this.isDeleted = isDeleted;
         this.courtApplicationOutcome = courtApplicationOutcome;
-        this.childResultLineIds = childResultLineIds;
-        this.parentResultLineIds = parentResultLineIds;
+
     }
 
     public DelegatedPowers getDelegatedPowers() {
@@ -257,21 +253,5 @@ public class SharedResultsCommandResultLine implements Serializable {
 
     public void setApplicationOutcome(final CourtApplicationOutcome courtApplicationOutcome) {
         this.courtApplicationOutcome = courtApplicationOutcome;
-    }
-
-    public List<UUID> getChildResultLineIds() {
-        return childResultLineIds;
-    }
-
-    public void setChildResultLineIds(final List<UUID> childResultLineIds) {
-        this.childResultLineIds = childResultLineIds;
-    }
-
-    public List<UUID> getParentResultLineIds() {
-        return parentResultLineIds;
-    }
-
-    public void setParentResultLineIds(final List<UUID> parentResultLineIds) {
-        this.parentResultLineIds = parentResultLineIds;
     }
 }

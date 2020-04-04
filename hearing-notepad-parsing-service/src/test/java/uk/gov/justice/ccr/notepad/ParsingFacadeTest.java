@@ -32,7 +32,7 @@ public class ParsingFacadeTest {
     private JsonEnvelope envelope;
 
     @Test
-    public void processParts() {
+    public void processParts() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp sus");
 
         final LocalDate hearingDate = LocalDate.now();
@@ -42,7 +42,7 @@ public class ParsingFacadeTest {
     }
 
     @Test
-    public void processResultDefinition() {
+    public void processResultDefinition() throws Exception {
         final LocalDate hearingDate = LocalDate.now();
         final String definitionId = STRING.next();
         testObj.processPrompt(definitionId, hearingDate);
@@ -51,29 +51,12 @@ public class ParsingFacadeTest {
     }
 
     @Test
-    public void retrieveChildResultDefinitionDetail()  {
-        final LocalDate hearingDate = LocalDate.now();
-        final String definitionId = STRING.next();
-        testObj.retrieveChildResultDefinitionDetail(definitionId, hearingDate);
-
-        verify(processor, times(1)).retrieveChildResultDefinitionDetail(definitionId, hearingDate);
-    }
-
-    @Test
-    public void shouldCallLazyLoadOfTheProcessor() {
+    public void shouldCallLazyLoadOfTheProcessor() throws Exception {
         final LocalDate hearingDate = LocalDate.now();
 
         testObj.lazyLoad(envelope, hearingDate);
 
         verify(processor).lazyLoad(eq(envelope), eq(hearingDate));
-    }
-
-    @Test
-    public void retrieveResultDefinition() {
-        final LocalDate orderedDate = LocalDate.now();
-        final String resultDefinitionId = STRING.next();
-        testObj.retrieveResultDefinitionById(resultDefinitionId,orderedDate);
-        verify(processor, times(1)).retrieveResultDefinitionById(resultDefinitionId, orderedDate);
     }
 
 }

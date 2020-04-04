@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -66,7 +65,6 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -121,7 +119,7 @@ public class ShareResultsCommandHandlerTest {
         initiateHearingCommand = standardInitiateHearingTemplate();
         metadataId = UUID.randomUUID();
         sharedTime = new UtcClock().now();
-        final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
+        ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
                 Arrays.asList(LocalDate.now()),
                 STRING.next(),
                 randomUUID(),
@@ -135,7 +133,7 @@ public class ShareResultsCommandHandlerTest {
         );
         prosecutionCounselAdded = new ProsecutionCounselAdded(prosecutionCounsel, randomUUID());
 
-        final DefenceCounsel defenceCounsel = new DefenceCounsel(
+        DefenceCounsel defenceCounsel = new DefenceCounsel(
                 Arrays.asList(LocalDate.now()),
                 Arrays.asList(UUID.randomUUID()),
                 STRING.next(),
@@ -296,9 +294,6 @@ public class ShareResultsCommandHandlerTest {
                 .withUserId(randomUUID())
                 .build());
 
-        final List<UUID> childResultLineIds = of(randomUUID());
-        final List<UUID> parentResultLineIds = of(randomUUID());
-
         shareResultsCommand.setResultLines(Arrays.asList(
                 new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
@@ -321,9 +316,7 @@ public class ShareResultsCommandHandlerTest {
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
-                        null,
-                        childResultLineIds,
-                        parentResultLineIds
+                        null
                 )
         ));
 
@@ -345,11 +338,7 @@ public class ShareResultsCommandHandlerTest {
                                 .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
                                 .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
                                 .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                        .with(Prompt::getId, is(promptIn.getId()))))
-                                .with(ResultLine::getChildResultLineIds, is(childResultLineIds))
-                                .with(ResultLine::getParentResultLineIds, is(parentResultLineIds))
-                                )
-                        )
+                                        .with(Prompt::getId, is(promptIn.getId()))))))
                 ))
                 .with(ResultsShared::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(targetDraft.getHearingId()))

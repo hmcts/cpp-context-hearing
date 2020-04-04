@@ -1,8 +1,6 @@
 {
   "originalText": "alc req 2 conc [abc def] £23 xyz",
   "resultLineId": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-  "resultCode": "RESTRAOP",
-  "resultLevel": "O",
   "parts": [
     {
       "value": "alc",
@@ -77,16 +75,5 @@
       "state": "UNRESOLVED",
       "type": "TXT"
     }
-  ],
-  "orderedDate": "2019-09-03",
-  "childResultDefinitions": [
-    {
-      "code": "abb95a52-2a75-40c3-8d3f-a1d75a199c47",
-      "shortCode": "imp",
-      "label": "Imprisonment",
-      "ruleType": "mandatory",
-      "excludedFromResults": "true"
-    }
-  ],
-  "excludedFromResults": "true"
+  ]
 }

@@ -2,13 +2,16 @@ package uk.gov.moj.cpp.hearing.query.view;
 
 import static java.time.LocalDate.now;
 import static java.util.UUID.fromString;
-import static javax.json.Json.createObjectBuilder;
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
-import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import static java.util.UUID.fromString;
+import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.core.annotation.Component;
@@ -34,6 +37,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import static java.time.LocalDate.now;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;

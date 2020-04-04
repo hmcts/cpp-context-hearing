@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
@@ -35,14 +34,10 @@ public class NotepadHearingIT extends AbstractIT {
         final ResponseData responseData = poll(requestParams(definitionUrl, definitionMediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
                 .until(
                         status().is(OK),
-                        payload().isJson(anyOf(
+                        payload().isJson(allOf(
                                 withJsonPath("$.originalText", is("RESTRAOP")),
                                 withJsonPath("$.parts[0].value", is("Restraining order for period")),
-                                withJsonPath("$.parts[0].state", is("RESOLVED")),
-                                withJsonPath("$.parts[0].type", is("RESULT")),
-                                withJsonPath("$.excludedFromResults", is(false)),
-
-                                withJsonPath("$.childResultDefinitions[0].ruleType", is("mandatory"))
+                                withJsonPath("$.parts[0].state", is("RESOLVED"))
                         )));
 
         final JSONObject jsonObject = new JSONObject(responseData.getPayload());
@@ -57,60 +52,20 @@ public class NotepadHearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withJsonPath("$.promptChoices[0].code", is("3054909b-15b6-499f-b44f-67b2b1215c76")),
-                                withJsonPath("$.promptChoices[0].label", is("Protected person's address")),
+                                withJsonPath("$.promptChoices[0].code", is("abc9bb61-cb5b-4cf7-be24-8866bcd2fc69")),
+                                withJsonPath("$.promptChoices[0].label", is("Protected person")),
                                 withJsonPath("$.promptChoices[0].type", is("TXT")),
-                                withJsonPath("$.promptChoices[0].required", is(true)),
-                                withJsonPath("$.promptChoices[0].durationSequence", is(0)),
-                                withJsonPath("$.promptChoices[0].componentType", is("TXT")),
-                                withJsonPath("$.promptChoices[1].code", is("abc9bb61-cb5b-4cf7-be24-8866bcd2fc69")),
-                                withJsonPath("$.promptChoices[1].label", is("Protected person")),
-                                withJsonPath("$.promptChoices[1].type", is("TXT")),
-                                withJsonPath("$.promptChoices[1].required", is(true)),
-                                withJsonPath("$.promptChoices[1].durationSequence", is(0)),
-                                withJsonPath("$.promptChoices[1].componentType", is("TXT")),
-                                withJsonPath("$.promptChoices[2].code", is("8df0ec7e-5985-4998-af1a-5da293d9cb3c")),
-                                withJsonPath("$.promptChoices[2].label", is("Order details")),
-                                withJsonPath("$.promptChoices[2].type", is("TXT")),
-                                withJsonPath("$.promptChoices[2].required", is(true)),
-                                withJsonPath("$.promptChoices[2].durationSequence", is(0)),
-                                withJsonPath("$.promptChoices[2].componentType", is("TXT")),
-                                withJsonPath("$.promptChoices[3].code", is("a20665cc-6877-40f4-b85e-d4c87e62987b")),
-                                withJsonPath("$.promptChoices[3].label", is("Period of order")),
-                                withJsonPath("$.promptChoices[3].type", is("DURATION")),
-                                withJsonPath("$.promptChoices[3].required", is(true)),
-                                withJsonPath("$.promptChoices[3].durationSequence", is(0)),
-                                withJsonPath("$.promptChoices[3].componentType", is("DURATION")),
-                                withJsonPath("$.promptChoices[3].children[0].type", is("INT")),
-                                withJsonPath("$.promptChoices[3].children[0].label", is("Years")),
-                                withJsonPath("$.promptChoices[3].children[1].type", is("INT")),
-                                withJsonPath("$.promptChoices[3].children[1].label", is("Months")),
-                                withJsonPath("$.promptChoices[3].children[2].type", is("INT")),
-                                withJsonPath("$.promptChoices[3].children[2].label", is("Weeks")),
-                                withJsonPath("$.promptChoices[3].children[3].type", is("INT")),
-                                withJsonPath("$.promptChoices[3].children[3].label", is("Days")),
-                                withJsonPath("$.promptChoices[4].code", is("47337f1c-e343-4093-884f-035ba96c4db0")),
-                                withJsonPath("$.promptChoices[4].label", is("Conviction / acquittal")),
-                                withJsonPath("$.promptChoices[4].type", is("FIXL")),
-                                withJsonPath("$.promptChoices[4].required", is(true)),
-                                withJsonPath("$.promptChoices[4].durationSequence", is(0)),
-                                withJsonPath("$.promptChoices[4].componentType", is("FIXL")),
-                                withJsonPath("$.promptChoices[5].code", is("ea26f773-0a91-4526-b4ad-84d07b5bf940")),
-                                withJsonPath("$.promptChoices[5].label", is("Reason")),
-                                withJsonPath("$.promptChoices[5].type", is("TXT")),
-                                withJsonPath("$.promptChoices[5].required", is(false)),
-                                withJsonPath("$.promptChoices[5].durationSequence", is(0)),
-                                withJsonPath("$.promptChoices[5].componentType", is("TXT"))
+                                withJsonPath("$.promptChoices[0].required", is(true))
                         )));
     }
 
     @Test
     public void shouldGetUnresolvedResultWhenLookingForFutureDefinition() {
         final LocalDate orderedDate = LocalDate.now().plusDays(1);
-        final String queryAPIEndPoint = MessageFormat
+        String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP", orderedDate.toString());
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+        String url = getBaseUri() + "/" + queryAPIEndPoint;
+        String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
@@ -126,10 +81,10 @@ public class NotepadHearingIT extends AbstractIT {
 
     @Test
     public void shouldParseDataThatAreAvailableTomorrow() {
-        final String queryAPIEndPoint = MessageFormat
+        String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "RESTRAOP2", LocalDate.now().plusDays(1).toString());
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+        String url = getBaseUri() + "/" + queryAPIEndPoint;
+        String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
 
         poll(requestParams(url, mediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)

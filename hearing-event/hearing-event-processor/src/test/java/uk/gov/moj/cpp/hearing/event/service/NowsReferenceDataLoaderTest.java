@@ -88,7 +88,7 @@ public class NowsReferenceDataLoaderTest {
 
         when(requester.requestAsAdmin(any())).thenReturn(resultEnvelope);
 
-        AllResultDefinitions actual = target.getAllResultDefinition(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
+        AllResultDefinitions actual = target.loadAllResultDefinitions(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
 
         assertThat(actual.getResultDefinitions().get(0), isBean(ResultDefinition.class)
                 .withValue(ResultDefinition::getId, actual.getResultDefinitions().get(0).getId())

@@ -4,7 +4,7 @@ import static com.google.common.io.Resources.getResource;
 import static java.lang.String.format;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
-import static java.util.UUID.fromString;
+import static java.util.UUID.*;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.ws.rs.core.Response.Status.OK;

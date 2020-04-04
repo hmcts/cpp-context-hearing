@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.Boolean.TRUE;
+import static java.time.ZoneOffset.UTC;
+import static java.time.ZoneOffset.of;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -26,8 +28,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
-import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
+import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -38,6 +40,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -155,7 +158,7 @@ public class HearingService {
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
 
-        if (null == date || null == courtCentreId ) {
+        if (null == date || null == courtCentreId) {
             return new GetHearings(null);
         }
 
@@ -172,7 +175,7 @@ public class HearingService {
         final ZonedDateTime from = getDateWithTime(date, startTime);
         final ZonedDateTime to = getDateWithTime(date, endTime);
         List<Hearing> filteredHearings = filterHearings(source, from, to);
-        if(null == roomId){
+        if (null == roomId) {
             filteredHearings = filterNonEndedHearings(filteredHearings);
         }
 
@@ -189,7 +192,7 @@ public class HearingService {
     }
 
     @Transactional
-    public GetHearings getHearingsForToday(final LocalDate date,  final UUID userId) {
+    public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
         if (null == date || null == userId) {
             return new GetHearings(null);
@@ -303,32 +306,32 @@ public class HearingService {
 
         LOGGER.debug("Get subscriptions for the given reference date and nowTypeId ='{} - {}'", referenceDateParam, nowTypeParam);
 
-            try {
+        try {
 
             final LocalDate referenceDate = LocalDate.parse(referenceDateParam, FORMATTER);
 
             final UUID nowTypeId = fromString(nowTypeParam);
 
-                final List<Document> existingDocuments = documentRepository.findAllByOrderByStartDateAsc();
+            final List<Document> existingDocuments = documentRepository.findAllByOrderByStartDateAsc();
 
-                final List<Document> documents = existingDocuments
-                        .stream()
-                        .filter(existingDocument -> (referenceDate.isAfter(existingDocument.getStartDate()) || referenceDate.isEqual(existingDocument.getStartDate())))
-                        .filter(existingDocument -> (isNull(existingDocument.getEndDate()) || referenceDate.isBefore(existingDocument.getEndDate()) || (referenceDate.isEqual(existingDocument.getEndDate()))))
+            final List<Document> documents = existingDocuments
+                    .stream()
+                    .filter(existingDocument -> (referenceDate.isAfter(existingDocument.getStartDate()) || referenceDate.isEqual(existingDocument.getStartDate())))
+                    .filter(existingDocument -> (isNull(existingDocument.getEndDate()) || referenceDate.isBefore(existingDocument.getEndDate()) || (referenceDate.isEqual(existingDocument.getEndDate()))))
                     .collect(toList());
 
-                final List<Subscription> subscriptionList = new ArrayList<>();
+            final List<Subscription> subscriptionList = new ArrayList<>();
 
-                documents.forEach(d -> d.getSubscriptions().forEach(s -> s.getNowTypeIds().forEach(nt -> {
-                    if (nowTypeId.equals(nt)) {
-                        subscriptionList.add(s);
-                    }
-                })));
+            documents.forEach(d -> d.getSubscriptions().forEach(s -> s.getNowTypeIds().forEach(nt -> {
+                if (nowTypeId.equals(nt)) {
+                    subscriptionList.add(s);
+                }
+            })));
 
-                final Subscriptions subscriptions = new Subscriptions();
+            final Subscriptions subscriptions = new Subscriptions();
             subscriptions.setSubscriptions(subscriptionList.stream().map(populateHearing()).collect(toList()));
 
-                return objectToJsonObjectConverter.convert(subscriptions);
+            return objectToJsonObjectConverter.convert(subscriptions);
 
         } catch (final DateTimeParseException | IllegalArgumentException e) {
 

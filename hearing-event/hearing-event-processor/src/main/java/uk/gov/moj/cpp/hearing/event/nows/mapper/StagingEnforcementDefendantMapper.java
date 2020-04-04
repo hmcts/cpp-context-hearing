@@ -88,25 +88,25 @@ class StagingEnforcementDefendantMapper {
 
 
     private String getVehicleRegistrationMark(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant) && CollectionUtils.isNotEmpty(defendant.getOffences())) {
+        if(nonNull(defendant) &&  CollectionUtils.isNotEmpty(defendant.getOffences())) {
             final Optional<Offence> optionalOffence = defendant.getOffences().stream()
                     .filter(Objects::nonNull)
                     .filter(offence -> nonNull(offence.getOffenceFacts()) && isNotEmpty(offence.getOffenceFacts().getVehicleRegistration()))
                     .findFirst();
 
-            return optionalOffence.isPresent() ? optionalOffence.get().getOffenceFacts().getVehicleRegistration() : null;
+           return  optionalOffence.isPresent() ?  optionalOffence.get().getOffenceFacts().getVehicleRegistration() : null ;
         }
         return null;
     }
 
     private String getVehicleMake(final uk.gov.justice.core.courts.Defendant defendant) {
-        if (nonNull(defendant) && CollectionUtils.isNotEmpty(defendant.getOffences())) {
+        if(nonNull(defendant) &&  CollectionUtils.isNotEmpty(defendant.getOffences())) {
             final Optional<Offence> optionalOffence = defendant.getOffences().stream()
                     .filter(Objects::nonNull)
                     .filter(offence -> nonNull(offence.getOffenceFacts()) && isNotEmpty(offence.getOffenceFacts().getVehicleMake()))
                     .findFirst();
 
-            return optionalOffence.isPresent() ? optionalOffence.get().getOffenceFacts().getVehicleMake() : null;
+            return  optionalOffence.isPresent() ?  optionalOffence.get().getOffenceFacts().getVehicleMake() : null ;
         }
         return null;
     }

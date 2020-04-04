@@ -1,14 +1,26 @@
 package uk.gov.justice.ccr.notepad.result.cache;
 
 
-import com.google.common.cache.LoadingCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import uk.gov.justice.ccr.notepad.result.cache.model.*;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
+
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
 import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
 import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.AccessTimeout;
@@ -18,17 +30,10 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
 import javax.inject.Named;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicLong;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
+import com.google.common.cache.LoadingCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Startup
 @Singleton
@@ -100,11 +105,11 @@ public class ResultCache {
     }
 
     private Map<String, List<Long>> getPromptsIndexByKeyword(final LocalDate orderedDate) {
-        final Map<String, List<Long>> resultPromptsIndexByKeyWord = newHashMap();
-        final AtomicLong indexPromptIncrementer = new AtomicLong();
+        Map<String, List<Long>> resultPromptsIndexByKeyWord = newHashMap();
+        AtomicLong indexPromptIncrementer = new AtomicLong();
         getCachedResultPrompt(orderedDate)
                 .forEach((ResultPrompt resultPrompt) -> {
-                    final long index = indexPromptIncrementer.getAndIncrement();
+                    long index = indexPromptIncrementer.getAndIncrement();
                     resultPrompt.getKeywords().stream().filter(v -> !v.isEmpty()).forEach(word -> {
                         resultPromptsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
                         resultPromptsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (s, l) -> {
@@ -118,11 +123,11 @@ public class ResultCache {
     }
 
     private Map<String, List<Long>> getResultDefinitionsIndexByKeywords(final LocalDate orderedDate) {
-        final Map<String, List<Long>> resultDefinitionsIndexByKeyWord = newHashMap();
-        final AtomicLong indexIncrementer = new AtomicLong();
+        Map<String, List<Long>> resultDefinitionsIndexByKeyWord = newHashMap();
+        AtomicLong indexIncrementer = new AtomicLong();
         getCachedResultDefinitions(orderedDate)
                 .forEach((ResultDefinition resultDefinition) -> {
-                    final long index = indexIncrementer.getAndIncrement();
+                    long index = indexIncrementer.getAndIncrement();
                     resultDefinition.getKeywords().forEach(word -> {
                         resultDefinitionsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
                         resultDefinitionsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (s, resultDefinitions) -> {
@@ -133,14 +138,6 @@ public class ResultCache {
                     });
                 });
         return resultDefinitionsIndexByKeyWord;
-    }
-
-    @Lock(LockType.READ)
-    public ResultDefinition getResultDefinitionsById(final String resultDefinitionId, final LocalDate orderedDate) {
-        return getCachedResultDefinitions(orderedDate).stream()
-                .filter(resultDefinition -> resultDefinition.getId().equals(resultDefinitionId))
-                .findFirst()
-                .orElse(null);
     }
 
     @Lock(LockType.READ)
@@ -160,9 +157,9 @@ public class ResultCache {
 
     @Lock(LockType.READ)
     public List<ResultDefinitionSynonym> getResultDefinitionSynonym(final LocalDate orderedDate) {
-        final Set<String> allKeyWords = newHashSet();
+        Set<String> allKeyWords = newHashSet();
         getResultDefinitions(orderedDate).stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
-        final List<ResultDefinitionSynonym> resultDefinitionKeyWordsSynonyms =
+        List<ResultDefinitionSynonym> resultDefinitionKeyWordsSynonyms =
                 allKeyWords.stream().map(s -> {
                     ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
                     resultDefinitionSynonym.setSynonym(s);
@@ -189,9 +186,9 @@ public class ResultCache {
 
     @Lock(LockType.READ)
     public List<ResultPromptSynonym> getResultPromptSynonym(final LocalDate orderedDate) {
-        final Set<String> allKeyWords = newHashSet();
+        Set<String> allKeyWords = newHashSet();
         getCachedResultPrompt(orderedDate).stream().map(ResultPrompt::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
-        final List<ResultPromptSynonym> resultPromptSynonyms =
+        List<ResultPromptSynonym> resultPromptSynonyms =
                 allKeyWords.stream().map(s -> {
                     ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
                     resultPromptSynonym.setWord(s);

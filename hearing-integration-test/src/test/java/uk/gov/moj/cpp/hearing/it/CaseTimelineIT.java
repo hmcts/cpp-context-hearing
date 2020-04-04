@@ -58,16 +58,16 @@ public class CaseTimelineIT extends AbstractIT {
 
         h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
-        final UUID trialTypeId = randomUUID();
+        final UUID trialtypeId = randomUUID();
 
         final TrialType addTrialType = builder()
                 .withHearingId(hearing.getId())
-                .withTrialTypeId(trialTypeId)
+                .withTrialTypeId(trialtypeId)
                 .build();
 
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
 
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialtypeId));
     }
 
     private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {

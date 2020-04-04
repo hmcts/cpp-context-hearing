@@ -17,7 +17,7 @@ public class UpdateOffencePleaCommand {
         return hearingId;
     }
 
-    public UpdateOffencePleaCommand setHearingId(final UUID hearingId) {
+    public UpdateOffencePleaCommand setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
         return this;
     }

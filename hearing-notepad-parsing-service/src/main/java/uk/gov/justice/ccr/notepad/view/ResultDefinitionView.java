@@ -14,9 +14,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "resultCode",
         "resultLevel",
         "orderedDate",
-        "parts",
-        "childResultDefinitions",
-        "excludedFromResults"
+        "parts"
 
 })
 public class ResultDefinitionView {
@@ -30,14 +28,6 @@ public class ResultDefinitionView {
     private String orderedDate;
 
     private List<Part> parts = new ArrayList<>();
-
-    private List<ChildResultDefinition> childResultDefinitions = new ArrayList<>();
-
-    private Boolean excludedFromResults;
-
-    public Boolean getExcludedFromResults() { return excludedFromResults; }
-
-    public void setExcludedFromResults(final Boolean excludedFromResults) { this.excludedFromResults = excludedFromResults; }
 
     public String getOriginalText() {
         return originalText;
@@ -81,14 +71,6 @@ public class ResultDefinitionView {
 
     public void setOrderedDate(final String orderedDate) {
         this.orderedDate = orderedDate;
-    }
-
-    public List<ChildResultDefinition> getChildResultDefinitions() {
-        return childResultDefinitions;
-    }
-
-    public void setChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
-        this.childResultDefinitions = childResultDefinitions;
     }
 
 }

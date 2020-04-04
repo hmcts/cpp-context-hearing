@@ -50,53 +50,15 @@ public class ResultDefinition {
 
     private String qualifier;
 
-    private String postHearingCustodyStatus;
-
-    private String resultDefinitionGroup;
-
-    private Boolean terminatesOffenceProceedings;
-
-    private Boolean lifeDuration;
-
-    private Boolean publishedAsAPrompt;
-
-    private Boolean excludedFromResults;
-
-    private Boolean alwaysPublished;
-
-    private Boolean urgent;
-
-    private Boolean d20;
-
-    private List<ResultDefinitionRuleType> resultDefinitionRules = new ArrayList<>();
-
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
-    }
-
-    public String getResultDefinitionGroup() {
-        return resultDefinitionGroup;
-    }
-
-    public ResultDefinition setResultDefinitionGroup(final String resultDefinitionGroup) {
-        this.resultDefinitionGroup = resultDefinitionGroup;
-        return this;
-    }
-
-    public String getPostHearingCustodyStatus() {
-        return postHearingCustodyStatus;
-    }
-
-    public ResultDefinition setPostHearingCustodyStatus(final String postHearingCustodyStatus) {
-        this.postHearingCustodyStatus = postHearingCustodyStatus;
-        return this;
     }
 
     public UUID getId() {
         return this.id;
     }
 
-    public ResultDefinition setId(final UUID id) {
+    public ResultDefinition setId(UUID id) {
         this.id = id;
         return this;
     }
@@ -105,7 +67,7 @@ public class ResultDefinition {
         return this.label;
     }
 
-    public ResultDefinition setLabel(final String label) {
+    public ResultDefinition setLabel(String label) {
         this.label = label;
         return this;
     }
@@ -114,7 +76,7 @@ public class ResultDefinition {
         return this.shortCode;
     }
 
-    public ResultDefinition setShortCode(final String shortCode) {
+    public ResultDefinition setShortCode(String shortCode) {
         this.shortCode = shortCode;
         return this;
     }
@@ -123,7 +85,7 @@ public class ResultDefinition {
         return this.level;
     }
 
-    public ResultDefinition setLevel(final String level) {
+    public ResultDefinition setLevel(String level) {
         this.level = level;
         return this;
     }
@@ -132,7 +94,7 @@ public class ResultDefinition {
         return this.rank;
     }
 
-    public ResultDefinition setRank(final Integer rank) {
+    public ResultDefinition setRank(Integer rank) {
         this.rank = rank;
         return this;
     }
@@ -141,7 +103,7 @@ public class ResultDefinition {
         return this.wordGroups;
     }
 
-    public ResultDefinition setWordGroups(final List<WordGroups> wordGroups) {
+    public ResultDefinition setWordGroups(List<WordGroups> wordGroups) {
         this.wordGroups = wordGroups;
         return this;
     }
@@ -150,7 +112,7 @@ public class ResultDefinition {
         return this.userGroups;
     }
 
-    public ResultDefinition setUserGroups(final List<String> userGroups) {
+    public ResultDefinition setUserGroups(List<String> userGroups) {
         this.userGroups = userGroups;
         return this;
     }
@@ -159,7 +121,7 @@ public class ResultDefinition {
         return this.prompts;
     }
 
-    public ResultDefinition setPrompts(final List<Prompt> prompts) {
+    public ResultDefinition setPrompts(List<Prompt> prompts) {
         this.prompts = prompts;
         return this;
     }
@@ -168,7 +130,7 @@ public class ResultDefinition {
         return this.startDate;
     }
 
-    public ResultDefinition setStartDate(final Date startDate) {
+    public ResultDefinition setStartDate(Date startDate) {
         this.startDate = startDate;
         return this;
     }
@@ -177,7 +139,7 @@ public class ResultDefinition {
         return this.endDate;
     }
 
-    public ResultDefinition setEndDate(final Date endDate) {
+    public ResultDefinition setEndDate(Date endDate) {
         this.endDate = endDate;
         return this;
     }
@@ -186,7 +148,7 @@ public class ResultDefinition {
         return version;
     }
 
-    public ResultDefinition setVersion(final String version) {
+    public ResultDefinition setVersion(String version) {
         this.version = version;
         return this;
     }
@@ -213,13 +175,9 @@ public class ResultDefinition {
         return welshLabel;
     }
 
-    public ResultDefinition setWelshLabel(final String welshLabel) {
+    public ResultDefinition setWelshLabel(String welshLabel) {
         this.welshLabel = welshLabel;
         return this;
-    }
-
-    public String getCategory() {
-        return this.category;
     }
 
     public ResultDefinition setCategory(final String category) {
@@ -227,13 +185,17 @@ public class ResultDefinition {
         return this;
     }
 
-    public String getCjsCode() {
-        return this.cjsCode;
+    public String getCategory() {
+        return this.category;
     }
 
     public ResultDefinition setCjsCode(final String cjsCode) {
         this.cjsCode = cjsCode;
         return this;
+    }
+
+    public String getCjsCode() {
+        return this.cjsCode;
     }
 
     public boolean isAdjournment() {
@@ -254,84 +216,12 @@ public class ResultDefinition {
         return this;
     }
 
-    public String getQualifier() {
-        return this.qualifier;
-    }
-
     public ResultDefinition setQualifier(final String qualifier) {
         this.qualifier = qualifier;
         return this;
     }
 
-    public Boolean getLifeDuration() {
-        return this.lifeDuration;
-    }
-
-    public ResultDefinition setLifeDuration(final Boolean lifeDuration) {
-        this.lifeDuration = lifeDuration;
-        return this;
-    }
-
-    public Boolean getPublishedAsAPrompt() {
-        return this.publishedAsAPrompt;
-    }
-
-    public ResultDefinition setPublishedAsAPrompt(final Boolean publishedAsAPrompt) {
-        this.publishedAsAPrompt = publishedAsAPrompt;
-        return this;
-    }
-
-    public Boolean getExcludedFromResults() {
-        return this.excludedFromResults;
-    }
-
-    public ResultDefinition setExcludedFromResults(final Boolean excludedFromResults) {
-        this.excludedFromResults = excludedFromResults;
-        return this;
-    }
-
-    public Boolean getAlwaysPublished() {
-        return this.alwaysPublished;
-    }
-
-    public ResultDefinition setAlwaysPublished(final Boolean alwaysPublished) {
-        this.alwaysPublished = alwaysPublished;
-        return this;
-    }
-
-    public Boolean getTerminatesOffenceProceedings() {
-        return this.terminatesOffenceProceedings;
-    }
-
-    public ResultDefinition setTerminatesOffenceProceedings(final Boolean terminatesOffenceProceedings) {
-        this.terminatesOffenceProceedings = terminatesOffenceProceedings;
-        return this;
-    }
-
-    public Boolean getUrgent() {
-        return this.urgent;
-    }
-
-    public ResultDefinition setUrgent(final Boolean urgent) {
-        this.urgent = urgent;
-        return this;
-    }
-
-    public Boolean getD20() {
-        return this.d20;
-    }
-
-    public ResultDefinition setD20(final Boolean d20) {
-        this.d20 = d20;
-        return this;
-    }
-
-    public List<ResultDefinitionRuleType> getResultDefinitionRules() {
-        return resultDefinitionRules;
-    }
-
-    public ResultDefinition setResultDefinitionRules(final List<ResultDefinitionRuleType> resultDefinitionRules) {
-        this.resultDefinitionRules = resultDefinitionRules;
-        return this;
+    public String getQualifier() {
+        return this.qualifier;
     }
 }

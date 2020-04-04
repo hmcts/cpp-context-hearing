@@ -41,12 +41,7 @@
             <artifactId>test-utils-core</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>uk.gov.justice.services</groupId>
-            <artifactId>test-utils-enveloper-provider</artifactId>
-            <scope>test</scope>
-            <version>${cpp.framework.version}</version>
-        </dependency>
+
     </dependencies>
 
     <build>

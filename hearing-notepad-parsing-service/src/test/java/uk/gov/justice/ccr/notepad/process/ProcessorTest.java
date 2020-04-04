@@ -1,12 +1,9 @@
 package uk.gov.justice.ccr.notepad.process;
 
-import static java.time.LocalDate.now;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
@@ -19,8 +16,6 @@ import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
 
 import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
-import uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
 import uk.gov.justice.ccr.notepad.view.Part;
@@ -28,10 +23,8 @@ import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
@@ -90,7 +83,7 @@ public class ProcessorTest {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
 
-        resultCache.lazyLoad(null, now());
+        resultCache.lazyLoad(null, LocalDate.now());
 
         findPromptsIndexesByKeyword.resultCache = resultCache;
         comparePromptKeywordsUsingIndexes.resultCache = resultCache;
@@ -122,10 +115,10 @@ public class ProcessorTest {
 
     @Test
     public void processResultDefinition1() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("Imp 2 years");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("Imp 2 years");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -140,10 +133,10 @@ public class ProcessorTest {
 
     @Test
     public void processResultDefinition2() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("Pard $367 conc conc [33] m");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("Pard $367 conc conc [33] m");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -162,10 +155,10 @@ public class ProcessorTest {
 
     @Test
     public void processResultDefinition3() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("sus imp 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("sus imp 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
         assertThat(knowledge.getResultDefinitionParts().entrySet(), hasSize(2));
         assertThat(knowledge.getResultPromptParts().entrySet(), hasSize(11));
     }
@@ -175,17 +168,17 @@ public class ProcessorTest {
         final List<Part> parts = new PartsResolver().getParts("Spec cust conc 4 yr 8 mo $5666 conc Early not apply [2ewe wew[wwe] [wewe ew]");
         final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
         assertThat(knowledge.getResultDefinitionParts().entrySet(), hasSize(4));
         assertThat(knowledge.getResultPromptParts().entrySet(), hasSize(9));
     }
 
     @Test
     public void processResultDefinition5() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("vs 2 yr 3m 3£3 02:25 30/11/1980");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("vs 2 yr 3m 3£3 02:25 30/11/1980");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -223,10 +216,10 @@ public class ProcessorTest {
 
     @Test
     public void processResultDefinition6() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("life imp release 2 yr mand conc £0 £");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("life imp release 2 yr mand conc £0 £");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -268,10 +261,10 @@ public class ProcessorTest {
 
     @Test
     public void processResultDefinition7() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("alc req pard shope 2 yr mand conc £300 344");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("alc req pard shope 2 yr mand conc £300 344");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processParts(values, now());
+        Knowledge knowledge = processor.processParts(values, LocalDate.now());
 
         assertThat(
                 knowledge.getResultDefinitionParts().size()
@@ -317,20 +310,20 @@ public class ProcessorTest {
 
     @Test
     public void processResultPrompt1() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("imp sus");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("imp sus");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, now()).getResultDefinitionParts().get("imp").getCode(), now());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("imp").getCode(), LocalDate.now());
 
         assertThat(knowledge.getPromptChoices(), hasSize(13));
     }
 
     @Test
     public void processResultPrompt2() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("f");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("f");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, now()).getResultDefinitionParts().get("f").getCode(), now());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("f").getCode(), LocalDate.now());
 
 
         assertThat(
@@ -341,10 +334,10 @@ public class ProcessorTest {
 
     @Test
     public void processResultPrompt3() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("imp");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("imp");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, now()).getResultDefinitionParts().get("imp").getCode(), now());
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("imp").getCode(), LocalDate.now());
 
 
         assertThat(
@@ -355,45 +348,15 @@ public class ProcessorTest {
 
     @Test
     public void processResultPromptWithFixedList() throws Exception {
-        final List<Part> parts = new PartsResolver().getParts("restraop conv");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
+        List<Part> parts = new PartsResolver().getParts("restraop conv");
+        List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        final Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, now()).getResultDefinitionParts().get("restraop").getCode(), now());
-        final Optional<PromptChoice> pc = knowledge.getPromptChoices().stream().filter(p -> p.getLabel().equals("Conviction / acquittal")).findFirst();
+        Knowledge knowledge = processor.processResultPrompt(processor.processParts(values, LocalDate.now()).getResultDefinitionParts().get("restraop").getCode(), LocalDate.now());
+        Optional<PromptChoice> pc = knowledge.getPromptChoices().stream().filter(p -> p.getLabel().equals("Conviction / acquittal")).findFirst();
 
         assertThat(pc.isPresent(), is(true));
         assertThat(pc.get().getType(), is(ResultType.FIXL));
         assertThat(pc.get().getFixedList(), is(Sets.newHashSet("Acquitted", "Convicted")));
-    }
-
-    @Test
-    public void retrieveChildResultDefinitionDetailWhenNoResultDefinitionRules() {
-
-        final List<Part> parts = new PartsResolver().getParts("imp sus");
-        final List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
-        final String resultDefinitionId = processor.processParts(values, now()).getResultDefinitionParts().get("imp").getCode();
-
-        final ChildResultDefinitionDetail childResultDefinitionDetail = processor.retrieveChildResultDefinitionDetail(resultDefinitionId, now());
-
-        assertThat(childResultDefinitionDetail, nullValue());
-    }
-
-    @Test
-    public void shouldSetComponentTypeIfPromptReferenceIsHCROOM() {
-        final Knowledge knowledge = processor.processResultPrompt("fbed768b-ee95-4434-87c8-e81cbc8d24c8", now());
-        assertThat(knowledge.getPromptChoices().stream().filter(promptChoice -> "HCROOM".equals(promptChoice.getComponentType())).count(), is(1L));
-    }
-
-    @Test
-    public void shouldSetComponentTypeIfPromptReferenceIsHCHOUSE() {
-        final Knowledge knowledge = processor.processResultPrompt("fbed768b-ee95-4434-87c8-e81cbc8d24c8", now());
-        assertThat(knowledge.getPromptChoices().stream().filter(promptChoice -> "HCHOUSE".equals(promptChoice.getComponentType())).count(), is(1L));
-    }
-
-    @Test
-    public void shouldSetComponentTypeIfResultPromptRuleIsOneOf() {
-        final Knowledge knowledge = processor.processResultPrompt("7f80f0f4-ae8a-4965-9cc6-ef5c2c5caef7", now());
-        assertThat(knowledge.getPromptChoices().stream().filter(promptChoice -> "ONEOF".equals(promptChoice.getComponentType())).count(), is(6L));
     }
 
     public Processor getProcessor() {

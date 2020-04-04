@@ -66,7 +66,6 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.PleaValue;
-import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -1119,13 +1118,6 @@ public class TestTemplates {
                                             .withMotReasonCode(STRING.next())
                                             .withAllocationDecisionDate(FUTURE_LOCAL_DATE.next())
                                             .withSequenceNumber(INTEGER.next())
-                                            .build())
-                                    .withLaaApplnReference(LaaReference.laaReference()
-                                            .withStatusDate(LocalDate.now())
-                                            .withApplicationReference(STRING.next())
-                                            .withStatusId(UUID.randomUUID())
-                                            .withStatusCode(STRING.next())
-                                            .withStatusDescription(STRING.next())
                                             .build())
                                     .withLaaApplnReference(LaaReference.laaReference()
                                             .withStatusDate(LocalDate.now())

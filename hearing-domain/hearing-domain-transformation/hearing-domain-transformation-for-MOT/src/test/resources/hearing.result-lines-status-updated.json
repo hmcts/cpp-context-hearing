@@ -1,0 +1,17 @@
+{
+  "hearingId": "f7bf1ba5-6975-44c7-aaea-867c59619b3b",
+  "lastSharedDateTime": "2018-12-18T10:36:29.459Z",
+  "courtClerk": {
+    "id": "10e850ec-6602-48e7-b216-c0891f7dc981",
+    "firstName": "Marion",
+    "lastName": "Martin"
+  },
+  "sharedResultLines": [
+    {
+      "sharedResultLineId": "cad69043-23c7-4eca-941d-af4866baded8"
+    },
+    {
+      "sharedResultLineId": "82a49f63-0e41-47c4-aac1-88cedf30c32c"
+    }
+  ]
+}

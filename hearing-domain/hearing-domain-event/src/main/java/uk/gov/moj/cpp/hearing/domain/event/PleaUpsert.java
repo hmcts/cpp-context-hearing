@@ -39,7 +39,7 @@ public class PleaUpsert implements Serializable {
         return hearingId;
     }
 
-    public PleaUpsert setHearingId(final UUID hearingId) {
+    public PleaUpsert setHearingId(UUID hearingId) {
         this.hearingId = hearingId;
         return this;
     }

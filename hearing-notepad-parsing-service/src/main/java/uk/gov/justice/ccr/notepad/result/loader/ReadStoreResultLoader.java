@@ -2,7 +2,6 @@ package uk.gov.justice.ccr.notepad.result.loader;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.mapping;
@@ -11,18 +10,17 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.FIXL;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.isFixedListType;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.valueOf;
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.HCHOUSE;
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.HTYPE;
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.getPromptReferenceDynamicFixListUuids;
 
-import uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptFixedList;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 import uk.gov.justice.ccr.notepad.service.ResultingQueryService;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -34,6 +32,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,8 +41,6 @@ import javax.inject.Named;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonString;
-
-import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings("squid:S1188")
 @Named("readStoreResultLoader")
@@ -72,14 +69,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                                     resultDefinition.setShortCode(jsonObjectResultDefinition.getString("shortCode").toLowerCase().trim());
                                     resultDefinition.setLevel(jsonObjectResultDefinition.getString("level"));
                                     resultDefinition.setKeywords(keywords);
-                                    resultDefinition.setTerminatesOffenceProceedings(getBooleanOrNull(jsonObjectResultDefinition, "terminatesOffenceProceedings"));
-                                    resultDefinition.setLifeDuration(getBooleanOrNull(jsonObjectResultDefinition, "lifeDuration"));
-                                    resultDefinition.getChildResultDefinitions().addAll(getChildResultDefinitions(jsonObjectResultDefinition));
-                                    resultDefinition.setPublishedAsAPrompt(getBooleanOrNull(jsonObjectResultDefinition, "publishedAsAPrompt"));
-                                    resultDefinition.setExcludedFromResults(getBooleanOrNull(jsonObjectResultDefinition, "excludedFromResults"));
-                                    resultDefinition.setAlwaysPublished(getBooleanOrNull(jsonObjectResultDefinition, "alwaysPublished"));
-                                    resultDefinition.setUrgent(getBooleanOrNull(jsonObjectResultDefinition, "urgent"));
-                                    resultDefinition.setD20(getBooleanOrNull(jsonObjectResultDefinition, "d20"));
+
                                     resultDefinitions.add(resultDefinition);
                                 }
                         ));
@@ -87,24 +77,9 @@ public class ReadStoreResultLoader implements ResultLoader {
         return resultDefinitions;
     }
 
-    private List<ChildResultDefinition> getChildResultDefinitions(final JsonObject jsonObjectResultDefinition) {
-        if (jsonObjectResultDefinition.containsKey("resultDefinitionRules")) {
-            return jsonObjectResultDefinition.getJsonArray("resultDefinitionRules").getValuesAs(JsonObject.class)
-                    .stream()
-                    .map(crd -> new ChildResultDefinition(UUID.fromString(crd.getString("childResultDefinitionId")), crd.getString("ruleType")))
-                    .collect(toList());
-        }
-
-        return emptyList();
-    }
-
-    private Boolean getBooleanOrNull(final JsonObject jsonObject, final String key) {
-        return jsonObject.containsKey(key) ? jsonObject.getBoolean(key) : null;
-    }
-
     private List<List<String>> getKeywordsGroups(final JsonObject resultDefinition) {
         if (!resultDefinition.containsKey("wordGroups")) {
-            return singletonList(emptyList());
+            return emptyList();
         }
 
         return resultDefinition.getJsonArray("wordGroups").getValuesAs(JsonObject.class)
@@ -121,7 +96,7 @@ public class ReadStoreResultLoader implements ResultLoader {
         final List<ResultDefinitionSynonym> resultDefinitionSynonyms = newArrayList();
         final JsonArray resultDefinitionSynonymsJson = resultingQueryService.getAllDefinitionWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject().getJsonArray("synonymCollection");
         resultDefinitionSynonymsJson.forEach(jsonValue -> {
-            final ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
+            ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
             resultDefinitionSynonym.setWord(((JsonObject) jsonValue).getString("word").replaceAll(" ", "").trim().toLowerCase());
             resultDefinitionSynonym.setSynonym(((JsonObject) jsonValue).getString("synonym").trim().toLowerCase());
             resultDefinitionSynonyms.add(resultDefinitionSynonym);
@@ -134,7 +109,6 @@ public class ReadStoreResultLoader implements ResultLoader {
         final List<ResultPrompt> resultPrompts = newArrayList();
         final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList(orderedDate);
         final JsonObject resultDefinitionsJson = resultingQueryService.getAllDefinitions(jsonEnvelope, orderedDate).payloadAsJsonObject();
-
         final Map<UUID, List<JsonObject>> resultPromptsByIdMap = resultDefinitionsJson.getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
                 .stream()
                 .filter(jsonObject -> jsonObject.containsKey("prompts"))
@@ -143,11 +117,11 @@ public class ReadStoreResultLoader implements ResultLoader {
 
         resultPromptsByIdMap.forEach((id, prompts) ->
                 prompts.forEach(promptJson -> {
-                    final ResultPrompt resultPrompt = new ResultPrompt();
+                    ResultPrompt resultPrompt = new ResultPrompt();
                     resultPrompt.setId(promptJson.getString("id"));
                     resultPrompt.setResultDefinitionId(id);
                     resultPrompt.setLabel(promptJson.getString("label").trim());
-                    final String durationElement = promptJson.getString("duration", null);
+                    String durationElement = promptJson.getString("duration", null);
                     if (durationElement != null && !durationElement.isEmpty()) {
                         resultPrompt.setType(DURATION);
                     } else {
@@ -156,29 +130,20 @@ public class ReadStoreResultLoader implements ResultLoader {
                     final String promptReference = promptJson.getString("reference", null);
                     resultPrompt.setReference(promptReference);
                     resultPrompt.setPromptOrder(promptJson.getInt("sequence"));
-                    setResultPromptRule(resultPrompt, promptJson);
+                    resultPrompt.setMandatory(promptJson.getBoolean("mandatory"));
                     resultPrompt.setDurationElement(durationElement);
                     resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
 
                     final String fixedListId = promptJson.getString("fixedListId", null);
-                    if (fixedListId != null && isFixedListType(resultPrompt.getType())) {
+                    if (fixedListId != null && (FIXL == resultPrompt.getType() || ResultType.FIXLM == resultPrompt.getType())) {
                         resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId.trim()));
                     } else if (HCHOUSE.equals(promptReference) || HTYPE.equals(promptReference)) {
-                        setFixedListValues(resultPromptFixedListMap, resultPrompt, promptReference);
+                        setFixedListValues(resultPromptFixedListMap, resultPrompt,promptReference);
                     }
-                    resultPrompt.setDurationSequence(promptJson.getInt("durationSequence", 0));
                     resultPrompts.add(resultPrompt);
 
                 }));
         return resultPrompts;
-    }
-    
-    private void setResultPromptRule(final ResultPrompt resultPrompt, final JsonObject promptJson) {
-        String resultPromptRule = promptJson.getString("resultPromptRule", null);
-        if (StringUtils.isBlank(resultPromptRule)) {
-            resultPromptRule = promptJson.getBoolean("mandatory") ? "mandatory" : "optional";
-        }
-        resultPrompt.setResultPromptRule(resultPromptRule);
     }
 
     private void setFixedListValues(final Map<String, Set<String>> resultPromptFixedListMap, final ResultPrompt resultPrompt, final String promptReference) {
@@ -218,7 +183,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     public Map<String, Set<String>> loadDynamicPromptFixedList() {
-        final Map<String, Set<String>> result = new ConcurrentHashMap<>();
+        Map<String, Set<String>> result = new ConcurrentHashMap<>();
         result.put(getPromptReferenceDynamicFixListUuids().get(HCHOUSE), getCourtCentres());
         result.put(getPromptReferenceDynamicFixListUuids().get(HTYPE), getHearingTypes());
         return result;
@@ -228,7 +193,7 @@ public class ReadStoreResultLoader implements ResultLoader {
         return resultingQueryService.getAllCourtCentre(this.jsonEnvelope).payloadAsJsonObject()
                 .getJsonArray("organisationunits").getValuesAs(JsonObject.class)
                 .stream()
-                .map(element -> element.getString("oucodeL3Name", null))
+                .map(element -> element.getString("oucodeL3Name",null))
                 .filter(Objects::nonNull)
                 .collect(toCollection(TreeSet::new));
     }
@@ -237,11 +202,10 @@ public class ReadStoreResultLoader implements ResultLoader {
         return resultingQueryService.getHearingTypes(this.jsonEnvelope).payloadAsJsonObject()
                 .getJsonArray("hearingTypes").getValuesAs(JsonObject.class)
                 .stream()
-                .map(element -> element.getString("hearingDescription", null))
+                .map(element -> element.getString("hearingDescription",null))
                 .filter(Objects::nonNull)
                 .collect(toCollection(TreeSet::new));
     }
-
     @Override
     public List<ResultPromptSynonym> loadResultPromptSynonym(final LocalDate orderedDate) {
         return resultingQueryService.getAllResultPromptWordSynonyms(jsonEnvelope, orderedDate).payloadAsJsonObject()

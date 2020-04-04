@@ -16,9 +16,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "code",
         "label",
         "type",
-        "required",
-        "durationSequence",
-        "componentType"
+        "required"
 })
 public class PromptChoice {
 
@@ -34,21 +32,17 @@ public class PromptChoice {
 
     private Set<String> fixedList;
 
-    private Integer durationSequence;
-
     @JsonIgnore
     private boolean isVisible = true;
 
     @JsonIgnore
     private String durationElement;
 
-    private String componentType;
-
     public String getCode() {
         return code;
     }
 
-    public void setCode(final String code) {
+    public void setCode(String code) {
         this.code = code;
     }
 
@@ -56,7 +50,7 @@ public class PromptChoice {
         return label;
     }
 
-    public void setLabel(final String label) {
+    public void setLabel(String label) {
         this.label = label;
     }
 
@@ -64,7 +58,7 @@ public class PromptChoice {
         return type;
     }
 
-    public final void setType(final ResultType value) {
+    public final void setType(ResultType value) {
         type = value;
     }
 
@@ -72,7 +66,7 @@ public class PromptChoice {
         return required;
     }
 
-    public void setRequired(final Boolean required) {
+    public void setRequired(Boolean required) {
         this.required = required;
     }
 
@@ -80,7 +74,7 @@ public class PromptChoice {
         return children;
     }
 
-    public final void addChildren(final Children value) {
+    public final void addChildren(Children value) {
         if (children == null) {
             children = newArrayList();
         }
@@ -92,7 +86,7 @@ public class PromptChoice {
         return isVisible;
     }
 
-    public final void setVisible(final boolean value) {
+    public final void setVisible(boolean value) {
         isVisible = value;
     }
 
@@ -100,7 +94,7 @@ public class PromptChoice {
         return durationElement;
     }
 
-    public final void setDurationElement(final String value) {
+    public final void setDurationElement(String value) {
         durationElement = value;
     }
 
@@ -109,23 +103,7 @@ public class PromptChoice {
         return fixedList;
     }
 
-    public void setFixedList(final Set<String> fixedList) {
+    public void setFixedList(Set<String> fixedList) {
         this.fixedList = fixedList;
-    }
-
-    public Integer getDurationSequence() {
-        return durationSequence;
-    }
-
-    public void setDurationSequence(final Integer durationSequence) {
-        this.durationSequence = durationSequence;
-    }
-
-    public String getComponentType() {
-        return componentType;
-    }
-
-    public void setComponentType(final String componentType) {
-        this.componentType = componentType;
     }
 }

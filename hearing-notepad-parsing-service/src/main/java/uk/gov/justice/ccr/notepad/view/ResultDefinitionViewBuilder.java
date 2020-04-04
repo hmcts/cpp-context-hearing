@@ -29,16 +29,7 @@ public class ResultDefinitionViewBuilder {
 
     private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
 
-    public String getResultDefinitionIdFromKnowledge(final List<Part> parts, final Knowledge knowledge) {
-        final List<String> partValues = parts.stream().map(v -> v.getValue().toString().toLowerCase()).collect(Collectors.toList());
-        if (knowledge.isThisPerfectMatch()) {
-            final Part firstQualifiedPartInResultDefinition = getFirstQualifiedPartInResultDefinition(partValues, knowledge);
-            return firstQualifiedPartInResultDefinition.getCode();
-        }
-        return null;
-    }
-
-    public ResultDefinitionView buildFromKnowledge(final List<Part> parts, final Knowledge knowledge, final List<ChildResultDefinition> childResultDefinitions, final Boolean excludedFromResults) {
+    public ResultDefinitionView buildFromKnowledge(final List<Part> parts, final Knowledge knowledge) {
         ResultDefinitionView resultDefinitionView = new ResultDefinitionView();
         List<String> partValues = parts.stream().map(v -> v.getValue().toString().toLowerCase()).collect(Collectors.toList());
         if (knowledge.isThisPerfectMatch()) {
@@ -46,8 +37,6 @@ public class ResultDefinitionViewBuilder {
             resultDefinitionView.setResultCode(firstQualifiedPartInResultDefinition.getCode());
             resultDefinitionView.setResultLevel(firstQualifiedPartInResultDefinition.getResultLevel());
             resultDefinitionView.setParts(buildParts(knowledge, partValues, parts));
-            resultDefinitionView.setChildResultDefinitions(childResultDefinitions);
-            resultDefinitionView.setExcludedFromResults(excludedFromResults);
         } else {
             resultDefinitionView.setParts(buildAmbiguousParts(knowledge, partValues, parts));
         }

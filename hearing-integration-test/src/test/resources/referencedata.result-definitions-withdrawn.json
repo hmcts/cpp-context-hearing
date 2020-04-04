@@ -18,7 +18,7 @@
         {
           "id": "c95ba750-39e2-4046-b462-a4a216568638",
           "label": "Reasons",
-          "resultPromptRule": "optional",
+          "mandatory": false,
           "type": "TXT",
           "sequence": 1,
           "userGroups": [

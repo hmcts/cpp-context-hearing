@@ -26,7 +26,7 @@
         {
           "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
           "label": "Date of hearing",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "DATE",
           "sequence": 1,
           "reference": "HDATE",
@@ -42,7 +42,7 @@
         {
           "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
           "label": "Time of hearing",
-          "resultPromptRule": "optional",
+          "mandatory": false,
           "type": "TIME",
           "sequence": 2,
           "reference": "HTIME",
@@ -58,7 +58,7 @@
         {
           "id": "5f507153-6dc9-4ec0-94db-c821eff333f1",
           "label": "Courtroom",
-          "resultPromptRule": "optional",
+          "mandatory": false,
           "type": "INT",
           "sequence": 3,
           "reference": "HCROOM",
@@ -74,7 +74,7 @@
         {
           "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
           "label": "Courthouse name",
-          "resultPromptRule": "optional",
+          "mandatory": false,
           "type": "TXT",
           "sequence": 4,
           "reference": "HCHOUSE",
@@ -90,7 +90,7 @@
         {
           "id": "c1116d12-dd35-4171-807a-2cb845357d22",
           "label": "Hearing type",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "FIXL",
           "sequence": 5,
           "reference": "HTYPE",
@@ -107,7 +107,7 @@
         {
           "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
           "label": "Estimated duration",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "INT",
           "sequence": 6,
           "duration": "Weeks",
@@ -124,7 +124,7 @@
         {
           "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
           "label": "Estimated duration",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "INT",
           "sequence": 7,
           "duration": "Days",
@@ -141,7 +141,7 @@
         {
           "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
           "label": "Estimated duration",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "INT",
           "sequence": 8,
           "duration": "Hours",
@@ -158,7 +158,7 @@
         {
           "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
           "label": "Estimated duration",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "INT",
           "sequence": 9,
           "duration": "Minutes",
@@ -175,7 +175,7 @@
         {
           "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
           "label": "Remand Status",
-          "resultPromptRule": "mandatory",
+          "mandatory": true,
           "type": "FIXL",
           "sequence": 10,
           "reference": "REST",

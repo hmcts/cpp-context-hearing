@@ -38,10 +38,4 @@ public class StringToResultPromptConverterTest {
         assertThat(resultPrompt.getFixedList(), is(equalTo(fixedListSet)));
     }
 
-    @Test
-    public void convertResultPromptWithPromptReference() {
-        final StringToResultPromptConverter stringToResultPromptConverter = new StringToResultPromptConverter(new HashMap());
-        final ResultPrompt resultPrompt = stringToResultPromptConverter.convert("400\tfbed768b-ee95-4434-87c8-e81cbc8d24c8\tNext hearing in Crown Court - scheduled\t7746831a-d5dd-4fa8-ac13-528573948c8a\tCourthouse name\tmandatory\tTXT\t\t\tCC Courthouse Names\t1\t1\t\t\t\t\t\t\t\tHCHOUSE\t\n");
-        assertThat(resultPrompt.getReference(), is("HCHOUSE"));
-    }
 }

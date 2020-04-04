@@ -75,8 +75,8 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                 .build()));
 
 
-        for (final Defendant defendant : magsCourtHearingRecorded.getOriginatingHearing().getDefendants()) {
-            for (final Offence offence : defendant.getOffences()) {
+        for (Defendant defendant : magsCourtHearingRecorded.getOriginatingHearing().getDefendants()) {
+            for (Offence offence : defendant.getOffences()) {
 
                 if (offence.getPlea() == null || "NOT_GUILTY".equals(offence.getPlea().getValue())) {
                     continue;

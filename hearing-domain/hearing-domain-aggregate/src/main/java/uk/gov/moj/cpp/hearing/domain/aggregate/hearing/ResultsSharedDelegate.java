@@ -140,8 +140,6 @@ public class ResultsSharedDelegate implements Serializable {
                 .withApprovedDate(resultLineIn.getApprovedDate())
                 .withFourEyesApproval(resultLineIn.getFourEyesApproval())
                 .withIsDeleted(resultLineIn.getIsDeleted())
-                .withChildResultLineIds(resultLineIn.getChildResultLineIds())
-                .withParentResultLineIds(resultLineIn.getParentResultLineIds())
                 .build();
     }
 

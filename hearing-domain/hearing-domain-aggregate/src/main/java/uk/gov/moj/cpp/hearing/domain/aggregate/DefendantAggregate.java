@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.util.stream.Stream.empty;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -8,9 +7,9 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESNotificationDecisionDelegate;
+import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
@@ -30,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
+
+import static java.util.stream.Stream.empty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
