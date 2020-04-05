@@ -21,6 +21,7 @@ import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.INPROG
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.STARTED;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.justice.core.courts.JudicialRole;
@@ -197,7 +198,7 @@ public class HearingListXhibitResponseTransformer {
 
         hearing.getCourtApplications()
                 .forEach(courtApplication -> {
-                    final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
+                    final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication.getApplicant(), StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
                     caseDetailList.add(buildCaseDetail(hearing,
                                         hearingEvent,
                                         isActiveHearing, defendants,
@@ -208,12 +209,17 @@ public class HearingListXhibitResponseTransformer {
         return caseDetailList;
     }
 
-    private List<Defendant> getDefendantsForStandaloneApplication(final CourtApplication courtApplication, final boolean needToBeOmitted) {
-        return (needToBeOmitted || Objects.isNull(courtApplication.getApplicant().getPersonDetails())) ? asList(defendant().build()) :
-                asList(defendant()
-                        .withFirstName(courtApplication.getApplicant().getPersonDetails().getFirstName())
-                        .withMiddleName(courtApplication.getApplicant().getPersonDetails().getMiddleName())
-                        .withLastName(courtApplication.getApplicant().getPersonDetails().getLastName()).build());
+    private List<Defendant> getDefendantsForStandaloneApplication(final CourtApplicationParty applicant, final boolean needToBeOmitted) {
+        if (needToBeOmitted || (Objects.isNull(applicant.getPersonDetails()) && Objects.isNull(applicant.getOrganisation()))) {
+            return asList(defendant().build());
+        }
+        if (Objects.nonNull(applicant.getPersonDetails())) {
+            return asList(defendant()
+                    .withFirstName(applicant.getPersonDetails().getFirstName())
+                    .withMiddleName(applicant.getPersonDetails().getMiddleName())
+                    .withLastName(applicant.getPersonDetails().getLastName()).build());
+        }
+        return  asList(defendant().withFirstName(applicant.getOrganisation().getName()).build());
     }
 
     @SuppressWarnings("squid:S3655")

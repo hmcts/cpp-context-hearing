@@ -1,0 +1,37 @@
+{
+  "courtApplications": [
+    {
+      "applicant": {
+        "id": "7d9efe06-19cf-41ce-bb7a-3f417b13706a",
+        "organisation": {
+          "address": {
+            "address1": "Tes",
+            "address2": "Te",
+            "address3": "T",
+            "address4": "t",
+            "postcode": "SM1 2NH"
+          },
+          "name": "Test"
+        }
+      },
+      "applicationParticulars": "test ",
+      "applicationReceivedDate": "2020-04-01",
+      "applicationReference": "3MIYIHJU6B",
+      "applicationStatus": "UN_ALLOCATED",
+      "id": "509f5631-759c-4e98-ab88-92a8586b6bca",
+      "type": {
+        "applicantSynonym": "Applicant",
+        "applicationCategory": "VP",
+        "applicationCode": "PC02507",
+        "applicationJurisdictionType": "MAGISTRATES",
+        "applicationLegislation": "In accordance with section 47M of the Proceeds of Crime Act 2002.",
+        "applicationType": "Application for the further detention of seized property",
+        "id": "43a060bc-70b0-3f76-ab01-505ab34207a7",
+        "isAppealApplication": false,
+        "isBreachApplication": false,
+        "linkType": "STANDALONE",
+        "respondentSynonym": "Respondent"
+      }
+    }
+  ]
+}
