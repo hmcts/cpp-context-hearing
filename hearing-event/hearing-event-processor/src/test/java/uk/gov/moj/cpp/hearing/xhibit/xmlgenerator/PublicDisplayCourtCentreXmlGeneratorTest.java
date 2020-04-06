@@ -46,6 +46,7 @@ import uk.gov.moj.cpp.hearing.xhibit.XhibitReferenceDataService;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Optional;
@@ -53,6 +54,8 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,6 +70,8 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
     private static final String PUBLIC_PAGE_FILE_PATH = "xhibit/expectedPublicPage.xml";
     private static final String PUBLIC_PAGE_FOR_SUMMER_TIME_FILE_PATH = "xhibit/expectedPublicPageForSummerTime.xml";
     private static final String PUBLIC_PAGE_FOR_ACTIVE_CASES_FILE_PATH = "xhibit/expectedPublicPageForActiveCases.xml";
+    private static final String PUBLIC_PAGE_FOR_STANDALONE_APPLICATION_FILE_PATH = "xhibit/expectedPublicPageForStandaloneApplication.xml";
+    private static final String PUBLIC_PAGE_FOR_STANDALONE_APPLICATION_FOR_ORGANISATION_FILE_PATH = "xhibit/expectedPublicPageForStandaloneApplicationForOrganisation.xml";
     private static final String PUBLIC_PAGE_WITHOUT_JUDGE_NAME_FILE_PATH = "xhibit/expectedPublicPageWithoutJudgeName.xml";
     private static final String MAGISTRATE_JUDICIAL_ROLE_TYPE = "Magistrate";
 
@@ -223,6 +228,69 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FOR_ACTIVE_CASES_FILE_PATH);
     }
 
+    @Test
+    public void shouldCreatePublicDisplayCourtCentreXmlWithStandaloneApplication() throws IOException {
+        final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
+        final Currentstatus currentstatus = getCurrentStatus();
+        final String defendantFirstName = "Neil";
+        final String defendantLastName = "Chukshi";
+
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .withId(UUID.randomUUID())
+                .withHearingId(UUID.randomUUID())
+                .withEventTime(lastUpdatedTime)
+                .build();
+
+        final Optional<CurrentCourtStatus> currentCourtStatus = of(getCurrentCourtStatusForStandaloneApplication(hearingEvent, defendantFirstName, defendantLastName));
+
+        final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
+        final JsonEnvelope hearingEnvelope = getHearingEnvelope();
+        when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
+        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
+
+        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
+        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
+
+        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
+
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
+
+        final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
+
+        assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FOR_STANDALONE_APPLICATION_FILE_PATH);
+    }
+
+    @Test
+    public void shouldCreatePublicDisplayCourtCentreXmlWithStandaloneApplicationForOrganisation() throws IOException {
+        final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
+        final Currentstatus currentstatus = getCurrentStatus();
+        final String organisationName = "Organisation X";
+
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .withId(UUID.randomUUID())
+                .withHearingId(UUID.randomUUID())
+                .withEventTime(lastUpdatedTime)
+                .build();
+
+        final Optional<CurrentCourtStatus> currentCourtStatus = of(getCurrentCourtStatusForStandaloneApplication(hearingEvent, organisationName, null));
+
+        final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
+        final JsonEnvelope hearingEnvelope = getHearingEnvelope();
+        when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
+        when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
+
+        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
+        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
+
+        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
+
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
+
+        final String generatedPublicPageXml = publicDisplayCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
+
+        assertXmlEquals(generatedPublicPageXml, PUBLIC_PAGE_FOR_STANDALONE_APPLICATION_FOR_ORGANISATION_FILE_PATH);
+    }
+
     private Currentstatus getCurrentStatus() {
         final ObjectFactory objectFactory = new ObjectFactory();
         final Currentstatus currentstatus = objectFactory.createCurrentstatus();
@@ -235,6 +303,34 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
 
         currentstatus.setEvent(event);
         return currentstatus;
+    }
+
+    private CurrentCourtStatus getCurrentCourtStatusForStandaloneApplication(final HearingEvent hearingEvent, final String defendantFirstName, final String defendantLastName) {
+        return currentCourtStatus()
+                .withCourt(court()
+                        .withCourtName("Court 1")
+                        .withCourtSites(asList(courtSite()
+                                .withCourtSiteName("testCourtSiteName")
+                                .withId(UUID.randomUUID())
+                                .withCourtRooms(asList(courtRoom()
+                                        .withCourtRoomName("courtRoomName")
+                                        .withHearingEvent(hearingEvent)
+                                        .withCases(cases()
+                                                .withCasesDetails(asList(caseDetail()
+                                                        .withHearingprogress(BigInteger.ZERO)
+                                                        .withCaseType("CROWN")
+                                                        .withActivecase(valueOf(0))
+                                                        .withCppUrn("FPHNY0K3Q9")
+                                                        .withHearingType("Application")
+                                                        .withHearingEvent(hearingEvent)
+                                                        .withDefendants(asList(defendant().withFirstName(defendantFirstName).withLastName(defendantLastName).build()))
+                                                        .withJudgeName(EMPTY)
+                                                        .withNotBeforeTime("2020-04-04T23:09Z")
+                                                        .build()))
+                                                .build())
+                                        .build()))
+                                .build()))
+                        .build()).build();
     }
 
     private CurrentCourtStatus getCurrentCourtStatus(final HearingEvent hearingEvent) {
