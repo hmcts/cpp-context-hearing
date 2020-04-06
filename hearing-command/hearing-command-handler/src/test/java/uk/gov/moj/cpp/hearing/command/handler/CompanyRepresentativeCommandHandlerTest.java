@@ -9,13 +9,6 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
 import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
@@ -34,9 +27,18 @@ import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
+
 import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -49,20 +51,15 @@ public class CompanyRepresentativeCommandHandlerTest {
             CompanyRepresentativeRemoved.class,
             CompanyRepresentativeChangeIgnored.class
     );
-
+    private final FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
     @InjectMocks
     private CompanyRepresentativeCommandHandler companyRepresentativeCommandHandler;
-
     @Mock
     private EventStream hearingEventStream;
-
     @Mock
     private EventSource eventSource;
-
     @Mock
     private AggregateService aggregateService;
-
-    private FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
 
     @Test
     public void shouldAddCompanyRepresentativeIfTheCompanyRepresentativeIsNotAvailableInHearing() throws EventStreamException, IOException {
@@ -77,8 +74,8 @@ public class CompanyRepresentativeCommandHandlerTest {
 
         companyRepresentativeCommandHandler.addCompanyRepresentative(envelope);
 
-        JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.company-representative-added",actualEventProduced.metadata().name());
+        final JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
+        Assert.assertEquals("hearing.company-representative-added", actualEventProduced.metadata().name());
     }
 
     @Test
@@ -91,7 +88,7 @@ public class CompanyRepresentativeCommandHandlerTest {
         final Envelope<AddCompanyRepresentative> envelope = envelopeFrom(metadata, addCompanyRepresentative);
         final CompanyRepresentative companyRepresentative = mock(CompanyRepresentative.class);
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        CompanyRepresentativeAdded companyRepresentativeAdded = mock(CompanyRepresentativeAdded.class);
+        final CompanyRepresentativeAdded companyRepresentativeAdded = mock(CompanyRepresentativeAdded.class);
 
         when(companyRepresentative.getId()).thenReturn(envelope.payload().getCompanyRepresentative().getId());
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
@@ -102,8 +99,8 @@ public class CompanyRepresentativeCommandHandlerTest {
 
         companyRepresentativeCommandHandler.addCompanyRepresentative(envelope);
 
-        JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.company-representative-change-ignored",actualEventProduced.metadata().name());
+        final JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
+        Assert.assertEquals("hearing.company-representative-change-ignored", actualEventProduced.metadata().name());
     }
 
     @Test
@@ -116,7 +113,7 @@ public class CompanyRepresentativeCommandHandlerTest {
         final Envelope<UpdateCompanyRepresentative> envelope = envelopeFrom(metadata, updateCompanyRepresentative);
         final CompanyRepresentative companyRepresentative = mock(CompanyRepresentative.class);
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        CompanyRepresentativeAdded companyRepresentativeAdded = mock(CompanyRepresentativeAdded.class);
+        final CompanyRepresentativeAdded companyRepresentativeAdded = mock(CompanyRepresentativeAdded.class);
 
         when(companyRepresentative.getId()).thenReturn(envelope.payload().getCompanyRepresentative().getId());
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
@@ -127,8 +124,8 @@ public class CompanyRepresentativeCommandHandlerTest {
 
         companyRepresentativeCommandHandler.updateCompanyRepresentative(envelope);
 
-        JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.company-representative-updated",actualEventProduced.metadata().name());
+        final JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
+        Assert.assertEquals("hearing.company-representative-updated", actualEventProduced.metadata().name());
     }
 
     @Test
@@ -144,8 +141,8 @@ public class CompanyRepresentativeCommandHandlerTest {
 
         companyRepresentativeCommandHandler.updateCompanyRepresentative(envelope);
 
-        JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.company-representative-change-ignored",actualEventProduced.metadata().name());
+        final JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
+        Assert.assertEquals("hearing.company-representative-change-ignored", actualEventProduced.metadata().name());
     }
 
     @Test
@@ -157,7 +154,7 @@ public class CompanyRepresentativeCommandHandlerTest {
         final Envelope<RemoveCompanyRepresentative> envelope = envelopeFrom(metadata, removeCompanyRepresentative);
         final CompanyRepresentative companyRepresentative = mock(CompanyRepresentative.class);
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        CompanyRepresentativeAdded companyRepresentativeAdded = mock(CompanyRepresentativeAdded.class);
+        final CompanyRepresentativeAdded companyRepresentativeAdded = mock(CompanyRepresentativeAdded.class);
 
         when(companyRepresentative.getId()).thenReturn(envelope.payload().getId());
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
@@ -168,8 +165,8 @@ public class CompanyRepresentativeCommandHandlerTest {
 
         companyRepresentativeCommandHandler.removeCompanyRepresentative(envelope);
 
-        JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.company-representative-removed",actualEventProduced.metadata().name());
+        final JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
+        Assert.assertEquals("hearing.company-representative-removed", actualEventProduced.metadata().name());
     }
 
     @Test
@@ -183,7 +180,7 @@ public class CompanyRepresentativeCommandHandlerTest {
 
         companyRepresentativeCommandHandler.removeCompanyRepresentative(envelope);
 
-        JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
-        Assert.assertEquals( "hearing.company-representative-change-ignored",actualEventProduced.metadata().name());
+        final JsonEnvelope actualEventProduced = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).get(0);
+        Assert.assertEquals("hearing.company-representative-change-ignored", actualEventProduced.metadata().name());
     }
 }

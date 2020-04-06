@@ -8,7 +8,7 @@ public enum ResultPromptKey {
     RESULT_DEFINITION_LABEL(2),
     UUID(3),
     LABEL(4),
-    MANDATORY(5),
+    RESULT_PROMPT_RULE(5),
     PROMPT_TYPE(6),
     DURATION_ELEMENT(7),
     FIXED_LIST_UUID(8),
@@ -25,7 +25,7 @@ public enum ResultPromptKey {
     PROMPT_REFERENCE(19),
     USER_GROUPS(20);
 
-    private int order;
+    private final int order;
 
     ResultPromptKey(final int order) {
         this.order = order;

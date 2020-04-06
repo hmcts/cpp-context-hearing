@@ -20,6 +20,8 @@ import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingResultDefinition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -106,22 +108,22 @@ public class HearingAdjournValidator {
     }
 
 
-    private Target getTargetByResultLine(final List<Target> targets, final ResultLine resultLine) {
-        Target result;
-        result = targets.stream().filter(target -> target.getResultLines().contains(resultLine)).findFirst().orElse(null);
-        return result;
+    private Optional<Target> getTargetByResultLine(final List<Target> targets, final ResultLine resultLine) {
+        return targets.stream().filter(target -> target.getResultLines().contains(resultLine)).findFirst();
     }
 
     private boolean isSharedResultHaveNextHearingOrWithdrawnOffenceResults(final List<Target> targets, final List<ResultLine> completedResultLines, final Offence offence, final List<UUID> nextHearingAndWithdrawnIds) {
         return completedResultLines.stream()
-                .filter(completedResultLine -> getTargetByResultLine(targets, completedResultLine).getOffenceId().equals(offence.getId()))
+                .filter(completedResultLine -> getTargetByResultLine(targets, completedResultLine).isPresent())
+                .filter(completedResultLine -> Objects.equals(offence.getId(), getTargetByResultLine(targets, completedResultLine).get().getOffenceId()))
                 .filter(completedResultLine -> nextHearingAndWithdrawnIds.contains(completedResultLine.getResultDefinitionId()))
                 .count() > ZERO;
     }
 
     private boolean isSharedResultHaveNextHearingOrWithdrawnApplicationResults(final List<Target> targets, final List<ResultLine> completedResultLines, final CourtApplication application, final List<UUID> nextHearingAndWithdrawnIds) {
         final long result = completedResultLines.stream()
-                .filter(completedResultLine -> application.getId().equals(getTargetByResultLine(targets, completedResultLine).getApplicationId()))
+                .filter(completedResultLine -> getTargetByResultLine(targets, completedResultLine).isPresent())
+                .filter(completedResultLine -> Objects.equals(application.getId(), getTargetByResultLine(targets, completedResultLine).get().getApplicationId()))
                 .filter(completedResultLine -> nextHearingAndWithdrawnIds.contains(completedResultLine.getResultDefinitionId()))
                 .count();
         return result > ZERO;

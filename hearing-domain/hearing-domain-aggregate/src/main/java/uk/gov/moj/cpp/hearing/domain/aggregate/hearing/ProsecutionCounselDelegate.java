@@ -62,7 +62,7 @@ public class ProsecutionCounselDelegate implements Serializable {
             return Stream.of(new ProsecutionCounselChangeIgnored(
                     String.format("Provided ProsecutionCounsel does not exists, payload [%s]", prosecutionCounsel.toString()),
                     prosecutionCounsel, hearingId, caseRef));
-        }else if (prosecutionCounsels.get(prosecutionCounsel.getId()).equals(prosecutionCounsel)){
+        } else if (prosecutionCounsels.get(prosecutionCounsel.getId()).equals(prosecutionCounsel)){
             return Stream.of(new ProsecutionCounselChangeIgnored(
                     String.format("No change in provided ProsecutionCounsel, payload [%s]", prosecutionCounsel.toString()),
                     prosecutionCounsel, hearingId, caseRef));

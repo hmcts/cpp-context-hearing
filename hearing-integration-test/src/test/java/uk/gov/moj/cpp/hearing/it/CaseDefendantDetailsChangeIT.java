@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.CoreMatchers.is;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -41,14 +41,6 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
         updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
         }, 3);
     }
-
-//    @Test
-//    public void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotSharedNoBailStatus() throws Exception {
-//        updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(c -> {
-//            c.getDefendants().get(0).getPersonDefendant().setBailStatus(null);
-//        }, 10);
-//    }
-
 
     private void updateCaseDefendantDetails_shouldUpdateDefendant_givenResultNotShared(Consumer<CaseDefendantDetails> caseDefendantDetailsConsumer, long waitTime) throws Exception {
 

@@ -1,0 +1,102 @@
+{
+  "courtClerk": {
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762",
+    "firstName": "Erica",
+    "lastName": "Wilson"
+  },
+  "resultLines": [
+    {
+      "resultLineId": "453c91e2-4d63-4f67-9bc4-f98e7981a461",
+      "resultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+      "level": "OFFENCE",
+      "resultLabel": "Community requirement: Curfew with electronic monitoring",
+      "prompts": [
+        {
+          "id": "816fbec4-6091-4aba-84cd-e348cc2bf36f",
+          "label": "Curfew and electronic monitoring period",
+          "value": "2 Weeks",
+          "welshValue": ""
+        },
+        {
+          "id": "206a8658-96da-42cb-80a7-ae1c0e440e11",
+          "label": "Start date",
+          "value": "2020-12-12",
+          "welshValue": ""
+        },
+        {
+          "id": "f18d4d90-954d-4b27-9e70-f4be9c487b0e",
+          "label": "Start time",
+          "value": "12:12",
+          "welshValue": ""
+        },
+        {
+          "id": "3b0c95d5-9595-4ddd-88b8-1a2e3e70d01f",
+          "label": "End date",
+          "value": "2023-12-12",
+          "welshValue": ""
+        },
+        {
+          "id": "fd6186a4-d928-47f1-abee-2466b9b80ebf",
+          "label": "End time",
+          "value": "12:12",
+          "welshValue": ""
+        },
+        {
+          "id": "51f96065-e622-4f72-b7dc-0c11c17d1983",
+          "label": "Curfew address, details and timings",
+          "value": "etst123",
+          "welshValue": ""
+        },
+        {
+          "id": "a5711a6c-18d0-4339-a37e-4796ab9f304d",
+          "label": "Contractor",
+          "value": "London Alcohol Abstinence Monitor",
+          "welshValue": ""
+        }
+      ],
+      "isModified": true,
+      "isComplete": true,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "dc263167-aa49-4fce-ab54-baf229798bbd"
+      ]
+    },
+    {
+      "resultLineId": "dc263167-aa49-4fce-ab54-baf229798bbd",
+      "targetId": "528d1e00-232a-11ea-b403-ef1613ffc989",
+      "sharedDate": "2019-12-20",
+      "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+      "level": "OFFENCE",
+      "resultLabel": "Community order England / Wales",
+      "prompts": [
+        {
+          "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+          "label": "End Date",
+          "value": "2022-11-11",
+          "welshValue": ""
+        },
+        {
+          "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+          "label": "Responsible officer",
+          "value": "a probation officer",
+          "welshValue": ""
+        },
+        {
+          "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+          "label": "Supervising Court name",
+          "value": "test 123",
+          "welshValue": ""
+        }
+      ],
+      "isModified": false,
+      "isComplete": true,
+      "defendantId": "b6f19358-48a2-47c1-815a-3f75ad717756",
+      "offenceId": "9c203493-bee2-4be8-b8a7-b8de2d09ba52",
+      "orderedDate": "2019-12-21",
+      "childResultLineIds": [
+        "453c91e2-4d63-4f67-9bc4-f98e7981a461"
+      ]
+    }
+  ]
+}
+}

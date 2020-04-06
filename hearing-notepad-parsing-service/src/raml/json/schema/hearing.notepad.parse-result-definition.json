@@ -53,6 +53,36 @@
           }
         }
       }
+    },
+    "orderedDate": {
+      "type": "string"
+    },
+    "childResultDefinitions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "shortCode": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "ruleType": {
+            "type": "string"
+          },
+          "excludedFromResults": {
+            "type": "boolean"
+          }
+
+        }
+      }
+    },
+    "excludedFromResults": {
+      "type": "boolean"
     }
   },
   "additionalProperties": false,

@@ -4,10 +4,14 @@ import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.bailstatus.BailStatus;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -21,18 +25,26 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
 
     private final LjaReferenceDataLoader ljaReferenceDataLoader;
 
+    private final BailStatusReferenceDataLoader bailStatusReferenceDataLoader;
+
     private final FixedListLookup fixedListLookup;
 
     @Inject
-    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader, final FixedListLookup fixedListLookup) {
+    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader, final FixedListLookup fixedListLookup, final BailStatusReferenceDataLoader bailStatusReferenceDataLoader) {
         this.nowsReferenceCache = nowsReferenceCache;
         this.ljaReferenceDataLoader = ljaReferenceDataLoader;
+        this.bailStatusReferenceDataLoader = bailStatusReferenceDataLoader;
         this.fixedListLookup = fixedListLookup;
     }
 
     @Override
     public LjaDetails getLjaDetails(final JsonEnvelope context, final UUID courtCentreId, final String postcode) {
         return ljaReferenceDataLoader.getLjaDetails(context, courtCentreId, postcode);
+    }
+
+    @Override
+    public List<BailStatus> getBailStatuses(final JsonEnvelope context) {
+        return bailStatusReferenceDataLoader.getAllBailStatuses(context);
     }
 
     @Override
@@ -46,13 +58,14 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
     }
 
     @Override
-    public Set<NowDefinition> getNowDefinitionByPrimaryResultDefinitionId(final JsonEnvelope context, final LocalDate referenceDate, UUID resultDefinitionId) {
+    public Set<NowDefinition> getNowDefinitionByPrimaryResultDefinitionId(final JsonEnvelope context, final LocalDate referenceDate, final UUID resultDefinitionId) {
 
         return nowsReferenceCache.getAllNows(context, referenceDate).getNows()
                 .stream()
                 .filter(n -> n.getResultDefinitions().stream().anyMatch(rd -> rd.getPrimary() && rd.getId().equals(resultDefinitionId)))
                 .collect(Collectors.toSet());
     }
+
 
     @Override
     public NowDefinition getNowDefinitionById(final JsonEnvelope context, final LocalDate referenceDate, final UUID id) {
@@ -64,7 +77,17 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
     }
 
     @Override
-    public ResultDefinition getResultDefinitionById(final JsonEnvelope context, final LocalDate referenceDate, UUID id) {
+    public ResultDefinition getResultDefinitionById(final JsonEnvelope context, final LocalDate referenceDate, final UUID id) {
+        return nowsReferenceCache.getResultDefinitionById(context, referenceDate, id).getData();
+    }
+
+    @Override
+    public TreeNode<ResultDefinition> getResultDefinitionTreeNodeById(JsonEnvelope context, LocalDate referenceDate, UUID id) {
         return nowsReferenceCache.getResultDefinitionById(context, referenceDate, id);
+    }
+
+    @Override
+    public AllFixedList getAllFixedList(JsonEnvelope context, LocalDate referenceDate) {
+        return nowsReferenceCache.getAllFixedList(context, referenceDate);
     }
 }

@@ -17,7 +17,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
@@ -32,6 +31,7 @@ import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -58,33 +58,23 @@ public class ResultCacheTest {
     private static final String RESULT_DEFINITION_LABEL = STRING.next();
     private static final String LABEL = STRING.next();
     private static final ResultType TYPE = randomEnum(ResultType.class).next();
-    private static final boolean MANDATORY = BOOLEAN.next();
+    private static final String RESULT_PROMPT_RULE = STRING.next();
     private static final String DURATION = STRING.next();
     private static final Set<String> KEYWORDS = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final Set<String> FIXED_LIST = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final int SEQUENCE = INTEGER.next();
     private static final String REFERENCE = STRING.next();
-
+    private static final int DURATION_SEQUENCE = INTEGER.next();
+    private final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
+    private final LocalDate hearingDate = LocalDate.parse("2018-06-01");
     @Mock
     private ResultLoader resultLoader;
-
     @Mock
     private CacheFactory cacheFactory;
-
     @Mock
     private LoadingCache<String, Object> cache;
-
     @InjectMocks
     private ResultCache underTest;
-
-    private JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
-    private LocalDate hearingDate = LocalDate.parse("2018-06-01");
-
-//    @Test(expected = CacheLoader.InvalidCacheLoadException.class)
-//    public void getResultLoaderWithKeyNotFound() throws Exception {
-//        underTest.cache.get("UNKNOWN");
-//    }
-
 
     @Before
     public void setUp() {
@@ -92,7 +82,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldNotLoadTheCacheWhenNotEmpty() throws Exception {
+    public void shouldNotLoadTheCacheWhenNotEmpty() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         cacheValue.put("resultDefinitionKey-2018-06-01", new Object());
         when(cache.asMap()).thenReturn(cacheValue);
@@ -103,7 +93,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldLoadResultDefinitionsWithDataFromServiceForGivenDate() throws Exception {
+    public void shouldLoadResultDefinitionsWithDataFromServiceForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
         final List mockResultDefinitions = mock(List.class);
@@ -118,7 +108,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldLoadPromptsWithDataFromServiceForGivenDate() throws Exception {
+    public void shouldLoadPromptsWithDataFromServiceForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
         final List mockPrompts = mock(List.class);
@@ -133,7 +123,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldLoadPromptSynonymsWithDataFromServiceForGivenDate() throws Exception {
+    public void shouldLoadPromptSynonymsWithDataFromServiceForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
         final List mockPromptSynonyms = mock(List.class);
@@ -148,7 +138,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldComputeResultDefinitionIndexByKeywordsForGivenDate() throws Exception {
+    public void shouldComputeResultDefinitionIndexByKeywordsForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultDefinition> resultDefinitions = new ArrayList<>();
@@ -168,8 +158,14 @@ public class ResultCacheTest {
         final String keyword2_1 = STRING.next();
         keywords2.add(keyword2_1);
 
-        resultDefinitions.add(new ResultDefinition(id1, label1, shortCode1, STRING.next(), keywords1));
-        resultDefinitions.add(new ResultDefinition(id2, label2, shortCode2, STRING.next(), keywords2));
+
+        resultDefinitions.add(ResultDefinition.builder().withId(id1).withLabel(label1).withShortCode(shortCode1)
+                .withLevel(STRING.next()).withKeywords(keywords1).withTerminatesOffenceProceedings(true)
+                .withLifeDuration(true).withPublishedAsAPrompt(true).withExcludedFromResults(true)
+                .withAlwaysPublished(true).withUrgent(true).withD20(true).build());
+
+        resultDefinitions.add(ResultDefinition.builder().withId(id2).withLabel(label2).withShortCode(shortCode2)
+                .withLevel(STRING.next()).withKeywords(keywords2).build());
 
         when(resultLoader.loadResultDefinition(hearingDate)).thenReturn(resultDefinitions);
         when(cache.asMap()).thenReturn(cacheValue);
@@ -188,7 +184,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldLoadResultDefinitionSynonymsWithDataFromServiceForGivenDate() throws Exception {
+    public void shouldLoadResultDefinitionSynonymsWithDataFromServiceForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
         final List mockResultDefinitionSynonym = mock(List.class);
@@ -203,7 +199,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldCacheThePromptSynonymIndexesForGivenDate() throws Exception {
+    public void shouldCacheThePromptSynonymIndexesForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
 
@@ -212,10 +208,11 @@ public class ResultCacheTest {
         final UUID resultDefinitionId1 = UUID.randomUUID();
         final String resultDefinitionLabel1 = STRING.next();
         final String label1 = STRING.next();
-        final Boolean mandatory1 = BOOLEAN.next();
+        final String resultPromptRule1 = STRING.next();
         final String durationElement1 = STRING.next();
         final Integer promptOrder1 = INTEGER.next();
         final String reference1 = STRING.next();
+        final Integer durationSequence1 = 0;
 
         final HashSet<String> keywords1 = new HashSet<>();
         final String keyword_1_common = STRING.next();
@@ -230,10 +227,11 @@ public class ResultCacheTest {
         final UUID resultDefinitionId2 = UUID.randomUUID();
         final String resultDefinitionLabel2 = STRING.next();
         final String label2 = STRING.next();
-        final Boolean mandatory2 = BOOLEAN.next();
+        final String resultPromptRule2 = STRING.next();
         final String durationElement2 = STRING.next();
         final Integer promptOrder2 = INTEGER.next();
         final String reference2 = STRING.next();
+        final Integer durationSequence2 = 0;
 
         final HashSet<String> keywords2 = new HashSet<>();
         final String keyword_2_2 = STRING.next();
@@ -249,12 +247,13 @@ public class ResultCacheTest {
                 resultDefinitionLabel1,
                 label1,
                 RandomGenerator.randomEnum(ResultType.class).next(),
-                mandatory1,
+                resultPromptRule1,
                 durationElement1,
                 keywords1,
                 new HashSet<>(),
                 promptOrder1,
-                reference1
+                reference1,
+                durationSequence1
         ));
 
         resultPrompts.add(new ResultPrompt(
@@ -263,12 +262,13 @@ public class ResultCacheTest {
                 resultDefinitionLabel2,
                 label2,
                 RandomGenerator.randomEnum(ResultType.class).next(),
-                mandatory2,
+                resultPromptRule2,
                 durationElement2,
                 keywords2,
                 new HashSet<>(),
                 promptOrder2,
-                reference2
+                reference2,
+                durationSequence2
         ));
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(resultPrompts);
@@ -292,7 +292,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldReturnThePromptSynonymIndexesForGivenDate() throws Exception {
+    public void shouldReturnThePromptSynonymIndexesForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
 
@@ -326,7 +326,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldProvideTheCachedDefinitionsByDate() throws Exception {
+    public void shouldProvideTheCachedDefinitionsByDate() {
         final LocalDate hearingDate = LocalDate.parse("2017-05-08");
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
@@ -343,7 +343,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldProvideTheCachedResultPromptsByDate() throws Exception {
+    public void shouldProvideTheCachedResultPromptsByDate() {
         final LocalDate hearingDate = LocalDate.parse("2017-05-08");
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
@@ -360,14 +360,14 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldProvideTheCachedResultPromptByResultDefinitionIdAndDate() throws Exception {
+    public void shouldProvideTheCachedResultPromptByResultDefinitionIdAndDate() {
         final LocalDate hearingDate = LocalDate.parse("2017-05-08");
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultPrompt> resultPrompts = new ArrayList<>();
-        resultPrompts.add(new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, BOOLEAN.next(), null, null, null, null, null));
+        resultPrompts.add(new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null));
         final UUID resultDefinitionIdToFind = UUID.randomUUID();
-        final ResultPrompt expectedResultPrompt = new ResultPrompt(UUID.randomUUID().toString(), resultDefinitionIdToFind, null, null, null, BOOLEAN.next(), null, null, null, null, null);
+        final ResultPrompt expectedResultPrompt = new ResultPrompt(UUID.randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null);
         resultPrompts.add(expectedResultPrompt);
 
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
@@ -380,7 +380,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldRetrieveResultPromptSynonymsMergedWithPromptWordGroupsForGivenDate() throws Exception {
+    public void shouldRetrieveResultPromptSynonymsMergedWithPromptWordGroupsForGivenDate() {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
         when(cache.asMap()).thenReturn(cacheValue);
 
@@ -390,7 +390,7 @@ public class ResultCacheTest {
 
         final HashSet<String> promptKeyWords = new HashSet<>();
         promptKeyWords.add(PROMPT_WORD);
-        final ResultPrompt resultPrompt = new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, BOOLEAN.next(), null, promptKeyWords, null, null, null);
+        final ResultPrompt resultPrompt = new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null);
         final List<ResultPrompt> prompts = newArrayList(resultPrompt);
 
         final ResultPromptSynonym givenResultPromptSynonym = new ResultPromptSynonym();
@@ -412,7 +412,7 @@ public class ResultCacheTest {
     }
 
     @Test
-    public void shouldGetResultPromptByResultDefinitionIdIfPresent() throws Exception {
+    public void shouldGetResultPromptByResultDefinitionIdIfPresent() {
         final LocalDate hearingDate = LocalDate.now();
         given(resultLoader.loadResultPrompt(any(LocalDate.class))).willReturn(prepareResultPrompts());
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
@@ -432,11 +432,31 @@ public class ResultCacheTest {
     private List<ResultPrompt> prepareResultPrompts() {
         return newArrayList(
                 new ResultPrompt(PROMPT_ID.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        MANDATORY, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE),
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE),
                 new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        MANDATORY, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE)
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE)
         );
     }
 
+    @Test
+    public void shouldReturnCachedDefinitionById() {
+        final LocalDate hearingDate = LocalDate.parse("2017-05-08");
+        final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
+        final String resultDefinitionId = UUID.randomUUID().toString();
+
+        final ArrayList<ResultDefinition> resultDefinitions = new ArrayList<>();
+        ResultDefinition resultDefinition1 = new ResultDefinition();
+        resultDefinition1.setId(resultDefinitionId);
+        ResultDefinition resultDefinition2 = new ResultDefinition();
+        resultDefinition2.setId(randomUUID().toString());
+        resultDefinitions.addAll(Arrays.asList(resultDefinition1, resultDefinition2));
+
+        cacheValue.put("resultDefinitionKey-2017-05-08", resultDefinitions);
+        when(cache.asMap()).thenReturn(cacheValue);
+
+        final ResultDefinition response = underTest.getResultDefinitionsById(resultDefinitionId, hearingDate);
+
+        assertThat(response.getId(), is(resultDefinitionId));
+    }
 
 }

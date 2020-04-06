@@ -1,0 +1,73 @@
+{
+  "courtClerk": {
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762",
+    "firstName": "Erica",
+    "lastName": "Wilson"
+  },
+  "resultLines": [
+    {
+      "resultLineId": "afe667a6-586b-4abc-837a-7212cdc35952",
+      "resultDefinitionId": "028f5bea-fe0c-4c1b-a650-e4e0a4259f01",
+      "level": "CASE",
+      "resultLabel": "Special measures direction: A video recording be admitted of the evidence in chief of the interview",
+      "prompts": [
+        {
+          "id": "1f983fe8-b061-4d33-86ec-1aeb37df4d8d",
+          "label": "In respect of witness name",
+          "value": "text 123",
+          "welshValue": ""
+        }
+      ],
+      "isModified": true,
+      "isComplete": true,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "88cd515a-3d4e-4a41-8c19-72672b130583"
+      ]
+    },
+    {
+      "resultLineId": "4baf5235-b522-4915-a17e-108ad1dc01ce",
+      "resultDefinitionId": "67a91dc8-f4f9-4f80-b644-e219326045cc",
+      "level": "CASE",
+      "resultLabel": "Special measures direction: Witness to be provided with an aid to commumication",
+      "prompts": [
+        {
+          "id": "8c390d4e-3e46-4d75-9db8-961976e6d011",
+          "label": "Name of witness",
+          "value": "w 123",
+          "welshValue": ""
+        },
+        {
+          "id": "f539367f-b941-4873-9567-a235ffb81d85",
+          "label": "Device",
+          "value": "d 123",
+          "welshValue": ""
+        }
+      ],
+      "isModified": true,
+      "isComplete": true,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "88cd515a-3d4e-4a41-8c19-72672b130583"
+      ]
+    },
+    {
+      "resultLineId": "88cd515a-3d4e-4a41-8c19-72672b130583",
+      "targetId": "f42622c0-232a-11ea-b403-ef1613ffc989",
+      "sharedDate": "2019-12-20",
+      "resultDefinitionId": "0c5824cd-b6db-4c8f-a8c3-92e7e4cc0195",
+      "level": "CASE",
+      "resultLabel": "Special measures",
+      "prompts": [],
+      "isModified": false,
+      "isComplete": true,
+      "defendantId": "d168a6d0-e664-46c8-89c0-fedf1baa0862",
+      "offenceId": "1588dbf5-6706-4c15-bf6f-63cde651a5df",
+      "orderedDate": "2019-12-21",
+      "childResultLineIds": [
+        "afe667a6-586b-4abc-837a-7212cdc35952",
+        "4baf5235-b522-4915-a17e-108ad1dc01ce"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,108 @@
+{
+  "courtClerk": {
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762",
+    "firstName": "Erica",
+    "lastName": "Wilson"
+  },
+  "resultLines": [
+    {
+      "resultLineId": "52ef56a9-1f7a-4d2a-8df0-710c200cb18f",
+      "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+      "level": "OFFENCE",
+      "resultLabel": "Next hearing in Crown Court",
+      "prompts": [],
+      "isModified": true,
+      "isComplete": false,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "d4992f0b-34fa-431c-88ff-ee0333a8511b"
+      ]
+    },
+    {
+      "resultLineId": "d4992f0b-34fa-431c-88ff-ee0333a8511b",
+      "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+      "level": "OFFENCE",
+      "resultLabel": "Next hearing",
+      "prompts": [],
+      "isModified": true,
+      "isComplete": true,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "197db9ee-c222-4e93-a6ec-971156b27721"
+      ],
+      "childResultLineIds": [
+        "52ef56a9-1f7a-4d2a-8df0-710c200cb18f"
+      ]
+    },
+    {
+      "resultLineId": "13fd8955-ca88-4c24-a5e6-305a9d7c1d97",
+        "resultDefinitionId": "e073f3ba-2585-4c0d-8c31-e51a1662d143",
+      "level": "OFFENCE",
+      "resultLabel": "Bail condition: Assessments/Reports - participate in any assistance or treatment considered appropriate for misuse of class A drugs",
+      "prompts": [
+        {
+          "id": "7656ce22-8bee-497c-8e27-c7718a743652",
+          "label": "Specify qualified person who will decide treatment",
+          "value": "test1",
+          "welshValue": ""
+        }
+      ],
+      "isModified": true,
+      "isComplete": true,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "f93717ef-ba18-460e-b271-7fa691bfd618"
+      ]
+    },
+    {
+      "resultLineId": "f93717ef-ba18-460e-b271-7fa691bfd618",
+      "resultDefinitionId": "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
+      "level": "OFFENCE",
+      "resultLabel": "Bail conditions",
+      "prompts": [],
+      "isModified": true,
+      "isComplete": true,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "197db9ee-c222-4e93-a6ec-971156b27721"
+      ],
+      "childResultLineIds": [
+        "13fd8955-ca88-4c24-a5e6-305a9d7c1d97"
+      ]
+    },
+    {
+      "resultLineId": "197db9ee-c222-4e93-a6ec-971156b27721",
+      "resultDefinitionId": "3a529001-2f43-45ba-a0a8-d3ced7e9e7ad",
+      "level": "OFFENCE",
+      "resultLabel": "Remanded on conditional bail",
+      "prompts": [],
+      "isModified": true,
+      "isComplete": false,
+      "orderedDate": "2019-12-21",
+      "parentResultLineIds": [
+        "8e20024f-cfe5-42aa-a91d-50de2a0d3f92"
+      ],
+      "childResultLineIds": [
+        "d4992f0b-34fa-431c-88ff-ee0333a8511b",
+        "f93717ef-ba18-460e-b271-7fa691bfd618"
+      ]
+    },
+    {
+      "resultLineId": "8e20024f-cfe5-42aa-a91d-50de2a0d3f92",
+      "targetId": "2c0e2980-2321-11ea-b403-ef1613ffc989",
+      "sharedDate": "2019-12-20",
+      "resultDefinitionId": "e7e02d63-46c2-4603-8255-921427f410fe",
+      "level": "OFFENCE",
+      "resultLabel": "Send To Crown Court On Conditional Bail",
+      "prompts": [],
+      "isModified": false,
+      "isComplete": true,
+      "defendantId": "2ca05f4c-29df-4f27-8744-3b6084777dfb",
+      "offenceId": "bd71e1e7-4d3e-4c98-8d3f-a000e4cf62a8",
+      "orderedDate": "2019-12-21",
+      "childResultLineIds": [
+        "197db9ee-c222-4e93-a6ec-971156b27721"
+      ]
+    }
+  ]
+}

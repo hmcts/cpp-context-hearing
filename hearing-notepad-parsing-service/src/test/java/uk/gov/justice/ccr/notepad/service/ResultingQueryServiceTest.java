@@ -14,10 +14,13 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory;
 
 import java.time.LocalDate;
+
+import javax.json.JsonObject;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,20 +34,23 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ResultingQueryServiceTest {
 
-    public static final String REFERENCEDATA_GET_ALL_FIXED_LIST = "referencedata.get-all-fixed-list";
+    private static final String REFERENCEDATA_GET_ALL_FIXED_LIST = "referencedata.get-all-fixed-list";
     private static final String REFERENCEDATA_GET_ALL_RESULT_DEFINITIONS = "referencedata.get-all-result-definitions";
     private static final String REFERENCEDATA_GET_ALL_RESULT_WORD_SYNONYMS = "referencedata.get-all-result-word-synonyms";
     private static final String REFERENCEDATA_RESULT_GET_ALL_PROMPT_KEYWORD_SYNONYMS = "referencedata.get-all-prompt-synonyms";
     private static final String REFERENCEDATA_GET_ALL_RESULT_PROMPT_WORD_SYNONYMS = "referencedata.get-all-result-prompt-word-synonyms";
     private final LocalDate hearingDate = LocalDate.parse("2018-05-01");
+    @Spy
+    private final Enveloper enveloper = EnveloperFactory.createEnveloper();
     @InjectMocks
     private ResultingQueryService resultingQueryService;
-    @Spy
-    private Enveloper enveloper = EnveloperFactory.createEnveloper();
     @Mock
     private Requester requester;
     @Captor
     private ArgumentCaptor<JsonEnvelope> captor;
+
+    @Captor
+    private ArgumentCaptor<Envelope<JsonObject>> envelopeCaptor;
 
     @Test
     public void shouldGetAllResultDefinitionForAGivenDate() {
@@ -132,4 +138,5 @@ public class ResultingQueryServiceTest {
                 )))
         ));
     }
+
 }
