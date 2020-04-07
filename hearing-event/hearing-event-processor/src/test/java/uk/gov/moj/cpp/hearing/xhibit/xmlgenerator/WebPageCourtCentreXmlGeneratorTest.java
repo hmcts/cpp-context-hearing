@@ -41,6 +41,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class WebPageCourtCentreXmlGeneratorTest {
 
     private static final String WEB_PAGE_FILE_PATH = "xhibit/expectedWebPage.xml";
+    private static final String WEB_PAGE_FOR_SUMMER_TIME_FILE_PATH = "xhibit/expectedWebPageForSummerTime.xml";
 
     @Spy
     private XmlUtils xmlUtils;
@@ -53,13 +54,18 @@ public class WebPageCourtCentreXmlGeneratorTest {
 
     @Test
     public void shouldCreatePublicDisplayCourtCentreXml() throws IOException {
+        final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
 
-        final HearingEvent hearingEvent = mock(HearingEvent.class);
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .withId(UUID.randomUUID())
+                .withHearingId(UUID.randomUUID())
+                .withEventTime(lastUpdatedTime)
+                .withLastModifiedTime(lastUpdatedTime)
+                .build();
+
         final Currentstatus currentstatus = getCurrentStatus();
 
         final Optional<CurrentCourtStatus> currentCourtStatus = of(getCurrentCourtStatus(hearingEvent));
-
-        final ZonedDateTime lastUpdatedTime = parse("2019-12-05T13:50:00Z");
 
         when(eventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0))).thenReturn(currentstatus);
 
@@ -68,6 +74,28 @@ public class WebPageCourtCentreXmlGeneratorTest {
         final String generatedWebPageXml = webPageCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
 
         assertXmlEquals(generatedWebPageXml, WEB_PAGE_FILE_PATH);
+    }
+
+    @Test
+    public void shouldCreatePublicDisplayCourtCentreXmlForSummerTime() throws IOException {
+        final ZonedDateTime lastUpdatedTime = parse("2020-03-30T13:50:00Z");
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent()
+                .withId(UUID.randomUUID())
+                .withHearingId(UUID.randomUUID())
+                .withEventTime(lastUpdatedTime)
+                .withLastModifiedTime(lastUpdatedTime)
+                .build();
+        final Currentstatus currentstatus = getCurrentStatus();
+
+        final Optional<CurrentCourtStatus> currentCourtStatus = of(getCurrentCourtStatus(hearingEvent));
+
+        when(eventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0))).thenReturn(currentstatus);
+
+        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime);
+
+        final String generatedWebPageXml = webPageCourtCentreXmlGenerator.generateXml(courtCentreGeneratorParameters);
+
+        assertXmlEquals(generatedWebPageXml, WEB_PAGE_FOR_SUMMER_TIME_FILE_PATH);
     }
 
     private Currentstatus getCurrentStatus() {
