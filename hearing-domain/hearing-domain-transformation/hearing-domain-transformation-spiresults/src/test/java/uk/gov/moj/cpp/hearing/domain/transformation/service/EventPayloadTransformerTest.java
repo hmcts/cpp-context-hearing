@@ -19,9 +19,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.transformation.domain.Prompt;
 import uk.gov.moj.cpp.hearing.domain.transformation.domain.ResultDefinition;
 
-import java.sql.Date;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
