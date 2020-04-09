@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
@@ -29,7 +28,6 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CourtListAggregate;
-import uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListExportSuccessful;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -185,8 +183,8 @@ public class PublishCourtListStatusHandlerTest {
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
         givenThatWeSuccessfullyGetTheStreamForAnyPublishCourtRequest();
         givenThatThePublishCourtListRequestAggregateExists();
-        final ZonedDateTime courtCentreOneRequestTime = now();
-        final ZonedDateTime courtCentreTwoRequestTime = now();
+        final ZonedDateTime courtCentreOneRequestTime = utcClock.now();
+        final ZonedDateTime courtCentreTwoRequestTime = utcClock.now();
 
         givenThatPublicationOfTheHearingListFailsToBeRequested(COURT_CENTRE_ID_ONE, courtCentreOneRequestTime);
         givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);
@@ -206,8 +204,8 @@ public class PublishCourtListStatusHandlerTest {
 
         givenThatThePublishCourtListRequestAggregateExists();
 
-        final ZonedDateTime courtCentreOneRequestTime = now();
-        final ZonedDateTime courtCentreTwoRequestTime = now();
+        final ZonedDateTime courtCentreOneRequestTime = utcClock.now();
+        final ZonedDateTime courtCentreTwoRequestTime = utcClock.now();
 
         givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_ONE, courtCentreOneRequestTime);
         givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);

@@ -128,6 +128,8 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
         assertThat(filePayloadForPubDisplay, containsString("activecase>1</activecase"));
         assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForPublic));
         assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+
+        assertThat(filePayloadForPubDisplay, containsString("<judgename>Recorder Mark J Ainsworth</judgename>"));
     }
 
     @Ignore("To be fixed in SCSL-466")
