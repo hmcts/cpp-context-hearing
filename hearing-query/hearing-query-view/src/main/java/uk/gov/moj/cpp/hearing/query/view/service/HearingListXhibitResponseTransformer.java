@@ -6,7 +6,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.justice.hearing.courts.JurisdictionType.CROWN;
-import static uk.gov.moj.cpp.JudicialRoleTypeEnum.CIRCUIT_JUDGE;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail.caseDetail;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases.cases;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court.court;
@@ -60,7 +59,7 @@ import org.apache.commons.lang3.StringUtils;
 @ApplicationScoped
 public class HearingListXhibitResponseTransformer {
 
-    private static final String CIRCUIT_SPACE_JUDGE = "Circuit Judge";
+    private static final String CIRCUIT = "circuit";
 
     @Inject
     private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
@@ -273,8 +272,8 @@ public class HearingListXhibitResponseTransformer {
 
     private Predicate<JudicialRole> isCircuitJudge() {
         return hearingJudicialRole -> {
-            final String judiciaryType = hearingJudicialRole.getJudicialRoleType().getJudiciaryType();
-            return (CIRCUIT_SPACE_JUDGE.equalsIgnoreCase(judiciaryType) || CIRCUIT_JUDGE.name().equalsIgnoreCase(judiciaryType));
+            final String judiciaryType = hearingJudicialRole.getJudicialRoleType().getJudiciaryType().toLowerCase();
+            return (judiciaryType.contains(CIRCUIT));
         };
     }
 

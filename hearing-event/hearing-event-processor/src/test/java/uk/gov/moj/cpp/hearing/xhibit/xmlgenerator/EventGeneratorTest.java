@@ -18,6 +18,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
@@ -39,14 +40,16 @@ public class EventGeneratorTest {
     @InjectMocks
     private EventGenerator eventGenerator;
 
-    private final DateTimeFormatter dateTimeFormatter = ofPattern("HH:mm");
+    private final DateTimeFormatter timeFormatter = ofPattern("HH:mm");
     private final DateTimeFormatter dateFormatter = ofPattern("dd/MM/yy");
-    private String eventDate = LocalDate.of(2020, 03, 19).toString();
+    private static final ZoneId localZoneId = ZoneId.of("Europe/London");
+    private final LocalDate eventDate = LocalDate.of(2020, 03, 30);
+    private final String formattedEventDate = eventDate.format(dateFormatter);
     private ZonedDateTime lastModifiedTime;
 
     @Before
     public void setup() {
-        lastModifiedTime = now();
+        lastModifiedTime = ZonedDateTime.parse("2020-03-30T15:00Z");
         final PopulateComplexEventType populateComplexEventType = new PopulateComplexEventType();
         final ComplexTypeDataProcessor complexTypeDataProcessor = new ComplexTypeDataProcessor();
         setField(populateComplexEventType, "complexTypeDataProcessor", complexTypeDataProcessor);
@@ -63,8 +66,8 @@ public class EventGeneratorTest {
 
         final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
 
-        assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
-        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
+        assertThat(currentstatus.getEvent().getDate(), is(formattedEventDate));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
         assertThat(currentstatus.getEvent().getType(), is(type));
         assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
     }
@@ -79,8 +82,8 @@ public class EventGeneratorTest {
 
         final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
 
-        assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
-        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
+        assertThat(currentstatus.getEvent().getDate(), is(formattedEventDate));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
         assertThat(currentstatus.getEvent().getType(), is(type));
         assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
         assertThat(currentstatus.getEvent().getE20903ProsecutionCaseOptions().getE20903PCOType(), is(Event20903OptionType.E_20903_PROSECUTION_OPENING));
@@ -98,8 +101,8 @@ public class EventGeneratorTest {
 
         final Currentstatus currentstatus = eventGenerator.generate(courtRoom);
 
-        assertThat(currentstatus.getEvent().getDate(), is("19/03/20"));
-        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.format(dateTimeFormatter)));
+        assertThat(currentstatus.getEvent().getDate(), is(formattedEventDate));
+        assertThat(currentstatus.getEvent().getTime(), is(lastModifiedTime.withZoneSameInstant(localZoneId).format(timeFormatter)));
         assertThat(currentstatus.getEvent().getType(), is(type));
         assertThat(currentstatus.getEvent().getFreeText(), is(EMPTY));
         assertThat(currentstatus.getEvent().getE20906DefenceCOName(), is("Sid Sox"));
@@ -108,11 +111,10 @@ public class EventGeneratorTest {
     private HearingEvent createHearingEvent(final UUID defenceCounselId) {
         final UUID hearingEventId = randomUUID();
         final UUID hearingEventDefinitionId = randomUUID();
-        final ZonedDateTime lastModifiedTime = now();
 
         return hearingEvent()
                 .withLastModifiedTime(lastModifiedTime)
-                .withEventDate(eventDate)
+                .withEventDate(eventDate.toString())
                 .withDefenceCounselId(defenceCounselId)
                 .withId(hearingEventId)
                 .withHearingEventDefinitionId(hearingEventDefinitionId)

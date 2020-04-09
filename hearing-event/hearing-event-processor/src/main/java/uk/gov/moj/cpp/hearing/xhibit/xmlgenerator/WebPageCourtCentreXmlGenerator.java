@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.Defendants;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.iwp.MonthsOfYearType;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.utils.DateUtils;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 
@@ -112,7 +113,10 @@ public class WebPageCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
         xhibitCourtRoom.setCases(getCases(ccpCourtRoom.getCases()));
         xhibitCourtRoom.setDefendants(getDefendants(ccpCourtRoom.getCases()));
         xhibitCourtRoom.setCurrentstatus(eventGenerator.generate(ccpCourtRoom));
-        ofNullable(xhibitCourtRoom.getCurrentstatus().getEvent()).ifPresent(x -> xhibitCourtRoom.setTimestatusset(x.getTime()));
+        ofNullable(xhibitCourtRoom.getCurrentstatus().getEvent())
+                .ifPresent(event ->
+                        xhibitCourtRoom.setTimestatusset(DateUtils.convertZonedDateTimeToLocalTime(ccpCourtRoom.getHearingEvent().getLastModifiedTime())));
+
         return xhibitCourtRoom;
     }
 

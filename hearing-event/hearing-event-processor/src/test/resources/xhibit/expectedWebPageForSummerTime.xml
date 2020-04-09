@@ -30,7 +30,7 @@
                                 <type>102000</type>
                             </event>
                         </currentstatus>
-                        <timestatusset>13:50</timestatusset>
+                        <timestatusset>14:50</timestatusset>
                         <courtroomname>courtRoomName</courtroomname>
                     </courtroom>
                 </courtrooms>
@@ -38,10 +38,10 @@
         </courtsites>
     </court>
     <datetimestamp>
-        <dayofweek>Thursday</dayofweek>
-        <date>5</date>
-        <month>December</month>
-        <year>2019</year>
+        <dayofweek>Monday</dayofweek>
+        <date>30</date>
+        <month>March</month>
+        <year>2020</year>
         <hour>13</hour>
         <min>50</min>
     </datetimestamp>
