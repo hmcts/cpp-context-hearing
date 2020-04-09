@@ -1,12 +1,8 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.lang.String.format;
-import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
-import static uk.gov.justice.services.core.enveloper.Enveloper.toEnvelopeWithMetadataFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -28,7 +24,6 @@ public class XhibitReferenceDataService {
 
     private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS = "referencedata.query.cp-xhibit-court-mappings";
     private static final String REFERENCEDATA_QUERY_COURTROOM = "referencedata.query.courtroom";
-    private static final String REFERENCEDATA_QUERY_JUDICIARIES = "referencedata.query.judiciaries";
     private static final String REFERENCE_DATA_HEARING_TYPES = "referencedata.query.hearing-types";
     private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS = "referencedata.query.organisationunits";
     private static final int UNMAPPED_COURT_ROOM_NUMBER = -99;
@@ -108,19 +103,6 @@ public class XhibitReferenceDataService {
                 .orElse(Json.createObjectBuilder().add("courtroomId", UNMAPPED_COURT_ROOM_NUMBER).build());
 
         return courtRoom.getInt("courtroomId");
-    }
-
-    public JsonObject getJudiciary(final JsonEnvelope envelope, final UUID judiciaryId) {
-
-        final JsonObject queryParameters = createObjectBuilder().add("ids", judiciaryId.toString()).build();
-
-        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(queryParameters)
-                .withName(REFERENCEDATA_QUERY_JUDICIARIES)
-                .withMetadataFrom(envelope);
-
-        return requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload()))
-                .payloadAsJsonObject().getJsonArray("judiciaries")
-                .getValuesAs(JsonObject.class).get(0);
     }
 
     public JsonObject getXhibitHearingType(final JsonEnvelope envelope, final UUID cppHearingTypeId) {

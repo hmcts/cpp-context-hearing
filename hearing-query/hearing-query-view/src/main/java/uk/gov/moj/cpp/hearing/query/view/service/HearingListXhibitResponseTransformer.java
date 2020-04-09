@@ -29,6 +29,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitHearingTypesCache;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitJudiciaryCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
@@ -48,6 +49,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -57,6 +59,8 @@ import org.apache.commons.lang3.StringUtils;
 
 @ApplicationScoped
 public class HearingListXhibitResponseTransformer {
+
+    private static final String CIRCUIT_SPACE_JUDGE = "Circuit Judge";
 
     @Inject
     private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
@@ -68,6 +72,10 @@ public class HearingListXhibitResponseTransformer {
 
     @Inject
     private ReferenceDataService referenceDataService;
+
+    @Inject
+    private XhibitJudiciaryCache xhibitJudiciaryCache;
+
 
     public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return currentCourtStatus()
@@ -254,13 +262,20 @@ public class HearingListXhibitResponseTransformer {
         final Optional<JudicialRole> judicialRole = hearing
                 .getJudiciary()
                 .stream()
-                .filter(hearingJudicialRole -> hearingJudicialRole.getJudicialRoleType().getJudiciaryType().equals(CIRCUIT_JUDGE.name()))
+                .filter(isCircuitJudge())
                 .findFirst();
 
         if (judicialRole.isPresent()) {
-            return judicialRole.get().getTitle().concat(" ").concat(judicialRole.get().getLastName());
+            return xhibitJudiciaryCache.getJudiciaryName(judicialRole.get().getJudicialId());
         }
         return EMPTY;
+    }
+
+    private Predicate<JudicialRole> isCircuitJudge() {
+        return hearingJudicialRole -> {
+            final String judiciaryType = hearingJudicialRole.getJudicialRoleType().getJudiciaryType();
+            return (CIRCUIT_SPACE_JUDGE.equalsIgnoreCase(judiciaryType) || CIRCUIT_JUDGE.name().equalsIgnoreCase(judiciaryType));
+        };
     }
 
     private List<Defendant> getDefendants(final ProsecutionCase prosecutionCase, final boolean needToBeOmitted) {

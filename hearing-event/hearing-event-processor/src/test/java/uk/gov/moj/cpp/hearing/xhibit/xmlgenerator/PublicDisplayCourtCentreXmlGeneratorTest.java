@@ -32,6 +32,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
@@ -39,7 +40,6 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
-import uk.gov.moj.cpp.hearing.test.FileUtil;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.XhibitReferenceDataService;
@@ -54,8 +54,6 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -126,9 +124,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
-        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
-        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
-
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
@@ -156,9 +151,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
-        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
-        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
-
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
@@ -180,16 +172,15 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final Currentstatus currentstatus = getCurrentStatus();
 
         final Optional<CurrentCourtStatus> currentCourtStatus = of(getCurrentCourtStatus(hearingEvent));
+        final CaseDetail cppCaseDetail = currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0);
+        ReflectionUtil.setField(cppCaseDetail, "judgeName", null);
 
         final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
         final JsonEnvelope hearingEnvelope = getHearingEnvelopeJustWithMagistrate();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
-        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
-        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
-
-        when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
+        when(publicDisplayEventGenerator.generate(cppCaseDetail)).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
 
@@ -215,9 +206,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
-
-        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
-        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
 
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
@@ -248,9 +236,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
 
-        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
-        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
-
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
         final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(PUBLIC_DISPLAY, currentCourtStatus, lastUpdatedTime, context);
@@ -278,9 +263,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
         final JsonEnvelope hearingEnvelope = getHearingEnvelope();
         when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString()).apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
         when(requester.requestAsAdmin(jsonEnvelopeMock)).thenReturn(hearingEnvelope);
-
-        final JsonObject judiciary = FileUtil.givenPayload("/data/referencedata.query.judiciaries.json");
-        when(xhibitReferenceDataService.getJudiciary(any(), any())).thenReturn(judiciary);
 
         when(publicDisplayEventGenerator.generate(currentCourtStatus.get().getCourt().getCourtSites().get(0).getCourtRooms().get(0).getCases().getCasesDetails().get(0))).thenReturn(currentstatus);
 
@@ -324,7 +306,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withHearingType("Application")
                                                         .withHearingEvent(hearingEvent)
                                                         .withDefendants(asList(defendant().withFirstName(defendantFirstName).withLastName(defendantLastName).build()))
-                                                        .withJudgeName(EMPTY)
+                                                        .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                                                         .withNotBeforeTime("2020-04-04T23:09Z")
                                                         .build()))
                                                 .build())
@@ -351,7 +333,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withHearingType("hearingType")
                                                         .withHearingEvent(hearingEvent)
                                                         .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
-                                                        .withJudgeName("Mr Lampard")
+                                                        .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                                                         .withNotBeforeTime("2020-02-09T15:00Z")
                                                         .build()))
                                                 .build())
@@ -378,7 +360,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withHearingType("hearingType")
                                                         .withHearingEvent(hearingEvent)
                                                         .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
-                                                        .withJudgeName("Mr Lampard")
+                                                        .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                                                         .withNotBeforeTime("2020-03-30T15:00Z")
                                                         .build()))
                                                 .build())
@@ -411,7 +393,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                 .withCppUrn("234")
                 .withHearingType("hearingType")
                 .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
-                .withJudgeName("Mr Lampard")
+                .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                 .withNotBeforeTime("2020-02-09T15:00Z")
                 .build();
     }
@@ -425,7 +407,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                 .withCppUrn("235")
                 .withHearingType("hearingType")
                 .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
-                .withJudgeName("Mr Lampard")
                 .withNotBeforeTime("2020-02-09T15:00Z")
                 .build();
     }
