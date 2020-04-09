@@ -1,29 +1,5 @@
 package uk.gov.justice.ccr.notepad;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import uk.gov.justice.ccr.notepad.process.Knowledge;
-import uk.gov.justice.ccr.notepad.view.ResultDefinitionView;
-import uk.gov.justice.ccr.notepad.view.ResultDefinitionViewBuilder;
-import uk.gov.justice.ccr.notepad.view.ResultPromptView;
-import uk.gov.justice.ccr.notepad.view.ResultPromptViewBuilder;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-
-import java.time.LocalDate;
-import java.util.function.Function;
-
-import javax.json.Json;
-import javax.json.JsonObject;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -31,6 +7,32 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.ccr.notepad.process.ChildResultDefinitionDetail;
+import uk.gov.justice.ccr.notepad.process.Knowledge;
+import uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.view.*;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+
+import javax.json.Json;
+import javax.json.JsonObject;
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class NotepadResultServiceApiTest {
@@ -64,28 +66,39 @@ public class NotepadResultServiceApiTest {
     @Captor
     private ArgumentCaptor<LocalDate> parsingLocalDateArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<Knowledge> knowledgeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Boolean> excludedFromResults;
+
+    @Captor
+    private ArgumentCaptor<List<uk.gov.justice.ccr.notepad.view.ChildResultDefinition>> childResultDefinitionsCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<Part>> partsCaptor;
 
     @Mock
     private Function<Object, JsonEnvelope> function;
-
-    @Mock
-    private JsonEnvelope responseJson;
 
     @Mock
     private ResultDefinitionView resultDefinitionView;
 
     @Test
     public void getResultDefinition() throws Exception {
+        final UUID resultDefinitionId = randomUUID();
         JsonObject payload = Json.createObjectBuilder()
                 .add("originalText", "imp sus")
                 .add("orderedDate", "2018-06-01")
+                .add("excludedFromResults", true)
                 .build();
         when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any())).thenReturn(resultDefinitionView);
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean())).thenReturn(resultDefinitionView);
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
+        when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(resultDefinitionId.toString());
+        when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(mock(ChildResultDefinitionDetail.class));
 
         testObj.getResultDefinition(jsonEnvelope);
-
 
         verify(parsingFacade, times(1)).processParts(any(), parsingLocalDateArgumentCaptor.capture());
         verify(parsingFacade, times(1)).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
@@ -94,7 +107,7 @@ public class NotepadResultServiceApiTest {
         assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse("2018-06-01")));
         verify(resultDefinitionView, times(1)).setOriginalText("imp sus");
         verify(resultDefinitionView, times(1)).setOrderedDate("2018-06-01");
-        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(any(), any());
+        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(any(), any(), any(), anyBoolean());
         verify(objectToJsonObjectConverter, times(1)).convert(any());
         verify(enveloper, times(1)).withMetadataFrom(any(), any());
     }
@@ -122,11 +135,22 @@ public class NotepadResultServiceApiTest {
     }
 
     @Test
-    public void buildResultDefinitionView() throws Exception {
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any())).thenReturn(new ResultDefinitionView());
+    public void buildResultDefinitionView() {
+        final UUID parentResultDefinitionId = randomUUID();
+        final UUID childResultDefinitionId1 = randomUUID();
+        final UUID childResultDefinitionId2 = randomUUID();
+        final UUID childResultDefinitionId3 = randomUUID();
+
+        ChildResultDefinitionDetail childResultDefinitionDetail = new ChildResultDefinitionDetail(createResultDefinition(parentResultDefinitionId, Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)),
+                createResultDefinitions(Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)));
+
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean())).thenReturn(new ResultDefinitionView());
+        when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(parentResultDefinitionId.toString());
+        when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
 
         final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
-                "imp sus", "2014-06-04", newArrayList(), new Knowledge());
+                "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
+        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture());
 
         assertThat(resultDefinitionView.getOriginalText()
                 , is("imp sus")
@@ -135,7 +159,58 @@ public class NotepadResultServiceApiTest {
         assertThat(resultDefinitionView.getResultLineId().length()
                 , is(36)
         );
+        assertThat(childResultDefinitionsCaptor.getValue().size(), is(3));
+        assertThat(childResultDefinitionsCaptor.getValue().get(0).getCode(), is(childResultDefinitionId1.toString()));
+        assertThat(childResultDefinitionsCaptor.getValue().get(0).getLabel(), is("lab"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(0).getShortCode(), is("sho code"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(0).getRuleType(), is("mandatory"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(0).getExcludedFromResults(), is(true));
 
+
+        assertThat(childResultDefinitionsCaptor.getValue().get(1).getCode(), is(childResultDefinitionId2.toString()));
+        assertThat(childResultDefinitionsCaptor.getValue().get(1).getLabel(), is("lab"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(1).getShortCode(), is("sho code"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(1).getRuleType(), is("mandatory"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(1).getExcludedFromResults(), is(true));
+
+
+        assertThat(childResultDefinitionsCaptor.getValue().get(2).getCode(), is(childResultDefinitionId3.toString()));
+        assertThat(childResultDefinitionsCaptor.getValue().get(2).getLabel(), is("lab"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(2).getShortCode(), is("sho code"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(2).getRuleType(), is("mandatory"));
+        assertThat(childResultDefinitionsCaptor.getValue().get(2).getExcludedFromResults(), is(true));
+
+    }
+
+    private List<ResultDefinition> createResultDefinitions(final List<UUID> childResultDefinitionIds) {
+        return childResultDefinitionIds.stream()
+                .map(uuid -> ResultDefinition.builder()
+                        .withId(uuid.toString())
+                        .withLabel("lab")
+                        .withShortCode("sho code")
+                        .withExcludedFromResults(true)
+                        .build()
+                )
+                .collect(Collectors.toList());
+    }
+
+    private ResultDefinition createResultDefinition(final UUID resultDefinitionId, final List<UUID> childResultDefinitionIds) {
+
+        ResultDefinition resultDefinition = new ResultDefinition();
+        resultDefinition.setId(resultDefinitionId.toString());
+        resultDefinition.getChildResultDefinitions().addAll(createChildResultDefinitions(childResultDefinitionIds));
+
+        return resultDefinition;
+    }
+
+    private List<ChildResultDefinition> createChildResultDefinitions(final List<UUID> childResultDefinitionIds) {
+        return childResultDefinitionIds.stream()
+                .map(uuid -> createChildResultDefinition(uuid))
+                .collect(Collectors.toList());
+    }
+
+    private ChildResultDefinition createChildResultDefinition(final UUID childDefinitionId) {
+        return new ChildResultDefinition(childDefinitionId, "mandatory");
     }
 
 }

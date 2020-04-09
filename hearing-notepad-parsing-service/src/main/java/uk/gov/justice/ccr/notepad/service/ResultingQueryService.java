@@ -1,8 +1,7 @@
 package uk.gov.justice.ccr.notepad.service;
 
 import static javax.json.Json.createObjectBuilder;
-
-import uk.gov.justice.services.common.converter.LocalDates;
+import static uk.gov.justice.services.common.converter.LocalDates.to;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -29,7 +28,7 @@ public class ResultingQueryService {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-definitions")
                 .apply(createObjectBuilder()
-                        .add("on", LocalDates.to(orderedDate))
+                        .add("on", to(orderedDate))
                         .build());
         return requester.request(requestEnvelope);
     }
@@ -38,7 +37,7 @@ public class ResultingQueryService {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-word-synonyms")
                 .apply(createObjectBuilder()
-                        .add("on", LocalDates.to(orderedDate))
+                        .add("on", to(orderedDate))
                         .build());
         return requester.request(requestEnvelope);
     }
@@ -46,7 +45,7 @@ public class ResultingQueryService {
     public JsonEnvelope getAllFixedLists(final JsonEnvelope envelope, final LocalDate orderedDate) {
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-fixed-list")
                 .apply(createObjectBuilder()
-                        .add("on", LocalDates.to(orderedDate))
+                        .add("on", to(orderedDate))
                         .build());
         return requester.request(requestEnvelope);
     }
@@ -67,8 +66,9 @@ public class ResultingQueryService {
 
         final JsonEnvelope requestEnvelope = enveloper.withMetadataFrom(envelope, "referencedata.get-all-result-prompt-word-synonyms")
                 .apply(createObjectBuilder()
-                        .add("on", LocalDates.to(orderedDate))
+                        .add("on", to(orderedDate))
                         .build());
         return requester.request(requestEnvelope);
     }
+
 }

@@ -1,12 +1,15 @@
 package uk.gov.justice.ccr.notepad.result.cache.model;
 
-import static java.util.stream.Collectors.toCollection;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toCollection;
 
 public class ResultDefinition {
     private String id;
@@ -14,19 +17,14 @@ public class ResultDefinition {
     private String shortCode;
     private String level;
     private Set<String> keywords;
-
-    public ResultDefinition() {
-
-    }
-
-    public ResultDefinition(final String id, final String label, final String shortCode,
-                            final String level, final Set<String> keywords) {
-        this.id = id;
-        this.label = label;
-        this.shortCode = shortCode;
-        this.level = level;
-        this.keywords = keywords;
-    }
+    private Boolean terminatesOffenceProceedings;
+    private Boolean lifeDuration;
+    private List<ChildResultDefinition> childResultDefinitions = new ArrayList<>();
+    private Boolean publishedAsAPrompt;
+    private Boolean excludedFromResults;
+    private Boolean alwaysPublished;
+    private Boolean urgent;
+    private Boolean d20;
 
     public final String getId() {
         return id;
@@ -70,6 +68,62 @@ public class ResultDefinition {
         }
     }
 
+    public Boolean getTerminatesOffenceProceedings() {
+        return terminatesOffenceProceedings;
+    }
+
+    public void setTerminatesOffenceProceedings(final Boolean terminatesOffenceProceedings) {
+        this.terminatesOffenceProceedings = terminatesOffenceProceedings;
+    }
+
+    public Boolean getLifeDuration() {
+        return lifeDuration;
+    }
+
+    public void setLifeDuration(final Boolean lifeDuration) {
+        this.lifeDuration = lifeDuration;
+    }
+
+    public Boolean getPublishedAsAPrompt() {
+        return publishedAsAPrompt;
+    }
+
+    public void setPublishedAsAPrompt(final Boolean publishedAsAPrompt) {
+        this.publishedAsAPrompt = publishedAsAPrompt;
+    }
+
+    public Boolean getExcludedFromResults() {
+        return excludedFromResults;
+    }
+
+    public void setExcludedFromResults(final Boolean excludedFromResults) {
+        this.excludedFromResults = excludedFromResults;
+    }
+
+    public Boolean getAlwaysPublished() {
+        return alwaysPublished;
+    }
+
+    public void setAlwaysPublished(final Boolean alwaysPublished) {
+        this.alwaysPublished = alwaysPublished;
+    }
+
+    public Boolean getUrgent() {
+        return urgent;
+    }
+
+    public void setUrgent(final Boolean urgent) {
+        this.urgent = urgent;
+    }
+
+    public Boolean getD20() {
+        return d20;
+    }
+
+    public void setD20(final Boolean d20) {
+        this.d20 = d20;
+    }
+
     @Override
     public String toString() {
         return "ResultDefinition{" +
@@ -78,6 +132,115 @@ public class ResultDefinition {
                 ", shortCode='" + shortCode + '\'' +
                 ", level='" + level + '\'' +
                 ", keywords=" + keywords +
+                ", terminatesOffenceProceedings=" + terminatesOffenceProceedings +
+                ", isLifeDuration=" + lifeDuration +
+                ", childResultDefinitions=" + childResultDefinitions +
+                ", isPublishedAsAPrompt=" + publishedAsAPrompt +
+                ", isExcludedFromResults=" + excludedFromResults +
+                ", isAlwaysPublished=" + alwaysPublished +
+                ", isUrgent=" + urgent +
+                ", isD20=" + d20 +
                 '}';
+    }
+
+    public static Builder builder() {
+        return new ResultDefinition.Builder();
+    }
+
+    public List<ChildResultDefinition> getChildResultDefinitions() {
+        return childResultDefinitions;
+    }
+
+    public static class Builder {
+
+        private String id;
+        private String label;
+        private String shortCode;
+        private String level;
+        private Set<String> keywords;
+        private Boolean terminatesOffenceProceedings;
+        private Boolean isLifeDuration;
+        private Boolean isPublishedAsAPrompt;
+        private Boolean isExcludedFromResults;
+        private Boolean isAlwaysPublished;
+        private Boolean isUrgent;
+        private Boolean isD20;
+
+        public Builder withId(final String id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withLabel(final String label) {
+            this.label = label;
+            return this;
+        }
+
+        public Builder withShortCode(final String shortCode) {
+            this.shortCode = shortCode;
+            return this;
+        }
+
+        public Builder withLevel(final String level) {
+            this.level = level;
+            return this;
+        }
+
+        public Builder withKeywords(final Set<String> keywords) {
+            this.keywords = keywords;
+            return this;
+        }
+
+        public Builder withTerminatesOffenceProceedings(final Boolean terminatesOffenceProceedings) {
+            this.terminatesOffenceProceedings = terminatesOffenceProceedings;
+            return this;
+        }
+
+        public Builder withLifeDuration(final Boolean lifeDuration) {
+            isLifeDuration = lifeDuration;
+            return this;
+        }
+
+        public Builder withPublishedAsAPrompt(final Boolean publishedAsAPrompt) {
+            isPublishedAsAPrompt = publishedAsAPrompt;
+            return this;
+        }
+
+        public Builder withExcludedFromResults(final Boolean excludedFromResults) {
+            isExcludedFromResults = excludedFromResults;
+            return this;
+        }
+
+        public Builder withAlwaysPublished(final Boolean alwaysPublished) {
+            isAlwaysPublished = alwaysPublished;
+            return this;
+        }
+
+        public Builder withUrgent(final Boolean urgent) {
+            isUrgent = urgent;
+            return this;
+        }
+
+        public Builder withD20(final Boolean d20) {
+            isD20 = d20;
+            return this;
+        }
+
+        public ResultDefinition build() {
+            final ResultDefinition resultDefinition = new ResultDefinition();
+            resultDefinition.setId(this.id);
+            resultDefinition.setLabel(this.label);
+            resultDefinition.setShortCode(this.shortCode);
+            resultDefinition.setLevel(this.level);
+            resultDefinition.setKeywords(this.keywords != null ? this.keywords.stream().collect(Collectors.toList()) : Collections.emptyList());
+            resultDefinition.setTerminatesOffenceProceedings(this.terminatesOffenceProceedings);
+            resultDefinition.setLifeDuration(this.isLifeDuration);
+            resultDefinition.setPublishedAsAPrompt(this.isPublishedAsAPrompt);
+            resultDefinition.setExcludedFromResults(this.isExcludedFromResults);
+            resultDefinition.setAlwaysPublished(this.isAlwaysPublished);
+            resultDefinition.setUrgent(this.isUrgent);
+            resultDefinition.setD20(this.isD20);
+            return resultDefinition;
+        }
     }
 }

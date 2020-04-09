@@ -3,6 +3,7 @@ package uk.gov.justice.ccr.notepad.view;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
@@ -26,8 +27,10 @@ import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -70,16 +73,18 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledge() throws Exception {
+    public void buildFromKnowledge() {
         List<Part> parts = new PartsResolver().getParts("imp 2Y 4 M 9d sus 5 m 6 w 7 d ");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(),true);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
         Part part3 = result.getParts().get(2);
         Part part4 = result.getParts().get(3);
+
+        assertThat(result.getChildResultDefinitions().size(), is(2));
         assertThat(result.getResultCode().length()
                 , is(36)
         );
@@ -119,15 +124,17 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledge1() throws Exception {
+    public void buildFromKnowledge1() {
         List<Part> parts = new PartsResolver().getParts("CrEdit bail reMand");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(),true);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
         Part part3 = result.getParts().get(2);
+
+        assertThat(result.getChildResultDefinitions().size(), is(2));
         assertThat(result.getResultCode().length()
                 , is(36)
         );
@@ -143,15 +150,17 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledge3() throws Exception {
+    public void buildFromKnowledge3() {
         List<Part> parts = new PartsResolver().getParts("imp 2 yr 8 m conc");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(),true);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
         Part part4 = result.getParts().get(2);
+
+        assertThat(result.getChildResultDefinitions().size(), is(2));
         assertThat(result.getResultCode().length()
                 , is(36)
         );
@@ -176,11 +185,11 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledge4() throws Exception {
+    public void buildFromKnowledge4() {
         List<Part> parts = new PartsResolver().getParts("2 yr m imp 18 $20 23:23 3/3/1980 [2y]");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(),true);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -190,6 +199,8 @@ public class ResultDefinitionViewBuilderTest {
         Part p6 = result.getParts().get(5);
         Part p7 = result.getParts().get(6);
         Part p8 = result.getParts().get(7);
+
+        assertThat(result.getChildResultDefinitions().size(), is(2));
         assertThat(result.getResultCode().length()
                 , is(36)
         );
@@ -219,11 +230,11 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledge5() throws Exception {
+    public void buildFromKnowledge5() {
         List<Part> parts = new PartsResolver().getParts("alc req conc 78 £2,000 2 mo ");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -231,6 +242,7 @@ public class ResultDefinitionViewBuilderTest {
         Part p4 = result.getParts().get(3);
         Part p5 = result.getParts().get(4);
         Part p6 = result.getParts().get(5);
+
         assertThat(result.getResultCode() == null
                 , is(true)
         );
@@ -256,13 +268,14 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledgeHavingDuplicateResultDefinitionMapping() throws Exception {
+    public void buildFromKnowledgeHavingDuplicateResultDefinitionMapping() {
         List<Part> parts = new PartsResolver().getParts("Curfew");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
 
         Part p1 = result.getParts().get(0);
+
         assertThat(result.getResultCode() == null
                 , is(true)
         );
@@ -278,11 +291,11 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledgeWithSameKeywordCountHavingMutipleResult() throws Exception {
+    public void buildFromKnowledgeWithSameKeywordCountHavingMultipleResult() {
         List<Part> parts = new PartsResolver().getParts("resTr Ord prd Fur");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -308,11 +321,11 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledgeKeywordCountHavingOneResult() throws Exception {
+    public void buildFromKnowledgeKeywordCountHavingOneResult() {
         List<Part> parts = new PartsResolver().getParts("resT Ord prd Furth");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -339,11 +352,11 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void buildFromKnowledge6() throws Exception {
+    public void buildFromKnowledge6() {
         List<Part> parts = new PartsResolver().getParts("imp 2 y 8 m sus 6 y conc 7 y 8 m 89 w 90 d");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -389,11 +402,11 @@ public class ResultDefinitionViewBuilderTest {
     }
 
     @Test
-    public void testWhenNoResultFoundAllPartsShouldTXT() throws Exception {
+    public void testWhenNoResultFoundAllPartsShouldTXT() {
         List<Part> parts = new PartsResolver().getParts("aaaAAaaaa 34 £23.00 conc");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge);
+        ResultDefinitionView result = testObj.buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -417,5 +430,39 @@ public class ResultDefinitionViewBuilderTest {
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "£23.00").toArray()));
         assertThat(Arrays.asList(p4.getState(), p4.getType(), p4.getValue())
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "conc").toArray()));
+    }
+
+    @Test
+    public void getResultDefinitionIdFromKnowledgeWhenThereIsAPerfectMatch() {
+        List<Part> parts = new PartsResolver().getParts("imp 2Y 4 M 9d sus 5 m 6 w 7 d ");
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
+
+        String result = testObj.getResultDefinitionIdFromKnowledge(parts, knowledge);
+
+        assertThat(result.length(), is(36));
+    }
+
+    @Test
+    public void getResultDefinitionIdFromKnowledgeWhenThereIsNoPerfectMatch() {
+        List<Part> parts = new PartsResolver().getParts("imp 2Y 4 M 9d sus 5 m 6 w 7 d ");
+        Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
+        knowledge.setThisPerfectMatch(false);
+
+        String result = testObj.getResultDefinitionIdFromKnowledge(parts, knowledge);
+
+        assertThat(result, nullValue());
+    }
+
+    private List<ChildResultDefinition> createChildResultDefinitions() {
+        return Arrays.asList(createChildResultDefinition(), createChildResultDefinition());
+    }
+
+    private ChildResultDefinition createChildResultDefinition() {
+        ChildResultDefinition childResultDefinition = new ChildResultDefinition();
+        childResultDefinition.setCode(UUID.randomUUID().toString());
+        childResultDefinition.setLabel("lab");
+        childResultDefinition.setShortCode("sho code");
+        childResultDefinition.setRuleType("mandatory");
+        return childResultDefinition;
     }
 }

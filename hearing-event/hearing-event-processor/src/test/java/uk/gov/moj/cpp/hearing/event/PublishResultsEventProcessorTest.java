@@ -43,6 +43,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDeta
 import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.SaveNowVariantsDelegate;
+import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDetailsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
 import uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant;
@@ -242,11 +243,11 @@ public class PublishResultsEventProcessorTest {
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
 
-            verify(nowsDelegate).sendPendingNows(
-                    senderArgumentCaptor.capture(),
-                    eventArgumentCaptor.capture(),
-                    createNowsRequestArgumentCaptor.capture(),
-                    targetsArgumentCaptor.capture());
+        verify(nowsDelegate).sendPendingNows(
+                senderArgumentCaptor.capture(),
+                eventArgumentCaptor.capture(),
+                createNowsRequestArgumentCaptor.capture(),
+                targetsArgumentCaptor.capture());
     }
 
     @Test
@@ -482,6 +483,6 @@ public class PublishResultsEventProcessorTest {
 
         publishResultsEventProcessor.resultsShared(event);
 
-        verify(nowsDelegate, never()).sendNows(any(),any(),any(),any());
+        verify(nowsDelegate, never()).sendNows(any(), any(), any(), any());
     }
 }

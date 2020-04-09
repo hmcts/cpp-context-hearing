@@ -4,10 +4,14 @@ import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.hearing.courts.referencedata.FixedListResult;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.bailstatus.BailStatus;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -23,5 +27,11 @@ public interface ReferenceDataService {
     LocalJusticeAreas getLJAByNationalCourtCode(JsonEnvelope context, final String nationalCourtCode);
 
     FixedListResult getAllFixedLists(final JsonEnvelope context);
+
+    TreeNode<ResultDefinition> getResultDefinitionTreeNodeById(JsonEnvelope context, LocalDate referenceDate, UUID id);
+
+    List<BailStatus> getBailStatuses(JsonEnvelope context);
+
+    AllFixedList getAllFixedList(JsonEnvelope context, LocalDate referenceDate);
 
 }

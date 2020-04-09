@@ -49,6 +49,12 @@
                         <classifier>raml</classifier>
                     </dependency>
                     <dependency>
+                        <groupId>uk.gov.moj.cpp.progression</groupId>
+                        <artifactId>progression-command-api</artifactId>
+                        <version>${progression.version}</version>
+                        <classifier>raml</classifier>
+                    </dependency>
+                    <dependency>
                         <groupId>uk.gov.moj.cpp.notification.notify</groupId>
                         <artifactId>notificationnotify-command-api</artifactId>
                         <version>${notification.notify.version}</version>
@@ -77,6 +83,18 @@
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
                         <artifactId>hearing-query-api</artifactId>
                         <version>${project.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <artifactId>*</artifactId>
+                                <groupId>*</groupId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.results</groupId>
+                        <artifactId>results-command-api</artifactId>
+                        <version>${results.version}</version>
                         <classifier>raml</classifier>
                         <exclusions>
                             <exclusion>
@@ -220,6 +238,12 @@
             <groupId>uk.gov.justice.services</groupId>
             <artifactId>test-utils-enveloper-provider</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.org.lidalia</groupId>
+            <artifactId>slf4j-test</artifactId>
+            <scope>test</scope>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
 </project>

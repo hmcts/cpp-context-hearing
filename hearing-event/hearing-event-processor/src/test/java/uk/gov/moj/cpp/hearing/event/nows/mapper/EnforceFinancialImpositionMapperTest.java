@@ -293,7 +293,7 @@ public class EnforceFinancialImpositionMapperTest {
         assertEquals(aliasIn.getMiddleName().substring(0,1).toUpperCase(), aliasOut.getInitials().substring(0, 1).toUpperCase());
 
 
-        assertEquals(null, enforceFinancialImposition.getDwpApNumber());
+        assertNull(enforceFinancialImposition.getDwpApNumber());
 
 
     }

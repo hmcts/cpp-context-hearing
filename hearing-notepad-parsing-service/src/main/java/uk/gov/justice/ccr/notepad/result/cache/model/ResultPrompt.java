@@ -18,39 +18,42 @@ public class ResultPrompt {
     private String resultDefinitionLabel;
     private String label;
     private ResultType type;
-    private boolean mandatory;
+    private String resultPromptRule;
     private String durationElement;
     private Set<String> keywords;
     private Set<String> fixedList;
     private Integer promptOrder;
     private String reference;
+    private Integer durationSequence;
 
     public ResultPrompt() {
 
     }
 
     public ResultPrompt(final String id, final UUID resultDefinitionId, final String resultDefinitionLabel,
-                        final String label, final ResultType type, final boolean mandatory,
+                        final String label, final ResultType type, final String resultPromptRule,
                         final String durationElement, final Set<String> keywords,
-                        final Set<String> fixedList, final Integer promptOrder, final String reference) {
+                        final Set<String> fixedList, final Integer promptOrder,
+                        final String reference, final Integer durationSequence) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.resultDefinitionLabel = resultDefinitionLabel;
         this.label = label;
         this.type = type;
-        this.mandatory = mandatory;
+        this.resultPromptRule = resultPromptRule;
         this.durationElement = durationElement;
         this.keywords = keywords;
         this.fixedList = fixedList;
         this.promptOrder = promptOrder;
         this.reference = reference;
+        this.durationSequence = durationSequence;
     }
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -66,7 +69,7 @@ public class ResultPrompt {
         return resultDefinitionLabel;
     }
 
-    public final void setResultDefinitionLabel(String value) {
+    public final void setResultDefinitionLabel(final String value) {
         resultDefinitionLabel = value;
     }
 
@@ -74,7 +77,7 @@ public class ResultPrompt {
         return label;
     }
 
-    public final void setLabel(String value) {
+    public final void setLabel(final String value) {
         label = value;
     }
 
@@ -82,23 +85,23 @@ public class ResultPrompt {
         return type;
     }
 
-    public final void setType(ResultType value) {
+    public final void setType(final ResultType value) {
         type = value;
     }
 
-    public boolean isMandatory() {
-        return mandatory;
+    public String getResultPromptRule() {
+        return resultPromptRule;
     }
 
-    public final void setMandatory(boolean value) {
-        mandatory = value;
+    public final void setResultPromptRule(final String value) {
+        resultPromptRule = value;
     }
 
     public String getDurationElement() {
         return durationElement;
     }
 
-    public final void setDurationElement(String value) {
+    public final void setDurationElement(final String value) {
         durationElement = value;
     }
 
@@ -106,7 +109,7 @@ public class ResultPrompt {
         return Optional.ofNullable(keywords).orElse(new HashSet<>());
     }
 
-    public final void setKeywords(List<String> keywords) {
+    public final void setKeywords(final List<String> keywords) {
         if (!keywords.isEmpty()) {
             this.keywords = keywords.stream().filter(v -> !v.isEmpty()).distinct().collect(toCollection(TreeSet::new));
         }
@@ -116,7 +119,7 @@ public class ResultPrompt {
         return fixedList;
     }
 
-    public final void setFixedList(Set<String> fixedList) {
+    public final void setFixedList(final Set<String> fixedList) {
         this.fixedList = fixedList;
     }
 
@@ -124,7 +127,7 @@ public class ResultPrompt {
         return promptOrder;
     }
 
-    public void setPromptOrder(Integer promptOrder) {
+    public void setPromptOrder(final Integer promptOrder) {
         this.promptOrder = promptOrder;
     }
 
@@ -132,8 +135,16 @@ public class ResultPrompt {
         return reference;
     }
 
-    public void setReference(String reference) {
+    public void setReference(final String reference) {
         this.reference = reference;
+    }
+
+    public Integer getDurationSequence() {
+        return durationSequence;
+    }
+
+    public void setDurationSequence(final Integer durationSequence) {
+        this.durationSequence = durationSequence;
     }
 
     @Override
@@ -143,12 +154,13 @@ public class ResultPrompt {
                 ", resultDefinitionLabel='" + resultDefinitionLabel + '\'' +
                 ", label='" + label + '\'' +
                 ", type=" + type +
-                ", mandatory='" + mandatory + '\'' +
+                ", resultPromptRule='" + resultPromptRule + '\'' +
                 ", durationElement='" + durationElement + '\'' +
                 ", keywords=" + keywords +
                 ", fixedList=" + fixedList +
                 ", promptOrder=" + promptOrder +
                 ", reference='" + reference + '\'' +
+                ", durationSequence='" + durationSequence + '\'' +
                 '}';
     }
 }

@@ -676,6 +676,9 @@ public class NowsRequestedToDocumentConverter {
         }
     }
 
+    public final Set<String> EXCLUDED_PROMPT_REFS = new HashSet(Arrays.asList(
+            PromptTypesConstant.P_PAYMENT_CARD_REQUIRED_PROMPT_REFERENCE, PromptTypesConstant.P_PARENT_GUARDIAN_TOPAY_PROMPT_REFERENCE));
+
     private List<Prompts> preparePrompts(final NowVariantResult selectedNowResult, final SharedResultLine sharedResultLine) {
         final List<ResultPrompt> nowResultPrompts = getMatchingPrompts(selectedNowResult, sharedResultLine);
         return nowResultPrompts.stream()

@@ -231,7 +231,7 @@ public class PublishResultsEventProcessor {
                             resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearing().getId(), resultLine.getOrderedDate()));
                 }
                 final Category resultCategory = getCategory(resultDefinition);
-                if (resultCategory.equals(Category.FINAL)) {
+                if (Category.FINAL.equals(resultCategory)) {
                     offenceResultMap.put(offence.getId(), mapOffenceResult(resultDefinition));
                 } else if (Category.ANCILLARY.equals(resultCategory)
                         || Category.INTERMEDIARY.equals(resultCategory)) {

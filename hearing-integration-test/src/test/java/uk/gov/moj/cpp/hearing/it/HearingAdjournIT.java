@@ -50,6 +50,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({"squid:S1607"})
@@ -72,11 +73,12 @@ public class HearingAdjournIT extends AbstractIT {
     private static final String COURT_ROOM_LABEL = "CourtRoom";
     private static final String COURT_CENTRE_LABEL = "Courthouse name";
 
+    @Ignore("GPE-13308")
     @Test
     public void shouldRaiseHearingAdjournedEvent() {
 
-        LocalDate orderedDate = PAST_LOCAL_DATE.next();
-        UUID resultLineId = randomUUID();
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID resultLineId = randomUUID();
 
         final UUID primaryResultDefinitionId = UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
 
@@ -254,8 +256,8 @@ public class HearingAdjournIT extends AbstractIT {
     @Test
     public void shouldRaiseHearingAdjournedEventForStandAloneApplication() {
 
-        LocalDate orderedDate = PAST_LOCAL_DATE.next();
-        UUID resultLineId = randomUUID();
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID resultLineId = randomUUID();
 
         final UUID primaryResultDefinitionId = UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
 
@@ -347,7 +349,7 @@ public class HearingAdjournIT extends AbstractIT {
     }
 
     private void stubReferenceData(final LocalDate referenceDate, final UUID primaryResultDefinitionId, final UUID mandatoryPromptId, final UUID courtCentreId) {
-        AllNows allNows = AllNows.allNows()
+        final AllNows allNows = AllNows.allNows()
                 .setNows(singletonList(
                         NowDefinition.now()
                                 .setId(randomUUID())
@@ -373,10 +375,10 @@ public class HearingAdjournIT extends AbstractIT {
         labelToUuid.put(COURT_CENTRE_LABEL, UUID.fromString("7746831a-d5dd-4fa8-ac13-528573948c8a"));
 
         final List<String> usergroups = singletonList(userGroup1);
-        List<Prompt> promptDefs = asList(REMAND_STATUS_LABEL, DATE_OF_HEARING_LABEL, HEARING_TYPE_LABEL, ESTIMATED_DURATION_LABEL, TIME_OF_HEARING_LABEL,
+        final List<Prompt> promptDefs = asList(REMAND_STATUS_LABEL, DATE_OF_HEARING_LABEL, HEARING_TYPE_LABEL, ESTIMATED_DURATION_LABEL, TIME_OF_HEARING_LABEL,
                 COURT_ROOM_LABEL, COURT_CENTRE_LABEL).stream()
                 .map(label -> Prompt.prompt()
-                        .setMandatory(false)
+                        .setResultPromptRule("optional")
                         //this needs to link to the id
                         .setId(labelToUuid.get(label))
                         .setLabel(label)
@@ -384,14 +386,15 @@ public class HearingAdjournIT extends AbstractIT {
                 .collect(Collectors.toList());
         promptDefs.add(Prompt.prompt()
                 .setLabel("mandatory")
-                .setMandatory(true)
+                .setResultPromptRule("mandatory")
                 .setId(mandatoryPromptId)
                 .setUserGroups(usergroups)
         );
 
-        AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
+        final AllResultDefinitions allResultDefinitions = AllResultDefinitions.allResultDefinitions().setResultDefinitions(
                 singletonList(ResultDefinition.resultDefinition()
                         .setId(primaryResultDefinitionId)
+                        .setPostHearingCustodyStatus("Conditional")
                         .setUserGroups(singletonList(userGroup1))
                         .setFinancial("Y")
                         .setCategory("F")
@@ -403,6 +406,7 @@ public class HearingAdjournIT extends AbstractIT {
 
         stubLjaDetails(courtCentreId);
 
+        ReferenceDataStub.stubGetReferenceDataResultDefinitionRules(referenceDate);
     }
 
 }
