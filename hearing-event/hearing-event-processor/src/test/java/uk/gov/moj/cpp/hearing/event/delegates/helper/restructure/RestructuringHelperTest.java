@@ -7,6 +7,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -372,6 +373,7 @@ public class RestructuringHelperTest {
 
         assertThat(restructuredTree.size(), is(1));
         assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().size(), is(5));
+        assertThat(restructuredTree.get(0).getJudicialResult().getDelegatedPowers(), nullValue());
         assertThat(restructuredTree.get(0).getJudicialResult().getResultText().split("\\R").length, is(6));
         assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultTypeId(), is(topLevelResultLineParents.get(0).getResultDefinitionId()));
         assertTrue(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().stream().allMatch(jrp -> nonNull(jrp.getJudicialResultPromptTypeId())));

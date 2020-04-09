@@ -176,9 +176,6 @@ public class RestructuringHelper {
                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), hearing.getId(), resultLine.getOrderedDate()));
         }
 
-        final DelegatedPowers delegatedPowers = getOrDefaultCourtClerkAsDelegatePowers(completedResultLinesStatus, courtClerk, resultLine.getResultLineId());
-
-
         Optional<NextHearing> nextHearing = empty();
 
         Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = empty();
@@ -216,7 +213,6 @@ public class RestructuringHelper {
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withPostHearingCustodyStatus(resultDefinition.getPostHearingCustodyStatus())
-                .withDelegatedPowers(delegatedPowers)
                 .withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine))
                 .withLifeDuration(resultDefinition.getLifeDuration())
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
