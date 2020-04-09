@@ -118,7 +118,7 @@ public class PublishResultsDelegate {
 
         final JsonEnvelope jsonEnvelope = this.enveloper.withMetadataFrom(context, "public.hearing.resulted").apply(jsonObject);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Payload for event 'public.hearing.resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
+            LOGGER.info("Payload for event 'public.hearing.resulted': \n{}", jsonEnvelope.toObfuscatedDebugString());
         }
         sender.send(jsonEnvelope);
     }
