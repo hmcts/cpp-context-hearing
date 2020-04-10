@@ -9,6 +9,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -65,7 +66,7 @@ public class Utilities {
         private long timeout;
 
         public EventListener(final String eventType) {
-            this(eventType, DEFAULT_POLL_TIMEOUT_IN_MILLIS);
+            this(eventType, DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
         }
 
         public EventListener(final String eventType, long timeout) {

@@ -40,6 +40,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
@@ -276,7 +277,7 @@ public class ShareResultsIT extends AbstractIT {
 
 
         //then
-        publicEventForDefendentCaseWithDrawnOrDismissed.expectNoneWithin(DEFAULT_POLL_TIMEOUT_IN_MILLIS);
+        publicEventForDefendentCaseWithDrawnOrDismissed.expectNoneWithin(DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
     }
 
     @Test
@@ -507,7 +508,7 @@ public class ShareResultsIT extends AbstractIT {
 
         //then
 
-        publicEventForDefendentCaseWithDrawnOrDismissed.expectNoneWithin(DEFAULT_POLL_TIMEOUT_IN_MILLIS);
+        publicEventForDefendentCaseWithDrawnOrDismissed.expectNoneWithin(DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
 
 
         //Test data creation for  another hearing result shared

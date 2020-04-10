@@ -12,5 +12,6 @@
     <modules>
         <module>hearing-domain-transformation-anonymise</module>
         <module>hearing-domain-transformation-spiresults</module>
+        <module>hearing-domain-transformation-for-corechanges</module>
     </modules>
 </project>

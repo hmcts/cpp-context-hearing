@@ -1,16 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapperTest.whenAllocationDecision;
-import static uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapperTest.whenIndicatedPlea;
-import static uk.gov.moj.cpp.hearing.mapping.NotifiedPleaJPAMapperTest.whenNotifiedPlea;
-import static uk.gov.moj.cpp.hearing.mapping.OffenceFactsJPAMapperTest.whenOffenceFacts;
-import static uk.gov.moj.cpp.hearing.mapping.PleaJPAMapperTest.whenPlea;
-import static uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapperTest.whenVerdict;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
-
+import org.junit.Test;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.IndicatedPlea;
@@ -25,11 +15,20 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapperTest.whenAllocationDecision;
+import static uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapperTest.whenIndicatedPlea;
+import static uk.gov.moj.cpp.hearing.mapping.NotifiedPleaJPAMapperTest.whenNotifiedPlea;
+import static uk.gov.moj.cpp.hearing.mapping.OffenceFactsJPAMapperTest.whenOffenceFacts;
+import static uk.gov.moj.cpp.hearing.mapping.PleaJPAMapperTest.whenPlea;
+import static uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapperTest.whenVerdict;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
 public class OffenceJPAMapperTest {
 
-    private OffenceJPAMapper offenceJpaMapper = JPACompositeMappers.OFFENCE_JPA_MAPPER;
+    private final OffenceJPAMapper offenceJpaMapper = JPACompositeMappers.OFFENCE_JPA_MAPPER;
 
     @Test
     public void testFromJPA() {
@@ -65,7 +64,7 @@ public class OffenceJPAMapperTest {
                 .with(Offence::getEndDate, is(entity.getEndDate()))
                 .with(Offence::getId, is(entity.getId().getId()))
                 .with(Offence::getIsDiscontinued, is(entity.isDiscontinued()))
-                .with(Offence::getIsIntroduceAfterInitialProceedings, is(entity.isIntroduceAfterInitialProceedings()))
+                .with(Offence::getIntroducedAfterInitialProceedings, is(entity.isIntroduceAfterInitialProceedings()))
                 .with(Offence::getProceedingsConcluded, is(entity.isProceedingsConcluded()))
 
                 .with(Offence::getIndicatedPlea,
@@ -152,7 +151,7 @@ public class OffenceJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlDaysSpent, is(pojo.getCustodyTimeLimit().getDaysSpent()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getCtlTimeLimit, is(pojo.getCustodyTimeLimit().getTimeLimit()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isDiscontinued, is(pojo.getIsDiscontinued()))
-                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isIntroduceAfterInitialProceedings, is(pojo.getIsIntroduceAfterInitialProceedings()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isIntroduceAfterInitialProceedings, is(pojo.getIntroducedAfterInitialProceedings()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isProceedingsConcluded, is(pojo.getProceedingsConcluded()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getLaidDate, is(pojo.getLaidDate()))
                 ;

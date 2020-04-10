@@ -29,6 +29,7 @@ import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimeline() {
-        setUpHearing(now().plusDays(1L));
+        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L));
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
         verifyTimeline(hearingDate);
     }
@@ -84,7 +85,7 @@ public class CaseTimelineIT extends AbstractIT {
         final String timelineURL = getBaseUri() + "/" + timelineQueryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.case.timeline+json";
 
-        final String hearingTime = hearingDay.getSittingDay().toLocalTime().format(ofPattern("HH:mm"));
+        final String hearingTime = hearingDay.getSittingDay().toLocalTime().format(ofPattern("HH:mm").withZone(ZoneId.of("UTC")));
         final String hearingType = hearing.getType().getDescription();
         final String courtHouse = hearing.getCourtCentre().getName();
         final String courtRoom = hearing.getCourtCentre().getRoomName();

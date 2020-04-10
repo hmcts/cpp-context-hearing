@@ -1,5 +1,13 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
@@ -88,7 +96,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                                                 .with(Offence::getConvictionDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getConvictionDate()))
                                                 .with(Offence::getLaaApplnReference, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getLaaApplnReference()))
                                                 .with(Offence::getIsDiscontinued, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getIsDiscontinued()))
-                                                .with(Offence::getIsIntroduceAfterInitialProceedings, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getIsIntroduceAfterInitialProceedings()))
+                                                .with(Offence::getIntroducedAfterInitialProceedings, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getIntroducedAfterInitialProceedings()))
                                                 .with(Offence::getProceedingsConcluded, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getProceedingsConcluded()))
 
                                         ))
@@ -124,7 +132,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                                                 .with(Offence::getConvictionDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getConvictionDate()))
                                                 .with(Offence::getLaaApplnReference, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getLaaApplnReference()))
                                                 .with(Offence::getIsDiscontinued, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIsDiscontinued()))
-                                                .with(Offence::getIsIntroduceAfterInitialProceedings, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIsIntroduceAfterInitialProceedings()))
+                                                .with(Offence::getIntroducedAfterInitialProceedings, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIntroducedAfterInitialProceedings()))
                                                 .with(Offence::getProceedingsConcluded, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getProceedingsConcluded()))
 
                                         ))

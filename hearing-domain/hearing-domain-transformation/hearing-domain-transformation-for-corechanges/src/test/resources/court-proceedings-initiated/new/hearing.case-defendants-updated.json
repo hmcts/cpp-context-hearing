@@ -1,0 +1,334 @@
+{
+  "prosecutionCase": {
+    "defendants": [
+      {
+        "id": "18b9bbd1-fbc1-43d8-9e3a-843abfa4dded",
+        "offences": [
+          {
+            "count": 1,
+            "endDate": "2019-05-23",
+            "id": "b70b3111-1105-4eca-8f3d-b1e843609e56",
+            "offenceCode": "OF61016A",
+            "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ed",
+            "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+            "offenceTitle": "Section 18 - attempt    wounding with intent",
+            "proceedingsConcluded": false,
+            "startDate": "2018-11-23",
+            "wording": "Wound / inflict grievous bodily harm without intent"
+          },
+          {
+            "count": 1,
+            "endDate": "2019-05-23",
+            "id": "4b9ca54c-216e-434f-b320-c8ac01312d41",
+            "offenceCode": "OF61016A",
+            "offenceDefinitionId": "2464e6ab-8731-3aa2-877a-009cb99659f7",
+            "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+            "offenceTitle": "Section 18 - attempt    wounding with intent",
+            "proceedingsConcluded": false,
+            "startDate": "2018-11-23",
+            "wording": "Wound / inflict grievous bodily harm without intent"
+          }
+        ],
+        "personDefendant": {
+          "arrestSummonsNumber": "007",
+          "bailConditions": "REGULARLY NEED TO SIGN IN THE REGISTER AND NEAREST POLICE STATION",
+          "bailStatus": {
+            "code": "B",
+            "description": "Conditional Bail",
+            "id": "0d4073b6-22be-3875-9d63-5da286bb3ece"
+          },
+          "custodyTimeLimit": "2019-08-26",
+          "driverLicenceCode": "FULL",
+          "driverLicenseIssue": "DVLA",
+          "driverNumber": "007",
+          "employerOrganisation": {
+            "address": {
+              "address1": "998",
+              "address2": "09276 Bode Court",
+              "address3": "South Andy",
+              "address4": "RU",
+              "address5": "Cuba",
+              "postcode": "SW11 1JU"
+            },
+            "contact": {
+              "fax": "(109) 682-9425",
+              "home": "308.046.7523",
+              "mobile": "(640) 056-9601",
+              "primaryEmail": "aglae.price@hotmail.com",
+              "secondaryEmail": "bridie.krajcik@hotmail.com",
+              "work": "527.160.3669"
+            },
+            "incorporationNumber": "01051975",
+            "name": "EY",
+            "registeredCharityNumber": "AA"
+          },
+          "employerPayrollReference": "6SvAAtZFS7",
+          "perceivedBirthYear": 1975,
+          "personDetails": {
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "998",
+              "address2": "09276 Bode Court",
+              "address3": "South Andy",
+              "address4": "RU",
+              "address5": "Cuba",
+              "postcode": "SW11 1JU"
+            },
+            "contact": {
+              "fax": "(109) 682-9425",
+              "home": "308.046.7523",
+              "mobile": "(640) 056-9601",
+              "primaryEmail": "aglae.price@hotmail.com",
+              "secondaryEmail": "bridie.krajcik@hotmail.com",
+              "work": "527.160.3669"
+            },
+            "dateOfBirth": "1994-09-23",
+            "disabilityStatus": "ehBVc0Z2sr",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Alfreda",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Parker",
+            "middleName": "Priscilla",
+            "nationalInsuranceNumber": "JX176824B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [
+              {
+                "id": "ab73b2b3-964c-49b7-b299-11a9a83f660c",
+                "markerTypeCode": "GBP",
+                "markerTypeDescription": "GBP",
+                "markerTypeid": "14e16417-22f8-48dd-87d4-c4b12f34dca2"
+              }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          },
+          "vehicleOperatorLicenceNumber": "BS007"
+        },
+        "proceedingsConcluded": false,
+        "prosecutionCaseId": "c3718907-c3d1-4a74-982d-4808b9c43a46",
+        "courtProceedingsInitiated": "2020-02-21T11:49:18.116Z"
+      },
+      {
+        "id": "1c5fccdf-80f8-4ed1-904f-55583d623e69",
+        "offences": [
+          {
+            "count": 2,
+            "endDate": "2019-05-23",
+            "id": "43ecf958-0d40-4cd2-bfbb-27cdb7930674",
+            "modeOfTrial": "Summary",
+            "offenceCode": "OF61016A",
+            "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ed",
+            "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+            "offenceTitle": "Section 18 - attempt    wounding with intent",
+            "proceedingsConcluded": false,
+            "startDate": "2018-11-23",
+            "wording": "Wound / inflict grievous bodily harm without intent"
+          },
+          {
+            "count": 2,
+            "endDate": "2019-05-23",
+            "id": "3a5bfe5d-04d3-4894-bd6c-c752d0b425ad",
+            "modeOfTrial": "Summary",
+            "offenceCode": "OF61016A",
+            "offenceDefinitionId": "2464e6ab-8731-3aa2-877a-009cb99659f7",
+            "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+            "offenceTitle": "Section 18 - attempt    wounding with intent",
+            "proceedingsConcluded": false,
+            "startDate": "2018-11-23",
+            "wording": "Wound / inflict grievous bodily harm without intent"
+          }
+        ],
+        "personDefendant": {
+          "arrestSummonsNumber": "007",
+          "bailConditions": "REGULARLY NEED TO SIGN IN THE REGISTER AND NEAREST POLICE STATION",
+          "bailStatus": {
+            "code": "B",
+            "description": "Conditional Bail",
+            "id": "0d4073b6-22be-3875-9d63-5da286bb3ece"
+          },
+          "custodyTimeLimit": "2019-08-26",
+          "driverLicenceCode": "FULL",
+          "driverLicenseIssue": "DVLA",
+          "driverNumber": "007",
+          "employerOrganisation": {
+            "address": {
+              "address1": "998",
+              "address2": "09276 Bode Court",
+              "address3": "South Andy",
+              "address4": "RU",
+              "address5": "Cuba",
+              "postcode": "SW11 1JU"
+            },
+            "contact": {
+              "fax": "(109) 682-9425",
+              "home": "308.046.7523",
+              "mobile": "(640) 056-9601",
+              "primaryEmail": "aglae.price@hotmail.com",
+              "secondaryEmail": "bridie.krajcik@hotmail.com",
+              "work": "527.160.3669"
+            },
+            "incorporationNumber": "01051975",
+            "name": "EY",
+            "registeredCharityNumber": "AA"
+          },
+          "employerPayrollReference": "6SvAAtZFS7",
+          "perceivedBirthYear": 1975,
+          "personDetails": {
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "998",
+              "address2": "09276 Bode Court",
+              "address3": "South Andy",
+              "address4": "RU",
+              "address5": "Cuba",
+              "postcode": "SW11 1JU"
+            },
+            "contact": {
+              "fax": "(109) 682-9425",
+              "home": "308.046.7523",
+              "mobile": "(640) 056-9601",
+              "primaryEmail": "aglae.price@hotmail.com",
+              "secondaryEmail": "bridie.krajcik@hotmail.com",
+              "work": "527.160.3669"
+            },
+            "dateOfBirth": "1991-09-23",
+            "disabilityStatus": "ehBVc0Z2sr",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Kennedi",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Padberg",
+            "middleName": "Mateo",
+            "nationalInsuranceNumber": "JX176824B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [
+              {
+                "id": "ab73b2b3-964c-49b7-b299-11a9a83f660c",
+                "markerTypeCode": "GBP",
+                "markerTypeDescription": "GBP",
+                "markerTypeid": "14e16417-22f8-48dd-87d4-c4b12f34dca2"
+              }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          },
+          "vehicleOperatorLicenceNumber": "BS007"
+        },
+        "proceedingsConcluded": false,
+        "prosecutionCaseId": "c3718907-c3d1-4a74-982d-4808b9c43a46",
+        "courtProceedingsInitiated": "2020-02-21T11:49:18.116Z"
+      },
+      {
+        "id": "dcab6792-1f67-4234-aac7-4ad05b1595f2",
+        "legalEntityDefendant": {
+          "organisation": {
+            "name": "Hilpert"
+          }
+        },
+        "offences": [
+          {
+            "count": 3,
+            "endDate": "2019-05-23",
+            "id": "2bc0ce7f-02df-49e9-b62c-f0dfef29518e",
+            "offenceCode": "OF61016A",
+            "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ed",
+            "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+            "offenceTitle": "Section 18 - attempt    wounding with intent",
+            "proceedingsConcluded": false,
+            "startDate": "2018-11-23",
+            "wording": "Wound / inflict grievous bodily harm without intent"
+          },
+          {
+            "count": 3,
+            "endDate": "2019-05-23",
+            "id": "9ce04b4a-8fec-4921-a172-4b0db44cf30f",
+            "judicialResults": [
+              {
+                "category": "ANCILLARY",
+                "courtClerk": {
+                  "firstName": "Erica",
+                  "lastName": "Wilson",
+                  "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+                },
+                "isAdjournmentResult": false,
+                "isAvailableForCourtExtract": true,
+                "isConvictedResult": false,
+                "isDeleted": false,
+                "isFinancialResult": false,
+                "judicialResultId": "b365e87f-66a2-4675-a08b-b1fe24bef3ec",
+                "judicialResultPrompts": [
+                  {
+                    "isAvailableForCourtExtract": true,
+                    "label": "Custody time limit extended until",
+                    "promptSequence": 1,
+                    "usergroups": [
+                      "Legal Advisers",
+                      "Court Clerks"
+                    ],
+                    "value": "15 May 2020",
+                    "welshLabel": ""
+                  }
+                ],
+                "label": "Custody time limit extended",
+                "lastSharedDateTime": "2020-03-17",
+                "orderedDate": "2019-09-23",
+                "orderedHearingId": "48c14e58-3ddd-4a1b-9793-c200bbe2158e",
+                "rank": 168,
+                "usergroups": []
+              }
+            ],
+            "offenceCode": "OF61016A",
+            "offenceDefinitionId": "2464e6ab-8731-3aa2-877a-009cb99659f7",
+            "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+            "offenceTitle": "Section 18 - attempt    wounding with intent",
+            "proceedingsConcluded": false,
+            "startDate": "2018-11-23",
+            "wording": "Wound / inflict grievous bodily harm without intent"
+          }
+        ],
+        "proceedingsConcluded": false,
+        "prosecutionCaseId": "c3718907-c3d1-4a74-982d-4808b9c43a46",
+        "courtProceedingsInitiated": "2020-02-21T11:49:18.116Z"
+      }
+    ],
+    "id": "c3718907-c3d1-4a74-982d-4808b9c43a46",
+    "initiationCode": "J",
+    "prosecutionCaseIdentifier": {
+      "prosecutionAuthorityCode": "TFL2",
+      "prosecutionAuthorityId": "31af405e-7b60-4dd8-a244-c24c2d3fa595",
+      "caseURN": "34GD4219219"
+    }
+  },
+  "hearingIds": [
+    "48c14e58-3ddd-4a1b-9793-c200bbe2158e"
+  ]
+}

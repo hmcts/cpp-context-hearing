@@ -1,20 +1,21 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Objects.isNull;
+
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Objects.isNull;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @ApplicationScoped
 public class DefendantJPAMapper {
@@ -75,11 +76,13 @@ public class DefendantJPAMapper {
         defendant.setWitnessStatement(pojo.getWitnessStatement());
         defendant.setWitnessStatementWelsh(pojo.getWitnessStatementWelsh());
         defendant.setPncId(pojo.getPncId());
-        if(null != pojo.getIsYouth()) {
+        defendant.setMasterDefendantId(pojo.getMasterDefendantId());
+        defendant.setCourtProceedingsInitiated(pojo.getCourtProceedingsInitiated());
+        if (null != pojo.getIsYouth()) {
             defendant.setIsYouth(pojo.getIsYouth());
         }
         defendant.setLegalaidStatus(pojo.getLegalAidStatus());
-        if(null != pojo.getProceedingsConcluded()) {
+        if (null != pojo.getProceedingsConcluded()) {
             defendant.setProceedingsConcluded(pojo.getProceedingsConcluded());
         }
         defendant.setAssociatedDefenceOrganisation(associatedDefenceOrganisationJPAMapper.toJPA(pojo.getAssociatedDefenceOrganisation()));
@@ -102,8 +105,8 @@ public class DefendantJPAMapper {
                 .withAssociatedPersons(associatedPersonJPAMapper.fromJPA(pojo.getAssociatedPersons()))
                 .withDefenceOrganisation(organisationJPAMapper.fromJPA(pojo.getDefenceOrganisation()))
                 .withLegalEntityDefendant(pojo.getLegalEntityOrganisation() != null ? LegalEntityDefendant.legalEntityDefendant()
-                       .withOrganisation(organisationJPAMapper.fromJPA(pojo.getLegalEntityOrganisation()))
-                       .build() : null)
+                        .withOrganisation(organisationJPAMapper.fromJPA(pojo.getLegalEntityOrganisation()))
+                        .build() : null)
                 .withMitigation(pojo.getMitigation())
                 .withMitigationWelsh(pojo.getMitigationWelsh())
                 .withNumberOfPreviousConvictionsCited(pojo.getNumberOfPreviousConvictionsCited())
@@ -114,6 +117,8 @@ public class DefendantJPAMapper {
                 .withPncId(pojo.getPncId())
                 .withWitnessStatementWelsh(pojo.getWitnessStatementWelsh())
                 .withProsecutionCaseId(pojo.getProsecutionCaseId())
+                .withMasterDefendantId(pojo.getMasterDefendantId())
+                .withCourtProceedingsInitiated(pojo.getCourtProceedingsInitiated())
                 .withIsYouth(pojo.getIsYouth())
                 .withLegalAidStatus(pojo.getLegalaidStatus())
                 .withProceedingsConcluded(pojo.isProceedingsConcluded())

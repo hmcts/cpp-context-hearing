@@ -72,6 +72,7 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,7 +101,7 @@ public class CoreTestTemplates {
                 .withListedDurationMinutes(INTEGER.next());
     }
 
-    public static HearingDay.Builder hearingDayWithParam(int year, int month, int day, int seq) {
+    public static HearingDay.Builder hearingDayWithParam(final int year, final int month, final int day, final int seq) {
         final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
         return HearingDay.hearingDay()
                 .withSittingDay(zonedDateTime)
@@ -138,7 +139,7 @@ public class CoreTestTemplates {
                 .withWelshRoomName(STRING.next());
     }
 
-    public static CourtCentre.Builder courtCentreWithArgs(String courtRoomName) {
+    public static CourtCentre.Builder courtCentreWithArgs(final String courtRoomName) {
         return CourtCentre.courtCentre()
                 .withId(randomUUID())
                 .withName(courtRoomName)
@@ -148,7 +149,8 @@ public class CoreTestTemplates {
                 .withWelshRoomName(STRING.next());
     }
 
-    public static JudicialRole.Builder judiciaryRole(CoreTemplateArguments args) {
+
+    public static JudicialRole.Builder judiciaryRole(final CoreTemplateArguments args) {
         return JudicialRole.judicialRole()
                 .withJudicialId(randomUUID())
                 .withFirstName(STRING.next())
@@ -160,7 +162,7 @@ public class CoreTestTemplates {
                 .withJudicialRoleType(args.jurisdictionType == JurisdictionType.CROWN ? circuitJudge() : magistrate());
     }
 
-    public static ProsecutionCaseIdentifier.Builder prosecutionCaseIdentifier(CoreTemplateArguments args) {
+    public static ProsecutionCaseIdentifier.Builder prosecutionCaseIdentifier(final CoreTemplateArguments args) {
         return ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
                 .withProsecutionAuthorityId(randomUUID())
                 .withProsecutionAuthorityReference(args.jurisdictionType == JurisdictionType.MAGISTRATES ? STRING.next() : null)
@@ -168,14 +170,14 @@ public class CoreTestTemplates {
                 .withCaseURN(args.jurisdictionType == JurisdictionType.CROWN ? STRING.next() : null);
     }
 
-    public static NotifiedPlea.Builder notifiedPlea(UUID offenceId) {
+    public static NotifiedPlea.Builder notifiedPlea(final UUID offenceId) {
         return NotifiedPlea.notifiedPlea()
                 .withOffenceId(offenceId)
                 .withNotifiedPleaValue(RandomGenerator.values(NotifiedPleaValue.values()).next())
                 .withNotifiedPleaDate(PAST_LOCAL_DATE.next());
     }
 
-    public static IndicatedPlea.Builder indicatedPlea(UUID offenceId, IndicatedPleaValue indicatedPleaValue) {
+    public static IndicatedPlea.Builder indicatedPlea(final UUID offenceId, final IndicatedPleaValue indicatedPleaValue) {
         return IndicatedPlea.indicatedPlea()
                 .withOffenceId(offenceId)
                 .withIndicatedPleaDate(PAST_LOCAL_DATE.next())
@@ -183,7 +185,7 @@ public class CoreTestTemplates {
                 .withSource(RandomGenerator.values(Source.values()).next());
     }
 
-    public static Plea.Builder plea(UUID offenceId, LocalDate convictionDate, final PleaValue pleaValue) {
+    public static Plea.Builder plea(final UUID offenceId, final LocalDate convictionDate, final PleaValue pleaValue) {
         return Plea.plea()
                 .withOffenceId(offenceId)
                 .withOriginatingHearingId(randomUUID())
@@ -226,7 +228,7 @@ public class CoreTestTemplates {
 
     }
 
-    public static Offence.Builder offence(CoreTemplateArguments args, UUID offenceId) {
+    public static Offence.Builder offence(final CoreTemplateArguments args, final UUID offenceId) {
 
         if (args.isMinimumOffence()) {
             return Offence.offence()
@@ -237,7 +239,7 @@ public class CoreTestTemplates {
                     .withCount(INTEGER.next())
                     .withWording(STRING.next())
                     .withOrderIndex(INTEGER.next())
-                    .withIsIntroduceAfterInitialProceedings(true)
+                    .withIntroducedAfterInitialProceedings(true)
                     .withIsDiscontinued(true)
                     .withProceedingsConcluded(true);
         }
@@ -266,7 +268,7 @@ public class CoreTestTemplates {
                 .withOrderIndex(INTEGER.next())
                 .withProceedingsConcluded(true)
                 .withIsDiscontinued(true)
-                .withIsIntroduceAfterInitialProceedings(true)
+                .withIntroducedAfterInitialProceedings(true)
                 .withLaidDate(PAST_LOCAL_DATE.next())
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
@@ -318,7 +320,7 @@ public class CoreTestTemplates {
                 .withWork(INTEGER.next().toString());
     }
 
-    public static Person.Builder person(CoreTemplateArguments args) {
+    public static Person.Builder person(final CoreTemplateArguments args) {
 
         if (args.isMinimumPerson()) {
             return Person.person()
@@ -351,13 +353,13 @@ public class CoreTestTemplates {
                 .withNationalityCode(STRING.next());
     }
 
-    public static AssociatedPerson.Builder associatedPerson(CoreTemplateArguments args) {
+    public static AssociatedPerson.Builder associatedPerson(final CoreTemplateArguments args) {
         return AssociatedPerson.associatedPerson()
                 .withPerson(person(args).build())
                 .withRole(STRING.next());
     }
 
-    public static Organisation.Builder organisation(CoreTemplateArguments args) {
+    public static Organisation.Builder organisation(final CoreTemplateArguments args) {
 
         if (args.isMinimumOrganisation()) {
             return Organisation.organisation()
@@ -372,7 +374,7 @@ public class CoreTestTemplates {
                 .withRegisteredCharityNumber(STRING.next());
     }
 
-    public static PersonDefendant.Builder personDefendant(CoreTemplateArguments args) {
+    public static PersonDefendant.Builder personDefendant(final CoreTemplateArguments args) {
         return PersonDefendant.personDefendant()
                 .withPersonDetails(person(args).build())
                 .withArrestSummonsNumber(STRING.next())
@@ -397,7 +399,7 @@ public class CoreTestTemplates {
         }
     }
 
-    public static LegalEntityDefendant.Builder legalEntityDefendant(CoreTemplateArguments args) {
+    public static LegalEntityDefendant.Builder legalEntityDefendant(final CoreTemplateArguments args) {
         return LegalEntityDefendant.legalEntityDefendant()
                 .withOrganisation(organisation(args).build());
     }
@@ -434,10 +436,11 @@ public class CoreTestTemplates {
                 .withIsAssociatedByLAA(true);
     }
 
-    public static Defendant.Builder defendant(UUID prosecutionCaseId, CoreTemplateArguments args, Pair<UUID, List<UUID>> structure) {
+    public static Defendant.Builder defendant(final UUID prosecutionCaseId, final CoreTemplateArguments args, final Pair<UUID, List<UUID>> structure) {
 
         return Defendant.defendant()
                 .withId(structure.getK())
+                .withMasterDefendantId(args.getDifferentMasterDefendantId() != null ? args.getDifferentMasterDefendantId() : structure.getK())
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withNumberOfPreviousConvictionsCited(INTEGER.next())
                 .withProsecutionAuthorityReference(STRING.next())
@@ -451,11 +454,12 @@ public class CoreTestTemplates {
                 .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : null)
                 .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
                 .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null)
+                .withCourtProceedingsInitiated(args.getCourtProceedingsInitiated() != null ? args.getCourtProceedingsInitiated() : ZonedDateTime.now(ZoneOffset.UTC))
                 .withProceedingsConcluded(Boolean.FALSE);
 
     }
 
-    public static Marker.Builder marker(Pair<UUID, List<UUID>> structure) {
+    public static Marker.Builder marker(final Pair<UUID, List<UUID>> structure) {
 
         return Marker.marker()
                 .withId(structure.getK())
@@ -464,7 +468,7 @@ public class CoreTestTemplates {
                 .withMarkerTypeid(UUID.randomUUID());
     }
 
-    public static ProsecutionCase.Builder prosecutionCase(CoreTemplateArguments args, Pair<UUID, Map<UUID, List<UUID>>> structure) {
+    public static ProsecutionCase.Builder prosecutionCase(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure) {
 
         return ProsecutionCase.prosecutionCase()
                 .withId(structure.getK())
@@ -506,7 +510,7 @@ public class CoreTestTemplates {
                 .withWelshDescription(STRING.next());
     }
 
-    public static Hearing.Builder hearing(CoreTemplateArguments args) {
+    public static Hearing.Builder hearing(final CoreTemplateArguments args) {
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType(Optional.empty()).build())
@@ -622,7 +626,7 @@ public class CoreTestTemplates {
         return STRING.next().toLowerCase() + "@" + STRING.next().toLowerCase() + "." + STRING.next().toLowerCase();
     }
 
-    public static Target.Builder target(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
+    public static Target.Builder target(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
         return Target.target()
                 .withTargetId(randomUUID())
                 .withHearingId(hearingId)
@@ -632,7 +636,7 @@ public class CoreTestTemplates {
                 .withResultLines(new ArrayList<>(asList(resultLine(resultLineId))));
     }
 
-    public static ResultLine resultLine(UUID resultLineId) {
+    public static ResultLine resultLine(final UUID resultLineId) {
         return ResultLine.resultLine()
                 .withResultDefinitionId(randomUUID())
                 .withResultLineId(resultLineId)
@@ -664,7 +668,7 @@ public class CoreTestTemplates {
                 .withJudiciaryType(JudicialRoleTypeEnum.MAGISTRATE.name()).build();
     }
 
-    public static Target.Builder targetForDocumentIsDeleted(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
+    public static Target.Builder targetForDocumentIsDeleted(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
         return Target.target()
                 .withTargetId(randomUUID())
                 .withHearingId(hearingId)
@@ -674,7 +678,7 @@ public class CoreTestTemplates {
                 .withResultLines(new ArrayList<>(asList(resultLineForDocumentIsDeleted(resultLineId))));
     }
 
-    public static ResultLine resultLineForDocumentIsDeleted(UUID resultLineId) {
+    public static ResultLine resultLineForDocumentIsDeleted(final UUID resultLineId) {
         return ResultLine.resultLine()
                 .withResultDefinitionId(randomUUID())
                 .withResultLineId(resultLineId)
@@ -693,7 +697,7 @@ public class CoreTestTemplates {
                 .build();
     }
 
-    public static Target.Builder targetForOffenceResultShared(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId, UUID resultDefinitionId) {
+    public static Target.Builder targetForOffenceResultShared(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId, final UUID resultDefinitionId) {
         return Target.target()
                 .withTargetId(randomUUID())
                 .withHearingId(hearingId)
@@ -703,7 +707,7 @@ public class CoreTestTemplates {
                 .withResultLines(new ArrayList<>(asList(resultLineForOffenceResultShared(resultLineId, resultDefinitionId))));
     }
 
-    public static ResultLine resultLineForOffenceResultShared(UUID resultLineId, UUID resultDefinitionId) {
+    public static ResultLine resultLineForOffenceResultShared(final UUID resultLineId, final UUID resultDefinitionId) {
         return ResultLine.resultLine()
                 .withResultDefinitionId(resultDefinitionId)
                 .withResultLineId(resultLineId)
@@ -721,6 +725,7 @@ public class CoreTestTemplates {
                 .build();
     }
 
+
     public enum DefendantType {
         PERSON, ORGANISATION
     }
@@ -735,6 +740,10 @@ public class CoreTestTemplates {
 
         private IndicatedPleaValue indicatedPlea = INDICATED_GUILTY;
 
+        private UUID differentMasterDefendantId;
+
+        private ZonedDateTime courtProceedingsInitiated;
+
         private boolean minimumAssociatedPerson;
         private boolean minimumDefenceOrganisation;
         private boolean minimumPerson;
@@ -747,32 +756,32 @@ public class CoreTestTemplates {
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
-        public static <T, U> Map<T, U> toMap(T t, U u) {
+        public static <T, U> Map<T, U> toMap(final T t, final U u) {
             final Map<T, U> map = new HashMap<>();
             map.put(t, u);
             return map;
         }
 
-        public static <T, U> Map<T, U> toMap(List<Pair<T, U>> pairs) {
+        public static <T, U> Map<T, U> toMap(final List<Pair<T, U>> pairs) {
             return pairs.stream().collect(Collectors.toMap(Pair::getK, Pair::getV));
         }
 
-        public CoreTemplateArguments setJurisdictionType(JurisdictionType jurisdictionType) {
+        public CoreTemplateArguments setJurisdictionType(final JurisdictionType jurisdictionType) {
             this.jurisdictionType = jurisdictionType;
             return this;
         }
 
-        public CoreTemplateArguments setHearingLanguage(HearingLanguage hearingLanguage) {
+        public CoreTemplateArguments setHearingLanguage(final HearingLanguage hearingLanguage) {
             this.hearingLanguage = hearingLanguage;
             return this;
         }
 
-        public CoreTemplateArguments setDefendantType(DefendantType defendantType) {
+        public CoreTemplateArguments setDefendantType(final DefendantType defendantType) {
             this.defendantType = defendantType;
             return this;
         }
 
-        public CoreTemplateArguments setIndicatedPleaValue(IndicatedPleaValue indicatedPleaValue) {
+        public CoreTemplateArguments setIndicatedPleaValue(final IndicatedPleaValue indicatedPleaValue) {
             this.indicatedPlea = indicatedPleaValue;
             return this;
         }
@@ -781,7 +790,7 @@ public class CoreTestTemplates {
             return minimumAssociatedPerson;
         }
 
-        public CoreTemplateArguments setMinimumAssociatedPerson(boolean minimumAssociatedPerson) {
+        public CoreTemplateArguments setMinimumAssociatedPerson(final boolean minimumAssociatedPerson) {
             this.minimumAssociatedPerson = minimumAssociatedPerson;
             return this;
         }
@@ -790,7 +799,7 @@ public class CoreTestTemplates {
             return minimumDefenceOrganisation;
         }
 
-        public CoreTemplateArguments setMinimumDefenceOrganisation(boolean minimumDefenceOrganisation) {
+        public CoreTemplateArguments setMinimumDefenceOrganisation(final boolean minimumDefenceOrganisation) {
             this.minimumDefenceOrganisation = minimumDefenceOrganisation;
             return this;
         }
@@ -799,7 +808,7 @@ public class CoreTestTemplates {
             return minimumPerson;
         }
 
-        public CoreTemplateArguments setMinimumPerson(boolean minimumPerson) {
+        public CoreTemplateArguments setMinimumPerson(final boolean minimumPerson) {
             this.minimumPerson = minimumPerson;
             return this;
         }
@@ -808,7 +817,7 @@ public class CoreTestTemplates {
             return minimumOrganisation;
         }
 
-        public CoreTemplateArguments setMinimumOrganisation(boolean minimumOrganisation) {
+        public CoreTemplateArguments setMinimumOrganisation(final boolean minimumOrganisation) {
             this.minimumOrganisation = minimumOrganisation;
             return this;
         }
@@ -817,17 +826,17 @@ public class CoreTestTemplates {
             return minimumOffence;
         }
 
-        public CoreTemplateArguments setMinimumOffence(boolean minimumOffence) {
+        public CoreTemplateArguments setMinimumOffence(final boolean minimumOffence) {
             this.minimumOffence = minimumOffence;
             return this;
         }
 
-        public CoreTemplateArguments setStructure(Map<UUID, Map<UUID, List<UUID>>> structure) {
+        public CoreTemplateArguments setStructure(final Map<UUID, Map<UUID, List<UUID>>> structure) {
             this.structure = structure;
             return this;
         }
 
-        public CoreTemplateArguments setConvicted(boolean convicted) {
+        public CoreTemplateArguments setConvicted(final boolean convicted) {
             this.convicted = convicted;
             return this;
         }
@@ -842,6 +851,15 @@ public class CoreTestTemplates {
             return this;
         }
 
+        public UUID getDifferentMasterDefendantId() {
+            return differentMasterDefendantId;
+        }
+
+        public CoreTemplateArguments setDifferentMasterDefendantId(final UUID differentMasterDefendantId) {
+            this.differentMasterDefendantId = differentMasterDefendantId;
+            return this;
+        }
+
         public boolean isPutCustodialEstablishment() {
             return putCustodialEstablishment;
         }
@@ -850,6 +868,16 @@ public class CoreTestTemplates {
             this.putCustodialEstablishment = putCustodialEstablishment;
             return this;
         }
+
+        public ZonedDateTime getCourtProceedingsInitiated() {
+            return courtProceedingsInitiated;
+        }
+
+        public CoreTemplateArguments setCourtProceedingsInitiated(final ZonedDateTime courtProceedingsInitiated) {
+            this.courtProceedingsInitiated = courtProceedingsInitiated;
+            return this;
+        }
     }
+
 
 }

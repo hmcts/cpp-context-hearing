@@ -90,6 +90,7 @@ public class HearingForTodayIT extends AbstractIT {
                         .withId(hearingId)
                         .withCourtCentre(courtCentre()
                                 .withId(courtCentreId)
+                                .withName("Lavender hill")
                                 .withRoomId(roomId)
                                 .build())
                         .withHearingDays(Arrays.asList(
@@ -127,6 +128,8 @@ public class HearingForTodayIT extends AbstractIT {
                                 .withInitiationCode(InitiationCode.J)
                                 .withDefendants(singletonList(defendant()
                                         .withId(randomUUID())
+                                        .withCourtProceedingsInitiated(ZonedDateTime.now())
+                                        .withMasterDefendantId(randomUUID())
                                         .withProsecutionCaseId(prosecutionCaseId)
                                         .withPersonDefendant(personDefendant()
                                                 .withPersonDetails(person()

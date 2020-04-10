@@ -1,15 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -41,14 +39,15 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.util.Collections;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateOffencesForDefendantEventListenerTest {
@@ -126,7 +125,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
                 .withDefendantId(randomUUID())
                 .withOffence(uk.gov.justice.core.courts.Offence.offence()
                         .withId(randomUUID())
-                        .withIsIntroduceAfterInitialProceedings(true)
+                        .withIntroducedAfterInitialProceedings(true)
                         .withIsDiscontinued(true)
                         .withProceedingsConcluded(true)
                         .build());
@@ -161,7 +160,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         assertThat(offenceUpdated.getOffence().getId(), is(offenceOut.getId().getId()));
         assertThat(offenceUpdated.getHearingId(), is(offenceOut.getId().getHearingId()));
         assertThat(offenceUpdated.getOffence().getProceedingsConcluded(), is(offenceOut.isProceedingsConcluded()));
-        assertThat(offenceUpdated.getOffence().getIsIntroduceAfterInitialProceedings(), is(offenceOut.isIntroduceAfterInitialProceedings()));
+        assertThat(offenceUpdated.getOffence().getIntroducedAfterInitialProceedings(), is(offenceOut.isIntroduceAfterInitialProceedings()));
         assertThat(offenceUpdated.getOffence().getIsDiscontinued(), is(offenceOut.isDiscontinued()));
     }
 
@@ -205,7 +204,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         assertThat(offenceUpdated.getOffence().getId(), is(offenceOut.getId().getId()));
         assertThat(offenceUpdated.getHearingId(), is(offenceOut.getId().getHearingId()));
         assertThat(offenceUpdated.getOffence().getProceedingsConcluded(), nullValue());
-        assertThat(offenceUpdated.getOffence().getIsIntroduceAfterInitialProceedings(), is(nullValue()));
+        assertThat(offenceUpdated.getOffence().getIntroducedAfterInitialProceedings(), is(nullValue()));
         assertThat(offenceUpdated.getOffence().getIsDiscontinued(), is(nullValue()));
     }
 

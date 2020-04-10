@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
@@ -55,7 +56,7 @@ public class SendingSheetCompleteIT extends AbstractIT {
                         .build()
         );
 
-        publicEventTopic.expectNoneWithin(DEFAULT_POLL_TIMEOUT_IN_MILLIS);
+        publicEventTopic.expectNoneWithin(DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
     }
 
 

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -137,6 +138,12 @@ public class Defendant {
 
     @Column(name = "prosecution_case_id")
     private UUID prosecutionCaseId;
+
+    @Column(name = "master_defendant_id")
+    private UUID masterDefendantId;
+
+    @Column(name = "court_proceedings_initiated")
+    private ZonedDateTime courtProceedingsInitiated;
 
     @Column(name = "number_of_previous_convictions_cited")
     private Integer numberOfPreviousConvictionsCited;
@@ -340,4 +347,19 @@ public class Defendant {
         return Objects.equals(this.id, ((Defendant) o).id);
     }
 
+    public UUID getMasterDefendantId() {
+        return masterDefendantId;
+    }
+
+    public void setMasterDefendantId(final UUID masterDefendantId) {
+        this.masterDefendantId = masterDefendantId;
+    }
+
+    public ZonedDateTime getCourtProceedingsInitiated() {
+        return courtProceedingsInitiated;
+    }
+
+    public void setCourtProceedingsInitiated(final ZonedDateTime courtProceedingsInitiated) {
+        this.courtProceedingsInitiated = courtProceedingsInitiated;
+    }
 }

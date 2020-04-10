@@ -69,7 +69,9 @@ public class HearingFactory {
     public Defendant defendant(UUID defendantId, UUID caseId) {
         return Defendant.defendant()
                 .withId(defendantId)
+                .withMasterDefendantId(defendantId)
                 .withProsecutionCaseId(caseId)
+                .withCourtProceedingsInitiated(ZonedDateTime.now())
                 .build();
     }
 

@@ -1,0 +1,124 @@
+{
+  "hearingId": "2e157cc3-e9f6-495f-9051-4c50df3523de",
+  "courtApplication": {
+    "applicant": {
+      "defendant": {
+        "id": "5aa80880-09df-47dc-a649-cd211abaf1c3",
+        "offences": [
+          {
+            "allocationDecision": {
+              "allocationDecisionDate": "2020-02-18",
+              "courtIndicatedSentence": {
+                "courtIndicatedSentenceDescription": "MLoUfWLTpV",
+                "courtIndicatedSentenceTypeId": "bf613f53-3398-4bc6-bdb0-40834f6ee429"
+              },
+              "motReasonCode": "06pa0usb5H",
+              "motReasonDescription": "lluCUCf9Gb",
+              "motReasonId": "c3b2bf24-d133-4fc7-b8ae-3fc852f0a718",
+              "offenceId": "0c390817-c76c-46be-9822-637e45947fb9",
+              "originatingHearingId": "575df046-de58-46aa-9052-a9896367e083",
+              "sequenceNumber": 2066416861
+            },
+            "arrestDate": "2019-03-30",
+            "chargeDate": "2017-09-06",
+            "count": 1215870826,
+            "custodyTimeLimit": {
+              "daysSpent": 1635248303,
+              "timeLimit": "2016-10-02"
+            },
+            "endDate": "2018-07-08",
+            "id": "0c390817-c76c-46be-9822-637e45947fb9",
+            "indicatedPlea": {
+              "indicatedPleaDate": "2018-05-14",
+              "indicatedPleaValue": "INDICATED_GUILTY",
+              "offenceId": "0c390817-c76c-46be-9822-637e45947fb9",
+              "source": "IN_COURT"
+            },
+            "laidDate": "2016-05-27",
+            "modeOfTrial": "40lTcz9bUY",
+            "notifiedPlea": {
+              "notifiedPleaDate": "2016-08-02",
+              "notifiedPleaValue": "NO_NOTIFICATION",
+              "offenceId": "0c390817-c76c-46be-9822-637e45947fb9"
+            },
+            "offenceCode": "zd9mPPHj4x",
+            "offenceDefinitionId": "bbc38b4d-b1e2-4edc-9c2c-38109d2dea6d",
+            "offenceFacts": {
+              "alcoholReadingAmount": 472019241,
+              "alcoholReadingMethodCode": "86OZyjLArR",
+              "vehicleMake": "koTZ6IXiUK",
+              "vehicleRegistration": "3CSUdgtMrG"
+            },
+            "offenceLegislation": "w1w39ReFrc",
+            "offenceLegislationWelsh": "xYIe9v9Wuc",
+            "offenceTitle": "4yfaS0hpYH",
+            "offenceTitleWelsh": "qksuCAxjoh",
+            "orderIndex": 478270505,
+            "startDate": "2017-06-22",
+            "wording": "SIMqDqoj5w",
+            "wordingWelsh": "AU5FJa51Ax"
+          }
+        ],
+        "prosecutionCaseId": "78c5de6b-49c9-4274-865d-6df730ced144"
+      },
+      "id": "3ba8a346-589f-4baf-8105-bf387a2e5a74",
+      "personDetails": {
+        "firstName": "Lauren",
+        "gender": "FEMALE",
+        "lastName": "Michelle",
+        "middleName": "Mia"
+      }
+    },
+    "applicationOutcome": {
+      "applicationId": "f3a6e917-7cc8-3c66-83dd-d958abd6a6e4",
+      "applicationOutcomeDate": "2020-02-18",
+      "applicationOutcomeType": {
+        "description": "granted",
+        "id": "c322f934-6b70-3fdd-b196-8628d5ee68db",
+        "sequence": 1
+      },
+      "originatingHearingId": "2e157cc3-e9f6-495f-9051-4c50df3523de"
+    },
+    "applicationReceivedDate": "2020-02-18",
+    "applicationReference": "12AA3456716",
+    "applicationStatus": "DRAFT",
+    "id": "e7ebfd07-533b-4134-bf6d-c0e60c265095",
+    "respondents": [
+      {
+        "partyDetails": {
+          "id": "0f50ff91-def2-434b-aee1-3fc2f31530d4",
+          "organisation": {
+            "name": "OrganisationName"
+          },
+          "personDetails": {
+            "firstName": "Gerald",
+            "gender": "MALE",
+            "lastName": "Harrison"
+          }
+        }
+      },
+      {
+        "partyDetails": {
+          "id": "dce53209-c768-48f3-9242-61853a64bcdd",
+          "organisation": {
+            "name": "OrganisationName"
+          },
+          "personDetails": {
+            "firstName": "Gerald",
+            "gender": "MALE",
+            "lastName": "Harrison"
+          }
+        }
+      }
+    ],
+    "type": {
+      "applicationCategory": "appCategory",
+      "applicationCode": "appCode",
+      "applicationJurisdictionType": "EITHER",
+      "applicationLegislation": "appLegislation",
+      "applicationType": "applicationType",
+      "id": "f3a6e917-7cc8-3c66-83dd-d958abd6a6e4",
+      "linkType": "EITHER"
+    }
+  }
+}

@@ -1,0 +1,123 @@
+{
+  "prosecutionCase": {
+    "caseStatus": "CLOSED",
+    "defendants": [
+      {
+        "id": "f16b1632-389b-41a0-beb0-0614937c1929",
+        "numberOfPreviousConvictionsCited": 0,
+        "offences": [
+          {
+            "allocationDecision": {
+              "allocationDecisionDate": "2020-03-17",
+              "motReasonCode": "b8c37e33-defd-351c-b91e-1e03e51657da",
+              "motReasonDescription": "Summary-only offence",
+              "motReasonId": "b8c37e33-defd-351c-b91e-1e03e51657da",
+              "offenceId": "7bca115c-dfda-4bb7-b765-edbfd1b20266",
+              "originatingHearingId": "4923715f-79ee-4adf-994b-1c07c53670a7",
+              "sequenceNumber": 90
+            },
+            "chargeDate": "2019-09-13",
+            "convictionDate": "2020-03-17",
+            "count": 1,
+            "id": "7bca115c-dfda-4bb7-b765-edbfd1b20266",
+            "judicialResults": [
+              {
+                "category": "FINAL",
+                "cjsCode": "1018",
+                "courtClerk": {
+                  "firstName": "Erica",
+                  "lastName": "Wilson",
+                  "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+                },
+                "isAdjournmentResult": false,
+                "isAvailableForCourtExtract": true,
+                "isConvictedResult": true,
+                "isDeleted": false,
+                "isFinancialResult": false,
+                "judicialResultId": "9dd628ba-e888-407f-9ac7-7e40faddb395",
+                "judicialResultPrompts": [
+                  {
+                    "isAvailableForCourtExtract": true,
+                    "label": "Period of conditional discharge",
+                    "promptSequence": 100,
+                    "usergroups": [
+                      "Court Clerks",
+                      "Legal Advisers"
+                    ],
+                    "value": "6 Months",
+                    "welshLabel": ""
+                  }
+                ],
+                "label": "Conditional discharge",
+                "lastSharedDateTime": "2020-03-17",
+                "orderedDate": "2020-03-17",
+                "orderedHearingId": "4923715f-79ee-4adf-994b-1c07c53670a7",
+                "rank": 7400,
+                "usergroups": [],
+                "welshLabel": "Rhyddhad Amodol"
+              }
+            ],
+            "modeOfTrial": "Summary",
+            "notifiedPlea": {
+              "notifiedPleaDate": "2020-03-17",
+              "notifiedPleaValue": "NO_NOTIFICATION",
+              "offenceId": "7bca115c-dfda-4bb7-b765-edbfd1b20266"
+            },
+            "offenceCode": "RT88569",
+            "offenceDefinitionId": "371f907b-bd4b-4b32-9ae9-e2e66639f2e3",
+            "offenceFacts": {
+              "vehicleMake": "BMW",
+              "vehicleRegistration": "YG43NWX"
+            },
+            "offenceLegislation": "Contrary to section 144A of the Road Traffic Act 1988 and Schedule 2 to the Road Traffic Offenders Act 1988.",
+            "offenceLegislationWelsh": "Yn groes i adran 144a Deddf Traffig Ffyrdd 1988 ac Atodlen 2 Deddf Troseddwyr Traffig Ffyrdd 1988.",
+            "offenceTitle": "Keep a motor vehicle which does not meet insurance requirements",
+            "offenceTitleWelsh": "Cadw cerbyd modur nad yw'n bodloni'r gofynion yswiriant",
+            "orderIndex": 1,
+            "plea": {
+              "offenceId": "7bca115c-dfda-4bb7-b765-edbfd1b20266",
+              "originatingHearingId": "4923715f-79ee-4adf-994b-1c07c53670a7",
+              "pleaDate": "2020-03-17",
+              "pleaValue": "GUILTY"
+            },
+            "proceedingsConcluded": true,
+            "startDate": "2019-03-16",
+            "wording": "sint",
+            "wordingWelsh": "ea"
+          }
+        ],
+        "personDefendant": {
+          "personDetails": {
+            "address": {
+              "address1": "6949 Taylor Stravenue",
+              "address2": "Stokes Valleys",
+              "address3": "London",
+              "address5": "North Maple",
+              "postcode": "SA7 0AN"
+            },
+            "contact": {},
+            "dateOfBirth": "1990-10-01",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {},
+            "firstName": "Update Defendant",
+            "gender": "NOT_SPECIFIED",
+            "lastName": "Details Inside Session",
+            "occupationCode": "0",
+            "title": "MR"
+          }
+        },
+        "proceedingsConcluded": true,
+        "prosecutionCaseId": "cbd670a9-edae-4930-8107-84809d6e4277",
+        "courtProceedingsInitiated": "2020-02-21T11:49:18.116Z"
+      }
+    ],
+    "id": "cbd670a9-edae-4930-8107-84809d6e4277",
+    "initiationCode": "J",
+    "prosecutionCaseIdentifier": {
+      "prosecutionAuthorityCode": "DVLA",
+      "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e",
+      "prosecutionAuthorityReference": "50423829YG43NWX"
+    }
+  },
+  "hearingId": "4923715f-79ee-4adf-994b-1c07c53670a7"
+}

@@ -1,35 +1,5 @@
 package uk.gov.moj.cpp.hearing.test;
 
-import static java.util.Collections.singletonList;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.randomUUID;
-import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
-import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
-import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
-import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
-import static uk.gov.justice.core.courts.PleaModel.pleaModel;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
-import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
-
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
@@ -134,6 +104,36 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
+import static java.util.Collections.unmodifiableList;
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.randomUUID;
+import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
+import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
+import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
+import static uk.gov.justice.core.courts.PleaModel.pleaModel;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
+import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+
 @SuppressWarnings({"squid:S1188", "squid:S1135", "squid:S1314", "squid:S1192"})
 public class TestTemplates {
 
@@ -193,7 +193,7 @@ public class TestTemplates {
             return new UpdateInterpreterIntermediary(hearingId, interpreterIntermediary);
         }
 
-        public static UpdateInterpreterIntermediary updateInterpreterIntermediaryCommandTemplate(final UUID hearingId, InterpreterIntermediary interpreterIntermediary) {
+        public static UpdateInterpreterIntermediary updateInterpreterIntermediaryCommandTemplate(final UUID hearingId, final InterpreterIntermediary interpreterIntermediary) {
             return new UpdateInterpreterIntermediary(hearingId, interpreterIntermediary);
         }
     }
@@ -631,14 +631,14 @@ public class TestTemplates {
                     ).build());
         }
 
-        public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(List<CourtApplication>  courtApplications) {
+        public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(final List<CourtApplication>  courtApplications) {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
                             .setJurisdictionType(CROWN))
-                    .withCourtApplications(courtApplications)
-                    .build());
+                            .withCourtApplications(courtApplications)
+                            .build());
         }
 
         public static InitiateHearingCommand standardInitiateHearingTemplateWithJurisdictionMagistrate() {
@@ -726,7 +726,7 @@ public class TestTemplates {
                     ).build());
         }
 
-        public static InitiateHearingCommand customStructureInitiateHearingTemplate(Map<UUID, Map<UUID, List<UUID>>> structure) {
+        public static InitiateHearingCommand customStructureInitiateHearingTemplate(final Map<UUID, Map<UUID, List<UUID>>> structure) {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
@@ -821,7 +821,7 @@ public class TestTemplates {
         private SaveDraftResultsCommandTemplates() {
         }
 
-        public static SaveDraftResultCommand standardSaveDraftTemplate(UUID hearingId, UUID defendantId, UUID offenceId, UUID resultLineId) {
+        public static SaveDraftResultCommand standardSaveDraftTemplate(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
             return SaveDraftResultCommand.saveDraftResultCommand()
                     .setTarget(CoreTestTemplates.target(hearingId, defendantId, offenceId, resultLineId).build());
         }
@@ -1072,29 +1072,29 @@ public class TestTemplates {
         private CaseDefendantOffencesChangedCommandTemplates() {
         }
 
-        public static TemplateArguments updateOffencesForDefendantArguments(UUID prosecutionCaseId, UUID defendantId) {
+        public static TemplateArguments updateOffencesForDefendantArguments(final UUID prosecutionCaseId, final UUID defendantId) {
             return new TemplateArguments(prosecutionCaseId, defendantId);
         }
 
-        public static UpdateOffencesForDefendantCommand addOffencesForDefendantTemplate(TemplateArguments args) {
+        public static UpdateOffencesForDefendantCommand addOffencesForDefendantTemplate(final TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
                     .setAddedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToAdd())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
-        public static UpdateOffencesForDefendantCommand updateOffencesForDefendantTemplate(TemplateArguments args) {
+        public static UpdateOffencesForDefendantCommand updateOffencesForDefendantTemplate(final TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
                     .setUpdatedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToUpdate())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
-        public static UpdateOffencesForDefendantCommand deleteOffencesForDefendantTemplate(TemplateArguments args) {
+        public static UpdateOffencesForDefendantCommand deleteOffencesForDefendantTemplate(final TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
                     .setDeletedOffences(asList(deletedOffence(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffenceToDelete())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
-        public static DefendantCaseOffences defendantCaseOffences(UUID prosecutionCaseId, UUID defendantId, List<UUID> offenceIds) {
+        public static DefendantCaseOffences defendantCaseOffences(final UUID prosecutionCaseId, final UUID defendantId, final List<UUID> offenceIds) {
             return DefendantCaseOffences.defendantCaseOffences()
                     .withProsecutionCaseId(prosecutionCaseId)
                     .withDefendantId(defendantId)
@@ -1153,13 +1153,13 @@ public class TestTemplates {
                                     .withWordingWelsh(STRING.next())
                                     .withProceedingsConcluded(true)
                                     .withIsDiscontinued(true)
-                                    .withIsIntroduceAfterInitialProceedings(true)
+                                    .withIntroducedAfterInitialProceedings(true)
                                     .build())
                             .collect(Collectors.toList())
                     );
         }
 
-        public static DeletedOffences deletedOffence(UUID caseId, UUID defendantId, List<UUID> offenceIds) {
+        public static DeletedOffences deletedOffence(final UUID caseId, final UUID defendantId, final List<UUID> offenceIds) {
             return DeletedOffences.deletedOffences()
                     .setProsecutionCaseId(caseId)
                     .setDefendantId(defendantId)
@@ -1174,7 +1174,7 @@ public class TestTemplates {
             private List<UUID> offencesToUpdate = new ArrayList<>();
             private List<UUID> offenceToDelete = new ArrayList<>();
 
-            public TemplateArguments(UUID prosecutionCaseId, UUID defendantId) {
+            public TemplateArguments(final UUID prosecutionCaseId, final UUID defendantId) {
                 this.prosecutionCaseId = prosecutionCaseId;
                 this.defendantId = defendantId;
             }
@@ -1183,7 +1183,7 @@ public class TestTemplates {
                 return prosecutionCaseId;
             }
 
-            public TemplateArguments setProsecutionCaseId(UUID caseId) {
+            public TemplateArguments setProsecutionCaseId(final UUID caseId) {
                 this.prosecutionCaseId = caseId;
                 return this;
             }
@@ -1192,7 +1192,7 @@ public class TestTemplates {
                 return defendantId;
             }
 
-            public TemplateArguments setDefendantId(UUID defendantId) {
+            public TemplateArguments setDefendantId(final UUID defendantId) {
                 this.defendantId = defendantId;
                 return this;
             }
@@ -1201,7 +1201,7 @@ public class TestTemplates {
                 return unmodifiableList(offencesToAdd);
             }
 
-            public TemplateArguments setOffencesToAdd(List<UUID> offencesToAdd) {
+            public TemplateArguments setOffencesToAdd(final List<UUID> offencesToAdd) {
                 this.offencesToAdd = unmodifiableList(offencesToAdd);
                 return this;
             }
@@ -1210,7 +1210,7 @@ public class TestTemplates {
                 return unmodifiableList(ofNullable(offencesToUpdate).orElseGet(ArrayList::new));
             }
 
-            public TemplateArguments setOffencesToUpdate(List<UUID> offencesToUpdate) {
+            public TemplateArguments setOffencesToUpdate(final List<UUID> offencesToUpdate) {
                 this.offencesToUpdate = unmodifiableList(ofNullable(offencesToUpdate).orElseGet(ArrayList::new));
                 return this;
             }
@@ -1219,7 +1219,7 @@ public class TestTemplates {
                 return unmodifiableList(ofNullable(offenceToDelete).orElseGet(ArrayList::new));
             }
 
-            public TemplateArguments setOffenceToDelete(List<UUID> offenceToDelete) {
+            public TemplateArguments setOffenceToDelete(final List<UUID> offenceToDelete) {
                 this.offenceToDelete = unmodifiableList(ofNullable(offenceToDelete).orElseGet(ArrayList::new));
                 return this;
             }
@@ -1273,7 +1273,7 @@ public class TestTemplates {
             return new AddDefenceCounsel(defenceCounsel, hearingId);
         }
 
-        public static AddDefenceCounsel addDefenceCounselCommandTemplate(final UUID hearingId, DefenceCounsel defenceCounsel) {
+        public static AddDefenceCounsel addDefenceCounselCommandTemplate(final UUID hearingId, final DefenceCounsel defenceCounsel) {
             return new AddDefenceCounsel(defenceCounsel, hearingId);
         }
     }
@@ -1297,7 +1297,7 @@ public class TestTemplates {
             return new UpdateDefenceCounsel(defenceCounsel, hearingId);
         }
 
-        public static UpdateDefenceCounsel updateDefenceCounselCommandTemplate(final UUID hearingId, DefenceCounsel defenceCounsel) {
+        public static UpdateDefenceCounsel updateDefenceCounselCommandTemplate(final UUID hearingId, final DefenceCounsel defenceCounsel) {
             return new UpdateDefenceCounsel(defenceCounsel, hearingId);
         }
     }
@@ -1336,7 +1336,7 @@ public class TestTemplates {
             return new AddProsecutionCounsel(hearingId, prosecutionCounsel);
         }
 
-        public static AddProsecutionCounsel addProsecutionCounselCommandTemplate(final UUID hearingId, ProsecutionCounsel prosecutionCounsel) {
+        public static AddProsecutionCounsel addProsecutionCounselCommandTemplate(final UUID hearingId, final ProsecutionCounsel prosecutionCounsel) {
             return new AddProsecutionCounsel(hearingId, prosecutionCounsel);
         }
     }
@@ -1397,7 +1397,7 @@ public class TestTemplates {
             return new UpdateProsecutionCounsel(hearingId, prosecutionCounsel);
         }
 
-        public static UpdateProsecutionCounsel updateProsecutionCounselCommandTemplate(final UUID hearingId, ProsecutionCounsel prosecutionCounsel) {
+        public static UpdateProsecutionCounsel updateProsecutionCounselCommandTemplate(final UUID hearingId, final ProsecutionCounsel prosecutionCounsel) {
             return new UpdateProsecutionCounsel(hearingId, prosecutionCounsel);
         }
     }
@@ -1613,11 +1613,11 @@ public class TestTemplates {
         }
     }
 
-    public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId, final JurisdictionType jurisdictionType, boolean convicted) {
+    public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId, final JurisdictionType jurisdictionType, final boolean convicted) {
         return generateNowsRequestTemplate(defendantId, jurisdictionType, convicted, false);
     }
 
-    public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId, final JurisdictionType jurisdictionType, boolean convicted, boolean remotePrintingRequired) {
+    public static CreateNowsRequest generateNowsRequestTemplate(final UUID defendantId, final JurisdictionType jurisdictionType, final boolean convicted, final boolean remotePrintingRequired) {
         final UUID caseId = UUID.randomUUID();
         final UUID offenceId = UUID.randomUUID();
         final UUID nowsTypeId = UUID.randomUUID();
@@ -1809,7 +1809,7 @@ public class TestTemplates {
                 .build();
     }
 
-    public static CreateNowsRequest generateNowsRequestTemplateWithConditionalText(final UUID defendantId, final JurisdictionType jurisdictionType, boolean convicted) {
+    public static CreateNowsRequest generateNowsRequestTemplateWithConditionalText(final UUID defendantId, final JurisdictionType jurisdictionType, final boolean convicted) {
         final UUID caseId = UUID.randomUUID();
         final UUID offenceId1 = UUID.randomUUID();
         final UUID offenceId2 = UUID.randomUUID();
@@ -2081,7 +2081,7 @@ public class TestTemplates {
             return new AddRespondentCounsel(hearingId, respondentCounsel);
         }
 
-        public static AddRespondentCounsel addRespondentCounselCommandTemplate(final UUID hearingId, RespondentCounsel respondentCounsel) {
+        public static AddRespondentCounsel addRespondentCounselCommandTemplate(final UUID hearingId, final RespondentCounsel respondentCounsel) {
             return new AddRespondentCounsel(hearingId, respondentCounsel);
         }
     }
@@ -2104,7 +2104,7 @@ public class TestTemplates {
             return new UpdateRespondentCounsel(hearingId, respondentCounsel);
         }
 
-        public static UpdateRespondentCounsel updateRespondentCounselCommandTemplate(final UUID hearingId, RespondentCounsel respondentCounsel) {
+        public static UpdateRespondentCounsel updateRespondentCounselCommandTemplate(final UUID hearingId, final RespondentCounsel respondentCounsel) {
             return new UpdateRespondentCounsel(hearingId, respondentCounsel);
         }
     }
@@ -2126,7 +2126,7 @@ public class TestTemplates {
             return new AddCompanyRepresentative(companyRepresentative, hearingId);
         }
 
-        public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
+        public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId, final CompanyRepresentative companyRepresentative) {
             return new AddCompanyRepresentative(companyRepresentative, hearingId);
         }
     }
@@ -2148,7 +2148,7 @@ public class TestTemplates {
             return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
         }
 
-        public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId, CompanyRepresentative companyRepresentative) {
+        public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId, final CompanyRepresentative companyRepresentative) {
             return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
         }
     }

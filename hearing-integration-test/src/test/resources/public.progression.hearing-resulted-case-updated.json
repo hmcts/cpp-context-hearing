@@ -13,6 +13,8 @@
       "defendants": [
         {
           "id": "DEFENDANT_ID",
+          "masterDefendantId": "DEFENDANT_ID",
+          "courtProceedingsInitiated": "2018-10-09T06:11:10.828Z",
           "prosecutionCaseId": "CASE_ID",
           "proceedingsConcluded": true,
           "numberOfPreviousConvictionsCited": 5,

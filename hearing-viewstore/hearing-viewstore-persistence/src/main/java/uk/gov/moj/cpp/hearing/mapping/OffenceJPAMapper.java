@@ -5,6 +5,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -12,9 +14,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 @ApplicationScoped
 public class OffenceJPAMapper {
@@ -102,8 +101,8 @@ public class OffenceJPAMapper {
         if(Objects.nonNull(pojo.getIsDiscontinued())) {
             offence.setDiscontinued(pojo.getIsDiscontinued());
         }
-        if(Objects.nonNull(pojo.getIsIntroduceAfterInitialProceedings())) {
-            offence.setIntroduceAfterInitialProceedings(pojo.getIsIntroduceAfterInitialProceedings());
+        if(Objects.nonNull(pojo.getIntroducedAfterInitialProceedings())) {
+            offence.setIntroduceAfterInitialProceedings(pojo.getIntroducedAfterInitialProceedings());
         }
         if(Objects.nonNull(pojo.getProceedingsConcluded())) {
             offence.setProceedingsConcluded(pojo.getProceedingsConcluded());
@@ -147,7 +146,7 @@ public class OffenceJPAMapper {
                 .withLaaApplnReference(laaApplnReferenceJPAMapper.fromJpa(entity.getLaaApplnReference()))
                 .withProceedingsConcluded(entity.isProceedingsConcluded())
                 .withIsDiscontinued(entity.isDiscontinued())
-                .withIsIntroduceAfterInitialProceedings(entity.isIntroduceAfterInitialProceedings())
+                .withIntroducedAfterInitialProceedings(entity.isIntroduceAfterInitialProceedings())
                 .withLaidDate(entity.getLaidDate())
                 .build();
     }

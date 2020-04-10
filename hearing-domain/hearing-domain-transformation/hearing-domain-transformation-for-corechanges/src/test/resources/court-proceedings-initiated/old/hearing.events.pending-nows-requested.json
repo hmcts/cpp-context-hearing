@@ -1,0 +1,716 @@
+{
+  "createNowsRequest": {
+    "courtClerk": {
+      "firstName": "Siouxsie",
+      "lastName": "Sioux",
+      "userId": "7cfe43b5-788b-43d8-a829-e4a7ce4166b8"
+    },
+    "hearing": {
+      "courtApplications": [
+        {
+          "applicant": {
+            "id": "fc988a85-c223-4de4-a1bc-0e726a07531f",
+            "organisation": {
+              "name": "OrganisationName"
+            },
+            "personDetails": {
+              "firstName": "Lauren",
+              "gender": "FEMALE",
+              "lastName": "Michelle",
+              "middleName": "Mia"
+            }
+          },
+          "applicationReceivedDate": "2020-02-21",
+          "applicationReference": "12AA3456716",
+          "applicationStatus": "DRAFT",
+          "id": "8fed46e5-1b22-4ba4-a281-f4cb2a82f3b4",
+          "respondents": [
+            {
+              "partyDetails": {
+                "id": "294ac135-42cd-48e3-8f86-c4b287f59877",
+                "organisation": {
+                  "name": "OrganisationName"
+                },
+                "personDetails": {
+                  "firstName": "Gerald",
+                  "gender": "MALE",
+                  "lastName": "Harrison"
+                }
+              }
+            },
+            {
+              "partyDetails": {
+                "id": "e858aab4-0716-4cfc-af9c-1b8453a734d0",
+                "organisation": {
+                  "name": "OrganisationName"
+                },
+                "personDetails": {
+                  "firstName": "Gerald",
+                  "gender": "MALE",
+                  "lastName": "Harrison"
+                }
+              }
+            }
+          ],
+          "type": {
+            "applicationCategory": "appCategory",
+            "applicationCode": "appCode",
+            "applicationJurisdictionType": "EITHER",
+            "applicationLegislation": "appLegislation",
+            "applicationType": "applicationType",
+            "id": "89692c88-6d25-4ab6-b717-3b344ef09a06",
+            "linkType": "EITHER"
+          }
+        }
+      ],
+      "courtCentre": {
+        "id": "d1ef6e5d-69e3-45cb-a0e9-eb1ffcf9c529",
+        "name": "r1dOMKgdxx",
+        "roomId": "9cc409bc-7143-477c-a471-cf200188ee51",
+        "roomName": "UPbginmE8p",
+        "welshName": "vGJy6P3wxe",
+        "welshRoomName": "kc4Ve9rcaY"
+      },
+      "crackedIneffectiveTrial": {
+        "code": "code",
+        "description": "fullDescription",
+        "id": "ac3e23cc-526e-4083-9db0-37f753b1af63",
+        "type": "InEffective"
+      },
+      "defendantReferralReasons": [
+        {
+          "defendantId": "d7ab60a5-4c57-4376-88f3-dea6f0cd20fd",
+          "description": "VCWkzUAiEe",
+          "id": "9e3ba154-3c0b-4c7c-92ff-8eaa6c37f606",
+          "welshDescription": "welshDescription"
+        }
+      ],
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 1252277202,
+          "listingSequence": 1379138631,
+          "sittingDay": "2016-07-27T06:14:21.193Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "3cab549a-1756-4716-99c8-515cf4425ca2",
+      "judiciary": [
+        {
+          "firstName": "Ro06trhaM2",
+          "isBenchChairman": false,
+          "isDeputy": false,
+          "judicialId": "b7ce8142-cfa9-47ff-869a-dfe0dc4b2a38",
+          "judicialRoleType": {
+            "judicialRoleTypeId": "4ff24d6d-c944-4f52-9786-e83b02731eb9",
+            "judiciaryType": "CIRCUIT_JUDGE"
+          },
+          "lastName": "evofg6LeHL",
+          "middleName": "kEZDW4OFxv",
+          "title": "iH13I0UXAt"
+        }
+      ],
+      "jurisdictionType": "CROWN",
+      "prosecutionCases": [
+        {
+          "caseMarkers": [
+            {
+              "id": "c3319094-f428-4317-9775-8afb7fad026e",
+              "markerTypeCode": "iJkfxNMsWT",
+              "markerTypeDescription": "CYIzKsZiME",
+              "markerTypeid": "fe53ee55-ba04-49e4-8a88-08a57e03c2ee"
+            }
+          ],
+          "caseStatus": "sfxulvdbnd",
+          "classOfCase": "Class 1",
+          "defendants": [
+            {
+              "id": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+              "isYouth": true,
+              "masterDefendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+              "numberOfPreviousConvictionsCited": 1256919676,
+              "offences": [
+                {
+                  "allocationDecision": {
+                    "allocationDecisionDate": "2020-02-21",
+                    "courtIndicatedSentence": {
+                      "courtIndicatedSentenceDescription": "Pa9pKLmvNW",
+                      "courtIndicatedSentenceTypeId": "51b231dd-dbba-4e37-9a48-1d529444c3a8"
+                    },
+                    "motReasonCode": "sYwaOEwbYu",
+                    "motReasonDescription": "qfF5VY3oU9",
+                    "motReasonId": "0cdc50f1-8823-499e-8eb1-59422e16e1ea",
+                    "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+                    "originatingHearingId": "2d6b38cf-7c6f-477b-a01a-6af93009e8fc",
+                    "sequenceNumber": 1873292594
+                  },
+                  "arrestDate": "2019-10-11",
+                  "chargeDate": "2016-01-17",
+                  "convictionDate": "2019-05-04",
+                  "count": 1787229995,
+                  "custodyTimeLimit": {
+                    "daysSpent": 599946239,
+                    "timeLimit": "2018-07-12"
+                  },
+                  "endDate": "2019-09-06",
+                  "id": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+                  "indicatedPlea": {
+                    "indicatedPleaDate": "2018-12-29",
+                    "indicatedPleaValue": "INDICATED_GUILTY",
+                    "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+                    "originatingHearingId": "3cab549a-1756-4716-99c8-515cf4425ca2",
+                    "source": "ONLINE"
+                  },
+                  "isDiscontinued": true,
+                  "isIntroduceAfterInitialProceedings": true,
+                  "laidDate": "2017-08-01",
+                  "modeOfTrial": "YBQ9NzR0t6",
+                  "notifiedPlea": {
+                    "notifiedPleaDate": "2019-11-29",
+                    "notifiedPleaValue": "NOTIFIED_NOT_GUILTY",
+                    "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93"
+                  },
+                  "offenceCode": "fDVt7apZhN",
+                  "offenceDefinitionId": "2ee37628-6bef-449b-bbf5-2a64c862f159",
+                  "offenceFacts": {
+                    "alcoholReadingAmount": 835201487,
+                    "alcoholReadingMethodCode": "JoxqegM5hc",
+                    "vehicleMake": "rCMEPxhePd",
+                    "vehicleRegistration": "RdHW6HHMLT"
+                  },
+                  "offenceLegislation": "xK5ZqdjIEx",
+                  "offenceLegislationWelsh": "kVyPB5Fzab",
+                  "offenceTitle": "XJBYnN9K9m",
+                  "offenceTitleWelsh": "bf8FOsOX8q",
+                  "orderIndex": 879315814,
+                  "plea": {
+                    "delegatedPowers": {
+                      "firstName": "SmajT5VGer",
+                      "lastName": "It0XovRbC8",
+                      "userId": "22595a9e-a40d-4436-b0a7-ea13a9ec0a38"
+                    },
+                    "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+                    "originatingHearingId": "3cab549a-1756-4716-99c8-515cf4425ca2",
+                    "pleaDate": "2019-05-04",
+                    "pleaValue": "GUILTY"
+                  },
+                  "proceedingsConcluded": true,
+                  "startDate": "2017-01-12",
+                  "wording": "xCq61mwK8r",
+                  "wordingWelsh": "g7H1gYnLlo"
+                }
+              ],
+              "personDefendant": {
+                "arrestSummonsNumber": "HZAUqxsnRE",
+                "bailStatus": {
+                  "code": "C",
+                  "description": "Remanded into Custody",
+                  "id": "2f63a571-cddf-4e50-815f-7705bff82351"
+                },
+                "custodyTimeLimit": "2015-04-25",
+                "driverNumber": "qWK0EjfraH",
+                "employerOrganisation": {
+                  "address": {
+                    "address1": "Kfwaa2hVqG",
+                    "address2": "nOALkrGOxa",
+                    "address3": "e78JlOy5D2",
+                    "address4": "N9FsyJhlGp",
+                    "address5": "ooNGsKUD9J",
+                    "postcode": "NA2 7WQ",
+                    "welshAddress1": "Z55pYlfT4x",
+                    "welshAddress2": "oef6Z1gaFz",
+                    "welshAddress3": "rBrHTshCRm",
+                    "welshAddress4": "ZtJZqmSdKq",
+                    "welshAddress5": "oSlwThfoVD"
+                  },
+                  "contact": {
+                    "fax": "1561372719",
+                    "home": "2004634042",
+                    "mobile": "1410979153",
+                    "primaryEmail": "j3r2olreak@bi3c6d5rxl.vgeuarzguf",
+                    "secondaryEmail": "mjvqx0uydb@ysaptbb6bi.kqn10wo84l",
+                    "work": "1104252634"
+                  },
+                  "incorporationNumber": "fBvB526Rrs",
+                  "name": "oalbalcJ68",
+                  "registeredCharityNumber": "CPE9Mbpgep"
+                },
+                "employerPayrollReference": "DIsyGHVyhd",
+                "perceivedBirthYear": 630290521,
+                "personDetails": {
+                  "additionalNationalityCode": "DYdk8YStd9",
+                  "additionalNationalityId": "2620a844-dc8e-41f6-a546-e66b57af4e60",
+                  "address": {
+                    "address1": "bmCFWaZwlt",
+                    "address2": "dUr1OPwZae",
+                    "address3": "9s7sG7qfvZ",
+                    "address4": "wHJ4dYWepD",
+                    "address5": "2TIjHMZ9qt",
+                    "postcode": "IE2 7PB",
+                    "welshAddress1": "tyFVFQWMgm",
+                    "welshAddress2": "UEoVJb3SW1",
+                    "welshAddress3": "Dxc7aEha0K",
+                    "welshAddress4": "a06PSiFIb8",
+                    "welshAddress5": "UYzFOjM2Qs"
+                  },
+                  "contact": {
+                    "fax": "151800851",
+                    "home": "1496261038",
+                    "mobile": "1328804414",
+                    "primaryEmail": "ynkacnxbxm@txptydci4w.p6fuofm4et",
+                    "secondaryEmail": "gh31xocfzy@l7ce7rym7t.uh41opyooz",
+                    "work": "493653121"
+                  },
+                  "dateOfBirth": "2015-11-11",
+                  "disabilityStatus": "AGagKJggVq",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "ethnicity": {
+                    "observedEthnicityCode": "wWI6e3bBLD"
+                  },
+                  "firstName": "G6CHjWLsuE",
+                  "gender": "NOT_KNOWN",
+                  "interpreterLanguageNeeds": "LM9k5iQ8dc",
+                  "lastName": "fP8iqiQb3o",
+                  "middleName": "mINqsRKz93",
+                  "nationalInsuranceNumber": "PR669898A",
+                  "nationalityCode": "B1kOcBH3p2",
+                  "nationalityDescription": "wamnIcwlHX",
+                  "nationalityId": "5dbbd18b-f4a1-4ef8-bddf-47c29517f1c9",
+                  "occupation": "z5QjclDMKC",
+                  "occupationCode": "5gefqHTcQp",
+                  "specificRequirements": "R55mQUhPrp",
+                  "title": "Lieutanant"
+                }
+              },
+              "proceedingsConcluded": false,
+              "prosecutionAuthorityReference": "oeqOxwGMx5",
+              "prosecutionCaseId": "1ac69889-bb97-4436-ab77-7ced30bba4c3"
+            }
+          ],
+          "id": "1ac69889-bb97-4436-ab77-7ced30bba4c3",
+          "initiationCode": "Z",
+          "originatingOrganisation": "WxOrbfuhhL",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "mif84IW5eZ",
+            "prosecutionAuthorityId": "02187252-f70d-4684-a420-b65f1950dd25",
+            "caseURN": "AZs64g6ujS"
+          },
+          "statementOfFacts": "RMZevRhcMZ",
+          "statementOfFactsWelsh": "YZONj8SjKm"
+        }
+      ],
+      "prosecutionCounsels": [
+        {
+          "attendanceDays": [
+            "2020-02-21"
+          ],
+          "firstName": "qVDOIS2241",
+          "id": "24297ac2-0c6f-4b9e-83b5-422573a0d236",
+          "lastName": "uQGzWPpLmc",
+          "middleName": "UytX809LrC",
+          "prosecutionCases": [
+            "8b471d9a-7239-4d7a-9a6e-e83dd0800ed3"
+          ],
+          "status": "NPWHLXja7m",
+          "title": "me3dnLNRd6",
+          "userId": "b07e96a0-5fad-42a9-8bb8-6f0ea4635aad"
+        }
+      ],
+      "reportingRestrictionReason": "NEIsCJnF9S",
+      "type": {
+        "description": "CXyt3E05RG",
+        "id": "df686ce9-39f2-445d-a858-363ecb9a0442",
+        "welshDescription": "GqqxMQdGpI"
+      }
+    },
+    "nowTypes": [
+      {
+        "description": "SmUvcLALw0",
+        "id": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "jurisdiction": "B",
+        "rank": 245904537,
+        "requiresBulkPrinting": false,
+        "requiresEnforcement": false,
+        "staticText": "NowLevel/U2Ef4eLUJj",
+        "templateName": "Yrk7aQS5b6",
+        "welshDescription": "Welsh Name",
+        "welshStaticText": "NowLevel/CBI7qY4oQB Welsh"
+      },
+      {
+        "description": "xMeNH0T9FM",
+        "id": "10115268-8efc-49fe-b8e8-feee216a03da",
+        "jurisdiction": "B",
+        "rank": 1918255885,
+        "requiresBulkPrinting": false,
+        "requiresEnforcement": false,
+        "staticText": "ZIbPnpCEIH",
+        "templateName": "c8Q58SERJx",
+        "welshDescription": "welshName",
+        "welshStaticText": "welshText"
+      }
+    ],
+    "nows": [
+      {
+        "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+        "documentationLanguage": "ENGLISH",
+        "financialOrders": {
+          "accountReference": "TBC",
+          "isCrownCourt": true,
+          "totalAmountImposed": "0.00",
+          "totalBalance": "0.00"
+        },
+        "id": "a6b2178f-c88c-4998-9862-c263f8041ffe",
+        "ljaDetails": {
+          "accountDivisionCode": "5673",
+          "bacsAccountNumber": "1",
+          "bacsBankName": "account name",
+          "bacsSortCode": "867878",
+          "enforcementAddress": {
+            "address1": "address1 8139",
+            "address2": "address2 8139",
+            "address3": "address3 8139",
+            "address4": "address4 8139",
+            "postcode": "AL4 9LG"
+          },
+          "enforcementEmail": "enforcement8139@gov.com",
+          "enforcementPhoneNumber": "123456789",
+          "ljaCode": "123",
+          "ljaName": "ljaName8139"
+        },
+        "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "referenceDate": "2017-07-24",
+        "requestedMaterials": [
+          {
+            "description": "SmUvcLALw0",
+            "isAmended": false,
+            "isRemotePrintingRequired": false,
+            "key": {
+              "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+              "hearingId": "3cab549a-1756-4716-99c8-515cf4425ca2",
+              "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+              "usergroups": [
+                "Listing Officer"
+              ]
+            },
+            "materialId": "a679a8b5-9c50-4e11-bccb-4fa752759af1",
+            "nowResults": [
+              {
+                "promptRefs": [
+                  "c74ee662-37a0-464e-b06b-e7d91a30bbd0"
+                ],
+                "sequence": 1,
+                "sharedResultId": "526c8c10-b72e-4e51-9374-8d48b7893328"
+              },
+              {
+                "promptRefs": [
+                  "2aacd456-f4b0-4898-8bc2-3b0ea1fe4cf8"
+                ],
+                "sequence": 1,
+                "sharedResultId": "b77657b5-335a-4311-9d4d-e24fda924b65"
+              }
+            ],
+            "nowVariantAddressee": {
+              "address": {
+                "address1": "bmCFWaZwlt",
+                "address2": "dUr1OPwZae",
+                "address3": "9s7sG7qfvZ",
+                "address4": "wHJ4dYWepD",
+                "address5": "2TIjHMZ9qt",
+                "postcode": "IE2 7PB",
+                "welshAddress1": "tyFVFQWMgm",
+                "welshAddress2": "UEoVJb3SW1",
+                "welshAddress3": "Dxc7aEha0K",
+                "welshAddress4": "a06PSiFIb8",
+                "welshAddress5": "UYzFOjM2Qs"
+              },
+              "name": "G6CHjWLsuE mINqsRKz93 fP8iqiQb3o"
+            },
+            "nowVariantDefendant": {
+              "address": {
+                "address1": "bmCFWaZwlt",
+                "address2": "dUr1OPwZae",
+                "address3": "9s7sG7qfvZ",
+                "address4": "wHJ4dYWepD",
+                "address5": "2TIjHMZ9qt",
+                "postcode": "IE2 7PB",
+                "welshAddress1": "tyFVFQWMgm",
+                "welshAddress2": "UEoVJb3SW1",
+                "welshAddress3": "Dxc7aEha0K",
+                "welshAddress4": "a06PSiFIb8",
+                "welshAddress5": "UYzFOjM2Qs"
+              },
+              "dateOfBirth": "2015-11-11",
+              "name": "G6CHjWLsuE mINqsRKz93 fP8iqiQb3o"
+            },
+            "status": "requesting",
+            "templateName": "Yrk7aQS5b6"
+          }
+        ]
+      },
+      {
+        "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+        "documentationLanguage": "ENGLISH",
+        "financialOrders": {
+          "accountReference": "TBC",
+          "isCrownCourt": true,
+          "totalAmountImposed": "0.00",
+          "totalBalance": "0.00"
+        },
+        "id": "eee68c1b-2d3f-48b0-b412-ffed74ce1aa9",
+        "ljaDetails": {
+          "accountDivisionCode": "5673",
+          "bacsAccountNumber": "1",
+          "bacsBankName": "account name",
+          "bacsSortCode": "867878",
+          "enforcementAddress": {
+            "address1": "address1 8139",
+            "address2": "address2 8139",
+            "address3": "address3 8139",
+            "address4": "address4 8139",
+            "postcode": "AL4 9LG"
+          },
+          "enforcementEmail": "enforcement8139@gov.com",
+          "enforcementPhoneNumber": "123456789",
+          "ljaCode": "123",
+          "ljaName": "ljaName8139"
+        },
+        "nowsTypeId": "10115268-8efc-49fe-b8e8-feee216a03da",
+        "referenceDate": "2017-03-20",
+        "requestedMaterials": [
+          {
+            "description": "xMeNH0T9FM",
+            "isAmended": false,
+            "isRemotePrintingRequired": false,
+            "key": {
+              "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+              "hearingId": "3cab549a-1756-4716-99c8-515cf4425ca2",
+              "nowsTypeId": "10115268-8efc-49fe-b8e8-feee216a03da",
+              "usergroups": [
+                "Listing Officer"
+              ]
+            },
+            "materialId": "26a47c6f-4766-41ee-a90e-dd774109b0cc",
+            "nowResults": [
+              {
+                "promptRefs": [
+                  "29ee237c-30f1-43b3-afcd-e91859a4cd5d"
+                ],
+                "sequence": 1,
+                "sharedResultId": "118bacb2-f297-49df-bb29-f5514a5b631f"
+              }
+            ],
+            "nowVariantAddressee": {
+              "address": {
+                "address1": "bmCFWaZwlt",
+                "address2": "dUr1OPwZae",
+                "address3": "9s7sG7qfvZ",
+                "address4": "wHJ4dYWepD",
+                "address5": "2TIjHMZ9qt",
+                "postcode": "IE2 7PB",
+                "welshAddress1": "tyFVFQWMgm",
+                "welshAddress2": "UEoVJb3SW1",
+                "welshAddress3": "Dxc7aEha0K",
+                "welshAddress4": "a06PSiFIb8",
+                "welshAddress5": "UYzFOjM2Qs"
+              },
+              "name": "G6CHjWLsuE mINqsRKz93 fP8iqiQb3o"
+            },
+            "nowVariantDefendant": {
+              "address": {
+                "address1": "bmCFWaZwlt",
+                "address2": "dUr1OPwZae",
+                "address3": "9s7sG7qfvZ",
+                "address4": "wHJ4dYWepD",
+                "address5": "2TIjHMZ9qt",
+                "postcode": "IE2 7PB",
+                "welshAddress1": "tyFVFQWMgm",
+                "welshAddress2": "UEoVJb3SW1",
+                "welshAddress3": "Dxc7aEha0K",
+                "welshAddress4": "a06PSiFIb8",
+                "welshAddress5": "UYzFOjM2Qs"
+              },
+              "dateOfBirth": "2015-11-11",
+              "name": "G6CHjWLsuE mINqsRKz93 fP8iqiQb3o"
+            },
+            "status": "requesting",
+            "templateName": "c8Q58SERJx"
+          }
+        ]
+      }
+    ],
+    "sharedResultLines": [
+      {
+        "courtClerk": {
+          "firstName": "David",
+          "lastName": "Bowie",
+          "userId": "1e3263c6-df52-4ded-9301-7f6977fd3ef1"
+        },
+        "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+        "id": "b77657b5-335a-4311-9d4d-e24fda924b65",
+        "isAvailableForCourtExtract": true,
+        "label": "imprisonment",
+        "lastSharedDateTime": "2020-02-21",
+        "level": "OFFENCE",
+        "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+        "orderedDate": "2017-07-24",
+        "prompts": [
+          {
+            "id": "2aacd456-f4b0-4898-8bc2-3b0ea1fe4cf8",
+            "isAvailableForCourtExtract": false,
+            "label": "IXzwSpwYyf",
+            "promptReference": "OlDaVoaeo3",
+            "value": "value1",
+            "welshValue": "wvalue1"
+          }
+        ],
+        "prosecutionCaseId": "1ac69889-bb97-4436-ab77-7ced30bba4c3",
+        "welshLabel": "z8W8HjhjXk"
+      },
+      {
+        "courtClerk": {
+          "firstName": "David",
+          "lastName": "Bowie",
+          "userId": "ea6a9151-ec39-449c-938f-b38c63dd347c"
+        },
+        "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+        "id": "526c8c10-b72e-4e51-9374-8d48b7893328",
+        "isAvailableForCourtExtract": true,
+        "label": "imprisonment",
+        "level": "OFFENCE",
+        "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+        "orderedDate": "2017-03-20",
+        "prompts": [
+          {
+            "id": "c74ee662-37a0-464e-b06b-e7d91a30bbd0",
+            "isAvailableForCourtExtract": false,
+            "label": "svDNIUpcgT",
+            "promptReference": "H3wqNaFFxS",
+            "value": "val0",
+            "welshValue": "wval0"
+          }
+        ],
+        "prosecutionCaseId": "1ac69889-bb97-4436-ab77-7ced30bba4c3",
+        "welshLabel": "SwNuKhUuZo"
+      },
+      {
+        "courtClerk": {
+          "firstName": "David",
+          "lastName": "Bowie",
+          "userId": "1e38745a-6732-4bac-824a-4395bd10c1ba"
+        },
+        "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+        "id": "118bacb2-f297-49df-bb29-f5514a5b631f",
+        "isAvailableForCourtExtract": true,
+        "label": "imprisonment",
+        "level": "OFFENCE",
+        "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+        "orderedDate": "2017-03-20",
+        "prompts": [
+          {
+            "id": "29ee237c-30f1-43b3-afcd-e91859a4cd5d",
+            "isAvailableForCourtExtract": false,
+            "label": "evc96zDfcS",
+            "promptReference": "cosTRWALzo",
+            "value": "val1",
+            "welshValue": "wval1"
+          }
+        ],
+        "prosecutionCaseId": "1ac69889-bb97-4436-ab77-7ced30bba4c3",
+        "welshLabel": "lOZV95Xlvu"
+      }
+    ]
+  },
+  "targets": [
+    {
+      "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+      "hearingId": "3cab549a-1756-4716-99c8-515cf4425ca2",
+      "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+      "resultLines": [
+        {
+          "delegatedPowers": {
+            "firstName": "David",
+            "lastName": "Bowie",
+            "userId": "1e3263c6-df52-4ded-9301-7f6977fd3ef1"
+          },
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2017-07-24",
+          "prompts": [
+            {
+              "fixedListCode": "fixedListCode",
+              "id": "2aacd456-f4b0-4898-8bc2-3b0ea1fe4cf8",
+              "label": "IXzwSpwYyf",
+              "value": "value1",
+              "welshValue": "wvalue1"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "imprisonment",
+          "resultLineId": "b77657b5-335a-4311-9d4d-e24fda924b65",
+          "sharedDate": "2020-02-21"
+        }
+      ],
+      "targetId": "6bdac3dc-0a7c-43bf-9f54-7e90fd7e35e5"
+    },
+    {
+      "defendantId": "3de09c7c-3f60-4977-b82d-cfe58f414892",
+      "hearingId": "3cab549a-1756-4716-99c8-515cf4425ca2",
+      "offenceId": "24f5a0b0-050f-4387-a960-bdfbec598a93",
+      "resultLines": [
+        {
+          "delegatedPowers": {
+            "firstName": "David",
+            "lastName": "Bowie",
+            "userId": "ea6a9151-ec39-449c-938f-b38c63dd347c"
+          },
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2017-03-20",
+          "prompts": [
+            {
+              "fixedListCode": "fixedList0",
+              "id": "c74ee662-37a0-464e-b06b-e7d91a30bbd0",
+              "label": "svDNIUpcgT",
+              "value": "val0",
+              "welshValue": "wval0"
+            }
+          ],
+          "resultDefinitionId": "b5d3a4e2-8465-466b-bdbc-85ece3835ff3",
+          "resultLabel": "imprisonment",
+          "resultLineId": "526c8c10-b72e-4e51-9374-8d48b7893328",
+          "sharedDate": "2020-02-21"
+        },
+        {
+          "delegatedPowers": {
+            "firstName": "David",
+            "lastName": "Bowie",
+            "userId": "1e38745a-6732-4bac-824a-4395bd10c1ba"
+          },
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2017-03-20",
+          "prompts": [
+            {
+              "fixedListCode": "fixedList1",
+              "id": "29ee237c-30f1-43b3-afcd-e91859a4cd5d",
+              "label": "evc96zDfcS",
+              "value": "val1",
+              "welshValue": "wval1"
+            }
+          ],
+          "resultDefinitionId": "de946ddc-ad77-44b1-8480-8bbc251cdcfb",
+          "resultLabel": "imprisonment",
+          "resultLineId": "118bacb2-f297-49df-bb29-f5514a5b631f",
+          "sharedDate": "2020-02-21"
+        }
+      ],
+      "targetId": "aede5587-4c54-4ac3-97fd-d0b11cc2ecdc"
+    }
+  ]
+}
