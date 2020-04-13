@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-TRANSFORMATION_JAR=`echo target/hearing-domain-transformation-for-corechanges-6.4.10-CORECHANGES-SNAPSHOT.jar`
+TRANSFORMATION_JAR=`echo target/hearing-domain-transformation-for-corechanges*SNAPSHOT.jar`
 EVENT_TOOL_VERSION=6.4.0
 EVENT_TOOL_JAR=target/event-tool-${EVENT_TOOL_VERSION}-swarm.jar
 

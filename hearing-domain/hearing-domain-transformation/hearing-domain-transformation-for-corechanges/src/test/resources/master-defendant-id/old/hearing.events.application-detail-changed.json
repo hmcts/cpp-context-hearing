@@ -164,28 +164,48 @@
     "respondents": [
       {
         "partyDetails": {
-          "id": "8f2b4189-40ed-449b-84fb-7e2839b900ff",
-          "organisation": {
-            "name": "OrganisationName"
+          "defendant": {
+            "defenceOrganisation": {
+              "name": "wHmyGENZZTyCxMCyhlZeOVGhhpQmpSOIhuwkATeccUyFQy"
+            },
+            "id": "44eea6bf-6530-4af5-a1f5-c21d3a4d4bd6",
+            "offences": [
+              {
+                "count": 1,
+                "id": "5b93661d-47cf-403a-956d-81b59e1e48e0",
+                "offenceCode": "wsVEoLG",
+                "offenceDefinitionId": "9c021b71-dbaf-4f67-903e-7ae3ae7abf88",
+                "offenceLegislation": "lBFNhkWazdWYtxppIuXCTDINxtNFitZGiXxrifsAeLdmRokfvhPMDbxnCecafZppACQYNWbFJSmAbIeHE",
+                "offenceTitle": "WufhvlbrtedJhvdtMlpgWdeGZHOaYNKizaOuIrKNejwWX",
+                "orderIndex": 1,
+                "startDate": "2018-01-01",
+                "wording": "BGmVfydfwkBKwzxaAuMiOxALhvgmlHnAGsVQxPzflMYuvXgxeGfKJmdBcXaypsZUiaRTnvbXJpWtXJSnaCbwqitvCeCpLGzRPmkdn"
+              }
+            ],
+            "personDefendant": {
+              "bailStatus": {
+                "id": "eaf18bf8-9569-3656-a4ab-64299f9bd513",
+                "code": "U",
+                "description": "Unconditional Bail"
+              },
+              "personDetails": {
+                "address": {
+                  "address1": "HuqAQvnwGMZPVwnDGIksEKJh",
+                  "address2": "VQAYsdzxrww",
+                  "address3": "gOyBtxziLPAHY"
+                },
+                "dateOfBirth": "1963-01-01",
+                "firstName": "MLaKZMc",
+                "gender": "MALE",
+                "lastName": "EUcHgXFA",
+                "nationalityCode": "Jal",
+                "nationalityDescription": "nbLKGcr",
+                "nationalityId": "49433158-3542-49c8-a9af-581a0e746152"
+              }
+            },
+            "prosecutionCaseId": "5ab9e370-9267-4bcc-97e4-989c160b10bc"
           },
-          "personDetails": {
-            "firstName": "Gerald",
-            "gender": "MALE",
-            "lastName": "Harrison"
-          }
-        }
-      },
-      {
-        "partyDetails": {
-          "id": "91938c17-ba89-4e5f-ac0e-7da6feb31c49",
-          "organisation": {
-            "name": "OrganisationName"
-          },
-          "personDetails": {
-            "firstName": "Gerald",
-            "gender": "MALE",
-            "lastName": "Harrison"
-          }
+          "id": "1b4e6572-547c-4a02-98aa-23ac4670eda3"
         }
       }
     ],

@@ -40,10 +40,10 @@ public class CourtProceedingsInitiatedEventTransformer implements HearingEventTr
                     {HEARING_DEFENDANT_ADDED, "defendant"},
                     {HEARING_EVENTS_INITIATED, "hearing\\.prosecutionCases\\.\\d\\.defendants\\.\\d"},
                     {HEARING_EVENTS_NOWS_REQUESTED, "createNowsRequest\\.hearing\\.prosecutionCases\\.\\d\\.defendants\\.\\d"},
-                    {HEARING_EVENTS_HEARING_EXTENDED, "courtApplication\\.applicant\\.defendant"},
+                    {HEARING_EVENTS_HEARING_EXTENDED, "courtApplication\\.applicant\\.defendant|courtApplication\\.respondents\\.\\d\\.partyDetails\\.defendant"},
                     {HEARING_EVENTS_PENDING_NOWS_REQUESTED, "createNowsRequest\\.hearing\\.prosecutionCases\\.\\d\\.defendants\\.\\d"},
                     {HEARING_RESULTS_SHARED, "hearing\\.prosecutionCases\\.\\d\\.defendants\\.\\d"},
-                    {HEARING_EVENTS_APPLICATION_DETAIL_CHANGED, "courtApplication\\.applicant\\.defendant"},
+                    {HEARING_EVENTS_APPLICATION_DETAIL_CHANGED, "courtApplication\\.applicant\\.defendant|courtApplication\\.respondents\\.\\d\\.partyDetails\\.defendant"},
                     {HEARING_EVENTS_CASE_DEFENDANTS_UPDATED, "prosecutionCase\\.defendants\\.\\d"},
                     {HEARING_EVENTS_CASE_DEFENDANTS_UPDATED_FOR_HEARING, "prosecutionCase\\.defendants\\.\\d"},
             }).collect(Collectors.toMap(data -> data[0], data -> Pattern.compile(data[1]))));
