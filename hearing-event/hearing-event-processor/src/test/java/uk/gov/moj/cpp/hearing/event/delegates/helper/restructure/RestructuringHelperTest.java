@@ -8,6 +8,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -25,6 +26,7 @@ import static uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared.builder;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -372,11 +374,25 @@ public class RestructuringHelperTest {
         final List<TreeNode<ResultLine>> restructuredTree = restructringHelper.restructure(context, resultsShared);
 
         assertThat(restructuredTree.size(), is(1));
-        assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().size(), is(5));
-        assertThat(restructuredTree.get(0).getJudicialResult().getDelegatedPowers(), nullValue());
-        assertThat(restructuredTree.get(0).getJudicialResult().getResultText().split("\\R").length, is(6));
-        assertThat(restructuredTree.get(0).getJudicialResult().getJudicialResultTypeId(), is(topLevelResultLineParents.get(0).getResultDefinitionId()));
-        assertTrue(restructuredTree.get(0).getJudicialResult().getJudicialResultPrompts().stream().allMatch(jrp -> nonNull(jrp.getJudicialResultPromptTypeId())));
+        final JudicialResult judicialResult = restructuredTree.get(0).getJudicialResult();
+        assertThat(judicialResult.getJudicialResultPrompts().size(), is(5));
+        assertThat(judicialResult.getDelegatedPowers(), nullValue());
+        assertThat(judicialResult.getResultText().split("\\R").length, is(6));
+        assertThat(judicialResult.getJudicialResultTypeId(), is(topLevelResultLineParents.get(0).getResultDefinitionId()));
+        assertTrue(judicialResult.getJudicialResultPrompts().stream().allMatch(jrp -> nonNull(jrp.getJudicialResultPromptTypeId())));
+
+        assertTrue(judicialResult.getTerminatesOffenceProceedings());
+        assertFalse(judicialResult.getLifeDuration());
+        assertFalse(judicialResult.getPublishedAsAPrompt());
+        assertFalse(judicialResult.getAlwaysPublished());
+
+        // the below three are not present in resdult definition and hence are defaulted
+        assertFalse(judicialResult.getExcludedFromResults());
+        assertFalse(judicialResult.getUrgent());
+        assertFalse(judicialResult.getD20());
+
+        assertThat(judicialResult.getJudicialResultPrompts().stream().filter(jrp -> jrp.getJudicialResultPromptTypeId().equals(fromString("76f15753-1706-42fb-b922-0d56d01e5706"))).findFirst().get().getCourtExtract(), is("Y"));
+        assertThat(judicialResult.getJudicialResultPrompts().stream().filter(jrp -> jrp.getJudicialResultPromptTypeId().equals(fromString("266a2bbe-b6b5-4b24-830d-70ceff3e2cac"))).findFirst().get().getCourtExtract(), is("N"));
     }
 
     @Test

@@ -54,6 +54,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 public class RestructuringHelper {
@@ -126,27 +127,28 @@ public class RestructuringHelper {
         return resultLinesMap;
     }
 
-    @SuppressWarnings({"squid:S4973"}) // suppress warning for using Boolean comparision-  when equals comparision is not intended.
+    @SuppressWarnings({"squid:S4973"})
+    // suppress warning for using Boolean comparision-  when equals comparision is not intended.
     private Map<UUID, TreeNode<ResultLine>> mapToTreeNode(final JsonEnvelope context, final ResultsShared resultsShared) {
         final Map<UUID, TreeNode<ResultLine>> result = new HashMap<>();
         resultsShared.getTargets().stream().forEach(target -> {
             final List<ResultLine> resultLines = target.getResultLines();
             resultLines
-                .stream()
-                    .filter(r1 -> r1.getIsDeleted() != Boolean.TRUE )
+                    .stream()
+                    .filter(r1 -> r1.getIsDeleted() != Boolean.TRUE)
                     .forEach(resultLine -> {
-                final TreeNode<ResultDefinition> resultDefinitionNode = this.referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
+                        final TreeNode<ResultDefinition> resultDefinitionNode = this.referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
 
-                if (resultDefinitionNode == null) {
-                    throw new ResultDefinitionNotFoundException(format(
-                            RESULT_DEFINITION_NOT_FOUND_FOR_RESULT_LINE_ID_S_RESULT_DEFINITION_ID_S_HEARING_ID_S_ORDERED_DATE_S,
-                            resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
-                }
+                        if (resultDefinitionNode == null) {
+                            throw new ResultDefinitionNotFoundException(format(
+                                    RESULT_DEFINITION_NOT_FOUND_FOR_RESULT_LINE_ID_S_RESULT_DEFINITION_ID_S_HEARING_ID_S_ORDERED_DATE_S,
+                                    resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
+                        }
 
-                final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, resultLines, resultsShared);
-                final TreeNode<ResultLine> treeNode = getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
-                result.put(treeNode.getId(), treeNode);
-            });
+                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, resultLines, resultsShared);
+                        final TreeNode<ResultLine> treeNode = getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
+                        result.put(treeNode.getId(), treeNode);
+                    });
         });
         return result;
     }
@@ -164,7 +166,7 @@ public class RestructuringHelper {
         return treeNode;
     }
 
-        private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final ResultsShared resultsShared) {
+    private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final ResultsShared resultsShared) {
         final Hearing hearing = resultsShared.getHearing();
         final DelegatedPowers courtClerk = resultsShared.getCourtClerk();
         final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = resultsShared.getCompletedResultLinesStatus();
@@ -214,14 +216,14 @@ public class RestructuringHelper {
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withPostHearingCustodyStatus(resultDefinition.getPostHearingCustodyStatus())
                 .withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine))
-                .withLifeDuration(resultDefinition.getLifeDuration())
+                .withLifeDuration(getBooleanOrDefaultValue(resultDefinition.getLifeDuration()))
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
-                .withTerminatesOffenceProceedings(resultDefinition.getTerminatesOffenceProceedings())
-                .withPublishedAsAPrompt(resultDefinition.getPublishedAsAPrompt())
-                .withExcludedFromResults(resultDefinition.getExcludedFromResults())
-                .withAlwaysPublished(resultDefinition.getAlwaysPublished())
-                .withUrgent(resultDefinition.getUrgent())
-                .withD20(resultDefinition.getD20());
+                .withTerminatesOffenceProceedings(getBooleanOrDefaultValue(resultDefinition.getTerminatesOffenceProceedings()))
+                .withPublishedAsAPrompt(getBooleanOrDefaultValue(resultDefinition.getPublishedAsAPrompt()))
+                .withExcludedFromResults(getBooleanOrDefaultValue(resultDefinition.getExcludedFromResults()))
+                .withAlwaysPublished(getBooleanOrDefaultValue(resultDefinition.getAlwaysPublished()))
+                .withUrgent(getBooleanOrDefaultValue(resultDefinition.getUrgent()))
+                .withD20(getBooleanOrDefaultValue(resultDefinition.getD20()));
 
         if (CollectionUtils.isNotEmpty(judicialResultPrompts)) {
             final List<JudicialResultPrompt> updatedJudicialResultPrompt = new ArrayList<>();
@@ -234,18 +236,18 @@ public class RestructuringHelper {
             builder.withJudicialResultPrompts(updatedJudicialResultPrompt);
         }
 
-        if (qualifiers.isPresent()) {
-            builder.withQualifier(qualifiers.get());
-        }
-        if (judicialResultPromptDurationElement.isPresent()) {
-            builder.withDurationElement(judicialResultPromptDurationElement.get());
-        }
-
-        if (nextHearing.isPresent()) {
-            builder.withNextHearing(nextHearing.get());
-        }
+        qualifiers.ifPresent(builder::withQualifier);
+        judicialResultPromptDurationElement.ifPresent(builder::withDurationElement);
+        nextHearing.ifPresent(builder::withNextHearing);
 
         return builder.build();
+    }
+
+    private Boolean getBooleanOrDefaultValue(final Boolean originalValue) {
+        if (null == originalValue) {
+            return false;
+        }
+        return originalValue;
     }
 
     private DelegatedPowers getOrDefaultCourtClerk(final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus, final DelegatedPowers defaultCourtClerk, final UUID resultLineId) {
@@ -286,7 +288,7 @@ public class RestructuringHelper {
 
         return JudicialResultPrompt.judicialResultPrompt()
                 .withJudicialResultPromptTypeId(prompt.getId())
-                .withCourtExtract(promptDefinition.getCourtExtract())
+                .withCourtExtract(getCalculatedCourtExtract(promptDefinition))
                 .withLabel(prompt.getLabel())
                 .withPromptReference(promptDefinition.getReference())
                 .withPromptSequence(promptDefinition.getSequence() == null ? null : BigDecimal.valueOf(promptDefinition.getSequence()))
@@ -299,6 +301,15 @@ public class RestructuringHelper {
                 .withWelshLabel(prompt.getWelshValue())
                 .withDurationSequence(promptDefinition.getDurationSequence())
                 .build();
+    }
+
+    private String getCalculatedCourtExtract(final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptDefinition) {
+        final String courtExtract = promptDefinition.getCourtExtract();
+        if (StringUtils.isNotBlank(courtExtract)) {
+            return courtExtract;
+        }
+
+        return promptDefinition.isAvailableForCourtExtract() ? "Y" : "N";
     }
 
     private Category getCategory(final ResultDefinition resultDefinition) {

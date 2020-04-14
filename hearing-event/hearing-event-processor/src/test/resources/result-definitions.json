@@ -39,10 +39,7 @@
     "terminatesOffenceProceedings" : false,
     "lifeDuration" : false,
     "publishedAsAPrompt" : true,
-    "excludedFromResults" : false,
     "alwaysPublished" : true,
-    "urgent" : false,
-    "d20" : false,
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "a1f2e6d7-7a21-41f8-9a9a-854b25a606d4",
@@ -27358,7 +27355,7 @@
       "fixedListId" : null,
       "qual" : null,
       "reference" : null,
-      "courtExtract" : "Y",
+      "isAvailableForCourtExtract" : true,
       "durationSequence" : 1
     }, {
       "id" : "76f15753-1706-42fb-b922-0d56d01e5706",
@@ -27373,7 +27370,7 @@
       "fixedListId" : null,
       "qual" : null,
       "reference" : null,
-      "courtExtract" : "Y",
+      "courtExtract" : "N",
       "durationSequence" : 1
     }, {
       "id" : "76f15753-1706-42fb-b922-0d56d01e5706",
@@ -27388,7 +27385,7 @@
       "fixedListId" : null,
       "qual" : null,
       "reference" : null,
-      "courtExtract" : "Y",
+      "isAvailableForCourtExtract" : false,
       "durationSequence" : 1
     }, {
       "id" : "321c3fd8-ea44-4ccc-b763-bc693ee6be0f",
@@ -27503,13 +27500,10 @@
     "adjournment" : false,
     "convicted" : true,
     "postHearingCustodyStatus" : "A",
-    "terminatesOffenceProceedings" : false,
+    "terminatesOffenceProceedings" : true,
     "lifeDuration" : false,
     "publishedAsAPrompt" : false,
     "excludedFromResults" : false,
-    "alwaysPublished" : false,
-    "urgent" : false,
-    "d20" : false,
     "resultDefinitionRules" : [ {
       "childResultDefinitionId" : "6cb15971-c945-4398-b7c9-3f8b743a4de3",
       "ruleType" : "mandatory"
@@ -29723,51 +29717,6 @@
       "courtExtract" : "Y",
       "durationSequence" : 1
     }, {
-      "id" : "76f15753-1706-42fb-b922-0d56d01e5706",
-      "label" : "Imprisonment Period",
-      "welshLabel" : null,
-      "resultPromptRule" : "mandatory",
-      "type" : "INT",
-      "sequence" : 100,
-      "duration" : "Months",
-      "wordGroup" : [ "Months" ],
-      "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-      "fixedListId" : null,
-      "qual" : null,
-      "reference" : null,
-      "courtExtract" : "Y",
-      "durationSequence" : 1
-    }, {
-      "id" : "76f15753-1706-42fb-b922-0d56d01e5706",
-      "label" : "Imprisonment Period",
-      "welshLabel" : null,
-      "resultPromptRule" : "mandatory",
-      "type" : "INT",
-      "sequence" : 100,
-      "duration" : "Weeks",
-      "wordGroup" : [ "Weeks" ],
-      "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-      "fixedListId" : null,
-      "qual" : null,
-      "reference" : null,
-      "courtExtract" : "Y",
-      "durationSequence" : 1
-    }, {
-      "id" : "76f15753-1706-42fb-b922-0d56d01e5706",
-      "label" : "Imprisonment Period",
-      "welshLabel" : null,
-      "resultPromptRule" : "mandatory",
-      "type" : "INT",
-      "sequence" : 100,
-      "duration" : "Days",
-      "wordGroup" : [ "Days" ],
-      "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-      "fixedListId" : null,
-      "qual" : null,
-      "reference" : null,
-      "courtExtract" : "Y",
-      "durationSequence" : 1
-    }, {
       "id" : "321c3fd8-ea44-4ccc-b763-bc693ee6be0f",
       "label" : "Concurrent",
       "welshLabel" : null,
@@ -29780,7 +29729,7 @@
       "fixedListId" : null,
       "qual" : "C",
       "reference" : null,
-      "courtExtract" : "Y",
+      "courtExtract" : "N",
       "durationSequence" : null
     }, {
       "id" : "7b5ba551-7adb-4555-93b1-dcb6f027f02f",
@@ -29795,7 +29744,7 @@
       "fixedListId" : null,
       "qual" : "F",
       "reference" : null,
-      "courtExtract" : "Y",
+      "isAvailableForCourtExtract" : true,
       "durationSequence" : null
     }, {
       "id" : "9637677e-c2d7-4609-a750-ffe90eba9351",
@@ -29810,7 +29759,7 @@
       "fixedListId" : null,
       "qual" : "F",
       "reference" : null,
-      "courtExtract" : "Y",
+      "isAvailableForCourtExtract" : false,
       "durationSequence" : null
     }, {
       "id" : "ea957761-0813-4a92-9e7c-b536654325f0",
@@ -38108,7 +38057,7 @@
       "fixedListId" : null,
       "qual" : null,
       "reference" : null,
-      "courtExtract" : "Y",
+      "isAvailableForCourtExtract" : false,
       "durationSequence" : null
     }, {
       "id" : "52c9c1f5-2a00-45ee-bca3-024d43626773",
@@ -39620,7 +39569,7 @@
       "fixedListId" : null,
       "qual" : null,
       "reference" : null,
-      "courtExtract" : "Y",
+      "courtExtract" : "N",
       "durationSequence" : null
     } ],
     "isAvailableForCourtExtract" : true,
