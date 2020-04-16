@@ -4,7 +4,6 @@ import static java.util.stream.Stream.of;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.tools.eventsourcing.transformation.api.Action.NO_ACTION;
 import static uk.gov.justice.tools.eventsourcing.transformation.api.Action.TRANSFORM;
-import static uk.gov.moj.cpp.hearing.domain.transformation.EventMapper.getEventNames;
 
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -13,10 +12,13 @@ import uk.gov.justice.tools.eventsourcing.transformation.api.EventTransformation
 import uk.gov.justice.tools.eventsourcing.transformation.api.annotation.Transformation;
 import uk.gov.moj.cpp.hearing.domain.transformation.service.EventPayloadTransformer;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.json.JsonValue;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +28,7 @@ public class JudicialResultsAndPromptsTransformer implements EventTransformation
     private static final Logger LOGGER = LoggerFactory.getLogger(JudicialResultsAndPromptsTransformer.class);
 
     private static final String JUDICIAL_RESULT_KEYWORD = "judicialResult";
+    private static final List<UUID> PRODUCTION_STREAM_IDS = Lists.newArrayList(UUID.fromString("e8c03f4a-0b82-4b0b-b2eb-a178c4ed8c17"), UUID.fromString("0b819a5f-0c7b-4934-88bc-55660bd477f3"));
     private Enveloper enveloper;
     private EventPayloadTransformer eventPayloadTransformer;
 
@@ -37,8 +40,9 @@ public class JudicialResultsAndPromptsTransformer implements EventTransformation
     @Override
     public Action actionFor(final JsonEnvelope event) {
         final String eventName = event.metadata().name();
-        if (getEventNames().contains(eventName) && event.payload().toString().contains(JUDICIAL_RESULT_KEYWORD)) {
-            LOGGER.debug("Found event '{}' with stream ID '{}'", eventName, event.metadata().streamId().orElse(null));
+        final UUID streamId = event.metadata().streamId().orElse(null);
+        if (PRODUCTION_STREAM_IDS.contains(streamId) && event.payload().toString().contains(JUDICIAL_RESULT_KEYWORD)) {
+            LOGGER.debug("Found event '{}' with stream ID '{}'", eventName, streamId);
             return TRANSFORM;
         }
 

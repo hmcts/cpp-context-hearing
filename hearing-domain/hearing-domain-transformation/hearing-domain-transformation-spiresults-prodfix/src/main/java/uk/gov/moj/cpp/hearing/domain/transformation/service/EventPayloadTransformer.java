@@ -159,7 +159,7 @@ public class EventPayloadTransformer {
         if (null != judicialResultPrompts && judicialResultPrompts.isJsonArray()) {
             judicialResultPrompts.getAsJsonArray().iterator().forEachRemaining(arrayElement -> {
                 JsonObject judicialResultPrompt = (JsonObject) arrayElement;
-                final boolean isAvailableForCourtExtract = judicialResultPrompt.get("isAvailableForCourtExtract").getAsBoolean();
+                final boolean isAvailableForCourtExtract = isAvailableForCourtExtract(judicialResultPrompt);
                 final String promptLabel = judicialResultPrompt.get(LABEL_ATTRIBUTE_NAME).getAsString();
                 final Optional<Prompt> optionalPrompt = getMatchingPrompt(resultDefinition, promptLabel);
 
@@ -171,6 +171,25 @@ public class EventPayloadTransformer {
                 judicialResultPrompt.remove("isAvailableForCourtExtract");
             });
         }
+    }
+
+    private boolean isAvailableForCourtExtract(final JsonObject judicialResultPrompt) {
+        final String isAvailableForCourtExtract = "isAvailableForCourtExtract";
+
+        if (judicialResultPrompt.has(isAvailableForCourtExtract)) {
+            return judicialResultPrompt.get(isAvailableForCourtExtract).getAsBoolean();
+        }
+
+        // fallback - bad event - look for an attribute with empty string key
+        if (judicialResultPrompt.has("")) {
+            LOGGER.info("Reinserting isAvailableForCourtExtract attribute for judicial result object");
+            final boolean resultPromptIsAvailableForCourtExtract = judicialResultPrompt.get("").getAsBoolean();
+            judicialResultPrompt.addProperty(isAvailableForCourtExtract, resultPromptIsAvailableForCourtExtract);
+            judicialResultPrompt.remove("");
+            return resultPromptIsAvailableForCourtExtract;
+        }
+
+        throw new TransformationException("Cannot find isAvailableForCourtExtract attribute for judicialResultPrompt object");
     }
 
     private Optional<Prompt> getMatchingPrompt(final ResultDefinition resultDefinition, final String promptLabel) {

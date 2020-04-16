@@ -7,7 +7,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hearing-domain-transformation-spiresults</artifactId>
+    <artifactId>hearing-domain-transformation-spiresults-prodfix</artifactId>
 
     <properties>
         <stream-transformation-tool-api.version>6.4.5</stream-transformation-tool-api.version>
