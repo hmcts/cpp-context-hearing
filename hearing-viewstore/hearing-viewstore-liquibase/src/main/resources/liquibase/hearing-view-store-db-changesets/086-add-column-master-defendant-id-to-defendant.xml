@@ -8,9 +8,17 @@
 
         <addColumn tableName="ha_defendant">
             <column name="master_defendant_id" type="UUID">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
+
+        <update tableName="ha_defendant">
+            <column name="master_defendant_id" type="UUID" valueComputed="id"/>
+        </update>
+
+        <addNotNullConstraint
+                columnName="master_defendant_id"
+                tableName="ha_defendant"/>
 
     </changeSet>
 

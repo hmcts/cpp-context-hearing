@@ -8,9 +8,17 @@
 
         <addColumn tableName="ha_defendant">
             <column name="court_proceedings_initiated" type="DATETIME TZ">
-                <constraints nullable="false"/>
+                <constraints nullable="true"/>
             </column>
         </addColumn>
+
+        <update tableName="ha_defendant">
+            <column name="court_proceedings_initiated" type="DATETIME TZ" value="2020-04-16 15:00:00.000000"/>
+        </update>
+
+        <addNotNullConstraint
+                columnName="court_proceedings_initiated"
+                tableName="ha_defendant"/>
 
     </changeSet>
 
