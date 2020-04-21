@@ -132,7 +132,7 @@ public class HearingListXhibitResponseTransformer {
                                    final Map<UUID, CourtRoom> courtRoomMap) {
         final UUID courtRoomKey = hearing.getCourtCentre().getRoomId();
         final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
-        CourtRoom courtRoom = courtRoomMap.get(courtRoomKey) ;
+        CourtRoom courtRoom = courtRoomMap.get(courtRoomKey);
 
         final Set<UUID> activeHearingIds = hearingEventsToHearingMapper.getActiveHearingIds();
 
@@ -140,13 +140,15 @@ public class HearingListXhibitResponseTransformer {
 
         BigInteger hearingprogessValue = ACTIVE.getStatusCode().equals(isActiveHearing) ? INPROGRESS.getProgressCode() : STARTED.getProgressCode();
 
-        final Map<UUID, UUID> hearingIdAndEventDefinitionIds = hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds();
-        final UUID hearingEventDefinitionId = hearingIdAndEventDefinitionIds.get(hearing.getId());
-        final boolean finishedHearingDefinitionsId = EventDefinitions.FINISHED.getEventDefinitionsId().equals(hearingEventDefinitionId);
+        final Optional<HearingEvent> latestEventOpt = hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId());
+        if (latestEventOpt.isPresent()) {
+            final HearingEvent latestEvent = latestEventOpt.get();
+            final UUID latestHearingEventDefinitionId = latestEvent.getHearingEventDefinitionId();
+            final boolean finishedHearingDefinitionsId = EventDefinitions.FINISHED.getEventDefinitionsId().equals(latestHearingEventDefinitionId);
+            hearingprogessValue = finishedHearingDefinitionsId ? FINISHED.getProgressCode() : hearingprogessValue;
+        }
 
-        hearingprogessValue = finishedHearingDefinitionsId ? FINISHED.getProgressCode() : hearingprogessValue;
-
-        if(courtRoom == null) {
+        if (courtRoom == null) {
             final Cases cases = getCases(hearing, hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId()).orElse(null), isActiveHearing, hearingprogessValue);
             courtRoom = courtRoom()
                     .withCourtRoomName(courtRoomMapping.getCrestCourtRoomName())
@@ -193,11 +195,19 @@ public class HearingListXhibitResponseTransformer {
                             hearingEvent,
                             isActiveHearing,
                             defendants,
-                            prosecutionCase.getProsecutionCaseIdentifier().getCaseURN(),
+                            getCaseURN(prosecutionCase),
                             hearingprogessValue));
                 });
 
         return caseDetailsList;
+    }
+
+    private String getCaseURN(final ProsecutionCase prosecutionCase) {
+        String caseURN = prosecutionCase.getProsecutionCaseIdentifier().getCaseURN();
+        if (caseURN == null) {
+            caseURN = prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityReference();
+        }
+        return caseURN;
     }
 
     private List<CaseDetail> buildCaseDetailsForStandaloneApplication(final Hearing hearing, final HearingEvent hearingEvent, final BigInteger isActiveHearing, final BigInteger hearingprogessValue) {

@@ -7,7 +7,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
@@ -227,17 +226,17 @@ public class HearingListXhibitResponseTransformerTest {
 
     @Test
     public void shouldTransformFromWithStartedEventAndInActiveCase() {
-        final UUID finishedEventDefinitionId = fromString("0df93f18-0a21-40f5-9fb3-da4749cd70fe");
+        final UUID eventDefinitionId = fromString("7df93f18-0a21-40f5-9fb3-da4749cd70ff");//could be any random uuid
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
-        final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingEventDefinitionId(finishedEventDefinitionId).build();
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingId(hearingId).withHearingEventDefinitionId(eventDefinitionId).build();
         final List<Hearing> hearingList = asList(hearing);
         final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
         final List<Defendant> defendantList = asList(defendant);
         final List<HearingDay> hearingDays = asList(hearingDay);
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = ProsecutionCaseIdentifier
-                .prosecutionCaseIdentifier().withCaseURN("caseURN").build();
+                .prosecutionCaseIdentifier().withProsecutionAuthorityReference("ProsecutionAuthorityReference").build();
         final Set<UUID> activeHearingIds = new HashSet<>();
 
         final Map<UUID, UUID> eventDefinitionsIds = new HashMap<>();
@@ -278,6 +277,7 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
         assertThat(caseDetail.getActivecase(), is(INACTIVE.getStatusCode()));
         assertThat(caseDetail.getHearingprogress(), is(STARTED.getProgressCode()));
+        assertThat(caseDetail.getCppUrn(), is("ProsecutionAuthorityReference"));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
     }
@@ -289,7 +289,7 @@ public class HearingListXhibitResponseTransformerTest {
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
         final UUID hearingId = randomUUID();
-        final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingEventDefinitionId(eventDefinitionsId).build();
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingId(hearingId).withHearingEventDefinitionId(eventDefinitionsId).build();
         final List<Hearing> hearingList = asList(hearing);
         final List<ProsecutionCase> prosecutionCases = asList(prosecutionCase);
         final List<Defendant> defendantList = asList(defendant);
@@ -336,6 +336,8 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getDefendants().get(0).getFirstName(), nullValue());
         assertThat(caseDetail.getDefendants().get(0).getMiddleName(), nullValue());
         assertThat(caseDetail.getDefendants().get(0).getLastName(), nullValue());
+        assertThat(caseDetail.getCppUrn(), is("caseURN"));
+
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
     }

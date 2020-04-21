@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
+import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -21,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataXhibitHearingTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
@@ -33,7 +35,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -41,6 +42,7 @@ import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,6 +53,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     private static final String HEARING_COMMAND_PUBLISH_HEARING_LIST = "hearing.publish-hearing-lists-for-crown-courts";
     private static final String MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST = "application/vnd.hearing.publish-hearing-lists-for-crown-courts+json";
+    private static UUID hearingTypeId;
 
 
     private String courtCentreId;
@@ -58,6 +61,12 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     private String courtRoom2Id;
     private String defenceCounselId;
     private UUID caseId;
+
+    @BeforeClass
+    public static void setUp() {
+        hearingTypeId = UUID.fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed");
+        stubGetReferenceDataXhibitHearingTypes();
+    }
 
     @Before
     public void initStub() {
@@ -80,12 +89,12 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, Optional.empty())));
+        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, of(hearingTypeId))));
         createHearingEvent(hearing1, defenceCounselId,"Start Hearing",eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing1.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()));
 
-        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, Optional.empty())));
+        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, of(hearingTypeId))));
         createHearingEvent(hearing2, defenceCounselId,"Start Hearing",eventTime.plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing2.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()));
@@ -108,7 +117,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
         final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
         final LocalDate localDate = eventTime.toLocalDate();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, Optional.empty())));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, of(hearingTypeId))));
         createHearingEvent(hearing, defenceCounselId, "Start Hearing",eventTime);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);
