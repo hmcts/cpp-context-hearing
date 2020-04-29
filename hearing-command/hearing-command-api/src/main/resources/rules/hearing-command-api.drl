@@ -345,3 +345,12 @@ rule "Command - API - Action - hearing.publish-hearing-lists-for-crown-courts"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.compute-outstanding-fines"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.compute-outstanding-fines");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Court Clerks", "Legal Advisers", "Court Associate", "NCES"));
+  then
+    $outcome.setSuccess(true);
+end

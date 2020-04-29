@@ -360,3 +360,31 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
     responses:
       202:
         description: Request accepted
+/outstanding-fines:
+  post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.compute-outstanding-fines+json
+            name: hearing.compute-outstanding-fines
+        ...
+      body:
+        application/vnd.hearing.compute-outstanding-fines+json:
+            example: !include json/hearing.compute-outstanding-fines.json
+            schema: !include json/schema/hearing.compute-outstanding-fines.json
+      responses:
+            202:
+                description: OK
+
+/add-request-for-outstanding-fines:
+  post:
+    description: |
+      ...
+      (mapping):
+          requestType: application/vnd.hearing.add-request-for-outstanding-fines+json
+          name: hearing.add-request-for-outstanding-fines
+      ...
+    body:
+      application/vnd.hearing.add-request-for-outstanding-fines+json:
+            example: !include json/hearing.add-request-for-outstanding-fines.json
+            schema: !include json/schema/hearing.add-request-for-outstanding-fines.json

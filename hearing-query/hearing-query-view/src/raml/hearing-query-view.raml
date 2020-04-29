@@ -389,3 +389,82 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.hearings-court-centres-for-date+json:
                     example:  !include json/hearing.get-hearings-by-court-centre.json
                     schema:  !include json/schema/hearing.get-hearings-by-court-centre.json
+
+
+
+/defendant/{defendantId}/outstanding-fines:
+  uriParameters:
+        defendantId:
+           description: ID of defendant to query outstanding fines
+           type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.defendant.outstanding-fines+json
+            name: hearing.defendant.outstanding-fines
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.defendant.outstanding-fines+json:
+                    example:  !include json/hearing.defendant.outstanding-fines.json
+                    schema:  !include  json/schema/hearing.defendant.outstanding-fines.json
+
+
+/defendant:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.defendant.info+json
+            name: hearing.defendant.info
+        ...
+      queryParameters:
+        courtCentreId:
+          description: court centre id
+          type: string
+          required: true
+        courtRoomIds:
+          description: room id
+          type: string
+          pattern: (-|\+)?[^,]+
+          required: true
+        hearingDate:
+          description: date of hearing
+          type: string
+          required: true
+          pattern: ^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.defendant.info+json:
+                    example:  !include json/hearing.defendant.info.json
+                    schema:  !include  json/schema/hearing.defendant.info.json
+
+
+/defendant-outstanding-fine-requests:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.defendant.outstanding-fine-requests+json
+            name: hearing.defendant.outstanding-fine-requests
+        ...
+      queryParameters:
+        hearingDate:
+          description: date of hearing
+          type: string
+          required: true
+          pattern: ^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$
+
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.defendant.outstanding-fine-requests+json:
+                    example:  !include json/hearing.defendant.outstanding-fine-requests.json
+                    schema:  !include  json/schema/hearing.defendant.outstanding-fine-requests.json

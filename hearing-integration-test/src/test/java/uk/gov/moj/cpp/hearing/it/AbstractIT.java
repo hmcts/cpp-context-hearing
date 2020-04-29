@@ -16,13 +16,9 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
-import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockMaterialUpload;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.mockUpdateHmpsMaterialStatus;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsWildcardUserBelongingToAllGroups;
 
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
@@ -66,22 +62,21 @@ import org.slf4j.LoggerFactory;
 
 public class AbstractIT {
 
+    public static final Properties ENDPOINT_PROPERTIES = new Properties();
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
     protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
     protected static final Header CPP_UID_HEADER_AS_ADMIN = new Header(USER_ID, USER_ID_VALUE_AS_ADMIN.toString());
     protected static final String PUBLIC_EVENT_TOPIC = "public.event";
-    public static final Properties ENDPOINT_PROPERTIES = new Properties();
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
     /**
-     * todo this is not a good pattern, only for fixing parallel runs without changing existing
-     * codes too much
+     * todo this is not a good pattern, only for fixing parallel runs without changing existing codes too much
      */
     private static final ThreadLocal<UUID> USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     private static final ThreadLocal<UUID> ADMIN_USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
-    private static String baseUri;
     protected static RequestSpecification requestSpec;
+    private static String baseUri;
 
     /**
      * In case of Single Test executions, initiation of Stubs Per Execution
@@ -246,11 +241,6 @@ public class AbstractIT {
     public void setUpPerTest() {
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
-
-       setupAsWildcardUserBelongingToAllGroups();
-       stubEnableAllCapabilities();
-       mockMaterialUpload();
-       mockUpdateHmpsMaterialStatus();
     }
 
     protected JSONObject getExistingHearing(final String hearingId) {

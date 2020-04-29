@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.core.courts.FundingType;
+import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedDefenceOrganisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
@@ -47,6 +48,23 @@ public class DefendantRepositoryTest {
         final Defendant actual = defendantRepository.findBy(new HearingSnapshotKey(id, hearingId));
 
         assertThat(actual, notNullValue());
+
+    }
+
+    @Test
+    public void testDefendantDetailsForSearching() {
+
+        final Defendant defendant1 = buildDefendant();
+        final Defendant defendant2 = buildDefendant();
+        defendant2.getId().setHearingId(UUID.randomUUID());
+        defendant2.getAssociatedDefenceOrganisation().getDefenceOrganisation().setLaaContractNumber("ABCLT2");
+
+        defendantRepository.save(defendant1);
+        defendantRepository.save(defendant2);
+
+        DefendantSearch defendantDetailsForSearching = defendantRepository.getDefendantDetailsForSearching(id);
+
+        assertThat(defendantDetailsForSearching, notNullValue());
 
     }
 

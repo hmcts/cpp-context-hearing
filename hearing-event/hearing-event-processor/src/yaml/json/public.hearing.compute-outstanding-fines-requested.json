@@ -1,0 +1,45 @@
+{
+  "courtRooms": [
+    {
+      "courtRoomName": "room1",
+      "defendantDetails": [
+        {
+          "id": "30b83084-d2fe-4a70-bbd1-fae1dfdb4b95",
+          "firstName": "John",
+          "lastName": "Doe",
+          "dateOfBirth": "1980-01-31",
+          "nationalInsuranceNumber": "SP123456"
+        },
+        {
+          "id": "df799de4-f4b9-4de0-8315-9262655c68d5",
+          "firstName": "Jane",
+          "lastName": "Doe",
+          "dateOfBirth": "1983-05-19",
+          "nationalInsuranceNumber": "SP234523"
+        }
+      ]
+    },
+    {
+      "courtRoomName": "room-2",
+      "defendantDetails": [
+        {
+          "id": "3346d10e-532b-42ee-8cde-dfc26157dc10",
+          "firstName": "Chris",
+          "lastName": "Brown",
+          "dateOfBirth": "1970-01-01"
+        },
+        {
+          "id": "88ad07d4-d6c3-4a13-9ee2-8c1c19f67e55",
+          "firstName": "Mr",
+          "lastName": "Bean",
+          "dateOfBirth": "1974-04-23",
+          "legalEntityOrganizationName": "DWP"
+        },
+        {
+          "id": "1e7a0446-710e-4f1c-888c-bc402b10d7ae",
+          "legalEntityOrganizationName": "TFL"
+        }
+      ]
+    }
+  ]
+}

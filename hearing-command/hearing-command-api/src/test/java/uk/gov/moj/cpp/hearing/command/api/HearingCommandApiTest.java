@@ -23,7 +23,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
-import org.junit.Ignore;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -64,9 +63,10 @@ public class HearingCommandApiTest {
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
             "addProsecutionCounsel", "removeProsecutionCounsel", "updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "applicationDraftResult", "saveHearingCaseNote",
             "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance", "saveApplicationResponse",
-            "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel","addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
+            "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
-            "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList","publishHearingListsForCrownCourts");
+            "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
+            "computeOutstandingFines", "addRequestForOutstandingFines");
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -75,6 +75,7 @@ public class HearingCommandApiTest {
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
     private Map<String, String> notificationApiMethodsToHandlerNames;
+    private Map<String, String> outstandingFinesCommandApiMethodsToHandlerNames;
     @Mock
     private Sender sender;
     @Captor
@@ -88,6 +89,7 @@ public class HearingCommandApiTest {
         apiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingCommandApi.class);
         eventApiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingEventCommandApi.class);
         notificationApiMethodsToHandlerNames = apiMethodsToHandlerNames(NotificationCommandApi.class);
+        outstandingFinesCommandApiMethodsToHandlerNames = apiMethodsToHandlerNames(OutstandingFinesCommandApi.class);
     }
 
     @Test
@@ -102,7 +104,8 @@ public class HearingCommandApiTest {
         final List<String> allHandlerNames = Stream.of(
                 apiMethodsToHandlerNames.values().stream(),
                 eventApiMethodsToHandlerNames.values().stream(),
-                notificationApiMethodsToHandlerNames.values().stream())
+                notificationApiMethodsToHandlerNames.values().stream(),
+                outstandingFinesCommandApiMethodsToHandlerNames.values().stream())
                 .reduce(Stream::concat)
                 .orElseGet(Stream::empty)
                 .collect(toList());
@@ -121,6 +124,9 @@ public class HearingCommandApiTest {
         assertHandlerMethodsArePassThrough(NotificationCommandApi.class, notificationApiMethodsToHandlerNames.keySet().stream()
                 .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
                 .collect(toMap(identity(), notificationApiMethodsToHandlerNames::get)));
+        assertHandlerMethodsArePassThrough(OutstandingFinesCommandApi.class, outstandingFinesCommandApiMethodsToHandlerNames.keySet().stream()
+                .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
+                .collect(toMap(identity(), outstandingFinesCommandApiMethodsToHandlerNames::get)));
     }
 
     @Test

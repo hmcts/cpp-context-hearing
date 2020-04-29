@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.io.FileUtils.readLines;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasEntry;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
@@ -14,6 +15,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +26,7 @@ public class HearingQueryApiTest {
 
     private static final String PATH_TO_RAML = "src/raml/hearing-query-api.raml";
     private static final String NAME = "name:";
+    private static final List NO_TEST_LIST = Arrays.asList("hearing.defendant.outstanding-fines");
 
     private Map<String, String> apiMethodsToHandlerNames;
 
@@ -47,11 +50,17 @@ public class HearingQueryApiTest {
 
     @Test
     public void testHandleNamesPassThroughRequester() throws Exception {
-        apiMethodsToHandlerNames.forEach((key, value) -> assertThat(HearingQueryApi.class,
-                isHandlerClass(QUERY_API)
-                        .with(method(key)
-                                .thatHandles(value)
-                                .withRequesterPassThrough())));
+        apiMethodsToHandlerNames.entrySet().stream()
+                .filter(entry -> noToTest(entry.getValue()))
+                .forEach(entry ->
+                assertThat(HearingQueryApi.class,
+                            isHandlerClass(QUERY_API).with(method(entry.getKey())
+                                                    .thatHandles(entry.getValue())
+                                                    .withRequesterPassThrough())));
+    }
+
+    private boolean noToTest(String handleName) {
+        return !NO_TEST_LIST.contains(handleName);
     }
 
 

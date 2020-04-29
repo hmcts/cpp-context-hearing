@@ -133,12 +133,12 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.add-interpreter-intermediary")
-    public void addInterpreterIntermediary(final JsonEnvelope envelope){
+    public void addInterpreterIntermediary(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-interpreter-intermediary").apply(envelope.payloadAsJsonObject()));
     }
 
     @Handles("hearing.remove-interpreter-intermediary")
-    public void removeInterpreterIntermediary(final JsonEnvelope envelope){
+    public void removeInterpreterIntermediary(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.remove-interpreter-intermediary").apply(envelope.payloadAsJsonObject()));
     }
 
@@ -168,12 +168,17 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.publish-court-list")
-    public void publishCourtList(final JsonEnvelope envelope){
+    public void publishCourtList(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.publish-court-list").apply(envelope.payloadAsJsonObject()));
     }
 
     @Handles("hearing.publish-hearing-lists-for-crown-courts")
-    public void publishHearingListsForCrownCourts(final JsonEnvelope envelope){
+    public void publishHearingListsForCrownCourts(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.publish-hearing-lists-for-crown-courts").apply(envelope.payloadAsJsonObject()));
+    }
+
+    @Handles("hearing.compute-outstanding-fines")
+    public void computeOutstandingFines(final JsonEnvelope envelope) {
+        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.compute-outstanding-fines").apply(envelope.payloadAsJsonObject()));
     }
 }

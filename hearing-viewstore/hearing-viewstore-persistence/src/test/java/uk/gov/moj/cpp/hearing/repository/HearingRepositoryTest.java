@@ -1,12 +1,15 @@
 package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.core.courts.HearingDay.hearingDay;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -18,6 +21,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -160,15 +165,72 @@ public class HearingRepositoryTest {
         assertThat(hearingDay.getListingSequence(), is(hearings.get(0).getHearingDays().get(0).getListingSequence()));
     }
 
-    private void saveHearingApplication(final Hearing hearing, UUID applicationId) {
-        UUID hearingId = hearing.getId();
+    private void saveHearingApplication(final Hearing hearing, final UUID applicationId) {
+        final UUID hearingId = hearing.getId();
 
-        HearingApplication hearingApplication = new HearingApplication();
-        HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(applicationId, hearingId);
+        final HearingApplication hearingApplication = new HearingApplication();
+        final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(applicationId, hearingId);
         hearingApplication.setId(hearingApplicationKey);
         hearingApplication.setHearing(hearing);
         hearing.getHearingApplications().add(hearingApplication);
         hearingApplicationRepository.save(hearingApplication);
     }
 
+    @Test
+    public void findByFilters() {
+
+    }
+
+    @Test
+    public void findByHearingDate() {
+
+        final uk.gov.justice.core.courts.Hearing hearing1 = addSampleHearing(false,
+                ZonedDateTime.now(),
+                ZonedDateTime.now().plusDays(1).plusMinutes(15));
+        final uk.gov.justice.core.courts.Hearing hearing2 = addSampleHearing(false,
+                ZonedDateTime.now(),
+                ZonedDateTime.now().plusDays(1).plusMinutes(5),
+                ZonedDateTime.now().plusDays(2).plusMinutes(5));
+        addSampleHearing(false,
+                ZonedDateTime.now(),
+                ZonedDateTime.now().plusDays(2).plusMinutes(5));
+        addSampleHearing(true,
+                ZonedDateTime.now(),
+                ZonedDateTime.now().plusDays(1).plusMinutes(5));
+
+
+        final LocalDate localDate = LocalDate.now().plusDays(1);
+
+        final List<Hearing> byHearingDate = hearingRepository.findByHearingDate(localDate);
+
+        assertThat(byHearingDate.size(), is(2));
+        assertThat(byHearingDate, containsInAnyOrder(
+                isBean(Hearing.class).with(Hearing::getId, is(hearing1.getId())),
+                isBean(Hearing.class).with(Hearing::getId, is(hearing2.getId()))
+        ));
+    }
+
+    public uk.gov.justice.core.courts.Hearing addSampleHearing(final Boolean isBoxHearing, final ZonedDateTime... sittingDays) {
+        final InitiateHearingCommand initiateHearingCommand;
+        initiateHearingCommand = minimumInitiateHearingTemplate();
+        for (final ZonedDateTime sittingDay : sittingDays) {
+            initiateHearingCommand.getHearing().getHearingDays().add(hearingDay()
+                    .withListedDurationMinutes(15)
+                    .withSittingDay(sittingDay)
+                    .withListingSequence(2)
+                    .build());
+        }
+        initiateHearingCommand.getHearing().setIsBoxHearing(isBoxHearing);
+        saveHearing(initiateHearingCommand);
+        return initiateHearingCommand.getHearing();
+    }
+
+    public void saveHearing(final InitiateHearingCommand initiateHearingCommand) {
+        final Hearing hearingEntity = hearingJPAMapper.toJPA(initiateHearingCommand.getHearing());
+        // because h2 incorrectly maps column type TEXT to VARCHAR(255)
+        hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
+        hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
+        hearingRepository.save(hearingEntity);
+        hearings.add(initiateHearingCommand.getHearing());
+    }
 }

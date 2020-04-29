@@ -36,7 +36,7 @@ public class CourtHouseReverseLookup {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    private OuCourtRoomsResult courtRoomsResult(JsonEnvelope context) {
+    public OuCourtRoomsResult getCourtRoomsResult(JsonEnvelope context) {
 
         final Envelope<JsonObject> envelope = Enveloper.envelop(createObjectBuilder().build())
                 .withName(GET_COURT_HOUSES)
@@ -52,7 +52,7 @@ public class CourtHouseReverseLookup {
     public Optional<CourtCentreOrganisationUnit> getCourtCentreByName(final JsonEnvelope context, final String name) {
 
         final String normalizedName = normalize(name);
-        return courtRoomsResult(context).getOrganisationunits().stream()
+        return getCourtRoomsResult(context).getOrganisationunits().stream()
                 .filter(cc -> normalizedName.equals(normalize(cc.getOucodeL3Name())))
                 .findFirst();
     }
@@ -67,7 +67,7 @@ public class CourtHouseReverseLookup {
 
     public Optional<CourtCentreOrganisationUnit> getCourtCentreById(final JsonEnvelope context, final UUID courtCentreId) {
 
-        final List<CourtCentreOrganisationUnit> allCourtCentreOrganisationUnits = courtRoomsResult(context).getOrganisationunits();
+        final List<CourtCentreOrganisationUnit> allCourtCentreOrganisationUnits = getCourtRoomsResult(context).getOrganisationunits();
         return allCourtCentreOrganisationUnits.stream()
                 .filter(ou -> ou.getId().equals(courtCentreId.toString()))
                 .findFirst();

@@ -209,6 +209,14 @@ subscriptions_descriptor:
         - name: hearing.case-defendants-updated
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.case-defendants-updated.json
 
+      # Outstanding Fines Queried
+        - name: hearing.compute-outstanding-fines-requested
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.compute-outstanding-fines-requested.json
+
+      # Request Outstanding Fines
+        - name: hearing.outstanding-fines-requested
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.outstanding-fines-requested.json
+
       event_source_name: hearing
 
     - name: public event subscription

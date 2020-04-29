@@ -384,3 +384,24 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.hearings-court-centres-for-date+json:
                     example:  !include json/hearing.get-hearings-by-court-centre.json
                     schema:  !include json/schema/hearing.get-hearings-by-court-centre.json
+
+
+/defendant/{defendantId}/outstanding-fines:
+  uriParameters:
+        defendantId:
+           description: ID of defendant to query outstanding fines
+           type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.defendant.outstanding-fines+json
+            name: hearing.defendant.outstanding-fines
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.defendant.outstanding-fines+json:
+                    example:  !include json/hearing.defendant.outstanding-fines.json
+                    schema:  !include  json/schema/hearing.defendant.outstanding-fines.json

@@ -37,12 +37,15 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_REMOVE_RESPONDENT_COUNSEL = "hearing.remove-respondent-counsel";
     private static final String ACTION_NAME_UPDATE_RESPONDENT_COUNSEL = "hearing.update-respondent-counsel";
 
+
     private static final String ACTION_NAME_ADD_APPLICANT_COUNSEL = "hearing.add-applicant-counsel";
     private static final String ACTION_NAME_REMOVE_APPLICANT_COUNSEL = "hearing.remove-applicant-counsel";
     private static final String ACTION_NAME_UPDATE_APPLICANT_COUNSEL = "hearing.update-applicant-counsel";
     private static final String ACTION_NAME_ADD_DEFENCE_COUNSEL = "hearing.add-defence-counsel";
     private static final String ACTION_NAME_COURT_LIST_PUBLISH_STATUS = "hearing.publish-court-list";
     private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS = "hearing.publish-hearing-lists-for-crown-courts";
+    private static final String ACTION_NAME_COMPUTE_OUTSTANDING_FINES = "hearing.compute-outstanding-fines";
+    private static final String ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES = "hearing.add-request-for-outstanding-fines";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -536,6 +539,47 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     public void shouldNotAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourts() {
         final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group"))
+                .willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+
+    @Test
+    public void shouldAllowAuthorisedUserToComputeOutstandingFines() {
+        final Action action = createActionFor(ACTION_NAME_COMPUTE_OUTSTANDING_FINES);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate", "NCES"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToComputeOutstandingFines() {
+        final Action action = createActionFor(ACTION_NAME_COMPUTE_OUTSTANDING_FINES);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,"group1", "group2"))
+                .willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToInitiateAccountQuery() {
+        final Action action = createActionFor(ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "System Users"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToInitiateAccountQuery() {
+        final Action action = createActionFor(ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,"Court Clerks", "Legal Advisers", "Court Associate", "NCES"))
                 .willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

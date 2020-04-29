@@ -12,6 +12,9 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.moj.cpp.hearing.domain.CourtRoom;
+import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
+import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
@@ -20,10 +23,13 @@ import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
@@ -54,7 +60,9 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -152,10 +160,11 @@ public class HearingService {
         return empty();
     }
 
+
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
 
-        if (null == date || null == courtCentreId ) {
+        if (null == date || null == courtCentreId) {
             return new GetHearings(null);
         }
 
@@ -172,7 +181,7 @@ public class HearingService {
         final ZonedDateTime from = getDateWithTime(date, startTime);
         final ZonedDateTime to = getDateWithTime(date, endTime);
         List<Hearing> filteredHearings = filterHearings(source, from, to);
-        if(null == roomId){
+        if (null == roomId) {
             filteredHearings = filterNonEndedHearings(filteredHearings);
         }
 
@@ -189,7 +198,7 @@ public class HearingService {
     }
 
     @Transactional
-    public GetHearings getHearingsForToday(final LocalDate date,  final UUID userId) {
+    public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
         if (null == date || null == userId) {
             return new GetHearings(null);
@@ -209,6 +218,56 @@ public class HearingService {
                 .build();
     }
 
+    @Transactional
+    public DefendantInfoQueryResult getHearingsByCourtRoomList(final LocalDate date, final UUID courtCentreId, final List<UUID> roomId) {
+
+        if (null == date || null == courtCentreId || null == roomId || roomId.isEmpty()) {
+            return new DefendantInfoQueryResult(null);
+        }
+        final List<Hearing> hearings = hearingRepository.findByFilters(date, courtCentreId, roomId);
+        if (CollectionUtils.isEmpty(hearings)) {
+            return new DefendantInfoQueryResult(null);
+        }
+
+        final DefendantInfoQueryResult queryResult = new DefendantInfoQueryResult();
+        final HashMap<UUID, CourtRoom> courtRooms = new HashMap<>();
+
+
+        for (final Hearing hearing : hearings) {
+            for (final ProsecutionCase pc : hearing.getProsecutionCases()) {
+                final UUID roomUUID = hearing.getCourtCentre().getRoomId();
+                if (!courtRooms.containsKey(roomUUID)) { //court room needs to be created
+
+                    courtRooms.put(roomUUID, CourtRoom.courtRoom().withCourtRoomName(hearing.getCourtCentre().getRoomName()).withDefendantDetails(new ArrayList<>()).build());
+                }
+                addDefendantDetailsToQueryResult(courtRooms, pc, roomUUID);
+
+            }
+        }
+        queryResult.getCourtRooms().addAll(courtRooms.values());
+        return queryResult;
+    }
+
+    private void addDefendantDetailsToQueryResult(final HashMap<UUID, CourtRoom> courtRooms, final ProsecutionCase pc, final UUID roomUUID) {
+        for (final Defendant defendant : pc.getDefendants()) {
+            DefendantDetail.Builder builder = DefendantDetail.defendantDetail()
+                    .withDefendantId(defendant.getId().getId());
+            if (defendant.getPersonDefendant() != null) {
+                final Person personDetails = defendant.getPersonDefendant().getPersonDetails();
+                if (personDetails != null) {
+                    builder = builder.withFirstName(personDetails.getFirstName())
+                            .withLastName(personDetails.getLastName())
+                            .withDateOfBirth(Objects.nonNull(personDetails.getDateOfBirth()) ? personDetails.getDateOfBirth().toString() : null)
+                            .withNationalInsuranceNumber(personDetails.getNationalInsuranceNumber());
+                }
+            }
+            if (defendant.getLegalEntityOrganisation() != null) {
+                builder = builder.withLegalEntityOrganizationName(defendant.getLegalEntityOrganisation().getName());
+            }
+
+            courtRooms.get(roomUUID).getDefendantDetails().add(builder.build());
+        }
+    }
 
     @Transactional
     public HearingDetailsResponse getHearingById(final UUID hearingId) {
@@ -303,32 +362,32 @@ public class HearingService {
 
         LOGGER.debug("Get subscriptions for the given reference date and nowTypeId ='{} - {}'", referenceDateParam, nowTypeParam);
 
-            try {
+        try {
 
             final LocalDate referenceDate = LocalDate.parse(referenceDateParam, FORMATTER);
 
             final UUID nowTypeId = fromString(nowTypeParam);
 
-                final List<Document> existingDocuments = documentRepository.findAllByOrderByStartDateAsc();
+            final List<Document> existingDocuments = documentRepository.findAllByOrderByStartDateAsc();
 
-                final List<Document> documents = existingDocuments
-                        .stream()
-                        .filter(existingDocument -> (referenceDate.isAfter(existingDocument.getStartDate()) || referenceDate.isEqual(existingDocument.getStartDate())))
-                        .filter(existingDocument -> (isNull(existingDocument.getEndDate()) || referenceDate.isBefore(existingDocument.getEndDate()) || (referenceDate.isEqual(existingDocument.getEndDate()))))
+            final List<Document> documents = existingDocuments
+                    .stream()
+                    .filter(existingDocument -> (referenceDate.isAfter(existingDocument.getStartDate()) || referenceDate.isEqual(existingDocument.getStartDate())))
+                    .filter(existingDocument -> (isNull(existingDocument.getEndDate()) || referenceDate.isBefore(existingDocument.getEndDate()) || (referenceDate.isEqual(existingDocument.getEndDate()))))
                     .collect(toList());
 
-                final List<Subscription> subscriptionList = new ArrayList<>();
+            final List<Subscription> subscriptionList = new ArrayList<>();
 
-                documents.forEach(d -> d.getSubscriptions().forEach(s -> s.getNowTypeIds().forEach(nt -> {
-                    if (nowTypeId.equals(nt)) {
-                        subscriptionList.add(s);
-                    }
-                })));
+            documents.forEach(d -> d.getSubscriptions().forEach(s -> s.getNowTypeIds().forEach(nt -> {
+                if (nowTypeId.equals(nt)) {
+                    subscriptionList.add(s);
+                }
+            })));
 
-                final Subscriptions subscriptions = new Subscriptions();
+            final Subscriptions subscriptions = new Subscriptions();
             subscriptions.setSubscriptions(subscriptionList.stream().map(populateHearing()).collect(toList()));
 
-                return objectToJsonObjectConverter.convert(subscriptions);
+            return objectToJsonObjectConverter.convert(subscriptions);
 
         } catch (final DateTimeParseException | IllegalArgumentException e) {
 
@@ -389,7 +448,7 @@ public class HearingService {
                 .collect(toList());
     }
 
-    private List<TimelineHearingSummary> populateTimeLineHearingSummariesWithApplicants(final Hearing hearing, UUID applicationId) {
+    private List<TimelineHearingSummary> populateTimeLineHearingSummariesWithApplicants(final Hearing hearing, final UUID applicationId) {
         final CrackedIneffectiveTrial crackedIneffectiveTrial = getCrackedIneffectiveTrial(hearing.getTrialTypeId());
         return hearing.getHearingDays()
                 .stream()
@@ -398,8 +457,8 @@ public class HearingService {
     }
 
     private List<HearingEvent> getHearingEvents(final List<HearingEventPojo> hearingEventPojos) {
-        final List<HearingEvent> hearingEvents  = new ArrayList();
-        for(final HearingEventPojo hearingEventPojo: hearingEventPojos){
+        final List<HearingEvent> hearingEvents = new ArrayList();
+        for (final HearingEventPojo hearingEventPojo : hearingEventPojos) {
             final HearingEvent hearingEvent = new HearingEvent();
             hearingEvent.setHearingId(hearingEventPojo.getHearingId());
             hearingEvent.setId(hearingEventPojo.getId());

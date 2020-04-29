@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
@@ -16,6 +17,9 @@ import static javax.ws.rs.client.Entity.entity;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.HttpStatus.SC_ACCEPTED;
+import static org.apache.http.HttpStatus.SC_OK;
+import static uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils.stubPingFor;
 import static uk.gov.justice.services.common.http.HeaderConstants.ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -24,11 +28,15 @@ import static uk.gov.justice.services.test.utils.core.rest.ResteasyClientBuilder
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
+import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
+import uk.gov.justice.services.common.http.HeaderConstants;
+
 import java.util.UUID;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.http.HttpStatus;
@@ -91,6 +99,34 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", randomUUID()), CONTENT_TYPE_QUERY_GROUPS);
     }
 
+    public static void setupAsAuthorizedAndSystemUser(final UUID userId) {
+        stubPingFor("usersgroups-service");
+
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(getPayload("stub-data/usersgroups.get-system-and-authorized-user-groups-by-user.json"))));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
+    public static void stubStagingEnforcementOutstandingFines() {
+
+        stubPingFor("stagingenforcement-query-api");
+
+        final String urlPath = "/stagingenforcement-service/query/api/rest/stagingenforcement/defendant/outstanding-fines";
+        stubFor(get(urlPathEqualTo(urlPath))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, "application/vnd.stagingenforcement.defendant.outstanding-fines+json")
+                        .withBody(getPayload("stub-data/stagingenforcement.defendant.outstanding-fines.json"))));
+        waitForStubToBeReady(
+                String.format("/stagingenforcement-service/query/api/rest/stagingenforcement/defendant/outstanding-fines"),
+                "application/vnd.stagingenforcement.defendant.outstanding-fines+json");
+
+    }
+
     public static void mockProgressionCaseDetails(final UUID caseId, final String caseUrn) {
 
         stubFor(get(urlMatching("/usersgroups-service/query/api/rest/usersgroups/users/.*/groups"))
@@ -112,10 +148,28 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
+    public static void stubStagingenforcementCourtRoomsOutstandingFines() {
+        InternalEndpointMockUtils.stubPingFor("stagingenforcement-service");
+
+        stubFor(post(urlPathEqualTo("/stagingenforcement-service/command/api/rest/stagingenforcement/court/rooms/outstanding-fines"))
+                .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.court.rooms.outstanding-fines+json"))
+                .willReturn(aResponse().withStatus(SC_ACCEPTED)));
+
+    }
+
+    public static void stubStagingenforcementOutstandingFines() {
+        InternalEndpointMockUtils.stubPingFor("stagingenforcement-service");
+
+        stubFor(post(urlPathEqualTo("/stagingenforcement-service/command/api/rest/stagingenforcement/outstanding-fines"))
+                .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.request-outstanding-fine+json"))
+                .willReturn(aResponse().withStatus(SC_ACCEPTED)));
+
+    }
+
     public static final void mockMaterialUpload() {
 
         stubFor(post(urlMatching(MATERIAL_UPLOAD_COMMAND))
-                .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                .willReturn(aResponse().withStatus(SC_ACCEPTED)
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody("")));
     }
@@ -123,7 +177,7 @@ public class WireMockStubUtils {
     public static final void mockUpdateHmpsMaterialStatus() {
         stubFor(post(urlMatching(
                 MATERIAL_STATUS_UPLOAD_COMMAND))
-                .willReturn(aResponse().withStatus(HttpStatus.SC_ACCEPTED)
+                .willReturn(aResponse().withStatus(SC_ACCEPTED)
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody("")));
     }

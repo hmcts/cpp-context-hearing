@@ -2,21 +2,28 @@ package uk.gov.moj.cpp.hearing.query.view;
 
 import static java.time.LocalDate.now;
 import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
+import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -26,6 +33,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
+import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -35,28 +43,44 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.persistence.NoResultException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(Component.QUERY_VIEW)
 @SuppressWarnings({"squid:S3655"})
 public class HearingQueryView {
 
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
     private static final String FIELD_COURT_CENTRE_IDS = "courtCentreIds";
     private static final String DATE_OF_HEARING = "dateOfHearing";
+    private static final String FIELD_COURT_ROOM_IDS = "courtRoomIds";
+    private static final String FIELD_HEARING_DATE = "hearingDate";
     private static final String FIELD_ROOM_ID = "roomId";
     private static final String FIELD_START_TIME = "startTime";
     private static final String FIELD_END_TIME = "endTime";
     private static final String FIELD_QUERY = "q";
     private static final String FIELD_ID = "id";
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
+
     @Inject
     private HearingService hearingService;
     @Inject
+    private DefendantRepository defendantRepository;
+    @Inject
     private Enveloper enveloper;
+    @Inject
+    private ObjectToJsonValueConverter objectToJsonValueConverter;
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Inject
     private CourtListRepository courtListRepository;
@@ -196,7 +220,7 @@ public class HearingQueryView {
 
         final List<UUID> courtCentreList = Stream.of(courtCentreIds.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
 
-        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsForWebPage(courtCentreList,  LocalDate.parse(dateOfHearing.get()));
+        final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsForWebPage(courtCentreList, LocalDate.parse(dateOfHearing.get()));
 
         return enveloper.withMetadataFrom(envelope, "hearing.get-latest-hearings-by-court-centres").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
     }
@@ -212,5 +236,50 @@ public class HearingQueryView {
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsByDate(courtCentreList, LocalDate.parse(dateOfHearing.get()));
 
         return enveloper.withMetadataFrom(envelope, "hearing.hearings-court-centres-for-date").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());
+    }
+
+    @SuppressWarnings("squid:S1166")
+    @Handles("hearing.defendant.outstanding-fines")
+    public JsonEnvelope getOutstandingFromDefendantId(final JsonEnvelope envelope) {
+        final Optional<UUID> defendantId = getUUID(envelope.payloadAsJsonObject(), FIELD_DEFENDANT_ID);
+        final JsonEnvelope jsonEnvelopeWithoutPayload = envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+        if (defendantId.isPresent()) {
+            try {
+                final DefendantSearch defendantSearch = defendantRepository.getDefendantDetailsForSearching(defendantId.get());
+                return envelopeFrom(envelope.metadata(), objectToJsonValueConverter.convert(defendantSearch));
+            } catch (final NoResultException ex) {
+                LOGGER.error(String.format("No defendant found with defendantId  ='%s'", defendantId.get()), ex);
+                return jsonEnvelopeWithoutPayload;
+            }
+        }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("No defendant id found in the payload");
+        }
+        return jsonEnvelopeWithoutPayload;
+    }
+
+    @SuppressWarnings("squid:S1166")
+    @Handles("hearing.defendant.info")
+    public JsonEnvelope getDefendantInfoFromCourtHouseId(final JsonEnvelope envelope) {
+
+        final JsonObject payload = envelope.payloadAsJsonObject();
+
+        final OutstandingFinesQuery outstandingFinesQuery = OutstandingFinesQuery.newBuilder()
+                .withCourtCentreId(UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID)))
+                .withCourtRoomIds(Stream.of(payload.getString(FIELD_COURT_ROOM_IDS).split(","))
+                        .map(UUID::fromString)
+                        .collect(toList()))
+                .withHearingDate(LocalDate.parse(payload.getString(FIELD_HEARING_DATE)))
+                .build();
+
+        try {
+            final DefendantInfoQueryResult result = hearingService.getHearingsByCourtRoomList(outstandingFinesQuery.getHearingDate(), outstandingFinesQuery.getCourtCentreId(), outstandingFinesQuery.getCourtRoomIds());
+            return envelopeFrom(envelope.metadata(), objectToJsonValueConverter.convert(result));
+
+
+        } catch (final NoResultException nre) {
+            LOGGER.error("### No defendant found with courtCentreId = '{}' , courtRoomIds = '{}' and hearingDate = '{}'", payload.getString(FIELD_COURT_CENTRE_ID), payload.getString(FIELD_COURT_ROOM_IDS), payload.getString(FIELD_HEARING_DATE));
+            return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+        }
     }
 }

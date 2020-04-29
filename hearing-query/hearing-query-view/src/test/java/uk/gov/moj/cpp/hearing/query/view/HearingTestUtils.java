@@ -18,6 +18,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
@@ -40,6 +41,10 @@ public class HearingTestUtils {
     public static final ZonedDateTime START_DATE_1 = parse("2018-02-22T10:30:00Z");
     public static final ZonedDateTime END_DATE_1 = parse("2018-02-24T15:45:00Z");
 
+    private static final String lexicon = "ABCDEFGHIJKLMNOPQRSTUVWXYZ12345674890";
+    private static final Set<String> identifiers = new HashSet<>();
+    private static final java.util.Random rand = new java.util.Random();
+
     public static Hearing buildHearing() {
         final UUID hearingId = randomUUID();
         final Defendant defendant1 = buildDefendant1(hearingId);
@@ -54,7 +59,25 @@ public class HearingTestUtils {
         return hearing;
     }
 
-    public static JudicialRole buildJudgeJudicialRole(UUID hearingId) {
+    public static Hearing buildHearingWithRandomDefendants(final Defendant... defendants) {
+        final UUID hearingId = UUID.randomUUID();
+        final Defendant defendant1 = buildRandomDefendant(hearingId);
+        final Defendant defendant2 = buildRandomDefendantNoDoBNoNINO(hearingId);
+        final Set<Defendant> defendantSet = asSet(defendants);
+        defendantSet.forEach(defendant -> defendant.getId().setHearingId(hearingId));
+        defendantSet.add(defendant1);
+        defendantSet.add(defendant2);
+        final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, defendantSet);
+        final Hearing hearing = buildHearingWithRandomRoom(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
+        final Offence offence1 = buildOffence1(hearing, defendant1);
+        defendant1.getOffences().add(offence1);
+        final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
+        hearing.setJudicialRoles(asSet(judicialRole));
+        judicialRole.setHearing(hearing);
+        return hearing;
+    }
+
+    public static JudicialRole buildJudgeJudicialRole(final UUID hearingId) {
         final JudicialRole judicialRole = new JudicialRole();
         judicialRole.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         judicialRole.setJudicialId(randomUUID());
@@ -70,8 +93,8 @@ public class HearingTestUtils {
     }
 
     public static Hearing buildHearing1(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
-                                        Set<ProsecutionCase> cases) {
-        Hearing hearing = new Hearing();
+                                        final Set<ProsecutionCase> cases) {
+        final Hearing hearing = new Hearing();
         hearing.setId(hearingId);
         hearing.setProsecutionCases(cases);
         hearing.setHearingLanguage(HearingLanguage.ENGLISH);
@@ -95,11 +118,20 @@ public class HearingTestUtils {
         return hearing;
     }
 
+    public static Hearing buildHearingWithRandomRoom(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
+                                                     final Set<ProsecutionCase> cases) {
+        final Hearing hearing = buildHearing1(hearingId, startDateTime, endDateTime, cases);
+        hearing.getCourtCentre().setRoomId(UUID.randomUUID());
+        hearing.getCourtCentre().setRoomName(randomIdentifier(3));
+        return hearing;
+    }
+
+
     public static Defendant buildDefendant1(final UUID hearingId) {
-        Defendant defendant = new Defendant();
+        final Defendant defendant = new Defendant();
         defendant.setId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), hearingId));
-        PersonDefendant personDefendant = new PersonDefendant();
-        Person person = new Person();
+        final PersonDefendant personDefendant = new PersonDefendant();
+        final Person person = new Person();
         person.setFirstName("Ken");
         person.setMiddleName("Rob");
         person.setLastName("Thompson");
@@ -136,9 +168,9 @@ public class HearingTestUtils {
 
     public static Defendant buildDefendant2(final UUID hearingId) {
 
-        Defendant defendant = new Defendant();
-        PersonDefendant personDefendant = new PersonDefendant();
-        Person person = new Person();
+        final Defendant defendant = new Defendant();
+        final PersonDefendant personDefendant = new PersonDefendant();
+        final Person person = new Person();
         defendant.setId(new HearingSnapshotKey(UUID.fromString("841164f6-13bc-46ff-8634-63cf9ae85d36"), hearingId));
         person.setFirstName("William");
         person.setMiddleName("Nelson");
@@ -153,6 +185,63 @@ public class HearingTestUtils {
         return defendant;
     }
 
+    public static Defendant buildRandomDefendant(final UUID hearingId) {
+
+        final Defendant defendant = new Defendant();
+        final PersonDefendant personDefendant = new PersonDefendant();
+        final Person person = new Person();
+        defendant.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        person.setFirstName(randomIdentifier(0));
+        person.setLastName(randomIdentifier(0));
+        person.setDateOfBirth(parse("1970-01-01T00:00:00Z").toLocalDate());
+        person.setNationalInsuranceNumber(randomIdentifier(9));
+        personDefendant.setPersonDetails(person);
+        defendant.setPersonDefendant(personDefendant);
+
+        return defendant;
+    }
+
+    public static Defendant buildRandomDefendantNoDoBNoNINO(final UUID hearingId) {
+
+        final Defendant defendant = new Defendant();
+        final PersonDefendant personDefendant = new PersonDefendant();
+        final Person person = new Person();
+        defendant.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        person.setFirstName(randomIdentifier(0));
+        person.setLastName(randomIdentifier(0));
+        personDefendant.setPersonDetails(person);
+        defendant.setPersonDefendant(personDefendant);
+
+        return defendant;
+    }
+
+    public static Defendant buildRandomDefendantLegalOrganisation() {
+
+        final Defendant defendant = new Defendant();
+        final Organisation legalEntityOrganisation = new Organisation();
+        legalEntityOrganisation.setName(randomIdentifier(10));
+        legalEntityOrganisation.setId(UUID.randomUUID());
+        defendant.setLegalEntityOrganisation(legalEntityOrganisation);
+        defendant.setId(new HearingSnapshotKey(UUID.randomUUID(), null));
+        return defendant;
+    }
+
+    public static String randomIdentifier(final int lenghLimit) {
+        StringBuilder builder = new StringBuilder();
+        while (builder.toString().length() == 0) {
+            final int length = (lenghLimit == 0 ? rand.nextInt(5) + 5 : lenghLimit);
+            for (int i = 0; i < length; i++) {
+                builder.append(lexicon.charAt(rand.nextInt(lexicon.length())));
+            }
+            if (identifiers.contains(builder.toString())) {
+                builder = new StringBuilder();
+            }
+        }
+        return builder.toString();
+    }
+
+
+
     /*public static Judge buildJudge(final Hearing hearing) {
         return Judge.builder()
                 .withId(new HearingSnapshotKey(UUID.fromString("a38d0d5f-a26c-436b-9b5e-4dc58f28878d"), hearing.getId()))
@@ -165,7 +254,7 @@ public class HearingTestUtils {
 
     public static ProsecutionCase buildLegalCase1(final UUID hearingId, final Set<Defendant> defendants) {
         // TODO add more fields
-        ProsecutionCase prosecutionCase = new ProsecutionCase();
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
         prosecutionCase.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         prosecutionCase.setDefendants(defendants);
         prosecutionCase.setProsecutionCaseIdentifier(buildProsecutionCaseIdentifier());
@@ -174,7 +263,7 @@ public class HearingTestUtils {
     }
 
     public static Offence buildOffence1(final Hearing hearing, final Defendant defendant) {
-        Offence offence = new Offence();
+        final Offence offence = new Offence();
 //        offence.setId(UUID.fromString("4b1318e4-1517-4e4f-a89d-6af0eafa5058"));
         offence.setDefendant(defendant);
         offence.setOffenceCode("UNKNOWN");
@@ -214,7 +303,7 @@ public class HearingTestUtils {
     }
 
     private static ProsecutionCaseIdentifier buildProsecutionCaseIdentifier() {
-        ProsecutionCaseIdentifier entity = new ProsecutionCaseIdentifier();
+        final ProsecutionCaseIdentifier entity = new ProsecutionCaseIdentifier();
         entity.setCaseURN("8C720B32E45B");
         entity.setProsecutionAuthorityCode("AUTH CODE");
         entity.setProsecutionAuthorityId(UUID.fromString("1dbab0cf-3822-46ff-b3ea-ddcf99e71ab9"));
@@ -222,14 +311,75 @@ public class HearingTestUtils {
         return entity;
     }
 
-    public static HearingHelper helper(Hearing hearing) {
+    public static HearingHelper helper(final Hearing hearing) {
         return new HearingHelper(hearing);
+    }
+
+    public static List<Hearing> buildHearingAndHearingDays() {
+
+        final List<Hearing> hearings = new ArrayList<>();
+
+        // Hearing 1
+        final Hearing hearing1 = new Hearing();
+        hearing1.setId(randomUUID());
+        final Set<HearingDay> hearingDays1 = generateHearingDays(hearing1.getId(), 2019, 7, 1, 3);//3
+        hearing1.setHearingDays(hearingDays1);
+
+        //Hearing 2
+        final Hearing hearing2 = new Hearing();
+        hearing2.setId(randomUUID());
+        final Set<HearingDay> hearingDays2 = generateHearingDays(hearing1.getId(), 2019, 7, 4, 1); //5
+        hearing2.setHearingDays(hearingDays2);
+
+        //Hearing 3
+        final Hearing hearing3 = new Hearing();
+        hearing3.setId(randomUUID());
+        final Set<HearingDay> hearingDays3 = generateHearingDays(hearing1.getId(), 2019, 7, 2, 4); //1
+        hearing3.setHearingDays(hearingDays3);
+
+        hearings.add(hearing1);
+        hearings.add(hearing2);
+        hearings.add(hearing3);
+
+        return hearings;
+    }
+
+    private static Set<HearingDay> generateHearingDays(final UUID hearingId, final int year, final int month, int day, final int sequence) {
+
+        final Set<HearingDay> hearingDays = new HashSet<>(); //add 5 days
+
+        final HearingDay hearingDay1 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay2 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay3 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay4 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay5 = getHearingDay(hearingId, year, month, day++, sequence);
+
+        hearingDays.add(hearingDay1);
+        hearingDays.add(hearingDay2);
+        hearingDays.add(hearingDay3);
+        hearingDays.add(hearingDay4);
+        hearingDays.add(hearingDay5);
+
+        return hearingDays;
+    }
+
+    private static HearingDay getHearingDay(final UUID hearingId, final int year, final int month, final int day, final int sequence) {
+        final HearingDay hearingDay = new HearingDay();
+        hearingDay.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        hearingDay.setListingSequence(sequence);
+
+        final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
+        hearingDay.setDate(zonedDateTime.toLocalDate());
+        hearingDay.setSittingDay(zonedDateTime);
+        hearingDay.setDateTime(zonedDateTime);
+
+        return hearingDay;
     }
 
     public static class HearingHelper {
         Hearing hearing;
 
-        public HearingHelper(Hearing hearing) {
+        public HearingHelper(final Hearing hearing) {
             this.hearing = hearing;
         }
 
@@ -248,67 +398,6 @@ public class HearingTestUtils {
         public Person getFirstDefendantPersonDetails() {
             return at(at(hearing.getProsecutionCases(), 0).getDefendants(), 0).getPersonDefendant().getPersonDetails();
         }
-    }
-
-    public static List<Hearing> buildHearingAndHearingDays() {
-
-        List<Hearing> hearings = new ArrayList<>();
-
-        // Hearing 1
-        final Hearing hearing1 = new Hearing();
-        hearing1.setId(randomUUID());
-        Set<HearingDay> hearingDays1 = generateHearingDays(hearing1.getId(), 2019, 7, 1, 3);//3
-        hearing1.setHearingDays(hearingDays1);
-
-        //Hearing 2
-        final Hearing hearing2 = new Hearing();
-        hearing2.setId(randomUUID());
-        Set<HearingDay> hearingDays2 = generateHearingDays(hearing1.getId(),2019, 7, 4, 1); //5
-        hearing2.setHearingDays(hearingDays2);
-
-        //Hearing 3
-        final Hearing hearing3 = new Hearing();
-        hearing3.setId(randomUUID());
-        Set<HearingDay> hearingDays3 = generateHearingDays(hearing1.getId(),2019, 7, 2, 4); //1
-        hearing3.setHearingDays(hearingDays3);
-
-        hearings.add(hearing1);
-        hearings.add(hearing2);
-        hearings.add(hearing3);
-
-        return hearings;
-    }
-
-    private static Set<HearingDay> generateHearingDays(UUID hearingId, int year, int month, int day, int sequence) {
-
-        Set<HearingDay> hearingDays = new HashSet<>(); //add 5 days
-
-        HearingDay hearingDay1 = getHearingDay(hearingId, year, month, day++, sequence);
-        HearingDay hearingDay2 = getHearingDay(hearingId, year, month, day++, sequence);
-        HearingDay hearingDay3 = getHearingDay(hearingId, year, month, day++, sequence);
-        HearingDay hearingDay4 = getHearingDay(hearingId, year, month, day++, sequence);
-        HearingDay hearingDay5 = getHearingDay(hearingId, year, month, day++, sequence);
-
-        hearingDays.add(hearingDay1);
-        hearingDays.add(hearingDay2);
-        hearingDays.add(hearingDay3);
-        hearingDays.add(hearingDay4);
-        hearingDays.add(hearingDay5);
-
-        return hearingDays;
-    }
-
-    private static HearingDay getHearingDay(UUID hearingId, int year, int month, int day, int sequence) {
-        HearingDay hearingDay = new HearingDay();
-        hearingDay.setId(new HearingSnapshotKey(randomUUID(), hearingId));
-        hearingDay.setListingSequence(sequence);
-
-        ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
-        hearingDay.setDate(zonedDateTime.toLocalDate());
-        hearingDay.setSittingDay(zonedDateTime);
-        hearingDay.setDateTime(zonedDateTime);
-
-        return hearingDay;
     }
 
 }

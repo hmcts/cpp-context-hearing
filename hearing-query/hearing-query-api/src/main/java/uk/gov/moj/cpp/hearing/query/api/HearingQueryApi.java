@@ -1,18 +1,32 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
+import static javax.json.Json.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+
 import uk.gov.justice.services.core.annotation.Component;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.inject.Inject;
+import javax.json.Json;
+import javax.json.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(Component.QUERY_API)
 public class HearingQueryApi {
+    public static final String STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES = "stagingenforcement.defendant.outstanding-fines";
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryApi.class);
 
     @Inject
     private Requester requester;
+
+    @Inject
+    private Enveloper enveloper;
 
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
@@ -103,5 +117,31 @@ public class HearingQueryApi {
     @Handles("hearing.hearings-court-centres-for-date")
     public JsonEnvelope getHearingsForCourtCentreForDate(final JsonEnvelope query) {
         return requester.request(query);
+    }
+
+
+    @Handles("hearing.defendant.outstanding-fines")
+    public JsonEnvelope getDefendantOutstandingFines(final JsonEnvelope query) {
+        final JsonEnvelope viewResponseEnvelope = this.requester.request(query);
+        final JsonObject viewResponseEnvelopePayload = viewResponseEnvelope.payloadAsJsonObject();
+        if (!viewResponseEnvelopePayload.isEmpty()) {
+            return requestStagingEnforcementToGetOutstandingFines(query, viewResponseEnvelopePayload);
+        }
+        return envelopeFrom(query.metadata(),
+                Json.createObjectBuilder()
+                        .add("outstandingFines",
+                                createArrayBuilder()).build());
+    }
+
+    @SuppressWarnings("squid:S2629")
+    private JsonEnvelope requestStagingEnforcementToGetOutstandingFines(final JsonEnvelope query, final JsonObject viewResponseEnvelopePayload) {
+        final JsonEnvelope enforcementResultEnvelope;
+        final JsonEnvelope enforcementRequestEnvelope = enveloper.withMetadataFrom(query, STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES)
+                .apply(viewResponseEnvelopePayload);
+
+        enforcementResultEnvelope = requester.requestAsAdmin(enforcementRequestEnvelope);
+        final JsonObject outstandingFines = enforcementResultEnvelope.payloadAsJsonObject();
+        LOGGER.info(String.format("outstandingFines  : %s", outstandingFines));
+        return enforcementResultEnvelope;
     }
 }

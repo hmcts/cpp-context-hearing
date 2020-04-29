@@ -20,6 +20,7 @@ import uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
+import java.util.UUID;
 
 import javax.jms.MessageConsumer;
 import javax.json.Json;
@@ -193,6 +194,7 @@ public class Utilities {
         private String endpoint;
         private String type;
         private String payloadAsString;
+        private UUID cppUserId;
         private Object[] arguments = new Object[0];
 
         public CommandBuilder(RequestSpecification requestSpec, String endpoint) {
@@ -213,6 +215,11 @@ public class Utilities {
         public CommandBuilder withPayload(final String payload) {
             this.payloadAsString = payload;
             LOGGER.info("Command Payload: {}", payloadAsString);
+            return this;
+        }
+
+        public CommandBuilder withCppUserId(final UUID cppUserId) {
+            this.cppUserId = cppUserId;
             return this;
         }
 
@@ -243,7 +250,7 @@ public class Utilities {
                     .contentType(type)
                     .accept(type)
                     .body(ofNullable(this.payloadAsString).orElse(""))
-                    .header(new Header(USER_ID, AbstractIT.getLoggedInUser().toString())).when()
+                    .header(new Header(USER_ID, cppUserId != null ? cppUserId.toString() : AbstractIT.getLoggedInUser().toString())).when()
                     .post(url)
                     .then().extract().response();
             assertThat(writeResponse.getStatusCode(), equalTo(HttpStatus.SC_ACCEPTED));

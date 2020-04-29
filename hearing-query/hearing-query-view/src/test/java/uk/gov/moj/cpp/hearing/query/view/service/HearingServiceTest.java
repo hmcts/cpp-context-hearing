@@ -5,9 +5,13 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -19,6 +23,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildRandomDefendant;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildRandomDefendantLegalOrganisation;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.helper;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail.caseDetail;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases.cases;
@@ -41,6 +47,8 @@ import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
+import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
@@ -50,6 +58,7 @@ import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
@@ -278,6 +287,77 @@ public class HearingServiceTest {
                 "10:15", "14:30", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId());
 
         assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+    }
+
+    @Test
+    public void shouldFindHearingListWithSingleCourtRoom() {
+
+        final LocalDate startDateStartOfDay = HearingTestUtils.START_DATE_1.toLocalDate();
+        final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
+        final Hearing hearingEntity = hearingHelper.it();
+
+        when(hearingRepository.findByFilters(startDateStartOfDay, hearingEntity.getCourtCentre().getId(), Arrays.asList(hearingEntity.getCourtCentre().getRoomId()))).thenReturn(asList(hearingEntity));
+
+        final DefendantInfoQueryResult response = hearingService.getHearingsByCourtRoomList(HearingTestUtils.START_DATE_1.toLocalDate(), hearingEntity.getCourtCentre().getId(), Arrays.asList(hearingEntity.getCourtCentre().getRoomId()));
+
+        assertThat(response, isBean(DefendantInfoQueryResult.class)
+                .with(DefendantInfoQueryResult::getCourtRooms, allOf(
+                        iterableWithSize(1),
+                        hasItems(
+                                isBean(uk.gov.moj.cpp.hearing.domain.CourtRoom.class)
+                                        .withValue(uk.gov.moj.cpp.hearing.domain.CourtRoom::getCourtRoomName, hearingEntity.getCourtCentre().getRoomName())
+                                        .with(uk.gov.moj.cpp.hearing.domain.CourtRoom::getDefendantDetails, hasItems(
+                                                isBean(DefendantDetail.class)
+                                                        .withValue(DefendantDetail::getDefendantId, hearingHelper.getFirstDefendant().getId().getId())
+                                                        .withValue(DefendantDetail::getFirstName, hearingHelper.getFirstDefendant().getPersonDefendant().getPersonDetails().getFirstName())
+                                        ))
+                        )
+                ))
+        );
+
+    }
+
+    @Test
+    public void shouldFindHearingListWithCourtRoomList() {
+
+        final LocalDate hearingDate = HearingTestUtils.START_DATE_1.toLocalDate();
+        Defendant organizationDefendant = buildRandomDefendantLegalOrganisation();
+        Defendant personDefendant = buildRandomDefendant(randomUUID());
+        final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearingWithRandomDefendants(personDefendant, organizationDefendant));
+        final Hearing hearingEntity = hearingHelper.it();
+
+        final HearingTestUtils.HearingHelper hearingHelper2 = helper(HearingTestUtils.buildHearingWithRandomDefendants());
+        final Hearing hearingEntity2 = hearingHelper2.it();
+
+        when(hearingRepository.findByFilters(hearingDate, hearingEntity.getCourtCentre().getId(), Arrays.asList(hearingEntity.getCourtCentre().getRoomId())))
+                .thenReturn(asList(hearingEntity, hearingEntity2));
+
+        final DefendantInfoQueryResult response = hearingService.getHearingsByCourtRoomList(HearingTestUtils.START_DATE_1.toLocalDate(), hearingEntity.getCourtCentre().getId(), Arrays.asList(hearingEntity.getCourtCentre().getRoomId()));
+
+        assertTrue(response.getCourtRooms().size() > 0);
+
+
+        assertThat(response, isBean(DefendantInfoQueryResult.class)
+                .with(DefendantInfoQueryResult::getCourtRooms, allOf(
+                        iterableWithSize(2),
+                        hasItems(
+                                isBean(uk.gov.moj.cpp.hearing.domain.CourtRoom.class)
+                                        .withValue(uk.gov.moj.cpp.hearing.domain.CourtRoom::getCourtRoomName, hearingEntity.getCourtCentre().getRoomName())
+                                        .with(uk.gov.moj.cpp.hearing.domain.CourtRoom::getDefendantDetails, hasItems(
+                                                isBean(DefendantDetail.class)
+                                                        .withValue(DefendantDetail::getDefendantId, personDefendant.getId().getId())
+                                                        .withValue(DefendantDetail::getFirstName, personDefendant.getPersonDefendant().getPersonDetails().getFirstName()),
+                                                isBean(DefendantDetail.class)
+                                                        .withValue(DefendantDetail::getDefendantId, organizationDefendant.getId().getId())
+                                                        .withValue(DefendantDetail::getLegalEntityOrganizationName, organizationDefendant.getLegalEntityOrganisation().getName())
+                                        )),
+                                isBean(uk.gov.moj.cpp.hearing.domain.CourtRoom.class)
+                                        .withValue(uk.gov.moj.cpp.hearing.domain.CourtRoom::getCourtRoomName, hearingEntity2.getCourtCentre().getRoomName())
+                                        .with(uk.gov.moj.cpp.hearing.domain.CourtRoom::getDefendantDetails, hasSize(2))
+                        )
+                ))
+        );
+
     }
 
     @Test

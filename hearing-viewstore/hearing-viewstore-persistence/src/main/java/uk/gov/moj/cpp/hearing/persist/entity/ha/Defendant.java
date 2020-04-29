@@ -183,7 +183,7 @@ public class Defendant {
         return id;
     }
 
-    public void setId(HearingSnapshotKey id) {
+    public void setId(final HearingSnapshotKey id) {
         this.id = id;
     }
 
@@ -191,7 +191,7 @@ public class Defendant {
         return prosecutionCase;
     }
 
-    public void setProsecutionCase(ProsecutionCase prosecutionCase) {
+    public void setProsecutionCase(final ProsecutionCase prosecutionCase) {
         this.prosecutionCase = prosecutionCase;
     }
 
@@ -199,7 +199,7 @@ public class Defendant {
         return offences;
     }
 
-    public void setOffences(Set<Offence> offences) {
+    public void setOffences(final Set<Offence> offences) {
         this.offences = offences;
     }
 
@@ -207,7 +207,7 @@ public class Defendant {
         return associatedPersons;
     }
 
-    public void setAssociatedPersons(Set<AssociatedPerson> associatedPersons) {
+    public void setAssociatedPersons(final Set<AssociatedPerson> associatedPersons) {
         this.associatedPersons = associatedPersons;
     }
 
@@ -215,7 +215,7 @@ public class Defendant {
         return defenceOrganisation;
     }
 
-    public void setDefenceOrganisation(Organisation defenceOrganisation) {
+    public void setDefenceOrganisation(final Organisation defenceOrganisation) {
         this.defenceOrganisation = defenceOrganisation;
     }
 
@@ -223,7 +223,7 @@ public class Defendant {
         return legalEntityOrganisation;
     }
 
-    public void setLegalEntityOrganisation(Organisation legalEntityOrganisation) {
+    public void setLegalEntityOrganisation(final Organisation legalEntityOrganisation) {
         this.legalEntityOrganisation = legalEntityOrganisation;
     }
 
@@ -231,7 +231,7 @@ public class Defendant {
         return personDefendant;
     }
 
-    public void setPersonDefendant(PersonDefendant personDefendant) {
+    public void setPersonDefendant(final PersonDefendant personDefendant) {
         this.personDefendant = personDefendant;
     }
 
@@ -239,7 +239,7 @@ public class Defendant {
         return prosecutionCaseId;
     }
 
-    public void setProsecutionCaseId(UUID prosecutionCaseId) {
+    public void setProsecutionCaseId(final UUID prosecutionCaseId) {
         this.prosecutionCaseId = prosecutionCaseId;
     }
 
@@ -247,7 +247,7 @@ public class Defendant {
         return numberOfPreviousConvictionsCited;
     }
 
-    public void setNumberOfPreviousConvictionsCited(Integer numberOfPreviousConvictionsCited) {
+    public void setNumberOfPreviousConvictionsCited(final Integer numberOfPreviousConvictionsCited) {
         this.numberOfPreviousConvictionsCited = numberOfPreviousConvictionsCited;
     }
 
@@ -255,7 +255,7 @@ public class Defendant {
         return prosecutionAuthorityReference;
     }
 
-    public void setProsecutionAuthorityReference(String prosecutionAuthorityReference) {
+    public void setProsecutionAuthorityReference(final String prosecutionAuthorityReference) {
         this.prosecutionAuthorityReference = prosecutionAuthorityReference;
     }
 
@@ -263,7 +263,7 @@ public class Defendant {
         return witnessStatement;
     }
 
-    public void setWitnessStatement(String witnessStatement) {
+    public void setWitnessStatement(final String witnessStatement) {
         this.witnessStatement = witnessStatement;
     }
 
@@ -271,7 +271,7 @@ public class Defendant {
         return witnessStatementWelsh;
     }
 
-    public void setWitnessStatementWelsh(String witnessStatementWelsh) {
+    public void setWitnessStatementWelsh(final String witnessStatementWelsh) {
         this.witnessStatementWelsh = witnessStatementWelsh;
     }
 
@@ -279,7 +279,7 @@ public class Defendant {
         return mitigation;
     }
 
-    public void setMitigation(String mitigation) {
+    public void setMitigation(final String mitigation) {
         this.mitigation = mitigation;
     }
 
@@ -287,7 +287,7 @@ public class Defendant {
         return mitigationWelsh;
     }
 
-    public void setMitigationWelsh(String mitigationWelsh) {
+    public void setMitigationWelsh(final String mitigationWelsh) {
         this.mitigationWelsh = mitigationWelsh;
     }
 
@@ -295,7 +295,7 @@ public class Defendant {
         return pncId;
     }
 
-    public void setPncId(String pncId) {
+    public void setPncId(final String pncId) {
         this.pncId = pncId;
     }
 

@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.query.view;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
-import static java.util.stream.Stream.concat;
 import static org.apache.commons.io.FileUtils.readLines;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,11 +26,13 @@ public class HearingQueryViewRamlConfigTest {
 
     private Map<String, String> viewMethodsToHandlerNames;
     private Map<String, String> eventViewMethodsToHandlerNames;
+    private Map<String, String> outstandingFineRequestsServiceNames;
 
     @Before
     public void setup() throws IOException {
         viewMethodsToHandlerNames = viewMethodsToHandlerNames(HearingQueryView.class);
         eventViewMethodsToHandlerNames = viewMethodsToHandlerNames(HearingEventQueryView.class);
+        outstandingFineRequestsServiceNames = viewMethodsToHandlerNames(OutstandingFineRequestsQueryView.class);
 
     }
 
@@ -42,7 +44,13 @@ public class HearingQueryViewRamlConfigTest {
                 .map(line -> line.replaceAll(LABEL_TO_METHOD_NAME, "").trim())
                 .collect(toList());
 
-        final List<String> allHandlerNames = concat(viewMethodsToHandlerNames.values().stream(), eventViewMethodsToHandlerNames.values().stream()).collect(toList());
+        final List<String> allHandlerNames = Stream.of(
+                viewMethodsToHandlerNames.values().stream(),
+                eventViewMethodsToHandlerNames.values().stream(),
+                outstandingFineRequestsServiceNames.values().stream())
+                .reduce(Stream::concat)
+                .orElseGet(Stream::empty)
+                .collect(toList());
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames.toArray()));
     }
 

@@ -32,6 +32,7 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String HEARING_QUERY_SEARCH_BY_MATERIAL_ID = "hearing.query.search-by-material-id";
     private static final String HEARING_QUERY_GET_CASE_TIMELINE = "hearing.case.timeline";
     private static final String HEARING_QUERY_GET_APPLICATION_TIMELINE = "hearing.application.timeline";
+    private static final String HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES = "hearing.defendant.outstanding-fines";
 
     private static final String HEARING_QUERY_COURT_LIST_PUBLISH_STATUS = "hearing.court.list.publish.status";
     private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.latest-hearings-by-court-centres";
@@ -170,6 +171,17 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInAuthorisedGroupToSearchForHearingByCourtCentreId() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID, "System Users");
+    }
+
+    @Test
+    public void shouldAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers");
+    }
+
+
+    @Test
+    public void shouldNotAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers");
     }
 
     @Override
