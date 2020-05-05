@@ -23,7 +23,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataXhibitHearingTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForWebPage;
@@ -66,18 +65,16 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractIT {
 
     private static final ZonedDateTime EVENT_TIME = now().minusMinutes(5l).withZoneSameLocal(ZoneId.of("UTC"));
     private static final LocalDate localDate = EVENT_TIME.toLocalDate();
-
+    private static UUID hearingTypeId;
     private String courtCentreId;
     private String courtRoom1Id;
     private String courtRoom2Id;
     private String defenceCounselId;
     private UUID caseId;
-    private static UUID hearingTypeId;
 
     @BeforeClass
-    public static void setUp(){
+    public static void setUp() {
         hearingTypeId = UUID.fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed");
-        stubGetReferenceDataXhibitHearingTypes();
     }
 
     @Before

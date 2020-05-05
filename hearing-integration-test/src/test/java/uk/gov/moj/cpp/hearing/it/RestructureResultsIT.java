@@ -17,7 +17,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.StubNowsReferenceData.setupNowsReferenceData;
 
@@ -47,7 +46,6 @@ public class RestructureResultsIT extends AbstractIT {
     public void setup() {
         fileResourceObjectMapper = new FileResourceObjectMapper();
         stubProgressionGenerateNows();
-        stubForReferenceDataResults();
         stubRelistReferenceDataResults();
         setupNowsReferenceData(now());
     }

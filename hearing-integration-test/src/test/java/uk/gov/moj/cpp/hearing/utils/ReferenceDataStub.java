@@ -122,7 +122,9 @@ public class ReferenceDataStub {
         stubGetReferenceDataResultPromptWordSynonymsForSecondDay();
         stubGetReferenceDataResultPromptFixedListsForSecondDay();
         stubGetReferenceDataResultBailStatuses();
+        changeCourtRoomsStubWithAdding();
         stubDynamicPromptFixedList();
+
     }
 
     private static void stubGetReferenceDataResultDefinitionsForFirstDay() {
@@ -381,15 +383,13 @@ public class ReferenceDataStub {
     private static void stubDynamicPromptFixedList() {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
-        changeCourtRoomsStubWithAdding();
-
         final String hearingTypePath = "/referencedata-service/query/api/rest/referencedata/hearing-types";
         final String hearingTypePathCT = "application/vnd.referencedata.query.hearing-types+json";
         stubFor(get(urlPathEqualTo(hearingTypePath))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", hearingTypePathCT)
-                        .withBody(getPayload("referencedata.dyna.fixedlists.hearing.type.json"))));
+                        .withBody(getPayload("stub-data/referencedata.query.hearing-types.json"))));
 
         waitForStubToBeReady(hearingTypePath, hearingTypePathCT);
     }
@@ -512,23 +512,6 @@ public class ReferenceDataStub {
                         .withBody(payload)));
 
         waitForStubToBeReady(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL, REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE);
-    }
-
-    public static void stubGetReferenceDataXhibitHearingTypes(){
-
-        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
-
-        String payload = getPayload("stub-data/referencedata.query.hearing-types.json");
-
-        stubFor(get(urlPathMatching(REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_URL))
-                .willReturn(aResponse()
-                        .withStatus(SC_OK)
-                        .withHeader("CPPID", randomUUID().toString())
-                        .withHeader("Content-Type", REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_MEDIA_TYPE)
-                        .withBody(payload)));
-
-        waitForStubToBeReady(REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_URL, REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_MEDIA_TYPE);
-
     }
 
     public static void stubOrganisationUnit(final String ouId) {

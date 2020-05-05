@@ -8,7 +8,9 @@ import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -113,9 +115,9 @@ public class NCESJourneyIT extends AbstractIT {
     private static final UUID ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID = fromString("10115268-8efc-49fe-b8e8-feee216a03da");
     private static final UUID RD_FINE = fromString("969f150c-cd05-46b0-9dd9-30891efcc766");
     private static final UUID RD_FIDICI = fromString("de946ddc-ad77-44b1-8480-8bbc251cdcfb");
-    private static final String FIRST_ACK_ACCOUNT_NUMBER = "999966829";
-    private static final String SECOND_ACK_ACCOUNT_NUMBER = "999966830";
     private static final String PUBLIC_EVENT_STAGINGENFORCEMENT_ENFORCE_FINANCIAL_IMPOSITION_ACKNOWLEDGEMENT = "public.stagingenforcement.enforce-financial-imposition-acknowledgement";
+    private final String FIRST_ACK_ACCOUNT_NUMBER = randomNumeric(9);
+    private final String SECOND_ACK_ACCOUNT_NUMBER = randomNumeric(9);
     private InitiateHearingCommandHelper hearingCommandHelper;
     private LocalDate orderedDate;
     private SaveDraftResultCommand draftResultCommand;
@@ -340,7 +342,7 @@ public class NCESJourneyIT extends AbstractIT {
 
     private void sendStagingEnforcementAcknowledgment(final int numberOfRequests, final String accountNumber, final ZonedDateTime requestsAfter) {
         //check the required number of system mapper requests
-        await().until(() -> {
+        await().timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS).until(() -> {
             final int size = findNowsIdForGivenHearingIdFromSystemMapper(hearingId, requestsAfter).size();
             return size == numberOfRequests;
         });

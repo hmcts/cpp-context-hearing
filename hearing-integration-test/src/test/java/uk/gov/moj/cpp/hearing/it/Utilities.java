@@ -9,7 +9,6 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -46,6 +45,8 @@ import org.slf4j.LoggerFactory;
 
 public class Utilities {
 
+    public static final int RETRY_TIMEOUT_IN_MILLIS = 5000;
+
     public static EventListener listenFor(String mediaType) {
         return new EventListener(mediaType);
     }
@@ -67,7 +68,7 @@ public class Utilities {
         private long timeout;
 
         public EventListener(final String eventType) {
-            this(eventType, DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
+            this(eventType, DEFAULT_POLL_TIMEOUT_IN_MILLIS);
         }
 
         public EventListener(final String eventType, long timeout) {
@@ -93,26 +94,31 @@ public class Utilities {
         }
 
         public JsonPath waitFor() {
-            JsonPath message = retrieveMessage(messageConsumer, timeout);
+            int numberOfRetries = 1;
+            final long startTime = System.currentTimeMillis();
+            JsonPath message;
             StringDescription description = new StringDescription();
+            do {
+                message = retrieveMessage(messageConsumer, RETRY_TIMEOUT_IN_MILLIS);
 
-            while (message != null && !this.matcher.matches(message.prettify())) {
-                description = new StringDescription();
-                description.appendText("Expected ");
-                this.matcher.describeTo(description);
-                description.appendText(" but ");
-                this.matcher.describeMismatch(message.prettify(), description);
+                if (message != null) {
+                    if (this.matcher.matches(message.prettify())) {
+                        LOGGER.info("message:" + message.prettify());
+                        return message;
+                    } else {
+                        description = new StringDescription();
+                        description.appendText("Expected ");
+                        this.matcher.describeTo(description);
+                        description.appendText(" but ");
+                        this.matcher.describeMismatch(message.prettify(), description);
+                    }
+                }
+                numberOfRetries++;
 
-                message = retrieveMessage(messageConsumer);
-            }
+            } while (timeout > (System.currentTimeMillis() - startTime));
 
-            if (message == null) {
-                fail("Expected '" + eventType + "' message to emit on the public.event topic: " + description.toString());
-            } else {
-                LOGGER.info("message:" + message.prettify());
-            }
-
-            return message;
+            fail("Expected '" + eventType + "' Retries " + numberOfRetries + "  message to emit on the public.event topic: " + description.toString());
+            return null;
         }
 
         public EventListener withFilter(Matcher<?> matcher) {

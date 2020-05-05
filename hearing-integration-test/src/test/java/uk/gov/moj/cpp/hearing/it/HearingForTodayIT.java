@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.it;
 import static java.time.LocalDate.now;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.CourtCentre.courtCentre;
@@ -23,8 +25,6 @@ import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.ini
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingForTodayPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
 
 import uk.gov.justice.core.courts.HearingDay;
@@ -38,7 +38,6 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class HearingForTodayIT extends AbstractIT {
@@ -50,7 +49,6 @@ public class HearingForTodayIT extends AbstractIT {
     private static final LocalDate DEFENDANT_DOB = LocalDate.now().minusYears(50);
 
 
-    @Ignore("GPE-13308")
     @Test
     public void shouldRetrieveHearingForTodayForLoggedOnUser() {
         final UUID userId = randomUUID();
@@ -64,13 +62,13 @@ public class HearingForTodayIT extends AbstractIT {
         initiateHearing(getRequestSpec(), initiateHearingCommand);
 
         getHearingForTodayPollForMatch(userId, 30, isBean(GetHearings.class)
-                .with(GetHearings::getHearingSummaries, hasSize(1))
-                .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
+                .with(GetHearings::getHearingSummaries, hasSize(greaterThanOrEqualTo(1)))
+                .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
                         .with(HearingSummaries::getId, is(hearingId))
                         .with(HearingSummaries::getHearingDays, hasSize(2))
-                        .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                        .with(HearingSummaries::getHearingDays, hasItem(isBean(HearingDay.class)
                                 .with(hearingDay -> hearingDay.getSittingDay().toLocalDate(), is(now()))))
-                        .with(HearingSummaries::getHearingDays, second(isBean(HearingDay.class)
+                        .with(HearingSummaries::getHearingDays, hasItem(isBean(HearingDay.class)
                                 .with(hearingDay -> hearingDay.getSittingDay().toLocalDate(), is(now()))))
                         .with(HearingSummaries::getCourtCentreId, is(courtCentreId))
                         .with(HearingSummaries::getRoomId, is(roomId))

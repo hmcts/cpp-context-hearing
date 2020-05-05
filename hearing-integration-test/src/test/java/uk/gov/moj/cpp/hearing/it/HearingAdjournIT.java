@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.Prompt.prompt;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -15,7 +16,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTempl
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
@@ -30,7 +30,6 @@ import uk.gov.justice.core.courts.NextHearingProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -50,7 +49,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 @SuppressWarnings({"squid:S1607"})
@@ -59,9 +57,6 @@ public class HearingAdjournIT extends AbstractIT {
     public static final UUID WIMBLEDON_COURT_CENTRE_ID = UUID.fromString("80921334-2cf0-4609-8a29-0921bf6b3520");
     public static final UUID WIMBLEDON_ROOM_B_ID = UUID.fromString("2bd3e322-f603-411d-a5ab-2e42ff4b6e00");
     public static final UUID WIMBLEDON_ROOM_A_ID = UUID.fromString("f703dc83-d0e4-42c8-8d44-0352d46e5194");
-    public static final String WIMBLEDON_ADDRESS1 = "4 Belmarsh Road";
-    public static final String WIMBLEDON_ADDRESS2 = "London";
-    public static final String WIMBLEDON_POSTCODE = "SE28 0HA";
     public static final LocalDate START_DATE1 = LocalDate.of(2018, 07, 02);
     public static final LocalDate START_DATE2 = LocalDate.of(2018, 8, 02);
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -73,7 +68,6 @@ public class HearingAdjournIT extends AbstractIT {
     private static final String COURT_ROOM_LABEL = "CourtRoom";
     private static final String COURT_CENTRE_LABEL = "Courthouse name";
 
-    @Ignore("GPE-13308")
     @Test
     public void shouldRaiseHearingAdjournedEvent() {
 
@@ -144,11 +138,11 @@ public class HearingAdjournIT extends AbstractIT {
             targets.add(saveDraftCommand.getTarget());
         }));
 
-        hearingOne.getHearing();
+
         final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
-                        .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
+                        .with(HearingAdjourned::getNextHearings, hasItem(isBean(NextHearing.class)
                                 .with(NextHearing::getType, isBean(HearingType.class)
                                         .with(HearingType::getDescription, is("Plea & Trial Preparation")))
                                 .with(NextHearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))
@@ -159,20 +153,20 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
                                         .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
                                         .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_A_ID))
-                                .with(NextHearing::getNextHearingProsecutionCases, first(isBean(NextHearingProsecutionCase.class)
+                                .with(NextHearing::getNextHearingProsecutionCases, hasItem(isBean(NextHearingProsecutionCase.class)
                                         .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
-                                        .with(NextHearingProsecutionCase::getDefendants, first(isBean(NextHearingDefendant.class)
+                                        .with(NextHearingProsecutionCase::getDefendants, hasItem(isBean(NextHearingDefendant.class)
                                                 .with(NextHearingDefendant::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()))
-                                                .with(NextHearingDefendant::getOffences, first(isBean(NextHearingOffence.class)
+                                                .with(NextHearingDefendant::getOffences, hasItem(isBean(NextHearingOffence.class)
                                                         .with(NextHearingOffence::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId()))))))))
                         ))
                 ));
 
-        ShareResultsCommand shareResultsCommand = standardShareResultsCommandTemplate(hearingOne.getHearingId());
 
         UseCases.shareResults(getRequestSpec(), hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
 
         publicHearingAdjourned.waitFor();
+
 
         UseCases.saveDraftResults(getRequestSpec(), with(saveDraftResultCommand, saveDraftCommand -> saveDraftCommand.getTarget()
                 .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
@@ -222,7 +216,7 @@ public class HearingAdjournIT extends AbstractIT {
         final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
-                        .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
+                        .with(HearingAdjourned::getNextHearings, hasItem(isBean(NextHearing.class)
                                 .with(NextHearing::getType, isBean(HearingType.class)
                                         .with(HearingType::getDescription, is("Sentence")))
                                 .with(NextHearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))
@@ -230,20 +224,15 @@ public class HearingAdjournIT extends AbstractIT {
                                 .with(NextHearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
                                 .with(NextHearing::getEstimatedMinutes, is(30))
                                 .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                                .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
-                                                .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_B_ID)
-                                         /*.with(CourtCentre::getAddress, isBean(Address.class)
-                                             .withValue(Address::getAddress1, WIMBLEDON_ADDRESS1)
-                                                 .withValue(Address::getAddress2, WIMBLEDON_ADDRESS2)
-                                                 .withValue(Address::getPostcode, WIMBLEDON_POSTCODE)
-                                         )*/
+                                        .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
+                                        .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_B_ID)
                                 )
 
-                                .with(NextHearing::getNextHearingProsecutionCases, first(isBean(NextHearingProsecutionCase.class)
+                                .with(NextHearing::getNextHearingProsecutionCases, hasItem(isBean(NextHearingProsecutionCase.class)
                                         .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
-                                        .with(NextHearingProsecutionCase::getDefendants, first(isBean(NextHearingDefendant.class)
+                                        .with(NextHearingProsecutionCase::getDefendants, hasItem(isBean(NextHearingDefendant.class)
                                                 .with(NextHearingDefendant::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()))
-                                                .with(NextHearingDefendant::getOffences, first(isBean(NextHearingOffence.class)
+                                                .with(NextHearingDefendant::getOffences, hasItem(isBean(NextHearingOffence.class)
                                                         .with(NextHearingOffence::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId()))))))))
                         ))));
 
@@ -322,11 +311,10 @@ public class HearingAdjournIT extends AbstractIT {
             targets.add(saveDraftCommand.getTarget());
         }));
         targets.forEach(target -> target.setApplicationId(initiateHearingCommand.getHearing().getCourtApplications().get(0).getId()));
-        hearingOne.getHearing();
         final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", 90000)
                 .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
                         .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
-                        .with(HearingAdjourned::getNextHearings, first(isBean(NextHearing.class)
+                        .with(HearingAdjourned::getNextHearings, hasItem(isBean(NextHearing.class)
                                 .with(NextHearing::getType, isBean(HearingType.class)
                                         .with(HearingType::getDescription, is("Plea & Trial Preparation")))
                                 .with(NextHearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))

@@ -9,6 +9,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -21,12 +22,16 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
@@ -70,6 +75,8 @@ import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -78,6 +85,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -94,6 +102,8 @@ import com.jayway.restassured.specification.RequestSpecification;
 import org.apache.http.HttpStatus;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 
 public class UseCases {
 
@@ -111,11 +121,12 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, boolean includeApplication) {
 
+        Hearing hearing = initiateHearing.getHearing();
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(initiateHearing.getHearing().getId().toString()))));
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
 
         if (!includeApplication) {
-            initiateHearing.getHearing().setCourtApplications(null);
+            hearing.setCourtApplications(null);
         }
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -124,8 +135,35 @@ public class UseCases {
                 .executeSuccessfully();
 
         publicEventTopic.waitFor();
+        BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
+        final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
+        if (prosecutionCases != null && !prosecutionCases.isEmpty()) {
+            resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                    .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(prosecutionCases))
+            );
+        }
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
 
         return initiateHearing;
+    }
+
+    private static Matcher<Iterable<ProsecutionCase>> getProsecutionCasesMatcher(final List<ProsecutionCase> prosecutionCases) {
+        return hasItems(
+                prosecutionCases.stream().map(prosecutionCase -> isBean(ProsecutionCase.class)
+                        .with(ProsecutionCase::getId, Matchers.is(prosecutionCase.getId()))
+                        .with(ProsecutionCase::getDefendants, hasItems(
+                                prosecutionCase.getDefendants().stream().map(
+                                        defendant -> isBean(Defendant.class)
+                                                .with(Defendant::getId, Matchers.is(defendant.getId()))
+                                                .with(Defendant::getOffences, hasItems(
+                                                        defendant.getOffences().stream().map(offence ->
+                                                                isBean(Offence.class).with(Offence::getId, Matchers.is(offence.getId()))
+                                                        ).toArray((IntFunction<Matcher<? super Offence>[]>) Matcher[]::new)
+                                                ))
+                                ).toArray((IntFunction<Matcher<? super Defendant>[]>) Matcher[]::new)
+
+                        ))).toArray((IntFunction<Matcher<? super ProsecutionCase>[]>) Matcher[]::new)
+        );
     }
 
     public static void verifyIgnoreInitiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
@@ -247,7 +285,7 @@ public class UseCases {
                                            final boolean alterable,
                                            final UUID defenceCounselId,
                                            final ZonedDateTime eventTime) {
-        return logEvent(hearingEventId,requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
+        return logEvent(hearingEventId, requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, STRING.next());
     }
 
     public static LogEventCommand logEvent(final RequestSpecification requestSpec,
@@ -257,9 +295,8 @@ public class UseCases {
                                            final boolean alterable,
                                            final UUID defenceCounselId,
                                            final ZonedDateTime eventTime) {
-        return logEvent(randomUUID(),requestSpec,consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId,eventTime ,STRING.next());
+        return logEvent(randomUUID(), requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, STRING.next());
     }
-
 
 
     public static LogEventCommand logEventForOverrideCourtRoom(final RequestSpecification requestSpec,
