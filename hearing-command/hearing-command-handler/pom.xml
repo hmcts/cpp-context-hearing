@@ -68,6 +68,13 @@
             <groupId>uk.gov.moj.cpp.system.id-mapper</groupId>
             <artifactId>id-mapper-client</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Test Dependencies -->
 
         <dependency>

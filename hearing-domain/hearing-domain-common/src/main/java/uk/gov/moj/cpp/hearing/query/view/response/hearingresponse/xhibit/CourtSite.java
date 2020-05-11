@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class CourtSite implements Serializable {
@@ -35,20 +36,23 @@ public class CourtSite implements Serializable {
         return id;
     }
 
-    @SuppressWarnings({"squid:S00121", "squid:S00122"})
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
 
-        CourtSite courtSite = (CourtSite) o;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
-        return id.equals(courtSite.id);
+        final CourtSite courtSite = (CourtSite) o;
+        return Objects.equals(id, courtSite.id);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Objects.hash(id);
     }
 
     public CourtSite setCourtRooms(List<CourtRoom> courtRooms) {

@@ -405,3 +405,28 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.defendant.outstanding-fines+json:
                     example:  !include json/hearing.defendant.outstanding-fines.json
                     schema:  !include  json/schema/hearing.defendant.outstanding-fines.json
+
+
+/session-time/{courtHouseId}/{courtRoomId}:
+  uriParameters:
+    courtHouseId:
+      description: ID of the court house
+      type: string
+    courtRoomId:
+          description: ID of the court room
+          type: string
+  get:
+    description: |
+      Get recorded Session times:
+      ...
+      (mapping):
+         responseType: application/vnd.hearing.query.session-time+json
+         name: hearing.query.session-time
+      ...
+    responses:
+          200:
+             description: OK
+             body:
+               application/vnd.hearing.query.session-time+json:
+                 schema: !include json/schema/hearing.query.session-time.json
+                 example: !include json/hearing.query.session-time.json

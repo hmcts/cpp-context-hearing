@@ -17,13 +17,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEvent
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRoomMappings;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtXhibitCourtMappings;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataEventMappings;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
-import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
@@ -35,52 +29,20 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Random;
-import java.util.UUID;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends AbstractIT {
+public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT.class);
 
     private static final String HEARING_COMMAND_PUBLISH_HEARING_LIST = "hearing.publish-hearing-lists-for-crown-courts";
     private static final String MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST = "application/vnd.hearing.publish-hearing-lists-for-crown-courts+json";
-    private static UUID hearingTypeId;
-
-
-    private String courtCentreId;
-    private String courtRoom1Id;
-    private String courtRoom2Id;
-    private String defenceCounselId;
-    private UUID caseId;
-
-    @BeforeClass
-    public static void setUp() {
-        hearingTypeId = UUID.fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed");
-    }
-
-    @Before
-    public void initStub() {
-        courtCentreId = randomUUID().toString();
-        courtRoom1Id = randomUUID().toString();
-        courtRoom2Id = randomUUID().toString();
-        defenceCounselId = randomUUID().toString();
-        caseId = randomUUID();
-
-        stubExhibitFileUpload();
-        stubGetReferenceDataCourtRoomMappings(courtRoom1Id, courtRoom2Id);
-        stubGetReferenceDataCourtXhibitCourtMappings();
-        stubOrganisationUnit(courtCentreId);
-        stubGetReferenceDataEventMappings();
-        stubGetReferenceDataJudiciaries();
-    }
 
     @Test
     public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() throws NoSuchAlgorithmException {

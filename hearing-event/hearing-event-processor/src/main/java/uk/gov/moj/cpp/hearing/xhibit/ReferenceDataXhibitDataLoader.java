@@ -15,6 +15,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.xhibit.exception.ReferenceDataNotFoundException;
+import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitCourtRoomMappingsCache;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -35,6 +36,9 @@ public class ReferenceDataXhibitDataLoader {
     @Inject
     private UtcClock utcClock;
 
+    @Inject
+    private XhibitCourtRoomMappingsCache xhibitCourtRoomMappingsCache;
+
     public XhibitEventMappingsList getEventMapping() {
         final Metadata metadata = metadataBuilder()
                 .createdAt(utcClock.now())
@@ -54,7 +58,7 @@ public class ReferenceDataXhibitDataLoader {
     }
 
     String getXhibitCrestCourtIdBy(final String courtCentreId) {
-        final CourtRoomMappingsList courtRoomMappingsList = getCourtRoomMappingsList(courtCentreId);
+        final CourtRoomMappingsList courtRoomMappingsList = xhibitCourtRoomMappingsCache.getCourtRoomMappingsMapCache(courtCentreId);
         /*
           Note that here, we are calling endpoint
           referencedata.query.cp-xhibit-courtroom-mappings
@@ -68,7 +72,7 @@ public class ReferenceDataXhibitDataLoader {
 
     }
 
-    private CourtRoomMappingsList getCourtRoomMappingsList(final String courtCentreId) {
+    public CourtRoomMappingsList getCourtRoomMappingsList(final String courtCentreId) {
         final JsonObject query = createObjectBuilder()
                 .add(XHIBIT_COURT_MAPPINGS_QUERY_PARAM, courtCentreId)
                 .build();

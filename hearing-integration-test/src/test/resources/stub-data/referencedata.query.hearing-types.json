@@ -9,14 +9,6 @@
       "defaultDurationMin": 20
     },
     {
-      "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
-      "seqId": 2,
-      "hearingCode": "FPTP",
-      "hearingDescription": "Further Plea & Trial Preparation",
-      "welshHearingDescription": "Paratoi ymhellach ar gyfer Pledio a Threial",
-      "defaultDurationMin": 20
-    },
-    {
       "id": "cb428693-e886-4809-868e-e5f874d459d5",
       "seqId": 3,
       "hearingCode": "PLY",

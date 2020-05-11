@@ -232,6 +232,7 @@ public class UseCases {
                         .withLastModifiedTime(PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC")))
                         .withRecordedLabel(recordedLabel)
                         .withDefenceCounselId(defenceCounselId)
+                        .withAlterable(alterable)
                 , consumer).build();
 
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();

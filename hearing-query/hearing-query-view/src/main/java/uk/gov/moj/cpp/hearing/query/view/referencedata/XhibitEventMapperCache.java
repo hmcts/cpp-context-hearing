@@ -27,7 +27,7 @@ public class XhibitEventMapperCache {
 
     @PostConstruct
     public void init() {
-        final XhibitEventMappingsList eventMapping = referenceDataService.getEventMapping();
+        final XhibitEventMappingsList eventMapping = referenceDataService.listAllEventMappings();
         if (eventMapping.getCpXhibitHearingEventMappings().isEmpty()) {
             LOGGER.warn("!!Xhibit Hearing Event Mapping is Empty!!");
         }

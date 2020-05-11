@@ -14,10 +14,13 @@ import static org.mockito.Mockito.when;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +36,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferenceDataXhibitDataLoaderTest {
+    private static final String CREST_COURT_SITE_CODE = "123";
+    private static final UUID EVENT_ID = randomUUID();
+    private static final UUID COURT_ROOM_ID = randomUUID();
+    private static final String CREST_COURT_SITE_NAME = "Wrexham";
+    private static final String OU_CODE = "B60OW00";
+    private static final int COURT_ROOM_NUMBER = 321;
+    private static final String CREST_COURT_ID = "K12";
+    private static final String CREST_COURT_SITE_ID = "CCS1";
+    private static final String CREST_COURT_ROOM_NAME = "WATERLOO";
+    private static final UUID CREST_COURT_SITE_UUID = randomUUID();
 
     @Mock(answer = RETURNS_DEEP_STUBS)
     private Requester requester;
@@ -43,8 +56,7 @@ public class ReferenceDataXhibitDataLoaderTest {
     @InjectMocks
     private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
 
-    private static final String CREST_COURT_SITE_CODE = "123";
-    private static final UUID EVENT_ID = randomUUID();
+
 
     @Test
     public void shouldLoadXhibitCourtCentreCodeByCourtCentreId() {
@@ -56,6 +68,29 @@ public class ReferenceDataXhibitDataLoaderTest {
 
         assertThat(xhibitEventMappingsList.getCpXhibitHearingEventMappings().get(0).getCpHearingEventId(), is(EVENT_ID));
         assertThat(xhibitEventMappingsList.getCpXhibitHearingEventMappings().get(0).getXhibitHearingEventCode(), is(CREST_COURT_SITE_CODE));
+    }
+
+    @Test
+    public void shouldLoadXhibitCourtRoomMappingsByCourtCentreId() {
+
+        final CourtRoomMappingsList courtCentreCourtList = getCourtRoomMappingsList();
+
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), eq(CourtRoomMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
+
+        final CourtRoomMappingsList courtRoomMappingsList = referenceDataXhibitDataLoader.getCourtRoomMappingsList(randomUUID().toString());
+
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCourtRoomUUID(), is(COURT_ROOM_ID));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteCode(), is(CREST_COURT_SITE_CODE));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtId(), is(CREST_COURT_ID));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCourtRoomId(), is(COURT_ROOM_NUMBER));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtRoomName(), is(CREST_COURT_ROOM_NAME));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteId(), is(CREST_COURT_SITE_ID));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteName(), is(CREST_COURT_SITE_NAME));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteUUID(), is(CREST_COURT_SITE_UUID));
+    }
+
+    private CourtRoomMappingsList getCourtRoomMappingsList() {
+        return new CourtRoomMappingsList(Collections.singletonList(new CourtRoomMapping(randomUUID(), COURT_ROOM_ID, CREST_COURT_SITE_NAME, OU_CODE, COURT_ROOM_NUMBER, CREST_COURT_ID, CREST_COURT_SITE_ID, CREST_COURT_SITE_CODE, CREST_COURT_ROOM_NAME, CREST_COURT_SITE_UUID)));
     }
 
     private XhibitEventMappingsList getExhibitEventMappingsList() {

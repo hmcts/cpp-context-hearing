@@ -12,10 +12,13 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -33,7 +36,7 @@ public class CourtCentreHearingsRetriever {
     private Enveloper enveloper;
 
     @Inject
-    private XhibitReferenceDataService xhibitReferenceDataService;
+    private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -63,9 +66,12 @@ public class CourtCentreHearingsRetriever {
 
 
 
-        final String crownCourtCrestId = xhibitReferenceDataService.getCourtDetails(envelope, fromString(courtCentreId)).getCrestCourtId();
+        final String crownCourtCrestId =  commonXhibitReferenceDataService.getCourtDetails(fromString(courtCentreId)).getCrestCourtId();
 
-        final List<String> courtCentreIds = xhibitReferenceDataService.getCourtCentreIdsForCrestId(envelope, crownCourtCrestId);
+        final List<String> courtCentreIds = commonXhibitReferenceDataService.getCourtCentreIdsForCrestId(crownCourtCrestId)
+                .stream()
+                .map(UUID::toString)
+                .collect(Collectors.toList());
 
         final JsonObject queryParameters = createObjectBuilder()
                 .add("courtCentreIds", String.join(",", courtCentreIds))

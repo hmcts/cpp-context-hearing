@@ -73,10 +73,13 @@ public class HearingEventStepDefinitions {
     private static final String FIELD_GROUP_LABEL = "groupLabel";
     private static final String FIELD_ALTERABLE = "alterable";
     private static final String FIELD_ACTION_LABEL = "actionLabel";
-    private static final UUID START_HEARING_EVENT_DEFINITION_ID = fromString("b71e7d2a-d3b3-4a55-a393-6d451767fc05");
-    private static final UUID RESUME_HEARING_EVENT_DEFINITION_ID = fromString("64476e43-2138-46d5-b58b-848582cf9b07");
+    public static final UUID START_HEARING_EVENT_DEFINITION_ID = fromString("b71e7d2a-d3b3-4a55-a393-6d451767fc05");
+    public static final UUID RESUME_HEARING_EVENT_DEFINITION_ID = fromString("64476e43-2138-46d5-b58b-848582cf9b07");
     private static final UUID PAUSE_HEARING_EVENT_DEFINITION_ID = fromString("160ecb51-29ee-4954-bbbf-daab18a24fbb");
     private static final UUID END_HEARING_EVENT_DEFINITION_ID = fromString("0df93f18-0a21-40f5-9fb3-da4749cd70fe");
+    public static final UUID OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID = fromString("e9060336-4821-4f46-969c-e08b33b48071");
+    public static final UUID APPELLANT_OPPENS_EVENT_DEFINITION_ID = fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043");
+    public static final UUID DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID = fromString("a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0");
 
     private static HearingEventDefinitionData hearingEventDefinitionData;
 
@@ -162,9 +165,9 @@ public class HearingEventStepDefinitions {
                 new HearingEventDefinition(END_HEARING_EVENT_DEFINITION_ID, "End Hearing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(PAUSE_HEARING_EVENT_DEFINITION_ID, "Pause", INTEGER.next(), STRING.next(), "PAUSE_RESUME", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(RESUME_HEARING_EVENT_DEFINITION_ID, "Resume", INTEGER.next(), STRING.next(), "PAUSE_RESUME", STRING.next(), INTEGER.next(), false),
-                new HearingEventDefinition(fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043"), "Appellant opens", INTEGER.next(), STRING.next(), "APPEAL", STRING.next(), INTEGER.next(), false),
-                new HearingEventDefinition(fromString("e9060336-4821-4f46-969c-e08b33b48071"), "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
-                new HearingEventDefinition(fromString("a3a9fe0c-a9a7-4e17-b0cd-42606722bbb0"), "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(APPELLANT_OPPENS_EVENT_DEFINITION_ID, "Appellant opens", INTEGER.next(), STRING.next(), "APPEAL", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(fromString("cc00cca8-39ba-431c-b08f-8c6f9be185d1"), "Defence counsel.name closes case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "CLOSE_CASE", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(fromString("b335327a-7f58-4f26-a2ef-7e07134ba60b"), "Point of law discussion prosecution", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false)
 

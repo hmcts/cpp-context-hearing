@@ -66,7 +66,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines");
+            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime");
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -76,6 +76,8 @@ public class HearingCommandApiTest {
     private Map<String, String> eventApiMethodsToHandlerNames;
     private Map<String, String> notificationApiMethodsToHandlerNames;
     private Map<String, String> outstandingFinesCommandApiMethodsToHandlerNames;
+    private Map<String, String> sessionTimeApiMethodsToHandlerNames;
+
     @Mock
     private Sender sender;
     @Captor
@@ -90,6 +92,8 @@ public class HearingCommandApiTest {
         eventApiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingEventCommandApi.class);
         notificationApiMethodsToHandlerNames = apiMethodsToHandlerNames(NotificationCommandApi.class);
         outstandingFinesCommandApiMethodsToHandlerNames = apiMethodsToHandlerNames(OutstandingFinesCommandApi.class);
+        sessionTimeApiMethodsToHandlerNames = apiMethodsToHandlerNames(SessionTimeCommandApi.class);
+
     }
 
     @Test
@@ -105,7 +109,8 @@ public class HearingCommandApiTest {
                 apiMethodsToHandlerNames.values().stream(),
                 eventApiMethodsToHandlerNames.values().stream(),
                 notificationApiMethodsToHandlerNames.values().stream(),
-                outstandingFinesCommandApiMethodsToHandlerNames.values().stream())
+                outstandingFinesCommandApiMethodsToHandlerNames.values().stream(),
+                sessionTimeApiMethodsToHandlerNames.values().stream())
                 .reduce(Stream::concat)
                 .orElseGet(Stream::empty)
                 .collect(toList());

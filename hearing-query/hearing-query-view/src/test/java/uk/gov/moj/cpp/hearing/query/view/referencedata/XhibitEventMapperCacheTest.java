@@ -11,9 +11,7 @@ import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.query.view.service.ReferenceDataService;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -46,7 +44,7 @@ public class XhibitEventMapperCacheTest {
         final XhibitEventMapping xhibitEventMapping2 = new XhibitEventMapping(cpHearingEventId_2, secondXhibitEventCode, EMPTY, EMPTY, EMPTY);
         final XhibitEventMappingsList mappings = new XhibitEventMappingsList(asList(xhibitEventMapping1, xhibitEventMapping2));
 
-        when(referenceDataService.getEventMapping()).thenReturn(mappings);
+        when(referenceDataService.listAllEventMappings()).thenReturn(mappings);
 
         xhibitEventMapperCache.init();
 

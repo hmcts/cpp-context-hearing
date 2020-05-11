@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
@@ -27,16 +26,15 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.command.handler.service.XhibitCrownCourtCentresCache;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CourtListAggregate;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringReader;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -61,7 +59,7 @@ public class PublishCourtListStatusHandlerTest {
     private UtcClock utcClock;
 
     @Mock
-    private ReferenceDataService referenceDataService;
+    private XhibitCrownCourtCentresCache xhibitCrownCourtCentresCache;
 
     @Mock
     private EventSource eventSource;
@@ -170,7 +168,7 @@ public class PublishCourtListStatusHandlerTest {
     public void shouldNotMakeAnyRequestsToPublishACourtListForACrownCourtWhenThereAreNone() {
 
         final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
-        final List<UUID> payload = getPayloadOfZeroCrownCourtCentres();
+        final Set<UUID> payload = getPayloadOfZeroCrownCourtCentres();
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
         publishCourtListStatusHandler.publishHearingListsForCrownCourts(commandEnvelope);
 
@@ -181,7 +179,7 @@ public class PublishCourtListStatusHandlerTest {
     public void shouldRequestPublicationOfACourtListEvenAfterOneFails() {
 
         final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
-        final List<UUID> payload = getPayloadOfMultipleCrownCourtCentres();
+        final Set<UUID> payload = getPayloadOfMultipleCrownCourtCentres();
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
         givenThatWeSuccessfullyGetTheStreamForAnyPublishCourtRequest();
         givenThatThePublishCourtListRequestAggregateExists();
@@ -199,7 +197,7 @@ public class PublishCourtListStatusHandlerTest {
     @Test
     public void shouldRequestPublicationOfACourtListForAllCrownCourtsWhenBothPasses() {
         final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
-        final List<UUID> payload = getPayloadOfMultipleCrownCourtCentres();
+        final Set<UUID> payload = getPayloadOfMultipleCrownCourtCentres();
         givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
 
         givenThatWeSuccessfullyGetTheStreamForAnyPublishCourtRequest();
@@ -233,20 +231,20 @@ public class PublishCourtListStatusHandlerTest {
         return createEnvelope(".", createObjectBuilder().build());
     }
 
-    private List<UUID> getPayloadOfMultipleCrownCourtCentres() {
-        final List<UUID> courtCentreIds = new ArrayList();
+    private Set<UUID> getPayloadOfMultipleCrownCourtCentres() {
+        final Set<UUID> courtCentreIds = new HashSet<>();
         courtCentreIds.add(COURT_CENTRE_ID_ONE);
         courtCentreIds.add(COURT_CENTRE_ID_TWO);
         return courtCentreIds;
     }
 
-    private List<UUID> getPayloadOfZeroCrownCourtCentres() {
-        final List<UUID> courtCentreIds = new ArrayList();
+    private Set<UUID> getPayloadOfZeroCrownCourtCentres() {
+        final Set<UUID> courtCentreIds = new HashSet<>();
         return courtCentreIds;
     }
 
-    private void givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(final List<UUID> returnedPayload) {
-        when(referenceDataService.getAllCrownCourtCentres(any(JsonEnvelope.class))).thenReturn(returnedPayload);
+    private void givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(final Set<UUID> returnedPayload) {
+        when(xhibitCrownCourtCentresCache.getAllCrownCourtCentres()).thenReturn(returnedPayload);
     }
 
     private void givenThatThePublishCourtListRequestAggregateExists() {

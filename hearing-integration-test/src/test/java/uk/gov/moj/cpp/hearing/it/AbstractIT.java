@@ -28,11 +28,14 @@ import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.justice.services.test.utils.persistence.TestJdbcConnectionProvider;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.hearing.utils.StubPerExecution;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -76,6 +79,7 @@ public class AbstractIT {
     private static final ThreadLocal<UUID> USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     private static final ThreadLocal<UUID> ADMIN_USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     protected static RequestSpecification requestSpec;
+    private static final TestJdbcConnectionProvider testJdbcConnectionProvider = new TestJdbcConnectionProvider();
     private static String baseUri;
 
     /**
@@ -223,6 +227,7 @@ public class AbstractIT {
      * Per Jvm Setup
      */
     public static void setUpJvm() {
+        truncateViewStoreTables("heda_hearing_event_definition");
         readConfig();
         setRequestSpecification();
         stubHearingEventDefinitions();
@@ -313,4 +318,19 @@ public class AbstractIT {
 
     }
 
+    protected static void truncateViewStoreTables(final String... tableNameNames) {
+        try (final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("hearing")) {
+
+            for (final String tableName : tableNameNames) {
+                final String sql = String.format("truncate table %s cascade", tableName);
+
+                try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

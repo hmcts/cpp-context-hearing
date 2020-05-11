@@ -177,3 +177,13 @@ rule "Query - API - hearing.defendant.outstanding-fines"
   then
     $outcome.setSuccess(true);
 end
+
+
+rule "Query - API - hearing.query.session-time"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.query.session-time");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin"));
+  then
+    $outcome.setSuccess(true);
+end

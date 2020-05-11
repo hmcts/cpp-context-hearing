@@ -514,6 +514,10 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL, REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE);
     }
 
+    public static void stubGetReferenceDataXhibitHearingTypes(){
+        stubDynamicPromptFixedList();
+    }
+
     public static void stubOrganisationUnit(final String ouId) {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
         String payload = getPayload("stub-data/referencedata.query.organisationunits.json")

@@ -27,13 +27,14 @@ public class HearingQueryViewRamlConfigTest {
     private Map<String, String> viewMethodsToHandlerNames;
     private Map<String, String> eventViewMethodsToHandlerNames;
     private Map<String, String> outstandingFineRequestsServiceNames;
+    private Map<String, String> sessionTimeViewMethodsToHandlerNames;
 
     @Before
     public void setup() throws IOException {
         viewMethodsToHandlerNames = viewMethodsToHandlerNames(HearingQueryView.class);
         eventViewMethodsToHandlerNames = viewMethodsToHandlerNames(HearingEventQueryView.class);
         outstandingFineRequestsServiceNames = viewMethodsToHandlerNames(OutstandingFineRequestsQueryView.class);
-
+        sessionTimeViewMethodsToHandlerNames = viewMethodsToHandlerNames(SessionTimeQueryView.class);
     }
 
     @Test
@@ -47,7 +48,8 @@ public class HearingQueryViewRamlConfigTest {
         final List<String> allHandlerNames = Stream.of(
                 viewMethodsToHandlerNames.values().stream(),
                 eventViewMethodsToHandlerNames.values().stream(),
-                outstandingFineRequestsServiceNames.values().stream())
+                outstandingFineRequestsServiceNames.values().stream(),
+                sessionTimeViewMethodsToHandlerNames.values().stream())
                 .reduce(Stream::concat)
                 .orElseGet(Stream::empty)
                 .collect(toList());

@@ -106,6 +106,12 @@
             <artifactId>junit-dataprovider</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-enveloper-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

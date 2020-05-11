@@ -15,7 +15,7 @@ import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.PublishCourtList;
 import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.PublishCourtListFields;
 import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportFailed;
 import uk.gov.moj.cpp.hearing.command.courtlistpublishstatus.RecordCourtListExportSuccessful;
-import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.command.handler.service.XhibitCrownCourtCentresCache;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CourtListAggregate;
 
 import java.util.UUID;
@@ -33,7 +33,7 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishCourtListStatusHandler.class);
 
     @Inject
-    private ReferenceDataService referenceDataService;
+    private XhibitCrownCourtCentresCache xhibitCrownCourtCentresCache;
 
     @Inject
     private UtcClock clock;
@@ -85,7 +85,7 @@ public class PublishCourtListStatusHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.publish-hearing-lists-for-crown-courts")
     public void publishHearingListsForCrownCourts(final JsonEnvelope commandEnvelope) {
-        referenceDataService.getAllCrownCourtCentres(commandEnvelope)
+        xhibitCrownCourtCentresCache.getAllCrownCourtCentres()
                 .forEach(courtCentreId -> publishFinalCourtList(commandEnvelope.metadata(), courtCentreId));
     }
 

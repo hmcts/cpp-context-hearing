@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.steps;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -16,7 +15,7 @@ import static uk.gov.justice.services.test.utils.core.http.RestPoller.poll;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsASystemUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorizedAndSystemUser;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
@@ -29,7 +28,7 @@ public class PublishCourtListSteps extends AbstractIT {
     private static final String MEDIA_TYPE_QUERY_COURT_LIST_STATUS = "application/vnd.hearing.court.list.publish.status+json";
     private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.latest-hearings-by-court-centres+json";
 
-    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC = 60*10;
+    private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC = 60 * 5;
     private static final int PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL = 1;
 
     public void verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(final String courtCentreId) {
@@ -57,12 +56,12 @@ public class PublishCourtListSteps extends AbstractIT {
     public void verifyLatestHearingEvents(final Hearing hearing, final LocalDate hearingEventDate,
                                           final UUID expectedHearingEventId) {
 
-        givenAUserHasLoggedInAsASystemUser(USER_ID_VALUE_AS_ADMIN);
+        setupAsAuthorizedAndSystemUser(USER_ID_VALUE_AS_ADMIN);
 
         final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.latest-hearings-by-court-centres"), hearing.getCourtCentre().getId(), hearingEventDate);
         final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
 
-        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInUser()))
+        poll(requestParams(searchCourtListUrl, MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE).withHeader(USER_ID, getLoggedInSystemUserHeader()))
                 .timeout(PUBLISH_COURT_LIST_DEFAULT_POLL_TIMEOUT_IN_SEC, SECONDS)
                 .pollInterval(PUBLISH_COURT_LIST_DEFAULT_POLL_INTERVAL, SECONDS)
                 .until(status().is(OK),

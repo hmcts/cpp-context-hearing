@@ -1,0 +1,37 @@
+{
+  "_metadata": {
+    "name": "hearing.event.session-time-recorded"
+  },
+  "courtSessionId": "0dbe970f-b5b5-45a4-9358-bcbba24d0316",
+  "courtHouseId": "0dbe970f-b5b5-45a4-9358-bcbba24d0316",
+  "courtRoomId": "e16ab96c-8ac9-4f67-82e8-fd2113cf957d",
+  "courtSessionDate":"2020-12-25",
+  "amCourtSession": {
+    "judiciaries": [
+      {
+        "judiciaryId": "2f00336e-dfc7-4042-9d49-f5ea122772ce",
+        "judiciaryName": "Joe Smith",
+        "benchChairman": true
+      }
+    ],
+    "startTime": "10:00",
+    "endTime": "11:00",
+    "courtClerkId": "d796149e-236a-41d4-b9cc-9eb4618aead7",
+    "courtAssociateId": "a2d88f91-3b90-46a6-9da9-a918fe13a7ae",
+    "legalAdviserId": "1376c0f5-c76d-406c-9d00-7a68e845fb78"
+  },
+  "pmCourtSession": {
+    "judiciaries": [
+      {
+        "judiciaryId": "ce5d998b-d002-4d19-82b9-eec0ddf6626e",
+        "judiciaryName": "John Smith",
+        "benchChairman": false
+      }
+    ],
+    "startTime": "13:00",
+    "endTime": "18:00",
+    "courtClerkId": "d997cc54-0fb8-47af-91c1-a065abdf1b63",
+    "courtAssociateId": "3552bc05-e448-48a5-863b-6861ee9954aa",
+    "legalAdviserId": "656dfc33-9287-4629-9b0a-dc8978501cea"
+  }
+}

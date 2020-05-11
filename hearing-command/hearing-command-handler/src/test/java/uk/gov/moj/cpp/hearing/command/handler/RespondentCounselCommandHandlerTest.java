@@ -51,6 +51,7 @@ public class RespondentCounselCommandHandlerTest {
             RespondentCounselRemoved.class,
             RespondentCounselUpdated.class
     );
+
     @InjectMocks
     private RespondentCounselCommandHandler respondentCounselCommandHandler;
     @Mock
@@ -76,8 +77,7 @@ public class RespondentCounselCommandHandlerTest {
         final Envelope<AddRespondentCounsel> envelope = envelopeFrom(metadata, addRespondentCounsel);
 
         when(eventSource.getStreamById(streamId)).thenReturn(hearingEventStream);
-        when(aggregateService.get(eq(hearingEventStream), any()))
-                .thenReturn(new HearingAggregate());
+        when(aggregateService.get(eq(hearingEventStream), any())).thenReturn(new HearingAggregate());
 
         respondentCounselCommandHandler.addRespondentCounsel(envelope);
 

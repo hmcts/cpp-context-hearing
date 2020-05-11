@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.Boolean.TRUE;
+import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -276,11 +277,16 @@ public class HearingService {
         }
 
         final Hearing hearing = hearingRepository.findBy(hearingId);
+
+        if (hearing == null) {
+            return new HearingDetailsResponse();
+        }
+
         final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearingJPAMapper.fromJPA(hearing));
 
         if (hearing.getTrialTypeId() != null) {
 
-            final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.getCrackedIneffectiveVacatedTrialTypes();
+            final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
 
             if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
 
@@ -310,7 +316,7 @@ public class HearingService {
     @Transactional
     public CrackedIneffectiveTrial getCrackedIneffectiveTrial(final UUID trailTypeId) {
 
-        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.getCrackedIneffectiveVacatedTrialTypes();
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
 
         if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
 
@@ -391,7 +397,7 @@ public class HearingService {
 
         } catch (final DateTimeParseException | IllegalArgumentException e) {
 
-            LOGGER.error(String.format("Exception occurred while retrieve get subscriptions = '%s - %s'", referenceDateParam, nowTypeParam), e);
+            LOGGER.error(format("Exception occurred while retrieve get subscriptions = '%s - %s'", referenceDateParam, nowTypeParam), e);
 
             return Json.createObjectBuilder().build();
         }

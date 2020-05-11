@@ -42,7 +42,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDet
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.test.HearingFactory;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
-import uk.gov.moj.cpp.hearing.xhibit.XhibitReferenceDataService;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 
 import java.io.IOException;
@@ -93,9 +92,6 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
 
     @Mock(answer = RETURNS_DEEP_STUBS)
     private Enveloper enveloper;
-
-    @Mock
-    private XhibitReferenceDataService xhibitReferenceDataService;
 
     @InjectMocks
     private PublicDisplayCourtCentreXmlGenerator publicDisplayCourtCentreXmlGenerator;

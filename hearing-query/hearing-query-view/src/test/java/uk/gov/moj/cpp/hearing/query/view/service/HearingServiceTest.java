@@ -7,12 +7,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.emptyCollectionOf;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.iterableWithSize;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -186,7 +186,7 @@ public class HearingServiceTest {
         final String endTime = "10:29";
 
         final GetHearings response = hearingService.getHearings(sittingDate, startTime, endTime, hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
-        assertEquals(0, response.getHearingSummaries().size());
+        assertThat(response.getHearingSummaries(),is(emptyCollectionOf(HearingSummaries.class)));
     }
 
     @Test
@@ -199,7 +199,7 @@ public class HearingServiceTest {
         final String endTime = "11:30";
 
         final GetHearings response = hearingService.getHearings(sittingDate, startTime, endTime, hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
-        assertEquals(0, response.getHearingSummaries().size());
+        assertThat(response.getHearingSummaries(), is(emptyCollectionOf(HearingSummaries.class)));
     }
 
     @Test
@@ -248,7 +248,7 @@ public class HearingServiceTest {
         final GetHearings response = hearingService.getHearings(HearingTestUtils.START_DATE_1.toLocalDate(),
                 "10:30", "14:30", hearingEntity.getCourtCentre().getId(), null);
 
-        assertEquals(0, response.getHearingSummaries().size());
+        assertThat(response.getHearingSummaries(), is(emptyCollectionOf(HearingSummaries.class)));
     }
 
     @Test
@@ -654,7 +654,7 @@ public class HearingServiceTest {
         entity.setTrialTypeId(trialTypeId);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
-        when(referenceDataService.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
@@ -702,7 +702,7 @@ public class HearingServiceTest {
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
         when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any())).thenReturn(hearingSummary);
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
-        when(referenceDataService.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypesMock);
+        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypesMock);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
         final Timeline response = hearingService.getTimeLineByCaseId(caseId);
@@ -733,7 +733,7 @@ public class HearingServiceTest {
         when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any())).thenReturn(hearingSummary);
 
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
-        when(referenceDataService.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypesMock);
+        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypesMock);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
         final Timeline response = hearingService.getTimeLineByApplicationId(applicationId);

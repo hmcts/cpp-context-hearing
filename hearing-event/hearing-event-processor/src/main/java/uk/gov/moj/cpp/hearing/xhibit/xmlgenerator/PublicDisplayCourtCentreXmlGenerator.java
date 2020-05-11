@@ -29,7 +29,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSi
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.utils.DateUtils;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
-import uk.gov.moj.cpp.hearing.xhibit.XhibitReferenceDataService;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
@@ -51,9 +50,6 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
 
     @Inject
     private XhibitEventMapperCache eventMapperCache;
-
-    @Inject
-    private XhibitReferenceDataService xhibitReferenceDataService;
 
     @ServiceComponent(EVENT_PROCESSOR)
     @Inject

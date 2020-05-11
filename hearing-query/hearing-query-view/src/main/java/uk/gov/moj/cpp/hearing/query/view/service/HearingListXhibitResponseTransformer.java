@@ -25,9 +25,6 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMapping;
-import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitCourtRoomMapperCache;
-import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitHearingTypesCache;
 import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitJudiciaryCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
@@ -36,6 +33,8 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant;
+import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
+import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
 
 import java.math.BigInteger;
 import java.time.format.DateTimeFormatter;
@@ -62,15 +61,9 @@ public class HearingListXhibitResponseTransformer {
     private static final String CIRCUIT = "circuit";
 
     @Inject
-    private XhibitCourtRoomMapperCache xhibitCourtRoomMapperCache;
+    private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
 
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
-
-    @Inject
-    private XhibitHearingTypesCache xhibitHearingTypesCache;
-
-    @Inject
-    private ReferenceDataService referenceDataService;
 
     @Inject
     private XhibitJudiciaryCache xhibitJudiciaryCache;
@@ -100,7 +93,7 @@ public class HearingListXhibitResponseTransformer {
     }
 
     private CourtSite getCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<UUID, CourtSite> courtSiteMap) {
-        final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+        final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
         CourtSite courtSite = courtSiteMap.get(courtRoomMapping.getCrestCourtSiteUUID()) ;
         if(courtSite == null) {
             courtSite = courtSite()
@@ -124,14 +117,16 @@ public class HearingListXhibitResponseTransformer {
     }
 
     private boolean isHearingForCourtSite(final UUID crestCourtSiteId, final Hearing hearing) {
-        return xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()).getCrestCourtSiteUUID().equals(crestCourtSiteId);
+        final CourtRoomMapping mapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+        final UUID siteId = mapping.getCrestCourtSiteUUID();
+        return crestCourtSiteId != null && crestCourtSiteId.equals(siteId);
     }
 
     private CourtRoom getCourtRoom(final HearingEventsToHearingMapper hearingEventsToHearingMapper,
                                    final Hearing hearing,
                                    final Map<UUID, CourtRoom> courtRoomMap) {
         final UUID courtRoomKey = hearing.getCourtCentre().getRoomId();
-        final CourtRoomMapping courtRoomMapping = xhibitCourtRoomMapperCache.getXhibitCourtRoomForCourtCentreAndRoomId(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+        final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
         CourtRoom courtRoom = courtRoomMap.get(courtRoomKey);
 
         final Set<UUID> activeHearingIds = hearingEventsToHearingMapper.getActiveHearingIds();
@@ -247,7 +242,7 @@ public class HearingListXhibitResponseTransformer {
                                        final String cppUrn,
                                        final BigInteger hearingprogessValue) {
         //get the hearingType by hearingType id from cache
-        final String exhibitHearingTypeDescription = xhibitHearingTypesCache.getHearingTypeDescription(hearing.getType().getId());
+        final String exhibitHearingTypeDescription = commonXhibitReferenceDataService.getXhibitHearingType(hearing.getType().getId()).getExhibitHearingDescription();
 
         final CaseDetail caseDetail  = caseDetail()
                 .withActivecase(activecase)

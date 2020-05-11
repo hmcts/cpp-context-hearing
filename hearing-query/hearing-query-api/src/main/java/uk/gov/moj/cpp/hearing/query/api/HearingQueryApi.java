@@ -144,4 +144,9 @@ public class HearingQueryApi {
         LOGGER.info(String.format("outstandingFines  : %s", outstandingFines));
         return enforcementResultEnvelope;
     }
+
+    @Handles("hearing.query.session-time")
+    public JsonEnvelope sessionTime(final JsonEnvelope query) {
+        return requester.request(query);
+    }
 }

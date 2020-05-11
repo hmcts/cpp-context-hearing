@@ -47,6 +47,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_COMPUTE_OUTSTANDING_FINES = "hearing.compute-outstanding-fines";
     private static final String ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES = "hearing.add-request-for-outstanding-fines";
 
+    private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
+
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
 
@@ -581,6 +583,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final Action action = createActionFor(ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,"Court Clerks", "Legal Advisers", "Court Associate", "NCES"))
                 .willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToRecordSessionTime() {
+        final Action action = createActionFor(ACTION_NAME_RECORD_SESSION_TIME);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToRecordSessionTime() {
+        final Action action = createActionFor(ACTION_NAME_RECORD_SESSION_TIME);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);

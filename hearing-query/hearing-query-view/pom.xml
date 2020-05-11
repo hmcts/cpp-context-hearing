@@ -23,7 +23,11 @@
             <artifactId>javaee-api</artifactId>
             <scope>provided</scope>
         </dependency>
-
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- JUnit regression testing framework. -->
         <dependency>
             <groupId>uk.gov.justice.services</groupId>
@@ -40,6 +44,11 @@
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-viewstore-persistence</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.listing</groupId>
+            <artifactId>listing-common</artifactId>
+            <version>${listing.version}</version>
         </dependency>
         <dependency>
             <groupId>com.tngtech.java</groupId>
@@ -85,6 +94,12 @@
                     <artifactId>*</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-enveloper-provider</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

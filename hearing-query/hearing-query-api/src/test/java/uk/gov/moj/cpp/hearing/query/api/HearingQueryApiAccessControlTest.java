@@ -36,6 +36,10 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String HEARING_QUERY_COURT_LIST_PUBLISH_STATUS = "hearing.court.list.publish.status";
     private static final String HEARING_QUERY_SEARCH_BY_COURT_CENTRE_ID = "hearing.latest-hearings-by-court-centres";
+
+    private static final String HEARING_QUERY_SESSION_TIME = "hearing.query.session-time";
+
+
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
 
@@ -182,6 +186,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToQuerySessionTime() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SESSION_TIME, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnAuthorisedGroupToQuerySessionTime() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SESSION_TIME, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin");
     }
 
     @Override

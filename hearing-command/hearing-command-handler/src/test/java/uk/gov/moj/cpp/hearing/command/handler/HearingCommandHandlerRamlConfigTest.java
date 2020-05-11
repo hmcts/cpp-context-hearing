@@ -64,7 +64,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 UpdateCaseDefendantsHandler.class,
                 PublishCourtListStatusHandler.class,
                 ComputeOutstandingFinesCommandHandler.class,
-                AddRequestForOutstandingFinesCommandHandler.class
+                AddRequestForOutstandingFinesCommandHandler.class,
+                SessionTimeCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

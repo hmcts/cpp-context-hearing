@@ -9,13 +9,4 @@
 	mvn jmeter:gui -Pscheduling-performance-test
 
 3. The test results will be save in a .jtl file in ./target/jmeter/results/ and can be viewed in any of the results
-   listeners within Jmeter gui. 
-
-
-[INFO] Results:
-[INFO]
-[ERROR] Errors:
-[ERROR]   PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT.shouldRequestToPublishHearingList:126 » ConditionTimeout
-[INFO]
-[ERROR] Tests run: 111, Failures: 0, Errors: 5, Skipped: 1
-[INFO]
+   listeners within Jmeter gui.
