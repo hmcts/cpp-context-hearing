@@ -76,7 +76,8 @@
       "fieldsToBeIgnored": [
         "$.variantDirectory[*].value.status",
         "$.targets[*].resultLines[*].level",
-        "$.savedTargets[*].resultLines[*].level"
+        "$.savedTargets[*].resultLines[*].level",
+        "$.hearing.defendantAttendance[*].attendanceDays[*].attendanceType"
       ]
     },
     {
@@ -107,6 +108,12 @@
       "eventName": "hearing.defendant-legalaid-status-updated-for-hearing",
       "fieldsToBeIgnored": [
         "$.legalAidStatus"
+      ]
+    },
+    {
+      "eventName": "hearing.defendant-attendance-updated",
+      "fieldsToBeIgnored": [
+        "$.attendanceDay.attendanceType"
       ]
     }
   ]
