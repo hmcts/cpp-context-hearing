@@ -65,7 +65,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 PublishCourtListStatusHandler.class,
                 ComputeOutstandingFinesCommandHandler.class,
                 AddRequestForOutstandingFinesCommandHandler.class,
-                SessionTimeCommandHandler.class
+                SessionTimeCommandHandler.class,
+                BookProvisionalHearingSlotsCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));
@@ -82,7 +83,7 @@ public class HearingCommandHandlerRamlConfigTest {
     @Test
     public void testThatAllFilesInSchemasAreReferenced() throws IOException {
 
-        List<String> filesThatArePresent =
+        final List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json/schema").listFiles()))
                         .map(File::getName)
                         .filter(filename -> !filename.equals("hearing.command.generate-nows.json"))
@@ -91,13 +92,13 @@ public class HearingCommandHandlerRamlConfigTest {
 
         Collections.sort(filesThatArePresent);
 
-        List<String> commandHandlerSchemas = FileUtils.readLines(new File("src/raml/hearing-command-handler.messaging.raml"))
+        final List<String> commandHandlerSchemas = FileUtils.readLines(new File("src/raml/hearing-command-handler.messaging.raml"))
                 .stream()
                 .filter(line -> line.contains("schema:"))
                 .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
                 .collect(Collectors.toList());
 
-        List<String> privateEventSchemas = FileUtils.readLines(new File("src/raml/hearing-private-event.messaging.raml"))
+        final List<String> privateEventSchemas = FileUtils.readLines(new File("src/raml/hearing-private-event.messaging.raml"))
                 .stream()
                 .filter(line -> line.contains("schema:"))
                 .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
@@ -112,7 +113,7 @@ public class HearingCommandHandlerRamlConfigTest {
     @Test
     public void testThatAllFilesInExamplesAreReferenced() throws IOException {
 
-        List<String> filesThatArePresent =
+        final List<String> filesThatArePresent =
                 Arrays.stream(Objects.requireNonNull(new File("src/raml/json").listFiles()))
                         .map(File::getName)
                         .map(name -> "json/" + name)
@@ -121,13 +122,13 @@ public class HearingCommandHandlerRamlConfigTest {
 
         Collections.sort(filesThatArePresent);
 
-        List<String> commandHandlerSchemas = FileUtils.readLines(new File("src/raml/hearing-command-handler.messaging.raml"))
+        final List<String> commandHandlerSchemas = FileUtils.readLines(new File("src/raml/hearing-command-handler.messaging.raml"))
                 .stream()
                 .filter(line -> line.contains("example:"))
                 .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())
                 .collect(Collectors.toList());
 
-        List<String> privateEventSchemas = FileUtils.readLines(new File("src/raml/hearing-private-event.messaging.raml"))
+        final List<String> privateEventSchemas = FileUtils.readLines(new File("src/raml/hearing-private-event.messaging.raml"))
                 .stream()
                 .filter(line -> line.contains("example:"))
                 .map(line -> line.substring(line.indexOf("include") + "include".length()).trim())

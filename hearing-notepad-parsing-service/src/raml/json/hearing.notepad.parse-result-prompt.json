@@ -5,13 +5,15 @@
       "code": "2d406cbe-c792-4a0c-af3d-25153e35f0be",
       "label": "Under direction of",
       "type": "TXT",
-      "required": "true"
+      "required": "true",
+      "hidden": "true"
     },
     {
       "code": "fa62316a-df37-4c00-9ce2-ee67dd09837d",
       "label": "Additional information",
       "type": "TXT",
-      "required": "false"
+      "required": "false",
+      "hidden": "false"
     }
   ]
 }

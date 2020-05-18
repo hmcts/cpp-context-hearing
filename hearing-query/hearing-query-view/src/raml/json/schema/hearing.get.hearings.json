@@ -17,7 +17,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
         },
         "type": {
           "$ref": "http://justice.gov.uk/core/courts/hearingType.json"
@@ -61,7 +61,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
         },
         "prosecutionCaseIdentifier": {
           "$ref": "http://justice.gov.uk/core/courts/prosecutionCaseIdentifier.json"
@@ -80,7 +80,14 @@
           {
             "properties": {
               "id": {
-                "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+                "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+              },
+              "masterDefendantId": {
+                "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+              },
+              "courtProceedingsInitiated": {
+                "type": "string",
+                "format": "date-time"
               },
               "synonym": {
                 "type": "string"
@@ -94,7 +101,7 @@
       "type": "object",
       "properties": {
         "id": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
         },
         "applicationReference": {
           "type": "string"
@@ -104,7 +111,7 @@
             {
               "properties": {
                 "id": {
-                  "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+                  "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
                 },
                 "synonym": {
                   "type": "string"
@@ -128,7 +135,7 @@
         {
           "properties": {
             "id": {
-              "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+              "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
             }
           }
         },

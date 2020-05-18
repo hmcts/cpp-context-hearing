@@ -8,6 +8,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +26,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.Envelope;
@@ -39,6 +41,8 @@ import uk.gov.moj.cpp.hearing.event.service.ReferenceDataClientTestBase;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -117,7 +121,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
     @Test
     public void test_Populate_NextHearing_For_CrownCourt_Hearing() {
-        final JsonEnvelope event = getJsonEnvelop("fbed768b-ee95-4434-87c8-e81cbc8d24c8");
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt.json");
 
         setupMocks(event);
 
@@ -126,12 +130,26 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
-        assertValid(nextHearing, JurisdictionType.CROWN);
+        assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T22:22Z"));
+    }
+
+    @Test
+    public void test_Populate_NextHearing_For_CrownCourt_Hearing_FixedDate() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt-fixed-date.json");
+
+        setupMocks(event);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
+
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
+
+        assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2020-01-01T22:22Z"));
     }
 
     @Test
     public void test_Populate_NextHearing_For_MagistrateCourt_Hearing() {
-        final JsonEnvelope event = getJsonEnvelop("70c98fa6-804d-11e8-adc0-fa7ae01bbebc");
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-magistratescourt.json");
         setupMocks(event);
 
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
@@ -139,7 +157,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
-        assertValid(nextHearing, JurisdictionType.MAGISTRATES);
+        assertValid(nextHearing, JurisdictionType.MAGISTRATES, ZonedDateTimes.fromString("2019-02-02T22:22Z"));
     }
 
     private void setupMocks(final JsonEnvelope event) {
@@ -150,13 +168,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         when(referenceDataService.getResultDefinitionById(any(), any(), eq(fromString("1d55fdeb-7dbc-46ec-b3ff-7b15fe08a476")))).thenReturn(adjournmentReasonsResultDefinition);
     }
 
-    private JsonEnvelope getJsonEnvelop(final String resultDefinitionId) {
-        String filePath = "/data/hearing.results-shared-with-nexthearing-magistratescourt.json";
-
-        if (resultDefinitionId.equals("fbed768b-ee95-4434-87c8-e81cbc8d24c8")) {
-            filePath = "/data/hearing.results-shared-with-nexthearing-crowncourt.json";
-        }
-
+    private JsonEnvelope getJsonEnvelop(final String filePath) {
         return JsonEnvelope.envelopeFrom(
                 Envelope.metadataBuilder().withId(randomUUID()).withName("hearing.results-shared").build(),
                 givenPayload(filePath));
@@ -196,19 +208,23 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         return emptyList();
     }
 
-    private void assertValid(Optional<NextHearing> nextHearingResult, final JurisdictionType jurisdictionType) {
+    private void assertValid(final Optional<NextHearing> nextHearingResult, final JurisdictionType jurisdictionType, final ZonedDateTime expectedListedStartDateTime) {
 
         assertTrue(nextHearingResult.isPresent());
 
         final NextHearing nextHearing = nextHearingResult.get();
 
         assertThat(nextHearing.getEstimatedMinutes(), is(valueOf(8793)));
-        assertThat(nextHearing.getListedStartDateTime(), is(ZonedDateTimes.fromString("2019-02-02T22:22Z")));
+        assertThat(nextHearing.getListedStartDateTime(), is(expectedListedStartDateTime));
         assertCourtCentre(nextHearing.getCourtCentre());
 
         assertThat(nextHearing.getAdjournmentReason(), is(expectedAdjournmentReason));
         assertThat(nextHearing.getType(), is(hearingType));
         assertThat(nextHearing.getJurisdictionType(), is(jurisdictionType));
+        assertThat(nextHearing.getBookingReference().toString(), is("8fc6a7c0-477e-493c-add9-ad4fda322b31"));
+        assertThat(nextHearing.getReservedJudiciary(), is(false));
+        assertThat(nextHearing.getExistingHearingId().toString(), is("beafea22-9862-4cf6-b595-25a7436664bb"));
+        assertThat(nextHearing.getWeekCommencingDate(), is(LocalDate.parse("2019-09-09")));
     }
 
     private void assertCourtCentre(final CourtCentre courtCentre) {

@@ -167,12 +167,14 @@ public class ReadStoreResultLoader implements ResultLoader {
                         setFixedListValues(resultPromptFixedListMap, resultPrompt, promptReference);
                     }
                     resultPrompt.setDurationSequence(promptJson.getInt("durationSequence", 0));
+                    resultPrompt.setHidden(getBooleanOrNull(promptJson,"hidden"));
+
                     resultPrompts.add(resultPrompt);
 
                 }));
         return resultPrompts;
     }
-    
+
     private void setResultPromptRule(final ResultPrompt resultPrompt, final JsonObject promptJson) {
         String resultPromptRule = promptJson.getString("resultPromptRule", null);
         if (StringUtils.isBlank(resultPromptRule)) {

@@ -239,6 +239,9 @@
           },
           "jurisdiction": {
             "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
           }
         },
         "additionalProperties": false,

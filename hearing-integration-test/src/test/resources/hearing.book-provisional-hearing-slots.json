@@ -1,0 +1,10 @@
+{
+  "slots": [
+    {
+      "courtScheduleId": "UUID1"
+    },
+    {
+      "courtScheduleId": "UUID2"
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.nonNull;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
@@ -10,6 +13,7 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
@@ -43,7 +47,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public void handleHearingExtended(final HearingExtended hearingExtended) {
-        if (this.momento.getHearing() != null) {
+        if (nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getCourtApplication())) {
             final List<CourtApplication> oldCourtApplications = this.momento.getHearing().getCourtApplications();
             final List<CourtApplication> newCourtApplications = oldCourtApplications == null ? new ArrayList<>() :
                     oldCourtApplications.stream()
@@ -51,6 +55,19 @@ public class HearingDelegate implements Serializable {
                             .collect(Collectors.toList());
             newCourtApplications.add(hearingExtended.getCourtApplication());
             this.momento.getHearing().setCourtApplications(newCourtApplications);
+        }
+
+        if (nonNull(this.momento.getHearing()) && isNotEmpty(hearingExtended.getProsecutionCases())) {
+            final List<ProsecutionCase> oldProsecutionCases = this.momento.getHearing().getProsecutionCases();
+            final List<ProsecutionCase> newProsecutionCases = oldProsecutionCases == null ? new ArrayList<>() :
+                    oldProsecutionCases.stream()
+                            .filter(ca -> !(hearingExtended.getProsecutionCases().stream()
+                                    .map(ProsecutionCase::getId)
+                                    .collect(Collectors.toList()))
+                                    .contains(ca.getId()))
+                            .collect(Collectors.toList());
+            newProsecutionCases.addAll(hearingExtended.getProsecutionCases());
+            this.momento.getHearing().setProsecutionCases(newProsecutionCases);
         }
     }
 
@@ -75,9 +92,9 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingInitiated(hearing));
     }
 
-    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication) {
+    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases) {
 
-        return Stream.of(new HearingExtended(hearingId, courtApplication));
+        return Stream.of(new HearingExtended(hearingId, courtApplication, prosecutionCases));
     }
 
     public Stream<Object> updateHearingDetails(final UUID id,

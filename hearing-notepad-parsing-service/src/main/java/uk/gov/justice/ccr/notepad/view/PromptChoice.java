@@ -18,7 +18,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "type",
         "required",
         "durationSequence",
-        "componentType"
+        "componentType",
+        "hidden"
 })
 public class PromptChoice {
 
@@ -43,6 +44,8 @@ public class PromptChoice {
     private String durationElement;
 
     private String componentType;
+
+    private Boolean hidden;
 
     public String getCode() {
         return code;
@@ -127,5 +130,13 @@ public class PromptChoice {
 
     public void setComponentType(final String componentType) {
         this.componentType = componentType;
+    }
+
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(final Boolean hidden) {
+        this.hidden = hidden;
     }
 }

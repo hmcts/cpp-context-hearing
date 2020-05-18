@@ -6,6 +6,7 @@ import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.time.ZoneOffset.UTC;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -19,10 +20,15 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HCROOM;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HDATE;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HEST;
-import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.bookingReference;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.existingHearingId;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.isPresent;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.reservedJudiciary;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.timeOfHearing;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.valueOf;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.weekCommencing;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -34,6 +40,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference;
@@ -42,6 +49,7 @@ import uk.gov.moj.cpp.hearing.event.service.CourtRoomOuCodeReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.HearingTypeReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -104,11 +112,15 @@ public class NextHearingHelper {
     private boolean canCreateNextHearing(final List<JudicialResultPrompt> prompts) {
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
 
+        final boolean isFixedDatePromptsPresent = ofNullable(promptsMap.get(timeOfHearing)).isPresent() &&
+                (ofNullable(promptsMap.get(fixedDate)).isPresent() || ofNullable(promptsMap.get(HDATE)).isPresent());
+
+        final boolean isWeekCommencingPromptsPresent = ofNullable(promptsMap.get(weekCommencing)).isPresent();
+
         return ofNullable(promptsMap.get(HTYPE)).isPresent()
                 && ofNullable(promptsMap.get(HCHOUSE)).isPresent()
                 && ofNullable(promptsMap.get(HEST)).isPresent()
-                && ofNullable(promptsMap.get(HDATE)).isPresent()
-                && ofNullable(promptsMap.get(HTIME)).isPresent();
+                && (isFixedDatePromptsPresent || isWeekCommencingPromptsPresent);
     }
 
     private NextHearing buildNextHearing(final JsonEnvelope context,
@@ -125,6 +137,10 @@ public class NextHearingHelper {
         populateAdjournmentReasons(builder, context, resultLines);
         populateHearingType(builder, context, promptsMap);
         populateJurisdictionType(builder, resultDefinition.getId().toString());
+        populateExistingHearingId(builder, promptsMap);
+        populateReservedJudiciary(builder, promptsMap);
+        populateWeekCommencingDate(builder, promptsMap);
+        populateBookingReference(builder, promptsMap);
 
         return builder.build();
     }
@@ -135,7 +151,10 @@ public class NextHearingHelper {
     }
 
     private static void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
-        builder.withListedStartDateTime(convertDateTimeToUTC(getPromptValue(promptsMap, HDATE), getPromptValue(promptsMap, HTIME)));
+        final String hDateValue = getPromptValue(promptsMap, HDATE);
+        final String dateValue = hDateValue != null ? hDateValue : getPromptValue(promptsMap, fixedDate);
+
+        builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, getPromptValue(promptsMap, timeOfHearing)));
     }
 
     private static String getPromptValue(final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearingPromptReference nextHearingPromptReference) {
@@ -144,6 +163,26 @@ public class NextHearingHelper {
 
     private static void populateEstimatedDuration(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         builder.withEstimatedMinutes(convertDurationIntoMinutes(Sets.newHashSet(promptsMap.get(HEST).getValue())));
+    }
+
+    private static void populateBookingReference(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, bookingReference);
+        builder.withBookingReference(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
+    }
+
+    private static void populateExistingHearingId(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, existingHearingId);
+       builder.withExistingHearingId(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
+    }
+
+    private static void populateReservedJudiciary(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, reservedJudiciary);
+        builder.withReservedJudiciary(nonNull(promptValue) ? Boolean.valueOf(promptValue) : null);
+    }
+
+    private static void populateWeekCommencingDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, weekCommencing);
+        builder.withWeekCommencingDate(nonNull(promptValue) ? LocalDate.parse(promptValue, DateTimeFormatter.ofPattern(PublishResultUtil.OUTGOING_PROMPT_DATE_FORMAT)) : null);
     }
 
     private void populateHearingType(final NextHearing.Builder builder,

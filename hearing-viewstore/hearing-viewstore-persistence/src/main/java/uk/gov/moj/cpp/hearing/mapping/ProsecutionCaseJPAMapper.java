@@ -34,7 +34,7 @@ public class ProsecutionCaseJPAMapper {
     public ProsecutionCaseJPAMapper() {
     }
 
-    ProsecutionCase toJPA(final Hearing hearing, final uk.gov.justice.core.courts.ProsecutionCase pojo) {
+    public ProsecutionCase toJPA(final Hearing hearing, final uk.gov.justice.core.courts.ProsecutionCase pojo) {
         if (null == pojo) {
             return null;
         }

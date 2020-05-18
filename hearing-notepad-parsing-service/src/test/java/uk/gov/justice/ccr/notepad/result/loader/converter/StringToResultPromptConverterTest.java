@@ -31,7 +31,7 @@ public class StringToResultPromptConverterTest {
         fixedListMap.put(fixedListId, fixedListSet);
         final StringToResultPromptConverter stringToResultPromptConverter = new StringToResultPromptConverter(fixedListMap);
 
-        final ResultPrompt resultPrompt = stringToResultPromptConverter.convert("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\t47337f1c-e343-4093-884f-035ba96c4db0\tConviction / acquittal\tY\tFIXL\t\t8dc70c95-fb09-4842-9138-bc579fceb605\tConviction / acquittal\t1\t1\t\t\t\tN\t40\t\t\t\t");
+        final ResultPrompt resultPrompt = stringToResultPromptConverter.convert("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\t47337f1c-e343-4093-884f-035ba96c4db0\tConviction / acquittal\tY\tFIXL\t\t8dc70c95-fb09-4842-9138-bc579fceb605\tConviction / acquittal\t1\t1\t\t\t\tN\t40\t\t\t\t\ttrue");
 
         assertThat(resultPrompt, is(notNullValue()));
         assertThat(resultPrompt.getLabel(), is(equalTo("Conviction / acquittal")));
@@ -41,7 +41,7 @@ public class StringToResultPromptConverterTest {
     @Test
     public void convertResultPromptWithPromptReference() {
         final StringToResultPromptConverter stringToResultPromptConverter = new StringToResultPromptConverter(new HashMap());
-        final ResultPrompt resultPrompt = stringToResultPromptConverter.convert("400\tfbed768b-ee95-4434-87c8-e81cbc8d24c8\tNext hearing in Crown Court - scheduled\t7746831a-d5dd-4fa8-ac13-528573948c8a\tCourthouse name\tmandatory\tTXT\t\t\tCC Courthouse Names\t1\t1\t\t\t\t\t\t\t\tHCHOUSE\t\n");
+        final ResultPrompt resultPrompt = stringToResultPromptConverter.convert("400\tfbed768b-ee95-4434-87c8-e81cbc8d24c8\tNext hearing in Crown Court - scheduled\t7746831a-d5dd-4fa8-ac13-528573948c8a\tCourthouse name\tmandatory\tTXT\t\t\tCC Courthouse Names\t1\t1\t\t\t\t\t\t\t\tHCHOUSE\t\ttrue\n");
         assertThat(resultPrompt.getReference(), is("HCHOUSE"));
     }
 }

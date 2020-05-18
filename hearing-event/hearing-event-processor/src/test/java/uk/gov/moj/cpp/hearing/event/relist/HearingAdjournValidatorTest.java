@@ -16,12 +16,12 @@ public class HearingAdjournValidatorTest {
 
     @Test
     public void validate_when_next_hearing_result_provided() throws Exception {
-        assertEquals(true, testObj.checkSharedResultHaveNextHearingOffenceResult(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+        assertEquals(true, testObj.checkSharedResultHaveNextHearingOrWithdrawnOffenceResult(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
 
     @Test
     public void validate_when_next_hearing_result_not_provided() throws Exception {
-        assertEquals(false, testObj.checkSharedResultHaveNextHearingOffenceResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+        assertEquals(false, testObj.checkSharedResultHaveNextHearingOrWithdrawnOffenceResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
 
     @Test
@@ -57,12 +57,12 @@ public class HearingAdjournValidatorTest {
 
     @Test
     public void checkSharedResultHaveNextHearingResult_when_next_hearing_result_provided() throws Exception {
-        assertEquals(true, testObj.checkSharedResultHaveNextHearingOffenceResult(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+        assertEquals(true, testObj.checkSharedResultHaveNextHearingOrWithdrawnOffenceResult(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
 
     @Test
     public void checkSharedResultHaveNextHearingResult_when_next_hearing_result_not_provided() throws Exception {
-        assertEquals(false, testObj.checkSharedResultHaveNextHearingOffenceResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+        assertEquals(false, testObj.checkSharedResultHaveNextHearingOrWithdrawnOffenceResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
 
 }

@@ -109,21 +109,29 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         verify(defendantRepository).save(defendantexArgumentCaptor.capture());
 
         assertThat(defendantexArgumentCaptor.getValue(), isBean(Defendant.class)
-                                         .with(defendant1 -> defendant.getId().getId(), is(defendantDetailsUpdated.getDefendant().getId()))
-                                         .with(Defendant::getPersonDefendant, isBean(PersonDefendant.class)
-                                                                                      .with(PersonDefendant::getCustodialEstablishment, isBean(CustodialEstablishment.class)
-                                                                                                                                                .with(CustodialEstablishment::getCustody, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getCustody()))
-                                                                                                                                                .with(CustodialEstablishment::getId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getId()))
-                                                                                                                                                .with(CustodialEstablishment::getName, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getName()))
+                .with(defendant1 -> defendant.getId().getId(), is(defendantDetailsUpdated.getDefendant().getId()))
+                .with(Defendant::getPersonDefendant, isBean(PersonDefendant.class)
+                        .with(PersonDefendant::getCustodialEstablishment, isBean(CustodialEstablishment.class)
+                                .with(CustodialEstablishment::getCustody, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getCustody()))
+                                .with(CustodialEstablishment::getId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getId()))
+                                .with(CustodialEstablishment::getName, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getName()))
 
-                                                                                      )
-                                         )
+                        )
+                        .with(PersonDefendant::getPersonDetails, isBean(Person.class)
+                                .with(Person::getNationalityCode, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getNationalityCode()))
+                                .with(Person::getNationalityId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getNationalityId()))
+                                .with(Person::getNationalityDescription, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getNationalityDescription()))
+                                .with(Person::getAdditionalNationalityCode, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getAdditionalNationalityCode()))
+                                .with(Person::getAdditionalNationalityId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getAdditionalNationalityId()))
+                        )
+
+                )
         );
         assertAssociatedDefenceOrganisation(defendant, defendantexArgumentCaptor);
     }
 
     private AssociatedDefenceOrganisation getAssociatedDefenceOrganisation() {
-        AssociatedDefenceOrganisation associatedDefenceOrganisation = new AssociatedDefenceOrganisation();
+        final AssociatedDefenceOrganisation associatedDefenceOrganisation = new AssociatedDefenceOrganisation();
         associatedDefenceOrganisation.setApplicationReference("application-reference");
         associatedDefenceOrganisation.setFundingType(FundingType.REPRESENTATION_ORDER);
         associatedDefenceOrganisation.setAssociationStartDate(LocalDate.of(2019, 12, 13));
@@ -163,7 +171,7 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         final Defendant defendant = new Defendant();
         defendant.setProsecutionCase(prosecutionCase);
         defendant.setId(new HearingSnapshotKey(defendantDetailsUpdated.getDefendant().getId(), hearingId));
-        PersonDefendant personDefendant = new PersonDefendant();
+        final PersonDefendant personDefendant = new PersonDefendant();
         personDefendant.setPersonDetails(new Person());
 
         defendant.setPersonDefendant(personDefendant);

@@ -47,6 +47,9 @@
                 },
                 "synonymMatch": {
                   "type": "string"
+                },
+                "hidden": {
+                  "type": "boolean"
                 }
               }
             }

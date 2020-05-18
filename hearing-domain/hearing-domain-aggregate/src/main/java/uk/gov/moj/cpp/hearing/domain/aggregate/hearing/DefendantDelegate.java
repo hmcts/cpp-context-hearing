@@ -116,7 +116,8 @@ public class DefendantDelegate implements Serializable {
                 .setProsecutionAuthorityReference(defendantIn.getProsecutionAuthorityReference())
                 .setWitnessStatement(defendantIn.getWitnessStatement())
                 .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
-                .setProsecutionCaseId(defendantIn.getProsecutionCaseId());
+                .setProsecutionCaseId(defendantIn.getProsecutionCaseId())
+                .setMasterDefendantId(defendantIn.getMasterDefendantId());
     }
 
     public void setHearingAggregateMomento(final HearingAggregateMomento momento) {

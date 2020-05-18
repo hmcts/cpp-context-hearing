@@ -23,9 +23,9 @@ public class ResultPromptsProcessorTest {
 
         //given
         List<String> lines = new ArrayList<>();
-        lines.add("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\tabc9bb61-cb5b-4cf7-be24-8866bcd2fc69\tProtected person\tY\tTXT\t\t\t\t1\t250\t\t\t\tN\t10\t\t\t\t\n");
-        lines.add("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\t3054909b-15b6-499f-b44f-67b2b1215c76\tProtected person's address\tY\tTXT\t\t\t\t\t\t\t\t\t\t\t\t\t\t\n");
-        lines.add("6\t418b3aa7-65ab-4a4a-bab9-2f96b698118c\tCommunity order England / Wales\td6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9\tEnd Date\tY\tDATE\t\t\t\t\t\t\t\t\tN\t\t\t\t\t");
+        lines.add("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\tabc9bb61-cb5b-4cf7-be24-8866bcd2fc69\tProtected person\tY\tTXT\t\t\t\t1\t250\t\t\t\tN\t10\t\t\t\t\ttrue\n");
+        lines.add("2\tb81ac80b-81a9-48b6-87b0-cc34610eec97\tRestraining order for period\t3054909b-15b6-499f-b44f-67b2b1215c76\tProtected person's address\tY\tTXT\t\t\t\t\t\t\t\t\t\t\t\t\t\t\ttrue\n");
+        lines.add("6\t418b3aa7-65ab-4a4a-bab9-2f96b698118c\tCommunity order England / Wales\td6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9\tEnd Date\tY\tDATE\t\t\t\t\t\t\t\t\tN\t\t\t\t\t\ttrue");
 
         //when
         Map<String, List<ResultPrompt>> actual = resultPromptsProcessor.groupByResultDefinition(lines);

@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -16,11 +18,14 @@ public class HearingExtended implements Serializable {
 
     private final UUID hearingId;
     private final CourtApplication courtApplication;
+    private final List<ProsecutionCase> prosecutionCases;
 
     @JsonCreator
-    public HearingExtended(@JsonProperty("hearingId") final UUID hearingId, @JsonProperty("courtApplication") final CourtApplication courtApplication) {
+    public HearingExtended(@JsonProperty("hearingId") final UUID hearingId, @JsonProperty("courtApplication") final CourtApplication courtApplication,
+                           @JsonProperty("prosecutionCases") final List<ProsecutionCase> prosecutionCases) {
         this.hearingId = hearingId;
         this.courtApplication = courtApplication;
+        this.prosecutionCases = prosecutionCases;
     }
 
     public CourtApplication getCourtApplication() {
@@ -29,5 +34,9 @@ public class HearingExtended implements Serializable {
 
     public UUID getHearingId() {
         return hearingId;
+    }
+
+    public List<ProsecutionCase> getProsecutionCases() {
+        return prosecutionCases;
     }
 }

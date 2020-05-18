@@ -29,6 +29,7 @@
           "resultPromptRule": "mandatory",
           "type": "DATE",
           "sequence": 1,
+           "hidden": false,
           "reference": "HDATE",
           "userGroups": [
             "Court Clerks",
@@ -45,6 +46,7 @@
           "resultPromptRule": "optional",
           "type": "TIME",
           "sequence": 2,
+           "hidden": false,
           "reference": "HTIME",
           "userGroups": [
             "Court Clerks",
@@ -61,6 +63,7 @@
           "resultPromptRule": "optional",
           "type": "INT",
           "sequence": 3,
+           "hidden": false,
           "reference": "HCROOM",
           "userGroups": [
             "Court Clerks",
@@ -77,6 +80,7 @@
           "resultPromptRule": "optional",
           "type": "TXT",
           "sequence": 4,
+           "hidden": false,
           "reference": "HCHOUSE",
           "userGroups": [
             "Court Clerks",
@@ -93,6 +97,7 @@
           "resultPromptRule": "mandatory",
           "type": "FIXL",
           "sequence": 5,
+          "hidden": false,
           "reference": "HTYPE",
           "fixedListId": "5591d709-4397-452c-8533-998165d58d9c",
           "userGroups": [
@@ -110,6 +115,7 @@
           "resultPromptRule": "mandatory",
           "type": "INT",
           "sequence": 6,
+          "hidden": false,
           "duration": "Weeks",
           "reference": "HEST",
           "userGroups": [
@@ -127,6 +133,7 @@
           "resultPromptRule": "mandatory",
           "type": "INT",
           "sequence": 7,
+          "hidden": false,
           "duration": "Days",
           "reference": "HEST",
           "userGroups": [
@@ -143,6 +150,7 @@
           "label": "Estimated duration",
           "resultPromptRule": "mandatory",
           "type": "INT",
+          "hidden": false,
           "sequence": 8,
           "duration": "Hours",
           "reference": "HEST",
@@ -161,6 +169,7 @@
           "resultPromptRule": "mandatory",
           "type": "INT",
           "sequence": 9,
+          "hidden": false,
           "duration": "Minutes",
           "reference": "HEST",
           "userGroups": [
@@ -179,6 +188,7 @@
           "type": "FIXL",
           "sequence": 10,
           "reference": "REST",
+          "hidden": false,
           "fixedListId": "c82897b8-7e25-4b5d-9cd3-dbf3e1cb7c0c",
           "userGroups": [
             "Court Clerks",

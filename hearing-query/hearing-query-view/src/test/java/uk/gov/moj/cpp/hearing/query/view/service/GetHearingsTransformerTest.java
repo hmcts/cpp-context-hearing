@@ -13,6 +13,7 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.hearing.courts.Applicant;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
+import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.justice.hearing.courts.Respondents;
@@ -28,7 +29,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class GetHearingsTransformerTest {
 
-    private GetHearingsTransformer target = new GetHearingsTransformer();
+    private final GetHearingsTransformer target = new GetHearingsTransformer();
 
     @Test
     public void test() {
@@ -70,6 +71,10 @@ public class GetHearingsTransformerTest {
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
                         .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
                         .withValue(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, prosecutionCase.getProsecutionCaseIdentifier())
+                            .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
+                            .withValue(Defendants::getId, defendant.getId())
+                            .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
+                            .withValue(Defendants::getCourtProceedingsInitiated, defendant.getCourtProceedingsInitiated())))
                 ))
         );
 

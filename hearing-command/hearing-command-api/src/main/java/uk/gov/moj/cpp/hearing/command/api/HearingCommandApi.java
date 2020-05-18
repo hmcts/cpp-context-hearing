@@ -181,4 +181,11 @@ public class HearingCommandApi {
     public void computeOutstandingFines(final JsonEnvelope envelope) {
         this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.compute-outstanding-fines").apply(envelope.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.book-provisional-hearing-slots")
+    public void bookProvisionalHearingSlots(final JsonEnvelope envelope) {
+        this.sender.send(Enveloper.envelop(envelope.payloadAsJsonObject())
+                .withName("hearing.command.book-provisional-hearing-slots")
+                .withMetadataFrom(envelope));
+    }
 }

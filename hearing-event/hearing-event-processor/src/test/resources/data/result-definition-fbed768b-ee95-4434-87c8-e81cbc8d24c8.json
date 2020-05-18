@@ -50,7 +50,7 @@
                 "Victims & Witness Care Admin",
                 "Youth Offending Service Admin"
             ],
-            "reference":"HTIME",
+            "reference":"timeOfHearing",
             "welshLabel":"TBD"
         },
         {
@@ -183,6 +183,86 @@
                 "Victims & Witness Care Admin",
                 "Youth Offending Service Admin"
             ],
+            "welshLabel":"TBD"
+        },
+        {
+            "id":"4d3b5e79-f6e9-4720-a76b-13a877640af7",
+            "label":"Booking Reference",
+            "mandatory":false,
+            "type":"TXT",
+            "sequence":11,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference": "bookingReference",
+            "welshLabel":"TBD"
+        },
+        {
+            "id":"a2238d4f-2b31-4501-8885-26dba30bd138",
+            "label":"Existing Hearing Id",
+            "mandatory":false,
+            "type":"TXT",
+            "sequence":12,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference": "existingHearingId",
+            "welshLabel":"TBD"
+        },
+        {
+            "id":"25f8cf9f-925a-444c-ba7e-aff4811b9a96",
+            "label":"Reserved Judiciary",
+            "mandatory":false,
+            "type":"TXT",
+            "sequence":12,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference": "reservedJudiciary",
+            "welshLabel":"TBD"
+        },
+        {
+            "id":"800db127-e78e-47cd-a602-b1c12a89d90b",
+            "label":"Week Commencing Date",
+            "mandatory":false,
+            "type":"DATE",
+            "sequence":13,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference": "weekCommencing",
+            "welshLabel":"TBD"
+        },
+        {
+            "id":"1ae357f9-9391-4d74-94b7-da33c8295382",
+            "label":"Fixed Date",
+            "mandatory":false,
+            "type":"DATE",
+            "sequence":13,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference": "fixedDate",
             "welshLabel":"TBD"
         }
     ]

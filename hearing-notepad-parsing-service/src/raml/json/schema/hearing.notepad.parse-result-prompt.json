@@ -21,6 +21,9 @@
           },
           "required": {
             "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
           }
         }
       }

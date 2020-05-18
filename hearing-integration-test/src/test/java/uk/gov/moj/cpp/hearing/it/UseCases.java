@@ -15,6 +15,7 @@ import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.getStringFromResource;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -119,7 +120,7 @@ public class UseCases {
         return initiateHearing(requestSpec, initiateHearing, true);
     }
 
-    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, boolean includeApplication) {
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplication) {
 
         Hearing hearing = initiateHearing.getHearing();
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
@@ -511,7 +512,7 @@ public class UseCases {
     }
 
 
-    public static SaveDraftResultCommand saveDraftResults(final RequestSpecification requestSpec, SaveDraftResultCommand saveDraftResultCommand) {
+    public static SaveDraftResultCommand saveDraftResults(final RequestSpecification requestSpec, final SaveDraftResultCommand saveDraftResultCommand) {
 
         final EventListener publicEventResulted = listenFor("public.hearing.draft-result-saved")
                 .withFilter(convertStringTo(PublicHearingDraftResultSaved.class, isBean(PublicHearingDraftResultSaved.class)
@@ -533,7 +534,7 @@ public class UseCases {
         return saveDraftResultCommand;
     }
 
-    public static SaveDraftResultCommand saveDraftResultsApplication(final RequestSpecification requestSpec, SaveDraftResultCommand saveDraftResultCommand) {
+    public static SaveDraftResultCommand saveDraftResultsApplication(final RequestSpecification requestSpec, final SaveDraftResultCommand saveDraftResultCommand) {
         //dummy save draft to use existing pattern
 
         return saveDraftResultCommand;
@@ -685,13 +686,13 @@ public class UseCases {
         return removeDefenceCounsel;
     }
 
-    public static CaseDefendantDetails updateDefendants(CaseDefendantDetails caseDefendantDetails) throws Exception {
+    public static CaseDefendantDetails updateDefendants(final CaseDefendantDetails caseDefendantDetails) throws Exception {
 
         final String eventName = "public.progression.case-defendant-changed";
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
 
-        String payloadAsString = mapper.writeValueAsString(caseDefendantDetails.getDefendants().get(0));
+        final String payloadAsString = mapper.writeValueAsString(caseDefendantDetails.getDefendants().get(0));
 
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
@@ -708,7 +709,7 @@ public class UseCases {
     }
 
 
-    public static UpdateOffencesForDefendantCommand updateOffences(UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand) throws Exception {
+    public static UpdateOffencesForDefendantCommand updateOffences(final UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand) throws Exception {
 
         final String eventName = "public.progression.defendant-offences-changed";
 
@@ -727,7 +728,7 @@ public class UseCases {
         return updateOffencesForDefendantCommand;
     }
 
-    public static HearingDetailsUpdateCommand updateHearing(HearingDetailsUpdateCommand hearingDetailsUpdateCommand) throws Exception {
+    public static HearingDetailsUpdateCommand updateHearing(final HearingDetailsUpdateCommand hearingDetailsUpdateCommand) throws Exception {
         final String eventName = "public.hearing-detail-changed";
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
@@ -859,7 +860,7 @@ public class UseCases {
         final String eventName = "public.progression.defendants-added-to-court-proceedings";
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
-        String payloadAsString = mapper.writeValueAsString(defendant);
+        final String payloadAsString = mapper.writeValueAsString(defendant);
 
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
@@ -879,7 +880,7 @@ public class UseCases {
         final String eventName = "public.progression.court-application-updated";
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
-        String payloadAsString = mapper.writeValueAsString(courtApplication);
+        final String payloadAsString = mapper.writeValueAsString(courtApplication);
 
         final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
 
@@ -905,7 +906,7 @@ public class UseCases {
                     .withPayload(addInterpreterIntermediary.toString())
                     .executeSuccessfully();
 
-        } catch (JsonProcessingException exception) {
+        } catch (final JsonProcessingException exception) {
             System.out.println(exception);
         }
 
@@ -948,14 +949,14 @@ public class UseCases {
     public static void updateCaseMarkers(final UUID prosecutionCaseId, final UUID hearingId, final List<Marker> markers) throws Exception {
 
         final String eventName = "public.progression.case-markers-updated";
-        JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        for (Marker marker : markers) {
+        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        for (final Marker marker : markers) {
             final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
-            String payloadAsString = mapper.writeValueAsString(marker);
+            final String payloadAsString = mapper.writeValueAsString(marker);
             final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
             arrayBuilder.add(uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build());
         }
-        JsonObject payload = createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("prosecutionCaseId", prosecutionCaseId.toString())
                 .add("hearingId", hearingId.toString())
                 .add("caseMarkers", arrayBuilder)
@@ -965,6 +966,20 @@ public class UseCases {
                 eventName,
                 payload,
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+
+    public static void bookHearingSlots(final RequestSpecification requestSpec, final UUID hearingId, final List<UUID> courtScheduleIds) throws Exception {
+
+        final String commandPayloadString = getStringFromResource("hearing.book-provisional-hearing-slots.json")
+                .replace("UUID1", courtScheduleIds.get(0).toString())
+                .replace("UUID2", courtScheduleIds.get(1).toString());
+
+        makeCommand(requestSpec, "hearing.book-provisional-hearing-slots")
+                .ofType("application/vnd.hearing.book-provisional-hearing-slots+json")
+                .withArgs(hearingId)
+                .withPayload(commandPayloadString)
+                .executeSuccessfully();
 
     }
 

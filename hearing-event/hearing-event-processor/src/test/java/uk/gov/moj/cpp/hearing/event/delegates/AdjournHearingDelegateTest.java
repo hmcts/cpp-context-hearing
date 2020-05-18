@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
@@ -117,7 +119,7 @@ public class AdjournHearingDelegateTest {
         when(hearingAdjournValidator.validateProsecutionCase(any(), any(), any())).thenReturn(validProsecutionCase);
         when(hearingAdjournValidator.validateApplication(any(), any())).thenReturn(validApplication);
         final HearingAdjourned hearingAdjourned = new HearingAdjourned(UUID.randomUUID(),
-                Arrays.asList(NextHearing.nextHearing().withCourtCentre(CourtCentre.courtCentre().withId(UUID.randomUUID()).build()).build()));
+                asList(NextHearing.nextHearing().withCourtCentre(CourtCentre.courtCentre().withId(UUID.randomUUID()).build()).build()));
         when(hearingAdjournTransformer.transform2Adjournment(any(), any(), any())).thenReturn(hearingAdjourned);
 
         testObj.execute(resultsShared, event);
@@ -129,22 +131,17 @@ public class AdjournHearingDelegateTest {
             //check that a filtered resultsShared is used to create adjournment message
             final ResultsShared filtered = transformerResultSharedCaptor.getAllValues().get(0);
             final long applicationTargetCount = filtered.getTargets().stream().filter(t -> t.getApplicationId() != null).count();
-            Assert.assertEquals(0, applicationTargetCount);
+            assertEquals(0, applicationTargetCount);
         }
         if (validApplication) {
             //check that a filtered resultsShared is used to create adjournment message
             final ResultsShared filtered = transformerResultSharedCaptor.getAllValues().get(expectedSendCount - 1);
             final long prosecutionCaseCount = filtered.getTargets().stream().filter(t -> t.getApplicationId() == null).count();
-            Assert.assertEquals(0, prosecutionCaseCount);
+            assertEquals(0, prosecutionCaseCount);
+            verify(this.sender, times(expectedSendCount)).send(this.envelopeArgumentCaptor.capture());
+            final HearingAdjourned hearingAdjournedOut = jsonObjectToObjectConvertor.convert(this.envelopeArgumentCaptor.getValue().payloadAsJsonObject(), HearingAdjourned.class);
+            assertEquals(hearingAdjourned.getAdjournedHearing(), hearingAdjournedOut.getAdjournedHearing());
+            assertEquals(hearingAdjourned.getNextHearings().get(0).getCourtCentre().getId(), hearingAdjournedOut.getNextHearings().get(0).getCourtCentre().getId());
         }
-
-        verify(this.sender, times(expectedSendCount)).send(this.envelopeArgumentCaptor.capture());
-
-        final HearingAdjourned hearingAdjournedOut = jsonObjectToObjectConvertor.convert(this.envelopeArgumentCaptor.getValue().payloadAsJsonObject(), HearingAdjourned.class);
-        Assert.assertEquals(hearingAdjourned.getAdjournedHearing(), hearingAdjournedOut.getAdjournedHearing());
-        Assert.assertEquals(hearingAdjourned.getNextHearings().get(0).getCourtCentre().getId(), hearingAdjournedOut.getNextHearings().get(0).getCourtCentre().getId());
-
     }
-
-
 }

@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -82,6 +83,7 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -146,6 +148,12 @@ public class InitiateHearingCommandHandlerTest {
     }
 
     @Test
+    public void extendHearingProsecutionCases() throws Throwable {
+        extendHearingWithProsecutionCases((h) -> {
+        });
+    }
+
+    @Test
     public void extendHearingNullInitialApplications() throws Throwable {
 
         extendHearing((h) -> h.setCourtApplications(null));
@@ -187,6 +195,41 @@ public class InitiateHearingCommandHandlerTest {
 
     }
 
+
+    private void extendHearingWithProsecutionCases(Consumer<Hearing> hearingModification) throws EventStreamException {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        hearingModification.accept(hearingOne.getHearing());
+
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        if (hearingOne.getHearing().getCourtApplications() != null) {
+            setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        }
+
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final ExtendHearingCommand command = new ExtendHearingCommand();
+        command.setProsecutionCases(Arrays.asList(ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).build()));
+        command.setHearingId(hearingOne.getHearingId());
+
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.extend-hearing"), objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.extendHearing(commandJson);
+
+        ArgumentCaptor<Stream> argumentCaptor = ArgumentCaptor.forClass(Stream.class);
+        ArgumentCaptor<Stream> argumentCaptorApplication = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) argumentCaptor.capture());
+        ((EventStream) Mockito.verify(this.applicationEventStream)).append((Stream)argumentCaptorApplication.capture());
+
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) argumentCaptor.getAllValues().get(1).findFirst().orElse(null);
+
+        HearingExtended hearingExtended = asPojo(jsonEnvelope, HearingExtended.class);
+
+        assertThat(hearingExtended.getProsecutionCases().get(0).getId(), is(command.getProsecutionCases().get(0).getId()));
+        assertThat(hearingExtended.getHearingId(), is(command.getHearingId()));
+    }
 
     @Test
     public void initiateHearing() throws Throwable {

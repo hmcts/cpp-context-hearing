@@ -17,6 +17,8 @@ public class Defendant implements Serializable {
 
     private UUID id;
 
+    private UUID masterDefendantId;
+
     private UUID prosecutionCaseId;
 
     private Integer numberOfPreviousConvictionsCited;
@@ -85,6 +87,14 @@ public class Defendant implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public UUID getMasterDefendantId() {
+        return masterDefendantId;
+    }
+
+    public void setMasterDefendantId(UUID masterDefendantId) {
+        this.masterDefendantId = masterDefendantId;
     }
 
     public LegalEntityDefendant getLegalEntityDefendant() {

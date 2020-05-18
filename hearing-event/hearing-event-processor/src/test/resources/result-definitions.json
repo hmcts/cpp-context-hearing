@@ -8169,7 +8169,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden": false
     }, {
       "id" : "382ff620-7645-4b1f-9905-4620b8d2f0e9",
       "label" : "Period of prohibition",
@@ -8184,7 +8185,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden": false
     }, {
       "id" : "382ff620-7645-4b1f-9905-4620b8d2f0e9",
       "label" : "Period of prohibition",
@@ -8199,7 +8201,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden": false
     }, {
       "id" : "382ff620-7645-4b1f-9905-4620b8d2f0e9",
       "label" : "Period of prohibition",
@@ -8214,7 +8217,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden": false
     }, {
       "id" : "1d1b41c9-0b16-4ac7-abfc-b28c2f444e20",
       "label" : "Prohibited activities",
@@ -8229,7 +8233,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden": false
     } ],
     "isAvailableForCourtExtract" : true,
     "financial" : false,
@@ -28748,7 +28753,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden"  : false
     }, {
       "id" : "b17b7df3-064f-492a-b19d-8e0bde43f7c6",
       "label" : "Period of residence",
@@ -28763,7 +28769,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden"  : false
     }, {
       "id" : "b17b7df3-064f-492a-b19d-8e0bde43f7c6",
       "label" : "Period of residence",
@@ -28778,7 +28785,8 @@
       "qual" : null,
       "reference" : null,
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden"  : false
     }, {
       "id" : "b17b7df3-064f-492a-b19d-8e0bde43f7c6",
       "label" : "Period of residence",

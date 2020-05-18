@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.book-provisional-hearing-slots.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "slots": {
+      "type": "array",
+      "items": {
+        "courtScheduleId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "minItems": 1
+      }
+    }
+  },
+  "required": [
+    "slots",
+    "hearingId"
+  ],
+  "additionalProperties": false
+}

@@ -152,6 +152,7 @@
                         </executions>
                         <configuration>
                             <skipITs>false</skipITs>
+                            <runOrder>alphabetical</runOrder>
                             <systemProperties>
                                 <property>
                                     <name>baseUri</name>

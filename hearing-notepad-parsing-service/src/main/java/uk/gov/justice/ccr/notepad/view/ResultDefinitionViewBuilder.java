@@ -217,6 +217,7 @@ public class ResultDefinitionViewBuilder {
         part.setType(partFromKnowledge.getType());
         part.setState(partFromKnowledge.getState());
         part.setResultChoices(partFromKnowledge.getResultChoices());
+        part.setHidden(partFromKnowledge.getHidden());
     }
 
     private void enrichPartForPrompt(final Part part, final Part partFromKnowledge) {

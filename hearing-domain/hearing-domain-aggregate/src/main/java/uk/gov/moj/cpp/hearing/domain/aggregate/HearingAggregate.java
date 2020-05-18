@@ -18,7 +18,6 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
-
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
@@ -48,7 +47,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.DefendantDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
-
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingTrialTypeDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
@@ -64,11 +62,12 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeAdded;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
@@ -121,7 +120,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 5L;
+    private static final long serialVersionUID = 6L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -216,8 +215,8 @@ public class HearingAggregate implements Aggregate {
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
                 when(CaseMarkersUpdated.class).apply(prosecutionCaseDelegate::handleCaseMarkersUpdated),
-                when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate ::onDefendantLegalaidStatusTobeUpdatedForHearing),
-                when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate ::onCaseDefendantUpdatedForHearing),
+                when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate::onDefendantLegalaidStatusTobeUpdatedForHearing),
+                when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
                 otherwiseDoNothing()
         );
 
@@ -255,7 +254,7 @@ public class HearingAggregate implements Aggregate {
 
         //check if offence count is missing for crown court hearing
         if (JurisdictionType.CROWN.equals(hearing.getJurisdictionType()) && hearing.getProsecutionCases() != null) {
-            List<Offence> offences = this.hearingDelegate.getAllOffencesMissingCount(hearing);
+            final List<Offence> offences = this.hearingDelegate.getAllOffencesMissingCount(hearing);
             if (!offences.isEmpty()) {
                 return apply(this.hearingDelegate.ignoreHearingInitiate(offences, hearing.getId()));
             }
@@ -263,8 +262,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.initiate(hearing));
     }
 
-    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication) {
-        return apply(this.hearingDelegate.extend(hearingId, courtApplication));
+    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases) {
+        return apply(this.hearingDelegate.extend(hearingId, courtApplication, prosecutionCases));
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea) {
@@ -279,7 +278,7 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
     }
 
-    public Stream<Object> updateHearingEvents(final UUID hearingId, List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents) {
+    public Stream<Object> updateHearingEvents(final UUID hearingId, final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents) {
         return this.apply(this.hearingEventDelegate.updateHearingEvents(hearingId, hearingEvents));
     }
 
@@ -350,7 +349,7 @@ public class HearingAggregate implements Aggregate {
         return apply(this.defendantDelegate.updateDefendantAttendance(hearingId, defendantId, attendanceDay));
     }
 
-    public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {
+    public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict) {
         return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict));
     }
 
@@ -414,6 +413,7 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> updateInterpreterIntermediary(final UUID hearingId, final InterpreterIntermediary interpreterIntermediary) {
         return interpreterIntermediaryDelegate.updateInterpreterIntermediary(interpreterIntermediary, hearingId);
     }
+
     public Stream<Object> setTrialType(final HearingTrialType trialType) {
         return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
     }
@@ -434,7 +434,7 @@ public class HearingAggregate implements Aggregate {
         return apply(companyRepresentativeDelegate.removeCompanyRepresentative(id, hearingId));
     }
 
-    public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, List<Marker> markers) {
+    public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, final List<Marker> markers) {
         return prosecutionCaseDelegate.updateCaseMarkers(hearingId, prosecutionCaseId, markers);
     }
 
@@ -445,22 +445,30 @@ public class HearingAggregate implements Aggregate {
         return !events.isEmpty();
     }
 
-    public Stream<Object> updateDefendantLegalAidStatusForHearing(final UUID hearingId, final UUID defendantId, final String legalAidStatus ) {
-            return apply(Stream.of(DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
-                    .withHearingId(hearingId)
-                    .withDefendantId(defendantId)
-                    .withLegalAidStatus(legalAidStatus)
-                    .build()));
+    public Stream<Object> updateDefendantLegalAidStatusForHearing(final UUID hearingId, final UUID defendantId, final String legalAidStatus) {
+        return apply(Stream.of(DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withLegalAidStatus(legalAidStatus)
+                .build()));
 
     }
 
     public Stream<Object> updateCaseDefendantsForHearing(final UUID hearingId, final ProsecutionCase prosecutionCase) {
-        if(this.momento.getHearing().getHasSharedResults().equals(Boolean.TRUE)) {
+        if (this.momento.getHearing().getHasSharedResults().equals(Boolean.TRUE)) {
             return Stream.empty();
         }
         return apply(Stream.of(CaseDefendantsUpdatedForHearing.caseDefendantsUpdatedForHearing()
                 .withHearingId(hearingId)
                 .withProsecutionCase(prosecutionCase)
+                .build()));
+    }
+
+    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<UUID> slots) {
+
+        return apply(Stream.of(BookProvisionalHearingSlots.bookProvisionalHearingSlots()
+                .withHearingId(hearingId)
+                .withSlots(slots)
                 .build()));
     }
 

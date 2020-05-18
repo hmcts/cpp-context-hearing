@@ -134,6 +134,7 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultPrompts.get(12).getType(), is(ResultType.FIXLO));
         assertThat(resultPrompts.get(13).getType(), is(ResultType.FIXLOM));
         assertThat(resultPrompts.get(3).getKeywords(), hasItems("years"));
+        assertThat(resultPrompts.get(0).getHidden(), is(false));
     }
 
     @Test
@@ -162,7 +163,7 @@ public class ReadStoreResultLoaderTest {
     }
 
     @Test
-    public void resultPromptShouldLoadAssociatedFixedlist() throws Exception {
+    public void resultPromptShouldLoadAssociatedFixedList() throws Exception {
         //given
         final LocalDate hearingDate = LocalDate.now();
         given(resultingQueryService.getAllFixedLists(jsonEnvelope, hearingDate)).willReturn(jsonEnvelope);

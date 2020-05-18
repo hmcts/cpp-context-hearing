@@ -16,7 +16,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "code",
         "label",
         "resultLevel",
-        "resultChoices"
+        "resultChoices",
+        "hidden"
 })
 public class Part {
 
@@ -35,6 +36,8 @@ public class Part {
     private State state;//resolved,unresolved
 
     private TreeSet<ResultChoice> resultChoices;
+
+    private Boolean hidden;
 
 
     @JsonIgnore
@@ -116,6 +119,14 @@ public class Part {
 
     public final void setOriginalText(String value) {
         originalText = value;
+    }
+
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public final void setHidden(final Boolean hidden) {
+        this.hidden = hidden;
     }
 
     public enum State {

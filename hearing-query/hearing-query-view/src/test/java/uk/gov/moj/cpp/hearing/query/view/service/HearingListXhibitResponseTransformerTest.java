@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;

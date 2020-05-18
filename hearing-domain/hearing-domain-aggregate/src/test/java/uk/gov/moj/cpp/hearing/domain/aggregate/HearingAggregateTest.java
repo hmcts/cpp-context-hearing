@@ -14,7 +14,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -514,6 +513,7 @@ public class HearingAggregateTest {
                 initiateDefendantCommandTemplate(hearing.getId()),
                 template -> {
                     template.getDefendant().setId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getId());
+                    template.getDefendant().setMasterDefendantId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId());
                     template.getDefendant().setProsecutionCaseId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getProsecutionCaseId());
                 });
 
@@ -524,7 +524,7 @@ public class HearingAggregateTest {
         final DefendantDetailsUpdated result = (DefendantDetailsUpdated) hearingAggregate.updateDefendantDetails(command.getHearingId(), command.getDefendant()).collect(Collectors.toList()).get(0);
 
         assertThat(hearing.getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getFirstName(), Matchers.is(result.getDefendant().getPersonDefendant().getPersonDetails().getFirstName()));
-
+        assertThat(hearing.getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId(), Matchers.is(result.getDefendant().getMasterDefendantId()));
         assertThat(hearing.getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getLastName(), Matchers.is(result.getDefendant().getPersonDefendant().getPersonDetails().getLastName()));
 
     }
@@ -607,7 +607,7 @@ public class HearingAggregateTest {
     public void shouldNotRaiseEvent_whenHearingResult_hasAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        Hearing hearing = initiateHearingCommand.getHearing();
+        final Hearing hearing = initiateHearingCommand.getHearing();
         hearing.setHasSharedResults(Boolean.TRUE);
         hearingAggregate.apply(new HearingInitiated(hearing));
         final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
@@ -621,7 +621,7 @@ public class HearingAggregateTest {
     public void shouldRaiseEvent_whenHearingResult_hasNotAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        Hearing hearing = initiateHearingCommand.getHearing();
+        final Hearing hearing = initiateHearingCommand.getHearing();
         hearing.setHasSharedResults(Boolean.FALSE);
 
         hearingAggregate.apply(new HearingInitiated(hearing));

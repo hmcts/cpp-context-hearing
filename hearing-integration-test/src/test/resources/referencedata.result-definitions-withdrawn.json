@@ -21,6 +21,7 @@
           "resultPromptRule": "optional",
           "type": "TXT",
           "sequence": 1,
+           "hidden": false,
           "userGroups": [
             "Court Clerks",
             "Prison Admin",

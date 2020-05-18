@@ -25,6 +25,7 @@ public class ResultPrompt {
     private Integer promptOrder;
     private String reference;
     private Integer durationSequence;
+    private Boolean hidden;
 
     public ResultPrompt() {
 
@@ -34,7 +35,7 @@ public class ResultPrompt {
                         final String label, final ResultType type, final String resultPromptRule,
                         final String durationElement, final Set<String> keywords,
                         final Set<String> fixedList, final Integer promptOrder,
-                        final String reference, final Integer durationSequence) {
+                        final String reference, final Integer durationSequence, final Boolean hidden) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.resultDefinitionLabel = resultDefinitionLabel;
@@ -47,6 +48,7 @@ public class ResultPrompt {
         this.promptOrder = promptOrder;
         this.reference = reference;
         this.durationSequence = durationSequence;
+        this.hidden = hidden;
     }
 
     public String getId() {
@@ -147,6 +149,14 @@ public class ResultPrompt {
         this.durationSequence = durationSequence;
     }
 
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(final Boolean hidden) {
+        this.hidden = hidden;
+    }
+
     @Override
     public String toString() {
         return "ResultPrompt{" +
@@ -160,6 +170,7 @@ public class ResultPrompt {
                 ", fixedList=" + fixedList +
                 ", promptOrder=" + promptOrder +
                 ", reference='" + reference + '\'' +
+                ", hidden='" + hidden + '\'' +
                 ", durationSequence='" + durationSequence + '\'' +
                 '}';
     }

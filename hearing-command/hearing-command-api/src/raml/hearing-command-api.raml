@@ -210,6 +210,24 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             202:
                 description: OK
 
+/hearings/{hearingId}/hearing-slots:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.book-provisional-hearing-slots+json
+            name: hearing.book-provisional-hearing-slots
+        ...
+      body:
+        application/vnd.hearing.book-provisional-hearing-slots+json:
+            example:
+             !include json/hearing.book-provisional-hearing-slots.json
+            schema:
+             !include json/schema/hearing.book-provisional-hearing-slots.json
+      responses:
+            202:
+                description: OK
+
 /hearings/event-definitions:
     post:
       description: |

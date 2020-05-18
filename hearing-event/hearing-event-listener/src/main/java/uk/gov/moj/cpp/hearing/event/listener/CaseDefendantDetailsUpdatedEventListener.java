@@ -56,6 +56,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantIn.getId(), hearingId));
 
         if (defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
+            defendant.setMasterDefendantId(defendantIn.getMasterDefendantId());
             defendant.setNumberOfPreviousConvictionsCited(defendantIn.getNumberOfPreviousConvictionsCited());
             defendant.setProsecutionAuthorityReference(defendantIn.getProsecutionAuthorityReference());
             defendant.setWitnessStatement(defendantIn.getWitnessStatement());
@@ -97,7 +98,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
 
     }
 
-    private uk.gov.justice.core.courts.Organisation getLegalEntityDefendantOrganisation(LegalEntityDefendant legalEntityDefendant) {
+    private uk.gov.justice.core.courts.Organisation getLegalEntityDefendantOrganisation(final LegalEntityDefendant legalEntityDefendant) {
         return nonNull(legalEntityDefendant) ? legalEntityDefendant.getOrganisation() : null;
     }
 
@@ -135,6 +136,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
         personDetailsJpa.setNationalInsuranceNumber(personDetailsPojo.getNationalInsuranceNumber());
         personDetailsJpa.setNationalityCode(personDetailsPojo.getNationalityCode());
         personDetailsJpa.setNationalityId(personDetailsPojo.getNationalityId());
+        personDetailsJpa.setNationalityDescription(personDetailsPojo.getNationalityDescription());
         personDetailsJpa.setOccupation(personDetailsPojo.getOccupation());
         personDetailsJpa.setOccupationCode(personDetailsPojo.getOccupationCode());
         personDetailsJpa.setSpecificRequirements(personDetailsPojo.getSpecificRequirements());
@@ -154,7 +156,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
         }
     }
 
-    private void setOrganisation(final Organisation organisationJpa, uk.gov.justice.core.courts.Organisation organisationPojo) {
+    private void setOrganisation(final Organisation organisationJpa, final uk.gov.justice.core.courts.Organisation organisationPojo) {
         if (nonNull(organisationJpa) && nonNull(organisationPojo)) {
             organisationJpa.setId(randomUUID());
             organisationJpa.setIncorporationNumber(organisationPojo.getIncorporationNumber());

@@ -65,6 +65,7 @@ public class ResultCacheTest {
     private static final int SEQUENCE = INTEGER.next();
     private static final String REFERENCE = STRING.next();
     private static final int DURATION_SEQUENCE = INTEGER.next();
+    private static final boolean HIDDEN = true;
     private final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
     private final LocalDate hearingDate = LocalDate.parse("2018-06-01");
     @Mock
@@ -213,6 +214,7 @@ public class ResultCacheTest {
         final Integer promptOrder1 = INTEGER.next();
         final String reference1 = STRING.next();
         final Integer durationSequence1 = 0;
+        final Boolean hidden1 = true;
 
         final HashSet<String> keywords1 = new HashSet<>();
         final String keyword_1_common = STRING.next();
@@ -232,6 +234,7 @@ public class ResultCacheTest {
         final Integer promptOrder2 = INTEGER.next();
         final String reference2 = STRING.next();
         final Integer durationSequence2 = 0;
+        final Boolean hidden2 = false;
 
         final HashSet<String> keywords2 = new HashSet<>();
         final String keyword_2_2 = STRING.next();
@@ -253,7 +256,8 @@ public class ResultCacheTest {
                 new HashSet<>(),
                 promptOrder1,
                 reference1,
-                durationSequence1
+                durationSequence1,
+                hidden1
         ));
 
         resultPrompts.add(new ResultPrompt(
@@ -268,7 +272,8 @@ public class ResultCacheTest {
                 new HashSet<>(),
                 promptOrder2,
                 reference2,
-                durationSequence2
+                durationSequence2,
+                hidden2
         ));
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(resultPrompts);
@@ -365,9 +370,9 @@ public class ResultCacheTest {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultPrompt> resultPrompts = new ArrayList<>();
-        resultPrompts.add(new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null));
+        resultPrompts.add(new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null, false));
         final UUID resultDefinitionIdToFind = UUID.randomUUID();
-        final ResultPrompt expectedResultPrompt = new ResultPrompt(UUID.randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null);
+        final ResultPrompt expectedResultPrompt = new ResultPrompt(UUID.randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, false);
         resultPrompts.add(expectedResultPrompt);
 
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
@@ -390,7 +395,7 @@ public class ResultCacheTest {
 
         final HashSet<String> promptKeyWords = new HashSet<>();
         promptKeyWords.add(PROMPT_WORD);
-        final ResultPrompt resultPrompt = new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null);
+        final ResultPrompt resultPrompt = new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null, false);
         final List<ResultPrompt> prompts = newArrayList(resultPrompt);
 
         final ResultPromptSynonym givenResultPromptSynonym = new ResultPromptSynonym();
@@ -432,9 +437,9 @@ public class ResultCacheTest {
     private List<ResultPrompt> prepareResultPrompts() {
         return newArrayList(
                 new ResultPrompt(PROMPT_ID.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE),
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN),
                 new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE)
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN)
         );
     }
 

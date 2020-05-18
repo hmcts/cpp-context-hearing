@@ -11,6 +11,9 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HEST;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.weekCommencing;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.timeOfHearing;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -64,6 +67,8 @@ public class HearingAdjournTransformer {
     private static final int DAY = SIX * MINUTES_IN_HOUR;
     private static final String COMMA_REGEX = "\\s*,\\s*";
     private static final String DATE_FORMATS = "[dd/MM/yyyy HH:mm][yyyy-MM-dd HH:mm]";
+    private static final String DEFAULT_HEARING_START_TIME = "09:00";
+
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
 
@@ -102,18 +107,7 @@ public class HearingAdjournTransformer {
         nextHearingBuilder.withReportingRestrictionReason(resultsShared.getHearing().getReportingRestrictionReason());
         nextHearingBuilder.withEstimatedMinutes(convertDurationIntoMinutes(getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HEST))));
         nextHearingBuilder.withCourtCentre(hearing.getCourtCentre());
-        final Set<String> strEarliestStartDates = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HDATE));
-        final Set<String> strEarliestStartTimes = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTIME));
-        final String strEarliestStartDate = strEarliestStartDates.isEmpty() ? null : strEarliestStartDates.iterator().next();
-        final String strEarliestStartTime = strEarliestStartTimes.isEmpty() ? null : strEarliestStartTimes.iterator().next();
-        LOGGER.info("Hearing start date {} time {}", strEarliestStartDate, strEarliestStartTime);
-        if (strEarliestStartDate == null) {
-            throw new RuntimeException(String.format("cant find earliest starttime (%s) prompt to adjourn hearing %s ", HDATE.name(), hearing.getId()));
-        }
-        final ZonedDateTime startDateTime = convertDateTimeToUTC(strEarliestStartDate, strEarliestStartTime);
-        nextHearingBuilder.withListedStartDateTime(startDateTime);
-
-        LOGGER.info("Hearing start datetime {} ", startDateTime != null ? startDateTime.toString() : startDateTime);
+        nextHearingBuilder.withListedStartDateTime(getStartDateTime(completedResultLines, nextHearingResultDefinitions, hearing.getId()));
 
         final Set<String> strCourthouse =
                 getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HCHOUSE));
@@ -121,10 +115,36 @@ public class HearingAdjournTransformer {
                 getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HCROOM));
 
         final CourtCentre courtCentre = extractCourtCentre(context, strCourthouse, strCourtRoom);
-
         nextHearingBuilder.withCourtCentre(courtCentre);
 
         return new HearingAdjourned(hearing.getId(), asList(nextHearingBuilder.build()));
+    }
+
+    private ZonedDateTime getStartDateTime(final List<ResultLine> completedResultLines, final Map<UUID, NextHearingResultDefinition> nextHearingResultDefinitions, final UUID hearingId) {
+        ZonedDateTime startDateTime = null;
+
+        final Set<String> weekCommencingDate =  getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, weekCommencing));
+        if(weekCommencingDate.isEmpty()) {
+            Set<String> strEarliestStartDates =  getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HDATE));
+            Set<String> strEarliestStartTimes = getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, HTIME));
+            strEarliestStartDates = strEarliestStartDates.isEmpty() ? getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, fixedDate)) : strEarliestStartDates;
+            strEarliestStartTimes = strEarliestStartTimes.isEmpty() ? getDistinctPromptValue(completedResultLines, nextHearingResultDefinitions, getAllPromptUuidsByPromptReference(nextHearingResultDefinitions, timeOfHearing)) : strEarliestStartTimes;
+
+            final String strEarliestStartDate = strEarliestStartDates.isEmpty() ? null : strEarliestStartDates.iterator().next();
+            final String strEarliestStartTime = strEarliestStartTimes.isEmpty() ? null : strEarliestStartTimes.iterator().next();
+            LOGGER.info("Hearing fixed start date {} time {}", strEarliestStartDate, strEarliestStartTime);
+            startDateTime = convertDateTimeToUTC(strEarliestStartDate, strEarliestStartTime);
+
+        } else {
+            startDateTime = weekCommencingDate.isEmpty() ? null : convertDateTimeToUTC(weekCommencingDate.iterator().next(), DEFAULT_HEARING_START_TIME);
+            LOGGER.info("Hearing week commencing start date time {}", startDateTime);
+        }
+
+        if (startDateTime == null) {
+            throw new RuntimeException(String.format("cant find start time (%s) prompts to adjourn hearing %s ", HDATE.name().concat(SPACE).concat(fixedDate.name()).concat(SPACE).concat(weekCommencing.name()), hearingId));
+        }
+
+        return startDateTime;
     }
 
     private List<NextHearingProsecutionCase> processProsecutionCases(final Hearing hearing,

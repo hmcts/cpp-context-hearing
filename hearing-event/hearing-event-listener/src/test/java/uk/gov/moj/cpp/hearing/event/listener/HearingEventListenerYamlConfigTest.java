@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
@@ -104,10 +105,11 @@ public class HearingEventListenerYamlConfigTest {
             CaseDefendantsUpdated.class.getAnnotation(Event.class).value(),
             CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value(),
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
-            OutstandingFinesRequested.class.getAnnotation(Event.class).value()
+            OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
+            BookProvisionalHearingSlots.class.getAnnotation(Event.class).value()
     );
 
-    private Map<String, String> handlerNames = new HashMap<>();
+    private final Map<String, String> handlerNames = new HashMap<>();
     private List<String> yamlEventNames;
 
     @Before
@@ -152,7 +154,7 @@ public class HearingEventListenerYamlConfigTest {
 
     @Test
     public void testEventsHandledProperly() {
-        List<String> eventHandlerNames = new FastClasspathScanner(
+        final List<String> eventHandlerNames = new FastClasspathScanner(
                 "uk.gov.moj.cpp.hearing.domain.event",
                 "uk.gov.moj.cpp.hearing.nows.events",
                 "uk.gov.justice.hearing.courts",

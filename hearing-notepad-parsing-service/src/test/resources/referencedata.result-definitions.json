@@ -34,7 +34,8 @@
           "resultPromptRule": "mandatory",
           "type": "TXT",
           "sequence": 1,
-          "durationSequence": 1
+          "durationSequence": 1,
+          "hidden": false
         },
         {
           "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
@@ -42,7 +43,8 @@
           "resultPromptRule": "mandatory",
           "type": "TXT",
           "sequence": 2,
-          "durationSequence": 2
+          "durationSequence": 2,
+          "hidden": false
         },
         {
           "id": "8df0ec7e-5985-4998-af1a-5da293d9cb3c",
@@ -50,7 +52,8 @@
           "resultPromptRule": "mandatory",
           "type": "TXT",
           "sequence": 3,
-          "durationSequence": 3
+          "durationSequence": 3,
+          "hidden": false
         },
         {
           "id": "a20665cc-6877-40f4-b85e-d4c87e62987b",
@@ -59,6 +62,7 @@
           "type": "INT",
           "sequence": 4,
           "duration": "Years",
+          "hidden": false,
           "wordGroup": [
             "Years"
           ]
@@ -70,6 +74,7 @@
           "sequence": 5,
           "type": "INT",
           "duration": "Months",
+          "hidden": false,
           "wordGroup": [
             "Months"
           ]
@@ -81,6 +86,7 @@
           "type": "INT",
           "sequence": 6,
           "duration": "Weeks",
+          "hidden": false,
           "wordGroup": [
             "Weeks"
           ]
@@ -92,6 +98,7 @@
           "type": "INT",
           "sequence": 7,
           "duration": "Days",
+          "hidden": false,
           "wordGroup": [
             "Days"
           ]
@@ -102,6 +109,7 @@
           "resultPromptRule": "mandatory",
           "type": "FIXL",
           "sequence": 8,
+          "hidden": false,
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
         },
         {
@@ -110,6 +118,7 @@
           "resultPromptRule": "mandatory",
           "type": "FIXL",
           "sequence": 8,
+          "hidden": false,
           "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b"
         },
         {
@@ -117,6 +126,7 @@
           "label": "Reason",
           "resultPromptRule": "optional",
           "type": "TXT",
+          "hidden": false,
           "sequence": 9
         },
         {
@@ -125,6 +135,7 @@
           "resultPromptRule": "mandatory",
           "type": "TXT",
           "sequence": 10,
+          "hidden": false,
           "reference": "HCHOUSE"
         },
         {
@@ -133,6 +144,7 @@
           "resultPromptRule": "mandatory",
           "type": "TXT",
           "sequence": 11,
+          "hidden": false,
           "reference": "HTYPE"
         },
         {
@@ -141,6 +153,7 @@
           "resultPromptRule": "mandatory",
           "type": "FIXLO",
           "sequence": 12,
+          "hidden": false,
           "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b"
         },
         {
@@ -149,6 +162,7 @@
           "resultPromptRule": "mandatory",
           "type": "FIXLOM",
           "sequence": 13,
+          "hidden": false,
           "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b"
         }
       ],
@@ -181,21 +195,24 @@
           "label": "Protected1 person",
           "resultPromptRule": "mandatory",
           "type": "TXT",
-          "sequence": 1
+          "sequence": 1,
+          "hidden": false
         },
         {
           "id": "3054909b-15b6-499f-b44f-67b2b1215c72",
           "label": "Protected1 person's address",
           "resultPromptRule": "mandatory",
           "type": "TXT",
-          "sequence": 2
+          "sequence": 2,
+          "hidden": false
         },
         {
           "id": "8df0ec7e-5985-4998-af1a-5da293d9cb32",
           "label": "Order1 details",
           "resultPromptRule": "mandatory",
           "type": "TXT",
-          "sequence": 3
+          "sequence": 3,
+          "hidden": false
         },
         {
           "id": "a20665cc-6877-40f4-b85e-d4c87e629872",
@@ -204,6 +221,7 @@
           "type": "INT",
           "sequence": 4,
           "duration": "Years",
+          "hidden": false,
           "wordGroup": [
             "Years"
           ]
@@ -215,6 +233,7 @@
           "sequence": 5,
           "type": "INT",
           "duration": "Months",
+          "hidden": false,
           "wordGroup": [
             "Months"
           ]
@@ -226,6 +245,7 @@
           "type": "INT",
           "sequence": 6,
           "duration": "Weeks",
+          "hidden": false,
           "wordGroup": [
             "Weeks"
           ]
@@ -237,6 +257,7 @@
           "type": "INT",
           "sequence": 7,
           "duration": "Days",
+          "hidden": false,
           "wordGroup": [
             "Days"
           ]
@@ -248,6 +269,7 @@
           "type": "FIXL",
           "sequence": 8,
           "duration": "Days",
+          "hidden": false,
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
         },
         {
@@ -255,6 +277,7 @@
           "label": "Reason",
           "resultPromptRule": "optional",
           "type": "TXT",
+          "hidden": false,
           "sequence": 9
         }
       ],

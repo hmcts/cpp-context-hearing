@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -69,12 +70,16 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.extend-hearing received {}", envelope.toObfuscatedDebugString());
         }
-        final ExtendHearingCommand command = convertToObject(envelope, ExtendHearingCommand.class);
 
+        final ExtendHearingCommand command = convertToObject(envelope, ExtendHearingCommand.class);
         final UUID hearingId = command.getHearingId();
-        final UUID applicationId = command.getCourtApplication().getId();
-        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.extend(hearingId, command.getCourtApplication()));
-        aggregate(ApplicationAggregate.class, applicationId, envelope, a -> a.registerHearingId(applicationId, hearingId));
+        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.extend(hearingId, command.getCourtApplication(), command.getProsecutionCases()));
+
+        if(nonNull(command.getCourtApplication())){
+            final UUID applicationId = command.getCourtApplication().getId();
+            aggregate(ApplicationAggregate.class, applicationId, envelope, a -> a.registerHearingId(applicationId, hearingId));
+        }
+
     }
 
 

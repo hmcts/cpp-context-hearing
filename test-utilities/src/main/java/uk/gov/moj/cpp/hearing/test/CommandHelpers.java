@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.test;
 
 import static java.util.stream.Collectors.toList;
 
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
@@ -203,6 +204,14 @@ public class CommandHelpers {
             return initiateHearingCommand.getHearing().getProsecutionCases().get(0);
         }
 
+        public ProsecutionCase getCase(int caseIndex) {
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(caseIndex);
+        }
+
+        public Defendant getDefendant(int caseIndex, int defendantIndex) {
+            return initiateHearingCommand.getHearing().getProsecutionCases().get(caseIndex).getDefendants().get(defendantIndex);
+        }
+
         public uk.gov.justice.core.courts.Defendant getFirstDefendantForFirstCase() {
             return initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0);
         }
@@ -263,7 +272,6 @@ public class CommandHelpers {
         public IndicatedPlea getIndicatedPlea() {
             return this.hearingUpdatePleaCommand.getPleas().get(0).getIndicatedPlea();
         }
-
 
 
     }

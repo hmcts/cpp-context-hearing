@@ -61,6 +61,8 @@ public class GetHearingsTransformer {
     private Defendants.Builder summary(final Defendant defendant) {
         final Defendants.Builder result = Defendants.defendants();
         result.withId(defendant.getId());
+        result.withMasterDefendantId(defendant.getMasterDefendantId());
+        result.withCourtProceedingsInitiated(defendant.getCourtProceedingsInitiated());
         if (defendant.getPersonDefendant() != null && defendant.getPersonDefendant().getPersonDetails() != null) {
             result.withFirstName(defendant.getPersonDefendant().getPersonDetails().getFirstName());
             result.withMiddleName(defendant.getPersonDefendant().getPersonDetails().getMiddleName());

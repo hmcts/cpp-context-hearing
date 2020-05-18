@@ -87,8 +87,6 @@ public class AdjournHearingDelegate {
                 ));
             }
             hearingAdjourned = hearingAdjournTransformer.transform2Adjournment(jsonEnvelope, filteredResultsShared, nextHearingResultDefinitions);
-            final JsonObject adjournHearingRequestPayload = objectToJsonObjectConverter.convert(hearingAdjourned);
-            this.sender.send(this.enveloper.withMetadataFrom(jsonEnvelope, PRIVATE_HEARING_COMMAND_ADJOURN_HEARING).apply(adjournHearingRequestPayload));
         }
         final ResultsShared filteredResultsShared = resultsSharedFilter.filterTargets(resultsShared, t -> t.getApplicationId() != null);
         final Set<UUID> uniqueApplicationIds = filteredResultsShared.getTargets().stream().map(Target::getApplicationId).filter(Objects::nonNull).collect(Collectors.toSet());

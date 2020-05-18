@@ -23,7 +23,8 @@ public enum ResultPromptKey {
     RESULT_PROMPT_WORD_GROUP(17),
     JURISDICTION(18),
     PROMPT_REFERENCE(19),
-    USER_GROUPS(20);
+    USER_GROUPS(20),
+    HIDDEN(21);
 
     private final int order;
 

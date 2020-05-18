@@ -42,6 +42,12 @@
         </dependency>
 
         <dependency>
+            <groupId>uk.gov.moj.cpp.core.domain</groupId>
+            <artifactId>common-core-domain</artifactId>
+            <version>${coredomain.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>commons-collections</groupId>
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>

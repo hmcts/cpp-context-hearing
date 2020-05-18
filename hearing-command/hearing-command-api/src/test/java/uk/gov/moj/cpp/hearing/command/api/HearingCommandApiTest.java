@@ -66,7 +66,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime");
+            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots");
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -141,7 +141,7 @@ public class HearingCommandApiTest {
                 .add("dummyField", "dummyFieldValue")
                 .build();
 
-        JsonEnvelope commandJsonEnvelope = envelopeFrom(metadataWithRandomUUIDAndName(), requestPayload);
+        final JsonEnvelope commandJsonEnvelope = envelopeFrom(metadataWithRandomUUIDAndName(), requestPayload);
 
         hearingCommandApi.shareResults(commandJsonEnvelope);
 

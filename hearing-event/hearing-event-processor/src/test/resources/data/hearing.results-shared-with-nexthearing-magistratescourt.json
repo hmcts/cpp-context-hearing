@@ -144,7 +144,7 @@
                       },
                       {
                         "isFinancialImposition": false,
-                        "promptReference": "HTIME",
+                        "promptReference": "timeOfHearing",
                         "label": "Time Of Hearing",
                         "usergroups": [
                           "DefenseCounsel"
@@ -697,6 +697,26 @@
               "label": "Estimated duration",
               "value": "3 Weeks, 3 Days, 33 Hours, 333 Minutes",
               "welshValue": ""
+            },
+            {
+              "id": "4d3b5e79-f6e9-4720-a76b-13a877640af7",
+              "label": "Booking Reference",
+              "value": "8fc6a7c0-477e-493c-add9-ad4fda322b31"
+            },
+            {
+              "id": "a2238d4f-2b31-4501-8885-26dba30bd138",
+              "label": "Existing Hearing Id",
+              "value": "beafea22-9862-4cf6-b595-25a7436664bb"
+            },
+            {
+              "id": "25f8cf9f-925a-444c-ba7e-aff4811b9a96",
+              "label": "Reserved Judiciary",
+              "value": "false"
+            },
+            {
+              "id":"800db127-e78e-47cd-a602-b1c12a89d90b",
+              "label":"Week Commencing Date",
+              "value": "09 Sep 2019"
             }
           ],
           "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",

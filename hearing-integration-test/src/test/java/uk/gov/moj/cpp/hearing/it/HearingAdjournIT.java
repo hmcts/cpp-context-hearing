@@ -17,19 +17,13 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.NextHearing;
-import uk.gov.justice.core.courts.NextHearingDefendant;
-import uk.gov.justice.core.courts.NextHearingOffence;
-import uk.gov.justice.core.courts.NextHearingProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -67,180 +61,6 @@ public class HearingAdjournIT extends AbstractIT {
     private static final String TIME_OF_HEARING_LABEL = "Time Of Hearing";
     private static final String COURT_ROOM_LABEL = "CourtRoom";
     private static final String COURT_CENTRE_LABEL = "Courthouse name";
-
-    @Test
-    public void shouldRaiseHearingAdjournedEvent() {
-
-        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
-        final UUID resultLineId = randomUUID();
-
-        final UUID primaryResultDefinitionId = UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
-
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
-        hearingOne.getHearing().setHearingLanguage(HearingLanguage.ENGLISH);
-        stubReferenceData(orderedDate, primaryResultDefinitionId, randomUUID(), hearingOne.getHearing().getCourtCentre().getId());
-        stubGetReferenceDataCourtRooms(hearingOne.getHearing().getCourtCentre(), hearingOne.getHearing().getHearingLanguage());
-        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-
-        final List<Target> targets = new ArrayList<>();
-
-        SaveDraftResultCommand saveDraftResultCommand = UseCases.saveDraftResults(getRequestSpec(), with(standardSaveDraftTemplate(hearingOne.getHearingId(),
-                hearingOne.getFirstDefendantForFirstCase().getId(),
-                hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                resultLineId
-        ), saveDraftCommand -> {
-
-            saveDraftCommand.getTarget()
-
-                    .setResultLines(asList(with(resultLine(resultLineId), resultLine ->
-                            resultLine.setResultLabel("Next Hearing")
-                                    .setResultDefinitionId(primaryResultDefinitionId)
-                                    .setOrderedDate(orderedDate)
-                                    .setPrompts(asList(
-                                            prompt().withId(UUID.fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283"))
-                                                    .withLabel(DATE_OF_HEARING_LABEL)
-                                                    .withValue(START_DATE1.format(DATE_TIME_FORMATTER))
-                                                    .withWelshValue(START_DATE1.format(DATE_TIME_FORMATTER))
-                                                    .build(),
-                                            prompt().withId(UUID.fromString("c1116d12-dd35-4171-807a-2cb845357d22"))
-                                                    .withLabel(HEARING_TYPE_LABEL)
-                                                    .withValue("Plea & Trial Preparation")
-                                                    .withWelshValue("WPlea & Trial Preparation")
-                                                    .build(),
-                                            prompt().withId(UUID.fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac"))
-                                                    .withLabel(ESTIMATED_DURATION_LABEL)
-                                                    .withValue("59 Minutes")
-                                                    .withWelshValue("W59 Minutes")
-                                                    .build(),
-                                            prompt().withId(UUID.fromString("9403f0d7-90b5-4377-84b4-f06a77811362"))
-                                                    .withLabel(REMAND_STATUS_LABEL)
-                                                    .withValue("remand in custody")
-                                                    .withWelshValue("remand in custody")
-                                                    .build(),
-                                            prompt().withId(UUID.fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d"))
-                                                    .withLabel(TIME_OF_HEARING_LABEL)
-                                                    .withValue("10:30")
-                                                    .withWelshValue("10:30")
-                                                    .build(),
-                                            prompt().withId(UUID.fromString("5f507153-6dc9-4ec0-94db-c821eff333f1"))
-                                                    .withLabel(COURT_ROOM_LABEL)
-                                                    .withValue("ROOM A")
-                                                    .withWelshValue("ROOM A")
-                                                    .build(),
-                                            prompt().withId(UUID.fromString("7746831a-d5dd-4fa8-ac13-528573948c8a"))
-                                                    .withLabel(COURT_CENTRE_LABEL)
-                                                    .withValue("Wimbledon")
-                                                    .withWelshValue("Wimbledon Magistrates")
-                                                    .build()
-
-                                    ))
-                    )));
-            targets.add(saveDraftCommand.getTarget());
-        }));
-
-
-        final Utilities.EventListener publicHearingAdjourned = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
-                .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
-                        .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
-                        .with(HearingAdjourned::getNextHearings, hasItem(isBean(NextHearing.class)
-                                .with(NextHearing::getType, isBean(HearingType.class)
-                                        .with(HearingType::getDescription, is("Plea & Trial Preparation")))
-                                .with(NextHearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))
-                                .with(NextHearing::getReportingRestrictionReason, is(hearingOne.getHearing().getReportingRestrictionReason()))
-                                .with(NextHearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
-                                .with(NextHearing::getEstimatedMinutes, is(59))
-                                .withValue(nh -> nh.getListedStartDateTime().toLocalDate(), START_DATE1)
-                                .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
-                                        .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_A_ID))
-                                .with(NextHearing::getNextHearingProsecutionCases, hasItem(isBean(NextHearingProsecutionCase.class)
-                                        .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
-                                        .with(NextHearingProsecutionCase::getDefendants, hasItem(isBean(NextHearingDefendant.class)
-                                                .with(NextHearingDefendant::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()))
-                                                .with(NextHearingDefendant::getOffences, hasItem(isBean(NextHearingOffence.class)
-                                                        .with(NextHearingOffence::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId()))))))))
-                        ))
-                ));
-
-
-        UseCases.shareResults(getRequestSpec(), hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
-
-        publicHearingAdjourned.waitFor();
-
-
-        UseCases.saveDraftResults(getRequestSpec(), with(saveDraftResultCommand, saveDraftCommand -> saveDraftCommand.getTarget()
-                .setResultLines(asList(with(resultLine(resultLineId), resultLine -> {
-                    resultLine.setResultLabel("Next Hearing")
-                            .setResultDefinitionId(primaryResultDefinitionId)
-                            .setOrderedDate(orderedDate)
-                            .setPrompts(asList(
-                                    prompt().withId(UUID.fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283"))
-                                            .withLabel(DATE_OF_HEARING_LABEL)
-                                            .withValue(START_DATE2.format(DATE_TIME_FORMATTER))
-                                            .withWelshValue(START_DATE2.format(DATE_TIME_FORMATTER))
-                                            .build(),
-                                    prompt().withId(UUID.fromString("c1116d12-dd35-4171-807a-2cb845357d22"))
-                                            .withLabel(HEARING_TYPE_LABEL)
-                                            .withValue("Sentence")
-                                            .withWelshValue("WSentencing")
-                                            .build(),
-                                    prompt().withId(UUID.fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac"))
-                                            .withLabel(ESTIMATED_DURATION_LABEL)
-                                            .withValue("30 Minutes")
-                                            .withWelshValue("30 Minutes")
-                                            .build(),
-                                    prompt().withId(UUID.fromString("9403f0d7-90b5-4377-84b4-f06a77811362"))
-                                            .withLabel(REMAND_STATUS_LABEL)
-                                            .withValue("remand in custody")
-                                            .withWelshValue("remand in custody")
-                                            .build(),
-                                    prompt().withId(UUID.fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d"))
-                                            .withLabel(TIME_OF_HEARING_LABEL)
-                                            .withValue("11:30")
-                                            .withWelshValue("11:30")
-                                            .build(),
-                                    prompt().withId(UUID.fromString("5f507153-6dc9-4ec0-94db-c821eff333f1"))
-                                            .withLabel(COURT_ROOM_LABEL)
-                                            .withValue("ROOM B")
-                                            .withWelshValue("ROOM B")
-                                            .build(),
-                                    prompt().withId(UUID.fromString("7746831a-d5dd-4fa8-ac13-528573948c8a"))
-                                            .withLabel(COURT_CENTRE_LABEL)
-                                            .withValue("Wimbledon")
-                                            .withWelshValue("Wimbledon Magistrates")
-                                            .build()
-
-                            ));
-                })))));
-
-        final Utilities.EventListener publicHearingAdjourned2 = listenFor("public.hearing.adjourned", DEFAULT_POLL_TIMEOUT_IN_MILLIS)
-                .withFilter(convertStringTo(HearingAdjourned.class, isBean(HearingAdjourned.class)
-                        .with(HearingAdjourned::getAdjournedHearing, is(hearingOne.getHearingId()))
-                        .with(HearingAdjourned::getNextHearings, hasItem(isBean(NextHearing.class)
-                                .with(NextHearing::getType, isBean(HearingType.class)
-                                        .with(HearingType::getDescription, is("Sentence")))
-                                .with(NextHearing::getJurisdictionType, is(hearingOne.getHearing().getJurisdictionType()))
-                                .with(NextHearing::getReportingRestrictionReason, is(hearingOne.getHearing().getReportingRestrictionReason()))
-                                .with(NextHearing::getHearingLanguage, is(hearingOne.getHearing().getHearingLanguage()))
-                                .with(NextHearing::getEstimatedMinutes, is(30))
-                                .with(NextHearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .withValue(CourtCentre::getId, WIMBLEDON_COURT_CENTRE_ID)
-                                        .withValue(CourtCentre::getRoomId, WIMBLEDON_ROOM_B_ID)
-                                )
-
-                                .with(NextHearing::getNextHearingProsecutionCases, hasItem(isBean(NextHearingProsecutionCase.class)
-                                        .with(NextHearingProsecutionCase::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getId()))
-                                        .with(NextHearingProsecutionCase::getDefendants, hasItem(isBean(NextHearingDefendant.class)
-                                                .with(NextHearingDefendant::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()))
-                                                .with(NextHearingDefendant::getOffences, hasItem(isBean(NextHearingOffence.class)
-                                                        .with(NextHearingOffence::getId, is(hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId()))))))))
-                        ))));
-
-
-        UseCases.shareResults(getRequestSpec(), hearingOne.getHearingId(), standardShareResultsCommandTemplate(hearingOne.getHearingId()), targets);
-
-        publicHearingAdjourned2.waitFor();
-    }
 
     @Test
     public void shouldRaiseHearingAdjournedEventForStandAloneApplication() {

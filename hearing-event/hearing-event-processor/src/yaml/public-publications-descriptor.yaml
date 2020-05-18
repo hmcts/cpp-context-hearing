@@ -73,6 +73,10 @@ subscriptions_descriptor:
         - name: public.hearing.adjourned
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-adjourned.json
 
+      # Hearing Slots Provisionally Booked
+        - name: public.hearing.hearing-slots-provisionally-booked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-slots-provisionally-booked.json
+
       # Hearing Adjourned
         - name: public.hearing.defendant-attendance-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-defendant-attendance-updated.json

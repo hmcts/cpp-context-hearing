@@ -4,6 +4,8 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.PleaValue;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -30,6 +33,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DelegatedPowers;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -37,8 +41,13 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
 import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.json.Json;
@@ -67,6 +76,12 @@ public class InitiateHearingEventListenerTest {
 
     @Mock
     private PleaJPAMapper pleaJPAMapper;
+
+    @Mock
+    private ProsecutionCaseRepository prosecutionCaseRepository;
+
+    @Mock
+    private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
 
     @Mock
     private OffenceRepository offenceRepository;
@@ -105,18 +120,68 @@ public class InitiateHearingEventListenerTest {
     @Test
     public void shouldExtendHearing() {
 
-        final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build());
+        final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
+        prosecutionCases.add(ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).build());
+        final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), prosecutionCases);
 
         Hearing hearing = new Hearing();
         hearing.setCourtApplicationsJson("zyz");
         final String expectedUpdatedCourtApplicationJson = "abcdef";
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCaseSet = new HashSet<>();
+        uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntitiy = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCaseSet.add(prosecutionCaseEntitiy);
         when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.addOrUpdateCourtApplication(hearing.getCourtApplicationsJson(), hearingExtended.getCourtApplication())).thenReturn(expectedUpdatedCourtApplicationJson);
-
+        when(prosecutionCaseJPAMapper.toJPA(hearing,prosecutionCases)).thenReturn(prosecutionCaseSet);
+        when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntitiy);
         initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
         final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
 
         verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        verify(prosecutionCaseRepository).save(any());
+
+        final String updatedCourtApplicationsJson = hearingExArgumentCaptor.getValue().getCourtApplicationsJson();
+        assertThat(updatedCourtApplicationsJson, is(expectedUpdatedCourtApplicationJson));
+    }
+
+    @Test
+    public void shouldExtendHearing_whenCourtApplicationIsNull() {
+
+        final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
+        prosecutionCases.add(ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).build());
+        final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), null, prosecutionCases);
+
+        Hearing hearing = new Hearing();
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCaseSet = new HashSet<>();
+        uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntitiy = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCaseSet.add(prosecutionCaseEntitiy);
+        when(prosecutionCaseJPAMapper.toJPA(hearing,prosecutionCases)).thenReturn(prosecutionCaseSet);
+        when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntitiy);
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+
+        verify(hearingRepository, never()).save(any());
+        verify(prosecutionCaseRepository).save(any());
+    }
+
+    @Test
+    public void shouldExtendHearing_whenProsecutionCaseIsNull() {
+
+        final HearingExtended hearingExtended = new HearingExtended(UUID.randomUUID(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null);
+
+        Hearing hearing = new Hearing();
+        hearing.setCourtApplicationsJson("zyz");
+        final String expectedUpdatedCourtApplicationJson = "abcdef";
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCaseSet = new HashSet<>();
+        uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntitiy = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCaseSet.add(prosecutionCaseEntitiy);
+        when(hearingRepository.findBy(hearingExtended.getHearingId())).thenReturn(hearing);
+        when(hearingJPAMapper.addOrUpdateCourtApplication(hearing.getCourtApplicationsJson(), hearingExtended.getCourtApplication())).thenReturn(expectedUpdatedCourtApplicationJson);
+        initiateHearingEventListener.hearingExtended(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(hearingExtended)));
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository, times(1)).save(hearingExArgumentCaptor.capture());
+        verify(prosecutionCaseRepository,never()).save(any());
+
         final String updatedCourtApplicationsJson = hearingExArgumentCaptor.getValue().getCourtApplicationsJson();
         assertThat(updatedCourtApplicationsJson, is(expectedUpdatedCourtApplicationJson));
     }

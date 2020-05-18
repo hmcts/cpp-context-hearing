@@ -363,3 +363,12 @@ rule "Command - API - Action - hearing.record-session-time"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.book-provisional-hearing-slots"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.book-provisional-hearing-slots");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Associate", "Legal Advisers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end

@@ -99,6 +99,7 @@ public class Processor {
             setComponentType(promptChoice, resultPromptRule, resultPrompt);
             promptChoice.setFixedList(resultPrompt.getFixedList());
             promptChoice.setDurationSequence(resultPrompt.getDurationSequence());
+            promptChoice.setHidden(resultPrompt.getHidden());
             return promptChoice;
         }).collect(toList()));
         return knowledge;

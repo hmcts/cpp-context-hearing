@@ -7,6 +7,7 @@ import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptKey.DURATION_ELEMENT;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptKey.FIXED_LIST_UUID;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptKey.HIDDEN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptKey.LABEL;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptKey.PROMPT_REFERENCE;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptKey.PROMPT_TYPE;
@@ -65,6 +66,7 @@ public final class StringToResultPromptConverter {
                 resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId));
             }
             resultPrompt.setReference(values[PROMPT_REFERENCE.getOrder()]);
+            resultPrompt.setHidden(Boolean.valueOf(values[HIDDEN.getOrder()]));
             return resultPrompt;
         }
         return null;

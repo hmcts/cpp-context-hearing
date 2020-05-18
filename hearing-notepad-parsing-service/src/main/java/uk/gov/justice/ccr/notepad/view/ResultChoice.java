@@ -10,7 +10,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "code",
         "label",
         "level",
-        "type"
+        "type",
+        "hidden"
 
 })
 public class ResultChoice implements Comparable<ResultChoice> {
@@ -22,6 +23,8 @@ public class ResultChoice implements Comparable<ResultChoice> {
     private String level;
 
     private ResultType type;
+
+    private Boolean hidden;
 
     public ResultChoice(String code, String label) {
         this.code = code;
@@ -52,6 +55,13 @@ public class ResultChoice implements Comparable<ResultChoice> {
         type = value;
     }
 
+    public Boolean getHidden() {
+        return hidden;
+    }
+
+    public void setHidden(final Boolean hidden) {
+        this.hidden = hidden;
+    }
 
     @Override
     public boolean equals(Object o) {

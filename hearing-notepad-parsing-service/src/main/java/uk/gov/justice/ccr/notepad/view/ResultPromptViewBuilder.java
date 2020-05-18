@@ -37,7 +37,7 @@ public class ResultPromptViewBuilder {
             }
             if (ONEOF.equals(promptChoice.getComponentType())) {
                 if (promptChoice.getType() != DURATION) {
-                    childrenList.add(new Children(promptChoice.getLabel(), promptChoice.getType(), promptChoice.getFixedList(), promptChoice.getChildren()));
+                    childrenList.add(new Children(promptChoice.getLabel(), promptChoice.getType(), promptChoice.getFixedList(), promptChoice.getChildren(), promptChoice.getCode()));
                     promptChoice.setVisible(false);
                 } else {
                     childDurationPrompt.putIfAbsent(label, Lists.newArrayList());

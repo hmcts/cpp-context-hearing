@@ -535,6 +535,8 @@ public class TestTemplates {
 
         defendant.setId(randomUUID());
 
+        defendant.setMasterDefendantId(randomUUID());
+
         defendant.setProsecutionCaseId(randomUUID());
 
         defendant.setNumberOfPreviousConvictionsCited(INTEGER.next());

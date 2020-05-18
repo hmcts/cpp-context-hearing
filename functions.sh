@@ -226,7 +226,7 @@ Usage: ${0##*/} [OPTION]
 Examples:
 ${0##*/} -a	Skip all tests
 ${0##*/} -u	Skip the unit tests
-${0##*/} -i	Skip the helth check and integration tests 
+${0##*/} -i	Skip the health check and integration tests
 
 EOF
   exit 1

@@ -21,6 +21,7 @@ public class Children {
     private String label;
     private ResultType type;
     private Set<String> fixedList;
+    private String code;
 
     @JsonProperty(value = "children")
     private List<Children> childrenList;
@@ -31,6 +32,14 @@ public class Children {
         this.type = type;
         this.fixedList = fixedList;
         this.childrenList = childrenList;
+    }
+
+    public Children(final String label,final ResultType type,final Set<String> fixedList,final List<Children> childrenList, final String code) {
+        this.label = label;
+        this.type = type;
+        this.fixedList = fixedList;
+        this.childrenList = childrenList;
+        this.code = code;
     }
 
     public Children(String label, ResultType type) {
@@ -45,6 +54,14 @@ public class Children {
     public Set<String> getFixedList() { return fixedList; }
 
     public void setFixedList(final Set<String> fixedList) { this.fixedList = fixedList; }
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(final String code) {
+        this.code = code;
+    }
 
     @JsonProperty(value = "children")
     public List<Children> getChildrenList() { return childrenList; }

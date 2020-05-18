@@ -19,12 +19,14 @@ import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
+import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -33,6 +35,7 @@ import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.transaction.Transactional;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +49,9 @@ public class InitiateHearingEventListener {
     private HearingRepository hearingRepository;
 
     @Inject
+    private ProsecutionCaseRepository prosecutionCaseRepository;
+
+    @Inject
     private OffenceRepository offenceRepository;
 
     @Inject
@@ -53,6 +59,9 @@ public class InitiateHearingEventListener {
 
     @Inject
     private HearingJPAMapper hearingJPAMapper;
+
+    @Inject
+    private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
 
     @Inject
     private PleaJPAMapper pleaJPAMapper;
@@ -87,11 +96,16 @@ public class InitiateHearingEventListener {
 
         final Hearing hearingEntity = hearingRepository.findBy(hearingExtended.getHearingId());
 
-        final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), hearingExtended.getCourtApplication());
+        if(nonNull(hearingExtended.getCourtApplication())){
+            final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), hearingExtended.getCourtApplication());
+            hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
+            hearingRepository.save(hearingEntity);
+        }
 
-        hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
-
-        hearingRepository.save(hearingEntity);
+        if(CollectionUtils.isNotEmpty(hearingExtended.getProsecutionCases())){
+            hearingExtended.getProsecutionCases()
+                    .forEach(p->prosecutionCaseRepository.save(prosecutionCaseJPAMapper.toJPA(hearingEntity,p)));
+        }
     }
 
     @Transactional

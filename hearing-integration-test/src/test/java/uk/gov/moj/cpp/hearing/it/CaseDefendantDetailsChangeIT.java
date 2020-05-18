@@ -81,6 +81,7 @@ public class CaseDefendantDetailsChangeIT extends AbstractIT {
                                 .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
                                 .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                                 .with(Defendant::getId, is(defendantUpdates.getFirstDefendant().getId()))
+                                                .with(Defendant::getMasterDefendantId, is(defendantUpdates.getFirstDefendant().getMasterDefendantId()))
                                                 .with(Defendant::getProsecutionCaseId, is(defendantUpdates.getFirstDefendant().getProsecutionCaseId()))
                                                 .with(Defendant::getNumberOfPreviousConvictionsCited, is(defendantUpdates.getFirstDefendant().getNumberOfPreviousConvictionsCited()))
                                                 .with(Defendant::getProsecutionAuthorityReference, is(defendantUpdates.getFirstDefendant().getProsecutionAuthorityReference()))

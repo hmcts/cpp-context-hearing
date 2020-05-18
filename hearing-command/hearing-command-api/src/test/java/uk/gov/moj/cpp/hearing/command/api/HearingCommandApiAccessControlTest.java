@@ -37,7 +37,6 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_REMOVE_RESPONDENT_COUNSEL = "hearing.remove-respondent-counsel";
     private static final String ACTION_NAME_UPDATE_RESPONDENT_COUNSEL = "hearing.update-respondent-counsel";
 
-
     private static final String ACTION_NAME_ADD_APPLICANT_COUNSEL = "hearing.add-applicant-counsel";
     private static final String ACTION_NAME_REMOVE_APPLICANT_COUNSEL = "hearing.remove-applicant-counsel";
     private static final String ACTION_NAME_UPDATE_APPLICANT_COUNSEL = "hearing.update-applicant-counsel";
@@ -48,6 +47,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES = "hearing.add-request-for-outstanding-fines";
 
     private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
+    private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -540,6 +540,26 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUserInAuthorisedGroupToPublishHearingEventForAllCrownCourts() {
         final Action action = createActionFor(ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group"))
+                .willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToBookProvisionalHearingSlots() {
+        final Action action = createActionFor(ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Associate", "Legal Advisers", "Court Clerks"))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUserInAuthorisedGroupToBookProvisionalHearingSlots() {
+        final Action action = createActionFor(ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group"))
                 .willReturn(false);
 

@@ -150,6 +150,10 @@ subscriptions_descriptor:
         - name: hearing.change-hearing-detail
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/change-hearing-detail.json
 
+        # Hearing Book Slots Provisionally
+        - name: hearing.event.book-provisional-hearing-slots
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.event.book-provisional-hearing-slots.json
+
         # Hearing Adjourn
         - name: hearing.event.hearing-adjourned
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-adjourned.json
