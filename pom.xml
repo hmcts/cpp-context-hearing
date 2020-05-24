@@ -90,7 +90,6 @@
                     <attachClasses>true</attachClasses>
                 </configuration>
             </plugin>
-
         </plugins>
     </build>
 
