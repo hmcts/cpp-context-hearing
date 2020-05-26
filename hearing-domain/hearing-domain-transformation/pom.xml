@@ -13,5 +13,6 @@
         <module>hearing-domain-transformation-anonymise</module>
         <module>hearing-domain-transformation-spiresults-prodfix</module>
         <module>hearing-domain-transformation-for-corechanges</module>
+        <module>hearing-domain-transformations-pilotdata</module>
     </modules>
 </project>

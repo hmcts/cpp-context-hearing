@@ -26,7 +26,8 @@
     "title",
     "noteType",
     "fundingType",
-    "courtApplicationPartyType"
+    "courtApplicationPartyType",
+    "attendanceType"
   ],
   "events": [
     {
@@ -76,8 +77,7 @@
       "fieldsToBeIgnored": [
         "$.variantDirectory[*].value.status",
         "$.targets[*].resultLines[*].level",
-        "$.savedTargets[*].resultLines[*].level",
-        "$.hearing.defendantAttendance[*].attendanceDays[*].attendanceType"
+        "$.savedTargets[*].resultLines[*].level"
       ]
     },
     {
@@ -113,7 +113,6 @@
     {
       "eventName": "hearing.defendant-attendance-updated",
       "fieldsToBeIgnored": [
-        "$.attendanceDay.attendanceType"
       ]
     }
   ]
