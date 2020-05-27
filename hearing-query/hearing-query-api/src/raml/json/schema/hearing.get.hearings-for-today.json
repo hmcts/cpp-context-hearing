@@ -123,6 +123,22 @@
           "items": {
             "$ref": "#/definitions/respondent"
           }
+        },
+        "type": {
+          "description": "The type of application made to court for judicial decision.  Taken from reference data",
+          "type": "object",
+          "properties": {
+            "applicationType": {
+              "description": "The CJS Title for the court application type",
+              "type": "string"
+            },
+            "applicationTypeWelsh": {
+              "type": "string"
+            },
+            "applicationLegislation": {
+              "type": "string"
+            }
+          }
         }
       }
     },

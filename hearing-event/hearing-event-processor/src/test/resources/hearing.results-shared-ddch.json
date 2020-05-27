@@ -1,0 +1,641 @@
+{
+  "hearingId": "47ec51e1-0215-11ea-9bbd-b1f5a4493d17",
+  "sharedTime": "2019-11-08T11:06:41.584Z",
+  "courtClerk": {
+    "firstName": "Robert",
+    "lastName": "Barnes",
+    "userId": "8959b8b5-92bd-4ada-96f4-7ac9d482671a"
+  },
+  "hearing": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+          "organisation": {
+            "name": "Testing Organisation Name"
+          },
+          "personDetails": {
+            "firstName": "Bryce",
+            "gender": "MALE",
+            "lastName": "Hammes",
+            "middleName": "Test"
+          },
+          "synonym": "Attendees"
+        },
+        "applicationReceivedDate": "2019-06-05",
+        "applicationReference": "17QV484066",
+        "applicationStatus": "DRAFT",
+        "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
+        "respondents": [
+          {
+            "partyDetails": {
+              "id": "421b0a0a-a7f1-46f9-b142-f85d5d3e95a2",
+              "organisation": {
+                "name": "Responding Organisation Name"
+              },
+              "personDetails": {
+                "firstName": "America",
+                "gender": "MALE",
+                "lastName": "Ryan"
+              },
+              "synonym": "Respondent"
+            }
+          }
+        ],
+        "type": {
+          "applicantSynonym": "Defendant",
+          "applicationCategory": "CO",
+          "applicationCode": "MC80527",
+          "applicationJurisdictionType": "EITHER",
+          "applicationLegislation": "In accordance with section 14 of the Magistrates' Courts Act 1980",
+          "applicationType": "Appearance to make statutory declaration",
+          "id": "a1d421a1-4f0f-4c9f-8a20-a960e25a0894",
+          "linkType": "EITHER",
+          "respondentSynonym": "Prosecutor"
+        }
+      }
+    ],
+    "courtCentre": {
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01",
+      "welshName": "Llys Ynadon Lavender Hill",
+      "welshRoomName": "Ystafell 01"
+    },
+    "defendantReferralReasons": [
+      {
+        "defendantId": "47ec51e0-0215-11ea-9bbd-b1f5a4493d17",
+        "description": "defendantReferralReasons",
+        "id": "47ec51e2-0215-11ea-9bbd-b1f5a4493d17"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 40,
+        "listingSequence": 1,
+        "sittingDay": "2019-11-08T10:48:21.247Z"
+      }
+    ],
+    "id": "47ec51e1-0215-11ea-9bbd-b1f5a4493d17",
+    "judiciary": [
+      {
+        "firstName": "Janie",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "47ecc710-0215-11ea-9bbd-b1f5a4493d17",
+        "judicialRoleType": {
+          "judiciaryType": "MAGISTRATE"
+        },
+        "lastName": "Leclerc",
+        "middleName": "Fanny",
+        "title": "Mrs"
+      }
+    ],
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "SJP Referral",
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "additionalNationalityCode": "GBP",
+                  "additionalNationalityId": "25f26487-6065-4680-9706-9398fa0ea030",
+                  "address": {
+                    "address1": "233",
+                    "address2": "Fuse Road",
+                    "address3": "Croydon",
+                    "address4": "SouthLondon ",
+                    "address5": "London",
+                    "postcode": "U5K 9LX"
+                  },
+                  "contact": {
+                    "fax": "765997700",
+                    "home": "759019681",
+                    "mobile": "1444010616",
+                    "primaryEmail": "zdivwdsblf@gxvm7kqbh4.duzrohmbtt",
+                    "secondaryEmail": "dusl1j0oxw@0rzelb2mln.rvjnuth3ar",
+                    "work": "584591171"
+                  },
+                  "dateOfBirth": "2017-03-26",
+                  "disabilityStatus": "No",
+                  "ethnicity": {
+                    "observedEthnicityCode": "British",
+                    "observedEthnicityDescription": "observedEthnicityDescription",
+                    "observedEthnicityId": "95be16c7-91c2-4b09-9639-535c54f03a0e",
+                    "selfDefinedEthnicityCode": "British",
+                    "selfDefinedEthnicityDescription": "selfDefinedEthnicityDescription",
+                    "selfDefinedEthnicityId": "95be16c7-91c2-4b09-9639-535c54f03a0e"
+                  },
+                  "firstName": "FirstName",
+                  "gender": "MALE",
+                  "interpreterLanguageNeeds": "No",
+                  "lastName": "LastName",
+                  "middleName": "MiddleName",
+                  "nationalInsuranceNumber": "EZ814857C",
+                  "nationalityCode": "GBP",
+                  "nationalityId": "47688578-d9a6-497b-8a73-340043448df6",
+                  "occupation": "Service",
+                  "occupationCode": "SER",
+                  "specificRequirements": "No",
+                  "title": "MR"
+                },
+                "role": "ABC"
+              }
+            ],
+            "defenceOrganisation": {
+              "address": {
+                "address1": "defenceOrganisation",
+                "address2": "225",
+                "address3": "FuseRoad",
+                "address4": "East Croydon",
+                "address5": "SouthLondon",
+                "postcode": "LN72 9NG"
+              },
+              "contact": {
+                "fax": "765997700",
+                "home": "759019681",
+                "mobile": "1444010616",
+                "primaryEmail": "zdivwdsblf@gxvm7kqbh4.duzrohmbtt",
+                "secondaryEmail": "dusl1j0oxw@0rzelb2mln.rvjnuth3ar",
+                "work": "584591171"
+              },
+              "incorporationNumber": "cegH7rIgdX",
+              "name": "Test",
+              "registeredCharityNumber": "TestCharity"
+            },
+            "id": "47ec51e0-0215-11ea-9bbd-b1f5a4493d17",
+            "legalEntityDefendant": {
+              "organisation": {
+                "address": {
+                  "address1": "legalEntityDefendant",
+                  "address2": "444 Fuse Road",
+                  "address3": "Esst Croydon",
+                  "address4": "South London",
+                  "address5": "London",
+                  "postcode": "N08 9JD"
+                },
+                "contact": {
+                  "fax": "765997700",
+                  "home": "759019681",
+                  "mobile": "1444010616",
+                  "primaryEmail": "zdivwdsblf@gxvm7kqbh4.duzrohmbtt",
+                  "secondaryEmail": "dusl1j0oxw@0rzelb2mln.rvjnuth3ar",
+                  "work": "584591171"
+                },
+                "incorporationNumber": "Jwo9KG3JWW",
+                "name": "TestNameLei",
+                "registeredCharityNumber": "TestCharityLEi"
+              }
+            },
+            "numberOfPreviousConvictionsCited": 1950828793,
+            "offences": [
+              {
+                "arrestDate": "2018-01-01",
+                "chargeDate": "2018-01-31",
+                "count": 2,
+                "endDate": "2018-08-30",
+                "id": "47ecee20-0215-11ea-9bbd-b1f5a4493d17",
+                "modeOfTrial": "modeOfTrial",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2018-06-24",
+                  "notifiedPleaValue": "NO_NOTIFICATION",
+                  "offenceId": "2f7810cc-7bc4-4015-9469-675a337e9ee5"
+                },
+                "offenceCode": "OFF123",
+                "offenceDefinitionId": "ec09757a-bf2a-4f30-9887-94e0eee26206",
+                "offenceFacts": {
+                  "alcoholReadingAmount": 100,
+                  "alcoholReadingMethodCode": "pipe",
+                  "vehicleRegistration": "ABC bbc"
+                },
+                "offenceLegislation": "Contrary to section 1(1)    of the Criminal Attempts Act 1981.",
+                "offenceLegislationWelsh": "Yn groes i Adran 1(1) Deddf Ymgeisiau i Droseddu 1981.",
+                "offenceTitle": "Section 18 - attempt wounding with intent",
+                "offenceTitleWelsh": "Adran 18 - ymgais i glwyfo gan fwriadu",
+                "orderIndex": 634464054,
+                "startDate": "2018-11-20",
+                "wording": "Offence wording",
+                "wordingWelsh": "Offence wording in Welsh"
+              }
+            ],
+            "personDefendant": {
+              "personDetails": {
+                "additionalNationalityCode": "GBP",
+                "additionalNationalityId": "25f26487-6065-4680-9706-9398fa0ea030",
+                "address": {
+                  "address1": "8888 Fuse Road",
+                  "address2": "East Croydon",
+                  "address3": "South London",
+                  "address4": "London",
+                  "address5": "UK",
+                  "postcode": "U5K 9LX"
+                },
+                "contact": {
+                  "fax": "02012345678",
+                  "home": "02012345678",
+                  "mobile": "1468105168",
+                  "primaryEmail": "iw0e4x5bne@yc1qeldnlc.fgxm31rcjh",
+                  "secondaryEmail": "r1biivekjx@7f8x6b4hks.dv3oqgbmkq",
+                  "work": "592199886"
+                },
+                "dateOfBirth": "2000-03-26",
+                "disabilityStatus": "Na",
+                "ethnicity": {
+                  "observedEthnicityCode": "British",
+                  "observedEthnicityDescription": "observedEthnicityDescription",
+                  "observedEthnicityId": "95be16c7-91c2-4b09-9639-535c54f03a0e",
+                  "selfDefinedEthnicityCode": "British",
+                  "selfDefinedEthnicityDescription": "selfDefinedEthnicityDescription",
+                  "selfDefinedEthnicityId": "95be16c7-91c2-4b09-9639-535c54f03a0e"
+                },
+                "firstName": "Miguel",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "NA",
+                "lastName": "Torrini",
+                "middleName": "",
+                "nationalInsuranceNumber": "EZ814857C",
+                "nationalityCode": "GBP",
+                "nationalityId": "47688578-d9a6-497b-8a73-340043448df6",
+                "occupation": "Serviec",
+                "occupationCode": "Ser",
+                "specificRequirements": "Na",
+                "title": "MR"
+              }
+            },
+            "prosecutionAuthorityReference": "prosecutionAuthorityReference",
+            "prosecutionCaseId": "9d084d07-2fdb-421d-99a0-51fe67c0d35f"
+          }
+        ],
+        "id": "47ecc711-0215-11ea-9bbd-b1f5a4493d17",
+        "initiationCode": "J",
+        "originatingOrganisation": "G01FT01AB",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "TFL",
+          "prosecutionAuthorityId": "47ecee21-0215-11ea-9bbd-b1f5a4493d17",
+          "caseURN": "68CY557175"
+        }
+      }
+    ],
+    "reportingRestrictionReason": "Automatic anonymity under the Sexual Offences (Amendment) Act 1992",
+    "type": {
+      "description": "68CY557175",
+      "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {},
+  "targets": [
+    {
+      "defendantId": "47ec51e0-0215-11ea-9bbd-b1f5a4493d17",
+      "hearingId": "47ec51e1-0215-11ea-9bbd-b1f5a4493d17",
+      "offenceId": "47ecee20-0215-11ea-9bbd-b1f5a4493d17",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "2493a3a4-918a-4b83-b3c0-d221ff83d6fc",
+              "label": "Defendant excused attendance",
+              "value": "true",
+              "welshValue": ""
+            },
+            {
+              "id": "80be59c8-ffaa-4570-b40a-f3a085058208",
+              "label": "Bail condition reason",
+              "value": "In the defendant's own interests,For the defendant's own welfare",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "3a529001-2f43-45ba-a0a8-d3ced7e9e7ad",
+          "resultLabel": "Remanded on conditional bail",
+          "resultLineId": "4da36ac9-856a-4e07-ae87-6dd9927f77ee",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": ["05a72db5-adf1-4270-bc93-cd426a739d9f", "ab38b24b-0e77-4aaf-b8d6-c9207b30b35c"],
+          "parentResultLineIds": []
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+              "label": "Time of hearing",
+              "value": "10:00",
+              "welshValue": ""
+            },
+            {
+              "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
+              "label": "Courthouse name",
+              "value": "Coventry Crown Court",
+              "welshValue": ""
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "value": "Breach",
+              "welshValue": ""
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "value": "1 Weeks",
+              "welshValue": ""
+            },
+            {
+              "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+              "label": "Remand Status",
+              "value": "Defendant not Present",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "464c6afa-4e28-4af6-b82f-72680570d803",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["05a72db5-adf1-4270-bc93-cd426a739d9f"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+              "label": "Time of hearing",
+              "value": "11:00",
+              "welshValue": ""
+            },
+            {
+              "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
+              "label": "Courthouse name",
+              "value": "Liverpool Crown Court",
+              "welshValue": ""
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "value": "Contempt",
+              "welshValue": ""
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "value": "1 Days",
+              "welshValue": ""
+            },
+            {
+              "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+              "label": "Remand Status",
+              "value": "Remand in Custody",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "53efa5f1-9e2f-40ea-aba9-5145d1bec83c",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["05a72db5-adf1-4270-bc93-cd426a739d9f"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+              "label": "Time of hearing",
+              "value": "12:00",
+              "welshValue": ""
+            },
+            {
+              "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
+              "label": "Courthouse name",
+              "value": "Croydon Magistrates' Court",
+              "welshValue": ""
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "value": "Execution of Bench Warrant",
+              "welshValue": ""
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "value": "1 Hours",
+              "welshValue": ""
+            },
+            {
+              "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+              "label": "Remand Status",
+              "value": "Remand in Custody",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "127e9776-5559-40de-a572-55ac2a96d9e8",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["05a72db5-adf1-4270-bc93-cd426a739d9f"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+              "label": "Time of hearing",
+              "value": "12:00",
+              "welshValue": ""
+            },
+            {
+              "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
+              "label": "Courthouse name",
+              "value": "Aberystwyth Magistrates' Court",
+              "welshValue": ""
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "value": "Application",
+              "welshValue": ""
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "value": "30 Minutes",
+              "welshValue": ""
+            },
+            {
+              "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+              "label": "Remand Status",
+              "value": "Remand in Custody",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "cfb3f182-44a6-49e0-b35d-8b5d7f9b6d4b",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["05a72db5-adf1-4270-bc93-cd426a739d9f"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+              "label": "Time of hearing",
+              "value": "11:01",
+              "welshValue": ""
+            },
+            {
+              "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
+              "label": "Courthouse name",
+              "value": "Barkingside Magistrates' Court",
+              "welshValue": ""
+            },
+            {
+              "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+              "label": "Hearing type",
+              "value": "Contempt",
+              "welshValue": ""
+            },
+            {
+              "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+              "label": "Estimated duration",
+              "value": "1 Days",
+              "welshValue": ""
+            },
+            {
+              "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+              "label": "Remand Status",
+              "value": "Defendant not Present",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+          "resultLabel": "Next hearing in Crown Court",
+          "resultLineId": "0d93a69f-4ed8-4d81-b328-648d11722938",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["05a72db5-adf1-4270-bc93-cd426a739d9f"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "2fc5fe29-28f8-47dc-86f9-7b3221a71975",
+              "label": "Specify qualified person to conduct assessments/reports",
+              "value": "test person",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "525c4660-9a0b-4a86-80fc-0efce539d6a5",
+          "resultLabel": "Bail condition: Assessments/Reports - undergo an assessment for dependency on Class A drugs and participate in any follow-up assessment, assistance or treatment considered appropriate",
+          "resultLineId": "e00e4bba-4982-4cf6-b25b-a15c5918cb56",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["ab38b24b-0e77-4aaf-b8d6-c9207b30b35c"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [],
+          "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+          "resultLabel": "Next hearing",
+          "resultLineId": "05a72db5-adf1-4270-bc93-cd426a739d9f",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": ["464c6afa-4e28-4af6-b82f-72680570d803","53efa5f1-9e2f-40ea-aba9-5145d1bec83c", "127e9776-5559-40de-a572-55ac2a96d9e8","cfb3f182-44a6-49e0-b35d-8b5d7f9b6d4b", "0d93a69f-4ed8-4d81-b328-648d11722938"],
+          "parentResultLineIds": ["4da36ac9-856a-4e07-ae87-6dd9927f77ee"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [],
+          "resultDefinitionId": "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
+          "resultLabel": "Bail conditions",
+          "resultLineId": "ab38b24b-0e77-4aaf-b8d6-c9207b30b35c",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": ["e00e4bba-4982-4cf6-b25b-a15c5918cb56"],
+          "parentResultLineIds": ["4da36ac9-856a-4e07-ae87-6dd9927f77ee"]
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [],
+          "resultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
+          "resultLabel": "Adjournment reasons",
+          "resultLineId": "b753c08f-3190-44b2-a10d-c7b82aa897f5",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": ["d8e4243b-1443-4071-8b3e-679fcfd1a6e7"],
+          "parentResultLineIds": []
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-11-08",
+          "prompts": [
+            {
+              "id": "cecebc7e-d1e8-45f3-b042-1aae41b8cfbf",
+              "label": "Additional information",
+              "value": "test additional information",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "c93c5a18-838a-41d3-a017-c203b37f5655",
+          "resultLabel": "Adjournment reason: At request of the defence",
+          "resultLineId": "d8e4243b-1443-4071-8b3e-679fcfd1a6e7",
+          "sharedDate": "2019-11-08",
+          "childResultLineIds": [],
+          "parentResultLineIds": ["b753c08f-3190-44b2-a10d-c7b82aa897f5"]
+        }
+      ],
+      "targetId": "849864d0-0215-11ea-a22b-f7a33b687d55"
+    }
+  ],
+  "savedTargets": [],
+  "defendantDetailsChanged": [
+    "47ec51e0-0215-11ea-9bbd-b1f5a4493d17"
+  ]
+}

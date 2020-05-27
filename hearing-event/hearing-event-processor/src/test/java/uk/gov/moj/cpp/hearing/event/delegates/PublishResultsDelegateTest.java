@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -51,6 +52,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.event.CommandEventTestBase;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelper;
@@ -257,6 +259,74 @@ public class PublishResultsDelegateTest {
         final Hearing hearingIn = resultsShared.getHearing();
 
 
+        verify(custodyTimeLimitCalculator, times(1)).calculate(custodyLimitCalculatorHearingIn.capture());
+        final Hearing calHearingIn = custodyLimitCalculatorHearingIn.getValue();
+        Assert.assertEquals(resultsShared.getHearing(), calHearingIn);
+
+
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+    }
+
+
+    @Test
+    public void shareResultsIncludingDDCH() throws IOException {
+
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptReferenceData =
+                uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                        .setId(randomUUID())
+                        .setLabel("promptReferenceData0")
+                        .setWelshLabel("welshLabel")
+                        .setType("CURR")
+                        .setUserGroups(Arrays.asList("usergroup0", "usergroup1"))
+                        .setWelshLabel("welshLabel");
+        doNothing().when(bailStatusHelper).mapBailStatuses(any(JsonEnvelope.class), any(ResultsShared.class));
+        final ResultsShared resultsShared = resultShared("hearing.results-shared-ddch.json");
+
+        final Prompt prompt0 = Prompt.prompt()
+                .withLabel(promptReferenceData.getLabel())
+                .withValue("400")
+                .withWelshValue("welshValue")
+                .withId(promptReferenceData.getId())
+                .withFixedListCode("fixedListCode0")
+                .build();
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(courtHouseReverseLookup.getCourtCentreByName(any(), any())).thenReturn(ofNullable(expectedCourtHouseByNameResult));
+        when(courtHouseReverseLookup.getCourtRoomByRoomName(expectedCourtHouseByNameResult, courtRoomName)).thenReturn(ofNullable(expectedCourtRoomResult));
+        when(courtRoomOuCodeReverseLookup.getcourtRoomOuCode(event, 291, "B47GL")).thenReturn("B47GL00");
+        when(hearingTypeReverseLookup.getHearingTypeByName(event, hearingTypeDescription)).thenReturn(hearingType);
+
+
+        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(JsonEnvelope.class), any(LocalDate.class))).thenReturn(new ArrayList<>());
+
+        final JsonEnvelope context = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared));
+
+        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(JsonEnvelope.class), any(LocalDate.class))).thenReturn(new ArrayList<>());
+
+        ResultDefinition resultDefinition = new ResultDefinition();
+        resultDefinition.setId(randomUUID());
+        resultDefinition.setLabel("Defendant Details Changed");
+
+        when(relistReferenceDataService.getResults(context, "DDCH")).thenReturn(resultDefinition);
+
+
+        //the actual test !!!
+        publishResultsDelegate.shareResults(context, sender, resultsShared);
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
+
+        final PublicHearingResulted publicHearingResulted = jsonObjectToObjectConverter.convert(sharedResultsMessage.payload(), PublicHearingResulted.class);
+
+        final Hearing hearingIn = resultsShared.getHearing();
+
+        assertThat(hearingIn.getProsecutionCases().get(0).getDefendants().get(0).getJudicialResults().get(0).getResultText(), is("Defendant Details Changed"));
         verify(custodyTimeLimitCalculator, times(1)).calculate(custodyLimitCalculatorHearingIn.capture());
         final Hearing calHearingIn = custodyLimitCalculatorHearingIn.getValue();
         Assert.assertEquals(resultsShared.getHearing(), calHearingIn);

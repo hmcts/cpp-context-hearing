@@ -76,6 +76,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdatedAfterResultPublished;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
@@ -182,13 +183,18 @@ public class HearingAggregate implements Aggregate {
                 when(DefenceCounselUpdated.class).apply(defenceCounselDelegate::handleDefenceCounselUpdated),
                 when(HearingEventLogged.class).apply(hearingEventDelegate::handleHearingEventLogged),
                 when(HearingEventDeleted.class).apply(hearingEventDelegate::handleHearingEventDeleted),
-                when(ResultsShared.class).apply(resultsSharedDelegate::handleResultsShared),
+                when(ResultsShared.class).apply(e -> {
+                            resultsSharedDelegate.handleResultsShared(e);
+                            defendantDelegate.clearDefendantDetailsChanged();
+                        }
+                ),
                 when(ResultLinesStatusUpdated.class).apply(resultsSharedDelegate::handleResultLinesStatusUpdated),
                 when(InheritedVerdictAdded.class).apply(verdictDelegate::handleInheritedVerdict),
                 when(VerdictUpsert.class).apply(verdictDelegate::handleVerdictUpsert),
                 when(ConvictionDateAdded.class).apply(convictionDateDelegate::handleConvictionDateAdded),
                 when(ConvictionDateRemoved.class).apply(convictionDateDelegate::handleConvictionDateRemoved),
                 when(DefendantDetailsUpdated.class).apply(defendantDelegate::handleDefendantDetailsUpdated),
+                when(DefendantDetailsUpdatedAfterResultPublished.class).apply( defendantDelegate::handleDefendantDetailsUpdatedAfterResultPublished),
                 when(OffenceAdded.class).apply(offenceDelegate::handleOffenceAdded),
                 when(OffenceUpdated.class).apply(offenceDelegate::handleOffenceUpdated),
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),
@@ -302,7 +308,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {
-        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines));
+        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged()));
     }
 
     public Stream<Object> saveDraftResults(final UUID applicationId, final UUID targetId, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {

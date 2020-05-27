@@ -63,7 +63,6 @@
                             <format>csv</format>
                             <password>${target.jdbc.password}</password>
                             <settingsKey>${target.jdbc.settingsKey}</settingsKey>
-                            <!-- <src>src/test/data</src>-->
                             <type>CLEAN_INSERT</type>
                             <url>${target.jdbc.url}</url>
                             <username>${target.jdbc.username}</username>
