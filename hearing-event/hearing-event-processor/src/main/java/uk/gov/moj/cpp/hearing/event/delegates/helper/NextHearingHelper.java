@@ -104,7 +104,7 @@ public class NextHearingHelper {
             return Optional.of(buildNextHearing(context, resultDefinition, resultLines, prompts));
         }
 
-        LOGGER.warn("Cannot create nextHearing object for resultDefinition id={}", resultDefinition);
+        LOGGER.warn("Cannot create nextHearing object for resultDefinition id={}", resultDefinitionId);
         return Optional.empty();
     }
 
@@ -172,7 +172,7 @@ public class NextHearingHelper {
 
     private static void populateExistingHearingId(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, existingHearingId);
-       builder.withExistingHearingId(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
+        builder.withExistingHearingId(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
     }
 
     private static void populateReservedJudiciary(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {

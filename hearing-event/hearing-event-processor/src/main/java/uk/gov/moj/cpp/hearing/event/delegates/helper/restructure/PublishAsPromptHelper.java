@@ -57,6 +57,11 @@ public class PublishAsPromptHelper {
                     targetParent.getJudicialResult().setQualifier(format("%s,%s", resultQualifier, newPrompt.getQualifier()));
                 }
             }
+            if (isNull(targetParent.getJudicialResult().getNextHearing())
+                    && nonNull(resultLineTreeNode.getJudicialResult())
+                    && nonNull(resultLineTreeNode.getJudicialResult().getNextHearing())) {
+                targetParent.getJudicialResult().setNextHearing(resultLineTreeNode.getJudicialResult().getNextHearing());
+            }
 
             remove(resultLineTreeNode, results);
         }
