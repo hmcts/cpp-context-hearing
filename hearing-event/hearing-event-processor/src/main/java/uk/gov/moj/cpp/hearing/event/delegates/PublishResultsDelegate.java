@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.Level.CASE;
 import static uk.gov.justice.core.courts.Level.DEFENDANT;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
@@ -33,6 +36,7 @@ import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -52,6 +56,7 @@ import org.slf4j.LoggerFactory;
 public class PublishResultsDelegate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsDelegate.class.getName());
+    private static final String DDCH = "DDCH";
 
     private final Enveloper enveloper;
 
@@ -107,6 +112,9 @@ public class PublishResultsDelegate {
             new ResultsSharedHelper().setIsDisposedFlagOnOffence(resultsShared);
             new BailStatusReasonHelper().setReason(resultsShared);
             new BailConditionsHelper().setBailConditions(resultsShared);
+            if(!isEmpty(resultsShared.getDefendantDetailsChanged())) {
+                mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH));
+            }
         }
 
         final PublicHearingResulted hearingResulted =
@@ -121,6 +129,53 @@ public class PublishResultsDelegate {
             LOGGER.info("Payload for event 'public.hearing.resulted': \n{}", jsonEnvelope.toObfuscatedDebugString());
         }
         sender.send(jsonEnvelope);
+    }
+
+    private void mapDefendantLevelDDCHJudicialResults(final ResultsShared resultsShared, final ResultDefinition resultDefinition) {
+        resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .forEach(defendant -> {
+                    if(resultsShared.getDefendantDetailsChanged().contains(defendant.getId())) {
+                        final JudicialResult judicialResult = createDDCHJudicialResult(resultsShared.getHearing().getId(), resultDefinition);
+                        judicialResult.setJudicialResultPrompts(null);
+                        judicialResult.setNextHearing(null);
+                        final List<JudicialResult> judicialResults = defendant.getJudicialResults();
+                        if(isEmpty(judicialResults)) {
+                            defendant.setJudicialResults(asList(judicialResult));
+                        } else {
+                            judicialResults.add(judicialResult);
+                            defendant.setJudicialResults(judicialResults);
+                        }
+                    }
+                });
+    }
+
+    private JudicialResult createDDCHJudicialResult(final UUID hearingId, final ResultDefinition resultDefinition) {
+        return JudicialResult.judicialResult()
+                .withJudicialResultId(randomUUID())
+                .withJudicialResultTypeId(resultDefinition.getId())
+                .withCategory(restructuringHelper.getCategory(resultDefinition))
+                .withCjsCode(resultDefinition.getCjsCode())
+                .withIsAdjournmentResult(resultDefinition.isAdjournment())
+                .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
+                .withIsConvictedResult(resultDefinition.isConvicted())
+                .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))
+                .withLabel(resultDefinition.getLabel())
+                .withLastSharedDateTime(LocalDate.now().toString())
+                .withOrderedDate(LocalDate.now())
+                .withOrderedHearingId(hearingId)
+                .withRank(isNull(resultDefinition.getRank()) ? BigDecimal.ZERO : new BigDecimal(resultDefinition.getRank()))
+                .withUsergroups(resultDefinition.getUserGroups())
+                .withWelshLabel(resultDefinition.getWelshLabel())
+                .withResultText(resultDefinition.getLabel())
+                .withLifeDuration(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getLifeDuration()))
+                .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
+                .withTerminatesOffenceProceedings(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getTerminatesOffenceProceedings()))
+                .withPublishedAsAPrompt(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getPublishedAsAPrompt()))
+                .withExcludedFromResults(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getExcludedFromResults()))
+                .withAlwaysPublished(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getAlwaysPublished()))
+                .withUrgent(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getUrgent()))
+                .withD20(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getD20())).build();
     }
 
     private void mapApplicationLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {
@@ -184,7 +239,7 @@ public class PublishResultsDelegate {
     private void setPromptsAsNullIfEmpty(final List<JudicialResult> judicialResults) {
         if (CollectionUtils.isNotEmpty(judicialResults)) {
             for (JudicialResult judicialResult : judicialResults) {
-                if (CollectionUtils.isEmpty(judicialResult.getJudicialResultPrompts())) {
+                if (isEmpty(judicialResult.getJudicialResultPrompts())) {
                     judicialResult.setJudicialResultPrompts(null);
                 }
             }

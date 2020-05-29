@@ -20,11 +20,11 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@SuppressWarnings({"squid:S2384", "pmd:BeanMembersShouldSerialize"})
+@SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
 @Event("hearing.results-shared")
 public class ResultsShared implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private UUID hearingId;
 
@@ -42,6 +42,8 @@ public class ResultsShared implements Serializable {
 
     private List<Target> savedTargets;
 
+    private List<UUID> defendantDetailsChanged;
+
     public ResultsShared() {
     }
 
@@ -53,7 +55,8 @@ public class ResultsShared implements Serializable {
                           @JsonProperty("variantDirectory") final List<Variant> variantDirectory,
                           @JsonProperty("completedResultLinesStatus") final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus,
                           @JsonProperty("targets") final List<Target> targets,
-                          @JsonProperty("savedTargets") final List<Target> savedTargets) {
+                          @JsonProperty("savedTargets") final List<Target> savedTargets,
+                          @JsonProperty("defendantDetailsChanged") final List<UUID> defendantDetailsChanged) {
         this.hearingId = hearingId;
         this.sharedTime = sharedTime;
         this.courtClerk = courtClerk;
@@ -62,6 +65,7 @@ public class ResultsShared implements Serializable {
         this.completedResultLinesStatus = ofNullable(completedResultLinesStatus).orElseGet(HashMap::new);
         this.targets = ofNullable(targets).orElseGet(ArrayList::new);
         this.savedTargets = ofNullable(savedTargets).orElseGet(ArrayList::new);
+        this.defendantDetailsChanged = ofNullable(defendantDetailsChanged).orElseGet(ArrayList::new);
     }
 
     public static Builder builder() {
@@ -108,7 +112,15 @@ public class ResultsShared implements Serializable {
         this.targets = targets;
     }
 
-    @SuppressWarnings("pmd:BeanMembersShouldSerialize")
+    public List<UUID> getDefendantDetailsChanged() {
+        return defendantDetailsChanged;
+    }
+
+    public void setDefendantDetailsChanged(final List<UUID> defendantDetailsChanged) {
+        this.defendantDetailsChanged = defendantDetailsChanged;
+    }
+
+    @SuppressWarnings("PMD:BeanMembersShouldSerialize")
     public static final class Builder {
 
         private UUID hearingId;
@@ -126,6 +138,8 @@ public class ResultsShared implements Serializable {
         private List<Target> targets;
 
         private List<Target> savedTargets;
+
+        private List<UUID> defendantDetailsChanged;
 
         public Builder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -169,6 +183,10 @@ public class ResultsShared implements Serializable {
             return this;
         }
 
+        public Builder withDefendantDetailsChanged(final List<UUID> defendantDetailsChanged) {
+            this.defendantDetailsChanged = defendantDetailsChanged;
+            return this;
+        }
         public ResultsShared build() {
             return new ResultsShared(
                     hearingId,
@@ -178,7 +196,8 @@ public class ResultsShared implements Serializable {
                     variantDirectory,
                     completedResultLinesStatus,
                     targets,
-                    savedTargets);
+                    savedTargets,
+                    defendantDetailsChanged);
         }
     }
 }

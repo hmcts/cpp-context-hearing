@@ -95,7 +95,12 @@
               "lastName": "Ryan",
               "organisationName": "Responding Organisation Name"
             }
-          ]
+          ],
+          "type": {
+            "applicationType": "applicationType",
+            "applicationTypeWelsh": "applicationTypeWelsh",
+            "applicationLegislation": "applicationLegislation"
+          }
         }
       ],
       "hasSharedResults": true,

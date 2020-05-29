@@ -28,6 +28,8 @@ import uk.gov.justice.core.courts.CourtApplicationResponseType;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
@@ -43,6 +45,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
@@ -54,6 +57,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
@@ -81,6 +85,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -101,6 +106,7 @@ public class ShareResultsCommandHandlerTest {
     private static uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent nowsVariantsSavedEvent;
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
+    private DefendantDetailsUpdated defendantDetailsUpdated;
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class, ApplicationDraftResulted.class);
     @InjectMocks
@@ -160,6 +166,28 @@ public class ShareResultsCommandHandlerTest {
                 ));
 
         hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null);
+
+    }
+
+    private static Defendant convert(final uk.gov.justice.core.courts.Defendant currentDefendant, String firstName) {
+        Defendant defendant = new Defendant();
+        defendant.setId(currentDefendant.getId());
+        final PersonDefendant curPd = currentDefendant.getPersonDefendant();
+        final Person cpd = curPd.getPersonDetails();
+        Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
+                cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
+
+        final PersonDefendant newPersonDefendant = new PersonDefendant(curPd.getArrestSummonsNumber(), curPd.getBailConditions(),
+                curPd.getBailReasons(), curPd.getBailStatus(), curPd.getCustodialEstablishment(), curPd.getCustodyTimeLimit(), curPd.getDriverLicenceCode(), curPd.getDriverLicenseIssue(),
+                curPd.getDriverNumber(), curPd.getEmployerOrganisation(), curPd.getEmployerPayrollReference(),
+                curPd.getPerceivedBirthYear(), person, curPd.getVehicleOperatorLicenceNumber());
+
+
+        defendant.setPersonDefendant(newPersonDefendant);
+        defendant.setProsecutionCaseId(currentDefendant.getProsecutionCaseId());
+        return defendant;
     }
 
     @Before
@@ -168,6 +196,7 @@ public class ShareResultsCommandHandlerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
         when(this.eventSource.getStreamById(initiateHearingCommand.getHearing().getId())).thenReturn(this.hearingEventStream);
         when(this.clock.now()).thenReturn(sharedTime);
+        defendantDetailsUpdated = new DefendantDetailsUpdated(initiateHearingCommand.getHearing().getId(), convert(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0), "Test"));
     }
 
     @Test
@@ -364,6 +393,82 @@ public class ShareResultsCommandHandlerTest {
                                 )
                         ))
         );
+    }
+
+
+    @Test
+    public void shouldRaiseResultsSharedEventAfterDDCH() throws Exception {
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft));
+        final ApplicationResponseSaved applicationResponseSaved = getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0));
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+            apply(Stream.of(prosecutionCounselAdded));
+            apply(Stream.of(defenceCounselUpsert));
+            apply(Stream.of(nowsVariantsSavedEvent));
+            apply(draftResultSavedEvent);
+            apply(hearingExtended);
+            apply(applicationResponseSaved);
+            apply(defendantDetailsUpdated);
+        }};
+
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+        final ShareResultsCommand shareResultsCommand =
+                TestTemplates.ShareResultsCommandTemplates.standardShareResultsCommandTemplate(initiateHearingCommand.getHearing().getId());
+
+        shareResultsCommand.setCourtClerk(DelegatedPowers.delegatedPowers()
+                .withFirstName("test")
+                .withLastName("testington")
+                .withUserId(randomUUID())
+                .build());
+
+        final List<UUID> childResultLineIds = of(randomUUID());
+        final List<UUID> parentResultLineIds = of(randomUUID());
+
+        shareResultsCommand.setResultLines(Arrays.asList(
+                new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                        resultLineIn.getOrderedDate(),
+                        resultLineIn.getSharedDate(),
+                        resultLineIn.getResultLineId(),
+                        targetDraft.getTargetId(),
+                        targetDraft.getOffenceId(),
+                        targetDraft.getDefendantId(),
+                        resultLineIn.getResultDefinitionId(),
+                        resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel())).collect(Collectors.toList()),
+                        resultLineIn.getResultLabel(),
+                        resultLineIn.getLevel().name(),
+                        resultLineIn.getIsModified(),
+                        resultLineIn.getIsComplete(),
+                        targetDraft.getApplicationId(),
+                        resultLineIn.getAmendmentReasonId(),
+                        resultLineIn.getAmendmentReason(),
+                        resultLineIn.getAmendmentDate(),
+                        resultLineIn.getFourEyesApproval(),
+                        resultLineIn.getApprovedDate(),
+                        resultLineIn.getIsDeleted(),
+                        null,
+                        childResultLineIds,
+                        parentResultLineIds
+                )
+        ));
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.share-results"), objectToJsonObjectConverter.convert(shareResultsCommand));
+
+        this.shareResultsCommandHandler.shareResult(envelope);
+
+        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), IsNull.notNullValue());
+
+        final ResultsShared resultsShared = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), ResultsShared.class);
+        assertThat(resultsShared.getDefendantDetailsChanged().size(), is(1));
+        assertThat(resultsShared.getDefendantDetailsChanged().get(0), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
     }
 
     private ApplicationResponseSaved getApplicationResponseSaved(final CourtApplication courtApplication) {

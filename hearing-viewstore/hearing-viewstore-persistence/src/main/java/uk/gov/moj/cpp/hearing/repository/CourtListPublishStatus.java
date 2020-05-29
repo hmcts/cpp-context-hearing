@@ -5,8 +5,8 @@ import static javax.persistence.EnumType.STRING;
 
 import uk.gov.moj.cpp.hearing.publishing.events.PublishStatus;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.persistence.Column;
@@ -17,9 +17,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "court_list_publish_status")
-public class CourtListPublishStatus implements Serializable {
-
-    private static final long serialVersionUID = 8137443412665L;
+public class CourtListPublishStatus {
 
     @Id
     @Column(name = "court_list_publish_status_id", nullable = false)
@@ -118,5 +116,21 @@ public class CourtListPublishStatus implements Serializable {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.publishCourtListStatusId);
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (null == o || getClass() != o.getClass()) {
+            return false;
+        }
+        return Objects.equals(this.publishCourtListStatusId, ((CourtListPublishStatus) o).publishCourtListStatusId);
     }
 }
