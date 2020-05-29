@@ -12,17 +12,22 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.referencedata.CourtRoomMappingsList;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.xhibit.exception.ReferenceDataNotFoundException;
+import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitCourtRoomMappingsCache;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 @SuppressWarnings("squid:S1168")
 @ApplicationScoped
 public class ReferenceDataXhibitDataLoader {
 
+    private static final String XHIBIT_COURT_ROOM_MAPPINGS = "referencedata.query.cp-xhibit-courtroom-mappings";
     private static final String XHIBIT_EVENT_MAPPINGS = "referencedata.query.cp-xhibit-hearing-event-mappings";
+    private static final String XHIBIT_COURT_MAPPINGS_QUERY_PARAM = "ouId";
 
     @ServiceComponent(EVENT_PROCESSOR)
     @Inject
@@ -30,6 +35,9 @@ public class ReferenceDataXhibitDataLoader {
 
     @Inject
     private UtcClock utcClock;
+
+    @Inject
+    private XhibitCourtRoomMappingsCache xhibitCourtRoomMappingsCache;
 
     public XhibitEventMappingsList getEventMapping() {
         final Metadata metadata = metadataBuilder()
@@ -43,6 +51,43 @@ public class ReferenceDataXhibitDataLoader {
         final XhibitEventMappingsList payload = requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
 
         if (payload == null || isEmpty(payload.getCpXhibitHearingEventMappings())) {
+            throw new ReferenceDataNotFoundException(jsonEnvelope);
+        }
+
+        return payload;
+    }
+
+    String getXhibitCrestCourtIdBy(final String courtCentreId) {
+        final CourtRoomMappingsList courtRoomMappingsList = xhibitCourtRoomMappingsCache.getCourtRoomMappingsMapCache(courtCentreId);
+        /*
+          Note that here, we are calling endpoint
+          referencedata.query.cp-xhibit-courtroom-mappings
+          to get crestCourtId for file name while in listing, we are calling
+          referencedata.query.cp-xhibit-court-mappings
+          instead.
+          We need consistency
+         */
+
+        return courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtId();
+
+    }
+
+    public CourtRoomMappingsList getCourtRoomMappingsList(final String courtCentreId) {
+        final JsonObject query = createObjectBuilder()
+                .add(XHIBIT_COURT_MAPPINGS_QUERY_PARAM, courtCentreId)
+                .build();
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(
+                metadataBuilder()
+                        .createdAt(utcClock.now())
+                        .withName(XHIBIT_COURT_ROOM_MAPPINGS)
+                        .withId(randomUUID())
+                        .build(),
+                query);
+
+        final CourtRoomMappingsList payload = requester.requestAsAdmin(jsonEnvelope, CourtRoomMappingsList.class).payload();
+
+        if (payload == null || isEmpty(payload.getCpXhibitCourtRoomMappings())) {
             throw new ReferenceDataNotFoundException(jsonEnvelope);
         }
 

@@ -7,7 +7,6 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantAttendance;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdatedAfterResultPublished;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -27,48 +26,18 @@ public class DefendantDelegate implements Serializable {
 
     private HearingAggregateMomento momento;
 
-    private List<UUID> defendantDetailsChanged = new ArrayList<>();
-
-
     public DefendantDelegate(final HearingAggregateMomento momento) {
         this.momento = momento;
     }
 
     public void handleDefendantDetailsUpdated(final DefendantDetailsUpdated defendantDetailsUpdated) {
-        handleDefendantDetailsUpdated(defendantDetailsUpdated.getDefendant(), false);
-    }
-
-
-    public void handleDefendantDetailsUpdatedAfterResultPublished(final DefendantDetailsUpdatedAfterResultPublished defendantDetailsUpdatedAfterResultPublished) {
-        handleDefendantDetailsUpdated(defendantDetailsUpdatedAfterResultPublished.getDefendant(), true);
-    }
-
-    private void handleDefendantDetailsUpdated(final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendant, final boolean isUpdatedAfterPublish) {
         this.momento.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .filter(defendant -> matchDefendant(defendant, updatedDefendant))
+                .filter(defendant -> matchDefendant(defendant, defendantDetailsUpdated))
                 .findFirst()
-                .ifPresent(defendant -> {
-                    final DefendantDetailsUtils verify = new DefendantDetailsUtils();
-
-                    if(!verify.verifyDDCHOnRequiredAttributes(defendant, updatedDefendant)) {
-                        defendantDetailsChanged.add(defendant.getId());
-                    }
-                    if(!isUpdatedAfterPublish) {
-                        setDefendant(defendant, updatedDefendant);
-                    }
-                });
+                .ifPresent(defendant -> setDefendant(defendant, defendantDetailsUpdated.getDefendant()));
     }
 
-    public List<UUID> getDefendantDetailsChanged() {
-        return new ArrayList<>(defendantDetailsChanged);
-    }
-
-    public void clearDefendantDetailsChanged() {
-        if(!defendantDetailsChanged.isEmpty()) {
-            this.defendantDetailsChanged.clear();
-        }
-    }
     public void handleDefendantAttendanceUpdated(final DefendantAttendanceUpdated defendantAttendanceUpdated) {
 
         final List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>();
@@ -94,11 +63,6 @@ public class DefendantDelegate implements Serializable {
     }
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant newDefendant) {
-
-        if(this.momento.isPublished() && momento.getHearing() != null) {
-            return Stream.of(new DefendantDetailsUpdatedAfterResultPublished(hearingId, newDefendant));
-        }
-
         if (!this.momento.isPublished() && momento.getHearing() != null) {
             final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
@@ -118,7 +82,6 @@ public class DefendantDelegate implements Serializable {
                     .setDefendant(newDefendant)
             );
         }
-
         return Stream.empty();
     }
 
@@ -137,9 +100,9 @@ public class DefendantDelegate implements Serializable {
         return Stream.empty();
     }
 
-    private boolean matchDefendant(final Defendant defendant, final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendant) {
-        return defendant.getId().equals(updatedDefendant.getId()) &&
-                defendant.getProsecutionCaseId().equals(updatedDefendant.getProsecutionCaseId());
+    private boolean matchDefendant(final Defendant defendant, final DefendantDetailsUpdated defendantDetailsUpdated) {
+        return defendant.getId().equals(defendantDetailsUpdated.getDefendant().getId()) &&
+                defendant.getProsecutionCaseId().equals(defendantDetailsUpdated.getDefendant().getProsecutionCaseId());
     }
 
     private void setDefendant(final Defendant defendant, final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantIn) {
@@ -159,10 +122,5 @@ public class DefendantDelegate implements Serializable {
 
     public void setHearingAggregateMomento(final HearingAggregateMomento momento) {
         this.momento = momento;
-    }
-
-    @SuppressWarnings("squid:S2384")
-    public void setDefendantDetailsChanged(final List<UUID> defendantDetailsChanged) {
-        this.defendantDetailsChanged = defendantDetailsChanged;
     }
 }

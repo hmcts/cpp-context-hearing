@@ -10,7 +10,6 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
@@ -34,7 +33,6 @@ import java.util.Random;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,30 +43,23 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     private static final String HEARING_COMMAND_PUBLISH_HEARING_LIST = "hearing.publish-hearing-lists-for-crown-courts";
     private static final String MEDIA_TYPE_HEARING_COMMAND_PUBLISH_HEARING_LIST = "application/vnd.hearing.publish-hearing-lists-for-crown-courts+json";
-    private static final String START_HEARING = "Start Hearing";
-    private static final String END_HEARING = "End Hearing";
-
-    private static CommandHelpers.InitiateHearingCommandHelper hearing;
-    private static ZonedDateTime eventTime;
-
-    @BeforeClass
-    public static void setUp() throws NoSuchAlgorithmException {
-        eventTime = now().withZoneSameLocal(ZoneId.of("UTC"));
-        hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), fromString(defenceCounselId), caseId, of(hearingTypeId))));
-        stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);
-    }
 
     @Test
     public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() throws NoSuchAlgorithmException {
-        createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
-        logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
+        final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
+        final LocalDate localDate = eventTime.toLocalDate();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing1 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, of(hearingTypeId))));
+        createHearingEvent(hearing1, defenceCounselId, "Start Hearing", eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
+        logEvent(getRequestSpec(), asDefault(), hearing1.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()));
 
-        createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
-        logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
+        final CommandHelpers.InitiateHearingCommandHelper hearing2 = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, of(hearingTypeId))));
+        createHearingEvent(hearing2, defenceCounselId, "Start Hearing", eventTime.plusMinutes(rand()).plusSeconds(rand()));
+        logEvent(getRequestSpec(), asDefault(), hearing2.it(), getHearingEventDefinition("End Hearing").getId(),
                 false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()));
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, eventTime.toLocalDate());
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
@@ -84,9 +75,12 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     @Test
     public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
-        createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
+        final ZonedDateTime eventTime = now().minusMinutes(5l).plusSeconds(rand()).withZoneSameLocal(ZoneId.of("UTC"));
+        final LocalDate localDate = eventTime.toLocalDate();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, of(hearingTypeId))));
+        createHearingEvent(hearing, defenceCounselId, "Start Hearing", eventTime);
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, eventTime.toLocalDate());
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, localDate);
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
@@ -114,7 +108,10 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     private final CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final CommandHelpers.InitiateHearingCommandHelper hearing,
                                                                                  final String defenceCounselId, final String actionLabel,
                                                                                  final ZonedDateTime eventTime) throws NoSuchAlgorithmException {
+        stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), hearing.getHearing().getHearingLanguage());
+
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
+
 
         final HearingEventDefinition hearingEventDefinition = getHearingEventDefinition(actionLabel);
 

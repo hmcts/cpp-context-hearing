@@ -243,7 +243,7 @@ public class RestructuringHelper {
         return builder.build();
     }
 
-    public Boolean getBooleanOrDefaultValue(final Boolean originalValue) {
+    private Boolean getBooleanOrDefaultValue(final Boolean originalValue) {
         if (null == originalValue) {
             return false;
         }
@@ -312,7 +312,7 @@ public class RestructuringHelper {
         return promptDefinition.isAvailableForCourtExtract() ? "Y" : "N";
     }
 
-    public Category getCategory(final ResultDefinition resultDefinition) {
+    private Category getCategory(final ResultDefinition resultDefinition) {
         Category category = null;
 
         if (nonNull(resultDefinition) && nonNull(resultDefinition.getCategory())) {

@@ -145,7 +145,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .build();
     }
 
-    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final List<UUID> defendantDetailsChanged) {
+    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {
         final Map<UUID, Target> finalTargets = new HashMap<>();
         final Map<UUID, Target> targets = new HashMap<>();
         resultLines.forEach(
@@ -171,7 +171,7 @@ public class ResultsSharedDelegate implements Serializable {
                 }
         );
 
-        final ResultsShared.Builder builder = ResultsShared.builder()
+        return Stream.concat(enrichHearing(resultLines), Stream.of(ResultsShared.builder()
                 .withHearingId(hearingId)
                 .withSharedTime(sharedTime)
                 .withCourtClerk(courtClerk)
@@ -179,11 +179,8 @@ public class ResultsSharedDelegate implements Serializable {
                 .withHearing(this.momento.getHearing())
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(new ArrayList<>(momento.getSavedTargets().values()))
-                .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus());
-        if(!defendantDetailsChanged.isEmpty()) {
-            builder.withDefendantDetailsChanged(defendantDetailsChanged);
-        }
-        return Stream.concat(enrichHearing(resultLines), Stream.of(builder.build()));
+                .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus())
+                .build()));
     }
 
     private Stream<Object> enrichHearing(final List<SharedResultsCommandResultLine> resultLines) {

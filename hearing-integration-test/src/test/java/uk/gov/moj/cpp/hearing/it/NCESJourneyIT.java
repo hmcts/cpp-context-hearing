@@ -392,7 +392,7 @@ public class NCESJourneyIT extends AbstractIT {
         stubLjaDetails(hearingCommandHelper.getHearing().getCourtCentre().getId());
 
         CourtCentre courtCentre = hearingCommandHelper.getHearing().getCourtCentre();
-        stubGetReferenceDataCourtRooms(courtCentre, hearingCommandHelper.getHearing().getHearingLanguage(), ouId3, ouId4);
+        stubGetReferenceDataCourtRooms(courtCentre, hearingCommandHelper.getHearing().getHearingLanguage());
 
         createFirstProsecutionCounsel(hearingCommandHelper);
 

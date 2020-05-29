@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
@@ -26,6 +25,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitJudiciaryCache;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
@@ -51,7 +51,6 @@ import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.JsonObject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -66,11 +65,9 @@ public class HearingListXhibitResponseTransformer {
 
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
 
-    private static final String TITLE_PREFIX = "titlePrefix";
-    private static final String TITLE_JUDICIAL_PREFIX = "titleJudicialPrefix";
-    private static final String TITLE_SUFFIX = "titleSuffix";
-    private static final String FORENAMES = "forenames";
-    private static final String SURNAME = "surname";
+    @Inject
+    private XhibitJudiciaryCache xhibitJudiciaryCache;
+
 
     public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return currentCourtStatus()
@@ -273,20 +270,9 @@ public class HearingListXhibitResponseTransformer {
                 .findFirst();
 
         if (judicialRole.isPresent()) {
-            return getJudiciaryFullName(commonXhibitReferenceDataService.getJudiciary(judicialRole.get().getJudicialId()));
+            return xhibitJudiciaryCache.getJudiciaryName(judicialRole.get().getJudicialId());
         }
         return EMPTY;
-    }
-
-    private String getJudiciaryFullName(final JsonObject judiciary) {
-
-        final String titlePrefix = judiciary.getString(TITLE_PREFIX, EMPTY);
-        final String titleJudicialPrefix = judiciary.getString(TITLE_JUDICIAL_PREFIX, titlePrefix);
-        final String foreNames = judiciary.getString(FORENAMES);
-        final String sureName = judiciary.getString(SURNAME);
-        final String titleSuffix = judiciary.getString(TITLE_SUFFIX, EMPTY);
-
-        return format("%s %s %s %s", titleJudicialPrefix, foreNames, sureName, titleSuffix).trim();
     }
 
     private Predicate<JudicialRole> isCircuitJudge() {

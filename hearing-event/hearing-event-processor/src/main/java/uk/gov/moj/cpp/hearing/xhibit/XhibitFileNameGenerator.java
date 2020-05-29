@@ -2,9 +2,6 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.UUID.fromString;
-
-import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -20,7 +17,7 @@ public class XhibitFileNameGenerator {
     private static final String PUBLIC_DISPLAY_PAGE_PREFIX = "PublicDisplay";
 
     @Inject
-    private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
+    private ReferenceDataXhibitDataLoader referenceDataXhibitDataLoader;
 
     public String generateWebPageFileName(final ZonedDateTime requestedDate, final String courtCentreId) {
         return generateFileName(WEB_PAGE_PREFIX, requestedDate, courtCentreId);
@@ -43,6 +40,6 @@ public class XhibitFileNameGenerator {
     }
 
     private String getCourtCode(final String courtCentreId) {
-        return commonXhibitReferenceDataService.getCourtDetails(fromString(courtCentreId)).getCrestCourtId();
+        return referenceDataXhibitDataLoader.getXhibitCrestCourtIdBy(courtCentreId);
     }
 }

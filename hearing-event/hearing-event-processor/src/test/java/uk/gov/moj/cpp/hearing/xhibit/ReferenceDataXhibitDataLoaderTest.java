@@ -70,6 +70,25 @@ public class ReferenceDataXhibitDataLoaderTest {
         assertThat(xhibitEventMappingsList.getCpXhibitHearingEventMappings().get(0).getXhibitHearingEventCode(), is(CREST_COURT_SITE_CODE));
     }
 
+    @Test
+    public void shouldLoadXhibitCourtRoomMappingsByCourtCentreId() {
+
+        final CourtRoomMappingsList courtCentreCourtList = getCourtRoomMappingsList();
+
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), eq(CourtRoomMappingsList.class)).payload()).thenReturn(courtCentreCourtList);
+
+        final CourtRoomMappingsList courtRoomMappingsList = referenceDataXhibitDataLoader.getCourtRoomMappingsList(randomUUID().toString());
+
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCourtRoomUUID(), is(COURT_ROOM_ID));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteCode(), is(CREST_COURT_SITE_CODE));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtId(), is(CREST_COURT_ID));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCourtRoomId(), is(COURT_ROOM_NUMBER));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtRoomName(), is(CREST_COURT_ROOM_NAME));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteId(), is(CREST_COURT_SITE_ID));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteName(), is(CREST_COURT_SITE_NAME));
+        assertThat(courtRoomMappingsList.getCpXhibitCourtRoomMappings().get(0).getCrestCourtSiteUUID(), is(CREST_COURT_SITE_UUID));
+    }
+
     private CourtRoomMappingsList getCourtRoomMappingsList() {
         return new CourtRoomMappingsList(Collections.singletonList(new CourtRoomMapping(randomUUID(), COURT_ROOM_ID, CREST_COURT_SITE_NAME, OU_CODE, COURT_ROOM_NUMBER, CREST_COURT_ID, CREST_COURT_SITE_ID, CREST_COURT_SITE_CODE, CREST_COURT_ROOM_NAME, CREST_COURT_SITE_UUID)));
     }

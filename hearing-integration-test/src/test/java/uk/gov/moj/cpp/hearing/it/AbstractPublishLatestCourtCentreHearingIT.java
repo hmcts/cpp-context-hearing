@@ -10,9 +10,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.Before;
@@ -26,9 +23,6 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
     protected static String defenceCounselId;
     protected static UUID caseId;
     protected static UUID hearingTypeId;
-
-    private static CommandHelpers.InitiateHearingCommandHelper hearing;
-    private static ZonedDateTime eventTime;
 
     @BeforeClass
     public static void setUpBeforeClassAbstractPublishLatestCourtCentreHearingIT() {
@@ -47,7 +41,7 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
         caseId = fromString("9c9824b3-8a61-472f-8b55-e532ceabb403");
 
         stubGetReferenceDataCourtRoomMappings(courtRoom1Id, courtRoom2Id);
-        stubOrganisationUnit(courtCentreId, ouId1, ouId2, ouId3, ouId4);
+        stubOrganisationUnit(courtCentreId);
         stubGetProgressionProsecutionCases(caseId);
     }
 
@@ -59,4 +53,6 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
     protected static void truncateViewStoreData() {
         truncateViewStoreTables("ha_hearing", "ha_hearing_event", "court_list_publish_status");
     }
+
+
 }

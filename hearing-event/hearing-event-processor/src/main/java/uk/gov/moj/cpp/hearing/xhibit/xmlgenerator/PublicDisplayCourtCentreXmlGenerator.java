@@ -30,6 +30,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Current
 import uk.gov.moj.cpp.hearing.utils.DateUtils;
 import uk.gov.moj.cpp.hearing.xhibit.CourtCentreGeneratorParameters;
 import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
+import uk.gov.moj.cpp.hearing.xhibit.refdatacache.XhibitEventMapperCache;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
@@ -46,6 +47,9 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
 
     @Inject
     private PublicDisplayEventGenerator eventGenerator;
+
+    @Inject
+    private XhibitEventMapperCache eventMapperCache;
 
     @ServiceComponent(EVENT_PROCESSOR)
     @Inject

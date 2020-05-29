@@ -20,11 +20,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
-@ApplicationScoped
 public class CourtCentreHearingsRetriever {
 
     private static final String HEARING_QUERY_LATEST_HEARING_BY_COURT_CENTRES = "hearing.latest-hearings-by-court-centres";
@@ -44,8 +42,8 @@ public class CourtCentreHearingsRetriever {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     public Optional<CurrentCourtStatus> getHearingDataForWebPage(final String courtCentreIds,
-                                                                 final ZonedDateTime latestCourtListUploadTime,
-                                                                 final JsonEnvelope envelope) {
+                                                       final ZonedDateTime latestCourtListUploadTime,
+                                                       final JsonEnvelope envelope) {
         final JsonObject queryParameters = createObjectBuilder()
                 .add("courtCentreIds", String.join(",", courtCentreIds))
                 .add("dateOfHearing", latestCourtListUploadTime.toLocalDate().toString())
@@ -63,11 +61,12 @@ public class CourtCentreHearingsRetriever {
 
     @SuppressWarnings("squid:CallToDeprecatedMethod")
     public Optional<CurrentCourtStatus> getHearingDataForPublicDisplay(final String courtCentreId,
-                                                                       final ZonedDateTime latestCourtListUploadTime,
-                                                                       final JsonEnvelope envelope) {
+                                                       final ZonedDateTime latestCourtListUploadTime,
+                                                       final JsonEnvelope envelope) {
 
 
-        final String crownCourtCrestId = commonXhibitReferenceDataService.getCourtDetails(fromString(courtCentreId)).getCrestCourtId();
+
+        final String crownCourtCrestId =  commonXhibitReferenceDataService.getCourtDetails(fromString(courtCentreId)).getCrestCourtId();
 
         final List<String> courtCentreIds = commonXhibitReferenceDataService.getCourtCentreIdsForCrestId(crownCourtCrestId)
                 .stream()

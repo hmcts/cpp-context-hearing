@@ -162,18 +162,11 @@ public class GetHearingsTransformer {
     }
 
     private CourtApplicationSummaries.Builder summary(final CourtApplication courtApplication) {
-        final CourtApplicationType type = courtApplication.getType();
         final CourtApplicationSummaries.Builder result = CourtApplicationSummaries.courtApplicationSummaries();
         result.withId(courtApplication.getId());
         result.withApplicationReference(courtApplication.getApplicationReference());
         result.withApplicant(summary(courtApplication.getApplicant()).build());
         result.withParentApplicationId(courtApplication.getParentApplicationId());
-        result.withType(courtApplication.getType() != null ?
-                Type.type().withApplicationType(type.getApplicationType())
-                        .withApplicationLegislation(type.getApplicationLegislation())
-                        .withApplicationTypeWelsh(type.getApplicationTypeWelsh())
-                        .build()
-                : null);
         result.withRespondents(courtApplication.getRespondents() == null ? emptyList() :
                 courtApplication.getRespondents().stream().map(ca -> summary(ca).build())
                         .collect(Collectors.toList())
