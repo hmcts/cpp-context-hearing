@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>6.4.47-SNAPSHOT</version>
+        <version>6.4.46</version>
     </parent>
     <artifactId>pojo-plugin</artifactId>
 
