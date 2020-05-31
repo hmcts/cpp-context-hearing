@@ -74,7 +74,7 @@ public class HearingAggregateTest {
         try {
             // ensure aggregate is serializable
             SerializationUtils.serialize(HEARING_AGGREGATE);
-        } catch (SerializationException e) {
+        } catch (final SerializationException e) {
             fail("Aggregate should be serializable");
         }
     }

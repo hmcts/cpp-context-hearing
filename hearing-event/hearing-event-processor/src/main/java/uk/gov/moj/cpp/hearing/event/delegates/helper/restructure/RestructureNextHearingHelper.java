@@ -7,8 +7,8 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper.CROWN_COURT_RESULT_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper.MAGISTRATE_RESULT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.CROWN_COURT_RESULT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MAGISTRATE_RESULT_DEFINITION_ID;
 
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
@@ -33,7 +33,7 @@ public class RestructureNextHearingHelper {
 
     public static List<TreeNode<ResultLine>> restructureNextHearing(final List<TreeNode<ResultLine>> treeNodeList) {
         final List<TreeNode<ResultLine>> candidateNodeForRemoval = new ArrayList<>();
-        getNextHearingResult(treeNodeList).stream().forEach(nextHearingTreeNode -> {
+        getNextHearingResult(treeNodeList).forEach(nextHearingTreeNode -> {
                     final Optional<TreeNode<ResultLine>> grandParent = processParent(nextHearingTreeNode.getParents(), candidateNodeForRemoval);
                     if (grandParent.isPresent()) {
                         nextHearingTreeNode.removeAllParents();

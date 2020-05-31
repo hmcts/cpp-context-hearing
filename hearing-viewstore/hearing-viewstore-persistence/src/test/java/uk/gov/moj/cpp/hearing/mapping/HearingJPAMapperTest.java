@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Collections.emptySet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
@@ -163,7 +164,6 @@ public class HearingJPAMapperTest {
         hearingEntity.setReportingRestrictionReason(RandomGenerator.STRING.next());
         hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
-        hearingEntity.setDefendantAttendance(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance.class)));
         hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
@@ -182,7 +182,7 @@ public class HearingJPAMapperTest {
         when(prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases())).thenReturn(asList(prosecutionCaseMock));
 
         Target targetMock = mock(Target.class);
-        when(targetJPAMapper.fromJPA(hearingEntity.getTargets())).thenReturn(asList(targetMock));
+        when(targetJPAMapper.fromJPA(hearingEntity.getTargets(), emptySet())).thenReturn(asList(targetMock));
 
         HearingType hearingTypeMock = mock(HearingType.class);
         when(hearingTypeJPAMapper.fromJPA(hearingEntity.getHearingType())).thenReturn(hearingTypeMock);

@@ -473,10 +473,11 @@ public class HearingServiceTest {
         final Hearing hearing = new Hearing();
 
         hearing.setId(randomUUID());
+        hearing.setProsecutionCases(createProsecutionCases());
 
         when(hearingRepository.findBy(any())).thenReturn(hearing);
 
-        when(targetJPAMapper.fromJPA(anySet())).thenReturn(new ArrayList());
+        when(targetJPAMapper.fromJPA(anySet(), anySet())).thenReturn(new ArrayList());
 
         final TargetListResponse targetListResponse = hearingService.getTargets(hearing.getId());
 
@@ -488,7 +489,7 @@ public class HearingServiceTest {
     public void shouldReturnResponseWhenTargetIsAdded() {
 
         final Hearing hearing = new Hearing();
-
+        hearing.setProsecutionCases(createProsecutionCases());
         hearing.setId(randomUUID());
         hearing.setTargets(asSet(new Target()));
 
@@ -498,7 +499,8 @@ public class HearingServiceTest {
 
         when(hearingRepository.findBy(any())).thenReturn(hearing);
 
-        when(targetJPAMapper.fromJPA(anySet())).thenReturn(targets);
+        when(targetJPAMapper.fromJPA(anySet(), anySet())).thenReturn(targets);
+
 
         final TargetListResponse targetListResponse = hearingService.getTargets(hearing.getId());
 
@@ -513,6 +515,7 @@ public class HearingServiceTest {
                 .with(TargetListResponse::getTargets, first(isBean(uk.gov.justice.core.courts.Target.class)
                         .with(uk.gov.justice.core.courts.Target::getTargetId, is(targetIn.getTargetId()))
                         .with(uk.gov.justice.core.courts.Target::getDefendantId, is(targetIn.getDefendantId()))
+                        .with(uk.gov.justice.core.courts.Target::getMasterDefendantId, is(targetIn.getMasterDefendantId()))
                         .with(uk.gov.justice.core.courts.Target::getDraftResult, is(targetIn.getDraftResult()))
                         .with(uk.gov.justice.core.courts.Target::getHearingId, is(targetIn.getHearingId()))
                         .with(uk.gov.justice.core.courts.Target::getOffenceId, is(targetIn.getOffenceId()))
@@ -606,7 +609,7 @@ public class HearingServiceTest {
     @Test
     public void shouldFindHearingListWhenJudicialUserIsMatched() {
 
-        LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
         final Hearing hearingEntity = HearingTestUtils.buildHearing();
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
@@ -626,7 +629,7 @@ public class HearingServiceTest {
     @Test
     public void shouldNotFindHearingListWhenJudicialUserIsNotMatched() {
 
-        LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
         final Hearing hearingEntity = HearingTestUtils.buildHearing();
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
@@ -936,5 +939,13 @@ public class HearingServiceTest {
                 .withJudgeName("Mr Lampard")
                 .withNotBeforeTime("2020-02-09T15:00Z[UTC]")
                 .build();
+    }
+
+    private Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> createProsecutionCases() {
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        final Defendant defendant = new Defendant();
+        final Set<Defendant> defendants = asSet(defendant);
+        prosecutionCase.setDefendants(defendants);
+        return asSet(prosecutionCase);
     }
 }

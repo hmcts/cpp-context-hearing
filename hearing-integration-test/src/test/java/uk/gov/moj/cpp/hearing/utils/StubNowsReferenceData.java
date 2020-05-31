@@ -9,13 +9,13 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
-import uk.gov.moj.cpp.hearing.it.ShareResultsIT;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
 import java.util.Arrays;
 
 public class StubNowsReferenceData {
+    private static final String BOTH_JURISDICTIONS = "B";
     public static CommandHelpers.AllNowsReferenceDataHelper setupNowsReferenceData(final LocalDate referenceDate) {
         AllNows allnows = AllNows.allNows()
                 .setNows(Arrays.asList(NowDefinition.now()
@@ -49,7 +49,7 @@ public class StubNowsReferenceData {
                                 .setName(STRING.next())
                                 .setTemplateName(STRING.next())
                                 .setRank(INTEGER.next())
-                                .setJurisdiction(ShareResultsIT.BOTH_JURISDICTIONS)
+                                .setJurisdiction(BOTH_JURISDICTIONS)
                                 .setRemotePrintingRequired(false)
                                 .setText(STRING.next())
                 ));

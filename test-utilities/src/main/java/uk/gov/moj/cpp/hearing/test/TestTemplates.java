@@ -948,6 +948,7 @@ public class TestTemplates {
                     )
                     .withIsComplete(true)
                     .withIsModified(true)
+                    .withIsDeleted(false)
                     .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())

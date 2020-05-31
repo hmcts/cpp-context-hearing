@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
 
 import uk.gov.justice.core.courts.CourtApplication;
@@ -25,7 +26,6 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +70,7 @@ public class ResultsSharedDelegate implements Serializable {
         momento.getTargets().values().stream()
                 .map(target -> {
                     if (target.getResultLines() == null) {
-                        target.setResultLines(Collections.emptyList());
+                        target.setResultLines(emptyList());
                     }
                     return target;
                 })
@@ -88,7 +88,7 @@ public class ResultsSharedDelegate implements Serializable {
             // assuming existing target matches defendantId, offenceId
             this.momento.getTargets().get(targetId).setDraftResult(draftResultSaved.getTarget().getDraftResult());
         } else {
-            draftResultSaved.getTarget().setResultLines(Collections.emptyList());
+            draftResultSaved.getTarget().setResultLines(emptyList());
             this.momento.getTargets().put(targetId, draftResultSaved.getTarget());
         }
 
@@ -154,7 +154,15 @@ public class ResultsSharedDelegate implements Serializable {
                     if (targets.containsKey(rl.getTargetId())) {
                         target = targets.get(rl.getTargetId());
                     } else {
-                        target = new Target(rl.getApplicationId(), rl.getDefendantId(), null, hearingId, rl.getOffenceId(), new ArrayList<>(), rl.getTargetId());
+                        target = Target
+                                .target()
+                                .withApplicationId(rl.getApplicationId())
+                                .withDefendantId(rl.getDefendantId())
+                                .withHearingId(hearingId)
+                                .withOffenceId(rl.getOffenceId())
+                                .withResultLines(new ArrayList<>())
+                                .withTargetId(rl.getTargetId())
+                                .build();
                         targets.put(target.getTargetId(), target);
                     }
                     target.getResultLines().add(convert(rl));

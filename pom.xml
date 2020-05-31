@@ -28,11 +28,12 @@
         <referencedata.version>6.4.21</referencedata.version>
         <criminal-court-public-model.version>1.0.81</criminal-court-public-model.version>
         <coredomain.version>1.0.81</coredomain.version>
+        <referencedata.version>6.4.21</referencedata.version>
         <material.version>6.0.1</material.version>
         <results.version>6.4.12</results.version>
         <notification.notify.version>0.0.38</notification.notify.version>
         <stagingenforcement.version>0.0.106</stagingenforcement.version>
-        <progression.version>6.4.45</progression.version>
+        <progression.version>6.4.46</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>

@@ -13,6 +13,16 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.core.courts.NextHearing.nextHearing;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.ADJOURNMENT_REASONS;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.COMMA_REGEX;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.CROWN_COURT_RESULT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DATE_FORMATS;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_A_DAY;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EUROPE_LONDON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DAYS_IN_A_WEEK;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MAGISTRATE_RESULT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_HOUR;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.SPACE;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.DAYS;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.HOURS;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.MINUTES;
@@ -68,19 +78,6 @@ import org.slf4j.LoggerFactory;
 
 public class NextHearingHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelper.class.getName());
-    private static final String ADJOURNMENT_REASONS = "Adjournment Reasons";
-    public static final String CROWN_COURT_RESULT_DEFINITION_ID = "fbed768b-ee95-4434-87c8-e81cbc8d24c8";
-    public static final String MAGISTRATE_RESULT_DEFINITION_ID = "70c98fa6-804d-11e8-adc0-fa7ae01bbebc";
-    private static final String SPACE = " ";
-    private static final String DATE_FORMATS = "[dd/MM/yyyy HH:mm][yyyy-MM-dd HH:mm][dd MMM yyyy HH:mm]";
-    private static final String EUROPE_LONDON = "Europe/London";
-    private static final int FIVE = 5;
-    private static final int SIX = 6;
-    private static final int MINUTES_IN_HOUR = 60;
-    private static final int DAY = SIX * MINUTES_IN_HOUR;
-    private static final String COMMA_REGEX = "\\s*,\\s*";
-
 
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
@@ -93,6 +90,8 @@ public class NextHearingHelper {
 
     @Inject
     private ReferenceDataService referenceDataService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelper.class.getName());
 
     public Optional<NextHearing> getNextHearing(final JsonEnvelope context,
                                                 final ResultDefinition resultDefinition,
@@ -150,37 +149,37 @@ public class NextHearingHelper {
                 .collect(toMap(prompt -> valueOf(prompt.getPromptReference()), prompt -> prompt));
     }
 
-    private static void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String hDateValue = getPromptValue(promptsMap, HDATE);
         final String dateValue = hDateValue != null ? hDateValue : getPromptValue(promptsMap, fixedDate);
 
         builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, getPromptValue(promptsMap, timeOfHearing)));
     }
 
-    private static String getPromptValue(final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearingPromptReference nextHearingPromptReference) {
+    private String getPromptValue(final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearingPromptReference nextHearingPromptReference) {
         return promptsMap.get(nextHearingPromptReference) != null ? promptsMap.get(nextHearingPromptReference).getValue() : null;
     }
 
-    private static void populateEstimatedDuration(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateEstimatedDuration(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         builder.withEstimatedMinutes(convertDurationIntoMinutes(Sets.newHashSet(promptsMap.get(HEST).getValue())));
     }
 
-    private static void populateBookingReference(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateBookingReference(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, bookingReference);
         builder.withBookingReference(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
     }
 
-    private static void populateExistingHearingId(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateExistingHearingId(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, existingHearingId);
         builder.withExistingHearingId(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
     }
 
-    private static void populateReservedJudiciary(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateReservedJudiciary(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, reservedJudiciary);
         builder.withReservedJudiciary(nonNull(promptValue) ? Boolean.valueOf(promptValue) : null);
     }
 
-    private static void populateWeekCommencingDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateWeekCommencingDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, weekCommencing);
         builder.withWeekCommencingDate(nonNull(promptValue) ? LocalDate.parse(promptValue, DateTimeFormatter.ofPattern(PublishResultUtil.OUTGOING_PROMPT_DATE_FORMAT)) : null);
     }
@@ -201,7 +200,7 @@ public class NextHearingHelper {
 
         final String adjournmentReasons = resultLines.stream()
                 .filter(resultLine -> this.isAdjournmentReasonResult(context, resultLine))
-                .map(NextHearingHelper::getAdjournmentsReasons)
+                .map(this::getAdjournmentsReasons)
                 .collect(joining(format("%s%s", lineSeparator(), lineSeparator())));
 
         builder.withAdjournmentReason(adjournmentReasons);
@@ -215,7 +214,7 @@ public class NextHearingHelper {
                 && ADJOURNMENT_REASONS.equalsIgnoreCase(resultDefinition.getResultDefinitionGroup());
     }
 
-    private static String getAdjournmentsReasons(final ResultLine resultLine) {
+    private String getAdjournmentsReasons(final ResultLine resultLine) {
 
         final String values = resultLine.getPrompts().stream()
                 .map(p -> format("%s %s", p.getLabel(), p.getValue()))
@@ -320,9 +319,9 @@ public class NextHearingHelper {
 
             Stream.of(durationValue.split(COMMA_REGEX)).map(String::toLowerCase).collect(toList()).forEach(durationElement -> {
                 if (durationElement.contains(DurationElements.WEEKS.name().toLowerCase())) {
-                    estimateMinutes[0] += parseInt(DIGIT.retainFrom(durationElement)) * FIVE * DAY;
+                    estimateMinutes[0] += parseInt(DIGIT.retainFrom(durationElement)) * DAYS_IN_A_WEEK * MINUTES_IN_A_DAY;
                 } else if (durationElement.contains(DAYS.name().toLowerCase())) {
-                    estimateMinutes[0] += parseInt(DIGIT.retainFrom(durationElement)) * DAY;
+                    estimateMinutes[0] += parseInt(DIGIT.retainFrom(durationElement)) * MINUTES_IN_A_DAY;
                 } else if (durationElement.contains(HOURS.name().toLowerCase())) {
                     estimateMinutes[0] += parseLong(DIGIT.retainFrom(durationElement)) * MINUTES_IN_HOUR;
                 } else if (durationElement.contains(MINUTES.name().toLowerCase())) {

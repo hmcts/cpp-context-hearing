@@ -58,6 +58,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaD
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.requestIssuedForStagingEnforcementForNowsId;
 import static uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub.findNowsIdForGivenHearingIdFromSystemMapper;
 import static uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub.stubMappingForNowsRequestId;
@@ -593,7 +594,7 @@ public class NCESJourneyIT extends AbstractIT {
                                                 .setIsAvailableForCourtExtract(true)
                                                 .setUserGroups(singletonList(LISTING_OFFICER_USERGROUP))
                                                 .setFinancial("Y")
-                                                .setCategory(ShareResultsIT.getCategoryForResultDefinition(resultDefinitionId))
+                                                .setCategory(getCategoryForResultDefinition(resultDefinitionId))
                                                 .setPrompts(singletonList(Prompt.prompt()
                                                                 .setId(randomUUID())
                                                                 .setMandatory(true)

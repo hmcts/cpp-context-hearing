@@ -11,10 +11,13 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.Level.CASE;
 import static uk.gov.justice.core.courts.Level.DEFENDANT;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -41,8 +44,10 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -154,7 +159,7 @@ public class PublishResultsDelegate {
         return JudicialResult.judicialResult()
                 .withJudicialResultId(randomUUID())
                 .withJudicialResultTypeId(resultDefinition.getId())
-                .withCategory(restructuringHelper.getCategory(resultDefinition))
+                .withCategory(getCategory(resultDefinition.getCategory()))
                 .withCjsCode(resultDefinition.getCjsCode())
                 .withIsAdjournmentResult(resultDefinition.isAdjournment())
                 .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
@@ -168,14 +173,14 @@ public class PublishResultsDelegate {
                 .withUsergroups(resultDefinition.getUserGroups())
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withResultText(resultDefinition.getLabel())
-                .withLifeDuration(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getLifeDuration()))
+                .withLifeDuration(getBooleanValue(resultDefinition.getLifeDuration(), false))
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
-                .withTerminatesOffenceProceedings(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getTerminatesOffenceProceedings()))
-                .withPublishedAsAPrompt(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getPublishedAsAPrompt()))
-                .withExcludedFromResults(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getExcludedFromResults()))
-                .withAlwaysPublished(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getAlwaysPublished()))
-                .withUrgent(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getUrgent()))
-                .withD20(restructuringHelper.getBooleanOrDefaultValue(resultDefinition.getD20())).build();
+                .withTerminatesOffenceProceedings(getBooleanValue(resultDefinition.getTerminatesOffenceProceedings(), false))
+                .withPublishedAsAPrompt(getBooleanValue(resultDefinition.getPublishedAsAPrompt(), false))
+                .withExcludedFromResults(getBooleanValue(resultDefinition.getExcludedFromResults(), false))
+                .withAlwaysPublished(getBooleanValue(resultDefinition.getAlwaysPublished(), false))
+                .withUrgent(getBooleanValue(resultDefinition.getUrgent(), false))
+                .withD20(getBooleanValue(resultDefinition.getD20(), false)).build();
     }
 
     private void mapApplicationLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {
@@ -201,24 +206,29 @@ public class PublishResultsDelegate {
 
 
     private void mapDefendantLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {
+        final Set<UUID> processedDefendants = new HashSet<>();
         resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .forEach(defendant -> {
-                    final List<JudicialResult> judicialResults = getCaseOrDefendantJudicialResults(results, defendant.getId());
-
+                    final List<JudicialResult> judicialResults = getJudicialResults(results, defendant.getId(), CASE);
+                    if(!processedDefendants.contains(defendant.getMasterDefendantId())) {
+                        final List<JudicialResult> defendantLevelJudicialResults = getJudicialResults(results, defendant.getId(), DEFENDANT);
+                        judicialResults.addAll(defendantLevelJudicialResults);
+                    }
                     if (!judicialResults.isEmpty()) { //so that judicialResults doesn't have empty tag
                         setPromptsAsNullIfEmpty(judicialResults);
                         defendant.setJudicialResults(judicialResults);
                     }
+                    processedDefendants.add(defendant.getMasterDefendantId());
                 });
     }
 
-    private List<JudicialResult> getCaseOrDefendantJudicialResults(final List<TreeNode<ResultLine>> results, final UUID id) {
+    private List<JudicialResult> getJudicialResults(final List<TreeNode<ResultLine>> results, final UUID id, final Level level) {
 
         return results.stream()
-                .filter(node -> node.getLevel() == CASE || node.getLevel() == DEFENDANT)
+                .filter(node -> node.getLevel() == level)
                 .filter(node -> nonNull(node.getDefendantId()) && id.equals(node.getDefendantId()))
-                .map(node -> node.getJudicialResult()).collect(toList());
+                .map(TreeNode::getJudicialResult).collect(toList());
     }
 
     private void mapOffenceLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {

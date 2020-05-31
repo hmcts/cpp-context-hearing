@@ -407,7 +407,7 @@ public class HearingService {
     public TargetListResponse getTargets(final UUID hearingId) {
         final Hearing hearing = hearingRepository.findBy(hearingId);
         return TargetListResponse.builder()
-                .withTargets(targetJPAMapper.fromJPA(hearing.getTargets())).build();
+                .withTargets(targetJPAMapper.fromJPA(hearing.getTargets(), hearing.getProsecutionCases())).build();
     }
 
     @Transactional

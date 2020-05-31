@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
@@ -39,6 +40,7 @@ public class TargetJPAMapperTest {
 
         UUID hearingId = UUID.randomUUID();
         Hearing hearing = mock(Hearing.class);
+        final UUID masterDefendantId = randomUUID();
         when(hearing.getId()).thenReturn(hearingId);
 
         Target target = new Target();
@@ -52,9 +54,10 @@ public class TargetJPAMapperTest {
         uk.gov.justice.core.courts.ResultLine resultLineMock = mock(uk.gov.justice.core.courts.ResultLine.class);
         when(resultLineJPAMapper.fromJPA(target.getResultLines())).thenReturn(asList(resultLineMock));
 
-        assertThat(targetJPAMapper.fromJPA(target), isBean(uk.gov.justice.core.courts.Target.class)
+        assertThat(targetJPAMapper.fromJPA(target, masterDefendantId), isBean(uk.gov.justice.core.courts.Target.class)
                 .with(uk.gov.justice.core.courts.Target::getTargetId, is(target.getId()))
                 .with(uk.gov.justice.core.courts.Target::getDefendantId, is(target.getDefendantId()))
+                .with(uk.gov.justice.core.courts.Target::getMasterDefendantId, is(masterDefendantId))
                 .with(uk.gov.justice.core.courts.Target::getOffenceId, is(target.getOffenceId()))
                 .with(uk.gov.justice.core.courts.Target::getHearingId, is(hearingId))
                 .with(uk.gov.justice.core.courts.Target::getDraftResult, is(target.getDraftResult()))

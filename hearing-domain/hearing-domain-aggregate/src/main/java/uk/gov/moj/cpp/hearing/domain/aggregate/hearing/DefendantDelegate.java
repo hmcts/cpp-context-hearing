@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import uk.gov.justice.core.courts.AttendanceDay;
@@ -95,31 +96,28 @@ public class DefendantDelegate implements Serializable {
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant newDefendant) {
 
-        if(this.momento.isPublished() && momento.getHearing() != null) {
+        if(isNull(momento.getHearing())) {
+            return Stream.empty();
+        } else if(this.momento.isPublished()) {
             return Stream.of(new DefendantDetailsUpdatedAfterResultPublished(hearingId, newDefendant));
         }
+        final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(d -> d.getId().equals(newDefendant.getId()))
+                .findFirst();
 
-        if (!this.momento.isPublished() && momento.getHearing() != null) {
-            final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
-                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                    .filter(d -> d.getId().equals(newDefendant.getId()))
-                    .findFirst();
-
-            if (previouslyStoredDefendant.isPresent() && nonNull(newDefendant.getPersonDefendant()) && nonNull(newDefendant.getPersonDefendant().getPersonDetails())) {
-                final String storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
-                final String newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
-                if (newTitle == null) {
-                    newDefendant.getPersonDefendant().getPersonDetails().setTitle(storedTitle);
-                }
+        if (previouslyStoredDefendant.isPresent() && nonNull(newDefendant.getPersonDefendant()) && nonNull(newDefendant.getPersonDefendant().getPersonDetails())) {
+            final String storedTitle = previouslyStoredDefendant.get().getPersonDefendant().getPersonDetails().getTitle();
+            final String newTitle = newDefendant.getPersonDefendant().getPersonDetails().getTitle();
+            if (newTitle == null) {
+                newDefendant.getPersonDefendant().getPersonDetails().setTitle(storedTitle);
             }
-
-            return Stream.of(DefendantDetailsUpdated.defendantDetailsUpdated()
-                    .setHearingId(hearingId)
-                    .setDefendant(newDefendant)
-            );
         }
 
-        return Stream.empty();
+        return Stream.of(DefendantDetailsUpdated.defendantDetailsUpdated()
+                .setHearingId(hearingId)
+                .setDefendant(newDefendant)
+        );
     }
 
     public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDayP) {

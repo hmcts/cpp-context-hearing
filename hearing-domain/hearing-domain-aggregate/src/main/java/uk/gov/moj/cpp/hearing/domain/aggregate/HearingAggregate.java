@@ -312,7 +312,16 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> saveDraftResults(final UUID applicationId, final UUID targetId, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {
-        return apply(resultsSharedDelegate.saveDraftResult(new Target(applicationId, defendantId, draftResult, hearingId, offenceId, resultLines, targetId)));
+        return apply(resultsSharedDelegate.saveDraftResult(Target
+                .target()
+                .withApplicationId(applicationId)
+                .withDefendantId(defendantId)
+                .withDraftResult(draftResult)
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId)
+                .withResultLines(resultLines)
+                .withTargetId(targetId)
+                .build()));
     }
 
     public Stream<Object> applicationDraftResults(final UUID targetId, final UUID applicationId, final UUID hearingId, final String draftResult, final CourtApplicationOutcomeType applicationOutcomeType, final LocalDate applicationOutcomeDate) {

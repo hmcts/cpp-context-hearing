@@ -88,8 +88,8 @@ public class CommandHelpers {
     }
 
 
-    public static UpdateDefendantAttendanceCommandHelper h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand) {
-        return new UpdateDefendantAttendanceCommandHelper(updateDefendantAttendanceCommand);
+    public static void h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand) {
+        new UpdateDefendantAttendanceCommandHelper(updateDefendantAttendanceCommand);
     }
 
     public static PendingNowsRequestedCommandHelper h(PendingNowsRequestedCommand pendingNowsRequestedCommand) {

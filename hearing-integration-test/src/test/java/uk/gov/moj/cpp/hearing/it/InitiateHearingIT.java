@@ -887,7 +887,7 @@ public class InitiateHearingIT extends AbstractIT {
                                 .withValue(CourtApplication::getId, courtApplication.getId())
                                 .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
                         ))
-                        .with(Hearing::getProsecutionCases, prosecutionCasesMatcher(hearingOne.getHearing().getProsecutionCases()))
+                        .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
 //TODO court applications
@@ -946,45 +946,4 @@ public class InitiateHearingIT extends AbstractIT {
                         .withValue(Defendants::getFirstName, defendant.getPersonDefendant().getPersonDetails().getFirstName()))
                 .toArray(BeanMatcher[]::new));
     }
-
-    public Matcher<Iterable<ProsecutionCase>> prosecutionCasesMatcher(final List<ProsecutionCase> prosecutionCases) {
-        return hasItems(prosecutionCases.stream().map(this::prosecutionCaseMatcher).toArray(BeanMatcher[]::new));
-    }
-
-    public BeanMatcher<ProsecutionCase> prosecutionCaseMatcher(final ProsecutionCase prosecutionCase) {
-        BeanMatcher<Defendant>[] items = prosecutionCase.getDefendants().stream()
-                .map(this::defendantMatcher)
-                .map(defendantBeanMatcher -> defendantBeanMatcher.with(Defendant::getProsecutionCaseId, is(prosecutionCase.getId())))
-                .toArray(BeanMatcher[]::new);
-        return isBean(ProsecutionCase.class)
-                .with(ProsecutionCase::getId, is(prosecutionCase.getId()))
-                .with(ProsecutionCase::getInitiationCode, is(prosecutionCase.getInitiationCode()))
-                .with(ProsecutionCase::getStatementOfFacts, is(prosecutionCase.getStatementOfFacts()))
-                .with(ProsecutionCase::getStatementOfFactsWelsh, is(prosecutionCase.getStatementOfFactsWelsh()))
-                .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
-                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()))
-                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))
-                        .with(ProsecutionCaseIdentifier::getCaseURN, is(prosecutionCase.getProsecutionCaseIdentifier().getCaseURN()))
-                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())))
-                .with(ProsecutionCase::getDefendants, hasItems(items));
-    }
-
-    public BeanMatcher<Defendant> defendantMatcher(final Defendant defendant) {
-        return isBean(Defendant.class)
-                .with(Defendant::getId, is(defendant.getId()))
-                .with(Defendant::getMasterDefendantId, is(defendant.getMasterDefendantId()))
-                .with(Defendant::getCourtProceedingsInitiated, is(defendant.getCourtProceedingsInitiated().withZoneSameLocal(ZoneId.of("UTC"))))
-                .with(Defendant::getOffences, hasItems(defendant.getOffences().stream().map(
-                        offence -> isBean(Offence.class)
-                                .with(Offence::getId, is(offence.getId()))
-                                .with(Offence::getOffenceDefinitionId, is(offence.getOffenceDefinitionId()))
-                                .with(Offence::getOffenceCode, is(offence.getOffenceCode()))
-                                .with(Offence::getWording, is(offence.getWording()))
-                                .with(Offence::getStartDate, is(offence.getStartDate()))
-                                .with(Offence::getOrderIndex, is(offence.getOrderIndex()))
-                                .with(Offence::getCount, is(offence.getCount()))
-                                .with(Offence::getLaidDate, is(offence.getLaidDate()))
-                ).toArray(BeanMatcher[]::new)));
-    }
-
 }
