@@ -16,7 +16,6 @@ import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdatedAfterResultPublished;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
@@ -107,9 +106,7 @@ public class HearingEventListenerYamlConfigTest {
             CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value(),
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
-            BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
-            DefendantDetailsUpdatedAfterResultPublished.class.getAnnotation(Event.class).value()
-
+            BookProvisionalHearingSlots.class.getAnnotation(Event.class).value()
     );
 
     private final Map<String, String> handlerNames = new HashMap<>();

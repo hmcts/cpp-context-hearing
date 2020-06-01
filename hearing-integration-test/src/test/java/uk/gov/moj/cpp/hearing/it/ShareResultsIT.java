@@ -408,6 +408,10 @@ public class ShareResultsIT extends AbstractIT {
         //When
         amendResultsToShare(hearingOne, targets, initiateHearing.getHearing());
 
+        shareResultsShouldNotHaveDDCH(targets, hearingOne);
+    }
+
+    private void shareResultsShouldNotHaveDDCH(final List<Target> targets, final InitiateHearingCommandHelper hearingOne) {
         final DelegatedPowers courtClerk2 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Siouxsie").withLastName("Sioux")
                 .withUserId(randomUUID()).build();
@@ -433,7 +437,7 @@ public class ShareResultsIT extends AbstractIT {
 
 
     @Test
-    public void reShareDefendantDetailsChangedShouldPublishDDCHResults() throws Exception {
+    public void reShareDefendantDetailsChangedShouldNotPublishDDCHResults() throws Exception {
 
         //Given
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
@@ -456,14 +460,7 @@ public class ShareResultsIT extends AbstractIT {
         updateDefendantDetails(initiateHearing, hearingOne, "Test2", "Test");
 
         //Then
-        shareAndVerifyDDCH(targets, hearingOne);
-
-        Queries.getHearingPollForMatch(initiateHearing.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
-                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(initiateHearing.getHearing().getId()))
-                        .with(Hearing::getHasSharedResults, is(true))));
-
-
+        shareResultsShouldNotHaveDDCH(targets, hearingOne);
     }
 
     private void shareAndVerifyDDCH(final List<Target> targets, final InitiateHearingCommandHelper hearingOne) {

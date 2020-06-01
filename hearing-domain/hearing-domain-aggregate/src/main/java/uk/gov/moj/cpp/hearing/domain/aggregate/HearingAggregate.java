@@ -76,7 +76,6 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdatedAfterResultPublished;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
@@ -194,7 +193,6 @@ public class HearingAggregate implements Aggregate {
                 when(ConvictionDateAdded.class).apply(convictionDateDelegate::handleConvictionDateAdded),
                 when(ConvictionDateRemoved.class).apply(convictionDateDelegate::handleConvictionDateRemoved),
                 when(DefendantDetailsUpdated.class).apply(defendantDelegate::handleDefendantDetailsUpdated),
-                when(DefendantDetailsUpdatedAfterResultPublished.class).apply( defendantDelegate::handleDefendantDetailsUpdatedAfterResultPublished),
                 when(OffenceAdded.class).apply(offenceDelegate::handleOffenceAdded),
                 when(OffenceUpdated.class).apply(offenceDelegate::handleOffenceUpdated),
                 when(OffenceDeleted.class).apply(offenceDelegate::handleOffenceDeleted),

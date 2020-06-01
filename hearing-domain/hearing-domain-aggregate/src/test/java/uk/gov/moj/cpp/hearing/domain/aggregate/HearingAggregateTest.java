@@ -483,7 +483,7 @@ public class HearingAggregateTest {
     @Test
     public void updateDefendantDetails_should_not_Ignore_when_resultShared() {
 
-        final int expected = 1;
+        final int expected = 0;
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
