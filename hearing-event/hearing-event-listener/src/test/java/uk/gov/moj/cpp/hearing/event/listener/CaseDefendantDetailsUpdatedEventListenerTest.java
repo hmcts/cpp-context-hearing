@@ -110,6 +110,64 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
         assertThat(defendantexArgumentCaptor.getValue(), isBean(Defendant.class)
                 .with(defendant1 -> defendant.getId().getId(), is(defendantDetailsUpdated.getDefendant().getId()))
+                .with(defendant1 -> defendant.getMasterDefendantId(), is(defendantDetailsUpdated.getDefendant().getMasterDefendantId()))
+                .with(Defendant::getPersonDefendant, isBean(PersonDefendant.class)
+                        .with(PersonDefendant::getCustodialEstablishment, isBean(CustodialEstablishment.class)
+                                .with(CustodialEstablishment::getCustody, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getCustody()))
+                                .with(CustodialEstablishment::getId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getId()))
+                                .with(CustodialEstablishment::getName, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getName()))
+
+                        )
+                        .with(PersonDefendant::getPersonDetails, isBean(Person.class)
+                                .with(Person::getNationalityCode, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getNationalityCode()))
+                                .with(Person::getNationalityId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getNationalityId()))
+                                .with(Person::getNationalityDescription, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getNationalityDescription()))
+                                .with(Person::getAdditionalNationalityCode, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getAdditionalNationalityCode()))
+                                .with(Person::getAdditionalNationalityId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getAdditionalNationalityId()))
+                        )
+
+                )
+        );
+        assertAssociatedDefenceOrganisation(defendant, defendantexArgumentCaptor);
+    }
+
+    @Test
+    public void shouldUpdateDefendantWithoutMasterDefendantId() {
+
+        final UUID hearingId = randomUUID();
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant defendantTemplate = defendantTemplate();
+        defendantTemplate.setMasterDefendantId(null);
+        final DefendantDetailsUpdated defendantDetailsUpdated = DefendantDetailsUpdated.defendantDetailsUpdated()
+                .setHearingId(hearingId)
+                .setDefendant(defendantTemplate);
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
+
+        final Defendant defendant = getDefendant(hearingId, defendantDetailsUpdated);
+        final UUID masterDefendantId = randomUUID();
+        defendant.setMasterDefendantId(masterDefendantId);
+
+        final JsonEnvelope envelope = createJsonEnvelope(defendantDetailsUpdated);
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        when(associatedDefenceOrganisationJPAMapper.toJPA(any(uk.gov.justice.core.courts.AssociatedDefenceOrganisation.class)))
+                .thenReturn(getAssociatedDefenceOrganisation());
+
+        caseDefendantDetailsUpdatedEventListener.defendantDetailsUpdated(envelope);
+
+        final ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+
+        verify(defendantRepository).save(defendantexArgumentCaptor.capture());
+
+        assertThat(defendantexArgumentCaptor.getValue(), isBean(Defendant.class)
+                .with(defendant1 -> defendant.getId().getId(), is(defendantDetailsUpdated.getDefendant().getId()))
+                .with(defendant1 -> defendant.getMasterDefendantId(), is(masterDefendantId))
                 .with(Defendant::getPersonDefendant, isBean(PersonDefendant.class)
                         .with(PersonDefendant::getCustodialEstablishment, isBean(CustodialEstablishment.class)
                                 .with(CustodialEstablishment::getCustody, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getCustodialEstablishment().getCustody()))
@@ -171,6 +229,7 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         final Defendant defendant = new Defendant();
         defendant.setProsecutionCase(prosecutionCase);
         defendant.setId(new HearingSnapshotKey(defendantDetailsUpdated.getDefendant().getId(), hearingId));
+        defendant.setMasterDefendantId(defendantDetailsUpdated.getDefendant().getMasterDefendantId());
         final PersonDefendant personDefendant = new PersonDefendant();
         personDefendant.setPersonDetails(new Person());
 

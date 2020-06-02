@@ -56,7 +56,9 @@ public class CaseDefendantDetailsUpdatedEventListener {
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantIn.getId(), hearingId));
 
         if (defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
-            defendant.setMasterDefendantId(defendantIn.getMasterDefendantId());
+            if(defendantIn.getMasterDefendantId() != null) {
+                defendant.setMasterDefendantId(defendantIn.getMasterDefendantId());
+            }
             defendant.setNumberOfPreviousConvictionsCited(defendantIn.getNumberOfPreviousConvictionsCited());
             defendant.setProsecutionAuthorityReference(defendantIn.getProsecutionAuthorityReference());
             defendant.setWitnessStatement(defendantIn.getWitnessStatement());
