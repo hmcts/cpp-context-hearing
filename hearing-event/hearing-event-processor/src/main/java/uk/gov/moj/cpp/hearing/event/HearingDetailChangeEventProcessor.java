@@ -26,5 +26,4 @@ public class HearingDetailChangeEventProcessor {
     public void publishHearingDetailChangedPrivateEvent(final JsonEnvelope event) {
         this.sender.send(this.enveloper.withMetadataFrom(event, PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE).apply(event.payloadAsJsonObject()));
     }
-
 }

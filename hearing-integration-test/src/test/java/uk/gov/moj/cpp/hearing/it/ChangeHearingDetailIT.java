@@ -16,7 +16,7 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -36,7 +36,7 @@ public class ChangeHearingDetailIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         HearingDetailsUpdateCommand hearingDetailsUpdateCommand = UseCases.updateHearing(HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()
-                .setHearing(uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing.hearing()
+                .setHearing(uk.gov.moj.cpp.hearing.command.hearing.details.Hearing.hearing()
                         .setId(hearingOne.getHearingId())
                         .setCourtCentre(CourtCentre.courtCentre()
                                 .withId(randomUUID())

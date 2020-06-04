@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 import uk.gov.justice.core.courts.AttendanceDay;

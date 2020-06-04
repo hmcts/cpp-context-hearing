@@ -669,6 +669,30 @@ public class HearingServiceTest {
     }
 
     @Test
+    public void shouldFindHearingWithVacateTrailType() {
+
+        final Hearing entity = mock(Hearing.class);
+
+        final uk.gov.justice.core.courts.Hearing pojo = mock(uk.gov.justice.core.courts.Hearing.class);
+
+        final UUID hearingId = randomUUID();
+        final UUID vacatedTrialReasonId = randomUUID();
+        entity.setvacatedTrialReasonId(vacatedTrialReasonId);
+        entity.setIsVacatedTrial(true);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(entity);
+        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(buildVacatedTrialTypes(vacatedTrialReasonId));
+
+        when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
+
+        final HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+
+        assertThat(response, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, is(pojo))
+        );
+    }
+
+    @Test
     public void shouldFindHearingWithEffectiveTrailType() {
 
         final Hearing entity = mock(Hearing.class);
@@ -896,7 +920,12 @@ public class HearingServiceTest {
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
+    private CrackedIneffectiveVacatedTrialTypes buildVacatedTrialTypes(final UUID vacatedTrialReasonId) {
+        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
+        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "fullDescription"));
 
+        return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
+    }
 
     private CurrentCourtStatus getCurrentCourtStatusWithMultipleCases(uk.gov.justice.core.courts.HearingEvent hearingEvent) {
         return currentCourtStatus()

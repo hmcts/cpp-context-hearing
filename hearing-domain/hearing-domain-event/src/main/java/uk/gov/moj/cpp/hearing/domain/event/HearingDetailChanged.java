@@ -18,6 +18,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Event("hearing.event.detail-changed")
 public class HearingDetailChanged implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private UUID id;
     private HearingType type;
     private CourtCentre courtCentre;
@@ -124,4 +126,5 @@ public class HearingDetailChanged implements Serializable {
         this.judiciary = judiciary;
         return this;
     }
+
 }

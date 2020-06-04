@@ -6,7 +6,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import org.slf4j.Logger;
@@ -35,6 +35,7 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
                 hearingDetailsUpdateCommand.getHearing().getHearingLanguage(),
                 hearingDetailsUpdateCommand.getHearing().getHearingDays(),
                 hearingDetailsUpdateCommand.getHearing().getJudiciary()
+
         ));
     }
 }

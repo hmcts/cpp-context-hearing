@@ -8,6 +8,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.JudicialRoleJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -47,7 +48,6 @@ public class ChangeHearingDetailEventListener {
         hearing.setJurisdictionType(hearingDetailChanged.getJurisdictionType());
         hearing.setReportingRestrictionReason(hearingDetailChanged.getReportingRestrictionReason());
         hearing.setHearingLanguage(hearingDetailChanged.getHearingLanguage());
-
         hearing.getHearingDays().clear();
         hearing.getHearingDays().addAll(hearingDayJPAMapper.toJPA(hearing, hearingDetailChanged.getHearingDays()));
 
@@ -64,5 +64,16 @@ public class ChangeHearingDetailEventListener {
         hearing.getJudicialRoles().addAll(judicialRoleJPAMapper.toJPA(hearing, hearingDetailChanged.getJudiciary()));
 
         hearingRepository.save(hearing);
+    }
+
+    @Transactional
+    @Handles("hearing.events.vacated-trial-cleared")
+    public void handleHearingVacatedTrialCleared(final JsonEnvelope event) {
+        final HearingEventVacatedTrialCleared hearingEventVacatedTrialCleared = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventVacatedTrialCleared.class);
+        final Hearing hearing = hearingRepository.findBy(hearingEventVacatedTrialCleared.getHearingId());
+        hearing.setvacatedTrialReasonId(null);
+        hearing.setIsVacatedTrial(Boolean.FALSE);
+        hearingRepository.save(hearing);
+
     }
 }

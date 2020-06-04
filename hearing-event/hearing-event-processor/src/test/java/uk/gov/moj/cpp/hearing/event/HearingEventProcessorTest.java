@@ -35,7 +35,12 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
+import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
@@ -173,7 +178,7 @@ public class HearingEventProcessorTest {
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
     @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
 
     @DataProvider
     public static Object[][] provideListOfRequiredHearingField() {
@@ -197,7 +202,7 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publicDraftResultSavedPublicEvent() {
+    public void shouldPublishDraftResultSavedPublicEvent() {
         final String draftResult = "some random text";
         final Target target = CoreTestTemplates.target(randomUUID(), randomUUID(), randomUUID(), randomUUID()).build();
         final JsonEnvelope eventIn = createDraftResultSavedPrivateEvent(target);
@@ -217,7 +222,7 @@ public class HearingEventProcessorTest {
     }
 
     @Test
-    public void publicApplicationDraftResultedPublicEvent() {
+    public void shouldPublishApplicationDraftResultedPublicEvent() {
         final ApplicationDraftResulted applicationDraftResulted = ApplicationDraftResulted.applicationDraftResulted()
                 .setDraftResult("result")
                 .setTargetId(randomUUID())
@@ -242,6 +247,69 @@ public class HearingEventProcessorTest {
         assertThat(publicEventOut.getTargetId(), is(applicationDraftResulted.getTargetId()));
         assertThat(publicEventOut.getApplicationOutcomeType(), is(applicationDraftResulted.getApplicationOutcomeType()));
         assertThat(publicEventOut.getApplicationOutcomeDate(), is(applicationDraftResulted.getApplicationOutcomeDate()));
+    }
+
+
+    @Test
+    public void shouldTriggerPublicHearingTrialVacatedEventForEffectiveTrial() {
+        final UUID hearingId = randomUUID();
+        final HearingEffectiveTrial hearingEffectiveTrial = new HearingEffectiveTrial(hearingId, true);
+        final JsonEnvelope eventIn = createApplicationHearingEffectiveTrialPrivateEvent(hearingEffectiveTrial);
+
+        this.hearingEventProcessor.publicHearingEventEffectiveTrialSetPublicEvent(eventIn);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
+        assertThat(publicEventOut.getHearingId(), is(hearingEffectiveTrial.getHearingId()));
+    }
+
+
+    @Test
+    public void shouldTriggerPublicHearingTrialVacatedEventForCrackedTrial() {
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+        final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "code", "cracked", "desc");
+        final JsonEnvelope eventIn = createApplicationHearingTrialPrivateEvent(hearingTrialType);
+
+        this.hearingEventProcessor.publicHearingEventTrialTypeSetPublicEvent(eventIn);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
+        assertThat(publicEventOut.getHearingId(), is(hearingTrialType.getHearingId()));
+    }
+
+    @Test
+    public void shouldTriggerCommandHearingRescheduled() {
+        final UUID hearingId = randomUUID();
+        final HearingEventVacatedTrialCleared hearingEventRescheduled = new HearingEventVacatedTrialCleared(hearingId);
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingEventRescheduled);
+        final Metadata metadata = metadataWithDefaults().build();
+        this.hearingEventProcessor.handlePublicListingHearingRescheduled(envelopeFrom(metadata, jsonObject));
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.COMMAND_LISTING_HEARING_RESCHEDULED));
+    }
+
+    @Test
+    public void shouldTriggerPublicHearingTrialVacatedEventForVacatedTrial() {
+        final UUID hearingId = randomUUID();
+        final UUID trialTypeId = randomUUID();
+        final HearingTrialVacated hearingTrialType = new HearingTrialVacated(hearingId, trialTypeId, "code", "cracked", "desc");
+        final JsonEnvelope eventIn = createApplicationHearingVacateTrialPrivateEvent(hearingTrialType);
+
+        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(eventIn);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
+        assertThat(publicEventOut.getHearingId(), is(hearingTrialType.getHearingId()));
+        assertThat(publicEventOut.getVacatedTrialReasonId(), is(hearingTrialType.getVacatedTrialReasonId()));
     }
 
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class<?> commandClass, int sendCount) {
@@ -323,6 +391,24 @@ public class HearingEventProcessorTest {
 
     private JsonEnvelope createApplicationDraftResultedPrivateEvent(final ApplicationDraftResulted applicationDraftResulted) {
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(applicationDraftResulted);
+        final Metadata metadata = metadataWithDefaults().build();
+        return envelopeFrom(metadata, jsonObject);
+    }
+
+    private JsonEnvelope createApplicationHearingEffectiveTrialPrivateEvent(final HearingEffectiveTrial hearingEffectiveTrial) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingEffectiveTrial);
+        final Metadata metadata = metadataWithDefaults().build();
+        return envelopeFrom(metadata, jsonObject);
+    }
+
+    private JsonEnvelope createApplicationHearingTrialPrivateEvent(final HearingTrialType hearingTrialType) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingTrialType);
+        final Metadata metadata = metadataWithDefaults().build();
+        return envelopeFrom(metadata, jsonObject);
+    }
+
+    private JsonEnvelope createApplicationHearingVacateTrialPrivateEvent(final HearingTrialVacated hearingTrialVacated) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingTrialVacated);
         final Metadata metadata = metadataWithDefaults().build();
         return envelopeFrom(metadata, jsonObject);
     }

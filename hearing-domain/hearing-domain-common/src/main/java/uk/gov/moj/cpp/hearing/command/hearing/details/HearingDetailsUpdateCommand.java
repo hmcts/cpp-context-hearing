@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.command.hearingDetails;
+package uk.gov.moj.cpp.hearing.command.hearing.details;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 

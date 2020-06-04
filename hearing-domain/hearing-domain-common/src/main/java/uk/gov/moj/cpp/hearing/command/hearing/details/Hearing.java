@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.command.hearingDetails;
+package uk.gov.moj.cpp.hearing.command.hearing.details;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingDay;
@@ -12,6 +12,8 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+
+@SuppressWarnings({"squid:S2384"})
 public class Hearing {
 
     private UUID id;
@@ -29,6 +31,10 @@ public class Hearing {
     private List<HearingDay> hearingDays;
 
     private List<JudicialRole> judiciary;
+
+    private Boolean isVacated ;
+
+    private UUID vacatedTrialReasonId;
 
     public Hearing() {
     }
@@ -117,6 +123,24 @@ public class Hearing {
 
     public Hearing setHearingDays(List<HearingDay> hearingDays) {
         this.hearingDays = hearingDays;
+        return this;
+    }
+
+    public Boolean getIsVacated() {
+        return isVacated;
+    }
+
+    public Hearing setIsVacated(final Boolean vacated) {
+        isVacated = vacated;
+        return this;
+    }
+
+    public UUID getVacatedTrialReasonId() {
+        return vacatedTrialReasonId;
+    }
+
+    public Hearing setVacatedTrialReasonId(final UUID vacatedTrialReasonId) {
+        this.vacatedTrialReasonId = vacatedTrialReasonId;
         return this;
     }
 }

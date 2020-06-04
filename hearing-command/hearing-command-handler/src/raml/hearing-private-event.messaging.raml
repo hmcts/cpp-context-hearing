@@ -130,6 +130,11 @@ baseUri: message://command/handler/message/hearing
                     schema: !include json/schema/hearing.event.detail-changed.json
                     example: !include json/hearing.event.detail-changed.json
 
+# Hearing Detail Vacated Trial Change
+                application/vnd.hearing.change-vacated-trial-detail+json:
+                        schema: !include json/schema/hearing.update-vacated-trial-detail.json
+                        example: !include json/hearing.update-vacated-trial-detail.json
+
 # Hearing Adjourned
                 application/vnd.hearing.event.hearing-adjourned+json:
                     schema: !include json/schema/hearing.event.hearing-adjourned.json

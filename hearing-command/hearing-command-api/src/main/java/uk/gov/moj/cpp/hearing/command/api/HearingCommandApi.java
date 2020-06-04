@@ -1,30 +1,73 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
+import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
 
+    private static final String DEFENDANT_DETAILS_CHANGED_SHORT_CODE = "DDCH";
+
     private final Sender sender;
     private final Enveloper enveloper;
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private final ReferenceDataService referenceDataService;
+
 
     @Inject
-    public HearingCommandApi(final Sender sender, final Enveloper enveloper) {
+    public HearingCommandApi(final Sender sender, final Enveloper enveloper, final JsonObjectToObjectConverter jsonObjectToObjectConverter, final ObjectToJsonObjectConverter objectToJsonObjectConverter, final ReferenceDataService referenceDataService) {
         this.sender = sender;
         this.enveloper = enveloper;
+        this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
+        this.objectToJsonObjectConverter = objectToJsonObjectConverter;
+        this.referenceDataService = referenceDataService;
     }
 
     @Handles("hearing.initiate")
     public void initiateHearing(final JsonEnvelope envelope) {
-        this.sender.send(envelope);
+        final InitiateHearingCommand command = verifyAndRemoveDDCHJudicialResult(envelope);
+
+        this.sender.send(Enveloper.envelop(this.objectToJsonObjectConverter.convert(command))
+                .withName("hearing.initiate")
+                .withMetadataFrom(envelope));
+    }
+
+    @SuppressWarnings("pmd:NullAssignment")
+    private InitiateHearingCommand verifyAndRemoveDDCHJudicialResult(final JsonEnvelope envelope) {
+        final InitiateHearingCommand command = this.jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), InitiateHearingCommand.class);
+        if (command.getHearing().getProsecutionCases() != null) {
+            command.getHearing().getProsecutionCases().stream().forEach(prosecutionCase ->
+                    prosecutionCase.getDefendants().stream().forEach(defendant -> {
+                        if (!isEmpty(defendant.getJudicialResults())) {
+                            final ResultDefinition resultDefinition = referenceDataService.getResults(envelope, DEFENDANT_DETAILS_CHANGED_SHORT_CODE);
+                            final List<JudicialResult> results = defendant.getJudicialResults().stream().filter(judicialResult -> judicialResult.getJudicialResultTypeId().compareTo(resultDefinition.getId()) != 0).collect(Collectors.toList());
+                            defendant.setJudicialResults(results.isEmpty() ? null : results);
+                        }
+                    })
+            );
+        }
+        return command;
     }
 
     @Handles("hearing.save-draft-result")
@@ -149,12 +192,14 @@ public class HearingCommandApi {
 
     @Handles("hearing.set-trial-type")
     public void setTrialType(final JsonEnvelope envelope) {
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.set-trial-type").apply(envelope.payloadAsJsonObject()));
+        final MetadataBuilder metadata = metadataFrom(envelope.metadata()).withName("hearing.command.set-trial-type");
+        sender.send(envelopeFrom(metadata, envelope.payloadAsJsonObject()));
     }
 
     @Handles("hearing.add-company-representative")
     public void addCompanyRepresentative(final JsonEnvelope envelope) {
-        this.sender.send(this.enveloper.withMetadataFrom(envelope, "hearing.command.add-company-representative").apply(envelope.payloadAsJsonObject()));
+        final MetadataBuilder metadata = metadataFrom(envelope.metadata()).withName("hearing.command.add-company-representative");
+        sender.send(envelopeFrom(metadata, envelope.payloadAsJsonObject()));
     }
 
     @Handles("hearing.update-company-representative")

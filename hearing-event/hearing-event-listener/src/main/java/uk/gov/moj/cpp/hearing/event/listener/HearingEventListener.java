@@ -23,6 +23,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 
 import javax.inject.Inject;
 
@@ -144,6 +145,27 @@ public class HearingEventListener {
         if (nonNull(hearing)) {
             hearing.setTrialTypeId(hearingTrialType.getTrialTypeId());
             hearing.setIsEffectiveTrial(null);
+            hearing.setIsVacatedTrial(false);
+            hearing.setvacatedTrialReasonId(null);
+            hearingRepository.save(hearing);
+        }
+    }
+
+    @Handles("hearing.trial-vacated")
+    public void setHearingVacateTrialType(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.trial-vacated event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingTrialVacated hearingTrialType = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingTrialVacated.class);
+
+        final Hearing hearing = hearingRepository.findBy(hearingTrialType.getHearingId());
+        if (nonNull(hearing)) {
+            hearing.setvacatedTrialReasonId(hearingTrialType.getVacatedTrialReasonId());
+            hearing.setIsVacatedTrial(nonNull(hearingTrialType.getVacatedTrialReasonId()));
+            hearing.setIsEffectiveTrial(null);
+            hearing.setTrialTypeId(null);
             hearingRepository.save(hearing);
         }
     }
@@ -161,6 +183,8 @@ public class HearingEventListener {
         if (nonNull(hearing)) {
             hearing.setIsEffectiveTrial(true);
             hearing.setTrialTypeId(null);
+            hearing.setIsVacatedTrial(false);
+            hearing.setvacatedTrialReasonId(null);
             hearingRepository.save(hearing);
         }
     }

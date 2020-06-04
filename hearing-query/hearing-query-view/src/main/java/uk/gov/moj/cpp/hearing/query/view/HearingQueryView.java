@@ -172,7 +172,7 @@ public class HearingQueryView {
 
 
         final Optional<UUID> trialTypeId = getUUID(envelope.payloadAsJsonObject(), "trialTypeId");
-        return envelop(hearingService.getCrackedIneffectiveTrial(trialTypeId.get()))
+        return envelop(hearingService.fetchCrackedIneffectiveTrial(trialTypeId.get()))
                 .withName("hearing.get-cracked-ineffective-reason")
                 .withMetadataFrom(envelope);
     }

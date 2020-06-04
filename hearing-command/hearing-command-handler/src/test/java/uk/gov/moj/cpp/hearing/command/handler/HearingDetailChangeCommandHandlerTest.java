@@ -29,7 +29,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
@@ -99,7 +99,7 @@ public class HearingDetailChangeCommandHandlerTest {
         List<JudicialRole> judicialRoles = createJudicialRoles();
         List<HearingDay> hearingDays = createHearingDays();
 
-        uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing hearingDetail = createHearing(hearingId, courtCentre, hearingType, judicialRoles, hearingDays);
+        uk.gov.moj.cpp.hearing.command.hearing.details.Hearing hearingDetail = createHearing(hearingId, courtCentre, hearingType, judicialRoles, hearingDays);
 
         HearingDetailsUpdateCommand hearingDetailsUpdateCommand = HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()
                 .setHearing(hearingDetail);
@@ -157,7 +157,7 @@ public class HearingDetailChangeCommandHandlerTest {
         List<JudicialRole> judicialRoles = createJudicialRoles();
         List<HearingDay> hearingDays = createHearingDays();
 
-        uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing hearingDetail = createHearing(hearingId, courtCentre, hearingType, judicialRoles, hearingDays);
+        uk.gov.moj.cpp.hearing.command.hearing.details.Hearing hearingDetail = createHearing(hearingId, courtCentre, hearingType, judicialRoles, hearingDays);
 
         HearingDetailsUpdateCommand hearingDetailsUpdateCommand = HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()
                 .setHearing(hearingDetail);
@@ -218,8 +218,8 @@ public class HearingDetailChangeCommandHandlerTest {
                 .build();
     }
 
-    private uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing createHearing(UUID hearingId, CourtCentre courtCentre, HearingType hearingType, List<JudicialRole> judicialRoles, List<HearingDay> hearingDays) {
-        uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing hearing = new uk.gov.moj.cpp.hearing.command.hearingDetails.Hearing();
+    private uk.gov.moj.cpp.hearing.command.hearing.details.Hearing createHearing(UUID hearingId, CourtCentre courtCentre, HearingType hearingType, List<JudicialRole> judicialRoles, List<HearingDay> hearingDays) {
+        uk.gov.moj.cpp.hearing.command.hearing.details.Hearing hearing = new uk.gov.moj.cpp.hearing.command.hearing.details.Hearing();
         hearing.setId(hearingId);
         hearing.setType(hearingType);
         hearing.setCourtCentre(courtCentre);
@@ -228,6 +228,8 @@ public class HearingDetailChangeCommandHandlerTest {
         hearing.setReportingRestrictionReason(STRING.next());
         hearing.setJurisdictionType(JurisdictionType.CROWN);
         hearing.setHearingLanguage(HearingLanguage.ENGLISH);
+        hearing.setIsVacated(false);
+        hearing.setVacatedTrialReasonId(null);
         return hearing;
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.test;
 
 
 import static java.util.Collections.singletonList;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.BailStatus.bailStatus;
@@ -42,6 +43,7 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.InitiationCode;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JudicialRoleType;
 import uk.gov.justice.core.courts.JurisdictionType;
@@ -459,6 +461,38 @@ public class CoreTestTemplates {
 
     }
 
+
+    public static Defendant.Builder defendantJudicialResults(final UUID prosecutionCaseId, final CoreTemplateArguments args, final Pair<UUID, List<UUID>> structure) {
+
+        final List<AssociatedPerson> nonAssociatePerson = null;
+        final Organisation noneDefenceOrganisation = null;
+
+        return Defendant.defendant()
+                .withId(structure.getK())
+                .withMasterDefendantId(args.getDifferentMasterDefendantId() != null ? args.getDifferentMasterDefendantId() : structure.getK())
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withNumberOfPreviousConvictionsCited(INTEGER.next())
+                .withProsecutionAuthorityReference(STRING.next())
+                .withIsYouth(Boolean.TRUE)
+                .withJudicialResults(asList(JudicialResult.judicialResult()
+                        .withJudicialResultTypeId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b"))
+                        .withLabel("Defendant's details changed")
+                        .withCjsCode("4592")
+                        .build()))
+                .withOffences(
+                        structure.getV().stream()
+                                .map(offenceId -> offence(args, offenceId).build())
+                                .collect(toList())
+                )
+                .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : nonAssociatePerson)
+                .withDefenceOrganisation(args.isMinimumDefenceOrganisation() ? organisation(args).build() : noneDefenceOrganisation)
+                .withPersonDefendant(args.defendantType == PERSON ? personDefendant(args).build() : null)
+                .withLegalEntityDefendant(args.defendantType == ORGANISATION ? legalEntityDefendant(args).build() : null)
+                .withCourtProceedingsInitiated(args.getCourtProceedingsInitiated() != null ? args.getCourtProceedingsInitiated() : ZonedDateTime.now(ZoneOffset.UTC))
+                .withProceedingsConcluded(Boolean.FALSE);
+
+    }
+
     public static Marker.Builder marker(final Pair<UUID, List<UUID>> structure) {
 
         return Marker.marker()
@@ -468,7 +502,7 @@ public class CoreTestTemplates {
                 .withMarkerTypeid(UUID.randomUUID());
     }
 
-    public static ProsecutionCase.Builder prosecutionCase(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure) {
+    public static ProsecutionCase.Builder prosecutionCase(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure, final boolean withJudicialResults) {
 
         return ProsecutionCase.prosecutionCase()
                 .withId(structure.getK())
@@ -482,7 +516,9 @@ public class CoreTestTemplates {
                 .withCaseMarkers(buildCaseMarkers())
                 .withDefendants(
                         structure.getV().entrySet().stream()
-                                .map(entry -> defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build())
+                                .map(entry -> withJudicialResults ? defendantJudicialResults(structure.getK(), args, p(entry.getKey(), entry.getValue())).build() :
+                                        defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build()
+                                )
                                 .collect(toList())
                 );
     }
@@ -510,7 +546,7 @@ public class CoreTestTemplates {
                 .withWelshDescription(STRING.next());
     }
 
-    public static Hearing.Builder hearing(final CoreTemplateArguments args) {
+    public static Hearing.Builder hearing(final CoreTemplateArguments args, final boolean withJudicialResults) {
         final Hearing.Builder hearingBuilder = Hearing.hearing()
                 .withId(randomUUID())
                 .withType(hearingType(Optional.empty()).build())
@@ -521,7 +557,7 @@ public class CoreTestTemplates {
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), withJudicialResults).build())
                                 .collect(toList())
                 )
 
@@ -535,6 +571,11 @@ public class CoreTestTemplates {
             hearingBuilder.withCourtCentre(courtCentre().build());
         }
         return hearingBuilder;
+    }
+
+
+    public static Hearing.Builder hearing(final CoreTemplateArguments args) {
+       return hearing(args, false);
     }
 
     public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
@@ -556,7 +597,7 @@ public class CoreTestTemplates {
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false).build())
                                 .collect(toList())
                 )
 
@@ -608,7 +649,7 @@ public class CoreTestTemplates {
                                         .build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue())).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false).build())
                                 .collect(toList())
                 )
 

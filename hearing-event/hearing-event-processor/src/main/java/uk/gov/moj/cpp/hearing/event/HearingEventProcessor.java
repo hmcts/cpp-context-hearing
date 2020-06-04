@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -10,8 +12,13 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -25,6 +32,9 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
 
     public static final String PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED = "public.hearing.application-draft-resulted";
+    public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
+    public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
+    public static final String COMMAND_LISTING_HEARING_RESCHEDULED = "hearing.command.clear-vacated-trial";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
     private final Enveloper enveloper;
     private final Sender sender;
@@ -81,4 +91,77 @@ public class HearingEventProcessor {
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED).apply(publicEventPayload));
     }
 
+
+    @Handles("hearing.hearing-effective-trial-set")
+    public void publicHearingEventEffectiveTrialSetPublicEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-effective-trial-type-set event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingEffectiveTrial hearingEffectiveTrial = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingEffectiveTrial.class);
+
+        final PublicHearingEventTrialVacated publicHearingEventTrialVacated = PublicHearingEventTrialVacated.publicHearingEventTrialVacated()
+                .setHearingId(hearingEffectiveTrial.getHearingId())
+                .setVacatedTrialReasonId(null);
+
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingEventTrialVacated);
+
+        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(PUBLIC_HEARING_TRIAL_VACATED);
+        sender.send(envelopeFrom(metadata, publicEventPayload));
+
+    }
+
+    @Handles("hearing.hearing-trial-type-set")
+    public void publicHearingEventTrialTypeSetPublicEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-trial-type-set event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingTrialType hearingTrialType = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingTrialType.class);
+
+
+        final PublicHearingEventTrialVacated publicHearingEventTrialVacated = PublicHearingEventTrialVacated.publicHearingEventTrialVacated()
+                .setHearingId(hearingTrialType.getHearingId())
+                .setVacatedTrialReasonId(null);
+
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingEventTrialVacated);
+
+        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(PUBLIC_HEARING_TRIAL_VACATED);
+        sender.send(envelopeFrom(metadata, publicEventPayload));
+
+    }
+
+    @Handles("hearing.trial-vacated")
+    public void publicHearingEventVacateTrialTypeSetPublicEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.trial-vacated event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingTrialVacated hearingTrialType = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingTrialVacated.class);
+
+        final PublicHearingEventTrialVacated publicHearingEventTrialVacated = PublicHearingEventTrialVacated.publicHearingEventTrialVacated()
+                .setHearingId(hearingTrialType.getHearingId())
+                .setVacatedTrialReasonId(hearingTrialType.getVacatedTrialReasonId());
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingEventTrialVacated);
+
+        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(PUBLIC_HEARING_TRIAL_VACATED);
+        sender.send(envelopeFrom(metadata, publicEventPayload));
+    }
+
+    @Handles(PUBLIC_LISTING_HEARING_RESCHEDULED)
+    public void handlePublicListingHearingRescheduled(final JsonEnvelope envelope) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("public.hearing.trial-vacated event received {}", envelope.toObfuscatedDebugString());
+        }
+
+        this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(COMMAND_LISTING_HEARING_RESCHEDULED),
+                envelope.payloadAsJsonObject()));
+
+    }
 }

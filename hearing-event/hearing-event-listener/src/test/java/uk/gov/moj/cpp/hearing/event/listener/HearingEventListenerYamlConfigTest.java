@@ -142,7 +142,8 @@ public class HearingEventListenerYamlConfigTest {
                 CaseDefendantsUpdateListener.class,
                 PublishCourtListEventListener.class,
                 CaseMarkerEventListener.class,
-                SessionTimeEventListener.class));
+                SessionTimeEventListener.class,
+                HearingVacatedTrialDetailChangeEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

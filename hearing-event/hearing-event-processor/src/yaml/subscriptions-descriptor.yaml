@@ -221,6 +221,16 @@ subscriptions_descriptor:
         - name: hearing.outstanding-fines-requested
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.outstanding-fines-requested.json
 
+      # Set Trial Type
+        - name: hearing.hearing-trial-type-set
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.hearing-trial-type-set.json
+
+        - name: hearing.hearing-effective-trial-set
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.hearing-effective-trial-set.json
+
+        - name: hearing.trial-vacated
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.trial-vacated.json
+
       event_source_name: hearing
 
     - name: public event subscription
@@ -254,6 +264,10 @@ subscriptions_descriptor:
         - name: public.hearing-detail-changed
           schema_uri: http://cpp.moj.gov.uk/listing/json/schema/event/public-hearing-detail-changed.json
 
+      # Listing Hearing Rescheduled
+        -  name: public.listing.hearing-rescheduled
+           schema_uri: http://cpp.moj.gov.uk/listing/json/schema/event/public-listing.hearing-rescheduled.json
+
       # Staging Enforcement
         - name: public.stagingenforcement.enforce-financial-imposition-acknowledgement
           schema_uri: http://cpp.moj.gov.uk/stagingenforcement/json/schema/event/public-enforce-financial-imposition-acknowledgement.json
@@ -273,5 +287,10 @@ subscriptions_descriptor:
         # Progression Hearing Resulted Case Updated
         - name: public.progression.hearing-resulted-case-updated
           schema_uri: http://justice.gov.uk/core/courts/hearing-resulted-case-updated.json
+
+        # Listing Hearing Detail Changed
+        - name: public.listing.vacated-trial-updated
+          schema_uri: http://cpp.moj.gov.uk/listing/json/schema/event/public-listing-vacated-trial-updated.json
+
 
       event_source_name: public.event.source

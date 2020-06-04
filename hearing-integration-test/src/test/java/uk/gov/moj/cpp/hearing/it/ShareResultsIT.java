@@ -29,6 +29,7 @@ import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArgument
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithDefendantJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.welshInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultWithOutcomeCommandTemplate;
@@ -360,6 +361,32 @@ public class ShareResultsIT extends AbstractIT {
         //then
         publicEventForDefendantCaseWithdrawnOrDismissed.waitFor();
     }
+
+
+    /**
+     *  DDCH -Defendant details changed,
+     *  if there are any changes to the defendant in name (Include first name, last name, middle name) or Organisation name, address, date of birth , nationality from last hearing
+     *  then when sharing results application should send "DDCH" result in SPI OUT
+     */
+    @Test
+    public void shareResultShouldNotPublishDDCHResultsWhenInitiateHearingHaveDDCHJudicialResult() {
+
+        //Given and When
+
+        stubGetReferenceDataResultDefinitionsDDCH();
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithDefendantJudicialResults();
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        //Then
+        shareResultsShouldNotHaveDDCH(targets, hearingOne);
+
+    }
+
 
     @Test
     public void shareResultShouldPublishDDCHResultsWhenDefendantDetailsChanged() throws Exception {

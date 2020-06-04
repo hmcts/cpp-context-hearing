@@ -81,9 +81,11 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryAdded;
@@ -215,12 +217,16 @@ public class HearingAggregate implements Aggregate {
                 when(InterpreterIntermediaryUpdated.class).apply(interpreterIntermediaryDelegate::handleInterpreterIntermediaryUpdated),
                 when(HearingTrialType.class).apply(hearingTrialTypeDelegate::handleTrialTypeSetForHearing),
                 when(HearingEffectiveTrial.class).apply(hearingTrialTypeDelegate::handleEffectiveTrailHearing),
+                when(HearingTrialVacated.class).apply(hearingTrialTypeDelegate::handleVacateTrialTypeSetForHearing),
                 when(CompanyRepresentativeAdded.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeAdded),
                 when(CompanyRepresentativeUpdated.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeUpdated),
                 when(CompanyRepresentativeRemoved.class).apply(companyRepresentativeDelegate::handleCompanyRepresentativeRemoved),
                 when(CaseMarkersUpdated.class).apply(prosecutionCaseDelegate::handleCaseMarkersUpdated),
                 when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate::onDefendantLegalaidStatusTobeUpdatedForHearing),
                 when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
+                when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> {
+                    hearingDelegate.handleVacatedTrialCleared();
+                }),
                 otherwiseDoNothing()
         );
 
@@ -299,6 +305,16 @@ public class HearingAggregate implements Aggregate {
                                                final List<HearingDay> hearingDays,
                                                final List<JudicialRole> judiciary) {
         return apply(this.hearingDelegate.updateHearingDetails(id, type, courtCentre, jurisdictionType, reportingRestrictionReason, hearingLanguage, hearingDays, judiciary));
+    }
+
+    public Stream<Object> updateHearingVacateTrialDetails(final UUID hearingId,
+                                               final Boolean isVacated,
+                                               final UUID vacatedTrialReasonId) {
+        return apply(this.hearingDelegate.updateHearingVacateTrialDetails(hearingId, isVacated, vacatedTrialReasonId));
+    }
+
+    public Stream<Object> clearVacatedTrial(final UUID id) {
+        return apply(this.hearingDelegate.clearVacatedTrial(id));
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
@@ -433,6 +449,10 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> setTrialType(final HearingEffectiveTrial hearingEffectiveTrial) {
         return apply(this.hearingTrialTypeDelegate.setTrialType(hearingEffectiveTrial));
+    }
+
+    public Stream<Object> setTrialType(final HearingTrialVacated trialType) {
+        return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {

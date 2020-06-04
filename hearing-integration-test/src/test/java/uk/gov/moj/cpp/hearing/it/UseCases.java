@@ -53,12 +53,15 @@ import uk.gov.justice.hearing.courts.UpdateInterpreterIntermediary;
 import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonObjects;
+import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
-import uk.gov.moj.cpp.hearing.command.hearingDetails.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
@@ -69,6 +72,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.eventlog.CourtCentre;
@@ -742,6 +746,35 @@ public class UseCases {
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
         return hearingDetailsUpdateCommand;
+    }
+
+    public static HearingVacatedTrialCleared rescheduleHearing(final HearingVacatedTrialCleared hearingVacatedTrialCleared) throws Exception {
+        final String eventName = "public.listing.hearing-rescheduled";
+        String eventPayloadString = " { \"hearingId\": \"" + hearingVacatedTrialCleared.getHearingId() + "\" }";
+        final JsonObject jsonObject = new StringToJsonObjectConverter().convert(eventPayloadString);
+
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                jsonObject,
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+        return hearingVacatedTrialCleared;
+    }
+
+    public static HearingVacatedTrialDetailsUpdateCommand updateHearingVacatedTrialDetail(final HearingVacatedTrialDetailsUpdateCommand hearingVacateTrialDetailsUpdateCommand) throws Exception {
+        final String eventName = "public.listing.vacated-trial-updated";
+
+        final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
+
+        final JsonObject jsonObject = mapper.readValue(mapper.writeValueAsString(hearingVacateTrialDetailsUpdateCommand), JsonObject.class);
+
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                jsonObject,
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+        return hearingVacateTrialDetailsUpdateCommand;
     }
 
     public static UploadSubscriptionsCommand uploadSubscriptions(final RequestSpecification requestSpec, final UploadSubscriptionsCommand uploadSubscriptionsCommand) {

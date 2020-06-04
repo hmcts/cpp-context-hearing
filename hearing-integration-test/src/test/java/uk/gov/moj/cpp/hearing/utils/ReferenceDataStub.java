@@ -197,6 +197,7 @@ public class ReferenceDataStub {
 
         waitForStubToBeReady(urlPath, REFERENCE_DATA_RESULT_DEFINITIONS_BY_CODE_MEDIA_TYPE);
     }
+
     public static void stubGetAllResultDefinitions(final AllResultDefinitions allResultDefinitions) {
         stub(allResultDefinitions, REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL_WITHOUT_DATE, REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE);
     }
@@ -540,7 +541,7 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL, REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE);
     }
 
-    public static void stubGetReferenceDataXhibitHearingTypes(){
+    public static void stubGetReferenceDataXhibitHearingTypes() {
         stubDynamicPromptFixedList();
     }
 
@@ -566,13 +567,11 @@ public class ReferenceDataStub {
     }
 
 
-
-
     public static void stubGetReferenceDataEventMappings() {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
         final String payload = getPayload("stub-data/referencedata.query.cp-xhibit-hearing-event-mappings.json");
-        stubFor(get(urlPathMatching( REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_QUERY_URL))
+        stubFor(get(urlPathMatching(REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_QUERY_URL))
                 .willReturn(aResponse()
                         .withStatus(SC_OK)
                         .withHeader("CPPID", randomUUID().toString())

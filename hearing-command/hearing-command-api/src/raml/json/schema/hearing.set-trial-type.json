@@ -4,14 +4,18 @@
   "type": "object",
   "properties": {
     "trialTypeId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     },
     "isEffectiveTrial": {
       "type": "boolean"
+    },
+    "vacatedTrialReasonId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     }
+
   },
   "oneOf": [
-    {
+  {
       "required": [
         "trialTypeId"
       ]
@@ -20,7 +24,13 @@
       "required": [
         "isEffectiveTrial"
       ]
+    },
+    {
+      "required": [
+        "vacatedTrialReasonId"
+      ]
     }
+
   ],
   "additionalProperties": false
 }

@@ -88,7 +88,7 @@
           "$ref": "http://justice.gov.uk.v24/core/courts/target.json"
         }
       }
-      },
+    },
       "required": [
         "id",
         "type",

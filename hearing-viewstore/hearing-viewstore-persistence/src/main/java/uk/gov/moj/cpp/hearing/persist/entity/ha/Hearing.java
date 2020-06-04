@@ -105,6 +105,13 @@ public class Hearing {
     @Column(name = "is_box_hearing")
     private Boolean isBoxHearing;
 
+    @Column(name = "is_vacated_trial")
+    private Boolean isVacatedTrial;
+
+    @Column(name = "vacate_reason_id")
+    private UUID vacatedTrialReasonId;
+
+
     public Hearing() {
         //For JPA
     }
@@ -337,6 +344,23 @@ public class Hearing {
     public void setHearingApplications(final Set<HearingApplication> hearingApplications) {
         this.hearingApplications = hearingApplications;
     }
+
+    public Boolean getIsVacatedTrial() {
+        return isVacatedTrial;
+    }
+
+    public void setIsVacatedTrial(final Boolean vacatedTrial) {
+        isVacatedTrial = vacatedTrial;
+    }
+
+    public UUID getVacatedTrialReasonId() {
+        return vacatedTrialReasonId;
+    }
+
+    public void setvacatedTrialReasonId(final UUID vacatedTrialReasonId) {
+        this.vacatedTrialReasonId = vacatedTrialReasonId;
+    }
+
 
     @Override
     public int hashCode() {

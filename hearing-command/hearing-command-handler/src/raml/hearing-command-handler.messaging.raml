@@ -35,6 +35,11 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.register-hearing-against-case.json
             example: !include json/hearing.command.register-hearing-against-case.json
 
+  # Hearing Rescheduled
+        application/vnd.hearing.command.clear-vacated-trial+json:
+            schema: !include json/schema/hearing.command.clear-vacated-trial.json
+            example: !include json/hearing.command.clear-vacated-trial.json
+
 # Log Event
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json
@@ -169,6 +174,11 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.change-hearing-detail+json:
                 schema: !include json/schema/hearing.change-hearing-detail.json
                 example: !include json/hearing.change-hearing-detail.json
+
+# Hearing Detail Vacated Trial Change
+        application/vnd.hearing.update-vacated-trial-detail+json:
+                schema: !include json/schema/hearing.update-vacated-trial-detail.json
+                example: !include json/hearing.update-vacated-trial-detail.json
 
 # Hearing Adjourn
         application/vnd.hearing.adjourn-hearing+json:

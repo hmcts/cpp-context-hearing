@@ -23,7 +23,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplate
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -383,4 +383,27 @@ public class HearingEventListenerTest {
                 .with(Hearing::getIsEffectiveTrial, is(true))
         );
     }
+
+    @Test
+    public void setInVacateTrialType_shouldPersist_with_hearing() {
+
+        final UUID hearingId = randomUUID();
+        final UUID vacateTrialTypeId = randomUUID();
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+        final HearingTrialVacated hearingTrialVacated = new HearingTrialVacated(hearingId, vacateTrialTypeId, "A", "Vacated", "full description");
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+
+        hearingEventListener.setHearingVacateTrialType(envelopeFrom(metadataWithRandomUUID("hearing.trial-vacated"),
+                objectToJsonObjectConverter.convert(hearingTrialVacated)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getVacatedTrialReasonId, is(vacateTrialTypeId))
+        );
+    }
+
 }

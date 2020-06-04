@@ -114,6 +114,10 @@ subscriptions_descriptor:
         - name: hearing.event.detail-changed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/detail-changed.json
 
+      # Hearing Update Vacate Trial Detail
+        - name: hearing.event.vacated-trial-detail-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/update-vacated-trial-detail.json
+
       # notification upload subscriptions
         - name: hearing.subscriptions-uploaded
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/subscriptions-uploaded.json
@@ -171,7 +175,11 @@ subscriptions_descriptor:
         - name: hearing.hearing-effective-trial-set
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.hearing-effective-trial-set.json
 
-      # Company Representative
+        - name: hearing.trial-vacated
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.trial-vacated.json
+
+
+        # Company Representative
         - name: hearing.company-representative-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/company-representative-added.json
 
@@ -214,5 +222,9 @@ subscriptions_descriptor:
       # Session Times Recorded
         - name: hearing.event.session-time-recorded
           schema_uri: http://cpp.moj.gov.uk/hearing/event/session-time-recorded.json
+
+      # Hearing Rescheduled
+        - name: hearing.events.vacated-trial-cleared
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.vacated-trial-cleared.json
 
       event_source_name: hearing

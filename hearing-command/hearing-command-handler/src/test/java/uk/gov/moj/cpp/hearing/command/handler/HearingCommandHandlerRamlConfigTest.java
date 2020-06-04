@@ -66,7 +66,9 @@ public class HearingCommandHandlerRamlConfigTest {
                 ComputeOutstandingFinesCommandHandler.class,
                 AddRequestForOutstandingFinesCommandHandler.class,
                 SessionTimeCommandHandler.class,
-                BookProvisionalHearingSlotsCommandHandler.class
+                BookProvisionalHearingSlotsCommandHandler.class,
+                ClearVacatedReasonCommandHandler.class,
+                HearingVacatedTrialDetailUpdateCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

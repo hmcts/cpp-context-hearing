@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.command.api;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.stream;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -13,6 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -23,12 +26,19 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
+import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.io.File;
 import java.lang.reflect.Method;
@@ -39,6 +49,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -68,10 +79,27 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots");
 
+    public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
+    public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
+    public static final String JSON_EXPECTED_HEARING_INITIATE_DDCH = "json/expected-hearing-initiate-ddch.json";
+    private static final String HEARING_INITIATE = "hearing.initiate";
+
     @Spy
     private final Enveloper enveloper = createEnveloper();
     @Spy
     private final Clock clock = new StoppedClock(ZonedDateTime.now());
+
+    @Spy
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+    @Spy
+    @InjectMocks
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter();
+
+    @Spy
+    @InjectMocks
+    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new ObjectToJsonObjectConverter();
+
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
     private Map<String, String> notificationApiMethodsToHandlerNames;
@@ -82,6 +110,13 @@ public class HearingCommandApiTest {
     private Sender sender;
     @Captor
     private ArgumentCaptor<JsonEnvelope> senderArgumentCaptor;
+
+    @Mock
+    private ReferenceDataService referenceDataService;
+
+
+    @Captor
+    private ArgumentCaptor<Envelope<JsonObject>> senderArgumentCaptor1;
 
     @InjectMocks
     private HearingCommandApi hearingCommandApi;
@@ -97,7 +132,7 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void testActionNameAndHandlerNameAreSame() throws Exception {
+    public void shouldCheckActionNameAndHandlerNameAreSame() throws Exception {
         final List<String> allLines = FileUtils.readLines(new File(PATH_TO_RAML));
         final List<String> ramlActionNames = allLines.stream()
                 .filter(action -> !action.isEmpty())
@@ -119,7 +154,45 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void testHandlerNamesPassThroughSender() {
+    public void shouldInitiateHearingWithDDCHJudiciaryResult() {
+        final JsonObject jsonObjectPayload = CommandAPITestBase.readJson(JSON_HEARING_INITIATE_DDCH, JsonObject.class);
+        final Metadata metadata = CommandAPITestBase.metadataFor(HEARING_INITIATE, randomUUID().toString());
+        final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(metadata, jsonObjectPayload);
+
+        when(referenceDataService.getResults(envelope, "DDCH")).thenReturn(ResultDefinition.resultDefinition().setId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b")));
+        hearingCommandApi.initiateHearing(envelope);
+
+
+        verify(sender).send(senderArgumentCaptor1.capture());
+
+        final Envelope<JsonObject> jsonEnvelopOut = senderArgumentCaptor1.getValue();
+
+        final JsonObject result = CommandAPITestBase.readJson(JSON_EXPECTED_HEARING_INITIATE_DDCH, JsonObject.class);
+
+        assertThat(jsonEnvelopOut.payload(), is(result));
+
+    }
+
+    @Test
+    public void shouldInitiateHearingWithOutDDCHJudiciaryResult() {
+        final JsonObject jsonObjectPayload = CommandAPITestBase.readJson(JSON_HEARING_INITIATE, JsonObject.class);
+        final Metadata metadata = CommandAPITestBase.metadataFor(HEARING_INITIATE, randomUUID().toString());
+        final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(metadata, jsonObjectPayload);
+
+        hearingCommandApi.initiateHearing(envelope);
+
+
+        verify(sender).send(senderArgumentCaptor1.capture());
+
+        final Envelope<JsonObject> jsonEnvelopOut = senderArgumentCaptor1.getValue();
+
+        assertThat(jsonEnvelopOut.payload(), is(jsonObjectPayload));
+
+    }
+
+
+    @Test
+    public void ShouldCheckHandlerNamesPassThroughSender() {
         assertHandlerMethodsArePassThrough(HearingCommandApi.class, apiMethodsToHandlerNames.keySet().stream()
                 .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
                 .collect(toMap(identity(), apiMethodsToHandlerNames::get)));

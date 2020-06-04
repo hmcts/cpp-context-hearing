@@ -18,9 +18,11 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -87,6 +89,13 @@ public class HearingDelegate implements Serializable {
 
     }
 
+    public void handleVacatedTrialCleared() {
+        if (this.momento.getHearing().getIsVacatedTrial() != null && this.momento.getHearing().getIsVacatedTrial()) {
+            this.momento.getHearing().setIsVacatedTrial(false);
+            this.momento.getHearing().setCrackedIneffectiveTrial(null);
+        }
+    }
+
     public Stream<Object> initiate(final Hearing hearing) {
 
         return Stream.of(new HearingInitiated(hearing));
@@ -104,13 +113,24 @@ public class HearingDelegate implements Serializable {
                                                final String reportingRestrictionReason,
                                                final HearingLanguage hearingLanguage,
                                                final List<HearingDay> hearingDays,
-                                               final List<JudicialRole> judiciary) {
+                                               final List<JudicialRole> judiciary
+                                               ) {
 
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.change-hearing-detail' event as hearing not found", id));
         }
 
         return Stream.of(new HearingDetailChanged(id, type, courtCentre, jurisdictionType, reportingRestrictionReason, hearingLanguage, hearingDays, judiciary));
+    }
+
+    public Stream<Object> updateHearingVacateTrialDetails(final UUID hearingId,
+                                                          final Boolean isVacated,
+                                                          final UUID vacatedTrialReasonId) {
+        return Stream.of(new HearingVacatedTrialDetailUpdated(hearingId, isVacated, vacatedTrialReasonId));
+    }
+
+    public Stream<Object> clearVacatedTrial(final UUID hearingId) {
+        return Stream.of(new HearingEventVacatedTrialCleared(hearingId));
     }
 
     private HearingChangeIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {

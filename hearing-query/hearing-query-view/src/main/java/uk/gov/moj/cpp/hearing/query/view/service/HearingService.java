@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
@@ -286,35 +287,57 @@ public class HearingService {
 
         if (hearing.getTrialTypeId() != null) {
 
-            final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
+            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId());
+            crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
+                    trialType.getReasonCode(),
+                    trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
+                    trialType.getId(),
+                    trialType.getTrialType()))
+                    .ifPresent(trialType -> hearingDetailsResponse
+                            .getHearing()
+                            .setCrackedIneffectiveTrial(trialType));
+            hearingDetailsResponse.getHearing().setIsVacatedTrial(FALSE);
 
-            if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
+        } else if (isVacatedTrialRequest(hearing)) {
 
-                final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = crackedIneffectiveVacatedTrialTypes
-                        .getCrackedIneffectiveVacatedTrialTypes()
-                        .stream()
-                        .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(hearing.getTrialTypeId()))
-                        .findFirst();
+            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId());
+            crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
+                    trialType.getReasonCode(),
+                    trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
+                    trialType.getId(),
+                    trialType.getTrialType()))
+                    .ifPresent(trialType -> hearingDetailsResponse
+                            .getHearing()
+                            .setCrackedIneffectiveTrial(trialType));
+            hearingDetailsResponse.getHearing().setIsVacatedTrial(TRUE);
 
-                crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                        trialType.getReasonCode(),
-                        trialType.getReasonFullDescription(),
-                        trialType.getId(),
-                        trialType.getTrialType()))
-                        .ifPresent(trialType -> hearingDetailsResponse
-                                .getHearing()
-                                .setCrackedIneffectiveTrial(trialType));
-
-            }
         } else if (nonNull(hearing.getIsEffectiveTrial())) {
             hearingDetailsResponse.getHearing().setIsEffectiveTrial(TRUE);
+            hearingDetailsResponse.getHearing().setIsVacatedTrial(FALSE);
+        } else {
+            hearingDetailsResponse.getHearing().setIsVacatedTrial(FALSE);
         }
 
         return hearingDetailsResponse;
     }
 
+    private Optional<CrackedIneffectiveVacatedTrialType> getCrackedIneffectiveVacatedTrialType(final UUID trialTypeId) {
+
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
+
+        return crackedIneffectiveVacatedTrialTypes
+                .getCrackedIneffectiveVacatedTrialTypes()
+                .stream()
+                .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals( trialTypeId ))
+                .findFirst();
+    }
+
+    private boolean isVacatedTrialRequest(final Hearing hearing) {
+        return hearing.getIsVacatedTrial()!=null && hearing.getIsVacatedTrial();
+    }
+
     @Transactional
-    public CrackedIneffectiveTrial getCrackedIneffectiveTrial(final UUID trailTypeId) {
+    public CrackedIneffectiveTrial fetchCrackedIneffectiveTrial(final UUID trailTypeId) {
 
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
 
@@ -328,7 +351,7 @@ public class HearingService {
 
             return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                     trialType.getReasonCode(),
-                    trialType.getReasonFullDescription(),
+                    trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                     trialType.getId(),
                     trialType.getTrialType()))
                     .orElse(null);
@@ -447,7 +470,7 @@ public class HearingService {
     }
 
     private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing) {
-        final CrackedIneffectiveTrial crackedIneffectiveTrial = getCrackedIneffectiveTrial(hearing.getTrialTypeId());
+        final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId());
         return hearing.getHearingDays()
                 .stream()
                 .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial))
@@ -455,7 +478,7 @@ public class HearingService {
     }
 
     private List<TimelineHearingSummary> populateTimeLineHearingSummariesWithApplicants(final Hearing hearing, final UUID applicationId) {
-        final CrackedIneffectiveTrial crackedIneffectiveTrial = getCrackedIneffectiveTrial(hearing.getTrialTypeId());
+        final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId());
         return hearing.getHearingDays()
                 .stream()
                 .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, applicationId))

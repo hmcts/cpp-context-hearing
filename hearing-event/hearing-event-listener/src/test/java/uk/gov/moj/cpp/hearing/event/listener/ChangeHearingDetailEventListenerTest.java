@@ -18,6 +18,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.JudicialRoleJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
@@ -49,6 +50,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ChangeHearingDetailEventListenerTest {
 
     private static final UUID HEARING_ID = randomUUID();
+    private static final UUID VACATED_REASON_ID = randomUUID();
 
     @Mock
     private HearingRepository hearingRepository;
@@ -75,6 +77,30 @@ public class ChangeHearingDetailEventListenerTest {
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+    }
+
+    @Test
+    public void shouldUpdateVacatedReasonToNull() {
+        final Hearing hearing = new Hearing();
+        hearing.setId(HEARING_ID);
+        hearing.setvacatedTrialReasonId(null);
+        hearing.setIsVacatedTrial(false);
+        hearing.setHasSharedResults(false);
+
+        when(this.hearingRepository.findBy(HEARING_ID)).thenReturn(hearing);
+
+        HearingEventVacatedTrialCleared hearingEventVacatedTrialCleared = new HearingEventVacatedTrialCleared(HEARING_ID);
+
+        changeHearingDetailEventListener.handleHearingVacatedTrialCleared(envelopeFrom(metadataWithRandomUUID("hearing.event.hearing-rescheduled"),
+                objectToJsonObjectConverter.convert(hearingEventVacatedTrialCleared)));
+
+        verify(this.hearingRepository).save(ahearingArgumentCaptor.capture());
+
+        final Hearing toBePersisted = ahearingArgumentCaptor.getValue();
+
+        assertThat(hearingEventVacatedTrialCleared.getHearingId(), equalTo(toBePersisted.getId()));
+        assertThat(null, equalTo(toBePersisted.getVacatedTrialReasonId()));
+        assertThat(false, equalTo(toBePersisted.getIsVacatedTrial()));
     }
 
     @Test

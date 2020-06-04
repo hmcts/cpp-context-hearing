@@ -5,7 +5,7 @@ import static java.util.Objects.nonNull;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
-
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import java.io.Serializable;
 import java.util.stream.Stream;
 
@@ -19,6 +19,20 @@ public class HearingTrialTypeDelegate implements Serializable {
         this.momento = momento;
     }
 
+    public void handleVacateTrialTypeSetForHearing(final HearingTrialVacated hearingTrialType) {
+        if (nonNull(hearingTrialType.getVacatedTrialReasonId())) {
+            this.momento.getHearing().setCrackedIneffectiveTrial(CrackedIneffectiveTrial.crackedIneffectiveTrial()
+                    .withId(hearingTrialType.getVacatedTrialReasonId())
+                    .withCode(hearingTrialType.getCode())
+                    .withDescription(hearingTrialType.getDescription())
+                    .withType(hearingTrialType.getType())
+                    .build());
+            this.momento.getHearing().setIsVacatedTrial(true);
+            this.momento.getHearing().setIsEffectiveTrial(null);
+        }
+    }
+
+
     public void handleTrialTypeSetForHearing(final HearingTrialType hearingTrialType) {
         if (nonNull(hearingTrialType.getTrialTypeId())) {
             this.momento.getHearing().setCrackedIneffectiveTrial(CrackedIneffectiveTrial.crackedIneffectiveTrial()
@@ -27,7 +41,7 @@ public class HearingTrialTypeDelegate implements Serializable {
                     .withDescription(hearingTrialType.getDescription())
                     .withType(hearingTrialType.getType())
                     .build());
-
+            this.momento.getHearing().setIsVacatedTrial(false);
             this.momento.getHearing().setIsEffectiveTrial(null);
         }
     }
@@ -36,6 +50,7 @@ public class HearingTrialTypeDelegate implements Serializable {
         if (nonNull(hearingEffectiveTrial.getIsEffectiveTrial()) && hearingEffectiveTrial.getIsEffectiveTrial()) {
             this.momento.getHearing().setIsEffectiveTrial(hearingEffectiveTrial.getIsEffectiveTrial());
             this.momento.getHearing().setCrackedIneffectiveTrial(null);
+            this.momento.getHearing().setIsVacatedTrial(false);
         }
     }
 
@@ -46,4 +61,9 @@ public class HearingTrialTypeDelegate implements Serializable {
     public Stream<Object> setTrialType(final HearingEffectiveTrial hearingEffectiveTrial) {
         return Stream.of(hearingEffectiveTrial);
     }
+
+    public Stream<Object> setTrialType(final HearingTrialVacated hearingTrialVacated) {
+        return Stream.of(hearingTrialVacated);
+    }
+
 }

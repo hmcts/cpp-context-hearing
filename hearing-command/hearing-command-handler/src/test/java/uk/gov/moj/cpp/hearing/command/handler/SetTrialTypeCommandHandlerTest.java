@@ -1,20 +1,13 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -30,11 +23,12 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.util.List;
@@ -61,7 +55,8 @@ public class SetTrialTypeCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            HearingTrialType.class
+            HearingTrialType.class,
+            HearingTrialVacated.class
     );
 
     @Mock
@@ -89,6 +84,7 @@ public class SetTrialTypeCommandHandlerTest {
     private ArgumentCaptor<JsonEnvelope> requesterArgumentCaptor;
 
     private final UUID trialTypeId = randomUUID();
+    private final UUID vacatedTrialReasonId = randomUUID();
 
     @Before
     public void setup() {
@@ -115,7 +111,7 @@ public class SetTrialTypeCommandHandlerTest {
 
         when(requester.request(any(JsonEnvelope.class))).thenReturn(prepareActiveHearingsResponse());
 
-        setTrialTypeCommandHandler.setTrialType(jsonEnvelope);
+        setTrialTypeCommandHandler.handleTrialType(jsonEnvelope);
 
         final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
 
@@ -124,6 +120,36 @@ public class SetTrialTypeCommandHandlerTest {
                 .with(HearingTrialType::getTrialTypeId, Matchers.is(trialTypeId))
         );
     }
+
+
+    @Test
+    public void eventHearingSetVacateTrialTypeShouldBeCreated() throws EventStreamException {
+        CommandHelpers.InitiateHearingCommandHelper hearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearingObject.getHearingId();
+
+        HearingTrialVacated vacateTrialType = new HearingTrialVacated(hearingId, vacatedTrialReasonId, "A", "Vacated", "Vacated Trial");
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearingObject.getHearing()));
+        }};
+
+        when(this.eventSource.getStreamById(hearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(HEARING_SET_TRIAL_TYPE), objectToJsonObjectConverter.convert(vacateTrialType));
+
+        when(requester.request(any(JsonEnvelope.class))).thenReturn(prepareVacatedHearingsResponse());
+
+        setTrialTypeCommandHandler.handleTrialType(jsonEnvelope);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        assertThat(asPojo(events.get(0), HearingTrialVacated.class), isBean(HearingTrialVacated.class)
+                .with(HearingTrialVacated::getHearingId, Matchers.is(hearingId))
+                .with(HearingTrialVacated::getVacatedTrialReasonId, Matchers.is(vacatedTrialReasonId))
+        );
+
+    }
+
 
     private JsonEnvelope prepareActiveHearingsResponse() {
         return envelopeFrom(metadataWithRandomUUIDAndName(), mockCrackedIneffectiveReasonPayload());
@@ -136,4 +162,17 @@ public class SetTrialTypeCommandHandlerTest {
                 .add("type", "Effective")
                 .add("description", "full description");
     }
+
+    private JsonEnvelope prepareVacatedHearingsResponse() {
+        return envelopeFrom(metadataWithRandomUUIDAndName(), mockVacatedReasonPayload());
+    }
+
+    private JsonObjectBuilder mockVacatedReasonPayload() {
+        return createObjectBuilder()
+                .add("id", vacatedTrialReasonId.toString())
+                .add("code", "A")
+                .add("type", "Vacated")
+                .add("description", "full description");
+    }
+
 }
