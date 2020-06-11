@@ -139,22 +139,22 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetCaseTimeline() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","Recorders","DJMC","Deputies","Victims & Witness Care Admin");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToToGetCaseTimeline() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_CASE_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","Recorders","DJMC","Deputies","Victims & Witness Care Admin");
     }
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetApplicationTimeline() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","Recorders","DJMC","Deputies","Victims & Witness Care Admin");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToToGetApplicationTimeline() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_GET_APPLICATION_TIMELINE, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","Recorders","DJMC","Deputies","Victims & Witness Care Admin");
     }
 
     @Test
