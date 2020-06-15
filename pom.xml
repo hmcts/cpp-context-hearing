@@ -27,7 +27,7 @@
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <referencedata.version>6.4.22</referencedata.version>
         <criminal-court-public-model.version>1.0.83</criminal-court-public-model.version>
-        <coredomain.version>1.0.83</coredomain.version>
+        <coredomain.version>1.0.86</coredomain.version>
         <material.version>6.0.1</material.version>
         <results.version>6.4.12</results.version>
         <notification.notify.version>6.4.4</notification.notify.version>

@@ -1,58 +1,64 @@
 package uk.gov.justice.ccr.notepad.result.cache;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newTreeSet;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasKey;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
-
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
-import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.google.common.cache.LoadingCache;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
+import uk.gov.justice.ccr.notepad.result.exception.CacheItemNotFoundException;
+import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
+import uk.gov.justice.services.common.converter.LocalDates;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newTreeSet;
+import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasKey;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
+import static org.hamcrest.core.Is.is;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.mock;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITION_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITION_SYNONYM_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_SYNONYM_KEY;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultCacheTest {
 
     private static final UUID ID = randomUUID();
-
     private static final UUID PROMPT_ID = randomUUID();
     private static final UUID PROMPT_ID_2 = randomUUID();
     private static final String RESULT_DEFINITION_LABEL = STRING.next();
@@ -66,31 +72,51 @@ public class ResultCacheTest {
     private static final String REFERENCE = STRING.next();
     private static final int DURATION_SEQUENCE = INTEGER.next();
     private static final boolean HIDDEN = true;
+    private static final String CACHE_KEY_FORMAT = "%s-%s";
     private final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
     private final LocalDate hearingDate = LocalDate.parse("2018-06-01");
+
     @Mock
-    private ResultLoader resultLoader;
+    private ReadStoreResultLoader resultLoader;
     @Mock
     private CacheFactory cacheFactory;
     @Mock
     private LoadingCache<String, Object> cache;
+    @Mock
+    private List<ResultDefinition> resultDefinitionList;
     @InjectMocks
-    private ResultCache underTest;
+    private ResultCache target;
+
+    @Spy
+    private final ConcurrentHashMap<String, Object> cacheMap = new ConcurrentHashMap<>();
 
     @Before
     public void setUp() {
         when(cacheFactory.build()).thenReturn(cache);
+        when(cache.asMap()).thenReturn(cacheMap);
     }
 
     @Test
-    public void shouldNotLoadTheCacheWhenNotEmpty() {
-        final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
-        cacheValue.put("resultDefinitionKey-2018-06-01", new Object());
-        when(cache.asMap()).thenReturn(cacheValue);
+    public void shouldNotLoadTheCacheForExistingEntry() {
+        when(resultLoader.loadResultDefinition(hearingDate)).thenReturn(resultDefinitionList);
+        cacheMap.put("resultDefinitionKey-2018-06-01", resultDefinitionList);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
-        assertThat(cacheValue.size(), equalTo(1));
+        verify(cacheMap).put("resultDefinitionKey-2018-06-01", resultDefinitionList);
+        assertThat(cacheMap.size(), is(greaterThan(1)));
+    }
+
+    @Test
+    public void shouldNotLoadCacheWithExistingKeysByDate() {
+        when(resultLoader.loadResultDefinition(hearingDate)).thenReturn(resultDefinitionList);
+        when(cacheMap.containsKey(anyString())).thenReturn(true);
+
+        target.lazyLoad(envelope, hearingDate);
+
+        String resultDefinitionKey = format(CACHE_KEY_FORMAT, RESULT_DEFINITION_KEY, LocalDates.to(hearingDate));
+        verify(cacheMap, never()).put(resultDefinitionKey, resultDefinitionList);
+        assertThat(cacheMap.size(), is(0));
     }
 
     @Test
@@ -101,11 +127,31 @@ public class ResultCacheTest {
 
         when(resultLoader.loadResultDefinition(hearingDate)).thenReturn(mockResultDefinitions);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
         assertThat(cacheValue.size(), is(greaterThan(0)));
         assertThat(cacheValue, hasKey("resultDefinitionKey-2018-06-01"));
         assertThat(cacheValue.get("resultDefinitionKey-2018-06-01"), is(mockResultDefinitions));
+    }
+
+    @Test
+    public void shouldReloadCacheSuccessfully() {
+        target.reloadCache();
+        assertThat(cacheMap.size(), is(greaterThan(0)));
+        assertThat(cacheMap, hasKey(format(CACHE_KEY_FORMAT, RESULT_DEFINITION_KEY, LocalDates.to(LocalDate.now()))));
+        assertThat(cacheMap, hasKey(format(CACHE_KEY_FORMAT, RESULT_DEFINITION_SYNONYM_KEY, LocalDates.to(LocalDate.now()))));
+        assertThat(cacheMap, hasKey(format(CACHE_KEY_FORMAT, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY, LocalDates.to(LocalDate.now()))));
+        assertThat(cacheMap, hasKey(format(CACHE_KEY_FORMAT, RESULT_PROMPT_KEY, LocalDates.to(LocalDate.now()))));
+        assertThat(cacheMap, hasKey(format(CACHE_KEY_FORMAT, RESULT_PROMPT_SYNONYM_KEY, LocalDates.to(LocalDate.now()))));
+        assertThat(cacheMap, hasKey(format(CACHE_KEY_FORMAT, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, LocalDates.to(LocalDate.now()))));
+    }
+
+    @Test
+    public void shouldReloadCacheFailWhenExceptionOccurs() {
+        when(resultLoader.loadResultDefinition(any(LocalDate.class))).thenThrow(new RuntimeException());
+        target.reloadCache();
+        assertThat(cacheMap.size(), is(0));
+        assertFalse(cacheMap.containsKey(format(CACHE_KEY_FORMAT, RESULT_DEFINITION_KEY, LocalDates.to(LocalDate.now()))));
     }
 
     @Test
@@ -116,7 +162,7 @@ public class ResultCacheTest {
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(mockPrompts);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
         assertThat(cacheValue.size(), is(greaterThan(0)));
         assertThat(cacheValue, hasKey("resultPromptKey-2018-06-01"));
@@ -131,7 +177,7 @@ public class ResultCacheTest {
 
         when(resultLoader.loadResultPromptSynonym(hearingDate)).thenReturn(mockPromptSynonyms);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
         assertThat(cacheValue.size(), is(greaterThan(0)));
         assertThat(cacheValue, hasKey("resultPromptSynonymKey-2018-06-01"));
@@ -171,11 +217,11 @@ public class ResultCacheTest {
         when(resultLoader.loadResultDefinition(hearingDate)).thenReturn(resultDefinitions);
         when(cache.asMap()).thenReturn(cacheValue);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
         assertThat(cacheValue.size(), is(greaterThan(0)));
         assertThat(cacheValue, hasKey("resultDefinitionsGroupByKeywordKey-2018-06-01"));
-        final Map<String, List<Long>> resultDefinitionsIndexGroupByKeyword = underTest.getResultDefinitionsIndexGroupByKeyword(hearingDate);
+        final Map<String, List<Long>> resultDefinitionsIndexGroupByKeyword = target.getResultDefinitionsIndexGroupByKeyword(hearingDate);
         assertThat(resultDefinitionsIndexGroupByKeyword.get(keyword1_1.toLowerCase()).size(), equalTo(1));
         assertThat(resultDefinitionsIndexGroupByKeyword.get(keyword1_1.toLowerCase()).get(0), equalTo(0L));
         assertThat(resultDefinitionsIndexGroupByKeyword.get(keyword1_2.toLowerCase()).size(), equalTo(1));
@@ -192,7 +238,7 @@ public class ResultCacheTest {
 
         when(resultLoader.loadResultDefinitionSynonym(hearingDate)).thenReturn(mockResultDefinitionSynonym);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
         assertThat(cacheValue.size(), is(greaterThan(0)));
         assertThat(cacheValue, hasKey("resultDefinitionSynonymKey-2018-06-01"));
@@ -205,8 +251,8 @@ public class ResultCacheTest {
         when(cache.asMap()).thenReturn(cacheValue);
 
         final List<ResultPrompt> resultPrompts = new ArrayList<>();
-        final String id1 = UUID.randomUUID().toString();
-        final UUID resultDefinitionId1 = UUID.randomUUID();
+        final String id1 = randomUUID().toString();
+        final UUID resultDefinitionId1 = randomUUID();
         final String resultDefinitionLabel1 = STRING.next();
         final String label1 = STRING.next();
         final String resultPromptRule1 = STRING.next();
@@ -225,8 +271,8 @@ public class ResultCacheTest {
         keywords1.add(keyword_1_2);
         keywords1.add(keyword_1_3);
 
-        final String id2 = UUID.randomUUID().toString();
-        final UUID resultDefinitionId2 = UUID.randomUUID();
+        final String id2 = randomUUID().toString();
+        final UUID resultDefinitionId2 = randomUUID();
         final String resultDefinitionLabel2 = STRING.next();
         final String label2 = STRING.next();
         final String resultPromptRule2 = STRING.next();
@@ -278,7 +324,7 @@ public class ResultCacheTest {
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(resultPrompts);
 
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
         assertThat(cacheValue.size(), is(greaterThan(0)));
         assertThat(cacheValue, hasKey("resultPromptsGroupByKeywordKey-2018-06-01"));
@@ -316,7 +362,7 @@ public class ResultCacheTest {
 
         cacheValue.put("resultPromptsGroupByKeywordKey-2018-06-01", givenMap);
 
-        final Map<String, List<Long>> cachedIndexesByKeywords = underTest.getResultPromptsIndexGroupByKeyword(hearingDate);
+        final Map<String, List<Long>> cachedIndexesByKeywords = target.getResultPromptsIndexGroupByKeyword(hearingDate);
         assertThat(cachedIndexesByKeywords.get(keyword_1_common), hasSize(2));
         assertThat(cachedIndexesByKeywords.get(keyword_1_common).get(0), equalTo(0L));
         assertThat(cachedIndexesByKeywords.get(keyword_1_common).get(1), equalTo(1L));
@@ -342,9 +388,17 @@ public class ResultCacheTest {
         cacheValue.put("resultDefinitionKey-2017-05-08", resultDefinitions);
         when(cache.asMap()).thenReturn(cacheValue);
 
-        final List<ResultDefinition> definitions = underTest.getResultDefinitions(hearingDate);
+        final List<ResultDefinition> definitions = target.getResultDefinitions(hearingDate);
 
         assertThat(definitions, is(resultDefinitions));
+    }
+
+    @Test(expected = CacheItemNotFoundException.class)
+    public void shouldThrowExceptionWhenCacheKeyNotFound() {
+        when(resultLoader.loadResultDefinition(hearingDate)).thenReturn(resultDefinitionList);
+        cacheMap.put("resultDefinitionKey-2018-06-01", resultDefinitionList);
+
+        target.getResultDefinitions(LocalDate.now());
     }
 
     @Test
@@ -359,7 +413,7 @@ public class ResultCacheTest {
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
         when(cache.asMap()).thenReturn(cacheValue);
 
-        final List<ResultPrompt> definitions = underTest.getResultPrompt(hearingDate);
+        final List<ResultPrompt> definitions = target.getResultPrompt(hearingDate);
 
         assertThat(definitions, is(resultPrompts));
     }
@@ -370,15 +424,15 @@ public class ResultCacheTest {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultPrompt> resultPrompts = new ArrayList<>();
-        resultPrompts.add(new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null, false));
-        final UUID resultDefinitionIdToFind = UUID.randomUUID();
-        final ResultPrompt expectedResultPrompt = new ResultPrompt(UUID.randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, false);
+        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null, false));
+        final UUID resultDefinitionIdToFind = randomUUID();
+        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, false);
         resultPrompts.add(expectedResultPrompt);
 
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
         when(cache.asMap()).thenReturn(cacheValue);
 
-        final List<ResultPrompt> resultPromptByResultDefinitionId = underTest.getResultPromptByResultDefinitionId(resultDefinitionIdToFind.toString(), hearingDate);
+        final List<ResultPrompt> resultPromptByResultDefinitionId = target.getResultPromptByResultDefinitionId(resultDefinitionIdToFind.toString(), hearingDate);
 
         assertThat(resultPromptByResultDefinitionId, hasSize(1));
         assertThat(resultPromptByResultDefinitionId.get(0), is(expectedResultPrompt));
@@ -395,7 +449,7 @@ public class ResultCacheTest {
 
         final HashSet<String> promptKeyWords = new HashSet<>();
         promptKeyWords.add(PROMPT_WORD);
-        final ResultPrompt resultPrompt = new ResultPrompt(UUID.randomUUID().toString(), UUID.randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null, false);
+        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null, false);
         final List<ResultPrompt> prompts = newArrayList(resultPrompt);
 
         final ResultPromptSynonym givenResultPromptSynonym = new ResultPromptSynonym();
@@ -407,7 +461,7 @@ public class ResultCacheTest {
         cacheValue.put("resultPromptKey-2018-06-01", prompts);
         cacheValue.put("resultPromptSynonymKey-2018-06-01", promptSynonyms);
 
-        final List<ResultPromptSynonym> resultPromptSynonym = underTest.getResultPromptSynonym(hearingDate);
+        final List<ResultPromptSynonym> resultPromptSynonym = target.getResultPromptSynonym(hearingDate);
 
         assertThat(resultPromptSynonym.size(), is(equalTo(2)));
         assertThat(resultPromptSynonym.get(0).getSynonym(), equalTo(PROMPT_WORD));
@@ -424,9 +478,9 @@ public class ResultCacheTest {
         when(cache.asMap()).thenReturn(cacheValue);
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
-        underTest.lazyLoad(envelope, hearingDate);
+        target.lazyLoad(envelope, hearingDate);
 
-        final List<ResultPrompt> prompts = underTest.getResultPromptByResultDefinitionId(ID.toString(), hearingDate);
+        final List<ResultPrompt> prompts = target.getResultPromptByResultDefinitionId(ID.toString(), hearingDate);
 
         assertThat(prompts, is(notNullValue()));
         assertThat(prompts, hasSize(2));
@@ -447,7 +501,7 @@ public class ResultCacheTest {
     public void shouldReturnCachedDefinitionById() {
         final LocalDate hearingDate = LocalDate.parse("2017-05-08");
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
-        final String resultDefinitionId = UUID.randomUUID().toString();
+        final String resultDefinitionId = randomUUID().toString();
 
         final ArrayList<ResultDefinition> resultDefinitions = new ArrayList<>();
         ResultDefinition resultDefinition1 = new ResultDefinition();
@@ -459,7 +513,7 @@ public class ResultCacheTest {
         cacheValue.put("resultDefinitionKey-2017-05-08", resultDefinitions);
         when(cache.asMap()).thenReturn(cacheValue);
 
-        final ResultDefinition response = underTest.getResultDefinitionsById(resultDefinitionId, hearingDate);
+        final ResultDefinition response = target.getResultDefinitionsById(resultDefinitionId, hearingDate);
 
         assertThat(response.getId(), is(resultDefinitionId));
     }

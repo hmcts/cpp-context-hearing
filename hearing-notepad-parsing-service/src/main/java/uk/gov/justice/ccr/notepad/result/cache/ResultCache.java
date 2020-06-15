@@ -1,33 +1,41 @@
 package uk.gov.justice.ccr.notepad.result.cache;
 
-
 import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.justice.ccr.notepad.result.cache.model.*;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
+import uk.gov.justice.ccr.notepad.result.exception.CacheItemNotFoundException;
 import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
 import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.AccessTimeout;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
+import javax.ejb.AccessTimeout;
 import javax.inject.Inject;
 import javax.inject.Named;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 
 @Startup
@@ -35,14 +43,14 @@ import static java.util.stream.Collectors.toList;
 @AccessTimeout(value = 60000)
 public class ResultCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ResultCache.class);
+    public static final String RESULT_DEFINITION_KEY = "resultDefinitionKey";
+    public static final String RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY = "resultDefinitionsGroupByKeywordKey";
+    public static final String RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY = "resultPromptsGroupByKeywordKey";
+    public static final String RESULT_DEFINITION_SYNONYM_KEY = "resultDefinitionSynonymKey";
+    public static final String RESULT_PROMPT_KEY = "resultPromptKey";
+    public static final String RESULT_PROMPT_SYNONYM_KEY = "resultPromptSynonymKey";
 
-    private static final String RESULT_DEFINITION_KEY = "resultDefinitionKey";
-    private static final String RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY = "resultDefinitionsGroupByKeywordKey";
-    private static final String RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY = "resultPromptsGroupByKeywordKey";
-    private static final String RESULT_DEFINITION_SYNONYM_KEY = "resultDefinitionSynonymKey";
-    private static final String RESULT_PROMPT_KEY = "resultPromptKey";
-    private static final String RESULT_PROMPT_SYNONYM_KEY = "resultPromptSynonymKey";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultCache.class);
 
     @Inject
     @Named("readStoreResultLoader")
@@ -62,82 +70,23 @@ public class ResultCache {
     @Lock(LockType.WRITE)
     @AccessTimeout(value = 120000)
     public void lazyLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
-        if (!cache.asMap().containsKey(getKey(orderedDate, RESULT_DEFINITION_KEY))) {
+        if (!isCacheLoadedByDate(orderedDate)) {
             synchronized (this) {
-                //Double protection to stop multiple cache loads
-                if (!cache.asMap().containsKey(getKey(orderedDate, RESULT_DEFINITION_KEY))) {
+                if (!isCacheLoadedByDate(orderedDate)) {
                     if (resultLoader instanceof ReadStoreResultLoader) {
                         ((ReadStoreResultLoader) resultLoader).setJsonEnvelope(envelope);
                     }
-                    loadResultCache(orderedDate);
+                    loadCache(orderedDate);
                 }
             }
         }
     }
 
-    private void loadResultCache(final LocalDate orderedDate) {
-
-        addValueToCache(getKey(orderedDate, RESULT_DEFINITION_KEY), resultLoader.loadResultDefinition(orderedDate));
-
-        addValueToCache(getKey(orderedDate, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY), getResultDefinitionsIndexByKeywords(orderedDate));
-
-        addValueToCache(getKey(orderedDate, RESULT_DEFINITION_SYNONYM_KEY), resultLoader.loadResultDefinitionSynonym(orderedDate));
-
-        addValueToCache(getKey(orderedDate, RESULT_PROMPT_KEY), resultLoader.loadResultPrompt(orderedDate));
-
-        addValueToCache(getKey(orderedDate, RESULT_PROMPT_SYNONYM_KEY), resultLoader.loadResultPromptSynonym(orderedDate));
-
-        addValueToCache(getKey(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY), getPromptsIndexByKeyword(orderedDate));
-    }
-
-    private String getKey(final LocalDate orderedDate, final String key) {
-        return format("%s-%s", key, LocalDates.to(orderedDate));
-    }
-
-    private void addValueToCache(final String key, final Object value) {
-        LOGGER.info("Add to cache key {} value {}", key, value);
-        cache.asMap().put(key, value);
-    }
-
-    private Map<String, List<Long>> getPromptsIndexByKeyword(final LocalDate orderedDate) {
-        final Map<String, List<Long>> resultPromptsIndexByKeyWord = newHashMap();
-        final AtomicLong indexPromptIncrementer = new AtomicLong();
-        getCachedResultPrompt(orderedDate)
-                .forEach((ResultPrompt resultPrompt) -> {
-                    final long index = indexPromptIncrementer.getAndIncrement();
-                    resultPrompt.getKeywords().stream().filter(v -> !v.isEmpty()).forEach(word -> {
-                        resultPromptsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
-                        resultPromptsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (s, l) -> {
-                            l.add(index);
-                            return l;
-                        });
-
-                    });
-                });
-        return resultPromptsIndexByKeyWord;
-    }
-
-    private Map<String, List<Long>> getResultDefinitionsIndexByKeywords(final LocalDate orderedDate) {
-        final Map<String, List<Long>> resultDefinitionsIndexByKeyWord = newHashMap();
-        final AtomicLong indexIncrementer = new AtomicLong();
-        getCachedResultDefinitions(orderedDate)
-                .forEach((ResultDefinition resultDefinition) -> {
-                    final long index = indexIncrementer.getAndIncrement();
-                    resultDefinition.getKeywords().forEach(word -> {
-                        resultDefinitionsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
-                        resultDefinitionsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (s, resultDefinitions) -> {
-                            resultDefinitions.add(index);
-                            return resultDefinitions;
-                        });
-
-                    });
-                });
-        return resultDefinitionsIndexByKeyWord;
-    }
-
     @Lock(LockType.READ)
     public ResultDefinition getResultDefinitionsById(final String resultDefinitionId, final LocalDate orderedDate) {
-        return getCachedResultDefinitions(orderedDate).stream()
+        final List<ResultDefinition> resultDefinitionList = (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
+
+        return resultDefinitionList.stream()
                 .filter(resultDefinition -> resultDefinition.getId().equals(resultDefinitionId))
                 .findFirst()
                 .orElse(null);
@@ -145,23 +94,25 @@ public class ResultCache {
 
     @Lock(LockType.READ)
     public List<ResultDefinition> getResultDefinitions(final LocalDate orderedDate) {
-        return getCachedResultDefinitions(orderedDate);
+        return (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
     }
 
     @Lock(LockType.READ)
     public Map<String, List<Long>> getResultDefinitionsIndexGroupByKeyword(final LocalDate orderedDate) {
-        return getCachedResultDefinitionsGroupByKeyword(orderedDate);
+        return (Map<String, List<Long>>) getCacheEntry(orderedDate, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY);
     }
 
     @Lock(LockType.READ)
     public Map<String, List<Long>> getResultPromptsIndexGroupByKeyword(final LocalDate orderedDate) {
-        return getCachedResultPromptsGroupByKeyword(orderedDate);
+        return (Map<String, List<Long>>) getCacheEntry(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY);
     }
 
     @Lock(LockType.READ)
     public List<ResultDefinitionSynonym> getResultDefinitionSynonym(final LocalDate orderedDate) {
         final Set<String> allKeyWords = newHashSet();
-        getResultDefinitions(orderedDate).stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
+        final List<ResultDefinition> resultDefinitions = (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
+
+        resultDefinitions.stream().map(ResultDefinition::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
         final List<ResultDefinitionSynonym> resultDefinitionKeyWordsSynonyms =
                 allKeyWords.stream().map(s -> {
                     ResultDefinitionSynonym resultDefinitionSynonym = new ResultDefinitionSynonym();
@@ -169,20 +120,22 @@ public class ResultCache {
                     resultDefinitionSynonym.setWord(s);
                     return resultDefinitionSynonym;
                 }).collect(toList());
-        //Adding all keywords as default entry with itself
-        resultDefinitionKeyWordsSynonyms.addAll(getCachedResultDefinitionSynonym(orderedDate));
+
+        final List<ResultDefinitionSynonym> resultDefinitionSynonyms = (List<ResultDefinitionSynonym>) getCacheEntry(orderedDate, RESULT_DEFINITION_SYNONYM_KEY);
+        resultDefinitionKeyWordsSynonyms.addAll(resultDefinitionSynonyms);
         return resultDefinitionKeyWordsSynonyms;
     }
 
     @Lock(LockType.READ)
     public List<ResultPrompt> getResultPrompt(final LocalDate orderedDate) {
-        return getCachedResultPrompt(orderedDate);
+        return (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
     }
 
     @Lock(LockType.READ)
     public List<ResultPrompt> getResultPromptByResultDefinitionId(final String resultDefinitionId, final LocalDate orderedDate) {
-        return getCachedResultPrompt(orderedDate)
-                .stream()
+        final List<ResultPrompt> resultPromptList = (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
+
+        return resultPromptList.stream()
                 .filter(resultPrompt -> resultPrompt.getResultDefinitionId().toString().equals(resultDefinitionId))
                 .collect(toList());
     }
@@ -190,7 +143,10 @@ public class ResultCache {
     @Lock(LockType.READ)
     public List<ResultPromptSynonym> getResultPromptSynonym(final LocalDate orderedDate) {
         final Set<String> allKeyWords = newHashSet();
-        getCachedResultPrompt(orderedDate).stream().map(ResultPrompt::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
+        final List<ResultPrompt> resultPromptList = (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
+        final List<ResultPromptSynonym> resultPromptSynonymList = (List<ResultPromptSynonym>) getCacheEntry(orderedDate, RESULT_PROMPT_SYNONYM_KEY);
+
+        resultPromptList.stream().map(ResultPrompt::getKeywords).filter(v -> !v.isEmpty()).forEach(allKeyWords::addAll);
         final List<ResultPromptSynonym> resultPromptSynonyms =
                 allKeyWords.stream().map(s -> {
                     ResultPromptSynonym resultPromptSynonym = new ResultPromptSynonym();
@@ -198,41 +154,115 @@ public class ResultCache {
                     resultPromptSynonym.setSynonym(s);
                     return resultPromptSynonym;
                 }).collect(toList());
-        //Adding all keywords as default entry with itself
-        resultPromptSynonyms.addAll(getCachedResultPromptSynonym(orderedDate));
+        resultPromptSynonyms.addAll(resultPromptSynonymList);
         return resultPromptSynonyms;
     }
 
-    private List<ResultDefinition> getCachedResultDefinitions(final LocalDate orderedDate) {
-        return (List<ResultDefinition>) cache.asMap().get(getKey(orderedDate, RESULT_DEFINITION_KEY));
-    }
-
-    private Map<String, List<Long>> getCachedResultDefinitionsGroupByKeyword(final LocalDate orderedDate) {
-        return (Map<String, List<Long>>) cache.asMap().get(getKey(orderedDate, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY));
-    }
-
-    private Map<String, List<Long>> getCachedResultPromptsGroupByKeyword(final LocalDate orderedDate) {
-        return (Map<String, List<Long>>) cache.asMap().get(getKey(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY));
-    }
-
-    private List<ResultDefinitionSynonym> getCachedResultDefinitionSynonym(final LocalDate orderedDate) {
-
-        return (List<ResultDefinitionSynonym>) cache.asMap().get(getKey(orderedDate, RESULT_DEFINITION_SYNONYM_KEY));
-    }
-
-    private List<ResultPrompt> getCachedResultPrompt(final LocalDate orderedDate) {
-        return (List<ResultPrompt>) cache.asMap().get(getKey(orderedDate, RESULT_PROMPT_KEY));
-    }
-
-    private List<ResultPromptSynonym> getCachedResultPromptSynonym(final LocalDate orderedDate) {
-
-        return (List<ResultPromptSynonym>) cache.asMap().get(getKey(orderedDate, RESULT_PROMPT_SYNONYM_KEY));
-    }
-
-    public void reload() {
-        if (cache.asMap().size() != 0) {
-            LOGGER.info("Reloading cache by MidnightScheduler ");
-            loadResultCache(LocalDate.now());
+    @SuppressWarnings({"squid:S2221"})
+    public void reloadCache() {
+        final Instant first = Instant.now();
+        LOGGER.info("Reloading cache started at: {}", first);
+        try {
+            loadCache(LocalDate.now());
+            final Instant second = Instant.now();
+            LOGGER.info("Reloading cache completed in {} seconds", Duration.between(first, second).getSeconds());
+        } catch (Exception ex) {
+            final Instant second = Instant.now();
+            LOGGER.error(format("Reloading cache failed in %s seconds", Duration.between(first, second).getSeconds()), ex);
         }
+    }
+
+    private void loadCache(final LocalDate orderedDate) {
+        if (!cacheContains(orderedDate, RESULT_DEFINITION_KEY)) {
+            putEntry(orderedDate, RESULT_DEFINITION_KEY, resultLoader.loadResultDefinition(orderedDate));
+        }
+        if (!cacheContains(orderedDate, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY)) {
+            putEntry(orderedDate, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY, getResultDefinitionsIndexByKeywords(orderedDate));
+        }
+        if (!cacheContains(orderedDate, RESULT_DEFINITION_SYNONYM_KEY)) {
+            putEntry(orderedDate, RESULT_DEFINITION_SYNONYM_KEY, resultLoader.loadResultDefinitionSynonym(orderedDate));
+        }
+        if (!cacheContains(orderedDate, RESULT_PROMPT_KEY)) {
+            putEntry(orderedDate, RESULT_PROMPT_KEY, resultLoader.loadResultPrompt(orderedDate));
+        }
+        if (!cacheContains(orderedDate, RESULT_PROMPT_SYNONYM_KEY)) {
+            putEntry(orderedDate, RESULT_PROMPT_SYNONYM_KEY, resultLoader.loadResultPromptSynonym(orderedDate));
+        }
+        if (!cacheContains(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY)) {
+            putEntry(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, getPromptsIndexByKeyword(orderedDate));
+        }
+    }
+
+    private Object getCacheEntry(final LocalDate orderedDate, final String key) {
+        final ConcurrentMap<String, Object> cacheMap = cache.asMap();
+        final String keyWithOrderedDate = getFormattedKey(key, orderedDate);
+
+        if (nonNull(cacheMap) && cacheMap.containsKey(keyWithOrderedDate)) {
+            return cacheMap.get(keyWithOrderedDate);
+        } else {
+            throw new CacheItemNotFoundException(format("No item found in cache with key: %s", keyWithOrderedDate));
+        }
+    }
+
+    private void putEntry(final LocalDate orderedDate, final String key, final Object value) {
+        final String keyWithOrderedDate = getFormattedKey(key, orderedDate);
+        LOGGER.info("Add to cache key {} value {}", keyWithOrderedDate, value);
+        cache.asMap().put(keyWithOrderedDate, value);
+    }
+
+    private String getFormattedKey(String key, LocalDate orderedDate) {
+        return format("%s-%s", key, LocalDates.to(orderedDate));
+    }
+
+    private boolean cacheContains(LocalDate orderedDate, String key) {
+        final String keyWithOrderedDate = getFormattedKey(key, orderedDate);
+        return cache.asMap().containsKey(keyWithOrderedDate);
+    }
+
+    private boolean isCacheLoadedByDate(LocalDate orderedDate) {
+        final List<String> keyMap = Arrays.asList(RESULT_DEFINITION_KEY,
+                RESULT_PROMPT_KEY,
+                RESULT_DEFINITION_SYNONYM_KEY,
+                RESULT_PROMPT_SYNONYM_KEY,
+                RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY,
+                RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY);
+
+        return keyMap.stream().allMatch(key -> cacheContains(orderedDate, key));
+    }
+
+    private Map<String, List<Long>> getPromptsIndexByKeyword(final LocalDate orderedDate) {
+        final Map<String, List<Long>> resultPromptsIndexByKeyWord = newHashMap();
+        final AtomicLong indexPromptIncrementer = new AtomicLong();
+        final List<ResultPrompt> resultPromptList = (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
+
+        resultPromptList.forEach((ResultPrompt resultPrompt) -> {
+            final long index = indexPromptIncrementer.getAndIncrement();
+            resultPrompt.getKeywords().stream().filter(word -> !word.isEmpty()).forEach(word -> {
+                resultPromptsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
+                resultPromptsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (inputStr, resultPrompts) -> {
+                    resultPrompts.add(index);
+                    return resultPrompts;
+                });
+            });
+        });
+        return resultPromptsIndexByKeyWord;
+    }
+
+    private Map<String, List<Long>> getResultDefinitionsIndexByKeywords(final LocalDate orderedDate) {
+        final Map<String, List<Long>> resultDefinitionsIndexByKeyWord = newHashMap();
+        final AtomicLong indexIncrementer = new AtomicLong();
+        final List<ResultDefinition> resultDefinitionList = (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
+
+        resultDefinitionList.forEach((ResultDefinition resultDefinition) -> {
+            final long index = indexIncrementer.getAndIncrement();
+            resultDefinition.getKeywords().forEach(word -> {
+                resultDefinitionsIndexByKeyWord.putIfAbsent(word.toLowerCase(), newArrayList());
+                resultDefinitionsIndexByKeyWord.computeIfPresent(word.toLowerCase(), (inputStr, resultDefinitions) -> {
+                    resultDefinitions.add(index);
+                    return resultDefinitions;
+                });
+            });
+        });
+        return resultDefinitionsIndexByKeyWord;
     }
 }

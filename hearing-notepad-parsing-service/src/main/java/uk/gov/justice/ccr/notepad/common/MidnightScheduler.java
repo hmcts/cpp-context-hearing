@@ -13,18 +13,14 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class MidnightScheduler {
 
-    private static final Logger LOGGER =
-            LoggerFactory.getLogger(MidnightScheduler.class.getName());
-
-
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MidnightScheduler.class.getName());
 
-    @Schedule(hour = "23", minute = "59", second = "59", persistent = false)
+    @Schedule(hour = "00", minute = "10", second = "00", persistent = false)
     public void runJob() {
-        LOGGER.info("Running job... to reload result cache ");
-        resultCache.reload();
+        LOGGER.info("Running job to reload result cache");
+        resultCache.reloadCache();
     }
-
 }
