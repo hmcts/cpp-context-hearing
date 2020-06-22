@@ -38,7 +38,7 @@ rule "Query - API - hearing.get-hearing-event-definitions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definitions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC"));
   then
     $outcome.setSuccess(true);
 end

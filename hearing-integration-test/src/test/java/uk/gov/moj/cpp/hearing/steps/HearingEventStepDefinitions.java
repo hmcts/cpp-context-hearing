@@ -33,6 +33,7 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.getRequestSpec;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
@@ -148,6 +149,14 @@ public class HearingEventStepDefinitions {
         return hearingEventDefinitions;
     }
 
+    public static void accessHearingEventsByGivenUser(final String userId) {
+        final String queryEventDefinitionsUrl = getQueryEventDefinitionsUrl();
+
+        poll(requestParams(queryEventDefinitionsUrl, MEDIA_TYPE_QUERY_EVENT_DEFINITIONS).withHeader(USER_ID, userId))
+                .until(
+                        status().is(OK)
+                );
+    }
     private static HearingEventDefinitionData hearingDefinitionData(final List<HearingEventDefinition> hearingEventDefinitions) {
         return new HearingEventDefinitionData(randomUUID(), hearingEventDefinitions);
     }

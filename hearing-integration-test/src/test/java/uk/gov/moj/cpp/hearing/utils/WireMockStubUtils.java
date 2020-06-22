@@ -66,6 +66,20 @@ public class WireMockStubUtils {
         configureFor(HOST, 8080);
     }
 
+    public static void setupAsAuthorisedUserByGivenGroup(final UUID userId, final String group) {
+
+        final String response = getPayload("stub-data/usersgroups.get-groups-by-user-and-group.json").replaceAll("%GROUP_NAME%", group);
+
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
+    }
+
+
     public static void setupAsAuthorisedUser(final UUID userId) {
 
         stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
