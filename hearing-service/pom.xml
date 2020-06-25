@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>6.4.55-SNAPSHOT</version>
+        <version>7.0.1-FRAMEWORK-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -52,6 +52,10 @@
             <artifactId>hearing-event-sources</artifactId>
             <version>${project.version}</version>
             <classifier>yaml</classifier>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.common</groupId>
+            <artifactId>service-component-config</artifactId>
         </dependency>
     </dependencies>
 

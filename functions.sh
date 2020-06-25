@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 declare -rx CONTEXT_NAME=hearing
-declare -rx FRAMEWORK_VERSION=6.4.0
-declare -rx EVENT_STORE_VERSION=2.4.3
-declare -rx FILE_SERVICE_VERSION=1.17.12
+declare -rx FRAMEWORK_VERSION=7.0.6
+declare -rx EVENT_STORE_VERSION=7.0.4
+declare -rx FRAMEWORK_LIBRARIES_VERSION=7.0.8
 
 function buildWars {
   echo
@@ -156,8 +156,8 @@ function runViewStoreLiquibase {
 
 function runFileServiceLiquibase() {
     echo "running file service liquibase"
-    mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:file-service-liquibase:${FILE_SERVICE_VERSION}:jar
-    java -jar target/file-service-liquibase-${FILE_SERVICE_VERSION}.jar --url=jdbc:postgresql://localhost:5432/fileservice --username=fileservice --password=fileservice --logLevel=info update
+    mvn org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:file-service-liquibase:${FRAMEWORK_LIBRARIES_VERSION}:jar
+    java -jar target/file-service-liquibase-${FRAMEWORK_LIBRARIES_VERSION}.jar --url=jdbc:postgresql://localhost:5432/fileservice --username=fileservice --password=fileservice --logLevel=info update
     echo "finished file service  liquibase"
 }
 
