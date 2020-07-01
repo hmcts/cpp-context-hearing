@@ -165,6 +165,7 @@ public class PublishResultsDelegate {
                 .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
                 .withIsConvictedResult(resultDefinition.isConvicted())
                 .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))
+                .withIsUnscheduled(resultDefinition.getUnscheduled())
                 .withLabel(resultDefinition.getLabel())
                 .withLastSharedDateTime(LocalDate.now().toString())
                 .withOrderedDate(LocalDate.now())

@@ -3,8 +3,11 @@ package uk.gov.moj.cpp.hearing.event.relist;
 import static org.junit.Assert.assertEquals;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.ARBITRARY_WITHDRAWN_META_DATA;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.arbitraryNextHearingMetaData;
+import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitraryApplicationSharedResultWithNextHearingResult;
+import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitraryApplicationSharedResultWithNextHearingResultWithExcludedPrompt;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResult;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResultWithNextHearingResult;
+import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResultWithNextHearingResultWithExcludedPrompt;
 
 import org.junit.Test;
 
@@ -65,4 +68,23 @@ public class HearingAdjournValidatorTest {
         assertEquals(false, testObj.checkSharedResultHaveNextHearingOrWithdrawnOffenceResult(getArbitrarySharedResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
     }
 
+    @Test
+    public void checkValidateProsecutionCaseWithNextHearingResults() {
+        assertEquals(true, testObj.validateProsecutionCase(getArbitrarySharedResultWithNextHearingResult(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+    }
+
+    @Test
+    public void checkValidateProsecutionCaseWithNextHearingResultsWithExcludedPrompt() {
+        assertEquals(false, testObj.validateProsecutionCase(getArbitrarySharedResultWithNextHearingResultWithExcludedPrompt(), ARBITRARY_WITHDRAWN_META_DATA, arbitraryNextHearingMetaData()));
+    }
+
+    @Test
+    public void checkValidateApplicationWithNextHearingResults() {
+        assertEquals(true, testObj.validateApplication(getArbitraryApplicationSharedResultWithNextHearingResult(), arbitraryNextHearingMetaData()));
+    }
+
+    @Test
+    public void checkValidateApplicationWithNextHearingWithExcludedPrompt() {
+        assertEquals(false, testObj.validateApplication(getArbitraryApplicationSharedResultWithNextHearingResultWithExcludedPrompt(), arbitraryNextHearingMetaData()));
+    }
 }

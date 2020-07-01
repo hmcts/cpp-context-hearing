@@ -2,8 +2,9 @@ package uk.gov.moj.cpp.hearing.event.relist.metadata;
 
 import static java.util.Arrays.stream;
 
+@SuppressWarnings("squid:S00115")
 public enum NextHearingPromptReference {
-    HDATE, HTIME, HTYPE, HEST, HCHOUSE, HCROOM, bookingReference, existingHearingId, reservedJudiciary, weekCommencing, timeOfHearing, fixedDate;
+    HDATE, HTIME, HTYPE, HEST, HCHOUSE, HCROOM, bookingReference, existingHearingId, reservedJudiciary, weekCommencing, timeOfHearing, fixedDate, dateToBeFixed;
 
       public static boolean isPresent(final String value){
           return stream(values()).anyMatch(v -> v.name().equals(value));

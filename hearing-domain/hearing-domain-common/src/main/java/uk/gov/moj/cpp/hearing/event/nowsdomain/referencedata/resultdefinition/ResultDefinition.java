@@ -56,6 +56,8 @@ public class ResultDefinition {
 
     private Boolean terminatesOffenceProceedings;
 
+    private Boolean unscheduled;
+
     private Boolean lifeDuration;
 
     private Boolean publishedAsAPrompt;
@@ -332,6 +334,15 @@ public class ResultDefinition {
 
     public ResultDefinition setResultDefinitionRules(final List<ResultDefinitionRuleType> resultDefinitionRules) {
         this.resultDefinitionRules = resultDefinitionRules;
+        return this;
+    }
+
+    public Boolean getUnscheduled() {
+        return unscheduled;
+    }
+
+    public ResultDefinition setUnscheduled(final Boolean unscheduled) {
+        this.unscheduled = unscheduled;
         return this;
     }
 }

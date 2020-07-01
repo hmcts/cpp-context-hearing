@@ -236,7 +236,7 @@
         {
             "id":"800db127-e78e-47cd-a602-b1c12a89d90b",
             "label":"Week Commencing Date",
-            "mandatory":false,
+            "resultPromptRule": "oneOf",
             "type":"DATE",
             "sequence":13,
             "userGroups":[
@@ -252,7 +252,7 @@
         {
             "id":"1ae357f9-9391-4d74-94b7-da33c8295382",
             "label":"Fixed Date",
-            "mandatory":false,
+            "resultPromptRule": "oneOf",
             "type":"DATE",
             "sequence":13,
             "userGroups":[
@@ -264,6 +264,22 @@
             ],
             "reference": "fixedDate",
             "welshLabel":"TBD"
+        },
+        {
+            "id": "46257d78-1cbf-42b0-a24b-206826fecfb9",
+            "label": "Date and time to be fixed",
+            "resultPromptRule": "oneOf",
+            "type": "BOOLEAN",
+            "sequence": 100,
+            "financial": "N",
+            "reference": "dateToBeFixed",
+            "userGroups": [
+                "Court Clerks",
+                "Legal Advisers"
+            ],
+            "courtExtract": "Y",
+            "jurisdiction": "B",
+            "hidden": false
         }
     ]
 }

@@ -127,6 +127,7 @@ public class ResultTreeBuilder {
                 .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
                 .withIsConvictedResult(resultDefinition.isConvicted())
                 .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))
+                .withIsUnscheduled(resultDefinition.getUnscheduled())
                 .withLabel(resultDefinition.getLabel())
                 .withLastSharedDateTime(nonNull(resultLine.getSharedDate()) ? resultLine.getSharedDate().toString() : LocalDate.now().toString())
                 .withOrderedDate(resultLine.getOrderedDate())

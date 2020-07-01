@@ -12,7 +12,6 @@
         <module>hearing-domain-aggregate</module>
         <module>hearing-domain-common</module>
         <module>hearing-domain-transformation</module>
-        <module>hearing-domain-transform-pojo</module>
         <module>hearing-domain-xhibit</module>
     </modules>
 </project>

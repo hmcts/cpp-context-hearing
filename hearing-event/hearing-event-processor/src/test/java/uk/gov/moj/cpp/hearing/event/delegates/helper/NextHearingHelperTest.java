@@ -8,7 +8,6 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -26,7 +25,6 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.Envelope;
@@ -120,7 +118,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
     private final ResultDefinition adjournmentReasonsResultDefinition = ResultDefinition.resultDefinition().setResultDefinitionGroup("Adjournment Reasons");
 
     @Test
-    public void test_Populate_NextHearing_For_CrownCourt_Hearing() {
+    public void shouldPopulateNextHearingForCrownCourtHearing() {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt.json");
 
         setupMocks(event);
@@ -134,7 +132,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
     }
 
     @Test
-    public void test_Populate_NextHearing_For_CrownCourt_Hearing_FixedDate() {
+    public void shouldPopulateNextHearingForCrownCourtHearingFixedDate() {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt-fixed-date.json");
 
         setupMocks(event);
@@ -148,7 +146,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
     }
 
     @Test
-    public void test_Populate_NextHearing_For_MagistrateCourt_Hearing() {
+    public void shouldPopulateNextHearingForMagistrateCourtHearing() {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-magistratescourt.json");
         setupMocks(event);
 
@@ -158,6 +156,22 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.MAGISTRATES, ZonedDateTimes.fromString("2019-02-02T22:22Z"));
+    }
+
+    @Test
+    public void shouldPopulateNextHearingForUnscheduled() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-unscheduled.json");
+
+        setupMocks(event);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
+
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
+
+        assertValid(nextHearing, JurisdictionType.CROWN, null);
+        assertThat(nextHearing.get().getDateToBeFixed(), is(true));
+
     }
 
     private void setupMocks(final JsonEnvelope event) {

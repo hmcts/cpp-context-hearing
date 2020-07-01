@@ -141,9 +141,14 @@ public class GetHearingsTransformer {
             result.withLastName(courtApplicationParty.getPersonDetails().getLastName());
             result.withMiddleName(courtApplicationParty.getPersonDetails().getMiddleName());
         }
+
         if (courtApplicationParty.getOrganisation() != null) {
             result.withOrganisationName(courtApplicationParty.getOrganisation().getName());
+        }else if(courtApplicationParty.getProsecutingAuthority()!=null) {
+            result.withOrganisationName(courtApplicationParty.getProsecutingAuthority().getName());
         }
+
+
         return result;
     }
 

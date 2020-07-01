@@ -7,6 +7,7 @@ import static uk.gov.moj.cpp.hearing.event.NowsTemplates.resultsSharedTemplate;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPrompt;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference;
@@ -40,6 +41,7 @@ public interface RelistTestHelper {
     UUID HEST_PROMPT_ID = UUID.fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac");
     UUID HCROOM_PROMPT_ID =UUID.fromString("5f507153-6dc9-4ec0-94db-c821eff333f1");
     UUID HCHOUSE_PROMPT_ID =UUID.fromString("7746831a-d5dd-4fa8-ac13-528573948c8a");
+    UUID DATETOBEFIXED_PROMPT_ID =UUID.fromString("46257d78-1cbf-42b0-a24b-206826fecfb9");
 
 
 
@@ -50,6 +52,7 @@ public interface RelistTestHelper {
 
         nextHearingResultDefinition.addNextHearingPrompt(new NextHearingPrompt(HTYPE_PROMPT_ID, NextHearingPromptReference.HTYPE.name()));
         nextHearingResultDefinition.addNextHearingPrompt(new NextHearingPrompt(HEST_PROMPT_ID, NextHearingPromptReference.HEST.name()));
+        nextHearingResultDefinition.addNextHearingPrompt(new NextHearingPrompt(DATETOBEFIXED_PROMPT_ID, "dateToBeFixed"));
 //        nextHearingResultDefinition.addNextHearingPrompt(new NextHearingPrompt(UUID.fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d"),
 //                NextHearingPromptReference.HTIME.name()));
         nextHearingResultDefinition.addNextHearingPrompt(new NextHearingPrompt(HCROOM_PROMPT_ID, NextHearingPromptReference.HCROOM.name()));
@@ -77,6 +80,42 @@ public interface RelistTestHelper {
                 .build();
         ARBITRARY_RESULT_SHARED.getTargets().get(0).getResultLines().add(nextHearingResult);
         return ARBITRARY_RESULT_SHARED;
+    }
+
+    static ResultsShared getArbitraryApplicationSharedResultWithNextHearingResult() {
+        final ResultsShared resultsShared = getArbitrarySharedResultWithNextHearingResult();
+        final Target target = resultsShared.getTargets().get(0);
+        target.setOffenceId(null);
+        target.setApplicationId(resultsShared.getHearing().getCourtApplications().get(0).getId());
+        return resultsShared;
+    }
+
+    static ResultsShared getArbitrarySharedResultWithNextHearingResultWithExcludedPrompt() {
+        ResultsShared ARBITRARY_RESULT_SHARED = resultsSharedTemplate();
+        Prompt dateOfHearing = Prompt.prompt().withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283")).withLabel(DATE_OF_HEARING_LABEL).withValue("12/12/2018").build();
+        Prompt hearingType = Prompt.prompt().withId(HTYPE_PROMPT_ID).withLabel(HEARING_TYPE_LABEL).withValue("Trial").build();
+        Prompt estimatedDuration = Prompt.prompt().withId(HEST_PROMPT_ID).withLabel(ESTIMATED_DURATION_LABEL).withValue("1 weeks,2 days").build();
+        Prompt courtRoom = Prompt.prompt().withId(HCROOM_PROMPT_ID).withLabel(COURT_ROOM_LABEL).withValue("Room A").build();
+        Prompt courtHouse = Prompt.prompt().withId(HCHOUSE_PROMPT_ID).withLabel(COURT_CENTRE_LABEL).withValue("Wimbledon Magistractes").build();
+        Prompt dateToBeFixed = Prompt.prompt().withId(DATETOBEFIXED_PROMPT_ID).withLabel("Date and time to be fixed").withValue("true").build();
+        Prompt remandStatus = Prompt.prompt().withId(fromString("9403f0d7-90b5-4377-84b4-f06a77811362")).withLabel(REMAND_STATUS_LABEL).withValue("remand in custody").build();
+
+        ResultLine nextHearingResult = ResultLine.resultLine()
+                .withResultLineId(UUID.randomUUID())
+                .withResultDefinitionId(fromString("fbed768b-ee95-4434-87c8-e81cbc8d24c8"))
+                .withResultLabel("Next Hearing")
+                .withPrompts(Arrays.asList(dateOfHearing, hearingType, estimatedDuration, remandStatus, dateToBeFixed, courtHouse, courtRoom))
+                .build();
+        ARBITRARY_RESULT_SHARED.getTargets().get(0).getResultLines().add(nextHearingResult);
+        return ARBITRARY_RESULT_SHARED;
+    }
+
+    static ResultsShared getArbitraryApplicationSharedResultWithNextHearingResultWithExcludedPrompt() {
+        final ResultsShared resultsShared = getArbitrarySharedResultWithNextHearingResultWithExcludedPrompt();
+        final Target target = resultsShared.getTargets().get(0);
+        target.setOffenceId(null);
+        target.setApplicationId(resultsShared.getHearing().getCourtApplications().get(0).getId());
+        return resultsShared;
     }
 
 

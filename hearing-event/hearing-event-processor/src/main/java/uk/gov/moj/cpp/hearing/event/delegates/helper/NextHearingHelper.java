@@ -17,10 +17,10 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.COMMA_REGEX;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.CROWN_COURT_RESULT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DATE_FORMATS;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_A_DAY;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EUROPE_LONDON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DAYS_IN_A_WEEK;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EUROPE_LONDON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MAGISTRATE_RESULT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_A_DAY;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_HOUR;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.SPACE;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.DAYS;
@@ -32,6 +32,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HEST;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.bookingReference;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.dateToBeFixed;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.existingHearingId;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.isPresent;
@@ -116,10 +117,12 @@ public class NextHearingHelper {
 
         final boolean isWeekCommencingPromptsPresent = ofNullable(promptsMap.get(weekCommencing)).isPresent();
 
+        final boolean isDateToBeFixed = ofNullable(promptsMap.get(dateToBeFixed)).isPresent();
+
         return ofNullable(promptsMap.get(HTYPE)).isPresent()
                 && ofNullable(promptsMap.get(HCHOUSE)).isPresent()
                 && ofNullable(promptsMap.get(HEST)).isPresent()
-                && (isFixedDatePromptsPresent || isWeekCommencingPromptsPresent);
+                && (isFixedDatePromptsPresent || isWeekCommencingPromptsPresent || isDateToBeFixed);
     }
 
     private NextHearing buildNextHearing(final JsonEnvelope context,
@@ -140,8 +143,16 @@ public class NextHearingHelper {
         populateReservedJudiciary(builder, promptsMap);
         populateWeekCommencingDate(builder, promptsMap);
         populateBookingReference(builder, promptsMap);
+        populateDateToBeFixed(builder, promptsMap);
 
         return builder.build();
+    }
+
+    private void populateDateToBeFixed(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, dateToBeFixed);
+        if(promptValue != null){
+            builder.withDateToBeFixed(Boolean.TRUE);
+        }
     }
 
     private Map<NextHearingPromptReference, JudicialResultPrompt> getPromptsMap(final List<JudicialResultPrompt> prompts) {
