@@ -17,6 +17,7 @@ public class Constants {
     public static final int HOURS_IN_A_DAY = 6;
     public static final int MINUTES_IN_HOUR = 60;
     public static final int MINUTES_IN_A_DAY = HOURS_IN_A_DAY * MINUTES_IN_HOUR;
+    public static final String START_OF_DAY_TIME = "00:00";
 
     private Constants() {
     }

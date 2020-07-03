@@ -7,6 +7,7 @@ import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -23,6 +24,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_A_DAY;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_HOUR;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.SPACE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.START_OF_DAY_TIME;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.DAYS;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.HOURS;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.MINUTES;
@@ -52,6 +54,7 @@ import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
+import uk.gov.moj.cpp.hearing.event.delegates.exception.NextHearingCreateException;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements;
 import uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference;
@@ -79,7 +82,6 @@ import org.slf4j.LoggerFactory;
 
 public class NextHearingHelper {
 
-
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
 
@@ -92,6 +94,8 @@ public class NextHearingHelper {
     @Inject
     private ReferenceDataService referenceDataService;
 
+    private static final String FAILED_TO_CREATE_NEXT_HEARING_MESSAGE = "Failed to create next hearing for result definition id=%s";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelper.class.getName());
 
     public Optional<NextHearing> getNextHearing(final JsonEnvelope context,
@@ -101,7 +105,15 @@ public class NextHearingHelper {
         final String resultDefinitionId = resultDefinition.getId().toString();
 
         if (isNextHearingResult(resultDefinitionId) && canCreateNextHearing(prompts)) {
-            return Optional.of(buildNextHearing(context, resultDefinition, resultLines, prompts));
+            LOGGER.info("Creating next hearing");
+            final NextHearing nextHearing = buildNextHearing(context, resultDefinition, resultLines, prompts);
+            if (isNull(nextHearing)) {
+                final String message = format(FAILED_TO_CREATE_NEXT_HEARING_MESSAGE, resultDefinitionId);
+                LOGGER.error(message);
+                throw new NextHearingCreateException(message);
+            } else {
+                return Optional.of(nextHearing);
+            }
         }
 
         LOGGER.warn("Cannot create nextHearing object for resultDefinition id={}", resultDefinitionId);
@@ -110,10 +122,13 @@ public class NextHearingHelper {
 
     @SuppressWarnings({"squid:S1067"})
     private boolean canCreateNextHearing(final List<JudicialResultPrompt> prompts) {
+
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
 
-        final boolean isFixedDatePromptsPresent = ofNullable(promptsMap.get(timeOfHearing)).isPresent() &&
-                (ofNullable(promptsMap.get(fixedDate)).isPresent() || ofNullable(promptsMap.get(HDATE)).isPresent());
+        LOGGER.info("Checking if next hearing can be created using Fixed date: {}, Hearing date: {}, Week commencing: {}, Hearing type: {}, Court centre: {}, Estimated duration: {}",
+                promptsMap.get(fixedDate), promptsMap.get(HDATE), promptsMap.get(weekCommencing), promptsMap.get(HTYPE), promptsMap.get(HCHOUSE), promptsMap.get(HEST));
+
+        final boolean isFixedDatePromptsPresent = ofNullable(promptsMap.get(fixedDate)).isPresent() || ofNullable(promptsMap.get(HDATE)).isPresent();
 
         final boolean isWeekCommencingPromptsPresent = ofNullable(promptsMap.get(weekCommencing)).isPresent();
 
@@ -163,8 +178,9 @@ public class NextHearingHelper {
     private void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String hDateValue = getPromptValue(promptsMap, HDATE);
         final String dateValue = hDateValue != null ? hDateValue : getPromptValue(promptsMap, fixedDate);
-
-        builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, getPromptValue(promptsMap, timeOfHearing)));
+        final String timeValue = getPromptValue(promptsMap, timeOfHearing);
+        LOGGER.info("Populating listed start date time using date: {} and time: {}", dateValue, timeValue);
+        builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, timeValue));
     }
 
     private String getPromptValue(final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearingPromptReference nextHearingPromptReference) {
@@ -172,26 +188,32 @@ public class NextHearingHelper {
     }
 
     private void populateEstimatedDuration(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
-        builder.withEstimatedMinutes(convertDurationIntoMinutes(Sets.newHashSet(promptsMap.get(HEST).getValue())));
+        final int estimatedMinutes = convertDurationIntoMinutes(Sets.newHashSet(promptsMap.get(HEST).getValue()));
+        LOGGER.info("Populating estimated duration minutes: {}", estimatedMinutes);
+        builder.withEstimatedMinutes(estimatedMinutes);
     }
 
     private void populateBookingReference(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, bookingReference);
+        LOGGER.info("Populating booking reference: {}", promptValue);
         builder.withBookingReference(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
     }
 
     private void populateExistingHearingId(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, existingHearingId);
+        LOGGER.info("Populating existing hearing id: {}", promptValue);
         builder.withExistingHearingId(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
     }
 
     private void populateReservedJudiciary(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, reservedJudiciary);
+        LOGGER.info("Populating reserved judiciary: {}", promptValue);
         builder.withReservedJudiciary(nonNull(promptValue) ? Boolean.valueOf(promptValue) : null);
     }
 
     private void populateWeekCommencingDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, weekCommencing);
+        LOGGER.info("Populating week commencing date: {}", promptValue);
         builder.withWeekCommencingDate(nonNull(promptValue) ? LocalDate.parse(promptValue, DateTimeFormatter.ofPattern(PublishResultUtil.OUTGOING_PROMPT_DATE_FORMAT)) : null);
     }
 
@@ -201,7 +223,7 @@ public class NextHearingHelper {
 
         final JudicialResultPrompt prompt = promptsMap.get(HTYPE);
         final HearingType hearingType = hearingTypeReverseLookup.getHearingTypeByName(context, prompt.getValue());
-
+        LOGGER.info("Populating hearing type: {}", hearingType);
         builder.withType(hearingType);
     }
 
@@ -213,7 +235,7 @@ public class NextHearingHelper {
                 .filter(resultLine -> this.isAdjournmentReasonResult(context, resultLine))
                 .map(this::getAdjournmentsReasons)
                 .collect(joining(format("%s%s", lineSeparator(), lineSeparator())));
-
+        LOGGER.info("Populating adjournment reason: {}", adjournmentReasons);
         builder.withAdjournmentReason(adjournmentReasons);
     }
 
@@ -243,7 +265,7 @@ public class NextHearingHelper {
                                      final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
 
         final CourtCentre courtCentre = extractCourtCentre(context, promptsMap);
-
+        LOGGER.info("Populating court centre: {}", courtCentre);
         if (courtCentre != null) {
             builder.withCourtCentre(courtCentre);
         }
@@ -301,8 +323,10 @@ public class NextHearingHelper {
     private static void populateJurisdictionType(final NextHearing.Builder builder,
                                                  final String resultDefinitionId) {
         if (CROWN_COURT_RESULT_DEFINITION_ID.equals(resultDefinitionId)) {
+            LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.CROWN);
             builder.withJurisdictionType(JurisdictionType.CROWN);
         } else if (MAGISTRATE_RESULT_DEFINITION_ID.equals(resultDefinitionId)) {
+            LOGGER.info("Populating jurisdiction type: {}", JurisdictionType.MAGISTRATES);
             builder.withJurisdictionType(JurisdictionType.MAGISTRATES);
         }
     }
@@ -314,8 +338,12 @@ public class NextHearingHelper {
     }
 
     private static ZonedDateTime convertDateTimeToUTC(String date, String time) {
-        if (!isEmpty(date) && !isEmpty(time)) {
-            return ZonedDateTime.parse(date.concat(SPACE).concat(time), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
+        if (!isEmpty(date)) {
+            String listingTime = time;
+            if (isEmpty(listingTime)) {
+                listingTime = START_OF_DAY_TIME;
+            }
+            return ZonedDateTime.parse(date.concat(SPACE).concat(listingTime), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
         }
 
         return null;

@@ -36,7 +36,6 @@ import java.util.UUID;
 
 import javax.json.Json;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,8 +111,8 @@ public class AdjournHearingDelegateTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.adjourn-hearing"), Json.createObjectBuilder().build());
         final ResultsShared resultsShared = getArbitrarySharedResult();
         if (validApplication) {
-            Target targetForCase = resultsShared.getTargets().get(0);
-            Target target = Target
+            final Target targetForCase = resultsShared.getTargets().get(0);
+            final Target target = Target
                     .target()
                     .withApplicationId(UUID.randomUUID())
                     .withDefendantId(targetForCase.getDefendantId())
@@ -150,10 +149,6 @@ public class AdjournHearingDelegateTest {
             final ResultsShared filtered = transformerResultSharedCaptor.getAllValues().get(expectedSendCount - 1);
             final long prosecutionCaseCount = filtered.getTargets().stream().filter(t -> t.getApplicationId() == null).count();
             assertEquals(0, prosecutionCaseCount);
-            verify(this.sender, times(expectedSendCount)).send(this.envelopeArgumentCaptor.capture());
-            final HearingAdjourned hearingAdjournedOut = jsonObjectToObjectConvertor.convert(this.envelopeArgumentCaptor.getValue().payloadAsJsonObject(), HearingAdjourned.class);
-            assertEquals(hearingAdjourned.getAdjournedHearing(), hearingAdjournedOut.getAdjournedHearing());
-            assertEquals(hearingAdjourned.getNextHearings().get(0).getCourtCentre().getId(), hearingAdjournedOut.getNextHearings().get(0).getCourtCentre().getId());
         }
     }
 }

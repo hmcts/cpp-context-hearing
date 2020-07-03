@@ -174,6 +174,22 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
     }
 
+    @Test
+    public void shouldPopulateNextHearingForCrownCourtHearingWithNoListedTime() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt-no-listing-time.json");
+
+        setupMocks(event);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
+
+        final List<JudicialResultPrompt> judicialResultPrompts = getPrompts(event, resultDefinition);
+
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), judicialResultPrompts);
+
+        assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T00:00Z"));
+    }
+
     private void setupMocks(final JsonEnvelope event) {
         when(courtHouseReverseLookup.getCourtCentreByName(event, courtName)).thenReturn(ofNullable(expectedCourtHouseByNameResult));
         when(courtHouseReverseLookup.getCourtRoomByRoomName(expectedCourtHouseByNameResult, courtRoomName)).thenReturn(ofNullable(expectedCourtRoomResult));

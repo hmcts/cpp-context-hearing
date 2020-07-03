@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.json.JsonObject;
 
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +37,6 @@ import org.slf4j.LoggerFactory;
 @Named
 public class AdjournHearingDelegate {
 
-    private static final String PRIVATE_HEARING_COMMAND_ADJOURN_HEARING = "hearing.adjourn-hearing";
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(AdjournHearingDelegate.class.getName());
 
     @Inject
@@ -100,8 +98,6 @@ public class AdjournHearingDelegate {
                     ));
                 }
                 hearingAdjourned = hearingAdjournTransformer.transform2Adjournment(jsonEnvelope, filteredResultsSharedSingleApplication, nextHearingResultDefinitions);
-                final JsonObject adjournHearingRequestPayload = objectToJsonObjectConverter.convert(hearingAdjourned);
-                this.sender.send(this.enveloper.withMetadataFrom(jsonEnvelope, PRIVATE_HEARING_COMMAND_ADJOURN_HEARING).apply(adjournHearingRequestPayload));
             }
         }
 

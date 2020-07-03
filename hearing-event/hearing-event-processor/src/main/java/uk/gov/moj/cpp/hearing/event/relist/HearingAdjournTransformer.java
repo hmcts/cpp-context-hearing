@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.event.relist;
 
 import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.START_OF_DAY_TIME;
 import static uk.gov.moj.cpp.hearing.event.relist.HearingAdjournHelper.getAllPromptUuidsByPromptReference;
 import static uk.gov.moj.cpp.hearing.event.relist.HearingAdjournHelper.getDistinctPromptValue;
 import static uk.gov.moj.cpp.hearing.event.relist.HearingAdjournHelper.getOffencesHaveResultNextHearing;
@@ -52,7 +54,6 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import com.google.common.base.CharMatcher;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +68,6 @@ public class HearingAdjournTransformer {
     private static final int DAY = SIX * MINUTES_IN_HOUR;
     private static final String COMMA_REGEX = "\\s*,\\s*";
     private static final String DATE_FORMATS = "[dd/MM/yyyy HH:mm][yyyy-MM-dd HH:mm]";
-    private static final String DEFAULT_HEARING_START_TIME = "09:00";
 
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
@@ -136,7 +136,7 @@ public class HearingAdjournTransformer {
             startDateTime = convertDateTimeToUTC(strEarliestStartDate, strEarliestStartTime);
 
         } else {
-            startDateTime = weekCommencingDate.isEmpty() ? null : convertDateTimeToUTC(weekCommencingDate.iterator().next(), DEFAULT_HEARING_START_TIME);
+            startDateTime = weekCommencingDate.isEmpty() ? null : convertDateTimeToUTC(weekCommencingDate.iterator().next(), START_OF_DAY_TIME);
             LOGGER.info("Hearing week commencing start date time {}", startDateTime);
         }
 
@@ -276,8 +276,12 @@ public class HearingAdjournTransformer {
 
 
     private ZonedDateTime convertDateTimeToUTC(String date, String time) {
-        if (!StringUtils.isEmpty(date) && !StringUtils.isEmpty(time)) {
-            return ZonedDateTime.parse(date.concat(SPACE).concat(time), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
+        if (!isEmpty(date)) {
+            String listingTime = time;
+            if (isEmpty(listingTime)) {
+                listingTime = START_OF_DAY_TIME;
+            }
+            return ZonedDateTime.parse(date.concat(SPACE).concat(listingTime), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
         }
         return null;
     }
