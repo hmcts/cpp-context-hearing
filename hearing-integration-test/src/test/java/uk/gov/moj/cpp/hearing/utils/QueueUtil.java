@@ -21,7 +21,7 @@ import org.apache.activemq.command.ActiveMQTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QueueUtil {
+public class QueueUtil implements AutoCloseable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueUtil.class);
 
@@ -31,20 +31,18 @@ public class QueueUtil {
     private static final String QUEUE_URI = "tcp://" + HOST + ":61616";
 
     private static final long RETRIEVE_TIMEOUT = 20000;
-
-    private final Session session;
-
     private final Topic topic;
+    private Session session;
+    private MessageProducer messageProducer;
 
-    public static QueueUtil getPublicTopicInstance() {
-        return new QueueUtil("public.event");
-    }
+    private MessageConsumer messageConsumer;
+    private Connection connection;
 
     private QueueUtil(final String topicName) {
         try {
             LOGGER.info("Artemis URI: {}", QUEUE_URI);
             final ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory(QUEUE_URI);
-            final Connection connection = factory.createConnection();
+            connection = factory.createConnection();
             connection.start();
             session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
             topic = new ActiveMQTopic(topicName);
@@ -54,20 +52,12 @@ public class QueueUtil {
         }
     }
 
-    public MessageConsumer createConsumer(final String eventSelector) {
-        try {
-            return session.createConsumer(topic, String.format(EVENT_SELECTOR_TEMPLATE, eventSelector));
-        } catch (final JMSException e) {
-            throw new RuntimeException(e);
-        }
+    public static QueueUtil getPublicTopicInstance() {
+        return new QueueUtil("public.event");
     }
 
-    public MessageProducer createProducer() {
-        try {
-            return session.createProducer(topic);
-        } catch (final JMSException e) {
-            throw new RuntimeException(e);
-        }
+    public static QueueUtil getPrivateTopicInstance(final String topicName) {
+        return new QueueUtil(topicName);
     }
 
     public static JsonPath retrieveMessage(final MessageConsumer consumer) {
@@ -103,5 +93,44 @@ public class QueueUtil {
         } catch (final JMSException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public MessageConsumer createConsumer(final String eventSelector) {
+        try {
+            messageConsumer = session.createConsumer(topic, String.format(EVENT_SELECTOR_TEMPLATE, eventSelector));
+            return messageConsumer;
+        } catch (final JMSException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public MessageProducer createProducer() {
+        try {
+            messageProducer = session.createProducer(topic);
+            return messageProducer;
+        } catch (final JMSException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            session.close();
+            if (messageConsumer != null) {
+                messageConsumer.close();
+            }
+            if (messageProducer != null) {
+                messageProducer.close();
+            }
+            connection.close();
+        } catch (JMSException ignored) {
+        }
+
+        session = null;
+        connection = null;
+        messageProducer = null;
+        messageConsumer = null;
+
     }
 }

@@ -21,6 +21,9 @@ import org.junit.BeforeClass;
 public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
 
     protected static String courtCentreId;
+    protected static String courtCentreId_1;
+    protected static String courtCentreId_2;
+    protected static String courtCentreId_3;
     protected static String courtRoom1Id;
     protected static String courtRoom2Id;
     protected static String defenceCounselId;
@@ -41,22 +44,26 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
         /** Easier to debug when you have non-random UUIDs */
         hearingTypeId = fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed");
         courtCentreId = "9d9824b3-8a61-472f-8b55-e532ceabb403";
+        courtCentreId_1 = "d9c200c1-5d63-405d-8ebb-4d1ac3b37144";
+        courtCentreId_2 = "c1006f71-233a-4292-aca0-9e4b66380c36";
+        courtCentreId_3 = "52955c69-c749-416d-a3ca-8ca881709325";
         courtRoom1Id = "9a0124b3-8a61-472f-8b55-e532ceabb403";
         courtRoom2Id = "9a0224b3-8a61-472f-8b55-e532ceabb403";
         defenceCounselId = "9dc824b3-8a61-472f-8b55-e532ceabb403";
         caseId = fromString("9c9824b3-8a61-472f-8b55-e532ceabb403");
 
         stubGetReferenceDataCourtRoomMappings(courtRoom1Id, courtRoom2Id);
-        stubOrganisationUnit(courtCentreId, ouId1, ouId2, ouId3, ouId4);
+        stubOrganisationUnit(courtCentreId, courtCentreId_1, courtCentreId_2, courtCentreId_3, ouId1, ouId2, ouId3, ouId4);
+
         stubGetProgressionProsecutionCases(caseId);
+    }
+
+    protected static void truncateViewStoreData() {
+        truncateViewStoreTables("ha_hearing", "ha_hearing_event", "court_list_publish_status");
     }
 
     @Before
     public void setUpAbstractPublishLatestCourtCentreHearingIT() {
         truncateViewStoreData();
-    }
-
-    protected static void truncateViewStoreData() {
-        truncateViewStoreTables("ha_hearing", "ha_hearing_event", "court_list_publish_status");
     }
 }

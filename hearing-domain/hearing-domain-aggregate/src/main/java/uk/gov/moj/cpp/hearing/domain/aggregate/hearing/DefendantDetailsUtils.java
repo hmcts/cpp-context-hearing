@@ -12,10 +12,10 @@ import java.util.Objects;
 
 public class DefendantDetailsUtils {
 
-    public boolean  verifyDDCHOnRequiredAttributes(final Defendant previousDefendant, final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendant) {
+    public boolean verifyDDCHOnRequiredAttributes(final Defendant previousDefendant, final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendant) {
         final PersonDefendant previousDefendantDetails = previousDefendant.getPersonDefendant();
-        if(nonNull(previousDefendantDetails)) {
-          return verifyDDCHOnRequiredAttributesForIndividual(previousDefendantDetails, updatedDefendant);
+        if (nonNull(previousDefendantDetails)) {
+            return verifyDDCHOnRequiredAttributesForIndividual(previousDefendantDetails, updatedDefendant);
         } else {
             return verifyDDCHOnRequiredAttributesForOrganisation(previousDefendant, updatedDefendant);
         }
@@ -32,25 +32,24 @@ public class DefendantDetailsUtils {
         final Person currentPerson = updatedDefendant.getPersonDefendant().getPersonDetails();
         final Person previousPerson = previousDefendant.getPersonDetails();
 
-       //Name Check
+        //Name Check
         boolean isSame = isChanged(true, Objects.equals(previousPerson.getLastName(), currentPerson.getLastName()));
-        isSame = isChanged(isSame , Objects.equals(previousPerson.getFirstName(), currentPerson.getFirstName()));
-        isSame = isChanged(isSame , Objects.equals(previousPerson.getMiddleName(), currentPerson.getMiddleName()));
+        isSame = isChanged(isSame, Objects.equals(previousPerson.getFirstName(), currentPerson.getFirstName()));
+        isSame = isChanged(isSame, Objects.equals(previousPerson.getMiddleName(), currentPerson.getMiddleName()));
         //Date of Birth
-        isSame = isChanged(isSame , previousPerson.getDateOfBirth().compareTo(currentPerson.getDateOfBirth()) == 0);
+        isSame = isChanged(isSame, Objects.equals(previousPerson.getDateOfBirth(), currentPerson.getDateOfBirth()));
 
         //Nationality
-        isSame = isChanged(isSame , Objects.equals(previousPerson.getNationalityCode(), currentPerson.getNationalityCode()));
+        isSame = isChanged(isSame, Objects.equals(previousPerson.getNationalityCode(), currentPerson.getNationalityCode()));
 
         //Address
-        return isChanged(isSame , compareAddress(previousPerson.getAddress(), currentPerson.getAddress()));
+        return isChanged(isSame, compareAddress(previousPerson.getAddress(), currentPerson.getAddress()));
     }
 
 
-
     private boolean compareAddress(final Address previousAddress, final Address currentAddress) {
-      boolean isSame = isChanged(true, Objects.equals(previousAddress.getAddress1(), currentAddress.getAddress1()));
-        isSame = isChanged(isSame , Objects.equals(previousAddress.getAddress2(), currentAddress.getAddress2()));
+        boolean isSame = isChanged(true, Objects.equals(previousAddress.getAddress1(), currentAddress.getAddress1()));
+        isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress2(), currentAddress.getAddress2()));
         isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress3(), currentAddress.getAddress3()));
         isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress4(), currentAddress.getAddress4()));
         isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress5(), currentAddress.getAddress5()));
@@ -60,7 +59,7 @@ public class DefendantDetailsUtils {
         isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress3(), currentAddress.getWelshAddress3()));
         isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress4(), currentAddress.getWelshAddress4()));
         isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress5(), currentAddress.getWelshAddress5()));
-        return isChanged(isSame , Objects.equals(previousAddress.getPostcode(), currentAddress.getPostcode()));
+        return isChanged(isSame, Objects.equals(previousAddress.getPostcode(), currentAddress.getPostcode()));
     }
 
     private boolean isChanged(final boolean changed, final boolean isChanged) {

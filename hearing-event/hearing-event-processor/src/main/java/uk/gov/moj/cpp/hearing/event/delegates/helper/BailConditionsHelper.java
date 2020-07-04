@@ -33,9 +33,12 @@ public class BailConditionsHelper {
     }
 
     private Defendant setBailConditions(final Defendant defendant) {
-        defendant
-                .getPersonDefendant()
-                .setBailConditions(getBailConditions(defendant.getOffences()));
+        if (defendant.getPersonDefendant() != null) {
+            defendant
+                    .getPersonDefendant()
+                    .setBailConditions(getBailConditions(defendant.getOffences()));
+        }
+
         return defendant;
     }
 
@@ -47,12 +50,12 @@ public class BailConditionsHelper {
 
     private StringBuilder constructBailConditions(final List<JudicialResultsLabelAndResultPrompts> judicialResultsLabelAndResultPrompts) {
         final StringBuilder bailconditionsBuilder = new StringBuilder();
-        for(final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt : judicialResultsLabelAndResultPrompts){
-           final String label =  judicialResultsLabelAndResultPrompt.getLabel();
+        for (final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt : judicialResultsLabelAndResultPrompts) {
+            final String label = judicialResultsLabelAndResultPrompt.getLabel();
             bailconditionsBuilder.append(String.format("%s%n", label));
-          for(final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()){
-              bailconditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
-          }
+            for (final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()) {
+                bailconditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+            }
         }
         return bailconditionsBuilder;
     }
@@ -65,19 +68,19 @@ public class BailConditionsHelper {
     private List<JudicialResultsLabelAndResultPrompts> getJudicialResultsBasedOnRank(final List<JudicialResult> judicialResults) {
         return judicialResults.stream()
                 .sorted(comparing(JudicialResult::getRank, nullsLast(naturalOrder())))
-                .map( jr -> new JudicialResultsLabelAndResultPrompts( jr.getLabel(), getJudicialResultPromptsBasedOnSequence(jr)))
+                .map(jr -> new JudicialResultsLabelAndResultPrompts(jr.getLabel(), getJudicialResultPromptsBasedOnSequence(jr)))
                 .collect(Collectors.toList());
     }
 
     private List<JudicialResult> getJudicialResultsBasedOnResultDefinitionGroup(final List<Offence> offences) {
         return offences
-                    .stream()
-                    .filter(o -> nonNull(o.getJudicialResults()))
-                    .map(Offence::getJudicialResults)
-                    .flatMap(List::stream)
-                    .filter(jr -> nonNull(jr.getResultDefinitionGroup()))
-                    .filter(jr-> jr.getResultDefinitionGroup().equalsIgnoreCase(BAIL_CONDITIONS))
-                    .collect(Collectors.toList());
+                .stream()
+                .filter(o -> nonNull(o.getJudicialResults()))
+                .map(Offence::getJudicialResults)
+                .flatMap(List::stream)
+                .filter(jr -> nonNull(jr.getResultDefinitionGroup()))
+                .filter(jr -> jr.getResultDefinitionGroup().equalsIgnoreCase(BAIL_CONDITIONS))
+                .collect(Collectors.toList());
     }
 
     private List<JudicialResultPrompt> getJudicialResultPromptsBasedOnSequence(final JudicialResult jr) {
@@ -89,8 +92,8 @@ public class BailConditionsHelper {
 
     private class JudicialResultsLabelAndResultPrompts {
 
-        private String label;
-        private List<JudicialResultPrompt> judicialResultPrompts;
+        private final String label;
+        private final List<JudicialResultPrompt> judicialResultPrompts;
 
         public JudicialResultsLabelAndResultPrompts(final String label, final List<JudicialResultPrompt> judicialResultPrompts) {
             this.label = label;
@@ -110,7 +113,7 @@ public class BailConditionsHelper {
             if (this == o) {
                 return true;
             }
-            if (o == null || getClass() != o.getClass()){
+            if (o == null || getClass() != o.getClass()) {
                 return false;
             }
             final JudicialResultsLabelAndResultPrompts that = (JudicialResultsLabelAndResultPrompts) o;

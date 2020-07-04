@@ -34,6 +34,7 @@ import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.AddApplicantCounsel;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
@@ -72,7 +73,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.eventlog.CourtCentre;
@@ -82,7 +83,6 @@ import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -243,7 +243,7 @@ public class UseCases {
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
         final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
 
-        final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
+        try(final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
                         .with(PublicHearingEventLogged::getHearingEvent, isBean(uk.gov.moj.cpp.hearing.eventlog.HearingEvent.class)
                                 .with(HearingEvent::getHearingEventId, is(logEvent.getHearingEventId()))
@@ -269,15 +269,16 @@ public class UseCases {
                                 )
                                 .with(uk.gov.moj.cpp.hearing.eventlog.Hearing::getHearingType, is(initiateHearingCommand.getHearing().getType().getDescription()))
                         )
-                ));
+                ))) {
 
-        makeCommand(requestSpec, "hearing.log-hearing-event")
-                .withArgs(initiateHearingCommand.getHearing().getId())
-                .ofType("application/vnd.hearing.log-hearing-event+json")
-                .withPayload(logEvent)
-                .executeSuccessfully();
+            makeCommand(requestSpec, "hearing.log-hearing-event")
+                    .withArgs(initiateHearingCommand.getHearing().getId())
+                    .ofType("application/vnd.hearing.log-hearing-event+json")
+                    .withPayload(logEvent)
+                    .executeSuccessfully();
 
-        publicEventTopic.waitFor();
+            publicEventTopic.waitFor();
+        }
 
         return logEvent;
     }
@@ -823,33 +824,87 @@ public class UseCases {
 
     public static AddRespondentCounsel addRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId,
                                                             final AddRespondentCounsel addRespondentCounsel) {
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.add-respondent-counsel+json")
-                .withArgs(hearingId)
-                .withPayload(addRespondentCounsel)
-                .executeSuccessfully();
+
+        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-added","hearing.event")
+                .withFilter(convertStringTo(AddRespondentCounsel.class,isBean(AddRespondentCounsel.class)
+                        .with(AddRespondentCounsel::getHearingId,Matchers.is(hearingId))
+                        .with(AddRespondentCounsel::getRespondentCounsel,isBean(RespondentCounsel.class).with(RespondentCounsel::getId,is(addRespondentCounsel.getRespondentCounsel().getId())))
+                ))
+
+        ) {
+
+            makeCommand(requestSpec, "hearing.update-hearing")
+                    .ofType("application/vnd.hearing.add-respondent-counsel+json")
+                    .withArgs(hearingId)
+                    .withPayload(addRespondentCounsel)
+                    .executeSuccessfully();
+
+            eventTopic.waitFor();
+
+        }
 
         return addRespondentCounsel;
     }
 
     public static UpdateRespondentCounsel updateRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateRespondentCounsel updateRespondentCounselCommandTemplate) {
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.update-respondent-counsel+json")
-                .withArgs(hearingId)
-                .withPayload(updateRespondentCounselCommandTemplate)
-                .executeSuccessfully();
+
+        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-updated","hearing.event")
+                .withFilter(convertStringTo(UpdateRespondentCounsel.class,isBean(UpdateRespondentCounsel.class)
+                        .with(UpdateRespondentCounsel::getHearingId,Matchers.is(hearingId))
+                        .with(UpdateRespondentCounsel::getRespondentCounsel,isBean(RespondentCounsel.class).with(RespondentCounsel::getId,is(updateRespondentCounselCommandTemplate.getRespondentCounsel().getId())))
+                ))
+
+        ) {
+            makeCommand(requestSpec, "hearing.update-hearing")
+                    .ofType("application/vnd.hearing.update-respondent-counsel+json")
+                    .withArgs(hearingId)
+                    .withPayload(updateRespondentCounselCommandTemplate)
+                    .executeSuccessfully();
+
+            eventTopic.waitFor();
+        }
 
         return updateRespondentCounselCommandTemplate;
     }
 
+    public static UpdateRespondentCounsel updateRespondentCounselAfterRemovingCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateRespondentCounsel updateRespondentCounselCommandTemplate) {
+
+        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-change-ignored","hearing.event")
+                .withFilter(convertStringTo(RespondentCounselChangeIgnored.class,isBean(RespondentCounselChangeIgnored.class)
+                        .with(RespondentCounselChangeIgnored::getReason,Matchers.containsString(updateRespondentCounselCommandTemplate.getRespondentCounsel().getId().toString()))
+                ))
+
+        ) {
+            makeCommand(requestSpec, "hearing.update-hearing")
+                    .ofType("application/vnd.hearing.update-respondent-counsel+json")
+                    .withArgs(hearingId)
+                    .withPayload(updateRespondentCounselCommandTemplate)
+                    .executeSuccessfully();
+
+            eventTopic.waitFor();
+        }
+
+        return updateRespondentCounselCommandTemplate;
+    }
     public static RemoveRespondentCounsel removeRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId,
                                                                   final RemoveRespondentCounsel removeRespondentCounsel) {
 
-        makeCommand(requestSpec, "hearing.update-hearing")
-                .ofType("application/vnd.hearing.remove-respondent-counsel+json")
-                .withArgs(hearingId)
-                .withPayload(removeRespondentCounsel)
-                .executeSuccessfully();
+
+
+        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-removed","hearing.event")
+                .withFilter(convertStringTo(RemoveRespondentCounsel.class,isBean(RemoveRespondentCounsel.class)
+                        .with(RemoveRespondentCounsel::getHearingId,Matchers.is(hearingId))
+                ))
+
+        ) {
+
+            makeCommand(requestSpec, "hearing.update-hearing")
+                    .ofType("application/vnd.hearing.remove-respondent-counsel+json")
+                    .withArgs(hearingId)
+                    .withPayload(removeRespondentCounsel)
+                    .executeSuccessfully();
+            eventTopic.waitFor();
+        }
 
         return removeRespondentCounsel;
     }
@@ -969,6 +1024,31 @@ public class UseCases {
     }
 
     public static TrialType setTrialType(final RequestSpecification requestSpec, final UUID hearingId,
+                                         final TrialType trialType,final boolean isVacated) {
+        final Utilities.EventListener publicEventTopic = listenFor("public.hearing.trial-vacated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .ofType("application/vnd.hearing.set-trial-type+json")
+                .withArgs(hearingId)
+                .withPayload(trialType)
+                .executeSuccessfully();
+
+        publicEventTopic.waitFor();
+
+        BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
+
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, Matchers.is(hearingId))
+                        .with(Hearing::getIsVacatedTrial, is(isVacated)
+                        ))
+                );
+
+        return trialType;
+    }
+
+    public static TrialType setTrialType(final RequestSpecification requestSpec, final UUID hearingId,
                                          final TrialType trialType) {
         makeCommand(requestSpec, "hearing.update-hearing")
                 .ofType("application/vnd.hearing.set-trial-type+json")
@@ -978,7 +1058,6 @@ public class UseCases {
 
         return trialType;
     }
-
     public static void updateCaseMarkers(final UUID prosecutionCaseId, final UUID hearingId, final List<Marker> markers) throws Exception {
 
         final String eventName = "public.progression.case-markers-updated";

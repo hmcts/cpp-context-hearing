@@ -1,18 +1,23 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static java.text.MessageFormat.format;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.apache.http.HttpStatus.SC_ACCEPTED;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.core.IsEqual.equalTo;
+import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.APPELLANT_OPPENS_EVENT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID;
@@ -21,12 +26,14 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.START_HEA
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
-import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForWebPage;
 
-import uk.gov.justice.services.test.utils.core.rest.RestClient;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.utils.RestUtils;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
@@ -34,21 +41,28 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
 
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishLatestCourtCentreHearingEventsIT.class);
     final private static UUID RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER = RESUME_HEARING_EVENT_DEFINITION_ID;
     private static final String LISTING_COMMAND_PUBLISH_COURT_LIST = "hearing.command.publish-court-list";
     private static final String MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST = "application/vnd.hearing.publish-court-list+json";
+    private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191026163445\\.xml";
+    private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_25 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191025163445\\.xml";
+    private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_27 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191027163445\\.xml";
 
     private ZonedDateTime eventTime;
     private LocalDate localDate;
@@ -62,17 +76,17 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
-        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId));
+        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
-        sendPublishCourtListCommand(publishCourtListJsonObject);
+        sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId);
 
         publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
 
-        final String filePayload = getSentXmlForWebPage();
+        final String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26);
         final String filePayloadForPubDisplay = getSentXmlForPubDisplay();
 
         final String expectedDefendantXMLValueForWeb = "<defendants>\n" +
@@ -94,52 +108,52 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRequestToPublishCourtListDefenceCouncilOpensCase() throws NoSuchAlgorithmException {
-        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId));
+        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_1);
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "27");
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_1, "27");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
-        sendPublishCourtListCommand(publishCourtListJsonObject);
+        sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId_1);
 
-        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId_1);
 
-        final String filePayload = getSentXmlForWebPage();
+        final String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_27);
         assertThat(filePayload, containsString("E20906_Defence_CO_Name>Mr John Jones</E20906_Defence_CO_Name"));
     }
 
     @Test
     public void shouldRequestToPublishCourtList() throws NoSuchAlgorithmException {
-        createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId));
+        createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_2);
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "28");
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_2, "28");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
-        sendPublishCourtListCommand(publishCourtListJsonObject);
+        sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId_2);
 
-        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId_2);
     }
 
     @Test
     public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
-        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId));
+        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_3);
 
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "25");
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_3, "25");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
-        sendPublishCourtListCommand(publishCourtListJsonObject);
+        sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId_3);
 
-        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId);
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId_3);
 
-        final String filePayload = getSentXmlForWebPage();
+        final String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_25);
         assertThat(filePayload, containsString("E20606_Appellant_CO_Name>TomAppellant BradyAppellant</E20606_Appellant_CO_Name"));
     }
 
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId));
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
         final UUID expectedHearingEventId = randomUUID();
         logEvent(expectedHearingEventId, requestSpec, asDefault(), hearing.it(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, false, fromString(defenceCounselId), eventTime.plusMinutes(10));
         logEvent(randomUUID(), requestSpec, asDefault(), hearing.it(), RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER, false, fromString(defenceCounselId), eventTime.plusMinutes(15));
@@ -148,25 +162,41 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), eventTime.toLocalDate(), expectedHearingEventId);
     }
 
-    private void sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject) {
-        final String updateHearingUrl = String.format("%s/%s", getBaseUri(), format(ENDPOINT_PROPERTIES.getProperty(LISTING_COMMAND_PUBLISH_COURT_LIST)));
-        final String request = publishCourtListJsonObject.toString();
+    private void sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
 
-        LOGGER.info("Post call made: \n\n\tURL = {} \n\tMedia type = {} \n\tPayload = {}\n with user {}\n\n", updateHearingUrl, MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST, request, getLoggedInSystemUserHeader());
+        try (final Utilities.EventListener eventTopic = listenFor("hearing.event.publish-court-list-export-successful", "hearing.event")
+                .withFilter(isJson(withJsonPath("$.courtCentreId", is(courtCentreId))))) {
 
-        final Response response = new RestClient().postCommand(updateHearingUrl, MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST, request, getLoggedInSystemUserHeader());
+            makeCommand(requestSpec, LISTING_COMMAND_PUBLISH_COURT_LIST)
+                    .ofType(MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST)
+                    .withPayload(publishCourtListJsonObject.toString())
+                    .withCppUserId(USER_ID_VALUE_AS_ADMIN)
 
-        assertThat(response.getStatus(), equalTo(SC_ACCEPTED));
+                    .executeSuccessfully();
+
+            eventTopic.waitFor();
+        }
     }
 
     private JsonObject buildPublishCourtListJsonString(final String courtCentreId, final String day) {
         return createObjectBuilder().add("courtCentreId", courtCentreId).add("createdTime", "2019-10-" + day + "T16:34:45.132Z").build();
     }
 
-    private CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final UUID hearingEventId, final String courtRoomId, final String defenceCounselId, final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
+    private CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final UUID hearingEventId, final String courtRoomId, final String defenceCounselId, final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, String courtCenter) throws NoSuchAlgorithmException {
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
         logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime);
+
+        RestUtils.poll(requestParams(getURL("hearing.latest-hearings-by-court-centres", courtCenter, LocalDate.now()), "application/vnd.hearing.latest-hearings-by-court-centres+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInAdminUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(CoreMatchers.allOf(
+
+                                withJsonPath("$.court.courtSites.[0].courtRooms.[0].hearingEvent.id", is(hearingEventId.toString()))
+                        )));
+
         return hearing;
     }
 }

@@ -3,12 +3,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 
 import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
+import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.LegalEntityDefendant;
@@ -65,7 +68,7 @@ public class DefendantDelegateTest {
     }
 
     @Theory
-    public void whenThereIsAChangeInAddressForDefendantHearingShouldListDefendantForDDCH(final Address changedAddress) {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInAddressForDefendantHearing(final Address changedAddress) {
 
        HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -86,7 +89,7 @@ public class DefendantDelegateTest {
 
 
     @Test
-    public void whenThereIsAChangeInFirstNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInFirstNameForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -105,7 +108,7 @@ public class DefendantDelegateTest {
     }
 
     @Test
-    public void whenThereIsAChangeInLastNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInLastNameForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -124,7 +127,7 @@ public class DefendantDelegateTest {
     }
 
     @Test
-    public void whenThereIsAChangeInMiddleNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInMiddleNameForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -143,7 +146,7 @@ public class DefendantDelegateTest {
     }
 
     @Test
-    public void whenThereIsAChangeInDateOfBirthForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInDateOfBirthForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -162,7 +165,7 @@ public class DefendantDelegateTest {
     }
 
     @Test
-    public void whenThereIsAChangeInNationalityForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInNationalityForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -181,7 +184,7 @@ public class DefendantDelegateTest {
     }
 
     @Test
-    public void whenThereIsANoChangeForDefendantHearingShouldNotListDefendantForDDCH() {
+    public void shouldNotListDefendantForDDCHWhenThereIsANoChangeForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -200,7 +203,7 @@ public class DefendantDelegateTest {
     }
 
     @Test
-    public void whenThereIsAChangeInOrganisationNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationNameForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -218,7 +221,7 @@ public class DefendantDelegateTest {
     }
 
     @Theory
-    public void whenThereIsAChangeInOrganisationAddressForDefendantHearingShouldListDefendantForDDCH(final Address changedAddress) {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationAddressForDefendantHearing(final Address changedAddress) {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -236,7 +239,7 @@ public class DefendantDelegateTest {
     }
 
     @Theory
-    public void whenThereIsAnoChangeInOrganisationDetailsForDefendantHearingShouldNotListDefendantForDDCH(final Address changedAddress) {
+    public void shouldNotListDefendantForDDCHWhenThereIsAnoChangeInOrganisationDetailsForDefendantHearing(final Address changedAddress) {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -251,6 +254,26 @@ public class DefendantDelegateTest {
         defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(false));
+    }
+
+
+    @Test
+    public void shouldHearingAggregateHaveDefenceOrganisationWhenThereIsAnDefenceAssociate() {
+
+        HearingAggregateMomento memento = new HearingAggregateMomento();
+        final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
+        memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
+
+
+        DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
+
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsWithDefenceOrganisation(prosecutionCaseId, defendantId, "Tim", null, "Karke",
+                getDate("2015-09-08"), "UK", address);
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+
+        assertThat(defendantDelegate.getMomento().getHearing().getProsecutionCases().get(0).getDefendants().get(0).getAssociatedDefenceOrganisation(), notNullValue());
     }
 
     private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsForOrganisation(final UUID prosecutionCaseId,final UUID defendantId, final String organisationName, final Address address) {
@@ -284,6 +307,33 @@ public class DefendantDelegateTest {
 
     }
 
+
+    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsWithDefenceOrganisation(final UUID prosecutionCaseId,final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
+
+        uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
+
+        Person person = Person.person()
+                .withFirstName(firstName)
+                .withMiddleName(middleName)
+                .withLastName(lastName)
+                .withNationalityCode(nationality)
+                .withDateOfBirth(dateOfBirth)
+                .withAddress(address)
+                .build();
+        PersonDefendant personDefendant = new PersonDefendant(null, null, null, null, null, null,
+                null, null, null, null, null, null, person, null);
+        defendant.setId(defendantId);
+        defendant.setPersonDefendant(personDefendant);
+        defendant.setProsecutionCaseId(prosecutionCaseId);
+
+        defendant.setAssociatedDefenceOrganisation(AssociatedDefenceOrganisation.associatedDefenceOrganisation()
+                .withApplicationReference(randomUUID().toString())
+                .withDefenceOrganisation(DefenceOrganisation.defenceOrganisation()
+                        .withLaaContractNumber("laaContactNumber")
+                        .build()).build());
+        return defendant;
+
+    }
     private DefendantDetailsUpdated createDefendantDetailsUpdated(final UUID hearingId, uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant) {
         return DefendantDetailsUpdated.defendantDetailsUpdated().setDefendant(defendant).setHearingId(hearingId);
     }

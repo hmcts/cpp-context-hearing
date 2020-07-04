@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
+import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPrivateTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.retrieveMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
@@ -15,12 +16,14 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher;
+import uk.gov.moj.cpp.hearing.utils.QueueUtil;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.util.UUID;
 
+import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -47,6 +50,10 @@ public class Utilities {
 
     public static final int RETRY_TIMEOUT_IN_MILLIS = 5000;
 
+
+    public static EventListener listenFor(String mediaType,String topicName) {
+        return new EventListener(mediaType,DEFAULT_POLL_TIMEOUT_IN_MILLIS,topicName);
+    }
     public static EventListener listenFor(String mediaType) {
         return new EventListener(mediaType);
     }
@@ -59,13 +66,14 @@ public class Utilities {
         return new CommandBuilder(requestSpec, endpoint);
     }
 
-    public static class EventListener {
+    public static class EventListener implements AutoCloseable{
 
         private static final Logger LOGGER = LoggerFactory.getLogger(EventListener.class);
         private MessageConsumer messageConsumer;
         private String eventType;
         private Matcher<?> matcher;
         private long timeout;
+        private QueueUtil queueUtil;
 
         public EventListener(final String eventType) {
             this(eventType, DEFAULT_POLL_TIMEOUT_IN_MILLIS);
@@ -73,7 +81,15 @@ public class Utilities {
 
         public EventListener(final String eventType, long timeout) {
             this.eventType = eventType;
-            this.messageConsumer = getPublicTopicInstance().createConsumer(eventType);
+            this.queueUtil = getPublicTopicInstance();
+            this.messageConsumer = queueUtil.createConsumer(eventType);
+            this.timeout = timeout;
+        }
+
+        public EventListener(final String eventType, long timeout,String topicName) {
+            this.eventType = eventType;
+            this.queueUtil = getPrivateTopicInstance(topicName);
+            this.messageConsumer = queueUtil.createConsumer(eventType);
             this.timeout = timeout;
         }
 
@@ -166,6 +182,16 @@ public class Utilities {
             };
 
             return this;
+        }
+
+        @Override
+        public void close()  {
+            try {
+                messageConsumer.close();
+                queueUtil.close();
+            } catch (JMSException ignored) {
+            }
+
         }
     }
 

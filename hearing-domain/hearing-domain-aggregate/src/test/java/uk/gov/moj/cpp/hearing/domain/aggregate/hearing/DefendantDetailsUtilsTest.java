@@ -73,7 +73,7 @@ public class DefendantDetailsUtilsTest {
 
 
     @Test
-    public void whenThereIsAChangeInFirstNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInFirstNameForDefendantHearing() {
 
         final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
@@ -87,7 +87,7 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
-    public void whenThereIsAChangeInLastNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInLastNameForDefendantHearing() {
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
 
@@ -101,7 +101,7 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
-    public void whenThereIsAChangeInMiddleNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInMiddleNameForDefendantHearing() {
 
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
@@ -112,7 +112,7 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
-    public void whenThereIsAChangeInDateOfBirthForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInDateOfBirthForDefendantHearing() {
 
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
@@ -125,7 +125,20 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
-    public void whenThereIsAChangeInNationalityForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInNullDateOfBirthForDefendantHearing() {
+
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", null, "UK", address);
+
+        DefendantDetailsUtils defendantDetailsUtils = new DefendantDetailsUtils();
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
+                getDate("1965-09-08"), "UK", address);
+        assertThat(defendantDetailsUtils.verifyDDCHOnRequiredAttributes(defendant, updatedDefendantDetails), is(false));
+    }
+
+    @Test
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInNationalityForDefendantHearing() {
 
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
@@ -137,7 +150,7 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
-    public void whenThereIsANoChangeForDefendantHearingShouldNotListDefendantForDDCH() {
+    public void shouldNotListDefendantForDDCHWhenThereIsANoChangeForDefendantHearing() {
 
         final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
@@ -150,7 +163,7 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
-    public void whenThereIsAChangeInOrganisationNameForDefendantHearingShouldListDefendantForDDCH() {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationNameForDefendantHearing() {
 
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createOrganisationDefendant(prosecutionCaseId, offenceId, defendantId, "Versu Ltd", address);
@@ -163,7 +176,7 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Theory
-    public void whenThereIsAChangeInOrganisationAddressForDefendantHearingShouldListDefendantForDDCH(final Address changedAddress) {
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationAddressForDefendantHearing(final Address changedAddress) {
 
         final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createOrganisationDefendant(prosecutionCaseId, offenceId, defendantId, "Versu Ltd", address);

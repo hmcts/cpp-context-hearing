@@ -139,15 +139,20 @@ public class DefendantDelegate implements Serializable {
                 .setWitnessStatement(defendantIn.getWitnessStatement())
                 .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
                 .setProsecutionCaseId(defendantIn.getProsecutionCaseId())
-                .setMasterDefendantId(defendantIn.getMasterDefendantId());
-    }
-
-    public void setHearingAggregateMomento(final HearingAggregateMomento momento) {
-        this.momento = momento;
+                .setMasterDefendantId(defendantIn.getMasterDefendantId())
+                .setAssociatedDefenceOrganisation(defendantIn.getAssociatedDefenceOrganisation());
     }
 
     @SuppressWarnings("squid:S2384")
     public void setDefendantDetailsChanged(final List<UUID> defendantDetailsChanged) {
         this.defendantDetailsChanged = defendantDetailsChanged;
+    }
+
+    public void setMomento(final HearingAggregateMomento momento) {
+        this.momento = momento;
+    }
+
+    public HearingAggregateMomento getMomento() {
+        return momento;
     }
 }

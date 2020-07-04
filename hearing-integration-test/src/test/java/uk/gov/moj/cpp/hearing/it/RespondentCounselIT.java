@@ -33,6 +33,29 @@ import org.junit.Test;
 @SuppressWarnings("unchecked")
 public class RespondentCounselIT extends AbstractIT {
 
+    public static RespondentCounsel createFirstRespondentCounsel(final InitiateHearingCommandHelper hearingOne) {
+        final AddRespondentCounsel firstRespondentCounselCommand = UseCases.addRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
+                addRespondentCounselCommandTemplate(hearingOne.getHearingId())
+        );
+        RespondentCounsel firstRespondentCounsel = firstRespondentCounselCommand.getRespondentCounsel();
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearing.respondentCounsels.[0].status", is(firstRespondentCounsel.getStatus())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].firstName", is(firstRespondentCounsel.getFirstName())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].lastName", is(firstRespondentCounsel.getLastName())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].title", is(firstRespondentCounsel.getTitle())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].middleName", is(firstRespondentCounsel.getMiddleName())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].attendanceDays.[0]", is(firstRespondentCounsel.getAttendanceDays().get(0).toString())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].respondents.[0]", is(firstRespondentCounsel.getRespondents().get(0).toString()))
+                        )));
+        return firstRespondentCounsel;
+    }
+
     @Test
     public void addRespondentCounsel_shouldAdd() throws Exception {
 
@@ -165,7 +188,7 @@ public class RespondentCounselIT extends AbstractIT {
         );
 
         firstRespondentCounsel.setLastName("DummyLastName");
-        final UpdateRespondentCounsel firstRespondentCounselUpdatedCommand = UseCases.updateRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
+        final UpdateRespondentCounsel firstRespondentCounselUpdatedCommand = UseCases.updateRespondentCounselAfterRemovingCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateRespondentCounselCommandTemplate(hearingOne.getHearingId(), firstRespondentCounsel)
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
@@ -174,13 +197,13 @@ public class RespondentCounselIT extends AbstractIT {
                         print(),
                         payload().isJson(allOf(
                                 withJsonPath("$.hearing.respondentCounsels", hasSize(1)),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].status", is(secondRespondentCounsel.getStatus())),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].firstName", is(secondRespondentCounsel.getFirstName())),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].lastName", is(secondRespondentCounsel.getLastName())),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].title", is(secondRespondentCounsel.getTitle())),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].middleName", is(secondRespondentCounsel.getMiddleName())),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].attendanceDays.[0]", is(secondRespondentCounsel.getAttendanceDays().get(0).toString())),
-                                        withJsonPath("$.hearing.respondentCounsels.[0].respondents.[0]", is(secondRespondentCounsel.getRespondents().get(0).toString())))));
+                                withJsonPath("$.hearing.respondentCounsels.[0].status", is(secondRespondentCounsel.getStatus())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].firstName", is(secondRespondentCounsel.getFirstName())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].lastName", is(secondRespondentCounsel.getLastName())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].title", is(secondRespondentCounsel.getTitle())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].middleName", is(secondRespondentCounsel.getMiddleName())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].attendanceDays.[0]", is(secondRespondentCounsel.getAttendanceDays().get(0).toString())),
+                                withJsonPath("$.hearing.respondentCounsels.[0].respondents.[0]", is(secondRespondentCounsel.getRespondents().get(0).toString())))));
 
 
     }
@@ -220,7 +243,7 @@ public class RespondentCounselIT extends AbstractIT {
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
 
-        String tempFirstRespondentCounsel = firstRespondentCounsel.getFirstName() ;
+        String tempFirstRespondentCounsel = firstRespondentCounsel.getFirstName();
 
         //Updating respondent counsel first time
         firstRespondentCounsel.setFirstName("DummyFirstName");
@@ -274,28 +297,5 @@ public class RespondentCounselIT extends AbstractIT {
                                 withJsonPath("$.hearing.respondentCounsels.[0].attendanceDays.[0]", is(firstRespondentCounselUpdated.getAttendanceDays().get(0).toString())),
                                 withJsonPath("$.hearing.respondentCounsels.[0].respondents.[0]", is(firstRespondentCounselUpdated.getRespondents().get(0).toString()))
                         )));
-    }
-
-    public static RespondentCounsel createFirstRespondentCounsel(final InitiateHearingCommandHelper hearingOne) {
-        final AddRespondentCounsel firstRespondentCounselCommand = UseCases.addRespondentCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                addRespondentCounselCommandTemplate(hearingOne.getHearingId())
-        );
-        RespondentCounsel firstRespondentCounsel = firstRespondentCounselCommand.getRespondentCounsel();
-
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearing.respondentCounsels.[0].status", is(firstRespondentCounsel.getStatus())),
-                                withJsonPath("$.hearing.respondentCounsels.[0].firstName", is(firstRespondentCounsel.getFirstName())),
-                                withJsonPath("$.hearing.respondentCounsels.[0].lastName", is(firstRespondentCounsel.getLastName())),
-                                withJsonPath("$.hearing.respondentCounsels.[0].title", is(firstRespondentCounsel.getTitle())),
-                                withJsonPath("$.hearing.respondentCounsels.[0].middleName", is(firstRespondentCounsel.getMiddleName())),
-                                withJsonPath("$.hearing.respondentCounsels.[0].attendanceDays.[0]", is(firstRespondentCounsel.getAttendanceDays().get(0).toString())),
-                                withJsonPath("$.hearing.respondentCounsels.[0].respondents.[0]", is(firstRespondentCounsel.getRespondents().get(0).toString()))
-                        )));
-        return firstRespondentCounsel;
     }
 }

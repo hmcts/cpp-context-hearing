@@ -38,7 +38,7 @@ public class WebDavStub {
         return getFileForPath(XHIBIT_GATEWAY_SEND_PUB_DISP_TO_XHIBIT_FILE_PATH_REG_EX);
     }
 
-    private static String getFileForPath(final String filePath) {
+    public static String getFileForPath(final String filePath) {
         final List<LoggedRequest> putRequests = findAll(putRequestedFor(urlPathMatching(filePath)));
         final LoggedRequest loggedRequest = putRequests.get(putRequests.size() - 1);
 

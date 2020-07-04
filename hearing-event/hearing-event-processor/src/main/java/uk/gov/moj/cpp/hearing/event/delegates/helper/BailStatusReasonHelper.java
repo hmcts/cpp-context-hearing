@@ -29,9 +29,11 @@ public class BailStatusReasonHelper {
 
     private Defendant setBailStatusReason(final Defendant defendant) {
 
-        defendant
-                .getPersonDefendant()
-                .setBailReasons(getBailStatusReason(defendant.getOffences()));
+        if (defendant.getPersonDefendant() != null) {
+            defendant
+                    .getPersonDefendant()
+                    .setBailReasons(getBailStatusReason(defendant.getOffences()));
+        }
 
         return defendant;
     }
