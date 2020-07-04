@@ -30,7 +30,7 @@
         <coredomain.version>1.0.93</coredomain.version>
         <material.version>6.0.1</material.version>
         <results.version>6.4.12</results.version>
-        <notification.notify.version>6.4.4</notification.notify.version>
+        <notification.notify.version>7.0.1</notification.notify.version>
         <stagingenforcement.version>6.4.5</stagingenforcement.version>
         <progression.version>6.4.51</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
