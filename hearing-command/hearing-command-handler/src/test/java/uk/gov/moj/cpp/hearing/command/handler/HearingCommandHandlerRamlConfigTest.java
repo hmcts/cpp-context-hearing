@@ -41,7 +41,6 @@ public class HearingCommandHandlerRamlConfigTest {
                 ProsecutionCounselCommandHandler.class,
                 MagistratesCourtInitiateHearingCommandHandler.class,
                 HearingEventCommandHandler.class,
-                GenerateNowsCommandHandler.class,
                 UpdateOffencesForDefendantCommandHandler.class,
                 UpdateDefendantCommandHandler.class,
                 HearingDetailChangeCommandHandler.class,

@@ -41,7 +41,7 @@ public class DefendantDelegate implements Serializable {
                 .ifPresent(defendant -> {
                     final DefendantDetailsUtils verify = new DefendantDetailsUtils();
 
-                    if(!verify.verifyDDCHOnRequiredAttributes(defendant, defendantDetailsUpdated.getDefendant())) {
+                    if (!verify.verifyDDCHOnRequiredAttributes(defendant, defendantDetailsUpdated.getDefendant())) {
                         defendantDetailsChanged.add(defendant.getId());
                     }
                     setDefendant(defendant, defendantDetailsUpdated.getDefendant());
@@ -53,10 +53,11 @@ public class DefendantDelegate implements Serializable {
     }
 
     public void clearDefendantDetailsChanged() {
-        if(!defendantDetailsChanged.isEmpty()) {
+        if (!defendantDetailsChanged.isEmpty()) {
             this.defendantDetailsChanged.clear();
         }
     }
+
     public void handleDefendantAttendanceUpdated(final DefendantAttendanceUpdated defendantAttendanceUpdated) {
 
         final List<DefendantAttendance> defendantAttendances = nonNull(this.momento.getHearing().getDefendantAttendance()) ? this.momento.getHearing().getDefendantAttendance() : new ArrayList<>();
@@ -83,7 +84,7 @@ public class DefendantDelegate implements Serializable {
 
     public Stream<Object> updateDefendantDetails(final UUID hearingId, final uk.gov.moj.cpp.hearing.command.defendant.Defendant newDefendant) {
 
-        if(!this.momento.isPublished() && nonNull(momento.getHearing())) {
+        if (!this.momento.isPublished() && nonNull(momento.getHearing())) {
 
             final Optional<Defendant> previouslyStoredDefendant = momento.getHearing().getProsecutionCases().stream()
                     .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
@@ -140,7 +141,9 @@ public class DefendantDelegate implements Serializable {
                 .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
                 .setProsecutionCaseId(defendantIn.getProsecutionCaseId())
                 .setMasterDefendantId(defendantIn.getMasterDefendantId())
-                .setAssociatedDefenceOrganisation(defendantIn.getAssociatedDefenceOrganisation());
+                .setAssociatedDefenceOrganisation(defendantIn.getAssociatedDefenceOrganisation())
+                .setIsYouth(defendantIn.getIsYouth())
+                .setAliases(defendantIn.getAliases());
     }
 
     @SuppressWarnings("squid:S2384")

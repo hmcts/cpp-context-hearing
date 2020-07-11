@@ -3,9 +3,12 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.util.Objects.nonNull;
+import static java.util.Objects.requireNonNull;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
@@ -15,6 +18,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 
 import java.math.BigDecimal;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public class JudicialResultPromptHelper {
@@ -29,12 +33,12 @@ public class JudicialResultPromptHelper {
                         .map(JudicialResult::getJudicialResultPrompts)
                         .map(Collection::stream)
                         .orElseGet(Stream::empty)
-                        .map(p -> format("%s:%s", p.getLabel(), p.getValue()))
+                        .map(p -> format("%s:%s", p.getLabel(), getPromptValue(p.getValue(),p.getType())))
                         .collect(joining(lineSeparator()));
 
-        final ResultDefinition resultDefinition = resultLineTreeNode.getResultDefinition().getData();
+        final ResultDefinition resultDefinition = requireNonNull(resultLineTreeNode).getResultDefinition().getData();
 
-        return judicialResultPrompt()
+        final JudicialResultPrompt.Builder builder = judicialResultPrompt()
                 .withJudicialResultPromptTypeId(resultDefinition.getId())
                 .withCourtExtract(parseCourtExtract(resultDefinition))
                 .withPromptSequence(newPromptSequenceNumber)
@@ -42,12 +46,30 @@ public class JudicialResultPromptHelper {
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withValue(newPromptValue)
                 .withQualifier(resultDefinition.getQualifier())
-                .withUsergroups(resultDefinition.getUserGroups())
-                .build();
+                .withUsergroups(resultDefinition.getUserGroups());
+
+        final Optional<String> promptReference = setPromptReference(resultLineTreeNode);
+
+        promptReference.ifPresent(builder::withPromptReference);
+
+        return builder.build();
     }
 
-    private static String parseCourtExtract(final ResultDefinition resultDefinition){
+    private static String getPromptValue(final String originalValue, final String promptType) {
+        if ("BOOLEAN".equalsIgnoreCase(promptType)) {
+            return convertBooleanPromptValue(originalValue);
+        }
+        return originalValue;
+    }
+
+    private static String parseCourtExtract(final ResultDefinition resultDefinition) {
         final Boolean isAvailableForCourtExtract = resultDefinition.getIsAvailableForCourtExtract();
         return nonNull(isAvailableForCourtExtract) && isAvailableForCourtExtract ? "Y" : "N";
+    }
+
+    private static Optional<String> setPromptReference(final TreeNode<ResultLine> resultLineTreeNode) {
+        return of(resultLineTreeNode)
+                .filter(node -> nonNull(node.getJudicialResult()) && nonNull(node.getJudicialResult().getJudicialResultId()))
+                .map(node -> node.getJudicialResult().getJudicialResultId().toString());
     }
 }

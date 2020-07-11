@@ -7,18 +7,21 @@ import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.event.nows.ResultDefinitionsConstant.NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID;
 
+import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.Category;
+import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CreateNowsRequest;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Level;
-import uk.gov.justice.core.courts.Now;
+import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
+import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -26,17 +29,13 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.AdjournHearingDelegate;
-import uk.gov.moj.cpp.hearing.event.delegates.NowsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDetailsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.ResultDefinitionNotFoundException;
-import uk.gov.moj.cpp.hearing.event.nows.NowsGenerator;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
-import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.Arrays;
@@ -44,7 +43,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -68,12 +66,6 @@ public class PublishResultsEventProcessor {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Inject
-    private NowsGenerator nowsGenerator;
-
-    @Inject
-    private NowsDelegate nowsDelegate;
-
-    @Inject
     private UpdateDefendantWithApplicationDetailsDelegate updateDefendantWithApplicationDetailsDelegate;
 
     @Inject
@@ -94,9 +86,6 @@ public class PublishResultsEventProcessor {
     @Inject
     private ReferenceDataService referenceDataService;
 
-    @Inject
-    private ResultsSharedFilter resultsSharedFilter;
-
     @Handles("hearing.results-shared")
     public void resultsShared(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
@@ -108,19 +97,25 @@ public class PublishResultsEventProcessor {
         final Hearing hearing = resultsShared.getHearing();
         final List<CourtApplication> courtApplications = hearing.getCourtApplications();
 
+        setCourtCentreOrganisationalUnitInfo(event, resultsShared.getHearing().getCourtCentre());
+
+        setLJADetails(event, resultsShared.getHearing().getCourtCentre());
+
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
                         prosecutionCases
-                                .forEach(prosecutionCase ->
-                                        prosecutionCase.getDefendants().forEach(defendant ->
-                                                {
-                                                    final UUID caseId = prosecutionCase.getId();
-                                                    final UUID defendantId = defendant.getId();
-                                                    final List<UUID> offenceIds = defendant.getOffences().stream().map(Offence::getId).collect(toList());
-                                                    final Map<UUID, OffenceResult> offenceResultMap = mapOffenceWithOffenceResult(event, defendant.getOffences(), resultsShared);
-                                                    updateTheDefendantsCase(event, resultsShared.getHearing().getId(), caseId, defendantId, offenceIds, offenceResultMap);
-                                                }
-                                        )
+                                .forEach(prosecutionCase -> {
+                                            populateProsecutorInformation(event, prosecutionCase.getProsecutionCaseIdentifier());
+                                            prosecutionCase.getDefendants().forEach(defendant ->
+                                                    {
+                                                        final UUID caseId = prosecutionCase.getId();
+                                                        final UUID defendantId = defendant.getId();
+                                                        final List<UUID> offenceIds = defendant.getOffences().stream().map(Offence::getId).collect(toList());
+                                                        final Map<UUID, OffenceResult> offenceResultMap = mapOffenceWithOffenceResult(event, defendant.getOffences(), resultsShared);
+                                                        updateTheDefendantsCase(event, resultsShared.getHearing().getId(), caseId, defendantId, offenceIds, offenceResultMap);
+                                                    }
+                                            );
+                                        }
                                 ));
 
 
@@ -128,40 +123,10 @@ public class PublishResultsEventProcessor {
             // invoke command (resultsShared)
             updateDefendantWithApplicationDetailsDelegate.execute(sender, event, resultsShared);
         }
-
         if (hearing.getProsecutionCases() != null || courtApplications != null) {
-            final HearingAdjourned hearingAdjourned = adjournHearingDelegate.execute(resultsShared, event);
-
-            final ResultsShared resultsSharedFiltered = resultsSharedFilter.filterTargets(resultsShared, t -> t.getApplicationId() == null);
-
-            if (!resultsSharedFiltered.getTargets().isEmpty()) {
-                final List<Now> nows = nowsGenerator.createNows(event, resultsSharedFiltered, hearingAdjourned);
-
-                final Map<UUID, List<Now>> nowsGroupByDefendant = nows.stream().collect(Collectors.groupingBy(Now::getDefendantId));
-
-                nowsGroupByDefendant.forEach((defendant, nowsList) -> {
-
-                    if (!nowsList.isEmpty()) {
-
-                        final CreateNowsRequest nowsRequest = nowsDelegate.generateNows(event, nowsList, resultsSharedFiltered);
-
-                        final Set<UUID> nowTypeIds = nowsRequest.getNows().stream()
-                                .filter(this::isFinancialNow)
-                                .map(Now::getNowsTypeId)
-                                .collect(Collectors.toSet());
-
-                        final List<Target> targets = resultsShared.getTargets();
-
-                        processOrderWithNonFinancial(event, nowsRequest, targets);
-
-                        processOrderWithFinancialPenaltyAndAttachmentOfEarnings(event, nowsRequest, nowTypeIds, targets);
-
-                        processOrderWithFinancial(event, nowsRequest, nowTypeIds, targets);
-
-                    }
-                });
-            }
+            adjournHearingDelegate.execute(resultsShared, event);
         }
+
         LOGGER.info("requested target size {}, saved target size {}", resultsShared.getTargets().size(), resultsShared.getSavedTargets().size());
         final List<UUID> requestedTargetIds = resultsShared.getTargets().stream().map(Target::getTargetId).collect(Collectors.toList());
         final List<Target> addSavedTargets = resultsShared.getSavedTargets().stream().filter(value -> !requestedTargetIds.contains(value.getTargetId())).collect(Collectors.toList());
@@ -170,11 +135,6 @@ public class PublishResultsEventProcessor {
         publishResultsDelegate.shareResults(event, sender, resultsShared);
 
         updateResultLineStatusDelegate.updateResultLineStatus(sender, event, resultsShared);
-    }
-
-    private boolean isFinancialNow(Now now) {
-        return now.getNowsTypeId().equals(NOTICE_OF_FINANCIAL_PENALTY_NOW_DEFINITION_ID) ||
-                now.getNowsTypeId().equals(ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID);
     }
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
@@ -279,69 +239,56 @@ public class PublishResultsEventProcessor {
         return category;
     }
 
-
-    private void processOrderWithFinancialPenaltyAndAttachmentOfEarnings(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds,
-                                                                         final List<Target> targets) {
-
-        final boolean hasOrderWithFinancialPenaltyAndAttachmentOfEarnings = nowTypeIds.size() == 2;
-
-        if (hasOrderWithFinancialPenaltyAndAttachmentOfEarnings) {
-
-            final List<Now> financialPenaltyWithAttachmentOfEarningsOrder = nowsRequest.getNows()
-                    .stream()
-                    .filter(this::isFinancialNow)
-                    .collect(Collectors.toList());
-
-            nowsDelegate.sendPendingNows(sender, event, createNowsRequest(nowsRequest, financialPenaltyWithAttachmentOfEarningsOrder), targets);
+    private void populateProsecutorInformation(final JsonEnvelope context, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
+        final Prosecutor prosecutor = referenceDataService.getProsecutorById(context, prosecutionCaseIdentifier.getProsecutionAuthorityId());
+        prosecutionCaseIdentifier.setProsecutionAuthorityName(prosecutor.getFullName());
+        prosecutionCaseIdentifier.setProsecutionAuthorityOUCode(prosecutor.getOucode());
+        prosecutionCaseIdentifier.setMajorCreditorCode(prosecutor.getMajorCreditorCode());
+        if (nonNull(prosecutor.getAddress())) {
+            prosecutionCaseIdentifier.setAddress(getProsecutorAddress(prosecutor));
+        }
+        if (nonNull(prosecutor.getInformantEmailAddress())) {
+            prosecutionCaseIdentifier.setContact(getProsecutorContact(prosecutor));
         }
     }
 
-    private void processOrderWithFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest, final Set<UUID> nowTypeIds,
-                                           final List<Target> targets) {
-
-        final boolean hasOrderWithFinancialPenaltyAndAttachmentOfEarnings = nowTypeIds.size() == 2;
-
-        List<Now> nowsPendingWithFinancialImposition;
-
-        if (hasOrderWithFinancialPenaltyAndAttachmentOfEarnings) {
-
-            nowsPendingWithFinancialImposition = nowsRequest.getNows()
-                    .stream()
-                    .filter(now -> nonNull(now.getFinancialOrders()) && nonNull(now.getFinancialOrders().getAccountReference()))
-                    .filter(now -> !nowTypeIds.contains(now.getNowsTypeId()))
-                    .collect(Collectors.toList());
-        } else {
-
-            nowsPendingWithFinancialImposition = nowsRequest.getNows().stream()
-                    .filter(now -> nonNull(now.getFinancialOrders()) && nonNull(now.getFinancialOrders().getAccountReference()))
-                    .collect(Collectors.toList());
-        }
-
-        if (!nowsPendingWithFinancialImposition.isEmpty()) {
-            nowsDelegate.sendPendingNows(sender, event, createNowsRequest(nowsRequest, nowsPendingWithFinancialImposition), targets);
-        }
+    private Address getProsecutorAddress(Prosecutor prosecutor) {
+        final uk.gov.justice.hearing.courts.referencedata.Address prosecutorAddress = prosecutor.getAddress();
+        return Address.address()
+                .withAddress1(prosecutorAddress.getAddress1())
+                .withAddress2(prosecutorAddress.getAddress2())
+                .withAddress3(prosecutorAddress.getAddress3())
+                .withAddress4(prosecutorAddress.getAddress4())
+                .withAddress5(prosecutorAddress.getAddress5())
+                .withPostcode(prosecutorAddress.getPostcode())
+                .build();
     }
 
-    private void processOrderWithNonFinancial(final JsonEnvelope event, final CreateNowsRequest nowsRequest,
-                                              final List<Target> targets) {
-
-        final List<Now> nowsToSendDirect = nowsRequest.getNows().stream()
-                .filter(now -> isNull(now.getFinancialOrders())
-                        || isNull(now.getFinancialOrders().getAccountReference()))
-                .filter(now -> !isFinancialNow(now)) //attachment of earnings now.getFinancialOrders() is null but is financial
-                .collect(toList());
-
-        if (!nowsToSendDirect.isEmpty()) {
-            nowsDelegate.sendNows(sender, event, createNowsRequest(nowsRequest, nowsToSendDirect), targets);
-        }
+    private ContactNumber getProsecutorContact(Prosecutor prosecutor) {
+        return ContactNumber.contactNumber()
+                .withPrimaryEmail(prosecutor.getInformantEmailAddress())
+                .build();
     }
 
-    private CreateNowsRequest createNowsRequest(final CreateNowsRequest nowsRequest, final List<Now> nowList) {
-        return new CreateNowsRequest(
-                nowsRequest.getCourtClerk(),
-                nowsRequest.getHearing(),
-                nowsRequest.getNowTypes(),
-                nowList,
-                nowsRequest.getSharedResultLines());
+    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre) {
+        final UUID courtCentreId = courtCentre.getId();
+        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId);
+        courtCentre.setLja(ljaDetails);
+    }
+
+    private void setCourtCentreOrganisationalUnitInfo(final JsonEnvelope context, final CourtCentre courtCentre) {
+        final OrganisationalUnit organisationalUnit = referenceDataService.getOrganisationUnitById(context, courtCentre.getId());
+        courtCentre.setCode(organisationalUnit.getOucode());
+        if(nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh())  {
+            courtCentre.setWelshName(organisationalUnit.getOucodeL3WelshName());
+            courtCentre.setWelshCourtCentre(organisationalUnit.getIsWelsh());
+            courtCentre.setWelshAddress(Address.address()
+                    .withAddress1(organisationalUnit.getWelshAddress1())
+                    .withAddress2(organisationalUnit.getWelshAddress2())
+                    .withAddress3(organisationalUnit.getWelshAddress3())
+                    .withAddress4(organisationalUnit.getWelshAddress4())
+                    .withAddress5(organisationalUnit.getWelshAddress5())
+                    .withPostcode(organisationalUnit.getPostcode()).build());
+        }
     }
 }

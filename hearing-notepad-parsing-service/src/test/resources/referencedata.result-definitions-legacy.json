@@ -13,6 +13,8 @@
       "alwaysPublished": true,
       "urgent": true,
       "d20": true,
+      "publishedForNows": true,
+      "rollUpPrompts": true,
       "wordGroups": [
         {
           "wordGroup": [

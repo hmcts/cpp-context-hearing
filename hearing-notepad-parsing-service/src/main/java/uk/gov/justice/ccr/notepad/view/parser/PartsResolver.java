@@ -1,59 +1,59 @@
 package uk.gov.justice.ccr.notepad.view.parser;
 
-
-import static com.google.common.collect.Lists.newLinkedList;
-
 import uk.gov.justice.ccr.notepad.view.Part;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class PartsResolver {
 
-    private final List<Part> parts = newLinkedList();
-    private final StringBuilder stringBuilder = new StringBuilder();
-    private boolean ignorePartHavingSquareBracket;
+    public static final char SQUARE_BRACKET_OPEN_CHAR = '[';
+    public static final char SQUARE_BRACKET_CLOSE_CHAR = ']';
+    public static final char SPACE_CHAR = ' ';
 
     public List<Part> getParts(final String line) {
-        Stream<Character> stream = amendBlankSpaceInTheEnd(line).chars().mapToObj(i -> (char) i);
-        stream.map(Character::charValue).forEach(this::resolvePart);
+        final List<Part> parts = new ArrayList<>();
+        final StringBuilder stringBuilder = new StringBuilder();
+        final char[] charArray = line.trim().toCharArray();
+        boolean squareBracketOpened = false;
+        int indexOfChar = 0;
+
+        for (final Character character : charArray) {
+            ++indexOfChar;
+            if (charArray.length == indexOfChar) {
+                stringBuilder.append(character);
+                addPart(parts, stringBuilder);
+                break;
+            }
+            if (character.equals(SQUARE_BRACKET_OPEN_CHAR)) {
+                stringBuilder.append(character);
+                squareBracketOpened = true;
+            } else if (character.equals(SQUARE_BRACKET_CLOSE_CHAR)) {
+                stringBuilder.append(character);
+                if (squareBracketOpened) {
+                    addPart(parts, stringBuilder);
+                    squareBracketOpened = false;
+                }
+            } else if (character.equals(SPACE_CHAR)) {
+                if (squareBracketOpened) {
+                    stringBuilder.append(character);
+                } else {
+                    addPart(parts, stringBuilder);
+                }
+            } else {
+                stringBuilder.append(character);
+            }
+        }
+
         return parts;
     }
 
-    private void resolvePart(final char c) {
-        if ('[' == c) {
-            appendStringBuilder(c);
-            ignorePartHavingSquareBracket = true;
-        } else if (']' == c) {
-            appendStringBuilder(c);
-            if (ignorePartHavingSquareBracket) {
-                addPart();
-                ignorePartHavingSquareBracket = false;
-            }
-        } else if (' ' == c) {
-            if (ignorePartHavingSquareBracket) {
-                appendStringBuilder(c);
-            } else if (stringBuilder.length() > 0) {
-                addPart();
-            }
-        } else {
-            appendStringBuilder(c);
+    private void addPart(List<Part> parts, StringBuilder stringBuilder) {
+        if (stringBuilder.length() > 0) {
+            Part part = new Part();
+            part.setValue(stringBuilder.toString());
+            parts.add(part);
+            stringBuilder.setLength(0);
         }
     }
-
-    private void addPart() {
-        Part part = new Part();
-        part.setValue(stringBuilder.toString().trim());
-        stringBuilder.setLength(0);
-        parts.add(part);
-    }
-
-    private void appendStringBuilder(final char c) {
-        stringBuilder.append(c);
-    }
-
-    private String amendBlankSpaceInTheEnd(final String line) {
-        return line.trim() + " ";
-    }
-
 }

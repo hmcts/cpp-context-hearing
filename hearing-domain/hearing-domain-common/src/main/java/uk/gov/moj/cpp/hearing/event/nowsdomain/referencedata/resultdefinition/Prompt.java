@@ -44,6 +44,8 @@ public class Prompt {
 
     private boolean isAvailableForCourtExtract;
 
+    private Boolean hidden;
+
     public static Prompt prompt() {
         return new Prompt();
     }
@@ -189,6 +191,14 @@ public class Prompt {
 
     public Prompt setDurationSequence(final Integer durationSequence) {
         this.durationSequence = durationSequence;
+        return this;
+    }
+    public Boolean isHidden() {
+        return this.hidden;
+    }
+
+    public Prompt setHidden(final Boolean hidden) {
+        this.hidden = hidden;
         return this;
     }
 }

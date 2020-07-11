@@ -166,7 +166,6 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
                 .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
-
         final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.CROWN, null);
@@ -220,22 +219,18 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
                 .filter(rl -> resultDefinition.getId().equals(rl.getResultDefinitionId()))
                 .findFirst();
 
-        if (resultLine.isPresent()) {
-            final List<JudicialResultPrompt> judicialResultPrompts = resultLine.get().getPrompts().stream().map(prompt -> {
-                        final Optional<String> referenceOptional = resultDefinition.getPrompts().stream().filter(p -> p.getId().equals(prompt.getId())).findFirst().map(
-                                Prompt::getReference);
-                        return JudicialResultPrompt.judicialResultPrompt()
-                                .withLabel(prompt.getLabel())
-                                .withValue(prompt.getValue())
-                                .withPromptReference(referenceOptional.isPresent() ? referenceOptional.get() : DEFAULT_VALUE
-                                )
-                                .build();
-                    }
-            ).collect(toList());
-            return judicialResultPrompts;
-        }
+        return resultLine.map(line -> line.getPrompts().stream().map(prompt -> {
+                    final Optional<String> referenceOptional = resultDefinition.getPrompts().stream().filter(p -> p.getId().equals(prompt.getId())).findFirst().map(
+                            Prompt::getReference);
+                    return JudicialResultPrompt.judicialResultPrompt()
+                            .withLabel(prompt.getLabel())
+                            .withValue(prompt.getValue())
+                            .withPromptReference(referenceOptional.orElse(DEFAULT_VALUE)
+                            )
+                            .build();
+                }
+        ).collect(toList())).orElse(emptyList());
 
-        return emptyList();
     }
 
     private void assertValid(final Optional<NextHearing> nextHearingResult, final JurisdictionType jurisdictionType, final ZonedDateTime expectedListedStartDateTime) {

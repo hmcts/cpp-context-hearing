@@ -14,7 +14,6 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
-import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -47,7 +46,6 @@ public class HearingAggregateMomento implements Serializable {
     private List<UUID> adjournedHearingIds = new ArrayList<>();
     private Map<UUID, Target> targets = new HashMap<>();
     private Map<UUID, LocalDate> convictionDates = new HashMap<>();
-    private List<PendingNowsRequested> hearingNowsMapper = new ArrayList<>();
     private Map<UUID, Target> savedTargets = new HashMap<>();
     private boolean published = false;
 
@@ -133,10 +131,6 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setConvictionDates(final Map<UUID, LocalDate> convictionDates) {
         this.convictionDates = convictionDates;
-    }
-
-    public List<PendingNowsRequested> getHearingNowsMapper() {
-        return this.hearingNowsMapper;
     }
 
     public Map<UUID, RespondentCounsel> getRespondentCounsels() {

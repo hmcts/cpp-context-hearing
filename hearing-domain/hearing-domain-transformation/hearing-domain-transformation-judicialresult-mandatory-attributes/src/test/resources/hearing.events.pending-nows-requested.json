@@ -1,0 +1,757 @@
+{
+  "createNowsRequest": {
+    "courtClerk": {
+      "firstName": "Erica",
+      "lastName": "Wilson",
+      "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+    },
+    "hearing": {
+      "courtCentre": {
+        "address": {
+          "address1": "The Court House",
+          "address2": "London Road",
+          "address3": "Basingstoke",
+          "address4": "Hants.",
+          "address5": "",
+          "postcode": "RG21 4AB"
+        },
+        "id": "4b6185e1-92f2-3634-b749-87d2fcadf1c8",
+        "name": "Basingstoke Magistrates' Court",
+        "roomId": "b74aeabf-702d-359c-b12d-8c215811f793",
+        "roomName": "Courtroom 01"
+      },
+      "defendantAttendance": [
+        {
+          "attendanceDays": [
+            {
+              "day": "2020-02-29",
+              "attendanceType": "IN_PERSON"
+            }
+          ],
+          "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e"
+        }
+      ],
+      "hasSharedResults": true,
+      "hearingDays": [
+        {
+          "listedDurationMinutes": 10,
+          "listingSequence": 0,
+          "sittingDay": "2020-02-29T11:00:00.000Z"
+        }
+      ],
+      "hearingLanguage": "ENGLISH",
+      "id": "40b4b58e-205b-4f2c-b6ef-4cfbbc40aebe",
+      "jurisdictionType": "MAGISTRATES",
+      "prosecutionCases": [
+        {
+          "caseStatus": "SJP_REFERRAL",
+          "defendants": [
+            {
+              "id": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+              "masterDefendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+              "isYouth": false,
+              "offences": [
+                {
+                  "allocationDecision": {
+                    "allocationDecisionDate": "2020-02-29",
+                    "motReasonCode": "b8c37e33-defd-351c-b91e-1e03e51657da",
+                    "motReasonDescription": "Summary-only offence",
+                    "motReasonId": "b8c37e33-defd-351c-b91e-1e03e51657da",
+                    "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+                    "originatingHearingId": "40b4b58e-205b-4f2c-b6ef-4cfbbc40aebe",
+                    "sequenceNumber": 90
+                  },
+                  "chargeDate": "2019-11-17",
+                  "convictionDate": "2020-02-29",
+                  "count": 1,
+                  "id": "f4109656-80b8-4273-afe6-9eb12557cea2",
+                  "judicialResults": [
+                    {
+                      "category": "ANCILLARY",
+                      "cjsCode": "4506",
+                      "courtClerk": {
+                        "firstName": "Erica",
+                        "lastName": "Wilson",
+                        "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+                      },
+                      "isAdjournmentResult": false,
+                      "isAvailableForCourtExtract": true,
+                      "isConvictedResult": false,
+                      "isDeleted": false,
+                      "isFinancialResult": false,
+                      "judicialResultId": "bf251cb6-edb5-4663-8f69-428cd0ec2684",
+                      "label": "Adjournment",
+                      "lastSharedDateTime": "2020-02-28",
+                      "orderedDate": "2020-02-28",
+                      "orderedHearingId": "3f01634a-8314-4c07-81a5-851aa2ff34f6",
+                      "rank": 48600,
+                      "usergroups": [],
+                      "welshLabel": "Gohiriad",
+                      "judicialResultTypeId": "d278650c-e429-11e8-9f32-f2801f1b9fd1",
+                      "urgent": false,
+                      "d20": false,
+                      "resultText": "NA",
+                      "terminatesOffenceProceedings": false,
+                      "lifeDuration": false,
+                      "publishedAsAPrompt": false,
+                      "excludedFromResults": false,
+                      "alwaysPublished": false
+                    },
+                    {
+                      "category": "ANCILLARY",
+                      "courtClerk": {
+                        "firstName": "Erica",
+                        "lastName": "Wilson",
+                        "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+                      },
+                      "isAdjournmentResult": false,
+                      "isAvailableForCourtExtract": true,
+                      "isConvictedResult": false,
+                      "isDeleted": false,
+                      "isFinancialResult": false,
+                      "judicialResultId": "a8ff0dd0-c9c4-4aa4-ab2f-678fac066980",
+                      "judicialResultPrompts": [
+                        {
+                          "label": "Reason for adjournment",
+                          "promptReference": "NSR",
+                          "promptSequence": 100,
+                          "usergroups": [
+                            "Court Clerks",
+                            "Legal Advisers"
+                          ],
+                          "value": "thiouaoifhaosuhkuahkjahajkhcvajkhcjkasbhcahjkchjakscb",
+                          "welshLabel": "",
+                          "judicialResultPromptTypeId": "28a271c5-aff0-4e60-b599-88e441960699",
+                          "courtExtract": "Y"
+                        }
+                      ],
+                      "label": "Adjournment reason: Non-standard reason",
+                      "lastSharedDateTime": "2020-02-28",
+                      "orderedDate": "2020-02-28",
+                      "orderedHearingId": "3f01634a-8314-4c07-81a5-851aa2ff34f6",
+                      "rank": 11300,
+                      "usergroups": [],
+                      "welshLabel": "Rheswm dros ohirio: Rheswm ansafonol",
+                      "judicialResultTypeId": "9fd6a4ef-1055-4e54-b035-f1130a524388",
+                      "urgent": false,
+                      "d20": false,
+                      "resultText": "NA",
+                      "terminatesOffenceProceedings": false,
+                      "lifeDuration": false,
+                      "publishedAsAPrompt": false,
+                      "excludedFromResults": false,
+                      "alwaysPublished": false
+                    },
+                    {
+                      "category": "ANCILLARY",
+                      "courtClerk": {
+                        "firstName": "Erica",
+                        "lastName": "Wilson",
+                        "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+                      },
+                      "isAdjournmentResult": false,
+                      "isAvailableForCourtExtract": true,
+                      "isConvictedResult": false,
+                      "isDeleted": false,
+                      "isFinancialResult": false,
+                      "judicialResultId": "7d63cb9c-36b5-4057-a3e3-7cf01ce7a080",
+                      "judicialResultPrompts": [
+                        {
+                          "label": "Date of hearig",
+                          "promptReference": "HDATE",
+                          "promptSequence": 100,
+                          "usergroups": [
+                            "Court Clerks",
+                            "Legal Advisers"
+                          ],
+                          "value": "29 Feb 2020",
+                          "welshLabel": "",
+                          "judicialResultPromptTypeId": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+                          "courtExtract": "Y"
+                        },
+                        {
+                          "label": "Time of hearing",
+                          "promptReference": "HTIME",
+                          "promptSequence": 200,
+                          "usergroups": [
+                            "Court Clerks",
+                            "Legal Advisers"
+                          ],
+                          "value": "11:00",
+                          "welshLabel": "",
+                          "judicialResultPromptTypeId": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+                          "courtExtract": "Y"
+                        },
+                        {
+                          "label": "Courthouse name",
+                          "promptReference": "HCHOUSE",
+                          "promptSequence": 400,
+                          "usergroups": [
+                            "Court Clerks",
+                            "Legal Advisers"
+                          ],
+                          "value": "Basingstoke Magistrates' Court",
+                          "welshLabel": "",
+                          "judicialResultPromptTypeId": "66868c04-72c4-46d9-a4fc-860a82107475",
+                          "courtExtract": "Y"
+                        },
+                        {
+                          "label": "Hearing type",
+                          "promptReference": "HTYPE",
+                          "promptSequence": 500,
+                          "usergroups": [
+                            "Court Clerks",
+                            "Legal Advisers"
+                          ],
+                          "value": "Trial",
+                          "welshLabel": "",
+                          "judicialResultPromptTypeId": "c1116d12-dd35-4171-807a-2cb845357d22",
+                          "courtExtract": "Y"
+                        },
+                        {
+                          "label": "Estimated duration",
+                          "promptReference": "HEST",
+                          "promptSequence": 600,
+                          "usergroups": [
+                            "Court Clerks",
+                            "Legal Advisers"
+                          ],
+                          "value": "10 Minutes",
+                          "welshLabel": "",
+                          "judicialResultPromptTypeId": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+                          "courtExtract": "Y"
+                        }
+                      ],
+                      "label": "Next hearing in magistrates' court",
+                      "lastSharedDateTime": "2020-02-28",
+                      "orderedDate": "2020-02-28",
+                      "orderedHearingId": "3f01634a-8314-4c07-81a5-851aa2ff34f6",
+                      "rank": 48500,
+                      "usergroups": [],
+                      "welshLabel": "Ni wnaeth y Llys barhau â’r treial yn absenoldeb y diffynnydd",
+                      "judicialResultTypeId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+                      "urgent": false,
+                      "d20": false,
+                      "resultText": "NA",
+                      "terminatesOffenceProceedings": false,
+                      "lifeDuration": false,
+                      "publishedAsAPrompt": false,
+                      "excludedFromResults": false,
+                      "alwaysPublished": false
+                    }
+                  ],
+                  "modeOfTrial": "Summary",
+                  "notifiedPlea": {
+                    "notifiedPleaDate": "2020-02-28",
+                    "notifiedPleaValue": "NO_NOTIFICATION",
+                    "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2"
+                  },
+                  "offenceCode": "TR11013",
+                  "offenceDefinitionId": "2256cd16-1b81-4f3a-8267-91d4c342c66e",
+                  "offenceLegislation": "Contrary to byelaws 7(2)(iii) and 23 of the Transport for London Railway Byelaws made under paragraph 26 of Schedule 11 to the Greater London Authority Act 1999 and confirmed under section 67 of the Transport Act 1962.",
+                  "offenceLegislationWelsh": "",
+                  "offenceTitle": "Tout for / solicit money / reward without permission on the Transport for London regional railway network",
+                  "offenceTitleWelsh": "",
+                  "orderIndex": 1,
+                  "plea": {
+                    "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+                    "originatingHearingId": "40b4b58e-205b-4f2c-b6ef-4cfbbc40aebe",
+                    "pleaDate": "2020-02-29",
+                    "pleaValue": "NOT_GUILTY"
+                  },
+                  "proceedingsConcluded": false,
+                  "startDate": "2019-11-10",
+                  "verdict": {
+                    "jurors": {
+                      "numberOfJurors": 12,
+                      "numberOfSplitJurors": 0,
+                      "unanimous": true
+                    },
+                    "lesserOrAlternativeOffence": {
+                      "offenceCode": "TR11013",
+                      "offenceDefinitionId": "2256cd16-1b81-4f3a-8267-91d4c342c66e",
+                      "offenceLegislation": "Contrary to byelaws 7(2)(iii) and 23 of the Transport for London Railway Byelaws made under paragraph 26 of Schedule 11 to the Greater London Authority Act 1999 and confirmed under section 67 of the Transport Act 1962.",
+                      "offenceTitle": "Tout for / solicit money / reward without permission on the Transport for London regional railway network"
+                    },
+                    "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+                    "originatingHearingId": "40b4b58e-205b-4f2c-b6ef-4cfbbc40aebe",
+                    "verdictDate": "2020-02-29",
+                    "verdictType": {
+                      "category": "Guilty",
+                      "categoryType": "GUILTY_BY_JURY_CONVICTED",
+                      "id": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                    }
+                  },
+                  "wording": "On 02/07/2015 At threadneedle street EC2 Being a passenger on a Public service Vehicle operated on behalf of London Bus Services Limited being used for the carriage of passengers at separate fares where the vehicle was being operated by a Driver without a Conductor did not as directed by the Driver an Inspector or a Notice displayed on the vehicle pay the fare for the journey in accordance with the direction "
+                }
+              ],
+              "personDefendant": {
+                "personDetails": {
+                  "address": {
+                    "address1": "Flat 1, Armageddon House",
+                    "address2": "13 Old Road",
+                    "address3": "Giggleswick",
+                    "address4": "Merton",
+                    "address5": "line5",
+                    "postcode": "CR0 1XG"
+                  },
+                  "dateOfBirth": "1980-11-25",
+                  "documentationLanguageNeeds": "ENGLISH",
+                  "firstName": "Amanvir",
+                  "gender": "FEMALE",
+                  "lastName": "Greenwood",
+                  "nationalityDescription": "Unknown",
+                  "nationalityId": "22ef7a73-df50-4349-8c72-ca3b9ace6363",
+                  "title": "MR"
+                }
+              },
+              "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+              "courtProceedingsInitiated": "2020-02-28T15:36:25.565Z"
+            }
+          ],
+          "id": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+          "initiationCode": "J",
+          "prosecutionCaseIdentifier": {
+            "prosecutionAuthorityCode": "TFL",
+            "prosecutionAuthorityId": "31af405e-7b60-4dd8-a244-c24c2d3fa595",
+            "prosecutionAuthorityReference": "TFL34436PFKYP"
+          },
+          "statementOfFacts": "An incident took place at GREEN PARK station whereby you were spoken to by a member of London Underground staff regarding your train journey and the associated fare.The facts of this incidents are now being considered and I must advise you that legal proceedings may be initiated against you regarding this matter in accordance with the LU prosecution policy"
+        }
+      ],
+      "type": {
+        "description": "Trial",
+        "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+      }
+    },
+    "nowTypes": [
+      {
+        "description": "Notice of Financial Penalty",
+        "id": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "jurisdiction": "B",
+        "priority": "0",
+        "rank": 30,
+        "requiresBulkPrinting": false,
+        "requiresEnforcement": false,
+        "staticText": "<h3>If the court has made a Deduction from Benefits order or an Attachment of Earnings order, please see further down.</h3> <h3>How to pay</h3> <p>Allow 5 days for payment to reach us.</p> <p><strong>Online:</strong> <a href=\"http://www.gov.uk/pay-court-fine-online\">www.gov.uk/pay-court-fine-online</a></p> <p><strong>By phone:</strong> 0300 790 9901</p> <p><strong>When paying online or by phone:</strong></p> <ul> <li>you can pay 24 hours a day with a credit or debit card (Visa, Mastercard or Maestro)</li> <li>you must quote your division number and account number as stated at the top of this notice</li> <li>you&rsquo;ll be given an authorisation number when you pay - keep this as proof along with the date and amount. The court won&rsquo;t issue you a receipt.</li> </ul> <p><strong>If you are granted time to pay, you can either:</strong></p> <ul> <li>ask for a payment card which you can use at a Post Office or PayPoint Outlets</li> <li>set up a direct debit</li> </ul> <p><strong>Paying other parties</strong></p> <p>You can only make your payment to HM Courts and Tribunals Service.</p> <p>If you pay anyone else, for example, the prosecutor or victims, there&rsquo;ll be no record and we may have to take action against you for non-payment.</p> <p>We&rsquo;ll pay any amounts owed to other parties once we&rsquo;ve received your payment.</p> <p><strong>Fraud and scams</strong></p> <p>There are several fake websites offering to let you pay your court fines, often with a discount.</p> <p>You can only use the official website, or telephone line, as above. If you use any other site or number to pay, we can&rsquo;t accept it and you&rsquo;ll still be liable to pay the debt.</p> <p>&nbsp;</p> <p><strong>For any questions NOT relating to financial penalties</strong></p> <p>Contact the Service Centre:</p><p><strong>Telephone:</strong> 0300 303 0656 Monday to Friday 9am to 5pm</p> <p>&nbsp;</p> <p><strong>If you&rsquo;re having difficulty paying or to discuss alternative ways to pay:</strong></p> <p>Contact the Fines Team:</p>",
+        "subTemplateName": "Noticefine",
+        "templateName": "NoticeOrderWarrants",
+        "welshDescription": "Rhybudd o gosb ariannol",
+        "welshStaticText": "<h3>Os yw&rsquo;r llys wedi gwneud Gorchymyn Didynnu o Fudd-daliadau neu Orchymyn Atafaelu Enillion, parhewch i ddarllen.</h3> <h3>Sut i dalu</h3> <p>Gadewch 5 diwrnod i&rsquo;r taliad ein cyrraedd.</p> <p><strong>Ar-lein:</strong> <a href=\"http://www.gov.uk/talu-dirwy-llys-ar-lein\">www.gov.uk/talu-dirwy-llys-ar-lein</a></p> <p><strong>Ff&ocirc;n:</strong> 0300 790 9901</p> <p><strong>Pan fyddwch yn talu ar-lein neu dros y ff&ocirc;n:</strong></p> <ul> <li>gallwch dalu 24 awr y dydd gyda cherdyn credyd neu ddebyd (Visa, Mastercard neu Maestro)</li> <li>rhaid ichi ddyfynnu eich rhif adran a'ch rhif cyfrif fel y&rsquo;u nodwyd ar frig y rhybudd hwn</li> <li>rhoddir rhif awdurdodi i chi pan fyddwch yn talu &ndash; cadwch hwn fel prawf yn ogystal &acirc;&rsquo;r dyddiad a&rsquo;r swm. Ni fydd y llys yn rhoi derbynneb i chi.</li> </ul> <p><strong>Os rhoddir rhagor o amser i chi dalu, gallwch naill ai:</strong></p> <ul> <li>ofyn am gerdyn talu y gallwch ei ddefnyddio yn Swyddfa&rsquo;r Post neu fan PayPoint</li> <li>trefnu debyd uniongyrchol</li> </ul> <p><strong>Talu part&iuml;on eraill</strong></p> <p>Gallwch ond wneud eich taliad i Wasanaeth Llysoedd a Thribiwnlysoedd EM.</p> <p>Os byddwch yn talu rhywun arall, er enghraifft, yr erlynydd neu&rsquo;r dioddefwyr, ni fydd yna gofnod o hyn ac efallai y bydd rhaid i ni gymryd camau yn eich erbyn am beidio &acirc; thalu.</p> <p>Byddwn yn talu unrhyw swm sy&rsquo;n ddyledus i bart&iuml;on eraill unwaith y byddwn wedi cael eich taliad.</p> <p><strong>Twyll a sgamiau</strong></p> <p>Mae yna nifer o wefannau ffug sy&rsquo;n cynnig cyfle i chi dalu eich dirwyon llys, yn aml gyda disgownt.</p> <p>Gallwch ond ddefnyddio&rsquo;r wefan neu&rsquo;r linell ff&ocirc;n swyddogol, fel a nodwyd uchod. Os byddwch yn defnyddio unrhyw wefan neu rif arall i dalu, ni allwn ei dderbyn a bydd rhaid i chi dal dalu'r ddyled.</p> <p>&nbsp;</p> <p><strong>Ar gyfer unrhyw gwestiynau NAD YDYNT yn ymwneud &acirc; chosbau ariannol </strong></p> <p>Cysylltwch &acirc;&rsquo;r Ganolfan Gyswllt:</p> <p><strong>Rhif ff&ocirc;n:</strong> 0300 303 0656 (dydd Llun i ddydd Gwener, 9am to 5pm)</p> <p>&nbsp;</p> <p><strong>Os ydych yn cael anhawster talu neu os ydych eisiau trafod ffyrdd gwahanol o dalu:</strong></p> <p>Cysylltwch &acirc;&rsquo;r T&icirc;m Dirwyon</p>"
+      }
+    ],
+    "nows": [
+      {
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "documentationLanguage": "ENGLISH",
+        "financialOrders": {
+          "accountReference": "TBC",
+          "isCrownCourt": false,
+          "paymentTerms": "Date to pay in full by 27-Mar-2020",
+          "totalAmountImposed": "332.00",
+          "totalBalance": "332.00"
+        },
+        "id": "50c9e0a6-c8fe-45d2-9d34-83684b10d747",
+        "ljaDetails": {
+          "accountDivisionCode": "77",
+          "bacsAccountNumber": "27049094",
+          "bacsBankName": "HMCTS/STH Hampshire",
+          "bacsSortCode": "56-00-33",
+          "enforcementAddress": {
+            "address1": "LCCC Enforcement Unit",
+            "address2": "P.O. Box 31089",
+            "address3": "London",
+            "postcode": "SW1P 3WT"
+          },
+          "enforcementEmail": "LCCCCollectionUnit@hmcts.gsi.gov.uk",
+          "enforcementPhoneNumber": "0300 123 9252",
+          "ljaCode": "1305",
+          "ljaName": "North Hampshire Magistrates' Court"
+        },
+        "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+        "referenceDate": "2020-02-29",
+        "requestedMaterials": [
+          {
+            "description": "Notice of Financial Penalty",
+            "isAmended": false,
+            "isRemotePrintingRequired": false,
+            "key": {
+              "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+              "hearingId": "40b4b58e-205b-4f2c-b6ef-4cfbbc40aebe",
+              "nowsTypeId": "66cd749a-1d51-11e8-accf-0ed5f89f718b",
+              "usergroups": [
+                "Court Clerks",
+                "Legal Advisers"
+              ]
+            },
+            "materialId": "7491f026-5e06-41db-93e8-026e2f1adb22",
+            "nowResults": [
+              {
+                "promptRefs": [
+                  "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+                  "af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe",
+                  "f6f953b6-e369-11e8-9f32-f2801f1b9fd1",
+                  "043faecf-e97c-4daf-9763-4b755d941b45",
+                  "cc1c2471-c4fd-44a2-886a-ec4d41aa1bdd",
+                  "2d1dab36-82ae-4a4c-9566-cc61a14dc1f5",
+                  "41576571-5573-498b-a9e9-eee24f7a67fa",
+                  "48edfdeb-6bd8-46be-bf9e-dda4c48051c4",
+                  "0ba8d27d-ce53-4e6b-b28d-59bf0a667a46"
+                ],
+                "sequence": 6800,
+                "sharedResultId": "615c887e-8ada-40a0-a434-174f21209815"
+              },
+              {
+                "nowVariantResultText": {
+                  "collOrd": "<h4>COLLECTION ORDER</h4> <p><strong>A collection order has been made, which means the court has powers to collect the money</strong></p> <p><strong>See above for how to pay</strong></p> <p>If you don&rsquo;t pay, we may:</p> <ul> <li>take money from your earnings or benefits</li> <li>increase your fine</li> <li>issue a warrant to seize your possessions which will mean extra costs</li> <li>log this in the Register of Judgements, Orders and Fines, making it harder for you to get credit</li> <li>apply to the court for a warrant for your arrest to bring you to court</li> </ul> <p><strong>If you still don’t pay, you could be sent to prison for non-payment.</strong></p>",
+                  "collOrdWelsh": "<h4>GORCHYMYN CASGLU</h4><p><strong>Mae gorchymyn casglu wedi&rsquo;i wneud, sy&rsquo;n golygu fod gan y llys bwerau i gasglu&rsquo;r arian.</strong></p><p><strong>Gweler drosodd am sut i dalu</strong></p><p>Os na fyddwch yn talu, efallai y byddwn yn:</p><ul><li>cymryd arian o&rsquo;ch enillion neu fudd-daliadau</li><li>cynyddu eich dirwy</li><li>codi gwarant i atafaelu eich eiddo fydd yn golygu costau ychwanegol</li><li>cofnodi hwn ar y Gofrestr Dyfarniadau, Gorchmynion a Dirwyon, a fydd yn ei gwneud yn anoddach i chi gael credyd</li><li>gwneud cais i&rsquo;r llys am warant i&rsquo;ch arestio er mwyn eich cludo i&rsquo;r llys</li></ul><p><strong>Os byddwch dal ddim yn talu, gallech gael eich anfon i&rsquo;r carchar am beidio &acirc; thalu.</strong></p><p><strong>&nbsp;</strong></p>"
+                },
+                "promptRefs": [
+                  "6b36e5ff-e116-4dc3-b438-8c02d493959e",
+                  "369b6e22-4678-4b04-9fe9-5bb53bed5067",
+                  "dc44f589-6dd2-4a8d-9164-c1796c6b0e36",
+                  "16ade3fb-9f0f-4ce4-a6c8-fa96277e1519"
+                ],
+                "sequence": 38200,
+                "sharedResultId": "9e8773fe-e224-45c7-83a1-44d03ee50190"
+              },
+              {
+                "nowVariantResultText": {
+                  "fineBands": "<table width=\"95%\"> <tbody> <tr> <td width=\"120\"> <p><strong><em>Daily earnings</em></strong></p> </td> <td width=\"134\"> <p><strong><em>Weekly earnings</em></strong></p> </td> <td width=\"141\"> <p><strong><em>Monthly earnings</em></strong></p> </td> <td width=\"206\"> <p><strong><em>% to be deducted each time you&rsquo;re paid</em></strong></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;0.00 - &pound;8.00</em></p> </td> <td width=\"134\"> <p><em>&pound;0.00 - &pound;55.00</em></p> </td> <td width=\"141\"> <p><em>&pound;0.00 - &pound;220.00</em></p> </td> <td width=\"206\"> <p><em>0%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;8.01 - &pound;15.00</em></p> </td> <td width=\"134\"> <p><em>&pound;55.01 - &pound;100.00</em></p> </td> <td width=\"141\"> <p><em>&pound;220.01 - &pound;400.00</em></p> </td> <td width=\"206\"> <p><em>3%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;15.01 - &pound;20.00</em></p> </td> <td width=\"134\"> <p><em>&pound;100.01 - &pound;135.00</em></p> </td> <td width=\"141\"> <p><em>&pound;400.01 - &pound;540.00</em></p> </td> <td width=\"206\"> <p><em>5%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;20.01 - &pound;24.00</em></p> </td> <td width=\"134\"> <p><em>&pound;135.01 - &pound;165.00</em></p> </td> <td width=\"141\"> <p><em>&pound;540.01 - &pound;660.00</em></p> </td> <td width=\"206\"> <p><em>7%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;24.01 - &pound;38.00</em></p> </td> <td width=\"134\"> <p><em>&pound;165.01 - &pound;260.00</em></p> </td> <td width=\"141\"> <p><em>&pound;660.01 - &pound;1040.00</em></p> </td> <td width=\"206\"> <p><em>12%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;38.01 - &pound;53.00</em></p> </td> <td width=\"134\"> <p><em>&pound;260.01 - &pound;370.00</em></p> </td> <td width=\"141\"> <p><em>&pound;1040.01 - &pound;1480.00</em></p> </td> <td width=\"206\"> <p><em>17%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;53.01 or more</em></p> </td> <td width=\"134\"> <p><em>&pound;370.01 or more</em></p> </td> <td width=\"141\"> <p><em>&pound;1480.01 or more</em></p> </td> <td width=\"206\"> <p><em>17% of lowest amount shown here and 50% of anything over</em></p> </td> </tr> </tbody> </table>",
+                  "fineBandsWelsh": "<table width=\"95%\"> <tbody> <tr> <td width=\"120\"> <p><strong><em>Daily earnings</em></strong></p> </td> <td width=\"134\"> <p><strong><em>Weekly earnings</em></strong></p> </td> <td width=\"141\"> <p><strong><em>Monthly earnings</em></strong></p> </td> <td width=\"206\"> <p><strong><em>% to be deducted each time you&rsquo;re paid</em></strong></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;0.00 - &pound;8.00</em></p> </td> <td width=\"134\"> <p><em>&pound;0.00 - &pound;55.00</em></p> </td> <td width=\"141\"> <p><em>&pound;0.00 - &pound;220.00</em></p> </td> <td width=\"206\"> <p><em>0%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;8.01 - &pound;15.00</em></p> </td> <td width=\"134\"> <p><em>&pound;55.01 - &pound;100.00</em></p> </td> <td width=\"141\"> <p><em>&pound;220.01 - &pound;400.00</em></p> </td> <td width=\"206\"> <p><em>3%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;15.01 - &pound;20.00</em></p> </td> <td width=\"134\"> <p><em>&pound;100.01 - &pound;135.00</em></p> </td> <td width=\"141\"> <p><em>&pound;400.01 - &pound;540.00</em></p> </td> <td width=\"206\"> <p><em>5%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;20.01 - &pound;24.00</em></p> </td> <td width=\"134\"> <p><em>&pound;135.01 - &pound;165.00</em></p> </td> <td width=\"141\"> <p><em>&pound;540.01 - &pound;660.00</em></p> </td> <td width=\"206\"> <p><em>7%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;24.01 - &pound;38.00</em></p> </td> <td width=\"134\"> <p><em>&pound;165.01 - &pound;260.00</em></p> </td> <td width=\"141\"> <p><em>&pound;660.01 - &pound;1040.00</em></p> </td> <td width=\"206\"> <p><em>12%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;38.01 - &pound;53.00</em></p> </td> <td width=\"134\"> <p><em>&pound;260.01 - &pound;370.00</em></p> </td> <td width=\"141\"> <p><em>&pound;1040.01 - &pound;1480.00</em></p> </td> <td width=\"206\"> <p><em>17%</em></p> </td> </tr> <tr> <td width=\"120\"> <p><em>&pound;53.01 or more</em></p> </td> <td width=\"134\"> <p><em>&pound;370.01 or more</em></p> </td> <td width=\"141\"> <p><em>&pound;1480.01 or more</em></p> </td> <td width=\"206\"> <p><em>17% of lowest amount shown here and 50% of anything over</em></p> </td> </tr> </tbody> </table>"
+                },
+                "promptRefs": [
+                  "7cd1472f-2379-4f5b-9e67-98a43d86e122"
+                ],
+                "sequence": 6600,
+                "sharedResultId": "a6121dcc-30cc-4015-be8f-95506bb0689c"
+              },
+              {
+                "promptRefs": [
+                  "ee7d253a-c629-11e8-a355-529269fb1459",
+                  "a9ad5002-ea38-4374-a475-4b352cdfa207",
+                  "e57dd7e2-edbe-11e8-8eb2-f2801f1b9fd1"
+                ],
+                "sequence": 48700,
+                "sharedResultId": "6fae3074-bb8a-4c15-bccc-cb2174e2e8d9"
+              },
+              {
+                "promptRefs": [
+                  "629a971e-9d7a-4526-838d-0a4cb922b5cb"
+                ],
+                "sequence": 6400,
+                "sharedResultId": "7afdc2d3-d768-4ab7-bcb9-91afe372e69c"
+              },
+              {
+                "promptRefs": [
+                  "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+                  "22ebf965-8a1c-4229-9894-0df7f8117753",
+                  "043faecf-e97c-4daf-9763-4b755d941b45",
+                  "f6f953b6-e369-11e8-9f32-f2801f1b9fd1",
+                  "cc1c2471-c4fd-44a2-886a-ec4d41aa1bdd",
+                  "2d1dab36-82ae-4a4c-9566-cc61a14dc1f5",
+                  "41576571-5573-498b-a9e9-eee24f7a67fa",
+                  "48edfdeb-6bd8-46be-bf9e-dda4c48051c4",
+                  "0ba8d27d-ce53-4e6b-b28d-59bf0a667a46"
+                ],
+                "sequence": 48200,
+                "sharedResultId": "7a1f33bc-80f8-4ef1-9ffd-4405a56d891b"
+              }
+            ],
+            "nowVariantAddressee": {
+              "address": {
+                "address1": "Flat 1, Armageddon House",
+                "address2": "13 Old Road",
+                "address3": "Giggleswick",
+                "address4": "Merton",
+                "address5": "line5",
+                "postcode": "CR0 1XG"
+              },
+              "name": "Amanvir Greenwood"
+            },
+            "nowVariantDefendant": {
+              "address": {
+                "address1": "Flat 1, Armageddon House",
+                "address2": "13 Old Road",
+                "address3": "Giggleswick",
+                "address4": "Merton",
+                "address5": "line5",
+                "postcode": "CR0 1XG"
+              },
+              "dateOfBirth": "1980-11-25",
+              "name": "Amanvir Greenwood"
+            },
+            "status": "requesting",
+            "subTemplateName": "Noticefine",
+            "templateName": "NoticeOrderWarrants"
+          }
+        ]
+      }
+    ],
+    "sharedResultLines": [
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "id": "a6121dcc-30cc-4015-be8f-95506bb0689c",
+        "isAvailableForCourtExtract": true,
+        "label": "Fine",
+        "level": "OFFENCE",
+        "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+        "orderedDate": "2020-02-29",
+        "prompts": [
+          {
+            "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of fine",
+            "promptReference": "AOF",
+            "value": "100",
+            "welshValue": ""
+          }
+        ],
+        "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+        "welshLabel": "Dirwy"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "id": "7a1f33bc-80f8-4ef1-9ffd-4405a56d891b",
+        "isAvailableForCourtExtract": true,
+        "label": "Costs",
+        "level": "CASE",
+        "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+        "orderedDate": "2020-02-29",
+        "prompts": [
+          {
+            "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of costs",
+            "promptReference": "AOC",
+            "value": "200",
+            "welshValue": ""
+          }
+        ],
+        "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+        "welshLabel": "Costau"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "id": "615c887e-8ada-40a0-a434-174f21209815",
+        "isAvailableForCourtExtract": true,
+        "label": "Compensation",
+        "level": "OFFENCE",
+        "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+        "orderedDate": "2020-02-29",
+        "prompts": [
+          {
+            "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of compensation",
+            "promptReference": "AOCOM",
+            "value": "2",
+            "welshValue": ""
+          }
+        ],
+        "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+        "welshLabel": "Iawndal"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "id": "9e8773fe-e224-45c7-83a1-44d03ee50190",
+        "isAvailableForCourtExtract": true,
+        "label": "Collection order",
+        "level": "CASE",
+        "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+        "orderedDate": "2020-02-29",
+        "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+        "welshLabel": "Gorchymyn Casglu"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "id": "7afdc2d3-d768-4ab7-bcb9-91afe372e69c",
+        "isAvailableForCourtExtract": true,
+        "label": "Surcharge",
+        "level": "DEFENDANT",
+        "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+        "orderedDate": "2020-02-29",
+        "prompts": [
+          {
+            "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+            "isAvailableForCourtExtract": false,
+            "label": "Amount of surcharge",
+            "promptReference": "AOS",
+            "value": "30",
+            "welshValue": ""
+          }
+        ],
+        "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+        "welshLabel": "Gordal"
+      },
+      {
+        "courtClerk": {
+          "firstName": "Erica",
+          "lastName": "Wilson",
+          "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+        },
+        "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+        "id": "6fae3074-bb8a-4c15-bccc-cb2174e2e8d9",
+        "isAvailableForCourtExtract": true,
+        "label": "Pay by date",
+        "level": "CASE",
+        "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+        "orderedDate": "2020-02-29",
+        "prompts": [
+          {
+            "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+            "isAvailableForCourtExtract": false,
+            "label": "Date to pay in full by",
+            "promptReference": "PBD",
+            "value": "2020-03-27",
+            "welshValue": ""
+          }
+        ],
+        "prosecutionCaseId": "bbfbcc32-0582-427f-89f3-67ccd8a4cefb",
+        "welshLabel": "Swm i’w dalu"
+      }
+    ]
+  },
+  "targets": [
+    {
+      "defendantId": "0e2b84bf-ee36-449e-9b31-f0840820eb8e",
+      "hearingId": "40b4b58e-205b-4f2c-b6ef-4cfbbc40aebe",
+      "offenceId": "f4109656-80b8-4273-afe6-9eb12557cea2",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-02-29",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "value": "100",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "a6121dcc-30cc-4015-be8f-95506bb0689c",
+          "sharedDate": "2020-02-28"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2020-02-29",
+          "prompts": [
+            {
+              "id": "db261fd9-c6bb-4e10-b93f-9fd98418f7b0",
+              "label": "Amount of costs",
+              "value": "200",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "76d43772-0660-4a33-b5c6-8f8ccaf6b4e3",
+          "resultLabel": "Costs",
+          "resultLineId": "7a1f33bc-80f8-4ef1-9ffd-4405a56d891b",
+          "sharedDate": "2020-02-28"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-02-29",
+          "prompts": [
+            {
+              "id": "26985e5b-fe1f-4d7d-a21a-57207c5966e7",
+              "label": "Amount of compensation",
+              "value": "2",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "ae89b99c-e0e3-47b5-b218-24d4fca3ca53",
+          "resultLabel": "Compensation",
+          "resultLineId": "615c887e-8ada-40a0-a434-174f21209815",
+          "sharedDate": "2020-02-28"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2020-02-29",
+          "prompts": [],
+          "resultDefinitionId": "9ea0d845-5096-44f6-9ce0-8ae801141eac",
+          "resultLabel": "Collection order",
+          "resultLineId": "9e8773fe-e224-45c7-83a1-44d03ee50190",
+          "sharedDate": "2020-02-28"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "DEFENDANT",
+          "orderedDate": "2020-02-29",
+          "prompts": [
+            {
+              "id": "629a971e-9d7a-4526-838d-0a4cb922b5cb",
+              "label": "Amount of surcharge",
+              "value": "30",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "e866cd11-6073-4fdf-a229-51c9d694e1d0",
+          "resultLabel": "Surcharge",
+          "resultLineId": "7afdc2d3-d768-4ab7-bcb9-91afe372e69c",
+          "sharedDate": "2020-02-28"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "CASE",
+          "orderedDate": "2020-02-29",
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "value": "2020-03-27",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "6fae3074-bb8a-4c15-bccc-cb2174e2e8d9",
+          "sharedDate": "2020-02-28"
+        }
+      ],
+      "targetId": "f5c1f4f0-5a3f-11ea-a422-c16acfd07d74"
+    }
+  ]
+}

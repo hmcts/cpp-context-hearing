@@ -29,41 +29,42 @@ public class PublishAsPromptHelper {
     public static List<TreeNode<ResultLine>> processPublishAsPrompt(final List<TreeNode<ResultLine>> results) {
         Optional<TreeNode<ResultLine>> leafNode;
         while ((leafNode = getLowestRankedLeafNodeWithIsPublishAsPromptFlag(results)).isPresent()) {
-            processPublishAsPrompt(leafNode.get(), results);
+            final Optional<TreeNode<ResultLine>> newParentOptional = findNewParent(leafNode.get());
+            if (newParentOptional.isPresent()) {
+                processPublishAsPrompt(newParentOptional.get(), leafNode.get(), results);
+            } else {
+                break;
+            }
         }
         return results;
     }
 
-    static void processPublishAsPrompt(final TreeNode<ResultLine> resultLineTreeNode, final List<TreeNode<ResultLine>> results) {
-        final Optional<TreeNode<ResultLine>> newParentOptional = findNewParent(resultLineTreeNode);
-        if (newParentOptional.isPresent()) {
-            final TreeNode<ResultLine> targetParent = newParentOptional.get();
-            final BigDecimal nextPromptSequenceNumber = getNextPromptSequenceNumber(targetParent);
-            final JudicialResultPrompt newPrompt = makePrompt(resultLineTreeNode, nextPromptSequenceNumber);
+    static void processPublishAsPrompt(final TreeNode<ResultLine> targetParent, final TreeNode<ResultLine> resultLineTreeNode, final List<TreeNode<ResultLine>> results) {
+        final BigDecimal nextPromptSequenceNumber = getNextPromptSequenceNumber(targetParent);
+        final JudicialResultPrompt newPrompt = makePrompt(resultLineTreeNode, nextPromptSequenceNumber);
 
-            if (isNull(targetParent.getJudicialResult().getJudicialResultPrompts())) {
-                targetParent.getJudicialResult().setJudicialResultPrompts(new ArrayList<>());
+        if (isNull(targetParent.getJudicialResult().getJudicialResultPrompts())) {
+            targetParent.getJudicialResult().setJudicialResultPrompts(new ArrayList<>());
+        }
+
+        targetParent.getJudicialResult()
+                .getJudicialResultPrompts()
+                .add(newPrompt);
+
+        if (nonNull(newPrompt.getQualifier())) {
+            final String resultQualifier = targetParent.getJudicialResult().getQualifier();
+            if (isNull(resultQualifier)) {
+                targetParent.getJudicialResult().setQualifier(newPrompt.getQualifier());
+            } else {
+                targetParent.getJudicialResult().setQualifier(format("%s,%s", resultQualifier, newPrompt.getQualifier()));
             }
-
-            targetParent.getJudicialResult()
-                    .getJudicialResultPrompts()
-                    .add(newPrompt);
-
-            if (nonNull(newPrompt.getQualifier())) {
-                final String resultQualifier = targetParent.getJudicialResult().getQualifier();
-                if (isNull(resultQualifier)) {
-                    targetParent.getJudicialResult().setQualifier(newPrompt.getQualifier());
-                } else {
-                    targetParent.getJudicialResult().setQualifier(format("%s,%s", resultQualifier, newPrompt.getQualifier()));
-                }
-            }
+        }
             if (isNull(targetParent.getJudicialResult().getNextHearing())
                     && nonNull(resultLineTreeNode.getJudicialResult())
                     && nonNull(resultLineTreeNode.getJudicialResult().getNextHearing())) {
                 targetParent.getJudicialResult().setNextHearing(resultLineTreeNode.getJudicialResult().getNextHearing());
             }
 
-            remove(resultLineTreeNode, results);
-        }
+        remove(resultLineTreeNode, results);
     }
 }

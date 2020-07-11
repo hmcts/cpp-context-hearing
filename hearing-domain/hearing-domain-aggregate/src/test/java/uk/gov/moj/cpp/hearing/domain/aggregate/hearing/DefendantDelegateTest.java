@@ -70,7 +70,7 @@ public class DefendantDelegateTest {
     @Theory
     public void shouldListDefendantForDDCHWhenThereIsAChangeInAddressForDefendantHearing(final Address changedAddress) {
 
-       HearingAggregateMomento memento = new HearingAggregateMomento();
+        HearingAggregateMomento memento = new HearingAggregateMomento();
         final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
 
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
@@ -82,7 +82,7 @@ public class DefendantDelegateTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
                 getDate("2015-09-08"), "UK", changedAddress);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -92,7 +92,7 @@ public class DefendantDelegateTest {
     public void shouldListDefendantForDDCHWhenThereIsAChangeInFirstNameForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
-        final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
         memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
 
@@ -102,7 +102,7 @@ public class DefendantDelegateTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim1", null, "Karke",
                 getDate("2015-09-08"), "UK", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -121,7 +121,7 @@ public class DefendantDelegateTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke1",
                 getDate("2015-09-08"), "UK", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -140,7 +140,7 @@ public class DefendantDelegateTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", "middle", "Karke",
                 getDate("2015-09-08"), "UK", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -156,12 +156,32 @@ public class DefendantDelegateTest {
 
         DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
 
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
+                getDate("1965-09-08"), "UK", address);
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
+
+        assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
+    }
+
+    @Test
+    public void shouldClearDefendantDetailsChanged() {
+
+        HearingAggregateMomento memento = new HearingAggregateMomento();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
+        memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
+
+        DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
                 getDate("1965-09-08"), "UK", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
+
+        defendantDelegate.clearDefendantDetailsChanged();
+
+        assertThat(defendantDelegate.getDefendantDetailsChanged().isEmpty(), is(true));
     }
 
     @Test
@@ -175,10 +195,25 @@ public class DefendantDelegateTest {
 
         DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
 
-
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
-                getDate("2015-09-08"), "USA", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+                null, "UK", address);
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
+
+        assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
+    }
+
+    @Test
+    public void whenThereIsAChangeInDateOfBirthFromNullForDefendantHearingShouldListDefendantForDDCH() {
+
+        HearingAggregateMomento memento = new HearingAggregateMomento();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", null, "UK", address);
+        memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
+
+        DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
+                getDate("1965-09-08"), "UK", address);
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -187,7 +222,7 @@ public class DefendantDelegateTest {
     public void shouldNotListDefendantForDDCHWhenThereIsANoChangeForDefendantHearing() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
-        final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
         memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
 
@@ -197,7 +232,7 @@ public class DefendantDelegateTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetails(prosecutionCaseId, defendantId, "Tim", null, "Karke",
                 getDate("2015-09-08"), "UK", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(false));
     }
@@ -215,7 +250,7 @@ public class DefendantDelegateTest {
 
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsForOrganisation(prosecutionCaseId, defendantId, "Tim Ltd", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -233,7 +268,7 @@ public class DefendantDelegateTest {
 
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsForOrganisation(prosecutionCaseId, defendantId, "Versu Ltd", changedAddress);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(true));
     }
@@ -251,7 +286,7 @@ public class DefendantDelegateTest {
 
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsForOrganisation(prosecutionCaseId, defendantId, "Versu Ltd", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getDefendantDetailsChanged().contains(defendantId), is(false));
     }
@@ -261,7 +296,7 @@ public class DefendantDelegateTest {
     public void shouldHearingAggregateHaveDefenceOrganisationWhenThereIsAnDefenceAssociate() {
 
         HearingAggregateMomento memento = new HearingAggregateMomento();
-        final Address address =Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
         Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
         memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
 
@@ -271,12 +306,12 @@ public class DefendantDelegateTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsWithDefenceOrganisation(prosecutionCaseId, defendantId, "Tim", null, "Karke",
                 getDate("2015-09-08"), "UK", address);
-        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId,  updatedDefendantDetails));
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getMomento().getHearing().getProsecutionCases().get(0).getDefendants().get(0).getAssociatedDefenceOrganisation(), notNullValue());
     }
 
-    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsForOrganisation(final UUID prosecutionCaseId,final UUID defendantId, final String organisationName, final Address address) {
+    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsForOrganisation(final UUID prosecutionCaseId, final UUID defendantId, final String organisationName, final Address address) {
 
         uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
         defendant.setId(defendantId);
@@ -286,7 +321,7 @@ public class DefendantDelegateTest {
 
     }
 
-    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetails(final UUID prosecutionCaseId,final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
+    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetails(final UUID prosecutionCaseId, final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
 
         uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
 
@@ -308,7 +343,7 @@ public class DefendantDelegateTest {
     }
 
 
-    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsWithDefenceOrganisation(final UUID prosecutionCaseId,final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
+    private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsWithDefenceOrganisation(final UUID prosecutionCaseId, final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
 
         uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
 
@@ -334,6 +369,7 @@ public class DefendantDelegateTest {
         return defendant;
 
     }
+
     private DefendantDetailsUpdated createDefendantDetailsUpdated(final UUID hearingId, uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant) {
         return DefendantDetailsUpdated.defendantDetailsUpdated().setDefendant(defendant).setHearingId(hearingId);
     }
@@ -349,9 +385,6 @@ public class DefendantDelegateTest {
                 .withProsecutionCases(asList(prosecutionCase))
                 .build();
     }
-
-
-
 
     private Defendant createIndividualDefendant(final UUID prosecutionCaseId, final UUID offenceId, final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
         return defendant()
@@ -386,8 +419,8 @@ public class DefendantDelegateTest {
     }
 
     private LocalDate getDate(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter. ofPattern( "yyyy-MM-dd" );
-        return LocalDate. parse( date , formatter);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        return LocalDate.parse(date, formatter);
     }
 
 }

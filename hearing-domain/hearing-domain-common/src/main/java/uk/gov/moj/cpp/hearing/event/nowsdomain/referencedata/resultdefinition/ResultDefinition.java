@@ -70,6 +70,14 @@ public class ResultDefinition {
 
     private Boolean d20;
 
+    private Boolean rollUpPrompts;
+
+    private Boolean publishedForNows;
+
+    private String resultWording;
+
+    private String welshResultWording;
+
     private List<ResultDefinitionRuleType> resultDefinitionRules = new ArrayList<>();
 
     public static ResultDefinition resultDefinition() {
@@ -343,6 +351,42 @@ public class ResultDefinition {
 
     public ResultDefinition setUnscheduled(final Boolean unscheduled) {
         this.unscheduled = unscheduled;
+        return this;
+    }
+
+    public Boolean getRollUpPrompts() {
+        return this.rollUpPrompts;
+    }
+
+    public ResultDefinition setRollUpPrompts(final Boolean rollUpPrompts) {
+        this.rollUpPrompts = rollUpPrompts;
+        return this;
+    }
+
+    public Boolean getPublishedForNows() {
+        return this.publishedForNows;
+    }
+
+    public ResultDefinition setPublishedForNows(final Boolean publishedForNows) {
+        this.publishedForNows = publishedForNows;
+        return this;
+    }
+
+    public String getResultWording() {
+        return this.resultWording;
+    }
+
+    public ResultDefinition setResultWording(final String resultWording) {
+        this.resultWording = resultWording;
+        return this;
+    }
+
+    public String getWelshResultWording() {
+        return this.welshResultWording;
+    }
+
+    public ResultDefinition setWelshResultWording(final String welshResultWording) {
+        this.welshResultWording = welshResultWording;
         return this;
     }
 }

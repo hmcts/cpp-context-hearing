@@ -16,7 +16,8 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllAlcoholLevelMethods;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllVerdictTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.StubNowsReferenceData.setupNowsReferenceData;
 
@@ -45,8 +46,9 @@ public class RestructureResultsIT extends AbstractIT {
     @Before
     public void setup() {
         fileResourceObjectMapper = new FileResourceObjectMapper();
-        stubProgressionGenerateNows();
         stubRelistReferenceDataResults();
+        stubGetAllVerdictTypes();
+        stubGetAllAlcoholLevelMethods();
         setupNowsReferenceData(now());
     }
 
@@ -70,7 +72,6 @@ public class RestructureResultsIT extends AbstractIT {
         publicEventResulted.waitFor();
 
     }
-
 
     @Test
     public void shouldRestructureDIRS() throws IOException {
@@ -143,6 +144,9 @@ public class RestructureResultsIT extends AbstractIT {
 
         hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setId(offenceId.get());
 
+        stubLjaDetails(hearing.getHearing().getCourtCentre(),
+                hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
+
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
 
@@ -169,9 +173,7 @@ public class RestructureResultsIT extends AbstractIT {
                 .getProsecutionCases()
                 .stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .flatMap(d -> ofNullable(d.getJudicialResults()).map(Collection::stream).orElseGet(Stream::empty))
+                .flatMap(d -> ofNullable(d.getDefendantCaseJudicialResults()).map(Collection::stream).orElseGet(Stream::empty))
                 .collect(toList());
     }
-
-
-}             
+}

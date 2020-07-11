@@ -11,6 +11,9 @@ public class RestructuringConstants {
     public static final int COURT_ROOM_ID = 54321;
     public static final String HEARING_RESULTS_SHARED_EVENT = "hearing.results-shared";
     public static final String HEARING_RESULTS_SHARED_JSON = "hearing.results-shared.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON = "hearing.results-shared-with-verdict-type.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON = "hearing.results-shared-with-offence-facts.json";
+    public static final String HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON = "hearing.results-shared-with-optional-promptRef.json";
     public static final String IMP_TIMP_HEARING_RESULTS_SHARED_JSON = "imp-timp-hearing-results-shared.json";
     public static final String HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON = "hearing.results-shared_multiple_defendant.json";
     public static final String HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON = "hearing.results-shared_multiple_defendant_multiple_case.json";

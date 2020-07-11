@@ -67,7 +67,10 @@
             "type": "object",
             "properties": {
               "id": {
-                "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+                "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+              },
+              "promptRef" : {
+                "type": "string"
               },
               "label": {
                 "type": "string"
@@ -85,8 +88,7 @@
             "required": [
               "id",
               "label",
-              "value",
-              "welshValue"
+              "value"
             ],
             "additionalProperties": false
           }

@@ -230,18 +230,21 @@
             {
               "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
               "label": "Total imprisonment period",
+              "promptRef":"totalImprisonmentPeriod",
               "value": "false Total imprisonment period is life",
               "welshValue": ""
             },
             {
               "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
               "label": "Prison",
+              "promptRef":"prison",
               "value": "test 1",
               "welshValue": ""
             },
             {
               "id": "266a2bbe-b6b5-4b24-830d-70ceff3e2cac",
               "label": "Probation team to be notified",
+              "promptRef":"probationPeriodTobeNotified",
               "value": "test 2",
               "welshValue": ""
             }
@@ -263,30 +266,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "12:12",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Liverpool Crown Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Application",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "2 Weeks",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Remand in Custody",
               "welshValue": ""
             }
@@ -308,24 +316,28 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "11:11",
               "welshValue": ""
             },
             {
               "id": "66868c04-72c4-46d9-a4fc-860a82107475",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Bexley Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Trial",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "3 Days",
               "welshValue": ""
             }
@@ -379,6 +391,7 @@
             {
               "id": "7656ce22-8bee-497c-8e27-c7718a743652",
               "label": "Specify qualified person who will decide treatment",
+              "promptRef": "specifyQualifiedPersonWhowillDecideTreatment",
               "value": "Breach of bail###Following a sample which revealed the presence of a Class A drug, the defendant did not agree to a drug assessment or participate in any follow-up###Failed to surrender (non-imprisonable/summary offence)###Likely to abscond###Likely to offend (physical or mental injury)",
               "welshValue": ""
             }
@@ -422,12 +435,14 @@
             {
               "id": "2493a3a4-918a-4b83-b3c0-d221ff83d6fc",
               "label": "Defendant excused attendance",
+              "promptRef": "defendantExcusedAttendance",
               "value": "false",
               "welshValue": ""
             },
             {
               "id": "80be59c8-ffaa-4570-b40a-f3a085058208",
               "label": "Bail condition reason",
+              "promptRef": "bailConditionReason",
               "value": "For the defendant's own protection",
               "welshValue": ""
             }
@@ -459,18 +474,21 @@
             {
               "id": "76f15753-1706-42fb-b922-0d56d01e5706",
               "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
               "value": "5 Years",
               "welshValue": ""
             },
             {
               "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
               "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCount",
               "value": "55",
               "welshValue": ""
             }
           ],
           "resultDefinitionId": "abb95a52-2a75-40c3-8d3f-a1d75a199c47",
           "resultLabel": "Imprisonment",
+          "promptRef":"imprisonment",
           "resultLineId": "be7843e9-772f-4be0-988e-cec150891a7c",
           "sharedDate": "2019-12-19"
         },
@@ -510,18 +528,21 @@
             {
               "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
               "label": "Total imprisonment period",
+              "promptRef": "totalImprisonmentPeriod",
               "value": "false Total imprisonment period is life",
               "welshValue": ""
             },
             {
               "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
               "label": "Prison",
+              "promptRef": "prison",
               "value": "test 1",
               "welshValue": ""
             },
             {
               "id": "266a2bbe-b6b5-4b24-830d-70ceff3e2cac",
               "label": "Probation team to be notified",
+              "promptRef": "probationPeriodTobeNotified",
               "value": "test 2",
               "welshValue": ""
             }
@@ -550,12 +571,14 @@
             {
               "id": "76f15753-1706-42fb-b922-0d56d01e5706",
               "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
               "value": "5 Years",
               "welshValue": ""
             },
             {
               "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
               "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCount",
               "value": "55",
               "welshValue": ""
             }

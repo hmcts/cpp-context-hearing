@@ -25,6 +25,9 @@ public class Prompt {
     @Column(name = "fixed_list_code")
     private String fixedListCode;
 
+    @Column(name = "prompt_reference")
+    private String promptReference;
+
     @Column(name = "label")
     private String label;
 
@@ -94,6 +97,14 @@ public class Prompt {
     public Prompt setWelshValue(String welshValue) {
         this.welshValue = welshValue;
         return this;
+    }
+
+    public String getPromptReference() {
+        return promptReference;
+    }
+
+    public void setPromptReference(String promptReference) {
+        this.promptReference = promptReference;
     }
 
     @Override

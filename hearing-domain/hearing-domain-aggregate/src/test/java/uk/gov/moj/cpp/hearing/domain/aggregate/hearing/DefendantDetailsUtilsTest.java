@@ -189,6 +189,7 @@ public class DefendantDetailsUtilsTest {
         assertThat(defendantDetailsUtils.verifyDDCHOnRequiredAttributes(defendant, updatedDefendantDetails), is(false));
     }
 
+    @Test
     public void whenThereIsNoChangeInOrganisationDetailsForDefendantHearingShouldNotListDefendantForDDCH() {
 
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
@@ -201,6 +202,20 @@ public class DefendantDetailsUtilsTest {
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsForOrganisation(prosecutionCaseId, defendantId, "Versu Ltd", address);
 
         assertThat(defendantDetailsUtils.verifyDDCHOnRequiredAttributes(defendant, updatedDefendantDetails), is(true));
+    }
+
+    @Test
+    public void shouldListDefendantForDDCHWhenThereIsAChangeInOrganisationAddressForDefendantHearingWithNoPreviousAddress() {
+
+        final Address address = Address.address().withAddress1("address1").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createOrganisationDefendant(prosecutionCaseId, offenceId, defendantId, "Versu Ltd", null);
+
+
+        DefendantDetailsUtils defendantDetailsUtils = new DefendantDetailsUtils();
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsForOrganisation(prosecutionCaseId, defendantId, "Versu Ltd", address);
+
+        assertThat(defendantDetailsUtils.verifyDDCHOnRequiredAttributes(defendant, updatedDefendantDetails), is(false));
     }
 
     private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsForOrganisation(final UUID prosecutionCaseId,final UUID defendantId, final String organisationName, final Address address) {

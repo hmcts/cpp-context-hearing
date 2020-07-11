@@ -20,12 +20,15 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.hearing.courts.referencedata.Address;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeArea;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
+import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcConnectionProvider;
@@ -266,7 +269,7 @@ public class AbstractIT {
         return new JSONObject(payload);
     }
 
-    protected void stubLjaDetails(final UUID courtCentreId) {
+    protected void stubLjaDetails(final CourtCentre courtCentre, final UUID prosecutionAuthorityId) {
         final String ljaCode = String.format("%04d", Integer.valueOf(Double.valueOf(Math.random() * 10000).intValue()));
 
         final EnforcementAreaBacs enforcementAreaBacs = EnforcementAreaBacs.enforcementAreaBacs()
@@ -280,13 +283,15 @@ public class AbstractIT {
         final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
                 .withOucode(ljaCode)
                 .withLja(ljaCode)
-                .withId(courtCentreId.toString())
+                .withId(courtCentre.getId().toString())
                 .withIsWelsh(true)
-                .withWelshAddress1("address1 " + ljaCode)
-                .withWelshAddress2("address2 " + ljaCode)
-                .withWelshAddress3("address3 " + ljaCode)
-                .withWelshAddress4("address4 " + ljaCode)
-                .withOucodeL3WelshName("OucodeL3WelshName")
+                .withWelshAddress1("Welsh address1")
+                .withWelshAddress2("Welsh address2")
+                .withWelshAddress3("Welsh address3")
+                .withWelshAddress4("Welsh address4")
+                .withWelshAddress4("Welsh address5")
+                .withPostcode("Post Code")
+                .withOucodeL3WelshName(courtCentre.getWelshName())
                 .withEnforcementArea(enforcementAreaBacs)
                 .build();
 
@@ -316,9 +321,22 @@ public class AbstractIT {
                 ))
                 .build();
 
+        Prosecutor prosecutor = Prosecutor.prosecutor()
+                .withId(prosecutionAuthorityId.toString())
+                .withFullName("Prosecutor Name")
+                .withOucode("OuCode")
+                .withMajorCreditorCode("Major creditor code")
+                .withAddress(Address.address()
+                        .withAddress1("Address1")
+                        .withPostcode("AA30BB").build())
+                .withInformantEmailAddress("dummy@email.com")
+                .build();
+
         ReferenceDataStub.stub(organisationalUnit);
 
         ReferenceDataStub.stub(enforcementArea, ljaCode);
+
+        ReferenceDataStub.stub(prosecutor);
 
         ReferenceDataStub.stub(localJusticeAreasResult, "123");
 

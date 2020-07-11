@@ -99,6 +99,8 @@
 24	40e88b4e-4f34-463d-92d3-1c5b03d05490	Community requirement: Prohibited activity for period	5e51a190-6d8b-4104-8c97-877fe5157cb0	Period of prohibition	mandatory	INT	Months								Y		Months				false
 24	40e88b4e-4f34-463d-92d3-1c5b03d05490	Community requirement: Prohibited activity for period	44a5fa6c-da56-401a-b10d-cb02138caa21	Period of prohibition	mandatory	INT	Weeks								Y		Weeks				false
 24	40e88b4e-4f34-463d-92d3-1c5b03d05490	Community requirement: Prohibited activity for period	f9758ee7-82ca-4451-9553-9f7e2bade36a	Period of prohibition	mandatory	INT	Days								Y		Days				false
+24	40e88b4e-4f34-463d-92d3-1c5b03d05490	Community requirement: Prohibited activity for period	44a5fa6c-da56-401a-b10d-cb01138caa21	Address Line 1	mandatory	ADDRESS				1	1000				Y					t	false
+24	40e88b4e-4f34-463d-92d3-1c5b03d05490	Community requirement: Prohibited activity for period	44a5fa6c-da56-401a-b10d-cb01138caa21	Address Line 2	mandatory	ADDRESS				1	1000				Y					t	false
 26	ea74de19-9918-434d-92ea-1e4e332c0d3d	Community requirement: Prohibited activity for days of week	3113a0c9-046a-4fa9-b906-64b0d42d1293	Prohibited activities	mandatory	TXT				1	1000				Y						false
 26	ea74de19-9918-434d-92ea-1e4e332c0d3d	Community requirement: Prohibited activity for days of week	53f817cd-0070-455e-9826-a103bd4a4a26	Days	mandatory	FIXLM		e652a90a-31cf-11e8-b467-0ed5f89f718b	DAYS OF WK	1	7				Y						false
 25	1c40353b-a3b8-4437-8691-6b54d5842010	Community requirement: Prohibited activity for dates	0b8b7dd9-5b3b-49c2-a3a8-9461ff610904	Prohibited activities	mandatory	TXT				1	1000				Y						false

@@ -1,0 +1,29 @@
+{
+  "prisons": [
+    {
+      "id": "4c3c4436-b233-3b0c-aba6-e7d9c3c53be9",
+      "seqNum": 10,
+      "nsdtIdentifier": "6001",
+      "name": "HMP/YOI New Hall",
+      "addressLine1": "Dial Wood",
+      "addressLine2": "Flockton",
+      "postCode": "WF4 4XX",
+      "addressLine3": "Wakefield",
+      "addressLine4": "West Yorkshire",
+      "addressLine5": "West Yorkshire",
+      "startDate": "2000-01-01"
+    },
+    {
+      "id": "66567e81-931e-337e-a5b3-47e0b221bcc7",
+      "seqNum": 20,
+      "nsdtIdentifier": "6001",
+      "name": "HMP/YOI New Hall",
+      "addressLine1": "Dial Wood",
+      "addressLine2": "Flockton",
+      "postCode": "WF4 4XX",
+      "addressLine3": "Wakefield",
+      "addressLine4": "West Yorkshire",
+      "addressLine5": "West Yorkshire"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 public class DefendantDetailsUtils {
@@ -36,8 +37,9 @@ public class DefendantDetailsUtils {
         boolean isSame = isChanged(true, Objects.equals(previousPerson.getLastName(), currentPerson.getLastName()));
         isSame = isChanged(isSame, Objects.equals(previousPerson.getFirstName(), currentPerson.getFirstName()));
         isSame = isChanged(isSame, Objects.equals(previousPerson.getMiddleName(), currentPerson.getMiddleName()));
+
         //Date of Birth
-        isSame = isChanged(isSame, Objects.equals(previousPerson.getDateOfBirth(), currentPerson.getDateOfBirth()));
+        isSame = isChanged(isSame, compareLocalDate(previousPerson.getDateOfBirth(), currentPerson.getDateOfBirth()));
 
         //Nationality
         isSame = isChanged(isSame, Objects.equals(previousPerson.getNationalityCode(), currentPerson.getNationalityCode()));
@@ -46,20 +48,22 @@ public class DefendantDetailsUtils {
         return isChanged(isSame, compareAddress(previousPerson.getAddress(), currentPerson.getAddress()));
     }
 
+    /**
+     * Compare to Local Dates. Uses {@link LocalDate#MIN} to avoid null checking.
+     *
+     * @param previousLocalDate
+     * @param currentLocalDate
+     * @return TRUE if the two dates are the same, false otherwise
+     */
+    private boolean compareLocalDate(final LocalDate previousLocalDate, final LocalDate currentLocalDate) {
+        final LocalDate a = previousLocalDate == null ? LocalDate.MIN : previousLocalDate;
+        final LocalDate b = currentLocalDate == null ? LocalDate.MIN : currentLocalDate;
+
+        return a.compareTo(b) == 0;
+    }
 
     private boolean compareAddress(final Address previousAddress, final Address currentAddress) {
-        boolean isSame = isChanged(true, Objects.equals(previousAddress.getAddress1(), currentAddress.getAddress1()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress2(), currentAddress.getAddress2()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress3(), currentAddress.getAddress3()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress4(), currentAddress.getAddress4()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getAddress5(), currentAddress.getAddress5()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress1(), currentAddress.getWelshAddress1()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress1(), currentAddress.getWelshAddress1()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress2(), currentAddress.getWelshAddress2()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress3(), currentAddress.getWelshAddress3()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress4(), currentAddress.getWelshAddress4()));
-        isSame = isChanged(isSame, Objects.equals(previousAddress.getWelshAddress5(), currentAddress.getWelshAddress5()));
-        return isChanged(isSame, Objects.equals(previousAddress.getPostcode(), currentAddress.getPostcode()));
+        return Objects.equals(previousAddress, currentAddress);
     }
 
     private boolean isChanged(final boolean changed, final boolean isChanged) {

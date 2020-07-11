@@ -14,10 +14,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-class FindDefinitionsByShortCodes implements ResultFilter<Set<ResultDefinition>, List<String>> {
+public class FindDefinitionsByShortCodes implements ResultFilter<Set<ResultDefinition>, List<String>> {
 
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
     @Override
     public Set<ResultDefinition> run(final List<String> values, final LocalDate orderedDate) {

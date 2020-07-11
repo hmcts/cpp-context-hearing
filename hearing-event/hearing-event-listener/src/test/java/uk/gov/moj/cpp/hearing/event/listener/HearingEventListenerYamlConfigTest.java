@@ -47,7 +47,6 @@ import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
-import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
 
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -90,7 +89,6 @@ public class HearingEventListenerYamlConfigTest {
             ResultLinesStatusUpdated.class.getAnnotation(Event.class).value(),
             EnrichUpdatePleaWithAssociatedHearings.class.getAnnotation(Event.class).value(),
             EnrichUpdateVerdictWithAssociatedHearings.class.getAnnotation(Event.class).value(),
-            NowsRequested.class.getAnnotation(Event.class).value(),
             EnforcementError.class.getAnnotation(Event.class).value(),
             RespondentCounselChangeIgnored.class.getAnnotation(Event.class).value(),
             ApplicantCounselChangeIgnored.class.getAnnotation(Event.class).value(),
@@ -129,7 +127,6 @@ public class HearingEventListenerYamlConfigTest {
                 SubscriptionsUploadEventListener.class,
                 DefendantAttendanceEventListener.class,
                 DefenceCounselEventListener.class,
-                StagingEnforcementEventListener.class,
                 ApplicationResponseSavedEventListener.class,
                 RespondentCounselEventListener.class,
                 ApplicantCounselEventListener.class,

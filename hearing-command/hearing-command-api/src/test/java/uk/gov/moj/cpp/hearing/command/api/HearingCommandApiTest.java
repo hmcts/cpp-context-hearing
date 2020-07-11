@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.stream;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -9,8 +8,6 @@ import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.Is.is;
@@ -18,20 +15,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerClassMatcher.isHandlerClass;
 import static uk.gov.justice.services.test.utils.core.matchers.HandlerMethodMatcher.method;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -84,10 +76,8 @@ public class HearingCommandApiTest {
     public static final String JSON_EXPECTED_HEARING_INITIATE_DDCH = "json/expected-hearing-initiate-ddch.json";
     private static final String HEARING_INITIATE = "hearing.initiate";
 
-    @Spy
-    private final Enveloper enveloper = createEnveloper();
-    @Spy
-    private final Clock clock = new StoppedClock(ZonedDateTime.now());
+    private static final String DUMMY_FIELD = "dummyField";
+    private static final String DUMMY_FIELD_VALUE = "dummyFieldValue";
 
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
@@ -108,12 +98,12 @@ public class HearingCommandApiTest {
 
     @Mock
     private Sender sender;
+
     @Captor
     private ArgumentCaptor<JsonEnvelope> senderArgumentCaptor;
 
     @Mock
     private ReferenceDataService referenceDataService;
-
 
     @Captor
     private ArgumentCaptor<Envelope<JsonObject>> senderArgumentCaptor1;
@@ -128,7 +118,6 @@ public class HearingCommandApiTest {
         notificationApiMethodsToHandlerNames = apiMethodsToHandlerNames(NotificationCommandApi.class);
         outstandingFinesCommandApiMethodsToHandlerNames = apiMethodsToHandlerNames(OutstandingFinesCommandApi.class);
         sessionTimeApiMethodsToHandlerNames = apiMethodsToHandlerNames(SessionTimeCommandApi.class);
-
     }
 
     @Test
@@ -160,8 +149,8 @@ public class HearingCommandApiTest {
         final JsonEnvelope envelope = JsonEnvelope.envelopeFrom(metadata, jsonObjectPayload);
 
         when(referenceDataService.getResults(envelope, "DDCH")).thenReturn(ResultDefinition.resultDefinition().setId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b")));
-        hearingCommandApi.initiateHearing(envelope);
 
+        hearingCommandApi.initiateHearing(envelope);
 
         verify(sender).send(senderArgumentCaptor1.capture());
 
@@ -169,8 +158,8 @@ public class HearingCommandApiTest {
 
         final JsonObject result = CommandAPITestBase.readJson(JSON_EXPECTED_HEARING_INITIATE_DDCH, JsonObject.class);
 
+        assertThat(jsonEnvelopOut.metadata().name(), is("hearing.initiate"));
         assertThat(jsonEnvelopOut.payload(), is(result));
-
     }
 
     @Test
@@ -181,13 +170,12 @@ public class HearingCommandApiTest {
 
         hearingCommandApi.initiateHearing(envelope);
 
-
         verify(sender).send(senderArgumentCaptor1.capture());
 
         final Envelope<JsonObject> jsonEnvelopOut = senderArgumentCaptor1.getValue();
 
+        assertThat(jsonEnvelopOut.metadata().name(), is("hearing.initiate"));
         assertThat(jsonEnvelopOut.payload(), is(jsonObjectPayload));
-
     }
 
 
@@ -209,25 +197,306 @@ public class HearingCommandApiTest {
 
     @Test
     public void shouldPassThroughShareResultCommandToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.share-results");
 
-        final JsonObject requestPayload = createObjectBuilder()
-                .add("dummyField", "dummyFieldValue")
-                .build();
+        hearingCommandApi.shareResults(jsonRequestEnvelope);
 
-        final JsonEnvelope commandJsonEnvelope = envelopeFrom(metadataWithRandomUUIDAndName(), requestPayload);
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), COMMAND_SHARE_RESULTS);
+    }
 
-        hearingCommandApi.shareResults(commandJsonEnvelope);
+    @Test
+    public void shouldPassThroughSetTrialTypeRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.set-trial-type");
 
-        verify(sender).send(senderArgumentCaptor.capture());
+        hearingCommandApi.setTrialType(jsonRequestEnvelope);
 
-        final JsonEnvelope jsonEnvelopOut = senderArgumentCaptor.getValue();
-        //check that payload was passed through and meta data name was changed
-        assertThat(jsonEnvelopOut, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(commandJsonEnvelope).withName(COMMAND_SHARE_RESULTS),
-                payloadIsJson(allOf(
-                        withJsonPath("dummyField", equalTo("dummyFieldValue")
-                        )))
-        )));
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.set-trial-type");
+    }
+
+    @Test
+    public void shouldPassThroughAddCompanyRepresentativeRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-company-representative");
+
+        hearingCommandApi.addCompanyRepresentative(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-company-representative");
+    }
+
+    @Test
+    public void shouldPassThroughComputeOutstandingFinesRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.compute-outstanding-fines");
+
+        hearingCommandApi.computeOutstandingFines(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.compute-outstanding-fines");
+    }
+
+    @Test
+    public void shouldPassThroughBookProvisionalHearingSlotsRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.book-provisional-hearing-slots");
+
+        hearingCommandApi.bookProvisionalHearingSlots(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.book-provisional-hearing-slots");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateCompanyRepresentativeRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-company-representative");
+
+        hearingCommandApi.updateCompanyRepresentative(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-company-representative");
+    }
+
+    @Test
+    public void shouldPassRemoveCompanyRepresentativeThroughRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.remove-company-representative");
+
+        hearingCommandApi.removeCompanyRepresentative(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-company-representative");
+    }
+
+    @Test
+    public void shouldPassThroughPublishCourtListRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.publish-court-list");
+
+        hearingCommandApi.publishCourtList(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.publish-court-list");
+    }
+
+    @Test
+    public void shouldPassThroughPublishHearingListsForCrownCourtsRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.publish-hearing-lists-for-crown-courts");
+
+        hearingCommandApi.publishHearingListsForCrownCourts(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.publish-hearing-lists-for-crown-courts");
+    }
+
+    @Test
+    public void shouldPassThroughAddInterpreterIntermediaryRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-interpreter-intermediary");
+
+        hearingCommandApi.addInterpreterIntermediary(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-interpreter-intermediary");
+    }
+
+    @Test
+    public void shouldPassThroughFemoveInterpreterIntermediaryRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.remove-interpreter-intermediary");
+
+        hearingCommandApi.removeInterpreterIntermediary(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-interpreter-intermediary");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateInterpreterIntermediaryRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-interpreter-intermediary");
+
+        hearingCommandApi.updateInterpreterIntermediary(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-interpreter-intermediary");
+    }
+
+    @Test
+    public void shouldPassThroughRemoveApplicantCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.remove-applicant-counsel");
+
+        hearingCommandApi.removeApplicantCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-applicant-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughAddApplicantCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-applicant-counsel");
+
+        hearingCommandApi.addApplicantCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-applicant-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateApplicantCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-applicant-counsel");
+
+        hearingCommandApi.updateApplicantCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-applicant-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughRemoveRespondentCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.remove-respondent-counsel");
+
+        hearingCommandApi.removeRespondentCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-respondent-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateRespondentCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-respondent-counsel");
+
+        hearingCommandApi.updateRespondentCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-respondent-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughAddRespondentCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-respondent-counsel");
+
+        hearingCommandApi.addRespondentCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-respondent-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateDefendantAttendanceRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-defendant-attendance-on-hearing-day");
+
+        hearingCommandApi.updateDefendantAttendance(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.update-defendant-attendance-on-hearing-day");
+    }
+
+    @Test
+    public void shouldPassThroughSaveHearingCaseNoteRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-hearing-case-note");
+
+        hearingCommandApi.saveHearingCaseNote(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-hearing-case-note");
+    }
+
+    @Test
+    public void shouldPassThroughSaveApplicationResponseRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-application-response");
+
+        hearingCommandApi.saveApplicationResponse(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-application-response");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateDefenceCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-defence-counsel");
+
+        hearingCommandApi.updateDefenceCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-defence-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughAddDefenceCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-defence-counsel");
+
+        hearingCommandApi.addDefenceCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-defence-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughRemoveDefenceCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.remove-defence-counsel");
+
+        hearingCommandApi.removeDefenceCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-defence-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughUpdatePleaRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-plea");
+
+        hearingCommandApi.updatePlea(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.hearing-offence-plea-update");
+    }
+
+    @Test
+    public void shouldPassThroughGenerateNOWsRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.generate-nows");
+
+        hearingCommandApi.generateNows(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.generate-nows");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateVerdictRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-verdict");
+
+        hearingCommandApi.updateVerdict(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-verdict");
+    }
+
+    @Test
+    public void shouldPassThroughAddProsecutionCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-prosecution-counsel");
+
+        hearingCommandApi.addProsecutionCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-prosecution-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughRemoveProsecutionCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.remove-prosecution-counsel");
+
+        hearingCommandApi.removeProsecutionCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-prosecution-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateProsecutionCounselRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-prosecution-counsel");
+
+        hearingCommandApi.updateProsecutionCounsel(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-prosecution-counsel");
+    }
+
+    @Test
+    public void shouldPassThroughSaveDraftResultRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-draft-result");
+
+        hearingCommandApi.saveDraftResult(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-draft-result");
+    }
+
+    @Test
+    public void shouldPassThroughApplicationDraftResultRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.application-draft-result");
+
+        hearingCommandApi.applicationDraftResult(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.application-draft-result");
+    }
+
+    private JsonEnvelope buildDummyJsonRequestEnvelopeWithName(final String name) {
+        return envelopeFrom(metadataWithRandomUUID(name).withCausation(randomUUID())
+                        .build(),
+                createObjectBuilder()
+                        .add(DUMMY_FIELD, DUMMY_FIELD_VALUE)
+                        .build());
+    }
+
+    private void assertEnvelopeIsPassedThroughWithName(final JsonObject originalPayload, final String expectedName) {
+        verify(sender).send(senderArgumentCaptor1.capture());
+
+        final Envelope<JsonObject> actualSentEnvelope = senderArgumentCaptor1.getValue();
+        assertThat(actualSentEnvelope.metadata().name(), is(expectedName));
+        assertThat(actualSentEnvelope.payload(), is(originalPayload));
     }
 
     private <T> void assertHandlerMethodsArePassThrough(final Class<T> commandApiClass, final Map<String, String> methodsToHandlerNamesMap) {

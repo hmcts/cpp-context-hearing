@@ -1,6 +1,5 @@
 package uk.gov.justice.ccr.notepad.process;
 
-
 import static com.google.common.collect.Sets.cartesianProduct;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.collect.Sets.powerSet;
@@ -25,7 +24,7 @@ import com.google.common.collect.Maps;
 import org.apache.commons.collections.CollectionUtils;
 
 
-class ResultDefinitionMatcher {
+public class ResultDefinitionMatcher {
 
     @Inject
     FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword;
@@ -47,12 +46,13 @@ class ResultDefinitionMatcher {
 
     public ResultDefinitionMatchingOutput match(final List<String> values, final LocalDate orderedDate) {
         ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = new ResultDefinitionMatchingOutput();
-        Optional<ResultDefinition> resultDefinition = matchEqual(values, orderedDate);
+        Optional<ResultDefinition> resultDefinition = matchBySynonym(values, orderedDate);
+
         if (resultDefinition.isPresent()) {
             resultDefinitionMatchingOutput.setResultDefinition(resultDefinition.get());
             resultDefinitionMatchingOutput.setMatchingType(EQUALS);
         } else {
-            resultDefinition = matchShortCode(values, orderedDate);
+            resultDefinition = matchByShortCode(values, orderedDate);
             if (resultDefinition.isPresent()) {
                 resultDefinitionMatchingOutput.setResultDefinition(resultDefinition.get());
                 resultDefinitionMatchingOutput.setMatchingType(SHORT_CODE);
@@ -61,14 +61,13 @@ class ResultDefinitionMatcher {
         return resultDefinitionMatchingOutput;
     }
 
-    Optional<ResultDefinition> matchContains(final List<String> values, final LocalDate orderedDate) {
-        //For contains search part length should be > 1
-        List<String> filteredValues = values.stream().filter(v -> v.length() > 1).collect(Collectors.toList());
+    public Optional<ResultDefinition> matchContains(final List<String> values, final LocalDate orderedDate) {
+        final List<String> filteredValues = values.stream().filter(value -> value.length() > 1).collect(Collectors.toList());
         final Map<String, Set<String>> matchedSynonymWords = findDefinitionPartialMatchSynonyms.run(filteredValues, orderedDate);
         return Optional.ofNullable(matchResultDefinition(matchedSynonymWords, orderedDate));
     }
 
-    Optional<ResultDefinition> matchShortCode(final List<String> values, final LocalDate orderedDate) {
+    public Optional<ResultDefinition> matchByShortCode(final List<String> values, final LocalDate orderedDate) {
         final Set<ResultDefinition> outPut = findDefinitionsByShortCodes.run(values, orderedDate);
         if (outPut.size() > 1) {
             return Optional.empty();
@@ -76,7 +75,7 @@ class ResultDefinitionMatcher {
         return outPut.stream().findFirst();
     }
 
-    Optional<ResultDefinition> matchEqual(final List<String> values, final LocalDate orderedDate) {
+    public Optional<ResultDefinition> matchBySynonym(final List<String> values, final LocalDate orderedDate) {
         final Map<String, Set<String>> matchedSynonymWords = findDefinitionExactMatchSynonyms.run(values, orderedDate);
         return Optional.ofNullable(matchResultDefinition(matchedSynonymWords, orderedDate));
     }
@@ -92,7 +91,6 @@ class ResultDefinitionMatcher {
 
         final Map<Long, Set<Set<String>>> matchingWordsInDescendingOrder = findCombinationHaveMaximumMatches(setOfPossibleCombination, orderedDate);
 
-
         for (Map.Entry<Long, Set<Set<String>>> entry : matchingWordsInDescendingOrder.entrySet()) {
             final List<ResultDefinition> resultDefinitions = getMatchedResultDefinition(entry.getValue(), orderedDate);
             if (resultDefinitions.size() > 1) {
@@ -101,7 +99,6 @@ class ResultDefinitionMatcher {
                 return resultDefinitions.get(0);
             }
         }
-
 
         return null;
     }

@@ -1,36 +1,55 @@
 package uk.gov.justice.ccr.notepad.process;
 
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.INT;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.RESULT;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TIME;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
+import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
+import static uk.gov.justice.ccr.notepad.view.Part.State.UNRESOLVED;
+
 import uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptDynamicListNameAddress;
+import uk.gov.justice.ccr.notepad.view.AddressParts;
+import uk.gov.justice.ccr.notepad.view.NameAddress;
 import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.ResultChoice;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.inject.Inject;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.*;
-import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
-import static uk.gov.justice.ccr.notepad.view.Part.State.UNRESOLVED;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Processor class will match List of provided values with resulting metadata and return Knowledge
@@ -40,23 +59,30 @@ import static uk.gov.justice.ccr.notepad.view.Part.State.UNRESOLVED;
  * lowercase and we are converting parts values in lower case before matching with metadata
  */
 public class Processor {
+    @Inject
+    private ResultDefinitionMatcher resultDefinitionMatcher;
+    @Inject
+    private ResultPromptMatcher resultPromptMatcher;
+    @Inject
+    private Time24HoursMatcher time24HoursMatcher;
+    @Inject
+    private DateMatcher dateMatcher;
+    @Inject
+    private ResultCache resultCache;
+    @Inject
+    private FindDefinitionExactMatchSynonyms findDefinitionExactMatchSynonyms;
+    @Inject
+    private FindDefinitionsByShortCodes findDefinitionsByShortCodes;
+    @Inject
+    private FindPromptSynonyms findPromptSynonyms;
+
+    private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
+    private final CurrencyMatcher currencyMatcher = new CurrencyMatcher();
 
     private static final String HCHOUSE = "HCHOUSE";
     private static final String HCROOM = "HCROOM";
     private static final String ONEOF = "ONEOF";
     private static final Logger LOGGER = LoggerFactory.getLogger(Processor.class);
-    private final Pattern alphaNumericRegex = Pattern.compile("[a-z]+|\\d+");
-    private final CurrencyMatcher currencyMatcher = new CurrencyMatcher();
-    @Inject
-    ResultDefinitionMatcher resultDefinitionMatcher;
-    @Inject
-    ResultPromptMatcher resultPromptMatcher;
-    @Inject
-    Time24HoursMatcher time24HoursMatcher;
-    @Inject
-    DateMatcher dateMatcher;
-    @Inject
-    ResultCache resultCache;
 
     public void lazyLoad(final JsonEnvelope envelope, final LocalDate referenceDate) {
         resultCache.lazyLoad(envelope, referenceDate);
@@ -64,12 +90,12 @@ public class Processor {
 
     public Knowledge processParts(final List<String> partsValues, final LocalDate referenceDate) {
         final List<String> values = partsValues.stream().map(String::toLowerCase).collect(Collectors.toList());
-
         final Knowledge knowledge = getKnowledge(values, referenceDate);
+        final Map<String, Part> resultDefinitionParts = knowledge.getResultDefinitionParts();
 
-        if (checkKnowledgeHavingResultDefinition(knowledge).get()) {
+        if (nonNull(resultDefinitionParts) && resultDefinitionParts.size() > 0) {
             //remove all result definition parts from the list and only process parse for prompt
-            values.removeAll(knowledge.getResultDefinitionParts().keySet());
+            values.removeAll(resultDefinitionParts.keySet());
         } else {
             //in case no result definition found treat all parts as TXT
             addAllPartsAsTxt(knowledge, values);
@@ -78,31 +104,81 @@ public class Processor {
         return processPrompts(knowledge, values, referenceDate);
     }
 
-    private Optional<Boolean> checkKnowledgeHavingResultDefinition(final Knowledge knowledge) {
-        return Optional.of(knowledge.getResultDefinitionParts().size() > 0);
-    }
-
     public Knowledge processResultPrompt(final String resultDefinitionId, final LocalDate referenceDate) {
         final Knowledge knowledge = new Knowledge();
         List<ResultPrompt> resultPrompts = resultCache.getResultPromptByResultDefinitionId(resultDefinitionId, referenceDate);
-        LOGGER.debug("resultPrompts unordered:" + resultPrompts);
+        LOGGER.debug("resultPrompts unordered: {}", resultPrompts);
         resultPrompts = new ResultPromptsOrder().process(resultPrompts);
-        LOGGER.debug("resultPrompts ordered:" + resultPrompts);
-        knowledge.setPromptChoices(resultPrompts.stream().map(resultPrompt -> {
-            PromptChoice promptChoice = new PromptChoice();
-            promptChoice.setCode(resultPrompt.getId());
-            promptChoice.setDurationElement(resultPrompt.getDurationElement());
-            promptChoice.setLabel(resultPrompt.getLabel());
-            promptChoice.setType(resultPrompt.getType());
-            final String resultPromptRule = resultPrompt.getResultPromptRule();
-            promptChoice.setRequired("optional".equals(resultPromptRule) ? FALSE : TRUE);
-            setComponentType(promptChoice, resultPromptRule, resultPrompt);
-            promptChoice.setFixedList(resultPrompt.getFixedList());
-            promptChoice.setDurationSequence(resultPrompt.getDurationSequence());
-            promptChoice.setHidden(resultPrompt.getHidden());
-            return promptChoice;
-        }).collect(toList()));
+        LOGGER.debug("resultPrompts ordered: {}", resultPrompts);
+        knowledge.setPromptChoices(resultPrompts.stream().map(this::getPromptChoice).collect(toList()));
         return knowledge;
+    }
+
+    private PromptChoice getPromptChoice(final ResultPrompt resultPrompt) {
+        final PromptChoice promptChoice = new PromptChoice();
+        promptChoice.setCode(resultPrompt.getId());
+        promptChoice.setDurationElement(resultPrompt.getDurationElement());
+        promptChoice.setWelshDurationElement(resultPrompt.getWelshDurationElement());
+        promptChoice.setLabel(resultPrompt.getLabel());
+        promptChoice.setType(resultPrompt.getType());
+        promptChoice.setPromptRef(resultPrompt.getReference());
+        promptChoice.setPromptOrder(resultPrompt.getPromptOrder());
+        final String resultPromptRule = resultPrompt.getResultPromptRule();
+        promptChoice.setRequired("optional".equals(resultPromptRule) ? FALSE : TRUE);
+        setComponentType(promptChoice, resultPromptRule, resultPrompt);
+        promptChoice.setFixedList(resultPrompt.getFixedList());
+        setNameAddressList(resultPrompt, promptChoice);
+        promptChoice.setComponentLabel(resultPrompt.getComponentLabel());
+        promptChoice.setAddressType(resultPrompt.getAddressType());
+        promptChoice.setListLabel(resultPrompt.getListLabel());
+        promptChoice.setPartName(resultPrompt.getPartName());
+        promptChoice.setDurationSequence(resultPrompt.getDurationSequence());
+        promptChoice.setHidden(resultPrompt.getHidden());
+        promptChoice.setNameEmail(resultPrompt.getNameEmail());
+        return promptChoice;
+    }
+
+    private void setNameAddressList(final ResultPrompt resultPrompt, final PromptChoice promptChoice) {
+        if (resultPrompt.getNameAddressList() != null) {
+            final Set<ResultPromptDynamicListNameAddress> nameAddressList = resultPrompt.getNameAddressList();
+            if (resultPrompt.getNameEmail() != null && resultPrompt.getNameEmail().booleanValue()) {
+                final Set<ResultPromptDynamicListNameAddress> nameEmailOnlyAddressList = nameAddressList.stream().map(nameAddress ->
+                        ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
+                                .withName(nameAddress.getName())
+                                .withEmailAddress1(nameAddress.getEmailAddress1())
+                                .build()
+                ).collect(toSet());
+                promptChoice.setNameAddressList(getNameAddressList(nameEmailOnlyAddressList));
+            } else {
+                promptChoice.setNameAddressList(getNameAddressList(nameAddressList));
+            }
+        }
+    }
+
+    private Set<NameAddress> getNameAddressList(final Set<ResultPromptDynamicListNameAddress> dynamicListNameAddressSet) {
+        return dynamicListNameAddressSet.stream().map(resultPromptDynamicListNameAddress -> NameAddress.nameAddress()
+                .withLabel(resultPromptDynamicListNameAddress.getName())
+                .withAddressParts(buildAddressParts(resultPromptDynamicListNameAddress))
+                .build()).collect(toSet());
+    }
+
+    private AddressParts buildAddressParts(final ResultPromptDynamicListNameAddress resultPromptDynamicListNameAddress) {
+
+        return AddressParts.addressParts()
+                .withName(resultPromptDynamicListNameAddress.getName())
+                .withFirstName(resultPromptDynamicListNameAddress.getFirstName())
+                .withMiddleName(resultPromptDynamicListNameAddress.getMiddleName())
+                .withLastName(resultPromptDynamicListNameAddress.getLastName())
+                .withAddress1(resultPromptDynamicListNameAddress.getAddressLine1())
+                .withAddress2(resultPromptDynamicListNameAddress.getAddressLine2())
+                .withAddress3(resultPromptDynamicListNameAddress.getAddressLine3())
+                .withAddress4(resultPromptDynamicListNameAddress.getAddressLine4())
+                .withAddress5(resultPromptDynamicListNameAddress.getAddressLine5())
+                .withPostCode(resultPromptDynamicListNameAddress.getPostcode())
+                .withEmail1(resultPromptDynamicListNameAddress.getEmailAddress1())
+                .withEmail2(resultPromptDynamicListNameAddress.getEmailAddress2())
+                .build();
+
     }
 
     private void setComponentType(final PromptChoice promptChoice, final String resultPromptRule, final ResultPrompt resultPrompt) {
@@ -119,13 +195,11 @@ public class Processor {
         return resultCache.getResultDefinitionsById(resultDefinitionId, orderedDate);
     }
 
-
     public ChildResultDefinitionDetail retrieveChildResultDefinitionDetail(final String resultDefinitionId, final LocalDate referenceDate) {
-
         final ResultDefinition resultDefinition = resultCache.getResultDefinitionsById(resultDefinitionId, referenceDate);
 
         ChildResultDefinitionDetail childResultDefinitionDetail = null;
-        if (Objects.nonNull(resultDefinition) && isNotEmpty(resultDefinition.getChildResultDefinitions())) {
+        if (nonNull(resultDefinition) && isNotEmpty(resultDefinition.getChildResultDefinitions())) {
             childResultDefinitionDetail = new ChildResultDefinitionDetail(resultDefinition,
                     retrieveChildResultDefinitions(resultDefinition, referenceDate));
         }
@@ -139,19 +213,22 @@ public class Processor {
                 .collect(toList());
     }
 
+    @SuppressWarnings("squid:S4165")
     private Knowledge getKnowledge(final List<String> values, final LocalDate referenceDate) {
+        final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = resultDefinitionMatcher.match(values, referenceDate);
+        final MatchingType matchingType = resultDefinitionMatchingOutput.getMatchingType();
         Knowledge knowledge = new Knowledge();
-        final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = match(values, referenceDate);
-        if (MatchingType.UNKNOWN.equals(resultDefinitionMatchingOutput.getMatchingType())) {
+
+        if (MatchingType.UNKNOWN.equals(matchingType)) {
             getAmbiguousResultDefinition(knowledge, values, referenceDate);
         } else {
             knowledge.setThisPerfectMatch(true);
-            if (MatchingType.EQUALS.equals(resultDefinitionMatchingOutput.getMatchingType())) {
-                knowledge = getEqualsPartsKnowledge(resultDefinitionMatchingOutput, knowledge, resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values, referenceDate));
+
+            if (MatchingType.EQUALS.equals(matchingType)) {
+                final Map<String, Set<String>> setMap = findDefinitionExactMatchSynonyms.run(values, referenceDate);
+                knowledge = addResulDefinitionParts(resultDefinitionMatchingOutput, knowledge, setMap);
             } else if (MatchingType.SHORT_CODE.equals(resultDefinitionMatchingOutput.getMatchingType())) {
-                knowledge = getShortCodePartsKnowledge(resultDefinitionMatchingOutput, knowledge);
-            } else if (MatchingType.CONTAINS.equals(resultDefinitionMatchingOutput.getMatchingType())) {
-                knowledge = getContainsPartsKnowledge(resultDefinitionMatchingOutput, knowledge, resultDefinitionMatcher.findDefinitionPartialMatchSynonyms.run(values, referenceDate));
+                knowledge = addResulDefinitionParts(resultDefinitionMatchingOutput, knowledge);
             }
         }
         return knowledge;
@@ -161,12 +238,12 @@ public class Processor {
         getResultPromptType(knowledge, values, referenceDate);
         getRemainingPromptTypes(knowledge, values);
         reprocessPromptTypeTXT(knowledge.getResultPromptParts().entrySet().stream().filter(e -> TXT == e.getValue().getType()).collect(Collectors.toMap(Entry::getKey, Entry::getValue)), referenceDate);
+
         return knowledge;
     }
 
     private void getAmbiguousResultDefinition(final Knowledge knowledge, final List<String> values, final LocalDate referenceDate) {
-
-        final Map<String, Set<String>> matchedSynonymWords = resultDefinitionMatcher.findDefinitionExactMatchSynonyms.run(values, referenceDate);
+        final Map<String, Set<String>> matchedSynonymWords = findDefinitionExactMatchSynonyms.run(values, referenceDate);
         final List<ResultDefinition> resultDefinitions = resultCache.getResultDefinitions(referenceDate);
         for (final Entry<String, Set<String>> entry : matchedSynonymWords.entrySet()) {
             final Set<ResultChoice> resultChoices = newHashSet();
@@ -179,9 +256,8 @@ public class Processor {
                 }
             }
             addToKnowledge(knowledge, entry.getKey(), resultChoices);
-
         }
-        final Set<ResultDefinition> resultDefinitionsByShortCode = resultDefinitionMatcher.findDefinitionsByShortCodes.run(values, referenceDate);
+        final Set<ResultDefinition> resultDefinitionsByShortCode = findDefinitionsByShortCodes.run(values, referenceDate);
         resultDefinitionsByShortCode.forEach(resultDefinition -> {
             final Set<ResultChoice> resultChoices = newHashSet();
             final String partValue = resultDefinition.getShortCode().toLowerCase();
@@ -189,7 +265,6 @@ public class Processor {
             resultChoices.add(resultChoice);
             addToKnowledge(knowledge, partValue, resultChoices);
         });
-
     }
 
     private void addToKnowledge(final Knowledge knowledge, final String key, final Set<ResultChoice> collect) {
@@ -202,22 +277,6 @@ public class Processor {
         knowledge.addResultDefinitionParts(key, part);
     }
 
-    /**
-     * Reprocessing TXT types for parts type duration with no gaps e.g 2y is 2 years
-     */
-    void reprocessPromptTypeTXT(final Map<String, Part> txtParts, final LocalDate referenceDate) {
-        for (final Entry<String, Part> part : txtParts.entrySet()) {
-            final String onlyStringValue = StringUtils.isAlphanumeric(part.getKey()) ? parse(part.getKey()) : null;
-            if (onlyStringValue != null) {
-                final ResultPrompt resultPrompt = resultPromptMatcher.match(Arrays.asList(onlyStringValue), referenceDate).getResultPrompt();
-                if (resultPrompt != null && DURATION == resultPrompt.getType()) {
-                    changePartFromTxtToDuration(part, resultPrompt);
-                }
-            }
-        }
-
-    }
-
     private void changePartFromTxtToDuration(final Entry<String, Part> part, final ResultPrompt resultPrompt) {
         final Part p = part.getValue();
         p.setType(resultPrompt.getType());
@@ -227,11 +286,13 @@ public class Processor {
         }
     }
 
-    private ResultChoice getResultChoice(final ResultDefinition resultDefinition) {
-        final ResultChoice resultChoice = new ResultChoice(resultDefinition.getId(), resultDefinition.getLabel());
-        resultChoice.setLevel(resultDefinition.getLevel());
-        resultChoice.setType(RESULT);
-        return resultChoice;
+    private void getResultPromptType(final Knowledge knowledge, final List<String> values, final LocalDate referenceDate) {
+        ResultPromptMatchingOutput resultPromptMatchingOutput = resultPromptMatcher.match(values, referenceDate, Optional.of(knowledge));
+        while (nonNull(resultPromptMatchingOutput) && nonNull(resultPromptMatchingOutput.getResultPrompt())) {
+            addResultPromptParts(resultPromptMatchingOutput, knowledge, findPromptSynonyms.run(values, referenceDate));
+            values.removeAll(knowledge.getResultPromptParts().keySet());
+            resultPromptMatchingOutput = resultPromptMatcher.match(values, referenceDate, Optional.of(knowledge));
+        }
     }
 
     private void getRemainingPromptTypes(final Knowledge knowledge, final List<String> values) {
@@ -252,9 +313,30 @@ public class Processor {
                     p.setState(UNRESOLVED);
                     knowledge.addResultPromptParts(s, p);
                 }
-
         );
         values.removeAll(knowledge.getResultPromptParts().keySet());
+    }
+
+    /**
+     * Reprocessing TXT types for parts type duration with no gaps e.g 2y is 2 years
+     */
+    private void reprocessPromptTypeTXT(final Map<String, Part> txtParts, final LocalDate referenceDate) {
+        for (final Entry<String, Part> part : txtParts.entrySet()) {
+            final String onlyStringValue = StringUtils.isAlphanumeric(part.getKey()) ? parse(part.getKey()) : null;
+            if (onlyStringValue != null) {
+                final ResultPrompt resultPrompt = resultPromptMatcher.match(Arrays.asList(onlyStringValue), referenceDate).getResultPrompt();
+                if (resultPrompt != null && DURATION == resultPrompt.getType()) {
+                    changePartFromTxtToDuration(part, resultPrompt);
+                }
+            }
+        }
+    }
+
+    private ResultChoice getResultChoice(final ResultDefinition resultDefinition) {
+        final ResultChoice resultChoice = new ResultChoice(resultDefinition.getId(), resultDefinition.getLabel());
+        resultChoice.setLevel(resultDefinition.getLevel());
+        resultChoice.setType(RESULT);
+        return resultChoice;
     }
 
     private void addAllPartsAsTxt(final Knowledge knowledge, final List<String> values) {
@@ -264,77 +346,49 @@ public class Processor {
                     p.setState(UNRESOLVED);
                     knowledge.addResultPromptParts(s, p);
                 }
-
         );
         values.removeAll(knowledge.getResultPromptParts().keySet());
     }
 
-    private void getResultPromptType(final Knowledge knowledge, final List<String> values, final LocalDate referenceDate) {
-        ResultPromptMatchingOutput resultPromptMatchingOutput = resultPromptMatcher.match(values, referenceDate);
-        while (resultPromptMatchingOutput != null && resultPromptMatchingOutput.getResultPrompt() != null) {
-            getPromptParts(resultPromptMatchingOutput, knowledge, resultPromptMatcher.findPromptSynonyms.run(values, referenceDate));
-            values.removeAll(knowledge.getResultPromptParts().keySet());
-            resultPromptMatchingOutput = resultPromptMatcher.match(values, referenceDate);
-        }
-
-    }
-
-    void getPromptParts(final ResultPromptMatchingOutput resultPromptMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
-        findQualifiedPartsForResultPrompt(resultPromptMatchingOutput, knowledge, values);
-    }
-
-    private Knowledge getShortCodePartsKnowledge(final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput, final Knowledge knowledge) {
+    private Knowledge addResulDefinitionParts(final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput, final Knowledge knowledge) {
         final ResultDefinition resultDefinition = resultDefinitionMatchingOutput.getResultDefinition();
-        knowledge.addResultDefinitionParts(resultDefinition.getShortCode().toLowerCase(), getPart(resultDefinition));
+        knowledge.addResultDefinitionParts(resultDefinition.getShortCode().toLowerCase(), generatePart(resultDefinition));
         return knowledge;
     }
 
-
-    Knowledge getContainsPartsKnowledge(final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
-        findQualifiedPartsForResultDefinition(resultDefinitionMatchingOutput, knowledge, values);
-        return knowledge;
-    }
-
-    Knowledge getEqualsPartsKnowledge(final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
-        findQualifiedPartsForResultDefinition(resultDefinitionMatchingOutput, knowledge, values);
-        return knowledge;
-    }
-
-    private void findQualifiedPartsForResultDefinition(final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
+    private Knowledge addResulDefinitionParts(final ResultDefinitionMatchingOutput resultDefinitionMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
         final ResultDefinition resultDefinition = resultDefinitionMatchingOutput.getResultDefinition();
         values.entrySet().stream().forEach(stringSetEntry -> resultDefinitionMatchingOutput.getResultDefinition().getKeywords().forEach(s -> {
             if (stringSetEntry.getValue().contains(s)) {
-                knowledge.addResultDefinitionParts(stringSetEntry.getKey(), getPart(resultDefinition));
+                knowledge.addResultDefinitionParts(stringSetEntry.getKey(), generatePart(resultDefinition));
             }
         }));
+        return knowledge;
     }
 
-    private void findQualifiedPartsForResultPrompt(final ResultPromptMatchingOutput resultPromptMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
+    private void addResultPromptParts(final ResultPromptMatchingOutput resultPromptMatchingOutput, final Knowledge knowledge, final Map<String, Set<String>> values) {
         final ResultPrompt resultPrompt = resultPromptMatchingOutput.getResultPrompt();
         values.entrySet().stream().forEach(stringSetEntry -> resultPromptMatchingOutput.getResultPrompt().getKeywords().forEach(s -> {
             if (stringSetEntry.getValue().contains(s)) {
-                knowledge.addResultPromptParts(stringSetEntry.getKey(), getPart(resultPrompt));
+                knowledge.addResultPromptParts(stringSetEntry.getKey(), generatePart(resultPrompt));
             }
         }));
     }
 
-    private Part getPart(final ResultDefinition resultDefinition) {
+    private Part generatePart(final ResultDefinition resultDefinition) {
         final Part part = new Part();
-        setCommonProperty(part, resultDefinition.getId(), resultDefinition.getLabel());
+        part.setCode(resultDefinition.getId());
+        part.setValue(resultDefinition.getLabel());
         part.setType(RESULT);
         part.setState(RESOLVED);
         part.setResultLevel(resultDefinition.getLevel());
         return part;
     }
 
-    private void setCommonProperty(final Part part, final String id, final String label) {
-        part.setCode(id);
-        part.setValue(label);
-    }
-
-    private Part getPart(final ResultPrompt resultPrompt) {
+    private Part generatePart(final ResultPrompt resultPrompt) {
         final Part part = new Part();
-        setCommonProperty(part, resultPrompt.getId(), resultPrompt.getLabel());
+        part.setCode(resultPrompt.getId());
+        part.setValue(resultPrompt.getLabel());
         part.setType(resultPrompt.getType());
         part.setState(UNRESOLVED);
         if (!StringUtils.isEmpty(resultPrompt.getDurationElement())) {
@@ -343,10 +397,6 @@ public class Processor {
             part.setLabel(resultPrompt.getLabel());
         }
         return part;
-    }
-
-    private ResultDefinitionMatchingOutput match(final List<String> partsValues, final LocalDate referenceDate) {
-        return resultDefinitionMatcher.match(partsValues, referenceDate);
     }
 
     private List<Long> getIndexes(final String word, final LocalDate referenceDate) {

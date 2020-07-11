@@ -130,6 +130,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .withWelshLabel(pin.getWelshLabel())
                                 .withId(pin.getId())
                                 .withLabel(pin.getLabel())
+                                .withPromptRef(pin.getPromptRef())
                                 .build())
                                 .collect(Collectors.toList())
                 )

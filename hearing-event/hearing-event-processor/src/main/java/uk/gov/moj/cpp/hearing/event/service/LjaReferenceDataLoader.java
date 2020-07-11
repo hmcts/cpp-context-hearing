@@ -1,15 +1,10 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
-import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
@@ -29,7 +24,6 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 
 public class LjaReferenceDataLoader {
 
@@ -70,22 +64,6 @@ public class LjaReferenceDataLoader {
         return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payloadAsJsonObject(), EnforcementArea.class);
     }
 
-    private EnforcementArea getEnforcementAreaByPostcode(final JsonEnvelope sourceEvent, final String postcode) {
-        final JsonObject queryParams = createObjectBuilder().add("postcode", postcode).build();
-
-        final Optional<JsonObject> jsonObject = getEnforcementArea(sourceEvent, queryParams);
-
-        return jsonObject.map(object -> jsonObjectToObjectConverter.convert(object, EnforcementArea.class)).orElse(null);
-    }
-
-    private Optional<JsonObject> getEnforcementArea(final JsonEnvelope sourceEvent, final JsonObject queryParams) {
-        final Envelope<JsonObject> requestEnvelope = envelop(queryParams)
-                .withName(ENFORCEMENT_AREA_QUERY_NAME)
-                .withMetadataFrom(sourceEvent);
-        final JsonValue enforcementArea = requester.requestAsAdmin(envelopeFrom(requestEnvelope.metadata(), requestEnvelope.payload())).payload();
-        return JsonValue.NULL.equals(enforcementArea) ? empty() : of((JsonObject) enforcementArea);
-    }
-
     public LocalJusticeAreas getLJAByNationalCourtCode(JsonEnvelope context, final String nationalCourtCode) {
 
         final JsonObject queryParams = createObjectBuilder().add("nationalCourtCode", nationalCourtCode).build();
@@ -101,43 +79,20 @@ public class LjaReferenceDataLoader {
         final Optional<LocalJusticeAreas> lja = localJusticeAreasResult.getLocalJusticeAreas().stream()
                 .filter(localJusticeAreas -> localJusticeAreas.getNationalCourtCode().equalsIgnoreCase(nationalCourtCode))
                 .findFirst();
-
-
         return lja.orElseGet(() -> null);
     }
 
-    public LjaDetails getLjaDetails(JsonEnvelope context, final UUID courtCentreId, final String postcode) {
+    public LjaDetails getLjaDetails(JsonEnvelope context, final UUID courtCentreId) {
         final OrganisationalUnit organisationUnit = organisationalUnitById(context, courtCentreId);
         final EnforcementAreaBacs enforcementAreaBACS = organisationUnit.getEnforcementArea();
         if (isNull(enforcementAreaBACS)) {
             throw new BacsNotFoundException(String.format("No BACS details found for court centreId %s", courtCentreId));
         }
-
-        EnforcementArea postcodeEnforcementArea = nonNull(postcode) ? getEnforcementAreaByPostcode(context, postcode) : null;
         final EnforcementArea courtEnforcementArea = enforcementAreaByLjaCode(context, organisationUnit.getLja());
-
-        if (isNull(postcodeEnforcementArea)) {
-            postcodeEnforcementArea = courtEnforcementArea;
-        }
-
         return LjaDetails.ljaDetails()
                 .withLjaCode(courtEnforcementArea.getLocalJusticeArea().getNationalCourtCode())
-                .withEnforcementPhoneNumber(postcodeEnforcementArea.getPhone())
-                .withEnforcementEmail(postcodeEnforcementArea.getEmail())
                 .withLjaName(courtEnforcementArea.getLocalJusticeArea().getName())
-                .withAccountDivisionCode(ofNullable(postcodeEnforcementArea.getAccountDivisionCode()).map(Object::toString).orElse(null))
-                .withBacsSortCode(enforcementAreaBACS.getBankAccntSortCode())
-                .withBacsBankName(enforcementAreaBACS.getBankAccntName())
-                .withBacsAccountNumber(enforcementAreaBACS.getBankAccntNum().toString())
-                .withEnforcementAddress(
-                        Address.address()
-                                .withAddress1(postcodeEnforcementArea.getAddress1())
-                                .withAddress2(postcodeEnforcementArea.getAddress2())
-                                .withAddress3(postcodeEnforcementArea.getAddress3())
-                                .withAddress4(postcodeEnforcementArea.getAddress4())
-                                .withPostcode(postcodeEnforcementArea.getPostcode())
-                                .build()
-                )
+                .withWelshLjaName(courtEnforcementArea.getLocalJusticeArea().getWelshName())
                 .build();
     }
 }

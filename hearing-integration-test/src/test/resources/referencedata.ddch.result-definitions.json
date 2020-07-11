@@ -9,8 +9,7 @@
       "level": "D",
       "rank": 52200,
       "userGroups": [
-        "Court Clerks",
-        "Legal Advisers"
+
       ],
       "financial": "N",
       "adjournment": "N",
@@ -22,12 +21,14 @@
       "postHearingCustodyStatus": "A",
       "terminatesOffenceProceedings": false,
       "lifeDuration": false,
+      "rollUpPrompts": true,
+      "publishedForNows": false,
       "publishedAsAPrompt": false,
       "excludedFromResults": false,
       "alwaysPublished": false,
       "jurisdiction": "B",
       "lCode": "DDCH",
-      "isAvailableForCourtExtract": true
+      "isAvailableForCourtExtract": false
     }
   ]
 }

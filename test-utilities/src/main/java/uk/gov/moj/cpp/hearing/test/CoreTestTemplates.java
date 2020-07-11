@@ -224,7 +224,7 @@ public class CoreTestTemplates {
     public static OffenceFacts.Builder offenceFacts() {
         return OffenceFacts.offenceFacts()
                 .withAlcoholReadingAmount(INTEGER.next())
-                .withAlcoholReadingMethodCode(STRING.next())
+                .withAlcoholReadingMethodCode("B")
                 .withVehicleMake(STRING.next())
                 .withVehicleRegistration(STRING.next());
 
@@ -474,7 +474,7 @@ public class CoreTestTemplates {
                 .withNumberOfPreviousConvictionsCited(INTEGER.next())
                 .withProsecutionAuthorityReference(STRING.next())
                 .withIsYouth(Boolean.TRUE)
-                .withJudicialResults(asList(JudicialResult.judicialResult()
+                .withDefendantCaseJudicialResults(asList(JudicialResult.judicialResult()
                         .withJudicialResultTypeId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b"))
                         .withLabel("Defendant's details changed")
                         .withCjsCode("4592")
@@ -589,9 +589,9 @@ public class CoreTestTemplates {
                 .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build()))
+                .withHearingDays(asList(hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build()))
                 .withCourtCentre(courtCentreWithArgs(courtAndRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
@@ -630,9 +630,9 @@ public class CoreTestTemplates {
                 .withType(hearingType(hearingTypeId).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(    hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build(),
-                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(),random.nextInt((max - min) + 1) + min).build()))
+                .withHearingDays(asList(hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build()))
                 .withCourtCentre(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))

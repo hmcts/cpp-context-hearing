@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import static com.google.common.collect.ImmutableList.of;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -9,7 +9,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.FixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.FixedListElement;
@@ -39,24 +38,10 @@ public class NowsReferenceCacheTest {
     NowsReferenceCache target;
 
     @Test
-    public void loadAllNowsReference_shouldReturnValue() throws Exception {
-
-        final AllNows allNows = new AllNows();
-
-        final LocalDate referenceDate = LocalDate.now();
-
-        when(nowsReferenceDataLoader.loadAllNowsReference(null, referenceDate)).thenReturn(allNows);
-
-        final AllNows results = target.getAllNows(null, referenceDate);
-
-        assertThat(results, is(allNows));
-    }
-
-    @Test
-    public void getResultDefinitionById_shouldReturnValue() {
+    public void shouldReturnCorrectValueForResultDefinitionById() {
         Map<UUID, TreeNode<ResultDefinition>> map = new HashMap<>();
         ResultDefinition resultDefinition = buildResultDefinition();
-        map.put(resultDefinition.getId(), new TreeNode(resultDefinition.getId(), resultDefinition));
+        map.put(resultDefinition.getId(), new TreeNode<>(resultDefinition.getId(), resultDefinition));
 
         final LocalDate referenceDate = LocalDate.now();
 
@@ -93,11 +78,11 @@ public class NowsReferenceCacheTest {
     @Test
     public void getFixedListById_shouldReturnValue() {
         final AllFixedList getAllFixedList = AllFixedList.allFixedList().setFixedListCollection(
-                asList(FixedList.fixedList()
-                        .setId(UUID.randomUUID())
+                singletonList(FixedList.fixedList()
+                        .setId(randomUUID())
                         .setStartDate(LocalDate.now())
                         .setEndDate(LocalDate.now())
-                        .setElements(asList(FixedListElement.fixedListElement()
+                        .setElements(singletonList(FixedListElement.fixedListElement()
                                 .setCode("code")
                                 .setValue("value")
                                 .setWelshValue("welshCode")

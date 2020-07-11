@@ -211,18 +211,21 @@
             {
               "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
               "label": "Total imprisonment period",
+              "promptRef": "totalImprisonmentPeriod",
               "value": "false Total imprisonment period is life",
               "welshValue": ""
             },
             {
               "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
               "label": "Prison",
+              "promptRef": "prison",
               "value": "test 1",
               "welshValue": ""
             },
             {
               "id": "266a2bbe-b6b5-4b24-830d-70ceff3e2cac",
               "label": "Probation team to be notified",
+              "promptRef": "probationPeriodTobeNotified",
               "value": "test 2",
               "welshValue": ""
             }
@@ -251,12 +254,14 @@
             {
               "id": "76f15753-1706-42fb-b922-0d56d01e5706",
               "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
               "value": "5 Years",
               "welshValue": ""
             },
             {
               "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
               "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCount",
               "value": "55",
               "welshValue": ""
             }

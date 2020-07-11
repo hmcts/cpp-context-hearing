@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.utils;
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDocumentCreate;
-import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubProgressionGenerateNows;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
@@ -42,7 +41,6 @@ public class StubPerExecution {
         stubEnableAllCapabilities();
         mockMaterialUpload();
         mockUpdateHmpsMaterialStatus();
-        stubProgressionGenerateNows();
         stubForReferenceDataResults();
         stubRelistReferenceDataResults();
         stubFixedListForWelshValues();

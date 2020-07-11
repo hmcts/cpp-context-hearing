@@ -10,12 +10,9 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -45,7 +42,7 @@ public class CustodyTimeLimitCalculatorTest {
                                         JudicialResultPrompt.judicialResultPrompt()
                                                 .withPromptReference(CustodyTimeLimitCalculator.CTL_TIME_LIMIT_PROMPT_REF
                                                 )
-                                                .withValue( timeLimitIn.format(DateTimeFormatter.ofPattern(CustodyTimeLimitCalculator.DATE_FORMAT0))      )
+                                                .withValue(timeLimitIn.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
                                                 .build())
                         )
                         .build()))

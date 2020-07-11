@@ -13,30 +13,47 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-class ComparePromptKeywordsUsingIndexes implements ResultFilter<ResultPrompt, Map<Set<String>, Set<Long>>> {
-
+public class ComparePromptKeywordsUsingIndexes {
 
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
-    @Override
+    private static final int INDEX_NOT_FOUND_LONG = -1;
+
     public ResultPrompt run(final Map<Set<String>, Set<Long>> indexes, final LocalDate orderedDate) {
+        return run(indexes, orderedDate, Optional.empty());
+    }
 
+    public ResultPrompt run(final Map<Set<String>, Set<Long>> indexes, final LocalDate orderedDate, final Optional<Set<String>> resultDefinitionIds) {
         final List<ResultPrompt> resultPrompts = resultCache.getResultPrompt(orderedDate);
-        OptionalLong index = indexes.entrySet()
-                .stream()
-                .mapToLong(value -> {
-                    Optional<Long> index1 = value.getValue().stream().filter(aLong -> {
-                        Set<String> keywords = resultPrompts.get(aLong.intValue()).getKeywords();
-                        return keywords.containsAll(value.getKey()) && keywords.size() == value.getKey().size();
-                    }).findFirst();
-                    return index1.orElse(-1l);
-                }).filter(v -> v > -1).findFirst();
+        OptionalLong index = getIndex(indexes, resultPrompts, resultDefinitionIds);
 
-        if (index.isPresent()) {
+        if (index.isPresent()) { // Search highest prompt match by result definition
             return resultPrompts.get((int) index.getAsLong());
+        } else { // If not found by result definition, search without it
+            index = getIndex(indexes, resultPrompts, Optional.empty());
+            if (index.isPresent()) {
+                return resultPrompts.get((int) index.getAsLong());
+            } else {
+                return null;
+            }
         }
+    }
 
-        return null;
+    private OptionalLong getIndex(final Map<Set<String>, Set<Long>> indexes, final List<ResultPrompt> resultPrompts, final Optional<Set<String>> resultDefinitionIds) {
+        return indexes.entrySet().stream()
+                .mapToLong(indexMap -> indexMap.getValue().stream().filter(index -> {
+                    final ResultPrompt resultPrompt = resultPrompts.get(index.intValue());
+                    final String resultDefinitionId = resultPrompt.getResultDefinitionId().toString();
+                    final Set<String> keywords = resultPrompt.getKeywords();
+
+                    if (resultDefinitionIds.isPresent()) {
+                        final Set<String> resultDefinitionIdSet = resultDefinitionIds.get();
+                        return resultDefinitionIdSet.contains(resultDefinitionId) && keywords.containsAll(indexMap.getKey()) && keywords.size() == indexMap.getKey().size();
+                    } else {
+                        return keywords.containsAll(indexMap.getKey()) && keywords.size() == indexMap.getKey().size();
+                    }
+                }).findFirst().orElse(Long.valueOf(INDEX_NOT_FOUND_LONG)))
+                .filter(value -> value > INDEX_NOT_FOUND_LONG).findFirst();
     }
 }

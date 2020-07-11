@@ -6,6 +6,7 @@ import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
@@ -40,6 +41,15 @@ public class BailStatusReasonHelperTest {
         assertThat(bailReasonResult, is("123" + System.lineSeparator() + "675"));
     }
 
+    @Test
+    public void testNoMapBailStatusReason() {
+        final ResultsShared resultsSharedTemplate = buildOffenceWithOutResultsSharedTemplate();
+        new BailStatusReasonHelper().setReason(resultsSharedTemplate);
+
+        final String bailReasonResult = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailReasons();
+        assertNull(bailReasonResult);
+    }
+
     private ResultsShared buildResultsSharedTemplate() {
         return builder()
                 .withHearing(hearing()
@@ -65,6 +75,25 @@ public class BailStatusReasonHelperTest {
                                                         .withPostHearingCustodyStatus("UNCONDITIONAL")
                                                         .build()))
                                                 .build()))
+                                        .withPersonDefendant(personDefendant().build())
+                                        .build())
+                                )
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private ResultsShared buildOffenceWithOutResultsSharedTemplate() {
+        return builder()
+                .withHearing(hearing()
+                        .withHearingDays(asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(singletonList(Defendant.defendant()
+                                        .withOffences(asList(offence().build(), offence().build()))
                                         .withPersonDefendant(personDefendant().build())
                                         .build())
                                 )

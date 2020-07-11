@@ -3,79 +3,37 @@ package uk.gov.justice.ccr.notepad.process;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.EQUALS;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.SHORT_CODE;
 import static uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType.UNKNOWN;
 
-import uk.gov.justice.ccr.notepad.result.cache.CacheFactory;
-import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
-import uk.gov.justice.ccr.notepad.result.loader.FileResultLoader;
+import uk.gov.justice.ccr.notepad.shared.AbstractTest;
 import uk.gov.justice.ccr.notepad.view.Part;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 
-import com.google.common.cache.LoadingCache;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ResultDefinitionMatcherTest {
-    @Spy
-    @InjectMocks
-    ResultCache resultCache = new ResultCache();
-    @Spy
-    FileResultLoader fileResultLoader = new FileResultLoader();
-    @InjectMocks
-    ResultDefinitionMatcher testObj = new ResultDefinitionMatcher();
-    FindDefinitionsIndexesByKeyword findDefinitionsIndexesByKeyword = new FindDefinitionsIndexesByKeyword();
-    CompareDefinitionKeywordsUsingIndexes compareDefinitionKeywordsUsingIndexes = new CompareDefinitionKeywordsUsingIndexes();
-    FindDefinitionPartialMatchSynonyms findDefinitionPartialMatchSynonyms = new FindDefinitionPartialMatchSynonyms();
-    FindDefinitionsByShortCodes findDefinitionsByShortCodes = new FindDefinitionsByShortCodes();
-    FindDefinitionExactMatchSynonyms findDefinitionExactMatchSynonyms = new FindDefinitionExactMatchSynonyms();
-    GroupResultByIndex groupResultByIndex = new GroupResultByIndex();
-    @Mock
-    private CacheFactory cacheFactory;
-    @Mock
-    private LoadingCache<String, Object> cache;
+public class ResultDefinitionMatcherTest extends AbstractTest {
 
-    @Before
-    public void init() throws ExecutionException {
-        when(cacheFactory.build()).thenReturn(cache);
-        final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
-        when(cache.asMap()).thenReturn(cacheValue);
-
-        resultCache.lazyLoad(null, LocalDate.now());
-        findDefinitionsIndexesByKeyword.resultCache = resultCache;
-        compareDefinitionKeywordsUsingIndexes.resultCache = resultCache;
-        findDefinitionExactMatchSynonyms.resultCache = resultCache;
-        findDefinitionsByShortCodes.resultCache = resultCache;
-        findDefinitionPartialMatchSynonyms.resultCache = resultCache;
-        testObj.findDefinitionsIndexesByKeyword = findDefinitionsIndexesByKeyword;
-        testObj.compareDefinitionKeywordsUsingIndexes = compareDefinitionKeywordsUsingIndexes;
-        testObj.findDefinitionExactMatchSynonyms = findDefinitionExactMatchSynonyms;
-        testObj.groupResultByIndex = groupResultByIndex;
-        testObj.findDefinitionPartialMatchSynonyms = findDefinitionPartialMatchSynonyms;
-        testObj.findDefinitionsByShortCodes = findDefinitionsByShortCodes;
-    }
+    @InjectMocks
+    ResultDefinitionMatcher target = new ResultDefinitionMatcher();
 
     @Test
-    public void match1() throws Exception {
+    public void shouldMatchRestrainingOrderForPeriodPattern1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prd imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -88,11 +46,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match2() throws Exception {
+    public void shouldMatchMandatoryLifeImprisonmentPattern1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("mand life imp release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -105,11 +63,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3() throws Exception {
+    public void shouldMatchRestrainingOrderForPeriodPattern2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prd pard");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -122,11 +80,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_1() throws Exception {
+    public void shouldMatchCommunityRequirementProhibitedActivityForDatePattern1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("restr ord pred pard");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -139,11 +97,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_2() throws Exception {
+    public void shouldNotMatchAnyPattern1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("restr ord prd fur");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -152,11 +110,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_3() throws Exception {
+    public void shouldNotMatchAnyPattern2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("tes");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -165,11 +123,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_4() throws Exception {
+    public void shouldMatchEqualsPattern1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("timp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -178,11 +136,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_5() throws Exception {
+    public void shouldMatchEqualsPattern2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("stimp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -191,11 +149,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_6() throws Exception {
+    public void shouldMatchEqualsPattern3() throws Exception {
         List<Part> parts = new PartsResolver().getParts("community ord em curfew");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -204,11 +162,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_6_1() throws Exception {
+    public void shouldMatchEqualsPattern4() throws Exception {
         List<Part> parts = new PartsResolver().getParts("community order em curfew");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -217,11 +175,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match3_7() throws Exception {
+    public void shouldMatchEqualsPattern5() throws Exception {
         List<Part> parts = new PartsResolver().getParts("imp");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getMatchingType()
@@ -230,11 +188,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match4() throws Exception {
+    public void shouldResultDefinitionIsNull() throws Exception {
         List<Part> parts = new PartsResolver().getParts("iquash pard");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition() == null
@@ -243,11 +201,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match5() throws Exception {
+    public void shouldMatchIndictmentQuashed() throws Exception {
         List<Part> parts = new PartsResolver().getParts("iquash hello hi 2 5");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -260,11 +218,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void match7() throws Exception {
+    public void shouldMatchFinePatter1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("f f f f f f f f f f f f f f f f f f f f f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = testObj.match(values, LocalDate.now());
+        ResultDefinitionMatchingOutput resultDefinitionMatchingOutput = target.match(values, LocalDate.now());
 
         assertThat(
                 resultDefinitionMatchingOutput.getResultDefinition().getLabel()
@@ -277,11 +235,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchEqual1() throws Exception {
+    public void shouldMatchEqual1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prd imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchBySynonym(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -290,21 +248,21 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchEqual4() throws Exception {
+    public void shouldMatchEqual4() throws Exception {
         List<Part> parts = new PartsResolver().getParts("com");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchBySynonym(values, LocalDate.now());
 
         assertThat(resultDefinition.isPresent(), is(false));
     }
 
     @Test
-    public void matchEqual5() throws Exception {
+    public void shouldMatchEqual5() throws Exception {
         List<Part> parts = new PartsResolver().getParts("upw");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchBySynonym(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -313,11 +271,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchEqual2() throws Exception {
+    public void shouldMatchEqual2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prdr further imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchBySynonym(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -326,11 +284,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchEqual3() throws Exception {
+    public void shouldMatchEqual3() throws Exception {
         List<Part> parts = new PartsResolver().getParts("mand life imp release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchBySynonym(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -339,11 +297,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchEqual_When_No_Result_Definition_Found() throws Exception {
+    public void shouldMatchEqualWhenNoResultDefinitionFound() throws Exception {
         List<Part> parts = new PartsResolver().getParts("mandi life impi release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchEqual(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchBySynonym(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.isPresent()
@@ -352,11 +310,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchContains1() throws Exception {
+    public void shouldMatchContains1() throws Exception {
         List<Part> parts = new PartsResolver().getParts("res ord pr su");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -365,11 +323,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchContains2() throws Exception {
+    public void shouldMatchContains2() throws Exception {
         List<Part> parts = new PartsResolver().getParts("rest ord prdr further imp sus");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -378,11 +336,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchContains3() throws Exception {
+    public void shouldMatchContains3() throws Exception {
         List<Part> parts = new PartsResolver().getParts("mand life imp release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -391,11 +349,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchContains_When_No_Result_Definition_Found() throws Exception {
+    public void shouldMatchContainsWhenNoResultDefinitionFound() throws Exception {
         List<Part> parts = new PartsResolver().getParts("mandi life impi release");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchContains(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchContains(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.isPresent()
@@ -404,11 +362,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchShortCode1() throws ExecutionException {
+    public void shouldMatchShortCode1() throws ExecutionException {
         List<Part> parts = new PartsResolver().getParts("pard 123 $123");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchByShortCode(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()
@@ -418,11 +376,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchShortCode2() throws ExecutionException {
+    public void shouldMatchShortCode2() throws ExecutionException {
         List<Part> parts = new PartsResolver().getParts("pard pr");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchByShortCode(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.isPresent()
@@ -432,11 +390,11 @@ public class ResultDefinitionMatcherTest {
     }
 
     @Test
-    public void matchShortCode3() throws ExecutionException {
+    public void shouldMatchShortCode3() throws ExecutionException {
         List<Part> parts = new PartsResolver().getParts("f f f f f f f f f f f f f f f f f");
         List<String> values = parts.stream().map(Part::getValueAsString).collect(toList());
 
-        Optional<ResultDefinition> resultDefinition = testObj.matchShortCode(values, LocalDate.now());
+        Optional<ResultDefinition> resultDefinition = target.matchByShortCode(values, LocalDate.now());
 
         assertThat(
                 resultDefinition.get().getLabel()

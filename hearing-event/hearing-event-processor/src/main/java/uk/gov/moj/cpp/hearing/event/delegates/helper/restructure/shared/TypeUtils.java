@@ -21,4 +21,8 @@ public class TypeUtils {
     public static String getString(final String originalValue, final String defaultValue) {
         return nonNull(originalValue) && !originalValue.isEmpty() ? originalValue : defaultValue;
     }
+
+    public static String convertBooleanPromptValue(final String originalValue) {
+        return "true".equalsIgnoreCase(originalValue) ? "Yes" : "No";
+    }
 }

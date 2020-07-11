@@ -113,8 +113,10 @@ import javax.json.JsonObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore("The NCES feature will be upgraded after NOWs feature. Due to this reason this IT Test has been ignored.")
 public class NCESJourneyIT extends AbstractIT {
 
     public static final String PUBLIC_EVENT_PROGRESSION_HEARING_EXTENDED = "public.progression.events.hearing-extended";
@@ -427,7 +429,8 @@ public class NCESJourneyIT extends AbstractIT {
         //setup reference data for ordered date
         setupNowsReferenceData(orderedDate, allNows.it());
 
-        stubLjaDetails(hearingCommandHelper.getHearing().getCourtCentre().getId());
+        stubLjaDetails(hearingCommandHelper.getHearing().getCourtCentre(),
+                hearingCommandHelper.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
 
         CourtCentre courtCentre = hearingCommandHelper.getHearing().getCourtCentre();
         stubGetReferenceDataCourtRooms(courtCentre, hearingCommandHelper.getHearing().getHearingLanguage(), ouId3, ouId4);

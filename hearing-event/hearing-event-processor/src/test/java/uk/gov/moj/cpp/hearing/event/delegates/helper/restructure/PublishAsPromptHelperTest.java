@@ -58,7 +58,7 @@ public class PublishAsPromptHelperTest {
         childResultLineTreeNode.addParent(parentResultLineTreeNode);
         parentResultLineTreeNode.setJudicialResult(judicialResult().build());
         final List<TreeNode<ResultLine>> resultLineTreeNodes = new ArrayList<>(asList(parentResultLineTreeNode, childResultLineTreeNode));
-        processPublishAsPrompt(childResultLineTreeNode, resultLineTreeNodes);
+        processPublishAsPrompt(parentResultLineTreeNode, childResultLineTreeNode, resultLineTreeNodes);
         assertThat(resultLineTreeNodes.size(), is(1));
         final List<JudicialResultPrompt> judicialResultPrompts = resultLineTreeNodes.get(0).getJudicialResult().getJudicialResultPrompts();
         assertThat(resultLineTreeNodes.get(0).getJudicialResult().getQualifier(), is(childResultLineTreeNode.getResultDefinition().getData().getQualifier()));

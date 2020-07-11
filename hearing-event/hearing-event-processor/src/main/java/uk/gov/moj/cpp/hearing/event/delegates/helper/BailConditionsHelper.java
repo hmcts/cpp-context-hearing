@@ -28,18 +28,14 @@ public class BailConditionsHelper {
                 .getProsecutionCases()
                 .stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .map(this::setBailConditions)
-                .collect(toList());
+                .forEach(this::setBailConditions);
     }
 
-    private Defendant setBailConditions(final Defendant defendant) {
-        if (defendant.getPersonDefendant() != null) {
-            defendant
-                    .getPersonDefendant()
-                    .setBailConditions(getBailConditions(defendant.getOffences()));
+    private void setBailConditions(final Defendant defendant) {
+        final String bailConditions = getBailConditions(defendant.getOffences());
+        if (!bailConditions.isEmpty()) {
+            defendant.getPersonDefendant().setBailConditions(bailConditions);
         }
-
-        return defendant;
     }
 
     private String getBailConditions(final List<Offence> offences) {
@@ -49,15 +45,15 @@ public class BailConditionsHelper {
     }
 
     private StringBuilder constructBailConditions(final List<JudicialResultsLabelAndResultPrompts> judicialResultsLabelAndResultPrompts) {
-        final StringBuilder bailconditionsBuilder = new StringBuilder();
+        final StringBuilder bailConditionsBuilder = new StringBuilder();
         for (final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt : judicialResultsLabelAndResultPrompts) {
             final String label = judicialResultsLabelAndResultPrompt.getLabel();
-            bailconditionsBuilder.append(String.format("%s%n", label));
+            bailConditionsBuilder.append(String.format("%s%n", label));
             for (final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()) {
-                bailconditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+                bailConditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
             }
         }
-        return bailconditionsBuilder;
+        return bailConditionsBuilder;
     }
 
     private List<JudicialResultsLabelAndResultPrompts> getJudicialResultsLabelBasedOnRankAndResultPrompts(final List<Offence> offences) {
@@ -90,7 +86,7 @@ public class BailConditionsHelper {
                 .collect(toList());
     }
 
-    private class JudicialResultsLabelAndResultPrompts {
+    private static class JudicialResultsLabelAndResultPrompts {
 
         private final String label;
         private final List<JudicialResultPrompt> judicialResultPrompts;

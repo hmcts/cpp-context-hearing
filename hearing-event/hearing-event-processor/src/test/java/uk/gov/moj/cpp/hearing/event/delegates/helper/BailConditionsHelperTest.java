@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.HearingDay.hearingDay;
@@ -59,6 +60,14 @@ public class BailConditionsHelperTest {
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
         assertNotNull(bailConditionsResult);
         assertThat(bailConditionsResult, is(bailCondition));
+    }
+
+    @Test
+    public void testNotMapBailStatusReason() {
+        final ResultsShared resultsSharedTemplate = buildOffenceWithoutResultsSharedTemplate();
+        new BailStatusReasonHelper().setReason(resultsSharedTemplate);
+        final String bailReasonResult = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailReasons();
+        assertNull(bailReasonResult);
     }
 
     @Test
@@ -180,6 +189,25 @@ public class BailConditionsHelperTest {
         assertNotNull(bailConditionsResult);
         assertThat(bailConditionsResult, is(bailCondition));
 
+    }
+
+    private ResultsShared buildOffenceWithoutResultsSharedTemplate() {
+        return builder()
+                .withHearing(hearing()
+                        .withHearingDays(asList(hearingDay()
+                                .withSittingDay(of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1),systemDefault()))
+                                .build(), hearingDay()
+                                .withSittingDay(of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), systemDefault()))
+                                .build()))
+                        .withProsecutionCases(singletonList(prosecutionCase()
+                                .withDefendants(singletonList(defendant()
+                                        .withOffences(asList(offence().build(), offence().build()))
+                                        .withPersonDefendant(personDefendant().build())
+                                        .build())
+                                )
+                                .build()))
+                        .build())
+                .build();
     }
 
     private ResultsShared buildResultsSharedTemplate() {

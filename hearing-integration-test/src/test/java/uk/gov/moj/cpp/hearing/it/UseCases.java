@@ -83,6 +83,7 @@ import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventLogged;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -243,7 +244,7 @@ public class UseCases {
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
         final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
 
-        try(final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
+        try (final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
                         .with(PublicHearingEventLogged::getHearingEvent, isBean(uk.gov.moj.cpp.hearing.eventlog.HearingEvent.class)
                                 .with(HearingEvent::getHearingEventId, is(logEvent.getHearingEventId()))
@@ -560,7 +561,7 @@ public class UseCases {
                         target.getDefendantId(),
                         resultLineIn.getResultDefinitionId(),
                         resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel())).collect(Collectors.toList()),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
                         resultLineIn.getResultLabel(),
                         resultLineIn.getLevel().name(),
                         resultLineIn.getIsModified(),
@@ -825,10 +826,10 @@ public class UseCases {
     public static AddRespondentCounsel addRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId,
                                                             final AddRespondentCounsel addRespondentCounsel) {
 
-        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-added","hearing.event")
-                .withFilter(convertStringTo(AddRespondentCounsel.class,isBean(AddRespondentCounsel.class)
-                        .with(AddRespondentCounsel::getHearingId,Matchers.is(hearingId))
-                        .with(AddRespondentCounsel::getRespondentCounsel,isBean(RespondentCounsel.class).with(RespondentCounsel::getId,is(addRespondentCounsel.getRespondentCounsel().getId())))
+        try (final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-added", "hearing.event")
+                .withFilter(convertStringTo(AddRespondentCounsel.class, isBean(AddRespondentCounsel.class)
+                        .with(AddRespondentCounsel::getHearingId, Matchers.is(hearingId))
+                        .with(AddRespondentCounsel::getRespondentCounsel, isBean(RespondentCounsel.class).with(RespondentCounsel::getId, is(addRespondentCounsel.getRespondentCounsel().getId())))
                 ))
 
         ) {
@@ -848,10 +849,10 @@ public class UseCases {
 
     public static UpdateRespondentCounsel updateRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateRespondentCounsel updateRespondentCounselCommandTemplate) {
 
-        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-updated","hearing.event")
-                .withFilter(convertStringTo(UpdateRespondentCounsel.class,isBean(UpdateRespondentCounsel.class)
-                        .with(UpdateRespondentCounsel::getHearingId,Matchers.is(hearingId))
-                        .with(UpdateRespondentCounsel::getRespondentCounsel,isBean(RespondentCounsel.class).with(RespondentCounsel::getId,is(updateRespondentCounselCommandTemplate.getRespondentCounsel().getId())))
+        try (final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-updated", "hearing.event")
+                .withFilter(convertStringTo(UpdateRespondentCounsel.class, isBean(UpdateRespondentCounsel.class)
+                        .with(UpdateRespondentCounsel::getHearingId, Matchers.is(hearingId))
+                        .with(UpdateRespondentCounsel::getRespondentCounsel, isBean(RespondentCounsel.class).with(RespondentCounsel::getId, is(updateRespondentCounselCommandTemplate.getRespondentCounsel().getId())))
                 ))
 
         ) {
@@ -869,9 +870,9 @@ public class UseCases {
 
     public static UpdateRespondentCounsel updateRespondentCounselAfterRemovingCounsel(final RequestSpecification requestSpec, final UUID hearingId, final UpdateRespondentCounsel updateRespondentCounselCommandTemplate) {
 
-        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-change-ignored","hearing.event")
-                .withFilter(convertStringTo(RespondentCounselChangeIgnored.class,isBean(RespondentCounselChangeIgnored.class)
-                        .with(RespondentCounselChangeIgnored::getReason,Matchers.containsString(updateRespondentCounselCommandTemplate.getRespondentCounsel().getId().toString()))
+        try (final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-change-ignored", "hearing.event")
+                .withFilter(convertStringTo(RespondentCounselChangeIgnored.class, isBean(RespondentCounselChangeIgnored.class)
+                        .with(RespondentCounselChangeIgnored::getReason, Matchers.containsString(updateRespondentCounselCommandTemplate.getRespondentCounsel().getId().toString()))
                 ))
 
         ) {
@@ -886,14 +887,13 @@ public class UseCases {
 
         return updateRespondentCounselCommandTemplate;
     }
+
     public static RemoveRespondentCounsel removeRespondentCounsel(final RequestSpecification requestSpec, final UUID hearingId,
                                                                   final RemoveRespondentCounsel removeRespondentCounsel) {
 
-
-
-        try(final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-removed","hearing.event")
-                .withFilter(convertStringTo(RemoveRespondentCounsel.class,isBean(RemoveRespondentCounsel.class)
-                        .with(RemoveRespondentCounsel::getHearingId,Matchers.is(hearingId))
+        try (final Utilities.EventListener eventTopic = listenFor("hearing.respondent-counsel-removed", "hearing.event")
+                .withFilter(convertStringTo(RemoveRespondentCounsel.class, isBean(RemoveRespondentCounsel.class)
+                        .with(RemoveRespondentCounsel::getHearingId, Matchers.is(hearingId))
                 ))
 
         ) {
@@ -1024,7 +1024,7 @@ public class UseCases {
     }
 
     public static TrialType setTrialType(final RequestSpecification requestSpec, final UUID hearingId,
-                                         final TrialType trialType,final boolean isVacated) {
+                                         final TrialType trialType, final boolean isVacated) {
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.trial-vacated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearingId.toString()))));
 
@@ -1043,7 +1043,7 @@ public class UseCases {
                         .with(Hearing::getId, Matchers.is(hearingId))
                         .with(Hearing::getIsVacatedTrial, is(isVacated)
                         ))
-                );
+        );
 
         return trialType;
     }
@@ -1058,6 +1058,7 @@ public class UseCases {
 
         return trialType;
     }
+
     public static void updateCaseMarkers(final UUID prosecutionCaseId, final UUID hearingId, final List<Marker> markers) throws Exception {
 
         final String eventName = "public.progression.case-markers-updated";

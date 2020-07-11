@@ -7,9 +7,6 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
-import uk.gov.justice.core.courts.Now;
-import uk.gov.justice.core.courts.NowVariant;
-import uk.gov.justice.core.courts.NowVariantResult;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -29,7 +26,6 @@ import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.generatenows.PendingNowsRequestedCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
@@ -41,6 +37,8 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class CommandHelpers {
 
@@ -90,47 +88,6 @@ public class CommandHelpers {
 
     public static void h(UpdateDefendantAttendanceCommand updateDefendantAttendanceCommand) {
         new UpdateDefendantAttendanceCommandHelper(updateDefendantAttendanceCommand);
-    }
-
-    public static PendingNowsRequestedCommandHelper h(PendingNowsRequestedCommand pendingNowsRequestedCommand) {
-        return new PendingNowsRequestedCommandHelper(pendingNowsRequestedCommand);
-    }
-
-    public static NowsHelper h(List<Now> nows) {
-        return new NowsHelper(nows);
-    }
-
-    public static class NowsHelper {
-
-        private List<Now> nows;
-
-        public NowsHelper(List<Now> nows) {
-            this.nows = nows;
-        }
-
-        public List<Now> it() {
-            return nows;
-        }
-
-        public Now getFirstNow() {
-            return nows.get(0);
-        }
-
-        public NowVariant getFirstMaterial() {
-            return nows.get(0).getRequestedMaterials().get(0);
-        }
-
-        public NowVariantResult getFirstNowsResult() {
-            return getFirstNow().getRequestedMaterials().get(0).getNowResults().get(0);
-        }
-
-        public UUID getFirstPrompt() {
-            return getFirstNowsResult().getPromptRefs().get(0);
-        }
-
-        public String getFirstUserGroup() {
-            return getFirstMaterial().getKey().getUsergroups().get(0);
-        }
     }
 
     public static class AllNowsReferenceDataHelper {
@@ -462,19 +419,6 @@ public class CommandHelpers {
             this.defendantAttendanceCommand = defendantAttendanceCommand;
         }
 
-    }
-
-    @SuppressWarnings("squid:S1068")
-    public static class PendingNowsRequestedCommandHelper {
-        private PendingNowsRequestedCommand pendingNowsRequestedCommand;
-
-        public PendingNowsRequestedCommandHelper(final PendingNowsRequestedCommand pendingNowsRequestedCommand) {
-            this.pendingNowsRequestedCommand = pendingNowsRequestedCommand;
-        }
-
-        public String getRequestId() {
-            return pendingNowsRequestedCommand.getCreateNowsRequest().getNows().get(0).getId().toString();
-        }
     }
 
 }

@@ -1,15 +1,14 @@
 package uk.gov.justice.ccr.notepad.result.cache.model;
 
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toCollection;
+
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.toCollection;
 
 public class ResultDefinition {
     private String id;
@@ -25,6 +24,8 @@ public class ResultDefinition {
     private Boolean alwaysPublished;
     private Boolean urgent;
     private Boolean d20;
+    private Boolean rollUpPrompts;
+    private Boolean publishedForNows;
 
     public final String getId() {
         return id;
@@ -124,6 +125,22 @@ public class ResultDefinition {
         this.d20 = d20;
     }
 
+    public Boolean getRollUpPrompts() {
+        return rollUpPrompts;
+    }
+
+    public void setRollUpPrompts(final Boolean rollUpPrompts) {
+        this.rollUpPrompts = rollUpPrompts;
+    }
+
+    public Boolean getPublishedForNows() {
+        return publishedForNows;
+    }
+
+    public void setPublishedForNows(final Boolean publishedForNows) {
+        this.publishedForNows = publishedForNows;
+    }
+
     @Override
     public String toString() {
         return "ResultDefinition{" +
@@ -140,6 +157,8 @@ public class ResultDefinition {
                 ", isAlwaysPublished=" + alwaysPublished +
                 ", isUrgent=" + urgent +
                 ", isD20=" + d20 +
+                ", isRollUpPrompts=" + rollUpPrompts +
+                ", isPublishedForNows=" + publishedForNows +
                 '}';
     }
 
@@ -165,6 +184,8 @@ public class ResultDefinition {
         private Boolean isAlwaysPublished;
         private Boolean isUrgent;
         private Boolean isD20;
+        private Boolean isRollUpPrompts;
+        private Boolean isPublishedForNows;
 
         public Builder withId(final String id) {
             this.id = id;
@@ -226,13 +247,23 @@ public class ResultDefinition {
             return this;
         }
 
+        public Builder withRollUpPrompts(final Boolean rollUpPrompts) {
+            isRollUpPrompts = rollUpPrompts;
+            return this;
+        }
+
+        public Builder withPublishedForNows(final Boolean publishedForNows) {
+            isPublishedForNows = publishedForNows;
+            return this;
+        }
+
         public ResultDefinition build() {
             final ResultDefinition resultDefinition = new ResultDefinition();
             resultDefinition.setId(this.id);
             resultDefinition.setLabel(this.label);
             resultDefinition.setShortCode(this.shortCode);
             resultDefinition.setLevel(this.level);
-            resultDefinition.setKeywords(this.keywords != null ? this.keywords.stream().collect(Collectors.toList()) : Collections.emptyList());
+            resultDefinition.setKeywords(this.keywords != null ? new ArrayList<>(this.keywords) : emptyList());
             resultDefinition.setTerminatesOffenceProceedings(this.terminatesOffenceProceedings);
             resultDefinition.setLifeDuration(this.isLifeDuration);
             resultDefinition.setPublishedAsAPrompt(this.isPublishedAsAPrompt);
@@ -240,6 +271,8 @@ public class ResultDefinition {
             resultDefinition.setAlwaysPublished(this.isAlwaysPublished);
             resultDefinition.setUrgent(this.isUrgent);
             resultDefinition.setD20(this.isD20);
+            resultDefinition.setRollUpPrompts(this.isRollUpPrompts);
+            resultDefinition.setPublishedForNows(this.isPublishedForNows);
             return resultDefinition;
         }
     }

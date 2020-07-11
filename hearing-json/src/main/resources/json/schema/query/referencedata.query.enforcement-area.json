@@ -83,6 +83,9 @@
         },
         "name": {
           "type": "string"
+        },
+        "welshName": {
+          "type": "string"
         }
       },
       "required": [

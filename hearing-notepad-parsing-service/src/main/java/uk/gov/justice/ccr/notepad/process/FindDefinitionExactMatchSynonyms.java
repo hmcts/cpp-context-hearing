@@ -16,10 +16,10 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Sets;
 
-class FindDefinitionExactMatchSynonyms implements ResultFilter<Map<String, Set<String>>, List<String>> {
+public class FindDefinitionExactMatchSynonyms implements ResultFilter<Map<String, Set<String>>, List<String>> {
 
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
     @Override
     public Map<String, Set<String>> run(final List<String> values, final LocalDate orderedDate) {
@@ -34,6 +34,5 @@ class FindDefinitionExactMatchSynonyms implements ResultFilter<Map<String, Set<S
                 }));
 
         return output.entrySet().stream().filter(stringSetEntry -> !stringSetEntry.getValue().isEmpty()).collect(Collectors.toMap(Entry::getKey, Entry::getValue));
-
     }
 }

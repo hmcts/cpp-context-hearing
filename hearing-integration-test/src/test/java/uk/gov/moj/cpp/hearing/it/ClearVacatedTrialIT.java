@@ -45,7 +45,7 @@ public class ClearVacatedTrialIT extends AbstractIT {
                 .withVacatedTrialReasonId(VACATE_REASON_ID)
                 .build();
 
-        UseCases.setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType,true);
+        UseCases.setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType, true);
         UseCases.rescheduleHearing(new HearingVacatedTrialCleared(hearingOne.getHearingId()));
 
         poll(requestParams(getURL(EVENT, hearingOne.getHearingId()), MEDIA_TYPE)

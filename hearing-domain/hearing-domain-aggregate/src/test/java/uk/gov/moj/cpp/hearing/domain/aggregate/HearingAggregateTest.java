@@ -60,7 +60,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.internal.matchers.NotNull;
 
 public class HearingAggregateTest {
 
@@ -80,7 +79,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void initiate() {
+    public void shouldInitiateHearing() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
@@ -89,7 +88,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void initiateHearingOffencePlea() {
+    public void shouldInitiateHearingOffencePlea() {
 
         final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
@@ -117,7 +116,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void logHearingEvent_shouldIgnore_givenNoPreviousHearing() {
+    public void shouldIgnoreLogHearingEventGivenNoPreviousHearing() {
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
@@ -148,7 +147,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void logHearingEvent_shouldIgnore_givenAPreviousEventId() {
+    public void shouldIgnoreLogHearingEventGivenAPreviousEventId() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -187,7 +186,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void logHearingEvent_shouldLog() {
+    public void shouldLoglogHearingEvent() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -216,7 +215,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void correctHearingEvent_shouldLog() {
+    public void shouldLogHearingEvent() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -291,7 +290,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void correctHearingEvent_shouldIgnore_givenInvalidPreviousEventId() {
+    public void shouldIgnoreCorrectHearingEventGivenInvalidPreviousEventId() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -334,7 +333,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void logHearingEvent_shouldIgnore_givenEventHasBeenDeleted() {
+    public void shouldIgnorelogHearingEventGivenEventHasBeenDeleted() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -410,7 +409,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void correctHearingEvent_shouldIgnore_givenEventHasPreivouslyBeenDeleted() {
+    public void shouldHearingEventNotIgnoredGivenEventHasPreivouslyBeenDeleted() {
 
         final UUID previousHearingEventId = randomUUID();
 
@@ -481,7 +480,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void updateDefendantDetails_should_not_Ignore_when_resultShared() {
+    public void shouldUpdateDefendantDetailsNotIgnoreWhenResultShared() {
 
         final int expected = 0;
 
@@ -503,7 +502,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void updateDefendantDetails_shouldUpdate_when_resultNotShared() {
+    public void shouldUpdateDefendantDetailsWhenResultNotShared() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -531,7 +530,7 @@ public class HearingAggregateTest {
 
 
     @Test
-    public void updateHearingEvents_shouldUpdate() {
+    public void shouldUpdateHearingEvents() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -555,7 +554,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void updateHearingEvents_shouldNotUpdateNoHearing() {
+    public void shouldNotUpdateHearingEventsNoHearing() {
 
         final UpdateHearingEventsCommand updateHearingEventsCommand = UpdateHearingEventsCommand.builder()
                 .withHearingId(randomUUID())
@@ -574,7 +573,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void logHearingEvent_shouldNotLogPauseHearingEvent_IfNoActiveHearingsReturned() {
+    public void shouldNotLogPauseHearingEventIfNoActiveHearingsReturned() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
@@ -604,7 +603,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotRaiseEvent_whenHearingResult_hasAlreadyShared() {
+    public void shouldNotRaiseEventWhenHearingResultHasAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -618,7 +617,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRaiseEvent_whenHearingResult_hasNotAlreadyShared() {
+    public void shouldRaiseEventWhenHearingResultHasNotAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -652,7 +651,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void addDefenceCounsel_beforeHearingEnded(){
+    public void shouldAddDefenceCounselBeforeHearingEnded(){
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
                 .withHearingId(randomUUID())
@@ -749,7 +748,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void addProsecutionCounsel_beforeHearingEnded(){
+    public void shouldAddProsecutionCounselBeforeHearingEnded(){
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
                 .withHearingId(randomUUID())

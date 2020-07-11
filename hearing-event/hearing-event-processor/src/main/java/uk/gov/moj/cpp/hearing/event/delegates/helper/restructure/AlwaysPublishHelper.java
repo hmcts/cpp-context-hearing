@@ -18,7 +18,7 @@ public class AlwaysPublishHelper {
 
         Optional<TreeNode<ResultLine>> alwaysPublishLeaNode;
 
-        while ((alwaysPublishLeaNode = getAlwaysPublishLeaNode(treeNodes)).isPresent()) {
+        while ((alwaysPublishLeaNode = getAlwaysPublishLeafNode(treeNodes)).isPresent()) {
             final TreeNode<ResultLine> node = alwaysPublishLeaNode.get();
             node.removeAllChildren();
             node.getParents().stream().forEach(parent -> parent.getChildren().remove(node));
@@ -27,7 +27,7 @@ public class AlwaysPublishHelper {
         return treeNodes;
     }
 
-    private static Optional<TreeNode<ResultLine>> getAlwaysPublishLeaNode(final List<TreeNode<ResultLine>> treeNodes) {
+    private static Optional<TreeNode<ResultLine>> getAlwaysPublishLeafNode(final List<TreeNode<ResultLine>> treeNodes) {
         return treeNodes.stream()
                 .filter(LeafNodeHelper::isValidTreeNode)
                 .filter(node -> nonNull(node.getResultDefinition().getData().getAlwaysPublished()))

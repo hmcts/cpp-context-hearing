@@ -6,7 +6,7 @@ import static java.util.stream.Collectors.groupingBy;
 import java.util.List;
 import java.util.Map;
 
-class GroupResultByIndex {
+public class GroupResultByIndex {
 
     public Map<Long, Long> run(final List<Long> resultDefinitionIndexes) {
         return resultDefinitionIndexes.stream().collect(groupingBy(

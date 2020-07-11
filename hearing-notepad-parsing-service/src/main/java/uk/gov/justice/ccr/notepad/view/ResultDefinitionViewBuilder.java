@@ -3,6 +3,7 @@ package uk.gov.justice.ccr.notepad.view;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newConcurrentMap;
+
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
@@ -183,6 +184,7 @@ public class ResultDefinitionViewBuilder {
 
     private List<Part> buildParts(final Knowledge knowledge, final List<String> partValues, final List<Part> parts) {
         int firstQualifiedPartInResultDefinitionIndex = getIndex(partValues, knowledge);
+
         for (int i = 0; i < parts.size(); i++) {
             Part part = parts.get(i);
             String partValue = partValues.get(i);
@@ -227,8 +229,9 @@ public class ResultDefinitionViewBuilder {
         if (!StringUtils.isEmpty(partFromKnowledge.getLabel())) {
             part.setLabel(partFromKnowledge.getLabel());
         }
-        if (INT == part.getType()) {
-            part.setValue(Integer.parseInt(part.getValue().toString()));
+        final Object partValue = part.getValue();
+        if (INT == part.getType() && StringUtils.isNumeric(partValue.toString())) {
+            part.setValue(Integer.parseInt(partValue.toString()));
         } else if (CURR == part.getType()) {
             part.setValue(partFromKnowledge.getValue());
         }

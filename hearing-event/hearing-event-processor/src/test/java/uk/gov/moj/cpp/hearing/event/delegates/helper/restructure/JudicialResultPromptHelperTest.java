@@ -28,6 +28,8 @@ public class JudicialResultPromptHelperTest {
     private static final String PROMPT_VALUE_1 = "Prompt Value 1";
     private static final String PROMPT_LABEL_2 = "Prompt Label 2";
     private static final String PROMPT_VALUE_2 = "Prompt Value 2";
+    private static final String PROMPT_VALUE_TRUE = "true";
+    private static final String PROMPT_VALUE_FALSE = "false";
     private static final String RESULT_DEFINITION_LABEL = "Result Definition Label";
     private static final String RESULT_DEFINITION_QUALIFIER = "Result Definition Qualifier";
 
@@ -35,9 +37,9 @@ public class JudicialResultPromptHelperTest {
     public void shouldMakePrompt_resultAvailableForCourtExtractIsNull() {
         final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1);
+        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2);
+        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
 
         createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), null);
 
@@ -50,12 +52,14 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
         assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
         assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
+        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     }
 
-    private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2) {
+    private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {
         return judicialResultPrompt()
                 .withLabel(s)
                 .withValue(s2)
+                .withType(type)
                 .build();
     }
 
@@ -63,9 +67,9 @@ public class JudicialResultPromptHelperTest {
     public void shouldMakePrompt_resultAvailableForCourtExtractIsFalse() {
         final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1);
+        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1,"TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2);
+        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
 
         createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), Boolean.FALSE);
 
@@ -77,15 +81,16 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
         assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
         assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
+        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     }
 
     @Test
     public void shouldMakePrompt_resultAvailableForCourtExtractIsTrue() {
         final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
 
-        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1);
+        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
 
-        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2);
+        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
 
         createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2), Boolean.TRUE);
 
@@ -96,6 +101,29 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
         assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
         assertThat(judicialResultPrompt.getCourtExtract(), is("Y"));
+        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    }
+
+    @Test
+    public void shouldConvertPromptValues_whenPromptTypeIsBoolean() {
+        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+
+        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_TRUE, "BOOLEAN");
+
+        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_FALSE, "BOOLEAN");
+
+        createJudicialResult(resultLineTreeNode, of(judicialResultPrompt1, judicialResultPrompt2), null);
+
+        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+        assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
+        assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
+        assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
+        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1 + ":" + "Yes" + System.lineSeparator() + PROMPT_LABEL_2 + ":" + "No"));
+        assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
+        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
+        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
+        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     }
 
     private TreeNode<ResultLine> createResultLineTreeNode() {
@@ -113,7 +141,7 @@ public class JudicialResultPromptHelperTest {
     }
 
     private void createJudicialResult(final TreeNode<ResultLine> resultLineTreeNode, final List<JudicialResultPrompt> judicialResultPrompts, final Boolean isAvailableForCourtExtract){
-        final JudicialResult judicialResult = judicialResult().withJudicialResultPrompts(judicialResultPrompts).build();
+        final JudicialResult judicialResult = judicialResult().withJudicialResultId(randomUUID()).withJudicialResultPrompts(judicialResultPrompts).build();
         resultLineTreeNode.setJudicialResult(judicialResult);
 
         resultLineTreeNode.getResultDefinition().getData()

@@ -14,10 +14,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultDefinition>, Map<Set<String>, Set<Long>>> {
+public class CompareDefinitionKeywordsUsingIndexes implements ResultFilter<List<ResultDefinition>, Map<Set<String>, Set<Long>>> {
 
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
     @Override
     public List<ResultDefinition> run(final Map<Set<String>, Set<Long>> indexes, final LocalDate orderedDate) {

@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
@@ -10,12 +11,16 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -131,5 +136,36 @@ public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest
         assertTrue(nextHearingInCrownCourtResults
                 .stream()
                 .allMatch(r -> NEXT_HEARING_IN_CROWN_COURT_ID.equals(r.getResultDefinitionId().toString()) || NEXT_HEARING_IN_MAGISTRATE_COURT_ID.equals(r.getResultDefinitionId().toString())));
+    }
+
+    @Test
+    public void shouldNotDisplayHiddenPrompts() {
+        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
+                SEND_TO_CROWN_COURT_ON_CONDITIONAL_BAIL_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_ON_CONDITIONAL_BAIL_ID.equals(resultDefinition.getId().toString()) ||
+                        NEXT_HEARING_ID.equals(resultDefinition.getId().toString()) ||
+                        BAIL_CONDITIONS_ID.equals(resultDefinition.getId().toString()) ||
+                        NEXT_HEARING_IN_CROWN_COURT_ID.equals(resultDefinition.getId().toString()) ||
+                        BAIL_CONDITION_ASSESSMENTS_REPORTS_ID.equals(resultDefinition.getId().toString())).collect(toList());
+
+        final ResultsShared resultsShared = getResultsShared(resultDefinitionList);
+        final List<TreeNode<ResultLine>> results = resultTreeBuilder.build(dummyEnvelope, resultsShared);
+        final TreeNode<ResultLine> sendToCrownCourtOnConditionalBailResultTree = results.stream().filter(jr -> fromString(SEND_TO_CROWN_COURT_ON_CONDITIONAL_BAIL_ID).equals(jr.getResultDefinitionId())).findAny().get();
+        final List<TreeNode<ResultLine>> sendToCrownCourtOnConditionalBailChildren = sendToCrownCourtOnConditionalBailResultTree.getChildren();
+
+        assertThat(sendToCrownCourtOnConditionalBailChildren.size(), is(0));
+        assertThat(results.size(), is(6));
+
+        final List<String> judicialResultPromptIds = results.stream()
+                .map(TreeNode::getJudicialResult)
+                .filter(p -> Objects.nonNull(p.getJudicialResultPrompts()))
+                .map(JudicialResult::getJudicialResultPrompts)
+                .flatMap(Collection::stream)
+                .map(m ->m.getJudicialResultPromptTypeId().toString())
+                .collect(Collectors.toList());
+
+        assertThat(judicialResultPromptIds.size(), is(20));
+        assertTrue(judicialResultPromptIds.contains("2493a3a4-918a-4b83-b3c0-d221ff83d6fc"));
+
     }
 }

@@ -23,7 +23,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -135,7 +135,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "5f29ba24-4168-11e8-842f-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForNoCompensation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -176,7 +176,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForNoCosts",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -268,7 +268,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "reason",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -370,7 +370,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodToProvideSamples",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -1713,7 +1713,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -1800,7 +1800,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -1901,7 +1901,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -3945,7 +3945,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4001,7 +4001,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4162,7 +4162,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4308,7 +4308,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4349,7 +4349,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4495,7 +4495,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4641,7 +4641,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4697,7 +4697,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -4843,7 +4843,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "mitigatingCircumStances",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -4858,7 +4858,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -5004,7 +5004,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -5224,7 +5224,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -5490,7 +5490,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -5756,7 +5756,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -5902,7 +5902,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6033,7 +6033,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6104,7 +6104,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6145,7 +6145,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6201,7 +6201,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6222,6 +6222,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "af322d0a-ba2a-47f1-8d46-7b3ea423d689",
+    "rollUpPrompts": true,
+    "publishedForNows": true,
     "label" : "No disqualification - Mitigating Circumstances",
     "shortCode" : "NDMC",
     "level" : "C",
@@ -6242,7 +6244,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -6257,7 +6259,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "mitigatingCircumStances",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6298,7 +6300,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -6658,7 +6660,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6789,7 +6791,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -6830,7 +6832,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -8866,7 +8868,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -9682,7 +9684,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantDrivingLicenseNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -11143,7 +11145,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -11158,7 +11160,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -11173,7 +11175,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -11188,7 +11190,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -11203,7 +11205,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -11970,7 +11972,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -11985,7 +11987,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -12000,7 +12002,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -12030,7 +12032,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -12045,7 +12047,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -12782,7 +12784,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "datesOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -13307,7 +13309,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "datesOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -13714,7 +13716,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -13919,7 +13921,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -14891,12 +14893,12 @@
       "resultPromptRule" : "mandatory",
       "type" : "TXT",
       "sequence" : 200,
-      "duration" : null,
+      "duration" : "prison",
       "wordGroup" : null,
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -14956,7 +14958,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "3740a41c-be28-40f3-8655-1b8cdf67a683",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailConditionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15201,6 +15203,8 @@
     "publishedAsAPrompt" : true,
     "excludedFromResults" : false,
     "alwaysPublished" : false,
+    "rollUpPrompts": false,
+    "publishedForNows": false,
     "urgent" : false,
     "d20" : false,
     "resultDefinitionRules" : [ ]
@@ -15226,7 +15230,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15241,7 +15245,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15256,7 +15260,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "periodOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15271,7 +15275,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "countryAllowed",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15286,7 +15290,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15301,7 +15305,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -15318,6 +15322,8 @@
     "publishedAsAPrompt" : false,
     "excludedFromResults" : false,
     "alwaysPublished" : true,
+    "rollUpPrompts": false,
+    "publishedForNows": false,
     "urgent" : false,
     "d20" : false,
     "resultDefinitionRules" : [ ]
@@ -15747,7 +15753,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "countryAllowed",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -15762,7 +15768,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "datesOfProhibition",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -15779,6 +15785,8 @@
     "publishedAsAPrompt" : false,
     "excludedFromResults" : false,
     "alwaysPublished" : true,
+    "rollUpPrompts": false,
+    "publishedForNows": true,
     "urgent" : false,
     "d20" : false,
     "resultDefinitionRules" : [ ]
@@ -15930,9 +15938,10 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "specifyQualifiedPersonToConductAssessmentsreports",
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden": true
     } ],
     "isAvailableForCourtExtract" : true,
     "financial" : false,
@@ -15952,6 +15961,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "e073f3ba-2585-4c0d-8c31-e51a1662d143",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Bail condition: Assessments/Reports - participate in any assistance or treatment considered appropriate for misuse of class A drugs",
     "shortCode" : "PORAR2",
     "level" : "O",
@@ -15972,7 +15983,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "specifyQualifiedPersonWhowillDecideTreatment",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -16165,6 +16176,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "9c88a9f3-fc2f-4001-80f1-c6e88c12defd",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Bail condition: Assessments/Reports - make available for reports to be prepared",
     "shortCode" : "PORAR6",
     "level" : "O",
@@ -16419,6 +16432,8 @@
     "publishedAsAPrompt" : true,
     "excludedFromResults" : false,
     "alwaysPublished" : false,
+    "rollUpPrompts": false,
+    "publishedForNows": true,
     "urgent" : false,
     "d20" : false,
     "resultDefinitionRules" : [ ]
@@ -16598,7 +16613,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -16685,7 +16700,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -16700,7 +16715,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -16817,7 +16832,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -16832,7 +16847,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -16949,7 +16964,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -16964,7 +16979,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -17051,7 +17066,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -17066,7 +17081,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -18882,6 +18897,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "fbed768b-ee95-4434-87c8-e81cbc8d24c8",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Next hearing in Crown Court",
     "shortCode" : "NHCCS",
     "level" : "O",
@@ -19026,7 +19043,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "c82897b8-7e25-4b5d-9cd3-dbf3e1cb7c0c",
       "qual" : null,
-      "reference" : null,
+      "reference" : "remandStatus",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19056,7 +19073,7 @@
       "userGroups" : null,
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "fixedDate",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -19077,8 +19094,11 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "3a529001-2f43-45ba-a0a8-d3ced7e9e7ad",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Remanded on conditional bail",
     "shortCode" : "RC",
+    "reference" : "",
     "level" : "O",
     "rank" : 32800,
     "wordGroups" : [ {
@@ -19097,9 +19117,10 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantExcusedAttendance",
       "courtExtract" : "Y",
-      "durationSequence" : null
+      "durationSequence" : null,
+      "hidden" : false
     }, {
       "id" : "80be59c8-ffaa-4570-b40a-f3a085058208",
       "label" : "Bail condition reason",
@@ -19112,7 +19133,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "3740a41c-be28-40f3-8655-1b8cdf67a683",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailConditionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19127,7 +19148,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bassProvider",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19142,7 +19163,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -19193,7 +19214,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantExcusedAttendance",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -19262,7 +19283,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "tvLinkAtNextHearing",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19277,7 +19298,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "tVLinkPrehearingConferenceTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19292,7 +19313,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "4954dd1c-f218-11e8-8eb2-f2801f1b9fd1",
       "qual" : null,
-      "reference" : null,
+      "reference" : "remandBasis",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19307,7 +19328,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -19322,7 +19343,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -19337,7 +19358,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "10a769e8-1b1c-430d-844b-8948942cf353",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailException",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19352,7 +19373,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "c0fb2ca5-7702-4f01-b344-33029cfdcd47",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailExceptionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19367,7 +19388,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -19409,7 +19430,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "timeOfOralNotice",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19424,7 +19445,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "custodianName",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -19465,7 +19486,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -19480,7 +19501,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "timeofWrtittenNotice",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -19495,7 +19516,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "crownCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -21573,7 +21594,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "3740a41c-be28-40f3-8655-1b8cdf67a683",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailConditionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -21603,7 +21624,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -21851,7 +21872,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "4954dd1c-f218-11e8-8eb2-f2801f1b9fd1",
       "qual" : null,
-      "reference" : null,
+      "reference" : "remandBasis",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -21881,7 +21902,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "10a769e8-1b1c-430d-844b-8948942cf353",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailException",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -21896,7 +21917,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "c0fb2ca5-7702-4f01-b344-33029cfdcd47",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailExceptionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -21911,7 +21932,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -21926,7 +21947,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "placeOfSafety",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -22158,7 +22179,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "specifyHospital",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -22188,7 +22209,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "placeOfSafety",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -22996,6 +23017,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "9ea0d845-5096-44f6-9ce0-8ae801141eac",
+    "rollUpPrompts": false,
+    "publishedForNows": false,
     "label" : "Collection order",
     "shortCode" : "COLO",
     "level" : "C",
@@ -23018,7 +23041,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "d7d75420-aace-11e8-98d0-529269fb1459",
       "qual" : null,
-      "reference" : null,
+      "reference" : "collectionOrderType",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -23033,7 +23056,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForNotMakingAnAttachment",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -23048,7 +23071,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "1fa26fa6-da67-48f7-9bb4-9b55d825854e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForMakingAnAttachment",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -23063,7 +23086,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "1fa26fa6-da67-48f7-9bb4-9b55d825854e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForMakingAnApplication",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -23860,7 +23883,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -23988,7 +24011,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "4954dd1c-f218-11e8-8eb2-f2801f1b9fd1",
       "qual" : null,
-      "reference" : null,
+      "reference" : "remandBasis",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -24003,7 +24026,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "specifyHospital",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -24018,7 +24041,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -24033,7 +24056,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "10a769e8-1b1c-430d-844b-8948942cf353",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailException",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -24048,7 +24071,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "c0fb2ca5-7702-4f01-b344-33029cfdcd47",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailExceptionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -24063,7 +24086,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -24078,7 +24101,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "placeOfSafety",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -24165,7 +24188,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "placeOfSafety",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -24913,7 +24936,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -24928,7 +24951,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -25308,7 +25331,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -25499,7 +25522,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26549,7 +26572,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26587,6 +26610,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Community order England / Wales",
     "shortCode" : "co",
     "level" : "O",
@@ -26609,7 +26634,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26624,7 +26649,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26639,7 +26664,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26654,7 +26679,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "persistentOfficerPreviuouslyFined",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26669,7 +26694,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "judgeReservesBreachProceedings",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -26684,7 +26709,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "directionComplyWithByMagistrateCourt",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -27204,7 +27229,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27219,7 +27244,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27324,10 +27349,13 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "abb95a52-2a75-40c3-8d3f-a1d75a199c47",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Imprisonment",
     "shortCode" : "imp",
     "level" : "O",
     "rank" : 4900,
+    "resultWording": "section 12(c)",
     "wordGroups" : [ {
       "wordGroup" : [ "imp" ]
     } ],
@@ -27344,7 +27372,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "imprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : 1
     }, {
@@ -27359,7 +27387,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "imprisonmentPeriod",
       "isAvailableForCourtExtract" : true,
       "durationSequence" : 1
     }, {
@@ -27374,7 +27402,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "imprisonmentPeriod",
       "courtExtract" : "N",
       "durationSequence" : 1
     }, {
@@ -27389,7 +27417,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "imprisonmentPeriod",
       "isAvailableForCourtExtract" : false,
       "durationSequence" : 1
     }, {
@@ -27404,7 +27432,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "C",
-      "reference" : null,
+      "reference" : "concurrent",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27419,7 +27447,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "F",
-      "reference" : null,
+      "reference" : "consecutiveToOffenceNumber",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27434,7 +27462,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "F",
-      "reference" : null,
+      "reference" : "whereConsecutiveToAnOffence",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27449,7 +27477,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "77177e00-4168-11e8-842f-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "imprisonmentReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27464,7 +27492,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "f30f0828-8387-11e8-adc0-fa7ae01bbebc",
       "qual" : null,
-      "reference" : null,
+      "reference" : "theReasonForThis",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27479,7 +27507,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -27494,7 +27522,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -28587,7 +28615,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -28602,7 +28630,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -29721,7 +29749,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "imprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : 1
     }, {
@@ -29736,7 +29764,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "C",
-      "reference" : null,
+      "reference" : "concurrent",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -29751,7 +29779,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "F",
-      "reference" : null,
+      "reference" : "consecutiveToOffenceNumber",
       "isAvailableForCourtExtract" : true,
       "durationSequence" : null
     }, {
@@ -29766,7 +29794,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "F",
-      "reference" : null,
+      "reference" : "whereConsecutiveToAnOffence",
       "isAvailableForCourtExtract" : false,
       "durationSequence" : null
     }, {
@@ -29811,7 +29839,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -29826,7 +29854,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -29841,7 +29869,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForSentenceWithoutPSR",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -30642,7 +30670,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30697,7 +30725,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAndElectricalMonitoringPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30712,7 +30740,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAndElectricalMonitoringPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30727,7 +30755,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAndElectricalMonitoringPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30742,7 +30770,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30757,7 +30785,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30772,7 +30800,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30787,7 +30815,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30802,7 +30830,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAddressDetailAndTiming",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30817,7 +30845,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -30902,7 +30930,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30917,7 +30945,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30932,7 +30960,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAddressDetailAndTiming",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -30971,7 +30999,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -30986,7 +31014,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -31001,7 +31029,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAddressDetailAndTiming",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -31203,7 +31231,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -31218,7 +31246,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -31420,7 +31448,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -31435,7 +31463,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -32865,7 +32893,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -32950,7 +32978,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -33035,7 +33063,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -33135,7 +33163,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -33235,7 +33263,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -33250,7 +33278,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -34271,6 +34299,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Next hearing in magistrates' court",
     "shortCode" : "NHMC",
     "level" : "O",
@@ -34457,7 +34487,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantExcusedAttendance",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -35390,7 +35420,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -35451,6 +35481,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "028f5bea-fe0c-4c1b-a650-e4e0a4259f01",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Special measures direction: A video recording be admitted of the evidence in chief of the interview",
     "shortCode" : "SMVR",
     "level" : "C",
@@ -35475,7 +35507,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "inRespectOfWitnessName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -35651,7 +35683,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "inRespectOfWitnessName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -35724,7 +35756,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -35782,7 +35814,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -35855,7 +35887,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "inRespectOfWitnessName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -35928,7 +35960,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -36001,7 +36033,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -36059,7 +36091,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -36110,6 +36142,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "67a91dc8-f4f9-4f80-b644-e219326045cc",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Special measures direction: Witness to be provided with an aid to commumication",
     "shortCode" : "SMAC",
     "level" : "C",
@@ -36132,7 +36166,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "nameOfWitness",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -36147,7 +36181,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "device",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -37912,10 +37946,13 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Total custodial period",
     "shortCode" : "TIMP",
     "level" : "D",
     "rank" : 5800,
+    "resultWording": "section 13(c)",
     "userGroups" : [ ],
     "prompts" : [ {
       "id" : "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
@@ -37929,7 +37966,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -37944,7 +37981,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -37959,7 +37996,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -37974,7 +38011,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -37989,7 +38026,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : "FH",
-      "reference" : null,
+      "reference" : "sentencedInAbsence",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38004,7 +38041,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalSentenceConsequenceToWhat",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38019,7 +38056,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriodInLife",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38034,7 +38071,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -38049,7 +38086,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "reasonForSentenceWithoutPSR",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38064,7 +38101,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "probationPeriodTobeNotified",
       "isAvailableForCourtExtract" : false,
       "durationSequence" : null
     }, {
@@ -38079,7 +38116,7 @@
       "userGroups" : null,
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -38735,7 +38772,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38750,7 +38787,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38765,7 +38802,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -38780,7 +38817,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "totalImprisonmentPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -39020,7 +39057,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "judgeReservesBreachProceedings",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -39204,6 +39241,8 @@
     } ]
   }, {
     "id" : "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Bail conditions",
     "shortCode" : "BAIC",
     "level" : "O",
@@ -39358,6 +39397,8 @@
     } ]
   }, {
     "id" : "f00359b5-7303-403b-b59e-0b1a1daa89bc",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Next hearing",
     "shortCode" : "NEXH",
     "level" : "O",
@@ -39576,7 +39617,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -39795,6 +39836,8 @@
     } ]
   }, {
     "id" : "0c5824cd-b6db-4c8f-a8c3-92e7e4cc0195",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Special measures",
     "shortCode" : "DIRS",
     "level" : "C",
@@ -39878,6 +39921,8 @@
     } ]
   }, {
     "id" : "e7e02d63-46c2-4603-8255-921427f410fe",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Send To Crown Court On Conditional Bail",
     "shortCode" : "SendToCCOnCB",
     "level" : "O",
@@ -39895,7 +39940,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "defendantExcusedAttendance",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -39910,7 +39955,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "3740a41c-be28-40f3-8655-1b8cdf67a683",
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailConditionReason",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -39925,7 +39970,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bassProvider",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -39940,7 +39985,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalReasons",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -40513,7 +40558,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -40554,7 +40599,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     } ],
@@ -40921,7 +40966,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -41496,7 +41541,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -41686,7 +41731,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -41882,6 +41927,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "f5d492b8-a09b-4f70-9ceb-aa06c306a7dc",
+    "rollUpPrompts": false,
+    "publishedForNows": true,
     "label" : "Costs to Crown Prosecution Service",
     "shortCode" : "FCPC",
     "level" : "C",
@@ -42108,7 +42155,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -42123,7 +42170,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -42138,7 +42185,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -42153,7 +42200,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -42168,7 +42215,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -42285,7 +42332,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -42524,7 +42571,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -42539,7 +42586,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43533,6 +43580,8 @@
     "resultDefinitionRules" : [ ]
   }, {
     "id" : "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+    "rollUpPrompts": true,
+    "publishedForNows": false,
     "label" : "Community requirement: Curfew with electronic monitoring",
     "shortCode" : "CURE",
     "level" : "O",
@@ -43553,7 +43602,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAndElectricalMonitoringPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43568,7 +43617,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAndElectricalMonitoringPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43583,7 +43632,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAndElectricalMonitoringPeriod",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43598,7 +43647,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43613,7 +43662,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43628,7 +43677,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43643,7 +43692,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endTime",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43658,7 +43707,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAddressDetailAndTiming",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43673,7 +43722,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "b1d843c0-3737-11e8-b467-0ed5f89f718b",
       "qual" : null,
-      "reference" : null,
+      "reference" : "contractor",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -43905,7 +43954,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -43920,7 +43969,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44024,7 +44073,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44039,7 +44088,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44144,7 +44193,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44159,7 +44208,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44293,7 +44342,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44308,7 +44357,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44383,7 +44432,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44398,7 +44447,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44472,7 +44521,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44487,7 +44536,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44711,7 +44760,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44726,7 +44775,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -44815,7 +44864,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44830,7 +44879,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -44845,7 +44894,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAddressDetailAndTiming",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -45146,7 +45195,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -45161,7 +45210,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -45465,7 +45514,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -45480,7 +45529,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -45784,7 +45833,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -45799,7 +45848,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -45876,7 +45925,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -45891,7 +45940,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -46057,7 +46106,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -46072,7 +46121,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -46236,7 +46285,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -46251,7 +46300,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -46431,7 +46480,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -46596,7 +46645,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -46611,7 +46660,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -46776,7 +46825,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "bailRemandDaysToCount",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -46791,7 +46840,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "numberOfDaysInCustodyInForeignJurisdiction",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -46973,7 +47022,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : "da9ab30d-d263-4123-9bde-e3078d547a8e",
       "qual" : null,
-      "reference" : null,
+      "reference" : "responsibleOfficer",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -46988,7 +47037,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "supervisingCourtName",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -47064,7 +47113,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "startDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -47079,7 +47128,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "endDate",
       "courtExtract" : "Y",
       "durationSequence" : null
     }, {
@@ -47094,7 +47143,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "curfewAddressDetailAndTiming",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -47858,7 +47907,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -47873,7 +47922,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -48274,7 +48323,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -48289,7 +48338,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -48645,7 +48694,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -48660,7 +48709,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -49076,7 +49125,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "prison",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -49091,7 +49140,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "riskFactors",
       "courtExtract" : "N",
       "durationSequence" : null
     }, {
@@ -49192,7 +49241,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],
@@ -49263,7 +49312,7 @@
       "userGroups" : [ "Court Clerks", "Legal Advisers" ],
       "fixedListId" : null,
       "qual" : null,
-      "reference" : null,
+      "reference" : "additionalInformation",
       "courtExtract" : "Y",
       "durationSequence" : null
     } ],

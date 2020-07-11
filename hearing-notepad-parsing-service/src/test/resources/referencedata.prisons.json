@@ -1,0 +1,30 @@
+{
+  "prisons": [
+    {
+      "id": "70ed3219-378f-3d4c-9bdc-61b399ab95f9",
+      "seqNum": 1060,
+      "name": "HMIRC The Verne",
+      "nsdtIdentifier": "6029",
+      "addressLine1": "HMP The Verne",
+      "addressLine2": "Verne Common Road",
+      "addressLine3": "Portland",
+      "addressLine4": "Dorset",
+      "addressLine5": "Dorset",
+      "postCode": "DT15 1EQ",
+      "startDate": "2000-01-01",
+      "omuEmailAddress": "omu.theverne@justice.gov.uk"
+    },
+    {
+      "id": "d5c35bad-5e03-3df5-8944-07fe4a983da7",
+      "seqNum": 20,
+      "name": "HMP Ashfield",
+      "nsdtIdentifier": "5925",
+      "addressLine1": "Shortwood Road",
+      "addressLine2": "Pucklechurch",
+      "addressLine3": "Bristol",
+      "postCode": "BS16 9QJ",
+      "startDate": "2000-01-01",
+      "omuEmailAddress": "yoiashfield.premiercustody@premier-serco.cjsm.net"
+    }
+  ]
+}

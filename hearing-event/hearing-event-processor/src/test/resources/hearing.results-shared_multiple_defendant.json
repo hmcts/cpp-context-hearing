@@ -237,12 +237,14 @@
             {
               "id": "2493a3a4-918a-4b83-b3c0-d221ff83d6fc",
               "label": "Defendant excused attendance",
+              "promptRef":"defendantExcusedAttendance",
               "value": "true",
               "welshValue": ""
             },
             {
               "id": "80be59c8-ffaa-4570-b40a-f3a085058208",
               "label": "Bail condition reason",
+              "promptRef":"bailConditionReason",
               "value": "For the defendant's own welfare",
               "welshValue": ""
             }
@@ -278,30 +280,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "11:00",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Aberystwyth Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Application",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "2 Days",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Defendant not Present",
               "welshValue": ""
             }
@@ -323,24 +330,28 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "11:00",
               "welshValue": ""
             },
             {
               "id": "66868c04-72c4-46d9-a4fc-860a82107475",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Amersham Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Breach",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "3 Minutes",
               "welshValue": ""
             }
@@ -384,30 +395,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "10:00",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Aldershot Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Application",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "2 Days",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Remand in Custody",
               "welshValue": ""
             }
@@ -429,30 +445,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "10:00",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Coventry Crown Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Contempt",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "2 Days",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Remand in Custody",
               "welshValue": ""
             }
@@ -474,24 +495,28 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "12:00",
               "welshValue": ""
             },
             {
               "id": "66868c04-72c4-46d9-a4fc-860a82107475",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Liverpool Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Application",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "2 Days",
               "welshValue": ""
             }
@@ -513,12 +538,14 @@
             {
               "id": "2493a3a4-918a-4b83-b3c0-d221ff83d6fc",
               "label": "Defendant excused attendance",
+              "promptRef":"defendantExcusedAttendance",
               "value": "true",
               "welshValue": ""
             },
             {
               "id": "80be59c8-ffaa-4570-b40a-f3a085058208",
               "label": "Bail condition reason",
+              "promptRef":"bailConditionReason",
               "value": "For the defendant's own welfare",
               "welshValue": ""
             }
@@ -562,30 +589,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "12:00",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Aldershot Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Breach",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "3 Hours",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Defendant not Present",
               "welshValue": ""
             }
@@ -629,30 +661,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "11:00",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Coventry Crown Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Application",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "2 Hours",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Unconditional Bail",
               "welshValue": ""
             }
@@ -674,24 +711,28 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "20:00",
               "welshValue": ""
             },
             {
               "id": "66868c04-72c4-46d9-a4fc-860a82107475",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Coventry Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Breach",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "3 Days",
               "welshValue": ""
             }
@@ -713,24 +754,28 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "12:00",
               "welshValue": ""
             },
             {
               "id": "66868c04-72c4-46d9-a4fc-860a82107475",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Croydon Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Contempt",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "1 Weeks",
               "welshValue": ""
             }
@@ -752,30 +797,35 @@
             {
               "id": "dfac671c-5b85-42a1-bb66-9aeee388a08d",
               "label": "Time of hearing",
+              "promptRef":"HTIME",
               "value": "11:00",
               "welshValue": ""
             },
             {
               "id": "7746831a-d5dd-4fa8-ac13-528573948c8a",
               "label": "Courthouse name",
+              "promptRef":"HCHOUSE",
               "value": "Newton Abbot Magistrates' Court",
               "welshValue": ""
             },
             {
               "id": "c1116d12-dd35-4171-807a-2cb845357d22",
               "label": "Hearing type",
+              "promptRef":"HTYPE",
               "value": "Breach",
               "welshValue": ""
             },
             {
               "id": "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
               "label": "Estimated duration",
+              "promptRef":"HEST",
               "value": "3 Hours",
               "welshValue": ""
             },
             {
               "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
               "label": "Remand Status",
+              "promptRef":"remandStatus",
               "value": "Defendant not Present",
               "welshValue": ""
             }

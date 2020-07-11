@@ -1,12 +1,32 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.util.Optional.ofNullable;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
+import static uk.gov.justice.core.courts.Hearing.hearing;
+import static uk.gov.justice.core.courts.ResultLine.resultLine;
+import static uk.gov.justice.core.courts.Target.target;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared.builder;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_NAME;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_ROOM_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_ROOM_NAME;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_ROOM_OU_CODE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DUMMY_NAME;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.FIXED_LIST_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_EVENT;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_TYPE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REFERENCE_DATE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_DEFINITIONS_JSON;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
+
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
@@ -26,59 +46,50 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Al
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.FixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
-import uk.gov.moj.cpp.hearing.event.service.FixedListLookup;
+import uk.gov.moj.cpp.hearing.event.service.AlcoholLevelMethodsReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.event.service.BailStatusReferenceDataLoader;
-import uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader;
-import uk.gov.moj.cpp.hearing.event.service.HearingTypeReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.CourtHouseReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.CourtRoomOuCodeReverseLookup;
-import uk.gov.moj.cpp.hearing.event.service.NowsReferenceDataLoader;
+import uk.gov.moj.cpp.hearing.event.service.FixedListLookup;
+import uk.gov.moj.cpp.hearing.event.service.HearingTypeReverseLookup;
+import uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.event.service.NowsReferenceCache;
+import uk.gov.moj.cpp.hearing.event.service.NowsReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.event.service.NowsReferenceDataServiceImpl;
+import uk.gov.moj.cpp.hearing.event.service.OrganisationalUnitLoader;
+import uk.gov.moj.cpp.hearing.event.service.ProsecutorDataLoader;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.event.service.VerdictTypesReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
-import javax.json.JsonValue;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static org.codehaus.groovy.runtime.InvokerHelper.asList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
-import static uk.gov.justice.core.courts.Hearing.hearing;
-import static uk.gov.justice.core.courts.ResultLine.resultLine;
-import static uk.gov.justice.core.courts.Target.target;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared.builder;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_NAME;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DUMMY_NAME;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_DEFINITIONS_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_ROOM_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_ROOM_OU_CODE;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.FIXED_LIST_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_TYPE;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_EVENT;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REFERENCE_DATE;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.COURT_ROOM_NAME;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
+import javax.json.JsonValue;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public abstract class AbstractRestructuringTest {
     @Mock
     protected FixedListLookup fixedListLookup;
+
+    @Mock
+    private ProsecutorDataLoader prosecutorDataLoader;
+
+    @Mock
+    private OrganisationalUnitLoader organisationalUnitLoader;
 
     @Mock
     protected BailStatusReferenceDataLoader bailStatusReferenceDataLoader;
@@ -94,6 +105,12 @@ public abstract class AbstractRestructuringTest {
 
     @Mock
     protected CourtRoomOuCodeReverseLookup courtRoomOuCodeReverseLookup;
+
+    @Mock
+    protected VerdictTypesReferenceDataLoader verdictTypesReferenceDataLoader;
+
+    @Mock
+    protected AlcoholLevelMethodsReferenceDataLoader alcoholLevelMethodsReferenceDataLoader;
 
     @Mock
     protected Requester requester;
@@ -126,7 +143,7 @@ public abstract class AbstractRestructuringTest {
 
     @Spy
     @InjectMocks
-    protected ReferenceDataService referenceDataService = new NowsReferenceDataServiceImpl(nowsReferenceCache, ljaReferenceDataLoader, fixedListLookup, bailStatusReferenceDataLoader);
+    protected ReferenceDataService referenceDataService = new NowsReferenceDataServiceImpl(nowsReferenceCache, ljaReferenceDataLoader, fixedListLookup, bailStatusReferenceDataLoader, prosecutorDataLoader, organisationalUnitLoader, verdictTypesReferenceDataLoader, alcoholLevelMethodsReferenceDataLoader);
 
     protected static final FileResourceObjectMapper fileResourceObjectMapper = new FileResourceObjectMapper();
     protected static final JsonEnvelope dummyEnvelope = envelopeFrom(metadataWithRandomUUID(DUMMY_NAME), JsonValue.NULL);
@@ -163,7 +180,14 @@ public abstract class AbstractRestructuringTest {
             final List<Prompt> promptList = resultDefinition
                     .getPrompts()
                     .stream()
-                    .map(p -> new Prompt(null, p.getId(), null, null, null, null))
+                    .map(p -> Prompt.prompt()
+                            .withFixedListCode(null)
+                            .withHidden(p.isHidden())
+                            .withId(p.getId())
+                            .withLabel(null)
+                            .withPromptRef(p.getReference())
+                            .withValue(null).withWelshLabel(null)
+                            .withWelshValue(null).build())
                     .collect(toList());
 
             resultLines.add(resultLine()
@@ -174,7 +198,7 @@ public abstract class AbstractRestructuringTest {
                     .build());
         });
 
-        return builder().withTargets(Arrays.asList(target().withResultLines(resultLines).build()))
+        return builder().withTargets(Collections.singletonList(target().withResultLines(resultLines).build()))
                 .withCourtClerk(delegatedPowers()
                         .withUserId(randomUUID())
                         .withFirstName("ClerkFirstName")
@@ -201,7 +225,7 @@ public abstract class AbstractRestructuringTest {
                 .withLja("3255")
                 .withOucodeL3Name(COURT_NAME)
                 .withOucode("B47GL")
-                .withCourtrooms(asList(expectedCourtRoomResult))
+                .withCourtrooms(Collections.singletonList(expectedCourtRoomResult))
                 .withAddress1("Address1")
                 .withAddress2("Address2")
                 .withAddress3("Address3")

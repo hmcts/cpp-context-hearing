@@ -14,5 +14,6 @@
         <module>hearing-domain-transformation-spiresults-prodfix</module>
         <module>hearing-domain-transformation-for-corechanges</module>
         <module>hearing-domain-transformations-pilotdata</module>
+        <module>hearing-domain-transformation-judicialresult-mandatory-attributes</module>
     </modules>
 </project>

@@ -6,8 +6,8 @@ import static java.lang.Long.parseLong;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.time.ZoneOffset.UTC;
-import static java.util.Objects.nonNull;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -37,6 +37,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.dateToBeFixed;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.existingHearingId;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hCHOUSEOrganisationName;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.isPresent;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.reservedJudiciary;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.timeOfHearing;
@@ -135,7 +136,7 @@ public class NextHearingHelper {
         final boolean isDateToBeFixed = ofNullable(promptsMap.get(dateToBeFixed)).isPresent();
 
         return ofNullable(promptsMap.get(HTYPE)).isPresent()
-                && ofNullable(promptsMap.get(HCHOUSE)).isPresent()
+                && (ofNullable(promptsMap.get(hCHOUSEOrganisationName)).isPresent() || ofNullable(promptsMap.get(HCHOUSE)).isPresent())
                 && ofNullable(promptsMap.get(HEST)).isPresent()
                 && (isFixedDatePromptsPresent || isWeekCommencingPromptsPresent || isDateToBeFixed);
     }
@@ -274,7 +275,11 @@ public class NextHearingHelper {
     private CourtCentre extractCourtCentre(final JsonEnvelope context,
                                            final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
 
-        final Optional<JudicialResultPrompt> courtHouse = ofNullable(promptsMap.get(HCHOUSE));
+        Optional<JudicialResultPrompt> courtHouse = ofNullable(promptsMap.get(hCHOUSEOrganisationName));
+
+        if (!courtHouse.isPresent()) {
+            courtHouse = ofNullable(promptsMap.get(HCHOUSE));
+        }
 
         if (!courtHouse.isPresent()) {
             return null;

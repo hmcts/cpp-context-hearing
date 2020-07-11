@@ -6,15 +6,16 @@
     "hearing": {
       "$ref": "http://justice.gov.uk/core/courts/hearing.json"
     },
-    "createNowsRequest": {
-      "$ref": "http://justice.gov.uk/core/courts/createNowsRequest.json"
-    },
     "nextHearing": {
       "$ref": "http://justice.gov.uk/core/courts/nextHearing.json"
     },
-    "nowDocumentRequest": {
-      "$ref": "http://justice.gov.uk/core/courts/nowdocument/now-document-request.json"
+    "emailNotifications": {
+      "$ref": "http://justice.gov.uk/core/courts/notification/email-channel.json"
+    },
+    "defendantCaseOffences": {
+      "$ref": "http://justice.gov.uk/core/courts/nowdocument/defendant-case-offence.json"
     }
+
   },
   "additionalProperties": false
 }

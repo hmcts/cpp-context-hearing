@@ -1,0 +1,22 @@
+{
+  "organisationTypes": [
+    {
+      "id": "50cb468b-38e4-3b91-8887-518df9dcc3ce",
+      "seqNum": 10,
+      "orgName": "Lincoln JAC",
+      "orgType": "ATTC",
+      "startDate": "2000-01-01",
+      "filtercode": "EM",
+      "emailAddress": "Stephen.Brett@noms.gsi.gov.uk"
+    },
+    {
+      "id": "3a48baac-a540-37f3-b6a3-3b6b2e71a8ca",
+      "seqNum": 20,
+      "orgName": "Preston JAC",
+      "orgType": "ATTC",
+      "startDate": "2000-01-01",
+      "filtercode": "NW",
+      "emailAddress": "sherry.barrass@noms.gsi.gov.uk"
+    }
+  ]
+}

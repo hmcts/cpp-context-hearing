@@ -43,6 +43,7 @@
         {
           "id": "7656ce22-8bee-497c-8e27-c7718a743652",
           "label": "Specify qualified person who will decide treatment",
+          "promptRef":"specifyQualifiedPersonWhowillDecideTreatment",
           "value": "test1",
           "welshValue": ""
         }

@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "id": "http://justice.gov.uk/hearing/courts/referencedata/prosecutor.json",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "majorCreditorCode": {
+      "type": "string"
+    },
+    "fullName": {
+      "type": "string"
+    },
+    "address": {
+      "type": "object",
+      "properties": {
+        "address1": {
+          "type": "string"
+        },
+        "address2": {
+          "type": "string"
+        },
+        "address3": {
+          "type": "string"
+        },
+        "address4": {
+          "type": "string"
+        },
+        "address5": {
+          "type": "string"
+        },
+        "postcode": {
+          "description": "The post code",
+          "$ref": "#/definitions/ukGovPostCode"
+        }
+      },
+      "required": [
+        "address1",
+        "postcode"
+      ],
+      "additionalProperties": false
+    },
+    "oucode": {
+      "type": "string"
+    },
+    "informantEmailAddress": {
+      "type": "string",
+      "$ref": "#/definitions/email"
+    }
+  },
+  "required": [
+    "id",
+    "majorCreditorCode",
+    "fullName"
+  ],
+  "definitions": {
+    "ukGovPostCode": {
+      "type": "string",
+      "pattern": "([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z])))) [0-9][A-Za-z]{2})$"
+    },
+    "email": {
+      "type": "string",
+      "pattern": "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$"
+    }
+  }
+
+  }

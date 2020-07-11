@@ -14,17 +14,16 @@ import org.slf4j.LoggerFactory;
 
 public class PublishResultUtil {
 
-    public static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
-    public static final String OUTGOING_PROMPT_DATE_FORMAT = "dd MMM yyyy";
-    public static final String DATE_PROMPT_TYPE = "DATE";
-    public static final String CURRENCY_PROMPT_TYPE = "CURR";
+    public static final String OUTGOING_PROMPT_DATE_FORMAT = "dd/MM/yyyy";
+    private static final String INCOMING_PROMPT_DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_PROMPT_TYPE = "DATE";
+    private static final String CURRENCY_PROMPT_TYPE = "CURR";
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultUtil.class.getName());
-    public static final String POUND_CURRENCY_LABEL = "£";
+    private static final String POUND_CURRENCY_LABEL = "£";
 
     private PublishResultUtil() {
 
     }
-
 
     public static String reformatValue(String value, final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptRef) {
         if (value == null) {

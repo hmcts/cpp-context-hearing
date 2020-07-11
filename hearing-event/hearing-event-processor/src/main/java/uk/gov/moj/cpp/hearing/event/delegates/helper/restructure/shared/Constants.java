@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared;
 
 public class Constants {
     public static final String RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT = "ResultDefinition not found for resultLineId: %s, resultDefinitionId: %s, hearingId: %s orderedDate: %s";
-    public static final String NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT = "No prompt definition found for prompt id: %s label: %s value: %s resultDefinitionId: %s";
+    public static final String NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT = "No prompt definition found for prompt id: %s  prompt ref : %s label: %s value: %s resultDefinitionId: %s";
     public static final String REPLACEMENT_COMMA = ",";
     public static final String YES_INITIAL_STR = "Y";
     public static final String NO_INITIAL_STR = "N";

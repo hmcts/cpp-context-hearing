@@ -1,14 +1,27 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
+import static java.lang.String.format;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier.SEPARATOR;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.REPLACEMENT_COMMA;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.JudicialResultPromptMapper.findJudicialResultPrompt;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
+
+import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
-import uk.gov.justice.core.courts.NextHearing;
-import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.JudicialResultPromptDurationElement;
+import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -21,28 +34,16 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
-import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.UUID;
-import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
-import static java.lang.String.format;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier.SEPARATOR;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.REPLACEMENT_COMMA;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.JudicialResultPromptMapper.findJudicialResultPrompt;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
+import javax.inject.Inject;
 
 public class ResultTreeBuilder {
     private final ReferenceDataService referenceDataService;
@@ -62,11 +63,11 @@ public class ResultTreeBuilder {
     private Map<UUID, TreeNode<ResultLine>> mapTreeNodeRelations(final Map<UUID, TreeNode<ResultLine>> resultLinesMap) {
         resultLinesMap.values().forEach(treeNode -> {
             final ResultLine resultLine = treeNode.getData();
-            final TreeNode parentTreeNode = resultLinesMap.get(treeNode.getId());
+            final TreeNode<ResultLine> parentTreeNode = resultLinesMap.get(treeNode.getId());
             final List<UUID> childResultLineIds = resultLine.getChildResultLineIds();
             if (!isEmpty(childResultLineIds)) {
                 childResultLineIds.forEach(childId -> {
-                            final TreeNode childTreeNode = resultLinesMap.get(childId);
+                            final TreeNode<ResultLine> childTreeNode = resultLinesMap.get(childId);
                             parentTreeNode.addChild(childTreeNode);
                             childTreeNode.addParent(parentTreeNode);
                         }
@@ -127,8 +128,8 @@ public class ResultTreeBuilder {
                 .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
                 .withIsConvictedResult(resultDefinition.isConvicted())
                 .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))
-                .withIsUnscheduled(resultDefinition.getUnscheduled())
                 .withLabel(resultDefinition.getLabel())
+                .withIsUnscheduled(resultDefinition.getUnscheduled())
                 .withLastSharedDateTime(nonNull(resultLine.getSharedDate()) ? resultLine.getSharedDate().toString() : LocalDate.now().toString())
                 .withOrderedDate(resultLine.getOrderedDate())
                 .withOrderedHearingId(hearing.getId())
@@ -145,7 +146,11 @@ public class ResultTreeBuilder {
                 .withExcludedFromResults(getBooleanValue(resultDefinition.getExcludedFromResults(), false))
                 .withAlwaysPublished(getBooleanValue(resultDefinition.getAlwaysPublished(), false))
                 .withUrgent(getBooleanValue(resultDefinition.getUrgent(), false))
-                .withD20(getBooleanValue(resultDefinition.getD20(), false));
+                .withD20(getBooleanValue(resultDefinition.getD20(), false))
+                .withRollUpPrompts(getBooleanValue(resultDefinition.getRollUpPrompts(), false))
+                .withPublishedForNows(getBooleanValue(resultDefinition.getPublishedForNows(), false))
+                .withResultWording(resultDefinition.getResultWording())
+                .withWelshResultWording(resultDefinition.getWelshResultWording());
 
         final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts());
 
@@ -174,7 +179,7 @@ public class ResultTreeBuilder {
     }
 
     private TreeNode<ResultLine> getResultLineTreeNode(final Target target, final ResultLine resultLine, final TreeNode<ResultDefinition> resultDefinitionNode, final JudicialResult judicialResult) {
-        final TreeNode<ResultLine> treeNode = new TreeNode(resultLine.getResultLineId(), resultLine);
+        final TreeNode<ResultLine> treeNode = new TreeNode<>(resultLine.getResultLineId(), resultLine);
         treeNode.setResultDefinition(resultDefinitionNode);
         treeNode.setJudicialResult(judicialResult);
         treeNode.setTargetId(target.getTargetId());
@@ -199,10 +204,9 @@ public class ResultTreeBuilder {
     private List<JudicialResultPrompt> buildJudicialResultPrompt(final ResultDefinition resultDefinition, final List<Prompt> prompts) {
         return prompts.stream()
                 .map(prompt -> {
-                            final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptDefinition = resultDefinition.getPrompts().stream().filter(
-                                    promptDef -> promptDef.getId().equals(prompt.getId()))
-                                    .findFirst().orElseThrow(() -> new RuntimeException(format(NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT, prompt.getId(), prompt.getLabel(), prompt.getValue(), resultDefinition.getId())));
-
+                            final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptDefinition = resultDefinition.getPrompts().stream()
+                                    .filter(promptDef -> promptDef.getId().equals(prompt.getId()) && (isNull(prompt.getPromptRef()) || prompt.getPromptRef().equals(promptDef.getReference())))
+                                    .findFirst().orElseThrow(() -> new RuntimeException(format(NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT, prompt.getId(), prompt.getPromptRef(), prompt.getLabel(), prompt.getValue(), resultDefinition.getId())));
                             return findJudicialResultPrompt(prompt, promptDefinition);
                         }
                 )

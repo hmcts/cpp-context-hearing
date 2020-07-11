@@ -41,7 +41,7 @@
           "id": "3054909b-15b6-499f-b44f-67b2b1215c76",
           "label": "Protected person's address",
           "resultPromptRule": "mandatory",
-          "type": "TXT",
+          "type": "NAMEADDRESS",
           "sequence": 2,
           "durationSequence": 2,
           "hidden": false
@@ -62,6 +62,7 @@
           "type": "INT",
           "sequence": 4,
           "duration": "Years",
+          "welshDuration": "Flynedd",
           "hidden": false,
           "wordGroup": [
             "Years"
@@ -74,6 +75,7 @@
           "sequence": 5,
           "type": "INT",
           "duration": "Months",
+          "welshDuration": "Mis",
           "hidden": false,
           "wordGroup": [
             "Months"
@@ -86,6 +88,7 @@
           "type": "INT",
           "sequence": 6,
           "duration": "Weeks",
+          "welshDuration": "Wythnos",
           "hidden": false,
           "wordGroup": [
             "Weeks"
@@ -98,6 +101,7 @@
           "type": "INT",
           "sequence": 7,
           "duration": "Days",
+          "welshDuration": "Niwrnod",
           "hidden": false,
           "wordGroup": [
             "Days"
@@ -110,7 +114,7 @@
           "type": "FIXL",
           "sequence": 8,
           "hidden": false,
-          "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
+          "referenceDataKey": "supervisingcourt"
         },
         {
           "id": "5aeb14be-6fe6-44c2-a827-5b8fb4a716b8",
@@ -202,7 +206,9 @@
           "id": "3054909b-15b6-499f-b44f-67b2b1215c72",
           "label": "Protected1 person's address",
           "resultPromptRule": "mandatory",
-          "type": "TXT",
+          "type": "NAMEADDRESS",
+          "referenceDataKey": "protectedPerson",
+          "nameEmail": true,
           "sequence": 2,
           "hidden": false
         },
@@ -221,6 +227,7 @@
           "type": "INT",
           "sequence": 4,
           "duration": "Years",
+          "welshDuration": "Flynedd",
           "hidden": false,
           "wordGroup": [
             "Years"
@@ -233,6 +240,7 @@
           "sequence": 5,
           "type": "INT",
           "duration": "Months",
+          "welshDuration": "Mis",
           "hidden": false,
           "wordGroup": [
             "Months"
@@ -245,6 +253,7 @@
           "type": "INT",
           "sequence": 6,
           "duration": "Weeks",
+          "welshDuration": "Wythnos",
           "hidden": false,
           "wordGroup": [
             "Weeks"
@@ -257,6 +266,7 @@
           "type": "INT",
           "sequence": 7,
           "duration": "Days",
+          "welshDuration": "Niwrnod",
           "hidden": false,
           "wordGroup": [
             "Days"
@@ -269,6 +279,7 @@
           "type": "FIXL",
           "sequence": 8,
           "duration": "Days",
+          "welshDuration": "Niwrnod",
           "hidden": false,
           "fixedListId": "8dc70c95-fb09-4842-9138-bc579fceb605"
         },

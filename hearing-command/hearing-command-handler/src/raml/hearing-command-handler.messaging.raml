@@ -135,15 +135,6 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.record-mags-court-hearing.json
             schema:  !include json/schema/hearing.record-mags-court-hearing.json
 
-# Nows
-
-        application/vnd.hearing.command.save-nows-variants+json:
-            example: !include json/hearing.command.save-nows-variants.json
-            schema:  !include json/schema/hearing.command.save-nows-variants.json
-
-        application/vnd.hearing.command.pending-nows-requested+json:
-                schema: !include json/schema/hearing.command.pending-nows-requested.json
-                example: !include json/hearing.command.pending-nows-requested.json
 # Case Defendant Details Update
         application/vnd.hearing.update-case-defendant-details-against-hearing-aggregate+json:
             schema: !include json/schema/hearing.update-case-defendant-details-against-hearing-aggregate.json
@@ -194,16 +185,6 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.upload-subscriptions+json:
                 schema: !include json/schema/hearing.command.upload-subscriptions.json
                 example: !include json/hearing.command.upload-subscriptions.json
-
-# Apply Enforcement Acknowledgement
-        application/vnd.hearing.command.apply-enforcement-acknowledgement+json:
-                schema: !include json/schema/hearing.command.apply-enforcement-acknowledgement.json
-                example: !include json/hearing.command.apply-enforcement-acknowledgement.json
-
-#Enforcement Acknowledgement Error
-        application/vnd.hearing.command.enforcement-acknowledgement-error+json:
-                schema: !include json/schema/hearing.command.enforcement-acknowledgement-error.json
-                example: !include json/hearing.command.enforcement-acknowledgement-error.json
 
 # Application response
         application/vnd.hearing.command.save-application-response+json:

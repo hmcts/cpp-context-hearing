@@ -211,42 +211,49 @@
             {
               "id": "816fbec4-6091-4aba-84cd-e348cc2bf36f",
               "label": "Curfew and electronic monitoring period",
+              "promptRef":"curfewAndElectricalMonitoringPeriod",
               "value": "2 Weeks",
               "welshValue": ""
             },
             {
               "id": "206a8658-96da-42cb-80a7-ae1c0e440e11",
               "label": "Start date",
+              "promptRef":"startDate",
               "value": "2020-12-12",
               "welshValue": ""
             },
             {
               "id": "f18d4d90-954d-4b27-9e70-f4be9c487b0e",
               "label": "Start time",
+              "promptRef":"startTime",
               "value": "12:12",
               "welshValue": ""
             },
             {
               "id": "3b0c95d5-9595-4ddd-88b8-1a2e3e70d01f",
               "label": "End date",
+              "promptRef":"endDate",
               "value": "2023-12-12",
               "welshValue": ""
             },
             {
               "id": "fd6186a4-d928-47f1-abee-2466b9b80ebf",
               "label": "End time",
+              "promptRef":"endTime",
               "value": "12:12",
               "welshValue": ""
             },
             {
               "id": "51f96065-e622-4f72-b7dc-0c11c17d1983",
               "label": "Curfew address, details and timings",
+              "promptRef":"curfewAddressDetailAndTiming",
               "value": "etst123",
               "welshValue": ""
             },
             {
               "id": "a5711a6c-18d0-4339-a37e-4796ab9f304d",
               "label": "Contractor",
+              "promptRef":"contractor",
               "value": "London Alcohol Abstinence Monitor",
               "welshValue": ""
             }
@@ -275,18 +282,21 @@
             {
               "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
               "label": "End Date",
+              "promptRef":"endDate",
               "value": "2022-11-11",
               "welshValue": ""
             },
             {
               "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
               "label": "Responsible officer",
+              "promptRef":"responsibleOfficer",
               "value": "a probation officer",
               "welshValue": ""
             },
             {
               "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
               "label": "Supervising Court name",
+              "promptRef":"supervisingCourtName",
               "value": "test 123",
               "welshValue": ""
             }

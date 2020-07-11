@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event.service;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
@@ -42,9 +41,7 @@ public class NowsReferenceCache {
             .build(new CacheLoader<CacheKey, Object>() {
                 @Override
                 public Object load(final CacheKey key) {
-                    if (Type.NOWS.equals(key.getType())) {
-                        return nowsReferenceDataLoader.loadAllNowsReference(context.get(), key.getReferenceDate());
-                    } else if (Type.RESULT_DEFINITIONS.equals(key.getType())) {
+                    if (Type.RESULT_DEFINITIONS.equals(key.getType())) {
                         return nowsReferenceDataLoader.loadAllResultDefinitionAsTree(context.get(), key.getReferenceDate());
                     } else if (Type.FIXED_LIST.equals(key.getType())) {
                         return nowsReferenceDataLoader.loadAllFixedList(context.get(), key.getReferenceDate());
@@ -67,18 +64,6 @@ public class NowsReferenceCache {
         }
     }
 
-    public AllNows getAllNows(final JsonEnvelope context, final LocalDate referenceDate) {
-        this.context.set(context);
-        try {
-            return (AllNows) cache.get(new CacheKey(Type.NOWS, referenceDate));
-        } catch (final ExecutionException executionException) {
-            LOGGER.error("getAllNows reference data service not available", executionException);
-            throw new RuntimeException(UNRECOVERABLE_SYSTEM_ERROR, executionException);
-        } finally {
-            this.context.remove();
-        }
-    }
-
     public AllFixedList getAllFixedList(final JsonEnvelope context, final LocalDate referenceDate) {
         this.context.set(context);
         try {
@@ -92,10 +77,10 @@ public class NowsReferenceCache {
     }
 
     private enum Type {
-        NOWS, RESULT_DEFINITIONS, FIXED_LIST
+        RESULT_DEFINITIONS, FIXED_LIST
     }
 
-    private class CacheKey {
+    private static class CacheKey {
         private final Type type;
         private final LocalDate referenceDate;
 

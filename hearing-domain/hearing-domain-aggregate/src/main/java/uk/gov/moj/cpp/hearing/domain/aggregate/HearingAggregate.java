@@ -11,7 +11,6 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtApplicationResponse;
 import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.CreateNowsRequest;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -34,7 +33,6 @@ import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.AdjournHearingDelegate;
@@ -49,7 +47,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingTrialTypeDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDelegate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.OffenceDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.PleaDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ProsecutionCaseDelegate;
@@ -109,7 +106,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
-import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -122,7 +118,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 6L;
+    private static final long serialVersionUID = 7L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -151,8 +147,6 @@ public class HearingAggregate implements Aggregate {
     private final VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
 
     private final AdjournHearingDelegate adjournHearingDelegate = new AdjournHearingDelegate(momento);
-
-    private final NowDelegate nowDelegate = new NowDelegate(momento);
 
     private final ApplicationDelegate applicationDelegate = new ApplicationDelegate(momento);
 
@@ -202,7 +196,6 @@ public class HearingAggregate implements Aggregate {
                 when(DraftResultSaved.class).apply(resultsSharedDelegate::handleDraftResultSaved),
                 when(ApplicationDraftResulted.class).apply(resultsSharedDelegate::handleApplicationDraftResulted),
                 when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
-                when(PendingNowsRequested.class).apply(nowDelegate::handlePendingNowsRequested),
                 when(ApplicationResponseSaved.class).apply(applicationDelegate::handleApplicationResponseSaved),
                 when(RespondentCounselAdded.class).apply(respondentCounselDelegate::handleRespondentCounselAdded),
                 when(RespondentCounselRemoved.class).apply(respondentCounselDelegate::handleRespondentCounselRemoved),
@@ -224,9 +217,7 @@ public class HearingAggregate implements Aggregate {
                 when(CaseMarkersUpdated.class).apply(prosecutionCaseDelegate::handleCaseMarkersUpdated),
                 when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate::onDefendantLegalaidStatusTobeUpdatedForHearing),
                 when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
-                when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> {
-                    hearingDelegate.handleVacatedTrialCleared();
-                }),
+                when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> hearingDelegate.handleVacatedTrialCleared()),
                 otherwiseDoNothing()
         );
 
@@ -308,8 +299,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateHearingVacateTrialDetails(final UUID hearingId,
-                                               final Boolean isVacated,
-                                               final UUID vacatedTrialReasonId) {
+                                                          final Boolean isVacated,
+                                                          final UUID vacatedTrialReasonId) {
         return apply(this.hearingDelegate.updateHearingVacateTrialDetails(hearingId, isVacated, vacatedTrialReasonId));
     }
 
@@ -366,32 +357,12 @@ public class HearingAggregate implements Aggregate {
         return apply(this.adjournHearingDelegate.adjournHearing(adjournHearing));
     }
 
-    public Stream<Object> saveNowsVariants(final UUID hearingId, final List<Variant> variants) {
-        final NowsVariantsSavedEvent event = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
-                .setHearingId(hearingId)
-                .setVariants(variants);
-        return apply(Stream.of(event));
-    }
-
-
     public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDay) {
         return apply(this.defendantDelegate.updateDefendantAttendance(hearingId, defendantId, attendanceDay));
     }
 
     public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict) {
         return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict));
-    }
-
-    public Stream<Object> registerPendingNowsRequest(final CreateNowsRequest nowsRequest, final List<Target> targets) {
-        return apply(this.nowDelegate.registerPendingNowsRequest(nowsRequest, targets));
-    }
-
-    public Stream<Object> applyAccountNumber(final UUID requestId, final String accountNumber) {
-        return apply(this.nowDelegate.applyAccountNumber(requestId, accountNumber));
-    }
-
-    public Stream<Object> recordEnforcementError(final UUID requestId, final String errorCode, final String errorMessage) {
-        return apply(this.nowDelegate.recordEnforcementError(requestId, errorCode, errorMessage));
     }
 
     public Stream<Object> courtApplicationResponse(final UUID applicationPartyId, final CourtApplicationResponse courtApplicationResponse) {
@@ -405,7 +376,6 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> removeRespondentCounsel(final UUID id, final UUID hearingId) {
         return apply(respondentCounselDelegate.removeRespondentCounsel(id, hearingId));
     }
-
 
     public Stream<Object> updateRespondentCounsel(final RespondentCounsel respondentCounsel, final UUID hearingId) {
         return apply(respondentCounselDelegate.updateRespondentCounsel(respondentCounsel, hearingId));
@@ -474,7 +444,7 @@ public class HearingAggregate implements Aggregate {
     private boolean hasHearingEnded() {
         final Map<UUID, HearingEventDelegate.HearingEvent> events = this.momento.getHearingEvents().entrySet().stream()
                 .filter(hearingEvent -> RECORDED_LABEL_HEARING_END.equalsIgnoreCase(hearingEvent.getValue().getHearingEventLogged().getRecordedLabel()))
-                .collect(Collectors.toMap(hearingEvent -> hearingEvent.getKey(), hearingEvent -> hearingEvent.getValue()));
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         return !events.isEmpty();
     }
 
@@ -504,6 +474,4 @@ public class HearingAggregate implements Aggregate {
                 .withSlots(slots)
                 .build()));
     }
-
-
 }

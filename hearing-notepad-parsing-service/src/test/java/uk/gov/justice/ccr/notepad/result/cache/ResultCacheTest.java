@@ -39,21 +39,52 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.mock;
-import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITION_KEY;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITION_KEY;
 import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_DEFINITION_SYNONYM_KEY;
-import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_KEY;
 import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY;
+import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_KEY;
 import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_SYNONYM_KEY;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
+
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptDynamicListNameAddress;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
+import uk.gov.justice.ccr.notepad.result.exception.CacheItemNotFoundException;
+import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
+import uk.gov.justice.services.common.converter.LocalDates;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.google.common.cache.LoadingCache;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultCacheTest {
@@ -66,13 +97,22 @@ public class ResultCacheTest {
     private static final ResultType TYPE = randomEnum(ResultType.class).next();
     private static final String RESULT_PROMPT_RULE = STRING.next();
     private static final String DURATION = STRING.next();
+    private static final String WELSH_DURATION = STRING.next();
     private static final Set<String> KEYWORDS = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final Set<String> FIXED_LIST = newTreeSet(newArrayList(STRING.next(), STRING.next()));
+    private static final String NAME = STRING.next();
+    private static  Set<ResultPromptDynamicListNameAddress> NAMEADDRESS_LIST = new HashSet<>();
     private static final int SEQUENCE = INTEGER.next();
     private static final String REFERENCE = STRING.next();
     private static final int DURATION_SEQUENCE = INTEGER.next();
     private static final boolean HIDDEN = true;
     private static final String CACHE_KEY_FORMAT = "%s-%s";
+    private static final String COMPONENT_LABEL = STRING.next();
+    private static final String LIST_LABEL = STRING.next();
+    private static final String ADDRESS_TYPE = STRING.next();
+    private static final String PARTNAME1 = STRING.next();
+    private static final String PARTNAME2 = STRING.next();
+    private static final Boolean NAMEEMAIL = true;
     private final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
     private final LocalDate hearingDate = LocalDate.parse("2018-06-01");
 
@@ -209,7 +249,8 @@ public class ResultCacheTest {
         resultDefinitions.add(ResultDefinition.builder().withId(id1).withLabel(label1).withShortCode(shortCode1)
                 .withLevel(STRING.next()).withKeywords(keywords1).withTerminatesOffenceProceedings(true)
                 .withLifeDuration(true).withPublishedAsAPrompt(true).withExcludedFromResults(true)
-                .withAlwaysPublished(true).withUrgent(true).withD20(true).build());
+                .withAlwaysPublished(true).withUrgent(true).withD20(true)
+                .withPublishedForNows(true).withRollUpPrompts(true).build());
 
         resultDefinitions.add(ResultDefinition.builder().withId(id2).withLabel(label2).withShortCode(shortCode2)
                 .withLevel(STRING.next()).withKeywords(keywords2).build());
@@ -257,10 +298,17 @@ public class ResultCacheTest {
         final String label1 = STRING.next();
         final String resultPromptRule1 = STRING.next();
         final String durationElement1 = STRING.next();
+        final String welshDurationElement1 = STRING.next();
         final Integer promptOrder1 = INTEGER.next();
         final String reference1 = STRING.next();
         final Integer durationSequence1 = 0;
         final Boolean hidden1 = true;
+        final String componentLabel = STRING.next();
+        final String listLabel = STRING.next();
+        final String addressType = STRING.next();
+        final String partName1 = STRING.next();
+        final String partName2 = STRING.next();
+        final Boolean nameEmail1 = true;
 
         final HashSet<String> keywords1 = new HashSet<>();
         final String keyword_1_common = STRING.next();
@@ -277,10 +325,12 @@ public class ResultCacheTest {
         final String label2 = STRING.next();
         final String resultPromptRule2 = STRING.next();
         final String durationElement2 = STRING.next();
+        final String welshDurationElement2 = STRING.next();
         final Integer promptOrder2 = INTEGER.next();
         final String reference2 = STRING.next();
         final Integer durationSequence2 = 0;
         final Boolean hidden2 = false;
+        final Boolean nameEmail2 = false;
 
         final HashSet<String> keywords2 = new HashSet<>();
         final String keyword_2_2 = STRING.next();
@@ -300,10 +350,17 @@ public class ResultCacheTest {
                 durationElement1,
                 keywords1,
                 new HashSet<>(),
+                new HashSet<>(),
                 promptOrder1,
                 reference1,
                 durationSequence1,
-                hidden1
+                hidden1,
+                componentLabel,
+                listLabel,
+                addressType,
+                partName1,
+                nameEmail1,
+                welshDurationElement1
         ));
 
         resultPrompts.add(new ResultPrompt(
@@ -316,10 +373,17 @@ public class ResultCacheTest {
                 durationElement2,
                 keywords2,
                 new HashSet<>(),
+                new HashSet<>(),
                 promptOrder2,
                 reference2,
                 durationSequence2,
-                hidden2
+                hidden2,
+                componentLabel,
+                listLabel,
+                addressType,
+                partName2,
+                nameEmail2,
+                welshDurationElement2
         ));
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(resultPrompts);
@@ -424,9 +488,9 @@ public class ResultCacheTest {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultPrompt> resultPrompts = new ArrayList<>();
-        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null, false));
+        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null,null, null, null, null, null, null, false, null, null,null, null, null, null));
         final UUID resultDefinitionIdToFind = randomUUID();
-        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, false);
+        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, null, false, null, null, null, null,  null, null);
         resultPrompts.add(expectedResultPrompt);
 
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
@@ -449,7 +513,7 @@ public class ResultCacheTest {
 
         final HashSet<String> promptKeyWords = new HashSet<>();
         promptKeyWords.add(PROMPT_WORD);
-        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null, false);
+        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(),null,  promptKeyWords, null,null, null, null, null, false, null, null, null, null, null, null);
         final List<ResultPrompt> prompts = newArrayList(resultPrompt);
 
         final ResultPromptSynonym givenResultPromptSynonym = new ResultPromptSynonym();
@@ -489,11 +553,14 @@ public class ResultCacheTest {
     }
 
     private List<ResultPrompt> prepareResultPrompts() {
+        NAMEADDRESS_LIST.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
+                .withName(NAME)
+                .withAddressLine1(STRING.next())
+                .build());
         return newArrayList(
                 new ResultPrompt(PROMPT_ID.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN),
-                new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN)
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST,NAMEADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME1, NAMEEMAIL, WELSH_DURATION),
+                new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE, RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST,NAMEADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME2, NAMEEMAIL, WELSH_DURATION)
         );
     }
 

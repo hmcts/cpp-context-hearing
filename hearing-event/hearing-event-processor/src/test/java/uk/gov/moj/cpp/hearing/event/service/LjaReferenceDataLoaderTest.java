@@ -1,5 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.core.courts.LjaDetails;
+import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
+import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeArea;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
+
+import java.util.UUID;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
@@ -11,20 +23,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.ENFORCEMENT_AREA_QUERY_NAME;
 import static uk.gov.moj.cpp.hearing.event.service.LjaReferenceDataLoader.GET_ORGANISATION_UNIT_BY_ID_ID;
 
-import uk.gov.justice.core.courts.LjaDetails;
-import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
-import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
-import uk.gov.justice.hearing.courts.referencedata.LocalJusticeArea;
-import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
-
-import java.util.UUID;
-
-import com.jayway.jsonpath.matchers.JsonPathMatchers;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
-
 @RunWith(MockitoJUnitRunner.class)
 public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
 
@@ -32,7 +30,7 @@ public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
     private LjaReferenceDataLoader target;
 
     @Test
-    public void testLoad() {
+    public void shouldQueryAndReturnLjaDetailsCorrectly() {
 
         final String ouCode = "1234abcd";
         final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
@@ -55,13 +53,7 @@ public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
         mockQuery(orgUnitQueryEnvelopeCaptor, organisationalUnit);
         mockAdminQuery(enforcementAreaQueryEnvelopeCaptor, enforcementArea);
 
-        final LjaDetails result = target.getLjaDetails(context, courtCentreId, null);
-
-        assertThat(result.getAccountDivisionCode(), is(enforcementArea.getAccountDivisionCode().toString()));
-        assertThat(result.getEnforcementEmail(), is(enforcementArea.getEmail()));
-        assertThat(result.getEnforcementAddress().getAddress1(), is(enforcementArea.getAddress1()));
-        assertThat(result.getEnforcementAddress().getAddress2(), is(enforcementArea.getAddress1()));
-        assertThat(result.getEnforcementAddress().getAddress3(), is(enforcementArea.getAddress1()));
+        target.getLjaDetails(context, courtCentreId);
 
         verify(requester).request(orgUnitQueryEnvelopeCaptor.capture());
         verify(requester).requestAsAdmin(enforcementAreaQueryEnvelopeCaptor.capture());

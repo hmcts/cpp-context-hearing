@@ -14,6 +14,7 @@
         {
           "id": "1f983fe8-b061-4d33-86ec-1aeb37df4d8d",
           "label": "In respect of witness name",
+          "promptRef":"inRespectOfWitnessName",
           "value": "text 123",
           "welshValue": ""
         }
@@ -34,12 +35,14 @@
         {
           "id": "8c390d4e-3e46-4d75-9db8-961976e6d011",
           "label": "Name of witness",
+          "promptRef":"nameOfWitness",
           "value": "w 123",
           "welshValue": ""
         },
         {
           "id": "f539367f-b941-4873-9567-a235ffb81d85",
           "label": "Device",
+          "promptRef":"device",
           "value": "d 123",
           "welshValue": ""
         }

@@ -1,9 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -11,7 +8,6 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
@@ -23,9 +19,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -100,38 +93,4 @@ public class NowsReferenceDataLoaderTest {
                 ))
         );
     }
-
-
-    @Test
-    public void testLoadAllNowsData() {
-
-        LocalDate referenceDate = PAST_LOCAL_DATE.next();
-
-        AllNows data = AllNows.allNows()
-                .setNows(singletonList(NowDefinition.now()
-                        .setId(randomUUID())
-                        .setResultDefinitions(singletonList(NowResultDefinitionRequirement.resultDefinitions()
-                                .setId(randomUUID())
-                                .setMandatory(true)
-                                .setPrimary(true)
-                        ))
-                        .setName(STRING.next())
-                        .setTemplateName(STRING.next())
-                ));
-
-
-        final JsonEnvelope resultEnvelope = envelopeFrom(metadataWithRandomUUID("something"), objectToJsonObjectConverter.convert(data));
-
-        when(requester.requestAsAdmin(any())).thenReturn(resultEnvelope);
-
-        AllNows actual = target.loadAllNowsReference(envelopeFrom(metadataWithRandomUUID("something"), JsonValue.NULL), referenceDate);
-
-        assertThat(actual.getNows().get(0), isBean(NowDefinition.class)
-                .with(NowDefinition::getId, is(data.getNows().get(0).getId()))
-                .with(NowDefinition::getReferenceDate, is(referenceDate))
-        );
-
-
-    }
-
 }

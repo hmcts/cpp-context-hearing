@@ -16,10 +16,10 @@ import javax.inject.Inject;
 
 import com.google.common.collect.Sets;
 
-class FindPromptSynonyms implements ResultFilter<Map<String, Set<String>>, List<String>> {
+public class FindPromptSynonyms implements ResultFilter<Map<String, Set<String>>, List<String>> {
 
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
     @Override
     public Map<String, Set<String>> run(final List<String> values, final LocalDate orderedDate) {

@@ -13,10 +13,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-class FindDefinitionsIndexesByKeyword implements ResultFilter<List<Long>, Set<String>> {
+public class FindDefinitionsIndexesByKeyword implements ResultFilter<List<Long>, Set<String>> {
 
     @Inject
-    ResultCache resultCache;
+    private ResultCache resultCache;
 
     @Override
     public List<Long> run(final Set<String> words, final LocalDate orderedDate) {

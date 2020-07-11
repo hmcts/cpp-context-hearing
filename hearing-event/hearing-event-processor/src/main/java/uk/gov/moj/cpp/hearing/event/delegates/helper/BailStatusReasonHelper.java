@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static com.google.common.collect.ImmutableList.of;
 import static java.lang.System.lineSeparator;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.JudicialResult;
@@ -18,28 +18,21 @@ public class BailStatusReasonHelper {
     private static final List<String> PROMPT_REFERENCES = of("BAILCONDREAS", "BAILEXCEPTREAS");
 
     public void setReason(final ResultsShared resultsShared) {
-
         resultsShared.getHearing()
                 .getProsecutionCases()
                 .stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .map(this::setBailStatusReason)
-                .collect(toList());
+                .forEach(this::setBailStatusReason);
     }
 
-    private Defendant setBailStatusReason(final Defendant defendant) {
-
-        if (defendant.getPersonDefendant() != null) {
-            defendant
-                    .getPersonDefendant()
-                    .setBailReasons(getBailStatusReason(defendant.getOffences()));
+    private void setBailStatusReason(final Defendant defendant) {
+        String bailStatusReason = getBailStatusReason(defendant.getOffences());
+        if(nonNull(bailStatusReason) && !bailStatusReason.isEmpty()) {
+            defendant.getPersonDefendant().setBailReasons(bailStatusReason);
         }
-
-        return defendant;
     }
 
     private String getBailStatusReason(final List<Offence> offences) {
-
         return offences
                 .stream()
                 .filter(o -> null != o.getJudicialResults())
