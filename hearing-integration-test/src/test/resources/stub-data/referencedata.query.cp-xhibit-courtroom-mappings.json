@@ -27,7 +27,38 @@
       "crestCourtShortName": "DUMMY",
       "crestCourtSiteCode": "A",
       "courtType": "CROWN_COURT",
+      "validFrom": "2016-04-08",
       "crestCourtRoomName": "CourtRoom 2",
+      "crestCourtSiteUUID" : "7b223ad0-4468-11ea-b77f-2e728ce88125"
+    },
+    {
+      "id": "COURT_ROOM3_ID",
+      "courtRoomUUID": "COURT_ROOM3_ID",
+      "oucode": "C43AY00",
+      "courtRoomId": "428",
+      "crestCourtId": "428",
+      "crestCourtSiteId": "000",
+      "crestCourtSiteName": "DUMMYCOURTNAME",
+      "crestCourtShortName": "DUMMY",
+      "crestCourtSiteCode": "A",
+      "courtType": "CROWN_COURT",
+      "validFrom": "2016-04-08",
+      "crestCourtRoomName": "CourtRoom 3",
+      "crestCourtSiteUUID" : "7b223ad0-4468-11ea-b77f-2e728ce88125"
+    },
+    {
+      "id": "COURT_ROOM4_ID",
+      "courtRoomUUID": "COURT_ROOM4_ID",
+      "oucode": "C43AY00",
+      "courtRoomId": "428",
+      "crestCourtId": "428",
+      "crestCourtSiteId": "000",
+      "crestCourtSiteName": "DUMMYCOURTNAME",
+      "crestCourtShortName": "DUMMY",
+      "crestCourtSiteCode": "A",
+      "courtType": "CROWN_COURT",
+      "validFrom": "2016-04-08",
+      "crestCourtRoomName": "CourtRoom 4",
       "crestCourtSiteUUID" : "7b223ad0-4468-11ea-b77f-2e728ce88125"
     }
   ]

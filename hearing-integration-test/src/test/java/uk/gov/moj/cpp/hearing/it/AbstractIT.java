@@ -82,14 +82,13 @@ public class AbstractIT {
      */
     private static final ThreadLocal<UUID> USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     private static final ThreadLocal<UUID> ADMIN_USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
-    protected static RequestSpecification requestSpec;
     private static final TestJdbcConnectionProvider testJdbcConnectionProvider = new TestJdbcConnectionProvider();
-    private static String baseUri;
-
+    protected static RequestSpecification requestSpec;
     protected static String ouId1 = "80921334-2cf0-4609-8a29-0921bf6b3520";
     protected static String ouId2 = "7e967376-eacf-4fca-9b30-21b0c5aad427";
     protected static String ouId3 = "7e967376-eacf-4fca-9b30-21b0c5aad428";
     protected static String ouId4 = "7e967376-eacf-4fca-9b30-21b0c5aad429";
+    private static String baseUri;
 
     /**
      * In case of Single Test executions, initiation of Stubs Per Execution
@@ -236,7 +235,7 @@ public class AbstractIT {
      * Per Jvm Setup
      */
     public static void setUpJvm() {
-        truncateViewStoreTables("heda_hearing_event_definition");
+        truncateViewStoreTables("heda_hearing_event_definition", "ha_hearing", "ha_hearing_event", "court_list_publish_status");
         readConfig();
         setRequestSpecification();
         stubHearingEventDefinitions();
@@ -251,6 +250,22 @@ public class AbstractIT {
         return requestSpec;
     }
 
+    protected static void truncateViewStoreTables(final String... tableNameNames) {
+        try (final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("hearing")) {
+
+            for (final String tableName : tableNameNames) {
+                final String sql = String.format("truncate table %s cascade", tableName);
+
+                try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+                    preparedStatement.executeUpdate();
+                }
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Before
     public void setUpPerTest() {
         setupAsAuthorisedUser(getLoggedInUser());
@@ -259,7 +274,7 @@ public class AbstractIT {
 
     protected JSONObject getExistingHearing(final String hearingId) {
         final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId.toString());
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
 
         final String url = getBaseUri() + "/" + queryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.get.hearing+json";
@@ -340,21 +355,5 @@ public class AbstractIT {
 
         ReferenceDataStub.stub(localJusticeAreasResult, "123");
 
-    }
-
-    protected static void truncateViewStoreTables(final String... tableNameNames) {
-        try (final Connection connection = testJdbcConnectionProvider.getViewStoreConnection("hearing")) {
-
-            for (final String tableName : tableNameNames) {
-                final String sql = String.format("truncate table %s cascade", tableName);
-
-                try (final PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 }

@@ -922,10 +922,13 @@ public class ReferenceDataStub {
         waitForStubToBeReady(COURT_ROOM_QUERY_URL, COURT_ROOM_MEDIA_TYPE);
     }
 
-    public static void stubGetReferenceDataCourtRoomMappings(final String courtRoom1Id, final String courtRoom2Id) {
+    public static void stubGetReferenceDataCourtRoomMappings(final String courtRoom1Id, final String courtRoom2Id,String courtRoom3Id,String courtRoom4Id) {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
-        String payload = getPayload("stub-data/referencedata.query.cp-xhibit-courtroom-mappings.json").replace("COURT_ROOM1_ID", courtRoom1Id).replace("COURT_ROOM2_ID", courtRoom2Id);
+        String payload = getPayload("stub-data/referencedata.query.cp-xhibit-courtroom-mappings.json").replace("COURT_ROOM1_ID", courtRoom1Id)
+                .replace("COURT_ROOM2_ID", courtRoom2Id)
+                .replace("COURT_ROOM3_ID", courtRoom3Id)
+                .replace("COURT_ROOM4_ID", courtRoom4Id);
 
         stubFor(get(urlPathMatching(REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL))
                 .willReturn(aResponse()

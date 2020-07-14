@@ -954,10 +954,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
 
-        shareResults(getRequestSpec(), initiateHearingCommandHelper.getHearingId(), with(
-                basicShareResultsCommandTemplate(),
-                command -> command.setCourtClerk(getCourtClerk())
-        ), targets);
+
 
         try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
@@ -970,7 +967,13 @@ public class ShareResultsIT extends AbstractIT {
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
                                         .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
 
+            shareResults(getRequestSpec(), initiateHearingCommandHelper.getHearingId(), with(
+                    basicShareResultsCommandTemplate(),
+                    command -> command.setCourtClerk(getCourtClerk())
+            ), targets);
+
             publicEventResulted.waitFor();
+
         }
 
         Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
