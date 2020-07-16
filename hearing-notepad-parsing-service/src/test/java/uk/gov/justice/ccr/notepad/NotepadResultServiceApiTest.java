@@ -1,5 +1,7 @@
 package uk.gov.justice.ccr.notepad;
 
+import com.google.common.collect.Lists;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -20,6 +22,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -30,6 +33,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.*;
@@ -84,32 +88,81 @@ public class NotepadResultServiceApiTest {
     @Mock
     private ResultDefinitionView resultDefinitionView;
 
+    @Mock
+    private Knowledge promptKnowledge;
+
+    @Mock
+    private ResultPromptView resultPromptView;
+
+    @Mock
+    private List<PromptChoice> mockPromptChoices;
+
     @Test
-    public void getResultDefinition() throws Exception {
+    public void getResultDefinitionWhenFullyResolved() throws Exception {
         final UUID resultDefinitionId = randomUUID();
+        final String orderedDate = "2018-06-01";
         JsonObject payload = Json.createObjectBuilder()
                 .add("originalText", "imp sus")
-                .add("orderedDate", "2018-06-01")
+                .add("orderedDate", orderedDate)
                 .add("excludedFromResults", true)
                 .build();
         when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean())).thenReturn(resultDefinitionView);
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), any())).thenReturn(resultDefinitionView);
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
         when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(resultDefinitionId.toString());
+        when(parsingFacade.processPrompt(resultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
+        when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
+        when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
         when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(mock(ChildResultDefinitionDetail.class));
 
         testObj.getResultDefinition(jsonEnvelope);
 
-        verify(parsingFacade, times(1)).processParts(any(), parsingLocalDateArgumentCaptor.capture());
-        verify(parsingFacade, times(1)).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
+        verify(parsingFacade).processParts(any(), parsingLocalDateArgumentCaptor.capture());
+        verify(parsingFacade).processPrompt(resultDefinitionId.toString(), LocalDate.parse(orderedDate));
+        verify(resultPromptViewBuilder).buildFromKnowledge(promptKnowledge);
+        verify(resultPromptView).getPromptChoices();
+        verify(parsingFacade).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
+        verify(resultDefinitionView).setOriginalText("imp sus");
+        verify(resultDefinitionView).setOrderedDate(orderedDate);
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(any(), any(), any(), anyBoolean(), eq(mockPromptChoices));
+        verify(objectToJsonObjectConverter).convert(any());
+        verify(enveloper).withMetadataFrom(any(), any());
+
         final LocalDate localDate = localDateArgumentCaptor.getValue();
-        assertThat(localDate, equalTo(LocalDate.parse("2018-06-01")));
-        assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse("2018-06-01")));
-        verify(resultDefinitionView, times(1)).setOriginalText("imp sus");
-        verify(resultDefinitionView, times(1)).setOrderedDate("2018-06-01");
-        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(any(), any(), any(), anyBoolean());
-        verify(objectToJsonObjectConverter, times(1)).convert(any());
-        verify(enveloper, times(1)).withMetadataFrom(any(), any());
+        assertThat(localDate, equalTo(LocalDate.parse(orderedDate)));
+        assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse(orderedDate)));
+    }
+
+    @Test
+    public void getResultDefinitionsWhenAmbiguous() throws Exception {
+        final UUID resultDefinitionId = randomUUID();
+        final String orderedDate = "2018-06-01";
+        JsonObject payload = Json.createObjectBuilder()
+                .add("originalText", "imp sus")
+                .add("orderedDate", orderedDate)
+                .add("excludedFromResults", true)
+                .build();
+        when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), any())).thenReturn(resultDefinitionView);
+        when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
+        when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(null);
+
+        testObj.getResultDefinition(jsonEnvelope);
+
+        verify(parsingFacade).processParts(any(), parsingLocalDateArgumentCaptor.capture());
+        verify(parsingFacade, never()).processPrompt(resultDefinitionId.toString(), LocalDate.parse(orderedDate));
+        verify(resultPromptViewBuilder, never()).buildFromKnowledge(promptKnowledge);
+        verify(resultPromptView, never()).getPromptChoices();
+        verify(parsingFacade).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
+        verify(resultDefinitionView).setOriginalText("imp sus");
+        verify(resultDefinitionView).setOrderedDate(orderedDate);
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(any(), any(), any(), anyBoolean(), eq(null));
+        verify(objectToJsonObjectConverter).convert(any());
+        verify(enveloper).withMetadataFrom(any(), any());
+
+        final LocalDate localDate = localDateArgumentCaptor.getValue();
+        assertThat(localDate, equalTo(LocalDate.parse(orderedDate)));
+        assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse(orderedDate)));
     }
 
     @Test
@@ -124,14 +177,14 @@ public class NotepadResultServiceApiTest {
 
         testObj.getResultPrompt(jsonEnvelope);
 
-        verify(parsingFacade, times(1)).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
-        verify(parsingFacade, times(1)).processPrompt(any(String.class), parsingLocalDateArgumentCaptor.capture());
+        verify(parsingFacade).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
+        verify(parsingFacade).processPrompt(any(String.class), parsingLocalDateArgumentCaptor.capture());
         final LocalDate localDate = localDateArgumentCaptor.getValue();
         assertThat(localDate, equalTo(LocalDate.parse("2018-06-01")));
         assertThat(parsingLocalDateArgumentCaptor.getValue(), equalTo(LocalDate.parse("2018-06-01")));
-        verify(resultPromptViewBuilder, times(1)).buildFromKnowledge(any());
-        verify(objectToJsonObjectConverter, times(1)).convert(any());
-        verify(enveloper, times(1)).withMetadataFrom(any(), any());
+        verify(resultPromptViewBuilder).buildFromKnowledge(any());
+        verify(objectToJsonObjectConverter).convert(any());
+        verify(enveloper).withMetadataFrom(any(), any());
     }
 
     @Test
@@ -144,18 +197,26 @@ public class NotepadResultServiceApiTest {
         ChildResultDefinitionDetail childResultDefinitionDetail = new ChildResultDefinitionDetail(createResultDefinition(parentResultDefinitionId, Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)),
                 createResultDefinitions(Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)));
 
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean())).thenReturn(new ResultDefinitionView());
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), any())).thenReturn(new ResultDefinitionView());
         when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(parentResultDefinitionId.toString());
         when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
+        final String orderedDate = "2014-06-04";
+        when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
+        when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
+        when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
 
         final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
                 "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
-        verify(resultDefinitionViewBuilder, times(1)).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture());
+
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture(), any());
+        verify(parsingFacade).processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate));
+        verify(resultPromptViewBuilder).buildFromKnowledge(promptKnowledge);
+        verify(resultPromptView).getPromptChoices();
 
         assertThat(resultDefinitionView.getOriginalText()
                 , is("imp sus")
         );
-        assertThat(resultDefinitionView.getOrderedDate(), is("2014-06-04"));
+        assertThat(resultDefinitionView.getOrderedDate(), is(orderedDate));
         assertThat(resultDefinitionView.getResultLineId().length()
                 , is(36)
         );
@@ -165,6 +226,7 @@ public class NotepadResultServiceApiTest {
         assertThat(childResultDefinitionsCaptor.getValue().get(0).getShortCode(), is("sho code"));
         assertThat(childResultDefinitionsCaptor.getValue().get(0).getRuleType(), is("mandatory"));
         assertThat(childResultDefinitionsCaptor.getValue().get(0).getExcludedFromResults(), is(true));
+        assertThat(childResultDefinitionsCaptor.getValue().get(0).getChildResultCodes(), hasSize(1));
 
 
         assertThat(childResultDefinitionsCaptor.getValue().get(1).getCode(), is(childResultDefinitionId2.toString()));
@@ -172,6 +234,7 @@ public class NotepadResultServiceApiTest {
         assertThat(childResultDefinitionsCaptor.getValue().get(1).getShortCode(), is("sho code"));
         assertThat(childResultDefinitionsCaptor.getValue().get(1).getRuleType(), is("mandatory"));
         assertThat(childResultDefinitionsCaptor.getValue().get(1).getExcludedFromResults(), is(true));
+        assertThat(childResultDefinitionsCaptor.getValue().get(1).getChildResultCodes(), hasSize(1));
 
 
         assertThat(childResultDefinitionsCaptor.getValue().get(2).getCode(), is(childResultDefinitionId3.toString()));
@@ -179,6 +242,7 @@ public class NotepadResultServiceApiTest {
         assertThat(childResultDefinitionsCaptor.getValue().get(2).getShortCode(), is("sho code"));
         assertThat(childResultDefinitionsCaptor.getValue().get(2).getRuleType(), is("mandatory"));
         assertThat(childResultDefinitionsCaptor.getValue().get(2).getExcludedFromResults(), is(true));
+        assertThat(childResultDefinitionsCaptor.getValue().get(2).getChildResultCodes(), hasSize(1));
 
     }
 
@@ -189,6 +253,7 @@ public class NotepadResultServiceApiTest {
                         .withLabel("lab")
                         .withShortCode("sho code")
                         .withExcludedFromResults(true)
+                        .withChildResultDefinitions(Lists.newArrayList(new ChildResultDefinition(randomUUID(), "mandatory")))
                         .build()
                 )
                 .collect(Collectors.toList());

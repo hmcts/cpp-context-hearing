@@ -200,6 +200,7 @@ public class ReadStoreResultLoader implements ResultLoader {
         resultPromptsByIdMap.forEach((id, prompts) ->
                 prompts.forEach(promptJson -> {
                     final ResultPrompt resultPrompt = new ResultPrompt();
+
                     resultPrompt.setId(promptJson.getString("id"));
                     resultPrompt.setResultDefinitionId(id);
                     resultPrompt.setLabel(promptJson.getString("label").trim());

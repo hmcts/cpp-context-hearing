@@ -50,6 +50,9 @@
                 },
                 "hidden": {
                   "type": "boolean"
+                },
+                "shortCode": {
+                  "type": "string"
                 }
               }
             }
@@ -79,13 +82,41 @@
           },
           "excludedFromResults": {
             "type": "boolean"
+          },
+          "childResultCodes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
-
         }
       }
     },
     "excludedFromResults": {
       "type": "boolean"
+    },
+    "promptChoices": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "hidden": {
+            "type": "boolean"
+          }
+        }
+      }
     }
   },
   "additionalProperties": false,

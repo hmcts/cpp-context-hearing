@@ -8,8 +8,10 @@ import uk.gov.justice.ccr.notepad.process.Knowledge;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.view.ChildResultDefinition;
 import uk.gov.justice.ccr.notepad.view.Part;
+import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.ResultDefinitionView;
 import uk.gov.justice.ccr.notepad.view.ResultDefinitionViewBuilder;
+import uk.gov.justice.ccr.notepad.view.ResultPromptView;
 import uk.gov.justice.ccr.notepad.view.ResultPromptViewBuilder;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 import uk.gov.justice.services.common.converter.LocalDates;
@@ -22,11 +24,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
+
+import org.apache.commons.collections.CollectionUtils;
 
 @ServiceComponent(Component.QUERY_API)
 public class NotepadResultServiceApi {
@@ -43,13 +46,12 @@ public class NotepadResultServiceApi {
     @Inject
     private ParsingFacade parsingFacade;
 
-
     @Inject
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
 
     @Handles("hearing.notepad.parse-result-definition")
-    public JsonEnvelope getResultDefinition(final JsonEnvelope envelope) throws ExecutionException {
+    public JsonEnvelope getResultDefinition(final JsonEnvelope envelope) {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate orderedDate = LocalDates.from(payload.getString("orderedDate"));
         lazyResultCacheLoad(envelope, orderedDate);
@@ -62,33 +64,40 @@ public class NotepadResultServiceApi {
     }
 
     @Handles("hearing.notepad.parse-result-prompt")
-    public JsonEnvelope getResultPrompt(final JsonEnvelope envelope) throws ExecutionException {
+    public JsonEnvelope getResultPrompt(final JsonEnvelope envelope) {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final String resultCode = payload.getString("resultCode");
         final LocalDate orderedDate = LocalDates.from(payload.getString("orderedDate"));
         lazyResultCacheLoad(envelope, orderedDate);
-        final Knowledge knowledge = parsingFacade.processPrompt(resultCode, orderedDate);
         return enveloper.withMetadataFrom(envelope, "hearing.notepad.parse-result-prompt-response")
-                .apply(objectToJsonObjectConverter.convert(resultPromptViewBuilder.buildFromKnowledge(knowledge)));
+                .apply(objectToJsonObjectConverter.convert(getResultPromptChoices(resultCode, orderedDate)));
 
     }
 
-    private void lazyResultCacheLoad(final JsonEnvelope envelope, final LocalDate orderedDate) throws ExecutionException {
+    private ResultPromptView getResultPromptChoices(final String resultDefinitionId, final LocalDate orderedDate) {
+        final Knowledge knowledge = parsingFacade.processPrompt(resultDefinitionId, orderedDate);
+        return resultPromptViewBuilder.buildFromKnowledge(knowledge);
+    }
+
+    private void lazyResultCacheLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
         parsingFacade.lazyLoad(envelope, orderedDate);
     }
 
     ResultDefinitionView buildResultDefinitionView(final String originalText,
                                                    final LocalDate orderedDate, final List<Part> parts, final Knowledge knowledge) {
         List<ChildResultDefinition> childResultDefinitions = null;
+        List<PromptChoice> promptChoices = null;
         final String resultDefinitionId = resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(parts, knowledge);
         if (nonNull(resultDefinitionId)) {
             final ChildResultDefinitionDetail childResultDefinitionDetail = parsingFacade.retrieveChildResultDefinitionDetail(resultDefinitionId, orderedDate);
             if (nonNull(childResultDefinitionDetail) && nonNull(childResultDefinitionDetail.getParentResultDefinition())) {
                 childResultDefinitions = transformChildResultDefinitionsView(childResultDefinitionDetail.getResultDefinitions(), childResultDefinitionDetail.getParentResultDefinition().getChildResultDefinitions());
             }
+
+            promptChoices = getResultPromptChoices(resultDefinitionId, orderedDate).getPromptChoices();
         }
         final Boolean excludedFromResults = getExcludedFromResultsFromResultDefinition(orderedDate, resultDefinitionId);
-        final ResultDefinitionView buildFromKnowledge = resultDefinitionViewBuilder.buildFromKnowledge(parts, knowledge, childResultDefinitions, excludedFromResults);
+        final ResultDefinitionView buildFromKnowledge = resultDefinitionViewBuilder.buildFromKnowledge(parts, knowledge, childResultDefinitions, excludedFromResults, promptChoices);
         buildFromKnowledge.setOriginalText(originalText);
         buildFromKnowledge.setOrderedDate(orderedDate.toString());
         return buildFromKnowledge;
@@ -112,6 +121,9 @@ public class NotepadResultServiceApi {
                     childResultDefinition.setShortCode(resultDefinition.getShortCode());
                     childResultDefinition.setRuleType(getRuleType(resultDefinition.getId(), childResultDefinitions));
                     childResultDefinition.setExcludedFromResults(resultDefinition.getExcludedFromResults());
+                    if(CollectionUtils.isNotEmpty(resultDefinition.getChildResultDefinitions())) {
+                        childResultDefinition.setChildResultCodes(resultDefinition.getChildResultDefinitions().stream().map(crd -> crd.getChildResultDefinitionId()).collect(Collectors.toList()));
+                    }
                     return childResultDefinition;
                 })
                 .collect(Collectors.toList());

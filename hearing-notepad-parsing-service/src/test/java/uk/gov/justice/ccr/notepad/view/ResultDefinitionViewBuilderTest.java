@@ -3,6 +3,7 @@ package uk.gov.justice.ccr.notepad.view;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.nullValue;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.BOOLEAN;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
@@ -31,21 +32,26 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultDefinitionViewBuilderTest extends AbstractTest {
     @InjectMocks
     private Processor processor = new Processor();
+
     @InjectMocks
     private ResultDefinitionViewBuilder target = new ResultDefinitionViewBuilder();
+
+    @Mock
+    private List<PromptChoice> mockPromptChoices;
 
     @Test
     public void buildFromKnowledge() {
         List<Part> parts = new PartsResolver().getParts("imp 2Y 4 M 9d sus 5 m 6 w 7 d ");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -89,6 +95,8 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         PartValue valueDaysOfPart4 = ((List<PartValue>) part4.getValue()).get(2);
         assertThat(Arrays.asList(valueDaysOfPart4.getValue(), valueDaysOfPart4.getLabel(), valueDaysOfPart4.getType())
                 , containsInAnyOrder(Arrays.asList(7, "Days", INT).toArray()));
+
+        assertThat(result.getPromptChoices(), is(mockPromptChoices));
     }
 
     @Test
@@ -96,7 +104,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("CrEdit bail reMand");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -115,6 +123,8 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList("bail", RESOLVED, IGNORED).toArray()));
         assertThat(Arrays.asList(part3.getValue(), part3.getState(), part3.getType())
                 , containsInAnyOrder(Arrays.asList("reMand", RESOLVED, IGNORED).toArray()));
+
+        assertThat(result.getPromptChoices(), is(mockPromptChoices));
     }
 
     @Test
@@ -122,7 +132,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("imp 2 yr 8 m conc");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -150,6 +160,8 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList(8, "Months", INT).toArray()));
         assertThat(Arrays.asList(part4.getValue(), part4.getState(), part4.getType(), part4.getLabel())
                 , containsInAnyOrder(Arrays.asList(true, UNRESOLVED, BOOLEAN, "Concurrent").toArray()));
+
+        assertThat(result.getPromptChoices(), is(mockPromptChoices));
     }
 
     @Test
@@ -157,7 +169,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("2 yr m imp 18 $20 23:23 3/3/1980 [2y]");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -195,6 +207,8 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList("3/3/1980", UNRESOLVED, DATE).toArray()));
         assertThat(Arrays.asList(p8.getValue(), p8.getState(), p8.getType())
                 , containsInAnyOrder(Arrays.asList("[2y]", UNRESOLVED, TXT).toArray()));
+
+        assertThat(result.getPromptChoices(), is(mockPromptChoices));
     }
 
     @Test
@@ -202,7 +216,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("alc req conc 78 £2,000 2 mo ");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -211,15 +225,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part p5 = result.getParts().get(4);
         Part p6 = result.getParts().get(5);
 
-        assertThat(result.getResultCode() == null
-                , is(true)
-        );
-        assertThat(result.getResultLevel() == null
-                , is(true)
-        );
-        assertThat(result.getParts().size()
-                , is(6)
-        );
+        assertThat(result.getResultCode(), nullValue());
+        assertThat(result.getResultLevel(), nullValue());
+
         assertThat(Arrays.asList(p3.getValue(), p3.getState(), p3.getType())
                 , containsInAnyOrder(Arrays.asList(true, UNRESOLVED, BOOLEAN).toArray()));
         ResultChoice resultChoice = p1.getResultChoices().stream().filter(v -> v.getLevel().equals("O")).findFirst().get();
@@ -233,6 +241,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, "2,000", CURR).toArray()));
         assertThat(Arrays.asList(p6.getState(), p6.getType())
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, DURATION).toArray()));
+
+        // this is an ambiguous match and hence prompt choices are not available
+        assertThat(result.getPromptChoices(), empty());
     }
 
     @Test
@@ -240,7 +251,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("Curfew");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
 
@@ -256,6 +267,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         assertThat(Arrays.asList(p1.getValue(), p1.getState(), p1.getResultChoices().size())
                 , containsInAnyOrder(Arrays.asList("Curfew", UNRESOLVED, 5).toArray()));
 
+        // this is an ambiguous match and hence prompt choices are not available
+        assertThat(result.getPromptChoices(), empty());
+
     }
 
     @Test
@@ -263,7 +277,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("resTr Ord prd Fur");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -286,6 +300,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList("prd", UNRESOLVED, 19).toArray()));
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getResultChoices().size())
                 , containsInAnyOrder(Arrays.asList("Fur", UNRESOLVED, 8).toArray()));
+
+        // this is an ambiguous match and hence prompt choices are not available
+        assertThat(result.getPromptChoices(), empty());
     }
 
     @Test
@@ -293,7 +310,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("resT Ord prd Furth");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -317,6 +334,8 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         assertThat(Arrays.asList(p4.getValue(), p4.getState(), p4.getType())
                 , containsInAnyOrder(Arrays.asList("Furth", UNRESOLVED, TXT).toArray()));
 
+        assertThat(result.getPromptChoices(), is(mockPromptChoices));
+
     }
 
     @Test
@@ -324,7 +343,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("imp 2 y 8 m sus 6 y conc 7 y 8 m 89 w 90 d");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -374,7 +393,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("aaaAAaaaa 34 £23.00 conc");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -398,6 +417,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "£23.00").toArray()));
         assertThat(Arrays.asList(p4.getState(), p4.getType(), p4.getValue())
                 , containsInAnyOrder(Arrays.asList(UNRESOLVED, TXT, "conc").toArray()));
+
+        // this is an ambiguous match and hence prompt choices are not available
+        assertThat(result.getPromptChoices(), empty());
     }
 
     @Test

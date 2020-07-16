@@ -1,5 +1,8 @@
 package uk.gov.justice.ccr.notepad.view;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -9,7 +12,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "shortCode",
         "label",
         "ruleType",
-        "excludedFromResults"
+        "excludedFromResults",
+        "childResultCodes"
 })
 public class ChildResultDefinition {
 
@@ -18,6 +22,7 @@ public class ChildResultDefinition {
     private String label;
     private String ruleType;
     private Boolean excludedFromResults;
+    private List<UUID> childResultCodes;
 
     public Boolean getExcludedFromResults() { return excludedFromResults; }
 
@@ -55,4 +60,11 @@ public class ChildResultDefinition {
         this.ruleType = ruleType;
     }
 
+    public List<UUID> getChildResultCodes() {
+        return childResultCodes;
+    }
+
+    public void setChildResultCodes(final List<UUID> childResultCodes) {
+        this.childResultCodes = childResultCodes;
+    }
 }

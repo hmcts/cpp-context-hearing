@@ -39,21 +39,24 @@ public class ResultDefinitionViewBuilder {
         return null;
     }
 
-    public ResultDefinitionView buildFromKnowledge(final List<Part> parts, final Knowledge knowledge, final List<ChildResultDefinition> childResultDefinitions, final Boolean excludedFromResults) {
-        ResultDefinitionView resultDefinitionView = new ResultDefinitionView();
-        List<String> partValues = parts.stream().map(v -> v.getValue().toString().toLowerCase()).collect(Collectors.toList());
+    public ResultDefinitionView buildFromKnowledge(final List<Part> parts, final Knowledge knowledge, final List<ChildResultDefinition> childResultDefinitions, final Boolean excludedFromResults, final List<PromptChoice> promptChoices) {
+        final ResultDefinitionView resultDefinitionView = new ResultDefinitionView();
+        final List<String> partValues = parts.stream().map(v -> v.getValue().toString().toLowerCase()).collect(Collectors.toList());
         if (knowledge.isThisPerfectMatch()) {
-            Part firstQualifiedPartInResultDefinition = getFirstQualifiedPartInResultDefinition(partValues, knowledge);
-            resultDefinitionView.setResultCode(firstQualifiedPartInResultDefinition.getCode());
+            final Part firstQualifiedPartInResultDefinition = getFirstQualifiedPartInResultDefinition(partValues, knowledge);
+            final String resultDefinitionId = firstQualifiedPartInResultDefinition.getCode();
+            resultDefinitionView.setResultCode(resultDefinitionId);
             resultDefinitionView.setResultLevel(firstQualifiedPartInResultDefinition.getResultLevel());
             resultDefinitionView.setParts(buildParts(knowledge, partValues, parts));
             resultDefinitionView.setChildResultDefinitions(childResultDefinitions);
             resultDefinitionView.setExcludedFromResults(excludedFromResults);
+            resultDefinitionView.setPromptChoices(promptChoices);
+
         } else {
             resultDefinitionView.setParts(buildAmbiguousParts(knowledge, partValues, parts));
         }
         joinParts(resultDefinitionView.getParts(), knowledge);
-        List<Part> visibleParts = resultDefinitionView.getParts().stream().filter(Part::getVisible).collect(Collectors.toList());
+        final List<Part> visibleParts = resultDefinitionView.getParts().stream().filter(Part::getVisible).collect(Collectors.toList());
         groupDurationInConsecutiveOrder(visibleParts);
         resultDefinitionView.setParts(visibleParts.stream().filter(Part::getVisible).collect(Collectors.toList()));
         return resultDefinitionView;
@@ -66,19 +69,19 @@ public class ResultDefinitionViewBuilder {
     }
 
     private void groupDurationInConsecutiveOrder(final List<Part> parts) {
-        Map<Integer, List<Integer>> groupDurationIndexesInSequence = newConcurrentMap();
-        AtomicInteger indexIncrementer = new AtomicInteger();
+        final Map<Integer, List<Integer>> groupDurationIndexesInSequence = newConcurrentMap();
+        final AtomicInteger indexIncrementer = new AtomicInteger();
         final List<Integer> tempIndexBucket = newArrayList();
 
         parts.forEach(part -> {
-            int index = indexIncrementer.getAndIncrement();
+            final int index = indexIncrementer.getAndIncrement();
             if (DURATION == part.getType()) {
-                int previousIndex = index - 1;
+                final int previousIndex = index - 1;
                 if (groupDurationIndexesInSequence.containsKey(previousIndex)) {
                     tempIndexBucket.add(previousIndex);
                 }
                 if (!tempIndexBucket.isEmpty() && groupDurationIndexesInSequence.containsKey(tempIndexBucket.get(0)) && tempIndexBucket.contains(previousIndex)) {
-                    List<Integer> sequenceDurationIndexes = groupDurationIndexesInSequence.get(tempIndexBucket.get(0));
+                    final List<Integer> sequenceDurationIndexes = groupDurationIndexesInSequence.get(tempIndexBucket.get(0));
                     tempIndexBucket.add(index);
                     sequenceDurationIndexes.add(index);
                 } else {
@@ -88,11 +91,11 @@ public class ResultDefinitionViewBuilder {
             }
         });
         groupDurationIndexesInSequence.forEach((integer, integers) -> {
-            Part partToEnrich = parts.get(integer);
+            final Part partToEnrich = parts.get(integer);
             integers.forEach(invisibleIndexes -> {
-                Part part = parts.get(invisibleIndexes);
+                final Part part = parts.get(invisibleIndexes);
                 partToEnrich.setOriginalText(partToEnrich.getOriginalText().concat(" ").concat(part.getOriginalText()));
-                List values = (List) partToEnrich.getValue();
+                final List values = (List) partToEnrich.getValue();
                 values.addAll((List) part.getValue());
                 part.setVisible(false);
             });
@@ -100,7 +103,7 @@ public class ResultDefinitionViewBuilder {
     }
 
     private void joinBooleanParts(final List<Part> parts, final Knowledge knowledge) {
-        Map<String, Part> booleanParts = Maps.newHashMap();
+        final Map<String, Part> booleanParts = Maps.newHashMap();
         knowledge.getResultPromptParts().forEach((s, part) -> {
             if (BOOLEAN == part.getType()) {
                 booleanParts.putIfAbsent(part.getCode(), part);
@@ -110,7 +113,7 @@ public class ResultDefinitionViewBuilder {
         booleanParts.forEach((s, part) -> parts.stream().filter(p -> part.getLabel().equals(p.getLabel())).forEach(this::ignoreParts));
         //filter first part and update state to resolved
         booleanParts.forEach((s, part) -> {
-            Optional<Part> partToChange = parts.stream().filter(v -> part.getLabel().equals(v.getLabel())).findFirst();
+            final Optional<Part> partToChange = parts.stream().filter(v -> part.getLabel().equals(v.getLabel())).findFirst();
             partToChange.ifPresent(p -> {
                 p.setValue(true);
                 p.setType(BOOLEAN);
@@ -120,22 +123,22 @@ public class ResultDefinitionViewBuilder {
     }
 
     private void joinDurationParts(final List<Part> parts) {
-        List<Integer> indexesOfTypeInt = newArrayList();
+        final List<Integer> indexesOfTypeInt = newArrayList();
         for (int i = 0; i < parts.size(); i++) {
-            Part part = parts.get(i);
+            final Part part = parts.get(i);
             if (INT == part.getType()) {
                 indexesOfTypeInt.add(i);
             }
         }
-        List<Integer> indexesOfTypeDuration = newArrayList();
+        final List<Integer> indexesOfTypeDuration = newArrayList();
         for (int i = 0; i < parts.size(); i++) {
             if (DURATION == parts.get(i).getType()) {
                 indexesOfTypeDuration.add(i);
             }
         }
         indexesOfTypeDuration.forEach(index -> {
-            List<PartValue> values = newArrayList();
-            Part typeDuration = parts.get(index);
+            final List<PartValue> values = newArrayList();
+            final Part typeDuration = parts.get(index);
             if (indexesOfTypeInt.contains(index - 1)) {
                 addTypeDurationWithGap(parts, index, values, typeDuration);
             } else if (typeDuration.getOriginalText() != null && parse(typeDuration.getOriginalText()) != null) {
@@ -154,9 +157,9 @@ public class ResultDefinitionViewBuilder {
      * e.g 2y is 2 years and '2' is int
      */
     private void addTypeDurationWithNoGap(final List<PartValue> values, final Part typeDuration) {
-        Integer integerValue = parse(typeDuration.getValueAsString());
+        final Integer integerValue = parse(typeDuration.getValueAsString());
         typeDuration.setOriginalText(typeDuration.getValueAsString());
-        PartValue value = new PartValue();
+        final PartValue value = new PartValue();
         value.setType(INT);
         value.setLabel(typeDuration.getLabel());
         value.setValue(integerValue);
@@ -170,10 +173,10 @@ public class ResultDefinitionViewBuilder {
      * e.g 2 y is 2 years and 2 is int and '2 y' should grouped as single part,
      */
     private void addTypeDurationWithGap(final List<Part> parts, final Integer index, final List<PartValue> values, final Part typeDuration) {
-        Part typeInt = parts.get(index - 1);
+        final Part typeInt = parts.get(index - 1);
         typeInt.setVisible(false);
         typeDuration.setOriginalText(typeInt.getValue() + " " + typeDuration.getValue());
-        PartValue value = new PartValue();
+        final PartValue value = new PartValue();
         value.setType(typeInt.getType());
         value.setLabel(typeDuration.getLabel());
         value.setValue(Integer.parseInt(typeInt.getValue().toString()));
@@ -186,10 +189,10 @@ public class ResultDefinitionViewBuilder {
         int firstQualifiedPartInResultDefinitionIndex = getIndex(partValues, knowledge);
 
         for (int i = 0; i < parts.size(); i++) {
-            Part part = parts.get(i);
-            String partValue = partValues.get(i);
+            final Part part = parts.get(i);
+            final String partValue = partValues.get(i);
             if (i == firstQualifiedPartInResultDefinitionIndex) {
-                Part partFromKnowledge = getFirstQualifiedPartInResultDefinition(partValues, knowledge);
+                final Part partFromKnowledge = getFirstQualifiedPartInResultDefinition(partValues, knowledge);
                 copyValues(part, partFromKnowledge);
             } else if (knowledge.getResultDefinitionParts().get(partValue) != null) {
                 ignoreParts(part);
@@ -202,7 +205,7 @@ public class ResultDefinitionViewBuilder {
 
     private List<Part> buildAmbiguousParts(final Knowledge knowledge, final List<String> partValues, final List<Part> parts) {
         for (int i = 0; i < parts.size(); i++) {
-            String partValue = partValues.get(i);
+            final String partValue = partValues.get(i);
             if (knowledge.getResultDefinitionParts().get(partValue) != null) {
                 copyValues(parts.get(i), knowledge.getResultDefinitionParts().get(partValue));
             } else if (knowledge.getResultPromptParts().get(partValue) != null) {
@@ -263,14 +266,14 @@ public class ResultDefinitionViewBuilder {
      * be duration. this function will returns Integer value only in case it is integer.
      */
     private Integer parse(String value) {
-        Matcher m = alphaNumericRegex.matcher(value.toLowerCase());
-        List<String> allMatches = newArrayList();
+        final Matcher m = alphaNumericRegex.matcher(value.toLowerCase());
+        final List<String> allMatches = newArrayList();
         Integer result = null;
         while (m.find()) {
             allMatches.add(m.group());
         }
         if (allMatches.size() == 2) {
-            String txt = allMatches.get(0);
+            final String txt = allMatches.get(0);
             if (StringUtils.isNumeric(txt)) {
                 result = Integer.valueOf(txt);
             }

@@ -1,7 +1,7 @@
 {
   "originalText": "alc req 2 conc [abc def] £23 xyz",
   "resultLineId": "040a316f-a10b-44ee-aa8a-40722e2dda0e",
-  "resultCode": "RESTRAOP",
+  "resultCode": "imp",
   "resultLevel": "O",
   "parts": [
     {
@@ -9,6 +9,7 @@
       "state": "UNRESOLVED",
       "resultChoices": [
         {
+          "shortCode": "AAR",
           "code": "dd5aeb25-88d9-4751-b513-043c5c28b6da",
           "label": "Alcohol treatment requirement",
           "level": "O",
@@ -16,6 +17,7 @@
           "synonymMatch": "alcohol"
         },
         {
+          "shortCode": "AARAL",
           "code": "2aa15e42-69e4-4d4c-9b45-9671926f6a72",
           "label": "Alcohol abstinence requirement",
           "level": "O",
@@ -29,6 +31,7 @@
       "state": "UNRESOLVED",
       "resultChoices": [
         {
+          "shortCode": "COV",
           "code": "237f7a20-619a-47a5-a493-ec4ccd244401",
           "label": "Unpaid work requirement",
           "level": "O",
@@ -36,6 +39,7 @@
           "synonymMatch": "requirement"
         },
         {
+          "shortCode": "ERP",
           "code": "dd5aeb25-88d9-4751-b513-043c5c28b6da",
           "label": "Alcohol treatment requirement",
           "level": "O",
@@ -43,6 +47,7 @@
           "synonymMatch": "requirement"
         },
         {
+          "shortCode": "ERBD",
           "code": "2aa15e42-69e4-4d4c-9b45-9671926f6a72",
           "label": "Alcohol abstinence requirement",
           "level": "O",
@@ -82,11 +87,31 @@
   "childResultDefinitions": [
     {
       "code": "abb95a52-2a75-40c3-8d3f-a1d75a199c47",
-      "shortCode": "imp",
+      "shortCode": "timp",
       "label": "Imprisonment",
       "ruleType": "mandatory",
-      "excludedFromResults": "true"
+      "excludedFromResults": true,
+      "childResultCodes": [
+        "abb95a52-2a75-40c3-8d3f-a1d75a199c41",
+        "abb95a52-2a75-40c3-8d3f-a1d75a199c42"
+      ]
     }
   ],
-  "excludedFromResults": "true"
+  "excludedFromResults": true,
+  "promptChoices": [
+  {
+    "code": "2d406cbe-c792-4a0c-af3d-25153e35f0be",
+    "label": "Under direction of",
+    "type": "TXT",
+    "required": true,
+    "hidden": true
+  },
+  {
+    "code": "fa62316a-df37-4c00-9ce2-ee67dd09837d",
+    "label": "Additional information",
+    "type": "TXT",
+    "required": false,
+    "hidden": false
+  }
+]
 }

@@ -35,6 +35,16 @@
       "postHearingCustodyStatus": "A",
       "jurisdiction": "B",
       "lCode": "RESTRAO",
+      "resultDefinitionRules": [
+        {
+          "childResultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "ruleType": "optional"
+        },
+        {
+          "childResultDefinitionId": "dada120c-160a-49a9-b040-e8b6b7128d67",
+          "ruleType": "optional"
+        }
+      ],
       "terminatesOffenceProceedings": false,
       "prompts": [
         {
@@ -330,6 +340,637 @@
         }
       ],
       "startDate": "2019-10-25"
+    },
+    {
+      "id": "dada120c-160a-49a9-b040-e8b6b7128d67",
+      "version": "2020-06-30T11:37:56.122Z",
+      "startDate": "2020-07-01",
+      "label": "Notification of electronic monitoring order (requirement)",
+      "shortCode": "NORDRC",
+      "level": "O",
+      "rank": 69400,
+      "prompts": [
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor organisation name",
+          "resultPromptRule": "mandatory",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorOrganisationName",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "OrganisationName",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor title",
+          "resultPromptRule": "mandatory",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorTitle",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "Title",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor first name",
+          "resultPromptRule": "mandatory",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorFirstName",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "FirstName",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor middle name",
+          "resultPromptRule": "mandatory",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorMiddleName",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "MiddleName",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor last name",
+          "resultPromptRule": "mandatory",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorLastName",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "LastName",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor address line 1",
+          "resultPromptRule": "mandatory",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorAddress1",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "AddressLine1",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor address line 2",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorAddress2",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "AddressLine2",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor address line 3",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorAddress3",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "AddressLine3",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor address line 4",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorAddress4",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "AddressLine4",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor address line 5",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorAddress5",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "AddressLine5",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor post code",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorPostCode",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "PostCode",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor email address 1",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorEmailAddress1",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "EmailAddress1",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+          "label": "Electronic monitoring contractor email address 2",
+          "resultPromptRule": "optional",
+          "type": "NAMEADDRESS",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "electronicmonitoringcontractorEmailAddress2",
+          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true,
+          "nameAddressType": "Organisation",
+          "componentLabel": "Electronic monitoring contractor",
+          "fixListLabel": "Select Electronic monitoring contractor",
+          "referenceDataKey": "electronicmonitoringcontractor",
+          "partName": "EmailAddress2",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        },
+        {
+          "id": "5ce30920-b300-471c-8fd7-67f3a193476a",
+          "label": "First notification of electronic monitoring",
+          "resultPromptRule": "oneOf",
+          "type": "BOOLEAN",
+          "sequence": 200,
+          "financial": "N",
+          "reference": "firstNotificationOfElectronicMonitoring",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "efffc361-7cca-40a5-a436-a1fdb590e8be",
+          "label": "Variation of electronic monitoring. Date and case reference of original order",
+          "resultPromptRule": "oneOf",
+          "type": "TXT",
+          "sequence": 300,
+          "financial": "N",
+          "reference": "variationOfElectronicMonitoringDateOfOriginalOrder",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "9cae4974-5cf4-4701-ae3a-74f8d586b16d",
+          "label": "Additional notification of electronic monitoring. Date and case reference of original order",
+          "resultPromptRule": "oneOf",
+          "type": "TXT",
+          "sequence": 400,
+          "financial": "N",
+          "reference": "additionalNotificationOfElectronicMonitoringDateOfOriginalOrder",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "a7cc84b3-0c62-440d-b2d3-f4b40ef13c99",
+          "label": "Continuation of electronic monitoring",
+          "resultPromptRule": "oneOf",
+          "type": "BOOLEAN",
+          "sequence": 500,
+          "financial": "N",
+          "reference": "continuationOfElectronicMonitoring",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "380d5917-d860-4c6a-9fde-d5e7e1923331",
+          "label": "Defendant's mobile number",
+          "resultPromptRule": "optional",
+          "type": "INT",
+          "sequence": 700,
+          "financial": "N",
+          "reference": "defendantsMobileNumber",
+          "userGroups": [],
+          "min": "1",
+          "max": "20",
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "cdc4f47c-612d-4f81-b321-a2b5861d6e19",
+          "label": "Was an interpreter used?",
+          "resultPromptRule": "mandatory",
+          "type": "BOOLEAN",
+          "sequence": 800,
+          "financial": "N",
+          "reference": "wasAnInterpreterUsed",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "5a386999-b2d9-45f4-9b68-57000ba2d6ef",
+          "label": "Does the offender have any special needs?",
+          "resultPromptRule": "mandatory",
+          "type": "BOOLEAN",
+          "sequence": 1000,
+          "financial": "N",
+          "reference": "doesTheOffenderHaveAnySpecialNeeds",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "c1503a10-f976-4d79-8073-3bc63b9d0641",
+          "label": "Special needs",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 1100,
+          "financial": "N",
+          "reference": "specialNeeds",
+          "userGroups": [],
+          "min": "1",
+          "max": "120",
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "f6ca6307-bdab-42d3-968b-44485824b535",
+          "label": "Are there any additional requirements as well?",
+          "resultPromptRule": "mandatory",
+          "type": "BOOLEAN",
+          "sequence": 600,
+          "financial": "N",
+          "reference": "areThereAnyAdditionalRequirementsAsWell",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
+          "associatedWithReferenceData": false
+        },
+        {
+          "id": "c7d508e9-1ea0-4a41-9961-703a5d164b6f",
+          "label": "Language",
+          "resultPromptRule": "optional",
+          "type": "FIXL",
+          "sequence": 900,
+          "financial": "N",
+          "reference": "language",
+          "userGroups": [],
+          "min": "1",
+          "max": "60",
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "referenceDataKey": "language",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        }
+      ],
+      "financial": "N",
+      "adjournment": "N",
+      "category": "A",
+      "urgent": false,
+      "convicted": "N",
+      "d20": false,
+      "resultDefinitionGroup": "Community requirements",
+      "postHearingCustodyStatus": "A",
+      "terminatesOffenceProceedings": false,
+      "lifeDuration": false,
+      "rollUpPrompts": false,
+      "publishedForNows": true,
+      "publishedAsAPrompt": true,
+      "excludedFromResults": false,
+      "alwaysPublished": false,
+      "jurisdiction": "B",
+      "isAvailableForCourtExtract": false
+    },
+    {
+      "id": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+      "version": "2020-06-30T11:36:28.814Z",
+      "startDate": "2020-07-01",
+      "label": "Community requirements",
+      "shortCode": "CRS",
+      "level": "O",
+      "rank": 7800,
+      "userGroups": [],
+      "financial": "N",
+      "adjournment": "N",
+      "category": "A",
+      "urgent": false,
+      "convicted": "N",
+      "d20": false,
+      "resultDefinitionGroup": "Community requirements",
+      "postHearingCustodyStatus": "A",
+      "terminatesOffenceProceedings": false,
+      "lifeDuration": false,
+      "rollUpPrompts": true,
+      "publishedForNows": false,
+      "publishedAsAPrompt": false,
+      "excludedFromResults": false,
+      "alwaysPublished": false,
+      "jurisdiction": "B",
+      "resultDefinitionRules": [
+        {
+          "childResultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45ea2d9f-ddd8-4c39-9585-780746ee6a8d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "6577e3ca-3e80-4412-8cba-bc608e012cf0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "2a9f9e63-c76a-4728-bc7f-025fed59b741",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ca79e8fc-6b65-400e-97b6-214c79388a6c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "cc2cbb94-b75a-4a8c-9840-31c5f8007724",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "61ea03c9-c113-446b-a392-402144fcd9e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "45a926ed-0b7f-4ba2-afeb-969697ca8415",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "bcf1b451-af1e-4603-9605-586310d0e61e",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a5aa694e-4729-40f5-814e-60a75d9429e0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ce5f92f8-2b32-4364-964b-2ea4b6ec0cae",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "65a59f46-61ae-4dac-a040-a25fca647cb2",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "40e88b4e-4f34-463d-92d3-1c5b03d05490",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "1c40353b-a3b8-4437-8691-6b54d5842010",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "ea74de19-9918-434d-92ea-1e4e332c0d3d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b0cb8194-0ccb-401d-b548-88a019aa6de0",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d1205bd2-b883-4f42-8be1-2aa797af3b47",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "c1b0dedf-1380-4889-9d31-1816b850e348",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7eb72e0e-3a24-4f27-8593-84f7bdd432e1",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "a19714a0-5d58-4666-bc15-3d9dd2692f77",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "b7bb83be-aa21-4c62-9e08-012c5fbdf07c",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "364d3065-0699-4df1-a68f-a69c429d0867",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9941e3d0-0e80-46c6-95c6-5b4f1a88c83d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7f80f0f4-ae8a-4965-9cc6-ef5c2c5caef7",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "99586f43-5b18-45da-87f7-1764ad149985",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d54c3093-6b9b-4b61-80cf-a0bf4ed5d2e8",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "d683f73c-488e-4d8e-a685-d37049c2a3e5",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "dc86a3bd-2fa0-4f90-b046-4ecc8d6c6265",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "54f41331-f5cb-44b3-ab88-ae063fb39e26",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "5473390c-dbe2-4026-a95f-8bb99d2e011d",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "7a31e2e7-3a90-4210-aa6e-b7c226af4b97",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "959dfbc9-5fc5-4aa1-ac26-135f28b09e23",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "091cd45b-4312-476e-a122-18cc02fd1699",
+          "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId": "9b216a08-4df8-41c2-a947-66506cd1e1b5",
+          "ruleType": "atleastOneOf"
+        }
+      ],
+      "isAvailableForCourtExtract": true
     },
     {
       "id": "cc2cbb94-b75a-4a8c-9840-31c5f8007724",

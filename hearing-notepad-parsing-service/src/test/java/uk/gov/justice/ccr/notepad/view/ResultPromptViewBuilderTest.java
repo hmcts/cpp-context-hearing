@@ -2,9 +2,9 @@ package uk.gov.justice.ccr.notepad.view;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.core.IsNull.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.ADDRESS;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.FIXL;
@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mortbay.log.Log;
@@ -46,11 +47,14 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
     @InjectMocks
     ResultPromptViewBuilder target;
 
+    @Mock
+    private List<PromptChoice> mockPromptChoices;
+
     @Test
     public void buildFromKnowledge() throws Exception {
         final List<Part> parts = new PartsResolver().getParts("parp");
         final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
-        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(), true);
+        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
 
         final Knowledge knowledgeResultPrompt = processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now());
         final String code = randomUUID().toString();
@@ -159,7 +163,7 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
     public void shouldBuildFromKnowledgeWithOneOf() throws Exception {
         final List<Part> parts = new PartsResolver().getParts("ATRNR");
         final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
-        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(),true);
+        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(),true, mockPromptChoices);
         final String code = randomUUID().toString();
         final Set<NameAddress> nameAddressList = new HashSet<>();
         NameAddress nameAddress1 = NameAddress.nameAddress()

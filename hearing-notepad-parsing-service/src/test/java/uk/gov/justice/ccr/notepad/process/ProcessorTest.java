@@ -223,6 +223,14 @@ public class ProcessorTest extends AbstractTest {
                 resultPromptParts.size()
                 , is(5)
         );
+
+        assertThat(knowledge.getResultDefinitionParts().get("pard").getResultChoices(), hasSize(1));
+        assertThat(knowledge.getResultDefinitionParts().get("pard").getResultChoices().first().getShortCode(), is("pard"));
+        assertThat(knowledge.getResultDefinitionParts().get("shope").getResultChoices(), hasSize(1));
+        assertThat(knowledge.getResultDefinitionParts().get("shope").getResultChoices().first().getShortCode(), is("shope"));
+        assertThat(knowledge.getResultDefinitionParts().get("req").getResultChoices(), hasSize(11));
+        assertThat(knowledge.getResultDefinitionParts().get("alc").getResultChoices(), hasSize(7));
+
         assertThat(
                 resultDefinitionParts.get("pard").getResultChoices().size()
                 , is(1)

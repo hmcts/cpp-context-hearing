@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "code",
+        "shortCode",
         "label",
         "level",
         "type",
@@ -25,6 +26,8 @@ public class ResultChoice implements Comparable<ResultChoice> {
     private ResultType type;
 
     private Boolean hidden;
+
+    private String shortCode;
 
     public ResultChoice(String code, String label) {
         this.code = code;
@@ -63,6 +66,14 @@ public class ResultChoice implements Comparable<ResultChoice> {
         this.hidden = hidden;
     }
 
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(final String shortCode) {
+        this.shortCode = shortCode;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -72,8 +83,7 @@ public class ResultChoice implements Comparable<ResultChoice> {
             return false;
         }
 
-        ResultChoice that = (ResultChoice) o;
-
+        final ResultChoice that = (ResultChoice) o;
         return label.equals(that.label);
     }
 

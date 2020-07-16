@@ -10,6 +10,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.collections.CollectionUtils;
+
 public class ResultDefinition {
     private String id;
     private String label;
@@ -170,6 +172,10 @@ public class ResultDefinition {
         return childResultDefinitions;
     }
 
+    public void setChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
+        this.childResultDefinitions = childResultDefinitions;
+    }
+
     public static class Builder {
 
         private String id;
@@ -186,6 +192,7 @@ public class ResultDefinition {
         private Boolean isD20;
         private Boolean isRollUpPrompts;
         private Boolean isPublishedForNows;
+        private List<ChildResultDefinition> isChildResultDefinitions;
 
         public Builder withId(final String id) {
             this.id = id;
@@ -257,6 +264,11 @@ public class ResultDefinition {
             return this;
         }
 
+        public Builder withChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
+            isChildResultDefinitions = childResultDefinitions;
+            return this;
+        }
+
         public ResultDefinition build() {
             final ResultDefinition resultDefinition = new ResultDefinition();
             resultDefinition.setId(this.id);
@@ -273,6 +285,7 @@ public class ResultDefinition {
             resultDefinition.setD20(this.isD20);
             resultDefinition.setRollUpPrompts(this.isRollUpPrompts);
             resultDefinition.setPublishedForNows(this.isPublishedForNows);
+            resultDefinition.setChildResultDefinitions(CollectionUtils.isNotEmpty(this.isChildResultDefinitions) ? new ArrayList<>(this.isChildResultDefinitions) : emptyList());
             return resultDefinition;
         }
     }

@@ -334,6 +334,7 @@ public class Processor {
 
     private ResultChoice getResultChoice(final ResultDefinition resultDefinition) {
         final ResultChoice resultChoice = new ResultChoice(resultDefinition.getId(), resultDefinition.getLabel());
+        resultChoice.setShortCode(resultDefinition.getShortCode());
         resultChoice.setLevel(resultDefinition.getLevel());
         resultChoice.setType(RESULT);
         return resultChoice;

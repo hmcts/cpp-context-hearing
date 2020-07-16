@@ -33,6 +33,8 @@ public class ResultDefinitionView {
 
     private List<ChildResultDefinition> childResultDefinitions = new ArrayList<>();
 
+    private List<PromptChoice> promptChoices = new ArrayList<>();
+
     private Boolean excludedFromResults;
 
     public Boolean getExcludedFromResults() { return excludedFromResults; }
@@ -91,4 +93,11 @@ public class ResultDefinitionView {
         this.childResultDefinitions = childResultDefinitions;
     }
 
+    public List<PromptChoice> getPromptChoices() {
+        return promptChoices;
+    }
+
+    public void setPromptChoices(final List<PromptChoice> promptChoices) {
+        this.promptChoices = promptChoices;
+    }
 }
