@@ -1,0 +1,1050 @@
+{
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "QEII Law Courts",
+        "address2": "Derby Square",
+        "address3": "Liverpool",
+        "address4": "",
+        "address5": "",
+        "postcode": "L2 1XA"
+      },
+      "code": "C05LV00",
+      "id": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+      "lja": {
+        "ljaCode": "1810",
+        "ljaName": "Merseyside Magistrates' Court"
+      },
+      "name": "Liverpool Crown Court",
+      "roomId": "7cb09222-49e1-3622-a5a6-ad253d2b3c39",
+      "roomName": "Crown Court 3-1"
+    },
+    "defendantAttendance": [{
+      "attendanceDays": [{
+        "attendanceType": "NOT_PRESENT",
+        "day": "2020-07-15"
+      }
+      ],
+      "defendantId": "f94df59b-d645-4339-a586-b8269b91f368"
+    }, {
+      "attendanceDays": [{
+        "attendanceType": "NOT_PRESENT",
+        "day": "2020-07-15"
+      }
+      ],
+      "defendantId": "e7fd345f-ee2c-433d-8217-258c46c358ec"
+    }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [{
+      "listedDurationMinutes": 1,
+      "listingSequence": 0,
+      "sittingDay": "2020-07-14T08:00:00.000Z"
+    }, {
+      "listedDurationMinutes": 2,
+      "listingSequence": 0,
+      "sittingDay": "2020-07-19T14:00:00.000Z"
+    }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+    "judiciary": [{
+      "firstName": "Rachel",
+      "isBenchChairman": false,
+      "isDeputy": false,
+      "judicialId": "1fb2a1c3-7b18-3a46-91c3-949d6148d0f8",
+      "judicialRoleType": {
+        "judicialRoleTypeId": "1fb2a1c3-7b18-3a46-91c3-949d6148d0f8",
+        "judiciaryType": "Circuit Judge"
+      },
+      "lastName": "Smith",
+      "title": ""
+    }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [{
+      "caseMarkers": [{
+        "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+        "markerTypeCode": "GBP",
+        "markerTypeDescription": "GBP",
+        "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+      }
+      ],
+      "caseStatus": "READY_FOR_REVIEW",
+      "defendants": [{
+        "aliases": [{
+          "firstName": "Oswaldo",
+          "lastName": "Wolf",
+          "legalEntityName": "PLEI",
+          "middleName": "Leonard",
+          "title": "MR"
+        }
+        ],
+        "associatedPersons": [{
+          "person": {
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          },
+          "role": "PARENT"
+        }
+        ],
+        "courtProceedingsInitiated": "2020-07-14T08:48:26.837Z",
+        "croNumber": "9aAaB9XJBzsj",
+        "id": "e7fd345f-ee2c-433d-8217-258c46c358ec",
+        "isYouth": false,
+        "masterDefendantId": "e7fd345f-ee2c-433d-8217-258c46c358ec",
+        "mitigation": "tJvbozvpro",
+        "mitigationWelsh": "tJvbozvpro_WELSH",
+        "numberOfPreviousConvictionsCited": 0,
+        "offences": [{
+          "arrestDate": "2020-06-14",
+          "chargeDate": "2020-06-14",
+          "count": 1,
+          "dateOfInformation": "2020-06-16",
+          "endDate": "2020-03-14",
+          "id": "1df74e21-8573-4df6-a8b0-fd431e5831f2",
+          "isDisposed": false,
+          "judicialResults": [{
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "courtClerk": {
+              "firstName": "Emma",
+              "lastName": "Cleaner",
+              "userId": "676ae4c5-fdd9-469e-a528-dd5b12c90287"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "isUnscheduled": false,
+            "judicialResultId": "e3b6616e-2817-4e5f-9627-c0c24b685240",
+            "judicialResultPrompts": [{
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "5348fd0e-0670-4811-997f-1baa78b06d62",
+              "label": "Custody time limit expires",
+              "promptReference": "CTLDATE",
+              "promptSequence": 100,
+              "type": "DATE",
+              "usergroups": [],
+              "value": "24/07/2020",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "3578eb56-309b-4521-a468-33139d6a3536",
+              "label": "Reason for extension",
+              "promptReference": "reasonForExtension",
+              "promptSequence": 200,
+              "type": "FIXL",
+              "usergroups": [],
+              "value": "Prosecutor absent",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "4483c255-2761-4549-a70a-314aa311d052",
+              "label": "Time spent in custody (in days)",
+              "promptReference": "CTLTIME",
+              "promptSequence": 300,
+              "type": "INT",
+              "usergroups": [],
+              "value": "34",
+              "welshLabel": ""
+            }
+            ],
+            "judicialResultTypeId": "311c8e5c-6f22-44a7-8c97-f72324cb05c4",
+            "label": "Custody time limit",
+            "lastSharedDateTime": "2020-07-14",
+            "lifeDuration": false,
+            "orderedDate": "2020-07-14",
+            "orderedHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": false,
+            "publishedForNows": false,
+            "rank": 7400,
+            "resultText": "Custody time limit\nCustody time limit expires 24/07/2020\nReason for extension Prosecutor absent\nTime spent in custody (in days) 34",
+            "rollUpPrompts": true,
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": []
+          }
+          ],
+          "modeOfTrial": "INPERSON",
+          "offenceCode": "OF61016A",
+          "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ed",
+          "offenceFacts": {
+            "alcoholReadingAmount": 2,
+            "alcoholReadingMethodCode": "AA",
+            "vehicleCode": "LARGE_GOODS_VEHICLE",
+            "vehicleRegistration": "VS07BSF"
+          },
+          "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+          "offenceLegislationWelsh": "Section 18 - attempt    wounding with intent Legislation_WELSH",
+          "offenceTitle": "Section 18 - attempt    wounding with intent",
+          "offenceTitleWelsh": "Section 18 - attempt    wounding with intent_WELSH",
+          "orderIndex": 1,
+          "plea": {
+            "offenceId": "1df74e21-8573-4df6-a8b0-fd431e5831f2",
+            "originatingHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "pleaDate": "2020-07-14",
+            "pleaValue": "NOT_GUILTY"
+          },
+          "startDate": "2019-09-14",
+          "victims": [{
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          }
+          ],
+          "wording": "Wound / inflict grievous bodily harm without intent",
+          "wordingWelsh": "Wound / inflict grievous bodily harm without intent_WELSH"
+        }, {
+          "arrestDate": "2020-06-14",
+          "chargeDate": "2020-06-14",
+          "count": 2,
+          "dateOfInformation": "2020-06-16",
+          "endDate": "2020-03-14",
+          "id": "fa7916bb-d870-438a-9c2e-1de8ebf1f45b",
+          "isDisposed": false,
+          "judicialResults": [{
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "courtClerk": {
+              "firstName": "Emma",
+              "lastName": "Cleaner",
+              "userId": "676ae4c5-fdd9-469e-a528-dd5b12c90287"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "isUnscheduled": false,
+            "judicialResultId": "4f78186c-6a89-4962-ad3a-00d1320b9b2c",
+            "judicialResultPrompts": [{
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "5348fd0e-0670-4811-997f-1baa78b06d62",
+              "label": "Custody time limit expires",
+              "promptReference": "CTLDATE",
+              "promptSequence": 100,
+              "type": "DATE",
+              "usergroups": [],
+              "value": "24/07/2020",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "3578eb56-309b-4521-a468-33139d6a3536",
+              "label": "Reason for extension",
+              "promptReference": "reasonForExtension",
+              "promptSequence": 200,
+              "type": "FIXL",
+              "usergroups": [],
+              "value": "Prosecutor absent",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "4483c255-2761-4549-a70a-314aa311d052",
+              "label": "Time spent in custody (in days)",
+              "promptReference": "CTLTIME",
+              "promptSequence": 300,
+              "type": "INT",
+              "usergroups": [],
+              "value": "34",
+              "welshLabel": ""
+            }
+            ],
+            "judicialResultTypeId": "311c8e5c-6f22-44a7-8c97-f72324cb05c4",
+            "label": "Custody time limit",
+            "lastSharedDateTime": "2020-07-14",
+            "lifeDuration": false,
+            "orderedDate": "2020-07-14",
+            "orderedHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": false,
+            "publishedForNows": false,
+            "rank": 7400,
+            "resultText": "Custody time limit\nCustody time limit expires 24/07/2020\nReason for extension Prosecutor absent\nTime spent in custody (in days) 34",
+            "rollUpPrompts": true,
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": []
+          }
+          ],
+          "modeOfTrial": "INPERSON",
+          "offenceCode": "CA03014",
+          "offenceDefinitionId": "d6bd72ad-37bf-330d-bcc6-215728949d3e",
+          "offenceFacts": {
+            "alcoholReadingAmount": 2,
+            "alcoholReadingMethodCode": "AA",
+            "vehicleCode": "LARGE_GOODS_VEHICLE",
+            "vehicleRegistration": "VS07BSF"
+          },
+          "offenceLegislation": "Contrary to section 366(8)(b) and (9) of the Communications Act 2003n",
+          "offenceLegislationWelsh": "Section 18 - attempt    wounding with intent Legislation_WELSH",
+          "offenceTitle": "Fail / refuse give assistance to person executing Communications Act search warrant",
+          "offenceTitleWelsh": "Section 18 - attempt    wounding with intent_WELSH",
+          "orderIndex": 1,
+          "plea": {
+            "offenceId": "fa7916bb-d870-438a-9c2e-1de8ebf1f45b",
+            "originatingHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "pleaDate": "2020-07-14",
+            "pleaValue": "NOT_GUILTY"
+          },
+          "startDate": "2019-09-14",
+          "victims": [{
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          }
+          ],
+          "wording": "Wound / inflict grievous bodily harm without intent",
+          "wordingWelsh": "Wound / inflict grievous bodily harm without intent_WELSH"
+        }
+        ],
+        "personDefendant": {
+          "arrestSummonsNumber": "007",
+          "bailStatus": {
+            "code": "C",
+            "description": "Custody or remanded into custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          },
+          "driverLicenceCode": "FULL",
+          "driverLicenseIssue": "DVLA",
+          "driverNumber": "007",
+          "employerOrganisation": {
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "incorporationNumber": "01051975",
+            "name": "EY",
+            "registeredCharityNumber": "AA"
+          },
+          "employerPayrollReference": "WytJfHSN0U",
+          "perceivedBirthYear": 1975,
+          "personDetails": {
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          },
+          "vehicleOperatorLicenceNumber": "BS007"
+        },
+        "pncId": "4075.8776721",
+        "prosecutionAuthorityReference": "TFL2854731",
+        "prosecutionCaseId": "b31d27bb-89a4-43f1-936a-503b3ed6e4e5",
+        "witnessStatement": "Lsce8Jm5uY",
+        "witnessStatementWelsh": "Lsce8Jm5uY_WELSH"
+      }, {
+        "aliases": [{
+          "firstName": "Oswaldo",
+          "lastName": "Wolf",
+          "legalEntityName": "PLEI",
+          "middleName": "Leonard",
+          "title": "MR"
+        }
+        ],
+        "associatedPersons": [{
+          "person": {
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          },
+          "role": "PARENT"
+        }
+        ],
+        "courtProceedingsInitiated": "2020-07-14T08:48:26.837Z",
+        "croNumber": "9aAaB9XJBzsj",
+        "id": "f94df59b-d645-4339-a586-b8269b91f368",
+        "isYouth": false,
+        "masterDefendantId": "f94df59b-d645-4339-a586-b8269b91f368",
+        "mitigation": "tJvbozvpro",
+        "mitigationWelsh": "tJvbozvpro_WELSH",
+        "numberOfPreviousConvictionsCited": 0,
+        "offences": [{
+          "arrestDate": "2020-06-14",
+          "chargeDate": "2020-06-14",
+          "count": 2,
+          "dateOfInformation": "2020-06-16",
+          "endDate": "2020-03-14",
+          "id": "a2a611ae-6131-43dc-a012-b3628a63912f",
+          "isDisposed": false,
+          "judicialResults": [{
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "courtClerk": {
+              "firstName": "Emma",
+              "lastName": "Cleaner",
+              "userId": "676ae4c5-fdd9-469e-a528-dd5b12c90287"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "isUnscheduled": false,
+            "judicialResultId": "9ef435c7-3254-49df-9e1a-102ece741124",
+            "judicialResultPrompts": [{
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "5348fd0e-0670-4811-997f-1baa78b06d62",
+              "label": "Custody time limit expires",
+              "promptReference": "CTLDATE",
+              "promptSequence": 100,
+              "type": "DATE",
+              "usergroups": [],
+              "value": "24/07/2020",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "3578eb56-309b-4521-a468-33139d6a3536",
+              "label": "Reason for extension",
+              "promptReference": "reasonForExtension",
+              "promptSequence": 200,
+              "type": "FIXL",
+              "usergroups": [],
+              "value": "Prosecutor absent",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "4483c255-2761-4549-a70a-314aa311d052",
+              "label": "Time spent in custody (in days)",
+              "promptReference": "CTLTIME",
+              "promptSequence": 300,
+              "type": "INT",
+              "usergroups": [],
+              "value": "34",
+              "welshLabel": ""
+            }
+            ],
+            "judicialResultTypeId": "311c8e5c-6f22-44a7-8c97-f72324cb05c4",
+            "label": "Custody time limit",
+            "lastSharedDateTime": "2020-07-14",
+            "lifeDuration": false,
+            "orderedDate": "2020-07-14",
+            "orderedHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": false,
+            "publishedForNows": false,
+            "rank": 7400,
+            "resultText": "Custody time limit\nCustody time limit expires 24/07/2020\nReason for extension Prosecutor absent\nTime spent in custody (in days) 34",
+            "rollUpPrompts": true,
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": []
+          }
+          ],
+          "modeOfTrial": "INPERSON",
+          "offenceCode": "OF61016A",
+          "offenceDefinitionId": "062cedf4-b495-3a6c-9148-cec6bef362ed",
+          "offenceFacts": {
+            "alcoholReadingAmount": 2,
+            "alcoholReadingMethodCode": "AA",
+            "vehicleCode": "LARGE_GOODS_VEHICLE",
+            "vehicleRegistration": "VS07BSF"
+          },
+          "offenceLegislation": "Section 18 - attempt    wounding with intent Legislation",
+          "offenceLegislationWelsh": "Section 18 - attempt    wounding with intent Legislation_WELSH",
+          "offenceTitle": "Section 18 - attempt    wounding with intent",
+          "offenceTitleWelsh": "Section 18 - attempt    wounding with intent_WELSH",
+          "orderIndex": 1,
+          "plea": {
+            "offenceId": "a2a611ae-6131-43dc-a012-b3628a63912f",
+            "originatingHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "pleaDate": "2020-07-14",
+            "pleaValue": "NOT_GUILTY"
+          },
+          "startDate": "2019-09-14",
+          "victims": [{
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          }
+          ],
+          "wording": "Wound / inflict grievous bodily harm without intent",
+          "wordingWelsh": "Wound / inflict grievous bodily harm without intent_WELSH"
+        }, {
+          "arrestDate": "2020-06-14",
+          "chargeDate": "2020-06-14",
+          "count": 1,
+          "dateOfInformation": "2020-06-16",
+          "endDate": "2020-03-14",
+          "id": "a55e0271-ae8b-4e90-aa20-1ed0b28259aa",
+          "isDisposed": false,
+          "judicialResults": [{
+            "alwaysPublished": false,
+            "category": "ANCILLARY",
+            "courtClerk": {
+              "firstName": "Emma",
+              "lastName": "Cleaner",
+              "userId": "676ae4c5-fdd9-469e-a528-dd5b12c90287"
+            },
+            "d20": false,
+            "excludedFromResults": false,
+            "isAdjournmentResult": false,
+            "isAvailableForCourtExtract": true,
+            "isConvictedResult": false,
+            "isDeleted": false,
+            "isFinancialResult": false,
+            "isUnscheduled": false,
+            "judicialResultId": "0bc2e164-27a6-4e0b-8c99-ebb5ba829bec",
+            "judicialResultPrompts": [{
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "5348fd0e-0670-4811-997f-1baa78b06d62",
+              "label": "Custody time limit expires",
+              "promptReference": "CTLDATE",
+              "promptSequence": 100,
+              "type": "DATE",
+              "usergroups": [],
+              "value": "24/07/2020",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "3578eb56-309b-4521-a468-33139d6a3536",
+              "label": "Reason for extension",
+              "promptReference": "reasonForExtension",
+              "promptSequence": 200,
+              "type": "FIXL",
+              "usergroups": [],
+              "value": "Prosecutor absent",
+              "welshLabel": ""
+            }, {
+              "courtExtract": "Y",
+              "isFinancialImposition": false,
+              "judicialResultPromptTypeId": "4483c255-2761-4549-a70a-314aa311d052",
+              "label": "Time spent in custody (in days)",
+              "promptReference": "CTLTIME",
+              "promptSequence": 300,
+              "type": "INT",
+              "usergroups": [],
+              "value": "34",
+              "welshLabel": ""
+            }
+            ],
+            "judicialResultTypeId": "311c8e5c-6f22-44a7-8c97-f72324cb05c4",
+            "label": "Custody time limit",
+            "lastSharedDateTime": "2020-07-14",
+            "lifeDuration": false,
+            "orderedDate": "2020-07-14",
+            "orderedHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "postHearingCustodyStatus": "A",
+            "publishedAsAPrompt": false,
+            "publishedForNows": false,
+            "rank": 7400,
+            "resultText": "Custody time limit\nCustody time limit expires 24/07/2020\nReason for extension Prosecutor absent\nTime spent in custody (in days) 34",
+            "rollUpPrompts": true,
+            "terminatesOffenceProceedings": false,
+            "urgent": false,
+            "usergroups": []
+          }
+          ],
+          "modeOfTrial": "INPERSON",
+          "offenceCode": "CA03014",
+          "offenceDefinitionId": "d6bd72ad-37bf-330d-bcc6-215728949d3e",
+          "offenceFacts": {
+            "alcoholReadingAmount": 2,
+            "alcoholReadingMethodCode": "AA",
+            "vehicleCode": "LARGE_GOODS_VEHICLE",
+            "vehicleRegistration": "VS07BSF"
+          },
+          "offenceLegislation": "Contrary to section 366(8)(b) and (9) of the Communications Act 2003n",
+          "offenceLegislationWelsh": "Section 18 - attempt    wounding with intent Legislation_WELSH",
+          "offenceTitle": "Fail / refuse give assistance to person executing Communications Act search warrant",
+          "offenceTitleWelsh": "Section 18 - attempt    wounding with intent_WELSH",
+          "orderIndex": 1,
+          "plea": {
+            "offenceId": "a55e0271-ae8b-4e90-aa20-1ed0b28259aa",
+            "originatingHearingId": "ca8c024f-d5dc-427a-b61b-3b1011183fed",
+            "pleaDate": "2020-07-14",
+            "pleaValue": "NOT_GUILTY"
+          },
+          "startDate": "2019-09-14",
+          "victims": [{
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1971-01-17",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Oswaldo",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Wolf",
+            "middleName": "Leonard",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          }
+          ],
+          "wording": "Wound / inflict grievous bodily harm without intent",
+          "wordingWelsh": "Wound / inflict grievous bodily harm without intent_WELSH"
+        }
+        ],
+        "personDefendant": {
+          "arrestSummonsNumber": "007",
+          "bailStatus": {
+            "code": "C",
+            "description": "Custody or remanded into custody",
+            "id": "12e69486-4d01-3403-a50a-7419ca040635"
+          },
+          "driverLicenceCode": "FULL",
+          "driverLicenseIssue": "DVLA",
+          "driverNumber": "007",
+          "employerOrganisation": {
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "incorporationNumber": "01051975",
+            "name": "EY",
+            "registeredCharityNumber": "AA"
+          },
+          "employerPayrollReference": "WytJfHSN0U",
+          "perceivedBirthYear": 1975,
+          "personDetails": {
+            "additionalNationalityCode": "GBP",
+            "additionalNationalityDescription": "GBP",
+            "additionalNationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "address": {
+              "address1": "hAtwENTZR1",
+              "address2": "1157 Sauer Forks",
+              "address3": "Hyattmouth",
+              "address4": "MQ",
+              "address5": "Ukraine",
+              "postcode": "WA9 1AB"
+            },
+            "contact": {
+              "fax": "(243) 513-4645",
+              "home": "430.714.5490",
+              "mobile": "070.211.6701",
+              "primaryEmail": "serenity.wyman@hotmail.com",
+              "secondaryEmail": "adelle.breitenberg@hotmail.com",
+              "work": "(782) 591-4630"
+            },
+            "dateOfBirth": "1948-03-23",
+            "disabilityStatus": "vGZPpKvTVd",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "GBP",
+              "observedEthnicityDescription": "GBP",
+              "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+              "selfDefinedEthnicityCode": "GBP",
+              "selfDefinedEthnicityDescription": "GBP",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Tabitha",
+            "gender": "MALE",
+            "interpreterLanguageNeeds": "NA",
+            "lastName": "Robel",
+            "middleName": "Lyla",
+            "nationalInsuranceNumber": "CB275326B",
+            "nationalityCode": "GBP",
+            "nationalityDescription": "GBP",
+            "nationalityId": "49433158-3542-49c8-a9af-581a0e746152",
+            "occupation": "Service",
+            "occupationCode": "SS",
+            "personMarkers": [{
+              "id": "ebf4d81a-fee6-432a-8f39-2ad92ceaa1b0",
+              "markerTypeCode": "GBP",
+              "markerTypeDescription": "GBP",
+              "markerTypeid": "aac28639-0937-4410-beb2-946fce9f0355"
+            }
+            ],
+            "specificRequirements": "NA",
+            "title": "MR"
+          },
+          "vehicleOperatorLicenceNumber": "BS007"
+        },
+        "pncId": "4075.8776721",
+        "prosecutionAuthorityReference": "TFL2854731",
+        "prosecutionCaseId": "b31d27bb-89a4-43f1-936a-503b3ed6e4e5",
+        "witnessStatement": "Lsce8Jm5uY",
+        "witnessStatementWelsh": "Lsce8Jm5uY_WELSH"
+      }
+      ],
+      "id": "b31d27bb-89a4-43f1-936a-503b3ed6e4e5",
+      "initiationCode": "S",
+      "originatingOrganisation": "RVY6pM5WAh",
+      "prosecutionCaseIdentifier": {
+        "address": {
+          "address1": "Southern House",
+          "address2": "Bond Street",
+          "address3": "Guildford",
+          "postcode": "GU15 1TL"
+        },
+        "majorCreditorCode": "PF45",
+        "prosecutionAuthorityCode": "SURRPF",
+        "prosecutionAuthorityId": "764bff92-a135-34cb-b858-8bb6b4b66301",
+        "prosecutionAuthorityName": "Surrey Police",
+        "prosecutionAuthorityOUCode": "0450000",
+        "caseURN": "31GD1030120"
+      },
+      "statementOfFacts": "2xqw560fP0",
+      "statementOfFactsWelsh": "2xqw560fP0_WELSH"
+    }
+    ],
+    "reportingRestrictionReason": "DO NOT SHOW IT TO PRESS",
+    "type": {
+      "description": "First Hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "sharedTime": "2020-07-14T08:48:47.028Z"
+}
