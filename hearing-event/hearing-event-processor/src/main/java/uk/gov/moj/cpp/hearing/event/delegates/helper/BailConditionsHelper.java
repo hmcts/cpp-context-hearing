@@ -13,6 +13,7 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 public class BailConditionsHelper {
 
     private static final String BAIL_CONDITIONS = "Bail Conditions";
+    private static final String[] applicableBailStatusCodes = new String[]{"L", "P", "B"};
 
     public void setBailConditions(final ResultsShared resultsShared) {
         resultsShared.getHearing()
@@ -32,9 +34,14 @@ public class BailConditionsHelper {
     }
 
     private void setBailConditions(final Defendant defendant) {
-        final String bailConditions = getBailConditions(defendant.getOffences());
-        if (!bailConditions.isEmpty()) {
-            defendant.getPersonDefendant().setBailConditions(bailConditions);
+        if (nonNull((defendant.getPersonDefendant()))) {
+            if (nonNull(defendant.getPersonDefendant().getBailStatus()) && Arrays.stream(applicableBailStatusCodes).anyMatch(defendant.getPersonDefendant().getBailStatus().getCode()::equals)) {
+                final String bailConditions = getBailConditions(defendant.getOffences());
+                defendant.getPersonDefendant().setBailConditions(bailConditions);
+            } else {
+                //Set Bail Conditions if Bail Status = ‘B’, ‘P’ or ‘L’. Otherwise field must be blank.
+                defendant.getPersonDefendant().setBailConditions("");
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import static java.util.UUID.fromString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -67,7 +68,7 @@ public class BailStatusHelperTest {
     public void testMapBailStatuses_ShouldNotUpdateIfApplicableStatusNotFound() {
 
         final List<BailStatus> bailStatusList = buildListOfBailStatuses();
-        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("U", Lists.newArrayList("A", "Z"));
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("U", Lists.newArrayList("W", "Z"));
         when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
 
         bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
@@ -75,6 +76,20 @@ public class BailStatusHelperTest {
         uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailStatus();
         assertNotNull(bailStatus);
         assertThat(bailStatus.getCode(), is("U"));
+
+    }
+
+    @Test
+    public void shouldMapBailStatusesWithoutPersonDefendant() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithoutPersonDefendant(Lists.newArrayList("C", "U", "A"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        PersonDefendant personDefendant = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant();
+        assertNull(personDefendant);
 
     }
 
@@ -99,6 +114,30 @@ public class BailStatusHelperTest {
                                                 .withJudicialResults(offenceJudicialResults)
                                                 .build()))
                                         .withPersonDefendant(personDefendant)
+                                        .build())
+                                )
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private ResultsShared buildResultsSharedTemplateWithoutPersonDefendant(final List<String> postHearingCustodyStatuses) {
+        final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
+
+        return ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withHearingDays(Arrays.asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withProsecutionCases(Arrays.asList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(Arrays.asList(Defendant.defendant()
+                                        .withOffences(Arrays.asList(Offence.offence()
+                                                .withJudicialResults(offenceJudicialResults)
+                                                .build(), Offence.offence()
+                                                .withJudicialResults(offenceJudicialResults)
+                                                .build()))
                                         .build())
                                 )
                                 .build()))

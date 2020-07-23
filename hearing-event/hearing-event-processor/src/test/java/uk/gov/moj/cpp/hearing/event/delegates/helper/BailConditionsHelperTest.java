@@ -20,7 +20,9 @@ import static uk.gov.justice.core.courts.PersonDefendant.personDefendant;
 import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 import static uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared.builder;
 
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.math.BigDecimal;
@@ -33,7 +35,7 @@ import org.junit.Test;
 
 public class BailConditionsHelperTest {
 
-     final  BailConditionsHelper bailConditionsHelper = new BailConditionsHelper();
+    final BailConditionsHelper bailConditionsHelper = new BailConditionsHelper();
 
     @Test
     public void testMapBailConditions() {
@@ -80,6 +82,17 @@ public class BailConditionsHelperTest {
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
         assertThat(bailConditionsResult, is(isEmptyOrNullString()));
+    }
+
+    @Test
+    public void shouldMapBailConditionsWhenPersonDefendantIsNotPresent() {
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithoutPersonDefendant();
+        setResultDefinitionGroupAsNull(resultsSharedTemplate);
+
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+
+        assertNull(resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant());
     }
 
     @Test
@@ -191,11 +204,42 @@ public class BailConditionsHelperTest {
 
     }
 
+    @Test
+    public void shouldMapBailCondition_blank_when_bailStatus_custody() {
+        assertBailConditionIsBlank("C");
+        assertBailConditionIsBlank("U");
+        assertBailConditionIsBlank("A");
+        assertBailConditionIsBlank("S");
+    }
+
+    private void assertBailConditionIsBlank(final String bailStatus) {
+        final String bailCondition = "";
+
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate(bailStatus);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+
+        final String bailConditionsResult = resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
+        assertThat(bailConditionsResult, is(bailCondition));
+    }
+
+    @Test
+    public void shouldMapBailCondition_blank_when_not_a_bailConditions() {
+        final String bailCondition = "";
+
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("L","Not a Bail Conditions");
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+
+        final String bailConditionsResult = resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
+        assertThat(bailConditionsResult, is(bailCondition));
+    }
+
     private ResultsShared buildOffenceWithoutResultsSharedTemplate() {
         return builder()
                 .withHearing(hearing()
                         .withHearingDays(asList(hearingDay()
-                                .withSittingDay(of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1),systemDefault()))
+                                .withSittingDay(of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), systemDefault()))
                                 .build(), hearingDay()
                                 .withSittingDay(of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), systemDefault()))
                                 .build()))
@@ -211,10 +255,68 @@ public class BailConditionsHelperTest {
     }
 
     private ResultsShared buildResultsSharedTemplate() {
+        return buildResultsSharedTemplate("P");
+    }
+
+    private ResultsShared buildResultsSharedTemplate(final String bailStatus) {
+        return buildResultsSharedTemplate(bailStatus, "Bail Conditions");
+    }
+
+    private ResultsShared buildResultsSharedTemplate(final String bailStatus, final String resultDefinitionGroup) {
         return builder()
                 .withHearing(hearing()
                         .withHearingDays(asList(hearingDay()
-                                .withSittingDay(of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1),systemDefault()))
+                                .withSittingDay(of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), systemDefault()))
+                                .build(), hearingDay()
+                                .withSittingDay(of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), systemDefault()))
+                                .build()))
+                        .withProsecutionCases(singletonList(prosecutionCase()
+                                .withDefendants(singletonList(defendant()
+                                        .withOffences(asList(offence()
+                                                .withJudicialResults(asList(judicialResult()
+                                                        .withLabel("Bail condition: Courthouse name")
+                                                        .withResultDefinitionGroup(resultDefinitionGroup)
+                                                        .withRank(new BigDecimal(4))
+                                                        .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                        .build(), judicialResult()
+                                                        .withResultDefinitionGroup(resultDefinitionGroup)
+                                                        .withLabel("Bail condition: Courtroom")
+                                                        .withRank(new BigDecimal(3))
+                                                        .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                        .build()))
+                                                .build(), offence()
+                                                .withJudicialResults(asList(judicialResult()
+                                                        .withResultDefinitionGroup("Not a Bail Conditions")
+                                                        .withLabel("Bail condition: Date of hearing")
+                                                        .withRank(new BigDecimal(2))
+                                                        .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                        .build(), judicialResult()
+                                                        .withResultDefinitionGroup(resultDefinitionGroup)
+                                                        .withLabel("Bail condition: Time of hearing")
+                                                        .withRank(new BigDecimal(1))
+                                                        .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                        .build()))
+                                                .build()))
+                                        .withPersonDefendant(buildPersonDefendant(bailStatus))
+                                        .build())
+                                )
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private PersonDefendant buildPersonDefendant(final String bailStatus) {
+        if (null == bailStatus) {
+            return personDefendant().build();
+        }
+        return personDefendant().withBailStatus(BailStatus.bailStatus().withCode(bailStatus).build()).build();
+    }
+
+    private ResultsShared buildResultsSharedTemplateWithoutPersonDefendant() {
+        return builder()
+                .withHearing(hearing()
+                        .withHearingDays(asList(hearingDay()
+                                .withSittingDay(of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), systemDefault()))
                                 .build(), hearingDay()
                                 .withSittingDay(of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), systemDefault()))
                                 .build()))
@@ -245,13 +347,13 @@ public class BailConditionsHelperTest {
                                                         .withJudicialResultPrompts(getJudicialResultPromptList())
                                                         .build()))
                                                 .build()))
-                                        .withPersonDefendant(personDefendant().build())
                                         .build())
                                 )
                                 .build()))
                         .build())
                 .build();
     }
+
 
     private List<JudicialResultPrompt> getJudicialResultPromptList() {
         List<JudicialResultPrompt> list = new ArrayList<>();

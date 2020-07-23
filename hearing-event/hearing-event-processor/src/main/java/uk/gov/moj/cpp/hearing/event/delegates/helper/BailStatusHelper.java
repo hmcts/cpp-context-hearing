@@ -22,13 +22,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.google.common.collect.Lists;
-
 public class BailStatusHelper {
 
     private final ReferenceDataService referenceDataService;
 
-    List<String> applicableBailStatusCodes = Lists.newArrayList("S", "C", "L", "R", "P", "B", "U");
 
     @Inject
     public BailStatusHelper(final ReferenceDataService referenceDataService) {
@@ -41,12 +38,14 @@ public class BailStatusHelper {
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).collect(Collectors.toList());
 
         for (final Defendant defendant : defendants) {
-            final Optional<BailStatus> bailStatusOptional = getPostHearingCustodyStatusBasedOnRank(defendant, bailStatusesFromRefData);
-            bailStatusOptional.ifPresent(s -> {
-                final BailStatus bailStatusResult = bailStatusOptional.get();
-                defendant.getPersonDefendant()
-                        .setBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode(bailStatusResult.getStatusCode()).withDescription(bailStatusResult.getStatusDescription()).withId(bailStatusResult.getId()).build());
-            });
+            if (nonNull(defendant.getPersonDefendant())) {
+                final Optional<BailStatus> bailStatusOptional = getPostHearingCustodyStatusBasedOnRank(defendant, bailStatusesFromRefData);
+                bailStatusOptional.ifPresent(s -> {
+                    final BailStatus bailStatusResult = bailStatusOptional.get();
+                    defendant.getPersonDefendant()
+                            .setBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode(bailStatusResult.getStatusCode()).withDescription(bailStatusResult.getStatusDescription()).withId(bailStatusResult.getId()).build());
+                });
+            }
         }
     }
 
@@ -76,7 +75,6 @@ public class BailStatusHelper {
         Optional<BailStatus> bailStatusOptional = empty();
         if (isNotEmpty(postHearingCustodyStatus)) {
             bailStatusOptional = bailStatusesFromRefData.stream()
-                    .filter(bailStatus -> applicableBailStatusCodes.contains(bailStatus.getStatusCode())) // from the ref data list, filtering it down further
                     .filter(bailStatus -> bailStatus.getStatusCode().equalsIgnoreCase(postHearingCustodyStatus))
                     .findFirst();
 

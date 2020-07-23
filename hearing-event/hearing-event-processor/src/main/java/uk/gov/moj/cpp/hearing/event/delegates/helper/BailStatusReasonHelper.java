@@ -15,7 +15,7 @@ import java.util.List;
 
 public class BailStatusReasonHelper {
 
-    private static final List<String> PROMPT_REFERENCES = of("BAILCONDREAS", "BAILEXCEPTREAS");
+    private static final List<String> PROMPT_REFERENCES = of("bailConditionReason", "bailExceptionReason");
 
     public void setReason(final ResultsShared resultsShared) {
         resultsShared.getHearing()
@@ -26,9 +26,11 @@ public class BailStatusReasonHelper {
     }
 
     private void setBailStatusReason(final Defendant defendant) {
-        String bailStatusReason = getBailStatusReason(defendant.getOffences());
-        if(nonNull(bailStatusReason) && !bailStatusReason.isEmpty()) {
-            defendant.getPersonDefendant().setBailReasons(bailStatusReason);
+        if (nonNull(defendant.getPersonDefendant())) {
+            String bailStatusReason = getBailStatusReason(defendant.getOffences());
+            if (nonNull(bailStatusReason) && !bailStatusReason.isEmpty()) {
+                defendant.getPersonDefendant().setBailReasons(bailStatusReason);
+            }
         }
     }
 
