@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.hasItems;
@@ -12,11 +13,14 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.eq;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate.computeAllOffencesWithdrawnOrDismissed;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESDecisionConstants;
@@ -476,6 +480,20 @@ public class DefendantAggregateTest {
                         .build(),
                 is(false));
 
+    }
+
+    @Test
+    public void shouldNotRaiseFoundHearingIdForNewOffences_when_hearingIdIsNotAssociatedWithCase() {
+        final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendant(randomUUID(), randomUUID(), Offence.offence().build()).collect(toList());
+        assertTrue(collect.isEmpty());
+    }
+
+    @Test
+    public void shouldRaiseFoundHearingIdForNewOffences_when_hearingIdIsNotAssociatedWithCase() {
+        setField(defendantAggregate, "hearingIds", singletonList(randomUUID()));
+
+        final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendant(randomUUID(), randomUUID(), Offence.offence().build()).collect(toList());
+        assertThat(collect.size(), is(1));
     }
 
     public void testMapWithdrawnDismissed(final Map map, final Matcher matcher) {

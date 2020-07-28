@@ -25,17 +25,22 @@ import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Now;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
-import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
+import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -46,6 +51,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -61,10 +67,10 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -77,6 +83,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.transaction.Transactional;
 
+import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,6 +97,8 @@ public class HearingService {
     private HearingRepository hearingRepository;
     @Inject
     private HearingEventRepository hearingEventRepository;
+    @Inject
+    private HearingEventDefinitionRepository hearingEventDefinitionRepository;
     @Inject
     private NowRepository nowRepository;
     @Inject
@@ -259,7 +268,7 @@ public class HearingService {
                 if (personDetails != null) {
                     builder = builder.withFirstName(personDetails.getFirstName())
                             .withLastName(personDetails.getLastName())
-                            .withDateOfBirth(Objects.nonNull(personDetails.getDateOfBirth()) ? personDetails.getDateOfBirth().toString() : null)
+                            .withDateOfBirth(nonNull(personDetails.getDateOfBirth()) ? personDetails.getDateOfBirth().toString() : null)
                             .withNationalInsuranceNumber(personDetails.getNationalInsuranceNumber());
                 }
             }
@@ -271,8 +280,46 @@ public class HearingService {
         }
     }
 
+    public Optional<Hearing> getHearingById(final UUID hearingId) {
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+        return Optional.ofNullable(hearing);
+    }
+
+    public List<HearingEvent> getHearingEvents(final UUID courtCentreId, final UUID roomId, LocalDate date) {
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findHearingEvents(courtCentreId, roomId, date);
+        if (isNull(hearingEvents)) {
+            return Collections.emptyList();
+        }
+        return hearingEvents;
+    }
+
+    public List<HearingEvent> getHearingEvents(UUID hearingId, LocalDate date) {
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(hearingId, date);
+        if (nonNull(hearingEvents)) {
+            return hearingEvents;
+        }
+        return Collections.emptyList();
+    }
+
+    public List<HearingEventDefinition> getHearingEventDefinitions() {
+        final List<HearingEventDefinition> hearingEventDefinitions = hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
+        if (nonNull(hearingEventDefinitions)) {
+            return hearingEventDefinitions;
+        }
+        return Collections.emptyList();
+    }
+
+    public Optional<CourtCentre> getCourtCenterByHearingId(UUID hearingId) {
+        return Optional.ofNullable(hearingRepository.findCourtCenterByHearingId(hearingId));
+    }
+
+    public Optional<HearingEventDefinition> getHearingEventDefinition(UUID definitionId) {
+        final HearingEventDefinition hearingEventDefinition = hearingEventDefinitionRepository.findBy(definitionId);
+        return Optional.ofNullable(hearingEventDefinition);
+    }
+
     @Transactional
-    public HearingDetailsResponse getHearingById(final UUID hearingId) {
+    public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId) {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
@@ -328,12 +375,12 @@ public class HearingService {
         return crackedIneffectiveVacatedTrialTypes
                 .getCrackedIneffectiveVacatedTrialTypes()
                 .stream()
-                .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals( trialTypeId ))
+                .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trialTypeId))
                 .findFirst();
     }
 
     private boolean isVacatedTrialRequest(final Hearing hearing) {
-        return hearing.getIsVacatedTrial()!=null && hearing.getIsVacatedTrial();
+        return hearing.getIsVacatedTrial() != null && hearing.getIsVacatedTrial();
     }
 
     @Transactional
@@ -363,12 +410,18 @@ public class HearingService {
 
     @Transactional
     public NowListResponse getNows(final UUID hearingId) {
-        final List<uk.gov.moj.cpp.hearing.persist.entity.ha.Now> nows = nowRepository.findByHearingId(hearingId);
-        final List<NowResponse> nowList = nows.stream()
-                .map(now -> new NowResponse(now.getId(), now.getHearingId()))
-                .collect(toList());
+        final List<Now> nows = nowRepository.findByHearingId(hearingId);
+        final NowListResponse.Builder builder = NowListResponse.builder();
 
-        return NowListResponse.builder().withNows(nowList).build();
+        if (!CollectionUtils.isEmpty(nows)) {
+            final List<NowResponse> nowResponses = nows
+                    .stream()
+                    .map(now -> new NowResponse(now.getId(), now.getHearingId()))
+                    .collect(toList());
+
+            builder.withNows(nowResponses);
+        }
+        return builder.build();
     }
 
     @Transactional
@@ -426,19 +479,18 @@ public class HearingService {
         }
     }
 
-    @Transactional
     public TargetListResponse getTargets(final UUID hearingId) {
-        final Hearing hearing = hearingRepository.findBy(hearingId);
+        final List<Target> listOfTargets = hearingRepository.findTargetsByHearingId(hearingId);
+        final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
         return TargetListResponse.builder()
-                .withTargets(targetJPAMapper.fromJPA(hearing.getTargets(), hearing.getProsecutionCases())).build();
+                .withTargets(targetJPAMapper.fromJPA(Sets.newHashSet(listOfTargets), Sets.newHashSet(listOfProsecutionCases))).build();
     }
 
     @Transactional
     public ApplicationTargetListResponse getApplicationTargets(final UUID hearingId) {
-        final Hearing hearing = hearingRepository.findBy(hearingId);
-
-        return ApplicationTargetListResponse.applicationTargetListResponse().setHearingId(hearing.getId())
-                .setTargets(hearing.getApplicationDraftResults().stream().map(dr ->
+        final List<ApplicationDraftResult> applicationDraftResults = hearingRepository.findApplicationDraftResultsByHearingId(hearingId);
+        return ApplicationTargetListResponse.applicationTargetListResponse().setHearingId(hearingId)
+                .setTargets(applicationDraftResults.stream().map(dr ->
                         ApplicationTarget.applicationTarget().setDraftResult(dr.getDraftResult())
                                 .setApplicationId(dr.getApplicationId())
                                 .setTargetId(dr.getId())

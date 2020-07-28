@@ -82,7 +82,7 @@ public class AbstractIT {
      */
     private static final ThreadLocal<UUID> USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
     private static final ThreadLocal<UUID> ADMIN_USER_ID_CONTEXT = ThreadLocal.withInitial(UUID::randomUUID);
-    private static final TestJdbcConnectionProvider testJdbcConnectionProvider = new TestJdbcConnectionProvider();
+    protected static final TestJdbcConnectionProvider testJdbcConnectionProvider = new TestJdbcConnectionProvider();
     protected static RequestSpecification requestSpec;
     protected static String ouId1 = "80921334-2cf0-4609-8a29-0921bf6b3520";
     protected static String ouId2 = "7e967376-eacf-4fca-9b30-21b0c5aad427";

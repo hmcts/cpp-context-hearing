@@ -134,16 +134,29 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     }
 
     @Test
-    public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
-        UUID hearingEventId = randomUUID();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom4Id, defenceCounselId, APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_3);
-        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_3, "20");
+    public void shouldRecordFailureIfSchemaValidationFails() throws NoSuchAlgorithmException {
+        createHearingEvent(randomUUID(), courtRoom5Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_3);
+
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_3, "28");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
 
-        sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId_3);
+        sendPublishCourtListCommandForExportFailed(publishCourtListJsonObject, courtCentreId_3);
 
-        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId_3);
+        publishCourtListSteps.verifyExportFailedWithErrorMessage(courtCentreId_3, "GenerationFailedException: Could not validate XML against schema");
+    }
+
+    @Test
+    public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
+        UUID hearingEventId = randomUUID();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom4Id, defenceCounselId, APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_4);
+        final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_4, "20");
+
+        final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
+
+        sendPublishCourtListCommand(publishCourtListJsonObject, courtCentreId_4);
+
+        publishCourtListSteps.verifyCourtListPublishStatusReturnedWhenQueryingFromAPI(courtCentreId_4);
 
         final String filePayload = getFileForPath(XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_20);
         assertThat(filePayload, containsString("E20606_Appellant_CO_Name>TomAppellant BradyAppellant</E20606_Appellant_CO_Name"));
@@ -164,10 +177,28 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), eventTime.toLocalDate(), expectedHearingEventId);
     }
 
-    private synchronized String sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
+    private String sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
 
         try (final Utilities.EventListener eventTopic = listenFor("hearing.event.publish-court-list-export-successful", "hearing.event")
                 .withFilter(isJson(withJsonPath("$.publishStatus", is("EXPORT_SUCCESSFUL")
+                )))) {
+
+            makeCommand(requestSpec, LISTING_COMMAND_PUBLISH_COURT_LIST)
+                    .ofType(MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST)
+                    .withPayload(publishCourtListJsonObject.toString())
+                    .withCppUserId(USER_ID_VALUE_AS_ADMIN)
+
+                    .executeSuccessfully();
+
+            eventTopic.waitFor();
+        }
+        return courtCentreId;
+    }
+
+    private String sendPublishCourtListCommandForExportFailed(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
+
+        try (final Utilities.EventListener eventTopic = listenFor("hearing.event.publish-court-list-export-failed", "hearing.event")
+                .withFilter(isJson(withJsonPath("$.publishStatus", is("EXPORT_FAILED")
                 )))) {
 
             makeCommand(requestSpec, LISTING_COMMAND_PUBLISH_COURT_LIST)

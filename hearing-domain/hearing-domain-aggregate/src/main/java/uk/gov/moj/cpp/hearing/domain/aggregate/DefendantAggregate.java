@@ -90,7 +90,7 @@ public class DefendantAggregate implements Aggregate {
     }
 
     public Stream<Object> lookupHearingsForNewOffenceOnDefendant(final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
-        return apply(Stream.of(FoundHearingsForNewOffence.foundHearingsForNewOffence()
+        return  hearingIds.isEmpty() ? empty() :apply(Stream.of(FoundHearingsForNewOffence.foundHearingsForNewOffence()
                 .withDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withOffence(offence)

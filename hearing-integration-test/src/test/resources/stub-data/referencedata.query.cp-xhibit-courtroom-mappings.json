@@ -60,6 +60,19 @@
       "validFrom": "2016-04-08",
       "crestCourtRoomName": "CourtRoom 4",
       "crestCourtSiteUUID" : "7b223ad0-4468-11ea-b77f-2e728ce88125"
+    },
+    {
+      "id": "COURT_ROOM5_ID",
+      "courtRoomUUID": "COURT_ROOM5_ID",
+      "oucode": "C43AY00",
+      "courtRoomId": "528",
+      "crestCourtId": "528",
+      "crestCourtSiteId": "000",
+      "crestCourtSiteName": "DUMMYCOURTNAME",
+      "crestCourtShortName": "DUMMY",
+      "crestCourtSiteCode": "A",
+      "courtType": "CROWN_COURT",
+      "crestCourtSiteUUID": "7b223ad0-4468-11ea-b77f-2e728ce88125"
     }
   ]
 }

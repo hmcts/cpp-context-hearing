@@ -3,13 +3,12 @@ package uk.gov.moj.cpp.hearing.query.view;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonassert.impl.matcher.IsEmptyCollection.empty;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.parse;
-import static java.util.Collections.emptyList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
@@ -18,34 +17,35 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.withMetadataEnvelopedFrom;
-import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.json.JsonObject;
+
+import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -145,23 +145,17 @@ public class HearingEventQueryViewTest {
     private final Enveloper enveloper = createEnveloper();
 
     @Mock
-    private HearingEventRepository hearingEventRepository;
-
-    @Mock
-    private HearingEventDefinitionRepository hearingEventDefinitionRepository;
-
-    @Mock
-    private HearingRepository hearingRepository;
+    private HearingService hearingService;
 
     @InjectMocks
-    private HearingEventQueryView hearingEventQueryView;
+    private HearingEventQueryView target;
 
     @Test
     public void shouldGetHearingEventLogByHearingId() {
-        when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID_1, EVENT_TIME.toLocalDate())).thenReturn(hearingEvents());
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService.getHearingEvents(HEARING_ID_1, EVENT_TIME.toLocalDate())).thenReturn(hearingEvents());
+        when(hearingService
+                .getHearingEvents(
                         COURT_CENTRE_ID,
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate())
@@ -174,41 +168,40 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualHearingEventLog = hearingEventQueryView.getHearingEventLog(query);
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLog(query);
 
-        assertThat(actualHearingEventLog, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_HEARING_EVENT_LOG),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID_1.toString())),
-                        withJsonPath(format("$.%s", FIELD_HAS_ACTIVE_HEARING), equalTo(TRUE)),
-                        withJsonPath(format("$.%s", FIELD_HEARING_EVENTS), hasSize(2)),
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(HEARING_ID_1, EVENT_TIME.toLocalDate());
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID, COURT_ROOM_ID, EVENT_TIME.toLocalDate());
 
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_1.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(START_HEARING_EVENT_DEFINITION_ID.toString())),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_EVENT_TIME), equalTo(ZonedDateTimes.toString(EVENT_TIME))),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_LAST_MODIFIED_TIME), equalTo(ZonedDateTimes.toString(LAST_MODIFIED_TIME))),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_ALTERABLE), equalTo(ALTERABLE)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_DEFENCE_COUNSEL_ID), equalTo(DEFENCE_COUNSEL_ID.toString())),
+        assertThat(actualHearingEventLog.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_LOG));
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID_1.toString())),
+                hasJsonPath(format("$.%s", FIELD_HAS_ACTIVE_HEARING), equalTo(TRUE)),
+                hasJsonPath(format("$.%s", FIELD_HEARING_EVENTS), hasSize(2)),
 
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_2.toString())),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(START_HEARING_EVENT_DEFINITION_ID.toString())),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_EVENT_TIME), equalTo(ZonedDateTimes.toString(EVENT_TIME_2))),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_LAST_MODIFIED_TIME), equalTo(ZonedDateTimes.toString(LAST_MODIFIED_TIME_2))),
-                        withJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_ALTERABLE), equalTo(ALTERABLE_2)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_DEFENCE_COUNSEL_ID), equalTo(DEFENCE_COUNSEL_ID.toString()))
-                ))).thatMatchesSchema()
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_1.toString())),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(START_HEARING_EVENT_DEFINITION_ID.toString())),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_EVENT_TIME), equalTo(ZonedDateTimes.toString(EVENT_TIME))),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_LAST_MODIFIED_TIME), equalTo(ZonedDateTimes.toString(LAST_MODIFIED_TIME))),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_ALTERABLE), equalTo(ALTERABLE)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_DEFENCE_COUNSEL_ID), equalTo(DEFENCE_COUNSEL_ID.toString())),
+
+                hasJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_ID), equalTo(HEARING_EVENT_ID_2.toString())),
+                hasJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_HEARING_EVENT_DEFINITION_ID), equalTo(START_HEARING_EVENT_DEFINITION_ID.toString())),
+                hasJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_RECORDED_LABEL), equalTo(RECORDED_LABEL_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_EVENT_TIME), equalTo(ZonedDateTimes.toString(EVENT_TIME_2))),
+                hasJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_LAST_MODIFIED_TIME), equalTo(ZonedDateTimes.toString(LAST_MODIFIED_TIME_2))),
+                hasJsonPath(format("$.%s[1].%s", FIELD_HEARING_EVENTS, FIELD_ALTERABLE), equalTo(ALTERABLE_2)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_HEARING_EVENTS, FIELD_DEFENCE_COUNSEL_ID), equalTo(DEFENCE_COUNSEL_ID.toString()))
         ));
     }
 
     @Test
     public void shouldReturnEmptyEventLogWhenThereAreNoEventsByHearingId() {
-        when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(HEARING_ID_1)).thenReturn(emptyList());
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService
+                .getHearingEvents(
                         COURT_CENTRE_ID,
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate())
@@ -221,127 +214,118 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualHearingEventLog = hearingEventQueryView.getHearingEventLog(query);
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLog(query);
 
-        assertThat(actualHearingEventLog, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_HEARING_EVENT_LOG),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID_1.toString())),
-                        withJsonPath(format("$.%s", FIELD_HAS_ACTIVE_HEARING), equalTo(FALSE)),
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate());
 
-                        withJsonPath(format("$.%s", FIELD_HEARING_EVENTS), empty())
-                ))).thatMatchesSchema()
+        assertThat(actualHearingEventLog.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_LOG));
+        assertThat(actualHearingEventLog.payload().toString(), allOf(
+                hasJsonPath(format("$.%s", FIELD_HEARING_ID), equalTo(HEARING_ID_1.toString())),
+                hasJsonPath(format("$.%s", FIELD_HAS_ACTIVE_HEARING), equalTo(FALSE)),
+                hasJsonPath(format("$.%s", FIELD_HEARING_EVENTS), empty())
         ));
     }
 
     @Test
     public void shouldGetHearingEventDefinitionById() {
-        when(hearingEventDefinitionRepository.findBy(START_HEARING_EVENT_DEFINITION_ID)).thenReturn(prepareHearingEventDefinition());
+        when(hearingService.getHearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID)).thenReturn(Optional.of(prepareHearingEventDefinition()));
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
                 .add(FIELD_HEARING_ID, HEARING_ID_1.toString())
                 .add(FIELD_HEARING_EVENT_DEFINITION_ID, START_HEARING_EVENT_DEFINITION_ID.toString())
                 .build());
 
-        final JsonEnvelope actualHearingEventDefinition = hearingEventQueryView.getHearingEventDefinition(query);
+        final Envelope<JsonObject> actualHearingEventDefinition = target.getHearingEventDefinition(query);
 
-        assertThat(actualHearingEventDefinition, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITION),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_GENERIC_ID), is(ID_1)),
-                        withJsonPath(format("$.%s", FIELD_ACTION_LABEL), is(ACTION_LABEL_1)),
-                        withJsonPath(format("$.%s", FIELD_RECORDED_LABEL), is(RECORDED_LABEL_1)),
-                        withJsonPath(format("$.%s", FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_1)),
-                        withoutJsonPath(format("$.%s", FIELD_CASE_ATTRIBUTES)),
-                        withJsonPath(format("$.%s", FIELD_GROUP_LABEL), is(GROUP_LABEL_1)),
-                        withJsonPath(format("$.%s", FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
-                        withJsonPath(format("$.%s", FIELD_ALTERABLE), is(ALTERABLE))
-                ))).thatMatchesSchema()
+        verify(hearingService).getHearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID);
+        assertThat(actualHearingEventDefinition.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_DEFINITION));
+        assertThat(actualHearingEventDefinition.payload().toString(), allOf(
+                hasJsonPath(format("$.%s", FIELD_GENERIC_ID), is(ID_1)),
+                hasJsonPath(format("$.%s", FIELD_ACTION_LABEL), is(ACTION_LABEL_1)),
+                hasJsonPath(format("$.%s", FIELD_RECORDED_LABEL), is(RECORDED_LABEL_1)),
+                hasJsonPath(format("$.%s", FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_1)),
+                hasNoJsonPath(format("$.%s", FIELD_CASE_ATTRIBUTES)),
+                hasJsonPath(format("$.%s", FIELD_GROUP_LABEL), is(GROUP_LABEL_1)),
+                hasJsonPath(format("$.%s", FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
+                hasJsonPath(format("$.%s", FIELD_ALTERABLE), is(ALTERABLE))
         ));
     }
 
     @Test
     public void shouldGetAllHearingEventDefinitionsVersionTwoWhichDoNotHaveCaseAttributes() {
-        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithoutCaseAttributes());
+        when(hearingService.getHearingEventDefinitions()).thenReturn(hearingEventDefinitionsWithoutCaseAttributes());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
                 .build());
 
-        final JsonEnvelope actualHearingEventDefinitions = hearingEventQueryView.getHearingEventDefinitionsVersionTwo(query);
+        final Envelope<JsonObject> actualHearingEventDefinitions = target.getHearingEventDefinitions(query);
 
-        assertThat(actualHearingEventDefinitions, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(2)),
+        verify(hearingService).getHearingEventDefinitions();
+        assertThat(actualHearingEventDefinitions.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS));
+        assertThat(actualHearingEventDefinitions.payload().toString(), allOf(
+                hasJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(2)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
+                hasNoJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
 
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
-                        withoutJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
-
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL_1)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
-                        withoutJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2))
-                ))).thatMatchesSchema()
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL_1)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
+                hasNoJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2))
         ));
     }
 
     @Test
     public void shouldGetAllHearingEventDefinitionsVersionTwoWithCaseAttributes() {
-        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionsWithCaseAttributes());
+        when(hearingService.getHearingEventDefinitions()).thenReturn(hearingEventDefinitionsWithCaseAttributes());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
                 .build());
 
-        final JsonEnvelope actualHearingEventDefinitions = hearingEventQueryView.getHearingEventDefinitionsVersionTwo(query);
+        final Envelope<JsonObject> actualHearingEventDefinitions = target.getHearingEventDefinitions(query);
 
-        assertThat(actualHearingEventDefinitions, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(2)),
-
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_1)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES), hasSize(2)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
-                        withJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
-
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES), hasSize(2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL_2)),
-                        withJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2))
-                ))).thatMatchesSchema()
+        verify(hearingService).getHearingEventDefinitions();
+        assertThat(actualHearingEventDefinitions.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_DEFINITIONS));
+        assertThat(actualHearingEventDefinitions.payload().toString(), allOf(
+                hasJsonPath(format("$.%s", FIELD_EVENT_DEFINITIONS), hasSize(2)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_1)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES), hasSize(2)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL)),
+                hasJsonPath(format("$.%s[0].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GENERIC_ID), is(ID_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_LABEL), is(ACTION_LABEL_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_RECORDED_LABEL), is(RECORDED_LABEL_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ACTION_SEQUENCE), is(ACTION_SEQUENCE_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_SEQUENCE), is(GROUP_SEQUENCE_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_CASE_ATTRIBUTES), hasSize(2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_GROUP_LABEL), is(GROUP_LABEL_2)),
+                hasJsonPath(format("$.%s[1].%s", FIELD_EVENT_DEFINITIONS, FIELD_ALTERABLE), is(ALTERABLE_2))
         ));
     }
 
     @Test
     public void shouldGetActiveHearingIdsWhenAnotherHearingIsActiveInTheSameCourtRoom() {
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
-                        COURT_CENTRE_ID,
-                        COURT_ROOM_ID,
-                        EVENT_TIME.toLocalDate())
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService.getHearingEvents(
+                COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate())
         ).thenReturn(mockActiveHearingEvents(HEARING_ID_2));
 
         final JsonEnvelope query = envelopeFrom(
@@ -351,23 +335,24 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualActiveHearingIdsForCourtRoom = hearingEventQueryView.getActiveHearingsForCourtRoom(query);
+        final Envelope<JsonObject> actualActiveHearingIdsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
 
-        assertThat(actualActiveHearingIdsForCourtRoom, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(1)),
-                        withJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID_2.toString()))
-                ))).thatMatchesSchema()
-        ));
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate());
+        assertThat(actualActiveHearingIdsForCourtRoom.metadata().name(), is(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM));
+        assertThat(actualActiveHearingIdsForCourtRoom.payload().toString(), (allOf(
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(1)),
+                hasJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID_2.toString()))
+        )));
     }
 
     @Test
     public void shouldGetActiveHearingIdsInCaseOfSamePauseAndResumeEventsRecorded() {
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService
+                .getHearingEvents(
                         COURT_CENTRE_ID,
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate())
@@ -380,23 +365,24 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualActiveHearingIdsForCourtRoom = hearingEventQueryView.getActiveHearingsForCourtRoom(query);
+        final Envelope<JsonObject> actualActiveHearingIdsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
 
-        assertThat(actualActiveHearingIdsForCourtRoom, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(1)),
-                        withJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID_2.toString()))
-                ))).thatMatchesSchema()
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate());
+        assertThat(actualActiveHearingIdsForCourtRoom.metadata().name(), is(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM));
+        assertThat(actualActiveHearingIdsForCourtRoom.payload().toString(), allOf(
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(1)),
+                hasJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID_2.toString()))
         ));
     }
 
     @Test
     public void shouldNotGetActiveHearingIdsInCaseOfMorePausesThanResumeEvents() {
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService
+                .getHearingEvents(
                         COURT_CENTRE_ID,
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate())
@@ -409,22 +395,23 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualActiveHearingIdsForCourtRoom = hearingEventQueryView.getActiveHearingsForCourtRoom(query);
+        final Envelope<JsonObject> actualActiveHearingIdsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
 
-        assertThat(actualActiveHearingIdsForCourtRoom, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(0))
-                ))).thatMatchesSchema()
-        ));
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate());
+        assertThat(actualActiveHearingIdsForCourtRoom.metadata().name(), is(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM));
+        assertThat(actualActiveHearingIdsForCourtRoom.payload().toString(),
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), Matchers.empty())
+        );
     }
 
     @Test
     public void shouldNotGetActiveHearingIdsInCaseOfEndEventsRecorded() {
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService
+                .getHearingEvents(
                         COURT_CENTRE_ID,
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate())
@@ -437,22 +424,23 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualActiveHearingIdsForCourtRoom = hearingEventQueryView.getActiveHearingsForCourtRoom(query);
+        final Envelope<JsonObject> actualActiveHearingIdsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
 
-        assertThat(actualActiveHearingIdsForCourtRoom, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(0))
-                ))).thatMatchesSchema()
-        ));
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate());
+        assertThat(actualActiveHearingIdsForCourtRoom.metadata().name(), is(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM));
+        assertThat(actualActiveHearingIdsForCourtRoom.payload().toString(),
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), Matchers.empty())
+        );
     }
 
     @Test
     public void shouldNotGetActiveHearingIdsWhenThereIsNoActiveHearingForTheSameCourtRoom() {
-        when(hearingRepository.findBy(HEARING_ID_1)).thenReturn(mockHearing());
-        when(hearingEventRepository
-                .findHearingEvents(
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.of(mockHearing().getCourtCentre()));
+        when(hearingService
+                .getHearingEvents(
                         COURT_CENTRE_ID,
                         COURT_ROOM_ID,
                         EVENT_TIME.toLocalDate())
@@ -465,15 +453,51 @@ public class HearingEventQueryViewTest {
                         .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
                         .build());
 
-        final JsonEnvelope actualActiveHearingIdsForCourtRoom = hearingEventQueryView.getActiveHearingsForCourtRoom(query);
+        final Envelope<JsonObject> actualActiveHearingIdsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
 
-        assertThat(actualActiveHearingIdsForCourtRoom, is(jsonEnvelope(
-                withMetadataEnvelopedFrom(query)
-                        .withName(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM),
-                payloadIsJson(allOf(
-                        withJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(0))
-                ))).thatMatchesSchema()
-        ));
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        verify(hearingService).getHearingEvents(COURT_CENTRE_ID,
+                COURT_ROOM_ID,
+                EVENT_TIME.toLocalDate());
+        assertThat(actualActiveHearingIdsForCourtRoom.metadata().name(), is(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM));
+        assertThat(actualActiveHearingIdsForCourtRoom.payload().toString(),
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), Matchers.empty())
+        );
+    }
+
+    @Test
+    public void shouldNotGetHearingEventDefinitionByNonExistingId() {
+        when(hearingService.getHearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID)).thenReturn(Optional.empty());
+
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
+                .add(FIELD_HEARING_ID, HEARING_ID_1.toString())
+                .add(FIELD_HEARING_EVENT_DEFINITION_ID, START_HEARING_EVENT_DEFINITION_ID.toString())
+                .build());
+
+        final Envelope<JsonObject> actualHearingEventDefinition = target.getHearingEventDefinition(query);
+
+        verify(hearingService).getHearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID);
+        assertThat(actualHearingEventDefinition.payload(), is((JsonObject) null));
+        assertThat(actualHearingEventDefinition.metadata().name(), is(RESPONSE_NAME_HEARING_EVENT_DEFINITION));
+    }
+
+    @Test
+    public void shouldNotGetActiveHearingsByNonExistingId() {
+        when(hearingService.getCourtCenterByHearingId(HEARING_ID_1)).thenReturn(Optional.empty());
+
+        final JsonEnvelope query = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder()
+                .add(FIELD_HEARING_ID, HEARING_ID_1.toString())
+                .add(FIELD_EVENT_DATE, EVENT_TIME.toLocalDate().toString())
+                .add(FIELD_HEARING_EVENT_DEFINITION_ID, START_HEARING_EVENT_DEFINITION_ID.toString())
+                .build());
+
+        final Envelope<JsonObject> activeHearingsForCourtRoom = target.getActiveHearingsForCourtRoom(query);
+
+        verify(hearingService).getCourtCenterByHearingId(HEARING_ID_1);
+        assertThat(activeHearingsForCourtRoom.metadata().name(), is(RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM));
+        assertThat(activeHearingsForCourtRoom.payload().toString(),
+                hasJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), Matchers.empty())
+        );
     }
 
     private HearingEventDefinition prepareHearingEventDefinition() {

@@ -14,12 +14,16 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -29,6 +33,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.Sets;
 import org.apache.deltaspike.testcontrol.api.junit.CdiTestRunner;
 import org.junit.After;
 import org.junit.Before;
@@ -41,6 +46,7 @@ import org.junit.runner.RunWith;
 public class HearingRepositoryTest {
 
     private static final List<uk.gov.justice.core.courts.Hearing> hearings = new ArrayList<>();
+    private static final uk.gov.justice.core.courts.Hearing simpleHearing = minimumInitiateHearingTemplate().getHearing();
 
     @Inject
     private HearingRepository hearingRepository;
@@ -66,6 +72,7 @@ public class HearingRepositoryTest {
         final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
 
         hearings.add(initiateHearingCommand.getHearing());
+        //hearings.add(initiateHearingCommand.getHearing());
     }
 
     @Before
@@ -77,6 +84,8 @@ public class HearingRepositoryTest {
             // because h2 incorrectly maps column type TEXT to VARCHAR(255)
             hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
             hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
+            hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(randomUUID()).setHearing(hearingEntity)));
+            hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
             hearingRepository.save(hearingEntity);
 
         });
@@ -100,12 +109,62 @@ public class HearingRepositoryTest {
 
     @Test
     public void shouldFindByHearingId() {
-
         final UUID hearingId = hearings.get(0).getId();
-
         final Hearing hearingEntityRetrieved = hearingRepository.findBy(hearingId);
-
         assertNotNull(hearingEntityRetrieved);
+    }
+
+    @Test
+    public void shouldFindCourtCenterByHearingID(){
+        final UUID hearingId = hearings.get(0).getId();
+        final CourtCentre courtCenter = hearingRepository.findCourtCenterByHearingId(hearingId);
+        assertNotNull(courtCenter);
+    }
+
+    @Test
+    public void shouldReturnNullWhenHearingIdIsAbsent(){
+        final CourtCentre courtCenter = hearingRepository.findCourtCenterByHearingId(randomUUID());
+        assertNull(courtCenter);
+    }
+
+    @Test
+    public void shouldFindTargetsByHearingId(){
+        final UUID hearingId = hearings.get(0).getId();
+        final List<Target> targets = hearingRepository.findTargetsByHearingId(hearingId);
+        assertThat(targets.size(), is(1));
+    }
+
+    @Test
+    public void shouldReturnEmptyTargetsIfHearingDoNotHaveTargets(){
+        final List<Target> targets = hearingRepository.findTargetsByHearingId(simpleHearing.getId());
+        assertThat(targets.size(), is(0));
+    }
+
+    @Test
+    public void shouldFindApplicationDraftResultsByHearingId(){
+        final UUID hearingId = hearings.get(0).getId();
+        final List<ApplicationDraftResult> applicationDraftResults = hearingRepository.findApplicationDraftResultsByHearingId(hearingId);
+        assertThat(applicationDraftResults.size(), is(1));
+    }
+
+    @Test
+    public void shouldReturnEmptyApplicationDraftResultsIfHearingDoNotHaveApplicationDraftResults(){
+        final List<ApplicationDraftResult> applicationDraftResults = hearingRepository.findApplicationDraftResultsByHearingId(simpleHearing.getId());
+        assertThat(applicationDraftResults.size(), is(0));
+    }
+
+    @Test
+    public void shouldFindProsecutionCasesByHearingId(){
+        final UUID hearingId = hearings.get(0).getId();
+        final List<ProsecutionCase> prosecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
+        assertThat(prosecutionCases.size(), is(1));
+    }
+
+    @Test
+    public void shouldReturnEmptyProsecutionCasesIfHearingDoNotHaveTargets(){
+        final List<ProsecutionCase> prosecutionCases =
+                hearingRepository.findProsecutionCasesByHearingId(simpleHearing.getId());
+        assertThat(prosecutionCases.size(), is(0));
     }
 
     @Test
@@ -116,7 +175,7 @@ public class HearingRepositoryTest {
 
         final HearingCaseNote hearingCaseNote = new HearingCaseNote();
         hearingCaseNote.setHearing(hearing);
-        hearingCaseNote.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
+        hearingCaseNote.setId(new HearingSnapshotKey(randomUUID(), hearing.getId()));
         hearingCaseNoteRepository.save(hearingCaseNote);
 
         final Hearing hearingEntityRetrieved = hearingRepository.findBy(hearingId);

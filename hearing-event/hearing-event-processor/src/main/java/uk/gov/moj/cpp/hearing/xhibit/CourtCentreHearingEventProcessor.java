@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
+import static java.time.ZonedDateTime.now;
 import static java.time.ZonedDateTime.parse;
 import static org.apache.commons.io.IOUtils.toInputStream;
 import static org.apache.commons.lang3.exception.ExceptionUtils.getMessage;
@@ -35,9 +36,6 @@ public class CourtCentreHearingEventProcessor  {
     private PublishCourtListCommandSender publishCourtListCommandSender;
 
     @Inject
-    private CourtListTimeUpdateRetriever courtListTimeUpdateRetriever;
-
-    @Inject
     private PublishCourtListRequestParametersParser publishCourtListRequestParametersParser;
 
     @Inject
@@ -58,7 +56,7 @@ public class CourtCentreHearingEventProcessor  {
 
         final PublishCourtListRequestParameters publishCourtListRequestParameters = publishCourtListRequestParametersParser.parse(envelope);
         try {
-            final ZonedDateTime latestCourtListUploadTime = courtListTimeUpdateRetriever.getLatestCourtListUploadTime(envelope, publishCourtListRequestParameters.getCourtCentreId());
+            final ZonedDateTime latestCourtListUploadTime = now();
 
             processHearingForXhibitWebPage(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);
             processHearingForXhibitPublicDisplay(envelope, publishCourtListRequestParameters, latestCourtListUploadTime);

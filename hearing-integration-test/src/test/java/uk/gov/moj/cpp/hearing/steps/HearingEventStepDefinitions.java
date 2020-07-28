@@ -12,6 +12,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -33,7 +34,6 @@ import static uk.gov.moj.cpp.hearing.it.AbstractIT.getRequestSpec;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 
@@ -245,5 +245,8 @@ public class HearingEventStepDefinitions {
         return format("%s/%s", getBaseUri(), queryEventDefinitionsEndPoint);
     }
 
-
+    public static void waitForNotFoundResponse(final String url, final String mediaType, final String userId) {
+        poll(requestParams(url, mediaType).withHeader(USER_ID, userId))
+                .until(status().is(NOT_FOUND));
+    }
 }

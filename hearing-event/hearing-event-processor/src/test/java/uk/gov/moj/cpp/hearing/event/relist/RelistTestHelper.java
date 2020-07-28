@@ -118,6 +118,26 @@ public interface RelistTestHelper {
         return resultsShared;
     }
 
+    static ResultsShared getArbitrarySharedResultWithNextHearingResultExceptTime() {
+        ResultsShared ARBITRARY_RESULT_SHARED = resultsSharedTemplate();
+        Prompt dateOfHearing = Prompt.prompt().withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283")).withLabel(DATE_OF_HEARING_LABEL).withValue("12/12/2018").build();
+        Prompt hearingType = Prompt.prompt().withId(HTYPE_PROMPT_ID).withLabel(HEARING_TYPE_LABEL).withValue("Trial").build();
+        Prompt estimatedDuration = Prompt.prompt().withId(HEST_PROMPT_ID).withLabel(ESTIMATED_DURATION_LABEL).withValue("1 weeks,2 days").build();
+        Prompt courtRoom = Prompt.prompt().withId(HCROOM_PROMPT_ID).withLabel(COURT_ROOM_LABEL).withValue("Room A").build();
+        Prompt courtHouse = Prompt.prompt().withId(HCHOUSE_PROMPT_ID).withLabel(COURT_CENTRE_LABEL).withValue("Wimbledon Magistractes").build();
+        Prompt remandStatus = Prompt.prompt().withId(fromString("9403f0d7-90b5-4377-84b4-f06a77811362")).withLabel(REMAND_STATUS_LABEL).withValue("remand in custody").build();
+        Prompt startTime = Prompt.prompt().withId(fromString("dfac671c-5b85-42a1-bb66-9aeee388a08d")).withLabel(TIME_OF_HEARING_LABEL).withValue("").build();
+
+        ResultLine nextHearingResult = ResultLine.resultLine()
+                .withResultLineId(UUID.randomUUID())
+                .withResultDefinitionId(fromString("fbed768b-ee95-4434-87c8-e81cbc8d24c8"))
+                .withResultLabel("Next Hearing")
+                .withPrompts(Arrays.asList(dateOfHearing, hearingType, estimatedDuration, remandStatus, startTime, courtHouse, courtRoom))
+                .build();
+        ARBITRARY_RESULT_SHARED.getTargets().get(0).getResultLines().add(nextHearingResult);
+        return ARBITRARY_RESULT_SHARED;
+    }
+
 
     static ResultsShared getArbitrarySharedResult() {
         return resultsSharedTemplate();

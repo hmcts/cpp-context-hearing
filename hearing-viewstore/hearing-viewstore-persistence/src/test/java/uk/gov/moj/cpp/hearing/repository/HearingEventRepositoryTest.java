@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.repository;
 
-import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.shuffle;
 import static java.util.UUID.randomUUID;
@@ -17,7 +16,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;

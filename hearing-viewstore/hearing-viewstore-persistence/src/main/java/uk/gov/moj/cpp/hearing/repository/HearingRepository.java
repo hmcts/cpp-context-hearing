@@ -1,6 +1,12 @@
 package uk.gov.moj.cpp.hearing.repository;
 
+import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
+
+import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -68,4 +74,20 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
             "WHERE day.date = :date and " +
             "( hearing.isBoxHearing is null or hearing.isBoxHearing != true)")
     public abstract List<Hearing> findByHearingDate(@QueryParam("date") final LocalDate date);
+
+    @Query(value = "SELECT hearing.courtCentre from Hearing hearing " +
+            "WHERE hearing.id = :hearingId", singleResult = OPTIONAL)
+    public abstract CourtCentre findCourtCenterByHearingId(@QueryParam("hearingId") final UUID hearingId);
+
+    @Query(value = "SELECT hearing.targets from Hearing hearing " +
+            "WHERE hearing.id = :hearingId")
+    public abstract List<Target> findTargetsByHearingId(@QueryParam("hearingId") final UUID hearingId);
+
+    @Query(value = "SELECT hearing.applicationDraftResults from Hearing hearing " +
+            "WHERE hearing.id = :hearingId")
+    public abstract List<ApplicationDraftResult> findApplicationDraftResultsByHearingId(@QueryParam("hearingId") final UUID hearingId);
+
+    @Query(value = "SELECT hearing.prosecutionCases from Hearing hearing " +
+            "WHERE hearing.id = :hearingId")
+    public abstract List<ProsecutionCase> findProsecutionCasesByHearingId(@QueryParam("hearingId") final UUID hearingId);
 }

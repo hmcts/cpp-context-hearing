@@ -8,6 +8,7 @@ import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.ESTIMATED_DUR
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.HEARING_TYPE_LABEL;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.arbitraryNextHearingMetaData;
 import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResultWithNextHearingResult;
+import static uk.gov.moj.cpp.hearing.event.relist.RelistTestHelper.getArbitrarySharedResultWithNextHearingResultExceptTime;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -89,9 +90,21 @@ public class HearingAdjournTransformerTest {
         transform(rs -> rs.getTargets().get(0).setOffenceId(null), true, true);
     }
 
+    @Test
+    public void transformProsecutionCaseWithoutTimeInNextHearing() {
+        transform(rs -> {
+        }, true, false);
+    }
+
     private void transform(final Consumer<ResultsShared> resultSharedModifier, boolean hasProsecutionCase,
-                           boolean hasApplications) {
-        final ResultsShared resultsShared = getArbitrarySharedResultWithNextHearingResult();
+                           boolean timeExistsInNextHearingResult) {
+
+        ResultsShared resultsShared;
+        if(timeExistsInNextHearingResult){
+            resultsShared = getArbitrarySharedResultWithNextHearingResult();
+        }else{
+            resultsShared = getArbitrarySharedResultWithNextHearingResultExceptTime();
+        }
         resultSharedModifier.accept(resultsShared);
         final Hearing hearing = resultsShared.getHearing();
         final Target firstTarget = resultsShared.getTargets().get(0);

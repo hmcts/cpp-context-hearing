@@ -24,6 +24,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -113,7 +114,7 @@ public class HearingQueryView {
     @Handles("hearing.get.hearing")
     public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingById(hearingId.get());
+        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(hearingId.get());
 
         return envelop(hearingDetailsResponse)
                 .withName("hearing.get-hearing")
@@ -124,7 +125,6 @@ public class HearingQueryView {
     public Envelope<TargetListResponse> getDraftResult(final JsonEnvelope envelope) {
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final TargetListResponse targetListResponse = hearingService.getTargets(hearingId);
-
         return envelop(targetListResponse)
                 .withName("hearing.get-draft-result")
                 .withMetadataFrom(envelope);
@@ -134,7 +134,6 @@ public class HearingQueryView {
     public Envelope<ApplicationTargetListResponse> getApplicationDraftResult(final JsonEnvelope envelope) {
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final ApplicationTargetListResponse applicationTargetListResponse = hearingService.getApplicationTargets(hearingId);
-
         return envelop(applicationTargetListResponse)
                 .withName("hearing.get-application-draft-result")
                 .withMetadataFrom(envelope);
@@ -148,9 +147,7 @@ public class HearingQueryView {
 
     @Handles("hearing.retrieve-subscriptions")
     public JsonEnvelope retrieveSubscriptions(final JsonEnvelope envelope) {
-
         final String referenceDate = envelope.payloadAsJsonObject().getString("referenceDate");
-
         final String nowTypeId = envelope.payloadAsJsonObject().getString("nowTypeId");
 
         return enveloper.withMetadataFrom(envelope, "hearing.retrieve-subscriptions")
@@ -159,8 +156,15 @@ public class HearingQueryView {
 
     @Handles("hearing.get.nows")
     public Envelope<NowListResponse> findNows(final JsonEnvelope envelope) {
-        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final NowListResponse nowListResponse = hearingService.getNows(hearingId.get());
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final Optional<Hearing> optionalHearing = hearingService.getHearingById(hearingId);
+
+        if (!optionalHearing.isPresent()) {
+            return envelop((NowListResponse)null)
+                    .withName("hearing.get-nows")
+                    .withMetadataFrom(envelope);
+        }
+        final NowListResponse nowListResponse = hearingService.getNows(hearingId);
 
         return envelop(nowListResponse)
                 .withName("hearing.get-nows")
@@ -169,9 +173,8 @@ public class HearingQueryView {
 
     @Handles("hearing.get-cracked-ineffective-reason")
     public Envelope<CrackedIneffectiveTrial> getCrackedIneffectiveTrialReason(final JsonEnvelope envelope) {
-
-
         final Optional<UUID> trialTypeId = getUUID(envelope.payloadAsJsonObject(), "trialTypeId");
+
         return envelop(hearingService.fetchCrackedIneffectiveTrial(trialTypeId.get()))
                 .withName("hearing.get-cracked-ineffective-reason")
                 .withMetadataFrom(envelope);
@@ -191,6 +194,7 @@ public class HearingQueryView {
     public Envelope<Timeline> getTimelineByApplicationId(final JsonEnvelope envelope) {
         final Optional<UUID> applicationId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
         final Timeline timeline = hearingService.getTimeLineByApplicationId(applicationId.get());
+
         return envelop(timeline)
                 .withName("hearing.timeline")
                 .withMetadataFrom(envelope);
@@ -199,27 +203,24 @@ public class HearingQueryView {
     @Handles("hearing.court.list.publish.status")
     public JsonEnvelope getCourtListPublishStatus(final JsonEnvelope query) {
         final String courtCentreId = query.payloadAsJsonObject().getString(FIELD_COURT_CENTRE_ID);
-
         final Optional<CourtListPublishStatusResult> publishCourtListStatus = courtListRepository.courtListPublishStatuses(fromString(courtCentreId));
-
         final JsonObjectBuilder builder = createObjectBuilder();
+
         if (publishCourtListStatus.isPresent()) {
             builder.add("courtCentreId", publishCourtListStatus.get().getCourtCentreId().toString())
                     .add("lastUpdated", publishCourtListStatus.get().getLastUpdated().toString())
                     .add("publishStatus", publishCourtListStatus.get().getPublishStatus().toString())
                     .add("errorMessage", defaultIfEmpty(publishCourtListStatus.get().getFailureMessage(), ""));
         }
+
         return enveloper.withMetadataFrom(query, "hearing.court.list.publish.status").apply(createObjectBuilder().add("publishCourtListStatus", builder.build()).build());
     }
-
 
     @Handles("hearing.latest-hearings-by-court-centres")
     public JsonEnvelope getLatestHearingsByCourtCentres(final JsonEnvelope envelope) {
         final Optional<String> courtCentreIds = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_IDS);
         final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
-
         final List<UUID> courtCentreList = Stream.of(courtCentreIds.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
-
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsForWebPage(courtCentreList, LocalDate.parse(dateOfHearing.get()));
 
         return enveloper.withMetadataFrom(envelope, "hearing.get-latest-hearings-by-court-centres").apply(currentCourtStatus.isPresent() ? currentCourtStatus.get() : createObjectBuilder().build());

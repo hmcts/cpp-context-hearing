@@ -4,11 +4,11 @@ import static java.math.BigInteger.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.emptyCollectionOf;
-import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -18,6 +18,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -58,6 +59,7 @@ import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
@@ -65,6 +67,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
@@ -81,6 +84,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
@@ -104,6 +108,7 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
+import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -112,7 +117,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
@@ -125,6 +129,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingEventRepository hearingEventRepository;
+
+    @Mock
+    private HearingEventDefinitionRepository hearingEventDefinitionRepository;
 
     @Mock
     private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
@@ -373,7 +380,7 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -497,8 +504,10 @@ public class HearingServiceTest {
                 targetTemplate(),
                 targetTemplate());
 
-        when(hearingRepository.findBy(any())).thenReturn(hearing);
-
+        when(hearingRepository.findTargetsByHearingId(hearing.getId()))
+                .thenReturn(Lists.newArrayList(hearing.getTargets()));
+        when(hearingRepository.findProsecutionCasesByHearingId(hearing.getId()))
+                .thenReturn(Lists.newArrayList(hearing.getProsecutionCases()));
         when(targetJPAMapper.fromJPA(anySet(), anySet())).thenReturn(targets);
 
 
@@ -509,6 +518,11 @@ public class HearingServiceTest {
         final ResultLine resultLine = targetIn.getResultLines().get(0);
 
         final Prompt prompt = resultLine.getPrompts().get(0);
+
+        verify(hearingRepository)
+                .findTargetsByHearingId(hearing.getId());
+        verify(hearingRepository)
+                .findProsecutionCasesByHearingId(hearing.getId());
 
         assertThat(targetListResponse, isBean(TargetListResponse.class)
                 .with(t -> t.getTargets().isEmpty(), is(false))
@@ -545,17 +559,12 @@ public class HearingServiceTest {
 
     @Test
     public void shouldReturnResponseWhenApplicationTargetIsAdded() {
-
-        final Hearing hearing = new Hearing();
-
-        hearing.setId(randomUUID());
         final ApplicationDraftResult applicationDraftResult = ApplicationDraftResult.applicationDraftResult()
                 .setApplicationId(randomUUID()).setDraftResult("result").setId(randomUUID());
-        hearing.setApplicationDraftResults(asSet(applicationDraftResult));
 
-        when(hearingRepository.findBy(any())).thenReturn(hearing);
+        when(hearingRepository.findApplicationDraftResultsByHearingId(any())).thenReturn(asList(applicationDraftResult));
 
-        final ApplicationTargetListResponse targetListResponse = hearingService.getApplicationTargets(hearing.getId());
+        final ApplicationTargetListResponse targetListResponse = hearingService.getApplicationTargets(randomUUID());
 
         assertThat(targetListResponse, isBean(ApplicationTargetListResponse.class)
                 .with(t -> t.getTargets().isEmpty(), is(false))
@@ -661,7 +670,7 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -685,7 +694,7 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -706,7 +715,7 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingById(hearingId);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -833,6 +842,111 @@ public class HearingServiceTest {
         assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
     }
 
+    @Test
+    public void shouldGetHearingById() {
+        final Hearing hearingStub = new Hearing();
+        when(hearingRepository.findBy(Mockito.any(UUID.class))).thenReturn(hearingStub);
+        final Optional<Hearing> optionalHearing = hearingService.getHearingById(randomUUID());
+
+        verify(hearingRepository).findBy(Mockito.any(UUID.class));
+        assertThat(optionalHearing.isPresent(), is(true));
+        assertThat(hearingStub, is(optionalHearing.get()));
+    }
+
+    @Test
+    public void shouldNotGetHearingByNonExistingId() {
+        when(hearingRepository.findBy(Mockito.any(UUID.class))).thenReturn(null);
+        final Optional<Hearing> optionalHearing = hearingService.getHearingById(randomUUID());
+
+        verify(hearingRepository).findBy(Mockito.any(UUID.class));
+        assertThat(optionalHearing.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldGetHearingEvents() {
+        final List<HearingEvent> hearingEventsStub = Arrays.asList(new HearingEvent());
+        when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(hearingEventsStub);
+        when(hearingEventRepository.findHearingEvents(Mockito.any(UUID.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(hearingEventsStub);
+        final List<HearingEvent> firstHearingEventsList = hearingService.getHearingEvents(randomUUID(), LocalDate.now());
+        final List<HearingEvent> secondHearingEventsList = hearingService.getHearingEvents(randomUUID(), randomUUID(), LocalDate.now());
+
+        verify(hearingEventRepository).findByHearingIdOrderByEventTimeAsc(Mockito.any(UUID.class), Mockito.any(LocalDate.class));
+        verify(hearingEventRepository).findHearingEvents(Mockito.any(UUID.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class));
+        assertThat(firstHearingEventsList, containsInAnyOrder(hearingEventsStub.toArray()));
+        assertThat(secondHearingEventsList, containsInAnyOrder(hearingEventsStub.toArray()));
+    }
+
+    @Test
+    public void shouldGetHearingEventsAsEmptyListByNonExistingHearingId() {
+        when(hearingEventRepository.findByHearingIdOrderByEventTimeAsc(Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(Collections.emptyList());
+        when(hearingEventRepository.findHearingEvents(Mockito.any(UUID.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class))).thenReturn(Collections.emptyList());
+        final List<HearingEvent> firstHearingEventsList = hearingService.getHearingEvents(randomUUID(), LocalDate.now());
+        final List<HearingEvent> secondHearingEventsList = hearingService.getHearingEvents(randomUUID(), randomUUID(), LocalDate.now());
+
+        verify(hearingEventRepository).findByHearingIdOrderByEventTimeAsc(Mockito.any(UUID.class), Mockito.any(LocalDate.class));
+        verify(hearingEventRepository).findHearingEvents(Mockito.any(UUID.class), Mockito.any(UUID.class), Mockito.any(LocalDate.class));
+        assertThat(firstHearingEventsList.isEmpty(), is(true));
+        assertThat(secondHearingEventsList.isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldGetHearingEventDefinition() {
+        final HearingEventDefinition hearingEventDefinitionStub = new HearingEventDefinition();
+        when(hearingEventDefinitionRepository.findBy(Mockito.any(UUID.class))).thenReturn(hearingEventDefinitionStub);
+        final Optional<HearingEventDefinition> optionalHearingEventDefinition = hearingService.getHearingEventDefinition(randomUUID());
+
+        verify(hearingEventDefinitionRepository).findBy(Mockito.any(UUID.class));
+        assertThat(optionalHearingEventDefinition.isPresent(), is(true));
+        assertThat(hearingEventDefinitionStub, is(optionalHearingEventDefinition.get()));
+    }
+
+    @Test
+    public void shouldNotGetHearingEventDefinitionByNonExistingHearingId() {
+        when(hearingEventDefinitionRepository.findBy(Mockito.any(UUID.class))).thenReturn(null);
+        final Optional<HearingEventDefinition> optionalHearingEventDefinition = hearingService.getHearingEventDefinition(randomUUID());
+
+        verify(hearingEventDefinitionRepository).findBy(Mockito.any(UUID.class));
+        assertThat(optionalHearingEventDefinition.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldGetHearingEventDefinitions() {
+        final List<HearingEventDefinition> hearingEventDefinitionListStub = Arrays.asList(new HearingEventDefinition());
+        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(hearingEventDefinitionListStub);
+        final List<HearingEventDefinition> hearingEventDefinitionList = hearingService.getHearingEventDefinitions();
+
+        verify(hearingEventDefinitionRepository).findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
+        assertThat(hearingEventDefinitionList, containsInAnyOrder(hearingEventDefinitionListStub.toArray()));
+    }
+
+    @Test
+    public void shouldGetHearingEventDefinitionsAsEmptyList() {
+        when(hearingEventDefinitionRepository.findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel()).thenReturn(Collections.emptyList());
+        final List<HearingEventDefinition> hearingEventDefinitionList = hearingService.getHearingEventDefinitions();
+
+        verify(hearingEventDefinitionRepository).findAllActiveOrderBySequenceTypeSequenceNumberAndActionLabel();
+        assertThat(hearingEventDefinitionList.isEmpty(), is(true));
+    }
+
+    @Test
+    public void shouldGetCourtCenterByHearingId() {
+        final CourtCentre courtCentreStub = new CourtCentre();
+        when(hearingRepository.findCourtCenterByHearingId(Mockito.any(UUID.class))).thenReturn(courtCentreStub);
+        final Optional<CourtCentre> optionalCourtCentre = hearingService.getCourtCenterByHearingId(randomUUID());
+
+        verify(hearingRepository).findCourtCenterByHearingId(Mockito.any(UUID.class));
+        assertTrue(optionalCourtCentre.isPresent());
+        assertThat(courtCentreStub, is(optionalCourtCentre.get()));
+    }
+
+    @Test
+    public void shouldNotGetCourtCenterByNonExistingHearingId() {
+        when(hearingRepository.findCourtCenterByHearingId(Mockito.any(UUID.class))).thenReturn(null);
+        final Optional<CourtCentre> optionalCourtCentre = hearingService.getCourtCenterByHearingId(randomUUID());
+
+        verify(hearingRepository).findCourtCenterByHearingId(Mockito.any(UUID.class));
+        assertThat(optionalCourtCentre.isPresent(), is(false));
+    }
 
     private void assertCurrentCourtStatus(final CurrentCourtStatus actual, final CurrentCourtStatus expected) {
         final Court actualCourt = actual.getCourt();

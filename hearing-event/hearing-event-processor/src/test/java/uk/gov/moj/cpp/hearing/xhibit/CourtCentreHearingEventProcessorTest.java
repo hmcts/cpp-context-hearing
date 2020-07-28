@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.xhibit;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.moj.cpp.hearing.XmlProducerType.WEB_PAGE;
 
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
@@ -13,7 +12,6 @@ import uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.CourtCentreXmlGenerator;
 import uk.gov.moj.cpp.hearing.xhibit.xmlgenerator.CourtCentreXmlGeneratorProducer;
 import uk.gov.moj.cpp.listing.common.xhibit.XhibitService;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -37,9 +35,6 @@ public class CourtCentreHearingEventProcessorTest {
     private PublishCourtListCommandSender publishCourtListCommandSender;
 
     @Mock
-    private CourtListTimeUpdateRetriever courtListTimeUpdateRetriever;
-
-    @Mock
     private PublishCourtListRequestParametersParser publishCourtListRequestParametersParser;
 
     @Mock
@@ -61,7 +56,6 @@ public class CourtCentreHearingEventProcessorTest {
     public void shouldHandlePublishCourtListRequested() {
 
         final String courtCentreId = UUID.randomUUID().toString();
-        final String createdTime = LocalDateTime.now().toString();
         final ZonedDateTime latestCourtListUploadTime = ZonedDateTime.now();
 
         final PublishCourtListRequestParameters parameters = new PublishCourtListRequestParameters(courtCentreId, latestCourtListUploadTime.toString());
@@ -71,11 +65,8 @@ public class CourtCentreHearingEventProcessorTest {
         final String publicDisplayFileName = "publicDisplayFileName";
         Optional<CurrentCourtStatus> currentCourtStatus = Optional.of(CurrentCourtStatus.currentCourtStatus().withCourt(court).withPageName(webPageFileName).build());
 
-        final CourtCentreGeneratorParameters courtCentreGeneratorParameters = new CourtCentreGeneratorParameters(WEB_PAGE, currentCourtStatus, latestCourtListUploadTime);
         when(publishCourtListRequestParametersParser.parse(jsonEnvelope))
                 .thenReturn(parameters);
-        when(courtListTimeUpdateRetriever.getLatestCourtListUploadTime(jsonEnvelope, courtCentreId))
-                .thenReturn(latestCourtListUploadTime);
         when(courtCentreXmlGeneratorProducer.getCourtCentreXmlGenerator(any(CourtCentreGeneratorParameters.class)))
                 .thenReturn(courtCentreXmlGenerator);
         when(courtCentreHearingsRetriever.getHearingDataForWebPage(courtCentreId, latestCourtListUploadTime, jsonEnvelope))

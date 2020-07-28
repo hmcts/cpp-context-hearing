@@ -1,5 +1,42 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.CourtRoom;
+import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
+import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
+import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
+import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
+
+import javax.json.JsonObject;
+import javax.persistence.NoResultException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
 import static java.util.Optional.empty;
@@ -12,6 +49,7 @@ import static org.hamcrest.core.AllOf.allOf;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.spi.DefaultJsonMetadata.metadataBuilder;
@@ -23,43 +61,11 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.CourtRoom;
-import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
-import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
-import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
-import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
-import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
-import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
-import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.persistence.NoResultException;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-
 @RunWith(MockitoJUnitRunner.class)
 public class HearingQueryViewTest {
 
     public static final UUID COURT_CENTRE_ID = randomUUID();
+    private static final UUID HEARING_ID = randomUUID();
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_COURTCENTRE_ID = "courtCentreId";
     private static final String FIELD_COURTROOM_IDS = "courtRoomIds";
@@ -67,6 +73,7 @@ public class HearingQueryViewTest {
     private static final String COURT_CENTRE_QUERY_PARAMETER = "courtCentreId";
     private static final String COURT_CENTRE_IDS_QUERY_PARAMETER = "courtCentreIds";
     private static final String LAST_MODIFIED_TIME = "dateOfHearing";
+    private static final String FIELD_HEARING_ID = "hearingId";
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @InjectMocks
@@ -83,7 +90,7 @@ public class HearingQueryViewTest {
     @Mock
     private HearingService hearingService;
     @InjectMocks
-    private HearingQueryView hearingQueryView;
+    private HearingQueryView target;
 
     @Test
     public void shouldReturnCorrectPublishCourtListStatus() {
@@ -97,7 +104,9 @@ public class HearingQueryViewTest {
                         .add(COURT_CENTRE_QUERY_PARAMETER, COURT_CENTRE_ID.toString())
                         .build());
 
-        final JsonEnvelope results = hearingQueryView.getCourtListPublishStatus(query);
+        final JsonEnvelope results = target.getCourtListPublishStatus(query);
+
+        verify(courtListRepository).courtListPublishStatuses(COURT_CENTRE_ID);
         assertThat(results, is(jsonEnvelope(withMetadataEnvelopedFrom(query).withName("hearing.court.list.publish.status"), payloadIsJson(
                 allOf(
                         withJsonPath("$.publishCourtListStatus.publishStatus", equalTo(EXPORT_SUCCESSFUL.name()))
@@ -133,8 +142,9 @@ public class HearingQueryViewTest {
                         .build());
 
 
-        final JsonEnvelope results = hearingQueryView.getLatestHearingsByCourtCentres(query);
+        final JsonEnvelope results = target.getLatestHearingsByCourtCentres(query);
 
+        verify(hearingService).getHearingsForWebPage(courtCentreIds, now);
         assertThat(results.metadata().name(), is("hearing.get-latest-hearings-by-court-centres"));
         assertThat(results.payloadAsJsonObject().getString("pageName"), is(testPageName));
     }
@@ -163,8 +173,9 @@ public class HearingQueryViewTest {
                         .build());
 
 
-        final JsonEnvelope results = hearingQueryView.getLatestHearingsByCourtCentres(query);
+        final JsonEnvelope results = target.getLatestHearingsByCourtCentres(query);
 
+        verify(hearingService).getHearingsForWebPage(courtCentreIds, now);
         assertThat(results.metadata().name(), is("hearing.get-latest-hearings-by-court-centres"));
         assertTrue(results.payloadAsJsonObject().isEmpty());
     }
@@ -179,11 +190,12 @@ public class HearingQueryViewTest {
                 createObjectBuilder()
                         .add(FIELD_DEFENDANT_ID, anExistingDefendantId.get().toString())
                         .build());
-        final JsonEnvelope outstandingFromDefendantIdEnvelope = hearingQueryView.getOutstandingFromDefendantId(query);
+        final JsonEnvelope outstandingFromDefendantIdEnvelope = target.getOutstandingFromDefendantId(query);
 
         assertThat(outstandingFromDefendantIdEnvelope.metadata().name(), is("hearing.defendant.outstanding-fines"));
 
         final DefendantSearch actualDefendantSearch = jsonObjectToObjectConverter.convert(outstandingFromDefendantIdEnvelope.payloadAsJsonObject(), DefendantSearch.class);
+        verify(defendantRepository).getDefendantDetailsForSearching(anExistingDefendantId.get());
         assertThat(actualDefendantSearch.getForename(), is("Tony"));
         assertThat(actualDefendantSearch.getSurname(), is("Stark"));
         assertThat(actualDefendantSearch.getNationalInsuranceNumber(), is("12345"));
@@ -201,10 +213,10 @@ public class HearingQueryViewTest {
                 createObjectBuilder()
                         .add(FIELD_DEFENDANT_ID, unknownDefendantId.get().toString())
                         .build());
-        final JsonEnvelope outstandingFromDefendantIdEnvelope = hearingQueryView.getOutstandingFromDefendantId(query);
+        final JsonEnvelope outstandingFromDefendantIdEnvelope = target.getOutstandingFromDefendantId(query);
 
+        verify(defendantRepository).getDefendantDetailsForSearching(unknownDefendantId.get());
         assertThat(outstandingFromDefendantIdEnvelope.metadata().name(), is("hearing.defendant.outstanding-fines"));
-
         assertTrue(outstandingFromDefendantIdEnvelope.payloadAsJsonObject().isEmpty());
     }
 
@@ -224,8 +236,9 @@ public class HearingQueryViewTest {
                         .add(FIELD_HEARING_DATE, hearingDate.toString())
                         .build());
 
-        final JsonEnvelope result = hearingQueryView.getDefendantInfoFromCourtHouseId(query);
+        final JsonEnvelope result = target.getDefendantInfoFromCourtHouseId(query);
 
+        verify(hearingService).getHearingsByCourtRoomList(hearingDate, courtCentreId, courtRoomIds);
         assertThat(result.metadata().name(), is("hearing.defendant.info"));
         assertTrue(result.payloadAsJsonObject().isEmpty());
     }
@@ -247,11 +260,63 @@ public class HearingQueryViewTest {
                         .add(FIELD_HEARING_DATE, hearingDate.toString())
                         .build());
 
-        final JsonEnvelope result = hearingQueryView.getDefendantInfoFromCourtHouseId(query);
+        final JsonEnvelope result = target.getDefendantInfoFromCourtHouseId(query);
+        verify(hearingService).getHearingsByCourtRoomList(hearingDate, courtHouseId, Arrays.asList(roomId1, roomId2));
         assertThat(result.metadata().name(), is("hearing.defendant.info"));
         assertTrue(result.payloadAsJsonObject().getJsonArray("courtRooms").size() == 1);
         assertTrue(result.payloadAsJsonObject().getJsonArray("courtRooms").getJsonObject(0).getString("courtRoomName").equalsIgnoreCase("Room-1"));
 
+    }
+
+    @Test
+    public void shouldNotGetNowsByNonExistingId() {
+        when(hearingService.getHearingById(HEARING_ID)).thenReturn(Optional.empty());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-now"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .build());
+
+        final Envelope<NowListResponse> nows = target.findNows(query);
+
+        verify(hearingService).getHearingById(HEARING_ID);
+        assertThat(nows.payload(), is((JsonObject)null));
+        assertThat(nows.metadata().name(), is("hearing.get-nows"));
+    }
+
+    @Test
+    public void shouldNotGetApplicationDraftResultByNonExistingId() {
+        when(hearingService.getApplicationTargets(HEARING_ID)).thenReturn(new ApplicationTargetListResponse());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-application-draft-result"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .build());
+
+        final Envelope<ApplicationTargetListResponse> applicationDraftResult = target.getApplicationDraftResult(query);
+
+        verify(hearingService).getApplicationTargets(HEARING_ID);
+        assertThat(applicationDraftResult.payload().getTargets(), Matchers.empty());
+        assertThat(applicationDraftResult.metadata().name(), is("hearing.get-application-draft-result"));
+    }
+
+    @Test
+    public void shouldNotGetDraftResultByNonExistingId() {
+        when(hearingService.getTargets(HEARING_ID)).thenReturn(new TargetListResponse());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-draft-result"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .build());
+
+        final Envelope<TargetListResponse> draftResult = target.getDraftResult(query);
+
+        verify(hearingService).getTargets(HEARING_ID);
+        assertThat(draftResult.payload().getTargets(), Matchers.empty());
+        assertThat(draftResult.metadata().name(), is("hearing.get-draft-result"));
     }
 
     private DefendantSearch createDefendantSearch() {

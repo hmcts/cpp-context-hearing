@@ -146,6 +146,7 @@ public class Processor {
                         ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
                                 .withName(nameAddress.getName())
                                 .withEmailAddress1(nameAddress.getEmailAddress1())
+                                .withEmailAddress2(nameAddress.getEmailAddress2())
                                 .build()
                 ).collect(toSet());
                 promptChoice.setNameAddressList(getNameAddressList(nameEmailOnlyAddressList));

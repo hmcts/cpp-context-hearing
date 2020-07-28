@@ -20,11 +20,21 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorizedAn
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.it.AbstractIT;
 
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import com.jayway.awaitility.Awaitility;
+import com.jayway.awaitility.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PublishCourtListSteps extends AbstractIT {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PublishCourtListSteps.class);
     private static final String MEDIA_TYPE_QUERY_COURT_LIST_STATUS = "application/vnd.hearing.court.list.publish.status+json";
     private static final String MEDIA_TYPE_QUERY_HEARINGS_BY_COURT_CENTRE = "application/vnd.hearing.latest-hearings-by-court-centres+json";
 
@@ -71,4 +81,35 @@ public class PublishCourtListSteps extends AbstractIT {
                                 withJsonPath("$.court.courtSites[0].courtRooms[0].hearingEvent.id", equalTo(expectedHearingEventId.toString()))
                         )));
     }
+
+    public void verifyExportFailedWithErrorMessage(final String courtCentreId, final String errorMessageSubstring) {
+
+        final String whereCondition = String.format(" court_centre_id='%s' and publish_status='EXPORT_FAILED' and error_message ilike '%s%%'", courtCentreId, errorMessageSubstring);
+
+        waitUntilDataPersist("court_list_publish_status", whereCondition, 1);
+    }
+
+    private void waitUntilDataPersist(final String tableName, final String criteria, final int count) {
+        Awaitility.await()
+                .atMost(Duration.FIVE_MINUTES)
+                .until(() -> countExportStatus(tableName, criteria) == count);
+    }
+
+    private int countExportStatus(final String tableName, final String criteria) {
+        try (final Connection viewStoreConnection = testJdbcConnectionProvider.getViewStoreConnection("hearing");
+             final Statement statement = viewStoreConnection.createStatement()) {
+            final String sql = String.format("select count(1) from %s where %s", tableName, criteria);
+            final ResultSet resultSet = statement.executeQuery(sql);
+
+            while (resultSet.next()) {
+                return resultSet.getInt(1);
+            }
+
+        } catch (SQLException exception) {
+            LOGGER.error(String.format("Failed to count from table %s with condition %s", tableName, criteria), exception);
+        }
+
+        return 0;
+    }
+
 }
