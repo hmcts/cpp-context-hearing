@@ -10,6 +10,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.PublishAsPromptHelper.processPublishAsPrompt;
 import static uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition.resultDefinition;
 
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.NextHearing;
@@ -65,6 +67,8 @@ public class PublishAsPromptHelperTest {
         assertThat(judicialResultPrompts.size(), is(1));
     }
 
+
+
     private TreeNode<ResultLine> createResultLineTreeNode(final boolean excludedFromResults, final boolean publishedAsAPrompt, final int rank, final JudicialResult judicialResult) {
         final TreeNode<ResultLine> resultLineTreeNode = new TreeNode<>(randomUUID(), ResultLine.resultLine().build());
         final TreeNode<ResultDefinition> resultDefinition = createResultDefinitionTreeNode(excludedFromResults, publishedAsAPrompt, rank);
@@ -87,6 +91,9 @@ public class PublishAsPromptHelperTest {
         return judicialResult()
                 .withNextHearing(NextHearing.nextHearing()
                         .withExistingHearingId(existingHearingId)
+                        .withType(HearingType.hearingType().withId(randomUUID()).build())
+                        .withCourtCentre(CourtCentre.courtCentre().withId(randomUUID()).build())
+                        .withDateToBeFixed(true)
                         .build())
                 .build();
     }

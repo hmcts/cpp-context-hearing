@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.PromptSe
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RemoveNodeFromTreeHelper.remove;
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
+import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
@@ -59,12 +60,27 @@ public class PublishAsPromptHelper {
                 targetParent.getJudicialResult().setQualifier(format("%s,%s", resultQualifier, newPrompt.getQualifier()));
             }
         }
-            if (isNull(targetParent.getJudicialResult().getNextHearing())
-                    && nonNull(resultLineTreeNode.getJudicialResult())
-                    && nonNull(resultLineTreeNode.getJudicialResult().getNextHearing())) {
-                targetParent.getJudicialResult().setNextHearing(resultLineTreeNode.getJudicialResult().getNextHearing());
-            }
+        if (isNull(targetParent.getJudicialResult().getNextHearing())
+                && nonNull(resultLineTreeNode.getJudicialResult())
+                && nonNull(resultLineTreeNode.getJudicialResult().getNextHearing())
+                && isValidNextHearing(resultLineTreeNode.getJudicialResult().getNextHearing())) {
+            targetParent.getJudicialResult().setNextHearing(resultLineTreeNode.getJudicialResult().getNextHearing());
+        }
 
         remove(resultLineTreeNode, results);
+    }
+
+    static boolean isValidNextHearing(NextHearing nextHearing) {
+
+        if (isNull(nextHearing.getType()) || isNull(nextHearing.getCourtCentre())) {
+            return false;
+        } else if (nonNull(nextHearing.getEstimatedMinutes()) && nonNull(nextHearing.getListedStartDateTime())) {
+            return true;
+        } else if (nonNull(nextHearing.getEstimatedMinutes()) && nonNull(nextHearing.getWeekCommencingDate())) {
+            return true;
+        } else if (nonNull(nextHearing.getDateToBeFixed())) {
+            return true;
+        }
+        return false;
     }
 }
