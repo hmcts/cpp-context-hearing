@@ -190,6 +190,20 @@ public class DefendantDetailsUtilsTest {
     }
 
     @Test
+    public void shouldListDefendantForDDCHWhenThereIsANullOrganisationAddressForDefendantHearing() {
+
+        Defendant defendant = createOrganisationDefendant(prosecutionCaseId, offenceId, defendantId, "Versu Ltd", null);
+
+        DefendantDetailsUtils defendantDetailsUtils = new DefendantDetailsUtils();
+
+        final Address updatedAddress = Address.address().withAddress1("address2").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsForOrganisation(prosecutionCaseId, defendantId, "Versu Ltd", updatedAddress);
+
+        assertThat(defendantDetailsUtils.verifyDDCHOnRequiredAttributes(defendant, updatedDefendantDetails), is(false));
+    }
+
+    @Test
     public void whenThereIsNoChangeInOrganisationDetailsForDefendantHearingShouldNotListDefendantForDDCH() {
 
         final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();

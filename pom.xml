@@ -31,7 +31,7 @@
         <material.version>7.0.0</material.version>
         <results.version>7.0.4</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
-        <stagingenforcement.version>7.0.1</stagingenforcement.version>
+        <stagingenforcement.version>7.0.4</stagingenforcement.version>
         <progression.version>7.0.17</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>

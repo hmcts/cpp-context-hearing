@@ -56,7 +56,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToInitiateHearing() {
         final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -142,7 +142,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddDefenceCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_DEFENCE_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers","Defence Users","Advocates"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Defence Users", "Advocates"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -508,6 +508,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
     @Test
     public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
         final Action action = createActionFor(ACTION_NAME_COURT_LIST_PUBLISH_STATUS);
@@ -582,7 +583,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToComputeOutstandingFines() {
         final Action action = createActionFor(ACTION_NAME_COMPUTE_OUTSTANDING_FINES);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,"group1", "group2"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "group1", "group2"))
                 .willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -602,7 +603,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToInitiateAccountQuery() {
         final Action action = createActionFor(ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,"Court Clerks", "Legal Advisers", "Court Associate", "NCES"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate", "NCES"))
                 .willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -627,8 +628,9 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
     @Test
-    public void shouldAllowAuthorisedUserToSetTrialType(){
+    public void shouldAllowAuthorisedUserToSetTrialType() {
         final Action action = createActionFor(ACTION_NAME_SET_TRIAL_TYPE);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"))
                 .willReturn(true);
