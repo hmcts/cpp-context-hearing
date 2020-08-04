@@ -101,9 +101,9 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingInitiated(hearing));
     }
 
-    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases) {
+    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
 
-        return Stream.of(new HearingExtended(hearingId, courtApplication, prosecutionCases));
+        return Stream.of(new HearingExtended(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
     public Stream<Object> updateHearingDetails(final UUID id,

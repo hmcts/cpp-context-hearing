@@ -46277,7 +46277,7 @@
           "courtExtract": "N",
           "financial": "N",
           "jurisdiction": "B",
-          "reference": "HTIME"
+          "reference": "timeOfHearing"
         },
         {
           "id": "5f507153-6dc9-4ec0-94db-c821eff333f1",
@@ -46427,6 +46427,56 @@
           "financial": "N",
           "jurisdiction": "B",
           "reference": "HEST"
+        },
+        {
+          "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
+          "label": "Booking reference",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 700,
+          "financial": "N",
+          "reference": "bookingReference",
+          "userGroups": [
+            "Court Clerks",
+            "Legal Advisers"
+          ],
+          "min": "1",
+          "max": "50",
+          "courtExtract": "N",
+          "jurisdiction": "M",
+          "hidden": true
+        },
+        {
+          "id": "bbc84e23-2543-4211-858f-59ae97800f5a",
+          "label": "Reserved Judiciary",
+          "resultPromptRule": "optional",
+          "type": "BOOLEAN",
+          "sequence": 800,
+          "financial": "N",
+          "reference": "reservedJudiciary",
+          "userGroups": [
+            "Court Clerks",
+            "Legal Advisers"
+          ],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false
+        },
+        {
+          "id": "a0ec3e68-5210-422f-9959-73c1c7ce495a",
+          "label": "Existing Hearing Id",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 900,
+          "financial": "N",
+          "reference": "existingHearingId",
+          "userGroups": [
+            "Court Clerks",
+            "Legal Advisers"
+          ],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": true
         }
       ],
       "startDate": "2019-10-25"

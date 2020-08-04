@@ -86,6 +86,9 @@ public class Offence {
     @Column(name = "is_discontinued")
     private boolean isDiscontinued;
 
+    @Column(name = "shadow_listed")
+    private boolean shadowListed;
+
     @Column(name = "is_introduce_after_initial_proceedings")
     private boolean isIntroduceAfterInitialProceedings;
 
@@ -387,5 +390,13 @@ public class Offence {
             return false;
         }
         return Objects.equals(this.id, ((Offence) o).id);
+    }
+
+    public boolean isShadowListed() {
+        return shadowListed;
+    }
+
+    public void setShadowListed(boolean shadowListed) {
+        this.shadowListed = shadowListed;
     }
 }

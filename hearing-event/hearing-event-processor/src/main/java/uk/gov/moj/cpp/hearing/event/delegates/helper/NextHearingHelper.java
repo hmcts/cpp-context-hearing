@@ -8,7 +8,6 @@ import static java.lang.System.lineSeparator;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -276,11 +275,7 @@ public class NextHearingHelper {
     private CourtCentre extractCourtCentre(final JsonEnvelope context,
                                            final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
 
-        Optional<JudicialResultPrompt> courtHouse = ofNullable(promptsMap.get(hCHOUSEOrganisationName));
-
-        if (!courtHouse.isPresent()) {
-            courtHouse = ofNullable(promptsMap.get(HCHOUSE));
-        }
+        Optional<JudicialResultPrompt> courtHouse = ofNullable(ofNullable(promptsMap.get(hCHOUSEOrganisationName)).orElse(promptsMap.get(HCHOUSE)));
 
         if (!courtHouse.isPresent()) {
             return null;

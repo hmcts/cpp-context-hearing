@@ -73,7 +73,7 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
 
         final ExtendHearingCommand command = convertToObject(envelope, ExtendHearingCommand.class);
         final UUID hearingId = command.getHearingId();
-        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.extend(hearingId, command.getCourtApplication(), command.getProsecutionCases()));
+        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.extend(hearingId, command.getCourtApplication(), command.getProsecutionCases(), command.getShadowListedOffences()));
 
         if(nonNull(command.getCourtApplication())){
             final UUID applicationId = command.getCourtApplication().getId();

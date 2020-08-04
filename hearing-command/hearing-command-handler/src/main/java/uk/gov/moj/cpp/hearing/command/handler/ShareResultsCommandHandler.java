@@ -35,7 +35,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final Target target = convertToObject(envelope, Target.class);
         if (target != null) {
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
-                    aggregate -> aggregate.saveDraftResults(target.getApplicationId(), target.getTargetId(), target.getDefendantId(), target.getHearingId(),
+                    aggregate -> aggregate.saveDraftResults(target.getApplicationId(), target, target.getDefendantId(), target.getHearingId(),
                             target.getOffenceId(), target.getDraftResult(), target.getResultLines()));
         }
     }

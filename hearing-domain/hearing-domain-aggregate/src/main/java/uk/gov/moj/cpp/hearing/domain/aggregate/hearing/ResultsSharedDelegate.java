@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
+import static uk.gov.justice.core.courts.Target.*;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
@@ -83,10 +84,12 @@ public class ResultsSharedDelegate implements Serializable {
     }
 
     public void handleDraftResultSaved(final DraftResultSaved draftResultSaved) {
-        final UUID targetId = draftResultSaved.getTarget().getTargetId();
+        final Target target = draftResultSaved.getTarget();
+        final UUID targetId = target.getTargetId();
         if (this.momento.getTargets().containsKey(targetId)) {
             // assuming existing target matches defendantId, offenceId
             this.momento.getTargets().get(targetId).setDraftResult(draftResultSaved.getTarget().getDraftResult());
+            this.momento.getTargets().get(targetId).setShadowListed(target.getShadowListed());
         } else {
             draftResultSaved.getTarget().setResultLines(emptyList());
             this.momento.getTargets().put(targetId, draftResultSaved.getTarget());
@@ -155,8 +158,7 @@ public class ResultsSharedDelegate implements Serializable {
                     if (targets.containsKey(rl.getTargetId())) {
                         target = targets.get(rl.getTargetId());
                     } else {
-                        target = Target
-                                .target()
+                        target = target()
                                 .withApplicationId(rl.getApplicationId())
                                 .withDefendantId(rl.getDefendantId())
                                 .withHearingId(hearingId)
@@ -166,14 +168,15 @@ public class ResultsSharedDelegate implements Serializable {
                                 .build();
                         targets.put(target.getTargetId(), target);
                     }
+                    if(this.momento.getTargets().containsKey(rl.getTargetId())) {
+                        target.setShadowListed(this.momento.getTargets().get(rl.getTargetId()).getShadowListed());
+                    }
                     target.getResultLines().add(convert(rl));
                 }
         );
-
         targets.values().forEach(
                 target -> {
                     if (finalTargets.containsKey(target.getTargetId()) && !StringUtils.isEmpty(target.getDraftResult())) {
-                        //retain draft result
                         target.setDraftResult(this.momento.getTargets().get(target.getTargetId()).getDraftResult());
                     }
                     finalTargets.put(target.getTargetId(), target);
@@ -286,7 +289,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         //We cull variants that have result lines that are no longer present.
 
-        List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
+        final List<UUID> completedResultLineIds = this.momento.getTargets().values().stream()
                 .flatMap(t -> t.getResultLines().stream())
                 .filter(ResultLine::getIsComplete)
                 .map(ResultLine::getResultLineId)
@@ -294,7 +297,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         return this.momento.getVariantDirectory().stream()
                 .filter(variant -> {
-                    List<UUID> resultLineIds = variant.getValue().getResultLines().stream().map(ResultLineReference::getResultLineId).collect(Collectors.toList());
+                    final List<UUID> resultLineIds = variant.getValue().getResultLines().stream().map(ResultLineReference::getResultLineId).collect(Collectors.toList());
 
                     resultLineIds.removeAll(completedResultLineIds);
 

@@ -8,11 +8,18 @@
     },
     "sharedTime": {
       "format": "date-time"
+    },
+    "shadowListedOffences": {
+      "type": "array",
+      "additionalItems": false,
+      "items": {
+        "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+      }
     }
   },
   "required": [
     "hearing",
     "sharedTime"
   ],
-  "additionalProperties": false
+  "additionalProperties": true
 }

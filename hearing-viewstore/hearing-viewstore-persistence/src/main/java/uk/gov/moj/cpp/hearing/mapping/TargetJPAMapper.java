@@ -44,6 +44,7 @@ public class TargetJPAMapper {
         target.setOffenceId(pojo.getOffenceId());
         target.setApplicationId(pojo.getApplicationId());
         target.setResultLines(resultLineJPAMapper.toJPA(target, pojo.getResultLines()));
+        target.setShadowListed(pojo.getShadowListed());
         return target;
     }
 
@@ -60,6 +61,7 @@ public class TargetJPAMapper {
                 .withApplicationId(entity.getApplicationId())
                 .withTargetId(entity.getId())
                 .withResultLines(resultLineJPAMapper.fromJPA(entity.getResultLines()))
+                .withShadowListed(entity.getShadowListed())
                 .build();
     }
 

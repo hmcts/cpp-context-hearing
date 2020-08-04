@@ -115,7 +115,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = 7L;
@@ -263,8 +263,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.initiate(hearing));
     }
 
-    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases) {
-        return apply(this.hearingDelegate.extend(hearingId, courtApplication, prosecutionCases));
+    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+        return apply(this.hearingDelegate.extend(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea) {
@@ -316,16 +316,17 @@ public class HearingAggregate implements Aggregate {
         return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged()));
     }
 
-    public Stream<Object> saveDraftResults(final UUID applicationId, final UUID targetId, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {
+    public Stream<Object> saveDraftResults(final UUID applicationId, final Target target, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {
         return apply(resultsSharedDelegate.saveDraftResult(Target
                 .target()
+                .withShadowListed(target.getShadowListed())
                 .withApplicationId(applicationId)
                 .withDefendantId(defendantId)
                 .withDraftResult(draftResult)
                 .withHearingId(hearingId)
                 .withOffenceId(offenceId)
                 .withResultLines(resultLines)
-                .withTargetId(targetId)
+                .withTargetId(target.getTargetId())
                 .build()));
     }
 

@@ -24,12 +24,17 @@ import uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -80,8 +85,28 @@ public class InitiateHearingEventListener {
         final HearingInitiated initiated = jsonObjectToObjectConverter.convert(payload, HearingInitiated.class);
 
         final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
+        getOffencesForHearing(hearingEntity)
+                .forEach(x -> updateOffenceForShadowListedStatus(initiated.getHearing().getShadowListedOffences(), x));
 
         hearingRepository.save(hearingEntity);
+    }
+
+    private List<Offence> getOffencesForHearing(final Hearing hearingEntity) {
+        return ofNullable(hearingEntity.getProsecutionCases()).orElse(new HashSet<>())
+                .stream()
+                .flatMap(x -> ofNullable(x.getDefendants()).orElse(new HashSet<>()).stream())
+                .flatMap(def -> ofNullable(def.getOffences()).orElse(new HashSet<>()).stream())
+                .collect(Collectors.toList());
+    }
+
+    private void updateOffenceForShadowListedStatus(final List<UUID> shadowListedOffences, final Offence offence) {
+        ofNullable(shadowListedOffences).orElseGet(() -> new ArrayList<>())
+                .stream()
+                .filter(x -> offence.getId().getId().equals(x))
+                .findFirst()
+                .ifPresent(x -> offence.setShadowListed(true));
+
+
     }
 
     @Transactional
@@ -101,11 +126,23 @@ public class InitiateHearingEventListener {
             hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
             hearingRepository.save(hearingEntity);
         }
-
         if(CollectionUtils.isNotEmpty(hearingExtended.getProsecutionCases())){
             hearingExtended.getProsecutionCases()
-                    .forEach(p->prosecutionCaseRepository.save(prosecutionCaseJPAMapper.toJPA(hearingEntity,p)));
+                    .forEach(p-> {
+                        final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity,p);
+                        getOffencesForProsecutionCase(prosecutionCase).forEach(x -> updateOffenceForShadowListedStatus(hearingExtended.getShadowListedOffences(), x));
+                        prosecutionCaseRepository.save(prosecutionCase);
+                    }
+                        );
         }
+
+    }
+
+    private List<Offence> getOffencesForProsecutionCase(final ProsecutionCase prosecutionCase) {
+        return prosecutionCase.getDefendants()
+                .stream()
+                .flatMap(def -> ofNullable(def.getOffences()).orElse(new HashSet<>()).stream())
+                .collect(Collectors.toList());
     }
 
     @Transactional

@@ -625,7 +625,10 @@ public class HearingServiceTest {
         final UUID hearingSummaryId = UUID.randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
 
-        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(buildHearingAndHearingDays());
+        final List<Hearing> hearingList = new ArrayList<>();
+        hearingList.add(hearingEntity);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(hearingList);
         when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
         when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder);
 

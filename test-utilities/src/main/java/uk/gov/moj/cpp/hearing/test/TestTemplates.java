@@ -355,6 +355,16 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithDefendantJudicialResultsForMagistrates() {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                                    .setDefendantType(PERSON)
+                                    .setHearingLanguage(ENGLISH)
+                                    .setJurisdictionType(MAGISTRATES),
+                            true
+                    ).build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(final List<CourtApplication> courtApplications) {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
@@ -556,7 +566,7 @@ public class TestTemplates {
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
-            return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID());
+            return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE);
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
@@ -718,7 +728,8 @@ public class TestTemplates {
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplate(
-                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final UUID resultLineId, final UUID resultDefinitionId) {
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
+                final UUID resultLineId, final UUID resultDefinitionId, final Boolean shadowListed) {
             final Hearing hearing = initiateHearingCommand.getHearing();
             final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
             final Offence offence0 = defendant0.getOffences().get(0);
@@ -729,10 +740,10 @@ public class TestTemplates {
                     .withOffenceId(offence0.getId())
                     .withTargetId(UUID.randomUUID())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .withShadowListed(shadowListed)
                     .build();
             return new SaveDraftResultCommand(target, null);
         }
-
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand,
                                                                                             final LocalDate orderedDate, final UUID resultLineId,

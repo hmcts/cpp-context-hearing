@@ -30,6 +30,9 @@
       "items": {
         "$ref": "http://justice.gov.uk/core/courts/resultLine.json"
       }
+    },
+    "shadowListed" : {
+      "type": "boolean"
     }
   },
   "required": [

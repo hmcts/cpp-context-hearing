@@ -31,7 +31,6 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
-import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
@@ -70,12 +69,9 @@ import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -85,7 +81,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -165,7 +160,7 @@ public class ShareResultsCommandHandlerTest {
                         .setValue(VariantValue.variantValue())
                 ));
 
-        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null);
+        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null, null);
 
     }
 

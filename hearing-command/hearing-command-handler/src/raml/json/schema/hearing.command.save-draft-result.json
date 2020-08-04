@@ -23,6 +23,9 @@
     },
     "draftResult": {
       "type": "string"
+    },
+    "shadowListed" : {
+      "type": "boolean"
     }
   },
   "required": [

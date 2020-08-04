@@ -14,18 +14,21 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @Event("hearing.events.hearing-extended")
 public class HearingExtended implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private final UUID hearingId;
     private final CourtApplication courtApplication;
     private final List<ProsecutionCase> prosecutionCases;
+    private List<UUID> shadowListedOffences;
+
 
     @JsonCreator
     public HearingExtended(@JsonProperty("hearingId") final UUID hearingId, @JsonProperty("courtApplication") final CourtApplication courtApplication,
-                           @JsonProperty("prosecutionCases") final List<ProsecutionCase> prosecutionCases) {
+                           @JsonProperty("prosecutionCases") final List<ProsecutionCase> prosecutionCases, @JsonProperty("shadowListedOffences") final List<UUID> shadowListedOffences) {
         this.hearingId = hearingId;
         this.courtApplication = courtApplication;
         this.prosecutionCases = prosecutionCases;
+        this.shadowListedOffences = shadowListedOffences;
     }
 
     public CourtApplication getCourtApplication() {
@@ -38,5 +41,9 @@ public class HearingExtended implements Serializable {
 
     public List<ProsecutionCase> getProsecutionCases() {
         return prosecutionCases;
+    }
+
+    public List<UUID> getShadowListedOffences() {
+        return shadowListedOffences;
     }
 }

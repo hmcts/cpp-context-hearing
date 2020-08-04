@@ -156,7 +156,6 @@ public class ReferenceDataStub {
     /*todo These 2 data is for same stub, but different tests are trying to add different values, so we put static list to not loose data for other tests.
      * And these data prevent running tests on multiple JVM forks, Currently we support one JVM/MultipleThreads. see  hearing-integration-test/pom.xml
      */
-    private static final List<JsonValue> organisationunits = createCourtRoomFixture();
     private static final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList<>();
     public static final String ALCOHOL_LEVEL_METHOD_B_CODE = "B";
     public static final String ALCOHOL_LEVEL_METHOD_B_DESCRIPTION = "Breath";
@@ -186,6 +185,10 @@ public class ReferenceDataStub {
         stubDynamicPromptFixedList();
         stubReferenceDataResultListForNameAddress();
 
+    }
+
+    public static void stubGetReferenceDataResultDefinitionsWithDefaultValues(final LocalDate orderedDate) {
+        stubGetReferenceDataResultDefinitions(LocalDate.now(), "stub-data/result-definitions.json");
     }
 
     private static void stubGetReferenceDataResultDefinitionsForFirstDay() {
@@ -906,6 +909,7 @@ public class ReferenceDataStub {
     }
 
     public static void changeCourtRoomsStubWithAdding(JsonObject... courtRooms) {
+        final List<JsonValue> organisationunits = createCourtRoomFixture();
         Collections.addAll(organisationunits, courtRooms);
         JsonArrayBuilder arrayBuilder = createArrayBuilder();
         organisationunits.forEach(arrayBuilder::add);

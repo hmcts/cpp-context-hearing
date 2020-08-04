@@ -208,16 +208,18 @@ public class HearingService {
                 .build();
     }
 
-    @Transactional
+
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
         if (null == date || null == userId) {
             return new GetHearings(null);
         }
         final List<Hearing> filteredHearings = hearingRepository.findByUserFilters(date, userId);
+        filterForShadowListedOffencesAndCases(filteredHearings);
         if (CollectionUtils.isEmpty(filteredHearings)) {
             return new GetHearings(null);
         }
+
 
         filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
 
@@ -227,6 +229,13 @@ public class HearingService {
                         .map(h -> getHearingTransformer.summaryForHearingsForToday(h).build())
                         .collect(toList()))
                 .build();
+    }
+
+    private void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
+        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach( d -> d.getOffences().removeIf(o -> o.isShadowListed()));
+        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
+        filteredHearings.stream().forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
+        filteredHearings.removeIf(x -> x.getProsecutionCases().isEmpty());
     }
 
     @Transactional

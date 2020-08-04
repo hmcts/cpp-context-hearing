@@ -41,6 +41,9 @@ public class Target {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "target", orphanRemoval = true)
     private Set<ResultLine> resultLines = new HashSet<>();
 
+    @Column(name = "shadow_listed")
+    private Boolean shadowListed;
+
     public Target() {
         //For JPA
     }
@@ -103,14 +106,24 @@ public class Target {
         return this;
     }
 
+    @SuppressWarnings("squid:S2384")
     public Set<ResultLine> getResultLines() {
         return resultLines;
     }
 
+    @SuppressWarnings("squid:S2384")
     public Target setResultLines(Set<ResultLine> resultLines) {
 
         this.resultLines = resultLines;
         return this;
+    }
+
+    public Boolean getShadowListed() {
+        return shadowListed;
+    }
+
+    public void setShadowListed(final Boolean shadowListed) {
+        this.shadowListed = shadowListed;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.lang.Boolean.TRUE;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
@@ -8,6 +10,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
 import static uk.gov.justice.core.courts.Level.CASE;
 import static uk.gov.justice.core.courts.Level.DEFENDANT;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
@@ -54,6 +57,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -133,11 +138,10 @@ public class PublishResultsDelegate {
                 mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH));
             }
         }
-
-        final PublicHearingResulted hearingResulted =
-                PublicHearingResulted.publicHearingResulted()
+        final PublicHearingResulted hearingResulted = PublicHearingResulted.publicHearingResulted()
                         .setHearing(resultsShared.getHearing())
-                        .setSharedTime(resultsShared.getSharedTime());
+                        .setSharedTime(resultsShared.getSharedTime())
+                        .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
 
@@ -148,6 +152,16 @@ public class PublishResultsDelegate {
         sender.send(jsonEnvelope);
     }
 
+    private List<UUID> getOffenceShadowListedForMagistratesNextHearing(final ResultsShared resultsShared) {
+        if(resultsShared.getHearing().getProsecutionCases().stream().flatMap(x -> x.getDefendants().stream())
+                .flatMap(def ->  def.getOffences() != null ? def.getOffences().stream() : Stream.empty())
+                .flatMap(off -> off.getJudicialResults() != null ? off.getJudicialResults().stream() :Stream.empty())
+                .filter(jr -> jr.getNextHearing() != null)
+                .map(jr -> jr.getNextHearing()).anyMatch(nh -> MAGISTRATES == nh.getJurisdictionType())) {
+            return  resultsShared.getTargets().stream().filter(t -> TRUE.equals(t.getShadowListed())).map(x -> x.getOffenceId()).collect(Collectors.toList());
+        }
+        return emptyList();
+    }
     private void enrichOffenceVerdictTypesData(final JsonEnvelope context, final Hearing hearing) {
         final List<VerdictType> verdictTypes = referenceDataService.getVerdictTypes(context);
 
@@ -367,7 +381,7 @@ public class PublishResultsDelegate {
 
     private void setPromptsAsNullIfEmpty(final List<JudicialResult> judicialResults) {
         if (CollectionUtils.isNotEmpty(judicialResults)) {
-            for (JudicialResult judicialResult : judicialResults) {
+            for (final JudicialResult judicialResult : judicialResults) {
                 if (isEmpty(judicialResult.getJudicialResultPrompts())) {
                     judicialResult.setJudicialResultPrompts(null);
                 }
