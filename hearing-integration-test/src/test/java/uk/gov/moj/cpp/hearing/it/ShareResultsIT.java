@@ -246,6 +246,7 @@ public class ShareResultsIT extends AbstractIT {
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.categoryType"), is("GUILTY_BY_JURY_CONVICTED"));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.sequence"), is("1"));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.description"), is("Guilty"));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.cjsVerdictCode"), is("G"));
 
         assertHearingHasSharedResults(expectedTrialType, hearing);
     }
@@ -1030,7 +1031,6 @@ public class ShareResultsIT extends AbstractIT {
         testSaveDraftResult(saveDraftResultCommand);
 
         final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
-
 
         try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)

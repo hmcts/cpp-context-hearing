@@ -285,6 +285,7 @@ public class ReferenceDataStub {
                 .withDescription("Guilty")
                 .withId(UUID.fromString(VERDICT_TYPE_GUILTY_ID))
                 .withSequence(1)
+                .withCjsVerdictCode("G")
                 .build());
         verdictTypes.add(
                 VerdictType.verdictType()
@@ -293,6 +294,7 @@ public class ReferenceDataStub {
                         .withCategoryType("NOT_GUILTY")
                         .withDescription("Not guilty by reason of insanity")
                         .withId(UUID.fromString("c51ce410-c124-310e-8db5-e4b97fc2af39"))
+                        .withCjsVerdictCode("N")
                         .withSequence(13)
                         .build());
 
