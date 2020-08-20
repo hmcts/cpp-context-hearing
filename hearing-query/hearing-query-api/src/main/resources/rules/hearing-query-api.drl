@@ -187,3 +187,21 @@ rule "Query - API - hearing.query.session-time"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.defendant.info"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.defendant.info");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.defendant.outstanding-fine-requests"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.defendant.outstanding-fine-requests");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end

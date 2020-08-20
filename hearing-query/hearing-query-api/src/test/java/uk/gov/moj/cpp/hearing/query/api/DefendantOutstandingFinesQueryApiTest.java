@@ -1,13 +1,21 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
+
+import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
+import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
+import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
+import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 
+import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
@@ -40,13 +48,28 @@ public class DefendantOutstandingFinesQueryApiTest {
     @Mock
     private Function<Object, JsonEnvelope> function;
 
+    @Mock
+    private JsonEnvelopeRepacker jsonEnvelopeRepacker;
+
+    @Mock
+    private EnvelopePayloadTypeConverter envelopePayloadTypeConverter;
+
+    @Mock
+    private HearingEventQueryView hearingEventQueryView;
+
+    @Mock
+    private HearingQueryView hearingQueryView;
+
+    @Mock
+    private SessionTimeQueryView sessionTimeQueryView;
+
     @InjectMocks
     private HearingQueryApi hearingQueryApi;
 
 
     @Test
     public void should_return_outstanding_fines_when_defendant_id_is_known() {
-        when(requester.request(anyObject())).thenReturn(jsonEnvelopeFromHearing);
+        when(hearingQueryView.getOutstandingFromDefendantId(anyObject())).thenReturn(jsonEnvelopeFromHearing);
         JsonObject responseFromHearingQueryView = getDefendantDetails();
 
         setUp(responseFromHearingQueryView);
@@ -60,7 +83,7 @@ public class DefendantOutstandingFinesQueryApiTest {
 
     @Test
     public void should_return_NO_outstanding_fines_when_defendant_id_is_unknown() {
-        when(requester.request(anyObject())).thenReturn(jsonEnvelopeFromHearing);
+        when(hearingQueryView.getOutstandingFromDefendantId(anyObject())).thenReturn(jsonEnvelopeFromHearing);
         JsonObject emptyResponseFromHearingQueryView = Json.createObjectBuilder().build();
 
         setUp(emptyResponseFromHearingQueryView);

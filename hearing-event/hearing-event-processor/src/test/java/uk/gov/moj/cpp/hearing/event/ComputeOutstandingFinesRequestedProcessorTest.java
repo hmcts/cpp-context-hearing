@@ -50,6 +50,9 @@ public class ComputeOutstandingFinesRequestedProcessorTest {
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<Class> argumentCaptor;
+
     @Mock
     private Requester requester;
 
@@ -68,7 +71,8 @@ public class ComputeOutstandingFinesRequestedProcessorTest {
                 outstandingFinesQuery);
 
 
-        final JsonEnvelope courtBasedDefendantQueryInformation = mock(JsonEnvelope.class);
+        final Envelope<JsonObject> courtBasedDefendantQueryInformation = mock(Envelope.class);
+        when(courtBasedDefendantQueryInformation.payload()).thenReturn(Json.createObjectBuilder().build());
 
         final OutstandingFinesQueried outstandingFinesQueried = OutstandingFinesQueried.newBuilder()
                 .withCourtCentreId(UUID.fromString("cb41f33d-9de0-4f49-9f8e-b7b06de4279a"))
@@ -80,9 +84,9 @@ public class ComputeOutstandingFinesRequestedProcessorTest {
                 outstandingFinesQueried
         );
 
-        when(requester.request(envelopeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
+        when(requester.requestAsAdmin(envelopeArgumentCaptor.capture(), argumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
         final JsonObject courtBasedDefendantQueryJsonObject = mock(JsonObject.class);
-        when(courtBasedDefendantQueryInformation.payloadAsJsonObject()).thenReturn(courtBasedDefendantQueryJsonObject);
+        when(courtBasedDefendantQueryInformation.payload()).thenReturn(courtBasedDefendantQueryJsonObject);
 
         doNothing().when(sender).send(envelopeArgumentCaptor.capture());
 

@@ -52,8 +52,8 @@ public class ComputeOutstandingFinesRequestedProcessor {
                 .build()
         ).withName("hearing.defendant.info").withMetadataFrom(event);
 
-        final JsonEnvelope courtBasedDefendantQueryInformation = requester.request(envelopeFrom(envelope.metadata(), envelope.payload()));
-        final JsonObject payload = courtBasedDefendantQueryInformation.payloadAsJsonObject();
+        final Envelope<JsonObject> courtBasedDefendantQueryInformation = requester.requestAsAdmin(envelopeFrom(envelope.metadata(), envelope.payload()), JsonObject.class);
+        final JsonObject payload = courtBasedDefendantQueryInformation.payload();
         if (!payload.isEmpty()) {
             this.sender.send(envelopeFrom(
                     metadataFrom(event.metadata()).withName("stagingenforcement.court.rooms.outstanding-fines"),

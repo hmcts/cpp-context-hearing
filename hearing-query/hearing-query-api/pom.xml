@@ -20,9 +20,9 @@
                 <artifactId>rest-client-generator-plugin</artifactId>
                 <dependencies>
                     <dependency>
-                        <groupId>uk.gov.moj.cpp.hearing</groupId>
-                        <artifactId>hearing-query-view</artifactId>
-                        <version>${project.version}</version>
+                        <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
+                        <artifactId>stagingenforcement-query-api</artifactId>
+                        <version>${stagingenforcement.version}</version>
                         <classifier>raml</classifier>
                         <exclusions>
                             <exclusion>
@@ -32,9 +32,9 @@
                         </exclusions>
                     </dependency>
                     <dependency>
-                        <groupId>uk.gov.moj.cpp.staging.enforcement</groupId>
-                        <artifactId>stagingenforcement-query-api</artifactId>
-                        <version>${stagingenforcement.version}</version>
+                        <groupId>uk.gov.moj.cpp.referencedata</groupId>
+                        <artifactId>referencedata-query-api</artifactId>
+                        <version>${referencedata.version}</version>
                         <classifier>raml</classifier>
                         <exclusions>
                             <exclusion>
@@ -63,6 +63,12 @@
         <dependency>
             <groupId>uk.gov.moj.cpp.system.authorisation</groupId>
             <artifactId>authorisation-interceptor</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-query-view</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Test dependencies -->

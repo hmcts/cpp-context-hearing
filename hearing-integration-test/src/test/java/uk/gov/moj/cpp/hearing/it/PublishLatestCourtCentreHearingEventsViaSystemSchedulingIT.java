@@ -18,10 +18,12 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEvent
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
@@ -29,7 +31,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
@@ -53,6 +58,9 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     @BeforeClass
     public static void setUp() throws NoSuchAlgorithmException {
+        final UUID trialTypeId = randomUUID();
+        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+
         eventTime = now().withZoneSameLocal(ZoneId.of("UTC"));
         hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), fromString(defenceCounselId), caseId, of(hearingTypeId))));
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);
@@ -129,5 +137,11 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         return hearingEventDefinition;
     }
 
+    private static List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
+        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
+
+        return trialList;
+    }
 
 }

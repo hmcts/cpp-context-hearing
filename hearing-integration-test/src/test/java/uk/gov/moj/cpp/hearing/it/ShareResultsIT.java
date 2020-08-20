@@ -155,11 +155,15 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID GUILTY_RESULT_DEF_ID = fromString("ce23a452-9015-4619-968f-1628d7a271c9");
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final UUID TRAIL_TYPE_ID = randomUUID();
+    private List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes;
+    private UUID TRAIL_TYPE_ID_1 = randomUUID();
 
     @Before
     public void setUp() {
         stubGetAllVerdictTypes();
         stubGetAllAlcoholLevelMethods();
+        crackedIneffectiveVacatedTrialTypes = buildCrackedIneffectiveVacatedTrialTypes(TRAIL_TYPE_ID_1);
+        stubCrackedIOnEffectiveTrialTypes(crackedIneffectiveVacatedTrialTypes);
     }
 
     @Test
@@ -859,14 +863,10 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private CrackedIneffectiveTrial setCrackedIneffectiveTrial(final InitiateHearingCommandHelper hearingOne, final CommandHelpers.UpdatePleaCommandHelper pleaOne) {
-        final UUID TRAIL_TYPE_ID_1 = randomUUID();
-
-        List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = buildCrackedIneffectiveVacatedTrialTypes(TRAIL_TYPE_ID_1);
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = crackedIneffectiveVacatedTrialTypes.get(0);
 
         CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
-        stubCrackedIOnEffectiveTrialTypes(crackedIneffectiveVacatedTrialTypes);
         TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())
                 .withTrialTypeId(TRAIL_TYPE_ID_1)

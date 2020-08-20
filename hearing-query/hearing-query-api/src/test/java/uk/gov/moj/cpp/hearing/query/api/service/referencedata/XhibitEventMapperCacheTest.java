@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.query.view.referencedata;
+package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
-import uk.gov.moj.cpp.hearing.query.view.service.ReferenceDataService;
 
 import java.util.HashSet;
 import java.util.Set;

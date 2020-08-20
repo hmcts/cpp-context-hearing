@@ -71,8 +71,8 @@ public class OutstandingFinesRequestedProcessor {
                 .build()
         ).withName("hearing.defendant.outstanding-fine-requests").withMetadataFrom(event);
 
-        final JsonEnvelope hearingAccountQueryInformation = requester.request(envelopeFrom(envelope.metadata(), envelope.payload()));
-        final DefendantOutstandingFineRequestsResult defendantInfoQueryResult = this.jsonObjectToObjectConverter.convert(hearingAccountQueryInformation.payloadAsJsonObject(),
+        final Envelope<JsonObject> hearingAccountQueryInformation = requester.requestAsAdmin(envelopeFrom(envelope.metadata(), envelope.payload()), JsonObject.class);
+        final DefendantOutstandingFineRequestsResult defendantInfoQueryResult = this.jsonObjectToObjectConverter.convert(hearingAccountQueryInformation.payload(),
                 DefendantOutstandingFineRequestsResult.class);
 
         if (defendantInfoQueryResult == null || defendantInfoQueryResult.getDefendantDetails() == null || defendantInfoQueryResult.getDefendantDetails().isEmpty()) {

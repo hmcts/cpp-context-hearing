@@ -16,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
@@ -32,6 +33,7 @@ import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcConnectionProvider;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.hearing.utils.StubPerExecution;
 
@@ -43,7 +45,9 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -270,7 +274,9 @@ public class AbstractIT {
     public void setUpPerTest() {
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
+        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(randomUUID()));
     }
+
 
     protected JSONObject getExistingHearing(final String hearingId) {
         final String queryAPIEndPoint = MessageFormat
@@ -356,4 +362,12 @@ public class AbstractIT {
         ReferenceDataStub.stub(localJusticeAreasResult, "123");
 
     }
+
+    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
+        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
+
+        return trialList;
+    }
+
 }

@@ -45,7 +45,6 @@
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-query-view</artifactId>
             <version>${project.version}</version>
-            <classifier>classes</classifier>
         </dependency>
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>

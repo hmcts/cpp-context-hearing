@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.query.view.referencedata;
+package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 
 public class ExhibitReferenceDataException extends RuntimeException{
 

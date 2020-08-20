@@ -6,11 +6,7 @@
         <version>7.0.17-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-query-view</artifactId>
-    <packaging>war</packaging>
-    <properties>
-        <cpp.service-component>QUERY_VIEW</cpp.service-component>
-    </properties>
-
+    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>

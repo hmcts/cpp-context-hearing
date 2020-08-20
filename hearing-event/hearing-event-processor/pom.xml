@@ -81,7 +81,7 @@
 
                     <dependency>
                         <groupId>uk.gov.moj.cpp.hearing</groupId>
-                        <artifactId>hearing-query-view</artifactId>
+                        <artifactId>hearing-query-api</artifactId>
                         <version>${project.version}</version>
                         <classifier>raml</classifier>
                         <exclusions>
@@ -120,6 +120,18 @@
                         <groupId>uk.gov.moj.cpp.referencedata</groupId>
                         <artifactId>referencedata-query-api</artifactId>
                         <version>${referencedata.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>*</groupId>
+                                <artifactId>*</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.progression</groupId>
+                        <artifactId>progression-query-api</artifactId>
+                        <version>${progression.version}</version>
                         <classifier>raml</classifier>
                         <exclusions>
                             <exclusion>

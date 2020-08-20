@@ -52,6 +52,9 @@ public class CaseTimelineIT extends AbstractIT {
     }
 
     private void setUpHearing(final ZonedDateTime sittingDay) {
+        final UUID trialTypeId = randomUUID();
+        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         hearing = initiateHearingCommand.getHearing();
         hearingDay = hearing.getHearingDays().get(0);
@@ -59,7 +62,6 @@ public class CaseTimelineIT extends AbstractIT {
 
         h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
-        final UUID trialTypeId = randomUUID();
 
         final TrialType addTrialType = builder()
                 .withHearingId(hearing.getId())
@@ -68,7 +70,6 @@ public class CaseTimelineIT extends AbstractIT {
 
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
 
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
     }
 
     private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {

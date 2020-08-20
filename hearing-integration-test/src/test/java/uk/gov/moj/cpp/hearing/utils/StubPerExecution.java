@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
-import static uk.gov.moj.cpp.hearing.utils.AuthorisationServiceStub.stubEnableAllCapabilities;
 import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDocumentCreate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
@@ -38,7 +37,6 @@ public class StubPerExecution {
         InternalEndpointMockUtils.stubPingFor("resultinghmps-service");
         InternalEndpointMockUtils.stubPingFor("usersgroups-service");
 
-        stubEnableAllCapabilities();
         mockMaterialUpload();
         mockUpdateHmpsMaterialStatus();
         stubForReferenceDataResults();

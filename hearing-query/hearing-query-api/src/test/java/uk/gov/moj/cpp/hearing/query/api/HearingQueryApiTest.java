@@ -48,20 +48,4 @@ public class HearingQueryApiTest {
         assertThat(apiMethodsToHandlerNames.values(), containsInAnyOrder(ramlActionNames.toArray()));
     }
 
-    @Test
-    public void testHandleNamesPassThroughRequester() throws Exception {
-        apiMethodsToHandlerNames.entrySet().stream()
-                .filter(entry -> noToTest(entry.getValue()))
-                .forEach(entry ->
-                assertThat(HearingQueryApi.class,
-                            isHandlerClass(QUERY_API).with(method(entry.getKey())
-                                                    .thatHandles(entry.getValue())
-                                                    .withRequesterPassThrough())));
-    }
-
-    private boolean noToTest(String handleName) {
-        return !NO_TEST_LIST.contains(handleName);
-    }
-
-
 }

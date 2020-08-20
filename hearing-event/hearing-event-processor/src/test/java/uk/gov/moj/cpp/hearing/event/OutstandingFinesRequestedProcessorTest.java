@@ -24,6 +24,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
@@ -65,6 +66,9 @@ public class OutstandingFinesRequestedProcessorTest {
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<Class> objectTypeArgumentCaptor;
+
     @Mock
     private Requester requester;
 
@@ -104,10 +108,10 @@ public class OutstandingFinesRequestedProcessorTest {
                 .build();
         when(jsonObjectToObjectConverter.convert(outstandingFinesQuery, OutstandingFinesRequested.class)).thenReturn(outstandingFinesRequested);
 
-        final JsonEnvelope courtBasedDefendantQueryInformation = mock(JsonEnvelope.class);
-        when(requester.request(envelopeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
+        final Envelope<JsonObject> courtBasedDefendantQueryInformation = mock(Envelope.class);
+        when(requester.requestAsAdmin(envelopeArgumentCaptor.capture(), objectTypeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
         final JsonObject courtBasedDefendantQueryJsonObject = Json.createObjectBuilder().build();
-        when(courtBasedDefendantQueryInformation.payloadAsJsonObject()).thenReturn(courtBasedDefendantQueryJsonObject);
+        when(courtBasedDefendantQueryInformation.payload()).thenReturn(courtBasedDefendantQueryJsonObject);
         when(jsonObjectToObjectConverter.convert(courtBasedDefendantQueryJsonObject, DefendantOutstandingFineRequestsResult.class)).thenReturn(getDefendantInfoQueryResult());
 
 
@@ -157,7 +161,7 @@ public class OutstandingFinesRequestedProcessorTest {
         when(jsonObjectToObjectConverter.convert(outstandingFinesQuery, OutstandingFinesRequested.class)).thenReturn(outstandingFinesRequested);
 
         final JsonEnvelope courtBasedDefendantQueryInformation = mock(JsonEnvelope.class);
-        when(requester.request(envelopeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
+        when(requester.requestAsAdmin(envelopeArgumentCaptor.capture(), objectTypeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
         final JsonObject courtBasedDefendantQueryJsonObject = Json.createObjectBuilder().build();
         when(courtBasedDefendantQueryInformation.payloadAsJsonObject()).thenReturn(courtBasedDefendantQueryJsonObject);
 
@@ -190,10 +194,11 @@ public class OutstandingFinesRequestedProcessorTest {
                 .build();
         when(jsonObjectToObjectConverter.convert(outstandingFinesQuery, OutstandingFinesRequested.class)).thenReturn(outstandingFinesRequested);
 
-        final JsonEnvelope courtBasedDefendantQueryInformation = mock(JsonEnvelope.class);
-        when(requester.request(envelopeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
+        final Envelope<JsonObject> courtBasedDefendantQueryInformation = mock(Envelope.class);
+        when(requester.requestAsAdmin(envelopeArgumentCaptor.capture(), objectTypeArgumentCaptor.capture())).thenReturn(courtBasedDefendantQueryInformation);
+
         final JsonObject courtBasedDefendantQueryJsonObject = Json.createObjectBuilder().build();
-        when(courtBasedDefendantQueryInformation.payloadAsJsonObject()).thenReturn(courtBasedDefendantQueryJsonObject);
+        when(courtBasedDefendantQueryInformation.payload()).thenReturn(courtBasedDefendantQueryJsonObject);
         DefendantOutstandingFineRequestsResult randomDefendantInfoQueryResult = getRandomDefendantInfoQueryResult();
         when(jsonObjectToObjectConverter.convert(courtBasedDefendantQueryJsonObject, DefendantOutstandingFineRequestsResult.class)).thenReturn(randomDefendantInfoQueryResult);
 

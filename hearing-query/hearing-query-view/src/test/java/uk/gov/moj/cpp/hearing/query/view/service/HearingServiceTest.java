@@ -71,7 +71,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
-import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -161,13 +160,7 @@ public class HearingServiceTest {
     private GetHearingsTransformer getHearingsTransformer;
 
     @Mock
-    private ReferenceDataService referenceDataService;
-
-    @Mock
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
-
-    @Mock
-    private XhibitEventMapperCache xhibitEventMapperCache;
 
     @InjectMocks
     private HearingService hearingService;
@@ -380,7 +373,8 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
+        final UUID trialTypeId = randomUUID();
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -669,11 +663,10 @@ public class HearingServiceTest {
         entity.setTrialTypeId(trialTypeId);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
-        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -693,11 +686,10 @@ public class HearingServiceTest {
         entity.setIsVacatedTrial(true);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(entity);
-        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(buildVacatedTrialTypes(vacatedTrialReasonId));
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildVacatedTrialTypes(vacatedTrialReasonId));
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -718,7 +710,8 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId);
+        final UUID trialTypeId = randomUUID();
+        final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(pojo))
@@ -741,10 +734,10 @@ public class HearingServiceTest {
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
         when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any())).thenReturn(hearingSummary);
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
-        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypesMock);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
-        final Timeline response = hearingService.getTimeLineByCaseId(caseId);
+        final UUID trialTypeId = randomUUID();
+        final Timeline response = hearingService.getTimeLineByCaseId(caseId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         assertThat(response, instanceOf(Timeline.class));
         assertThat(response.getHearingSummaries().get(0), is(hearingSummary));
@@ -772,10 +765,10 @@ public class HearingServiceTest {
         when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any())).thenReturn(hearingSummary);
 
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
-        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypesMock);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
-        final Timeline response = hearingService.getTimeLineByApplicationId(applicationId);
+        final UUID trialTypeId = randomUUID();
+        final Timeline response = hearingService.getTimeLineByApplicationId(applicationId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
 
         assertThat(response, instanceOf(Timeline.class));
         assertThat(response.getHearingSummaries().get(0), is(hearingSummary));
@@ -800,13 +793,13 @@ public class HearingServiceTest {
         final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet();
         hearingEventRequiredDefinitionsIds.add(randomUUID());
         hearingEventRequiredDefinitionsIds.add(randomUUID());
-        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(hearingEventRequiredDefinitionsIds);
+
         when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
 
-        final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now);
+        final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now, hearingEventRequiredDefinitionsIds);
 
         assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
     }
@@ -830,7 +823,6 @@ public class HearingServiceTest {
         final Set<UUID> hearingEventRequiredDefinitionsIds = new HashSet<>();
         hearingEventRequiredDefinitionsIds.add(randomUUID());
         hearingEventRequiredDefinitionsIds.add(randomUUID());
-        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(hearingEventRequiredDefinitionsIds);
 
         when(hearingRepository.findHearingsByDateAndCourtCentreList(now, courtCentreIds)).thenReturn(hearings);
         when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
@@ -840,7 +832,7 @@ public class HearingServiceTest {
         final CurrentCourtStatus expectedCurrentCourtStatus = getCurrentCourtStatusWithMultipleCases(hearingEvent);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
 
-        final Optional<CurrentCourtStatus> response = hearingService.getHearingsByDate(courtCentreIds, now);
+        final Optional<CurrentCourtStatus> response = hearingService.getHearingsByDate(courtCentreIds, now, hearingEventRequiredDefinitionsIds);
         assertCurrentCourtStatus(response.get(), expectedCurrentCourtStatus);
         assertThat(response.get().getPageName(), is(expectedCurrentCourtStatus.getPageName()));
     }

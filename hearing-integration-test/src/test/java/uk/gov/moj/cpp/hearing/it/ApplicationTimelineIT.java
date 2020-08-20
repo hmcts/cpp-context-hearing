@@ -48,12 +48,13 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Before
     public void setUpHearingWithApplication() {
+        final UUID trialtypeId = randomUUID();
+        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialtypeId));
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOneHelper =
                 h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         hearingOne = hearingOneHelper.getHearing();
 
-        final UUID trialtypeId = randomUUID();
         addTrialType = builder()
                 .withHearingId(hearingOne.getId())
                 .withTrialTypeId(trialtypeId)
@@ -62,7 +63,6 @@ public class ApplicationTimelineIT extends AbstractIT {
         applicationId = hearingOne.getCourtApplications().get(0).getId();
 
         setTrialType(getRequestSpec(), hearingOne.getId(), addTrialType);
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialtypeId));
     }
 
     private void setUpSecondHearingWithApplication() {

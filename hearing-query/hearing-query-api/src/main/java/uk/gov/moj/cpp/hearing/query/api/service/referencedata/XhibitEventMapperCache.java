@@ -1,8 +1,7 @@
-package uk.gov.moj.cpp.hearing.query.view.referencedata;
+package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
-import uk.gov.moj.cpp.hearing.query.view.service.ReferenceDataService;
 
 import java.util.HashMap;
 import java.util.Map;

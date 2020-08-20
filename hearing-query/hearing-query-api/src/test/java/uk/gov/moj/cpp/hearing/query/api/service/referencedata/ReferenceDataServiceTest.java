@@ -1,4 +1,4 @@
-package uk.gov.moj.cpp.hearing.query.view.service;
+package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
@@ -56,7 +56,7 @@ public class ReferenceDataServiceTest {
 
     @Test
     public void shouldRequestCrackedInEffectiveTrialTypes() {
-        when(requester.requestAsAdmin(any(JsonEnvelope.class))).thenReturn(crackedInEffectiveTrialTypesResponseEnvelope());
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(crackedInEffectiveTrialTypesResponseEnvelope());
         final CrackedIneffectiveVacatedTrialTypes trialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         assertEquals(2, trialTypes.getCrackedIneffectiveVacatedTrialTypes().size());
     }

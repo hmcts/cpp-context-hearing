@@ -7,13 +7,10 @@ import static java.util.UUID.fromString;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
@@ -41,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @SuppressWarnings({"CdiInjectionPointsInspection", "WeakerAccess", "squid:S1172", "squid:CommentedOutCodeLine", "squid:S1481", "squid:S1854"})
-@ServiceComponent(QUERY_VIEW)
 public class HearingEventQueryView {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(HearingEventQueryView.class.getName());
@@ -51,7 +47,9 @@ public class HearingEventQueryView {
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String RESPONSE_NAME_ACTIVE_HEARINGS_FOR_COURT_ROOM = "hearing.get-active-hearings-for-court-room";
+
     private static final String FIELD_HEARING_ID = "hearingId";
+
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
     private static final String FIELD_HEARING_EVENT_ID = "hearingEventId";
@@ -67,6 +65,7 @@ public class HearingEventQueryView {
     private static final String FIELD_ACTIVE_HEARINGS = "activeHearings";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_EVENT_DATE = "eventDate";
+
     private static final String FIELD_CASE_ATTRIBUTES = "caseAttributes";
     private static final String FIELD_DEFENDANT_NAME = "defendant.name";
     private static final String FIELD_COUNSEL_NAME = "counsel.name";
@@ -79,7 +78,6 @@ public class HearingEventQueryView {
     @Inject
     private HearingService hearingService;
 
-    @Handles("hearing.get-hearing-event-definitions")
     public Envelope<JsonObject> getHearingEventDefinitions(final JsonEnvelope query) {
         final List<HearingEventDefinition> hearingEventDefinitions = hearingService.getHearingEventDefinitions();
         final JsonArrayBuilder eventDefinitionsJsonArrayBuilder = createArrayBuilder();
@@ -93,7 +91,6 @@ public class HearingEventQueryView {
                 .withMetadataFrom(query);
     }
 
-    @Handles("hearing.get-hearing-event-definition")
     public Envelope<JsonObject> getHearingEventDefinition(final JsonEnvelope query) {
         final UUID hearingEventDefinitionId = fromString(query.payloadAsJsonObject().getString(FIELD_HEARING_EVENT_DEFINITION_ID));
         final Optional<HearingEventDefinition> optionalHearingEventDefinition = hearingService.getHearingEventDefinition(hearingEventDefinitionId);
@@ -110,7 +107,6 @@ public class HearingEventQueryView {
                 .withMetadataFrom(query);
     }
 
-    @Handles("hearing.get-hearing-event-log")
     public Envelope<JsonObject> getHearingEventLog(final JsonEnvelope query) {
         final UUID hearingId = fromString(query.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final LocalDate date = LocalDates.from(query.payloadAsJsonObject().getString(FIELD_DATE));
@@ -147,7 +143,6 @@ public class HearingEventQueryView {
                 .withMetadataFrom(query);
     }
 
-    @Handles("hearing.get-active-hearings-for-court-room")
     public Envelope<JsonObject> getActiveHearingsForCourtRoom(final JsonEnvelope query) {
         final UUID hearingId = fromString(query.payloadAsJsonObject().getString(FIELD_HEARING_ID));
         final LocalDate eventDate = LocalDates.from(query.payloadAsJsonObject().getString(FIELD_EVENT_DATE));

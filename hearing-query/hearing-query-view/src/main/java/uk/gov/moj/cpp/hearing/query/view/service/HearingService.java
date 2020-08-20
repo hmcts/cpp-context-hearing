@@ -40,7 +40,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
-import uk.gov.moj.cpp.hearing.query.view.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
@@ -121,17 +120,13 @@ public class HearingService {
     private GetHearingsTransformer getHearingTransformer;
 
     @Inject
-    private ReferenceDataService referenceDataService;
-    @Inject
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     @Inject
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
-    @Inject
-    private XhibitEventMapperCache xhibitEventMapperCache;
-
-    public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList, final LocalDate localDate) {
-        final Set<UUID> cppHearingEventIds = xhibitEventMapperCache.getCppHearingEventIds();
+    public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
+                                                              final LocalDate localDate,
+                                                              final Set<UUID> cppHearingEventIds) {
 
         final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
@@ -149,8 +144,9 @@ public class HearingService {
         return empty();
     }
 
-    public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList, final LocalDate localDate) {
-        final Set<UUID> cppHearingEventIds = xhibitEventMapperCache.getCppHearingEventIds();
+    public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList,
+                                                          final LocalDate localDate,
+                                                          final Set<UUID> cppHearingEventIds) {
 
         final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
@@ -328,7 +324,7 @@ public class HearingService {
     }
 
     @Transactional
-    public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId) {
+    public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
@@ -343,7 +339,7 @@ public class HearingService {
 
         if (hearing.getTrialTypeId() != null) {
 
-            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId());
+            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                     trialType.getReasonCode(),
                     trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
@@ -356,7 +352,7 @@ public class HearingService {
 
         } else if (isVacatedTrialRequest(hearing)) {
 
-            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId());
+            final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                     trialType.getReasonCode(),
                     trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
@@ -377,9 +373,7 @@ public class HearingService {
         return hearingDetailsResponse;
     }
 
-    private Optional<CrackedIneffectiveVacatedTrialType> getCrackedIneffectiveVacatedTrialType(final UUID trialTypeId) {
-
-        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
+    private Optional<CrackedIneffectiveVacatedTrialType> getCrackedIneffectiveVacatedTrialType(final UUID trialTypeId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
 
         return crackedIneffectiveVacatedTrialTypes
                 .getCrackedIneffectiveVacatedTrialTypes()
@@ -393,9 +387,8 @@ public class HearingService {
     }
 
     @Transactional
-    public CrackedIneffectiveTrial fetchCrackedIneffectiveTrial(final UUID trailTypeId) {
+    public CrackedIneffectiveTrial fetchCrackedIneffectiveTrial(final UUID trailTypeId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
 
-        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
 
         if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
 
@@ -507,11 +500,11 @@ public class HearingService {
     }
 
     @Transactional
-    public Timeline getTimeLineByCaseId(final UUID caseId) {
+    public Timeline getTimeLineByCaseId(final UUID caseId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
 
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findByCaseId(caseId)
                 .stream()
-                .map(this::populateTimeLineHearingSummaries)
+                .map(e-> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
@@ -519,27 +512,29 @@ public class HearingService {
     }
 
     @Transactional
-    public Timeline getTimeLineByApplicationId(final UUID applicationId) {
+    public Timeline getTimeLineByApplicationId(final UUID applicationId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
 
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findAllHearingsByApplicationId(applicationId)
                 .stream()
-                .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing, applicationId))
+                .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing, applicationId,crackedIneffectiveVacatedTrialTypes))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
         return new Timeline(hearingSummaries);
     }
 
-    private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing) {
-        final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId());
+    private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+        final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
         return hearing.getHearingDays()
                 .stream()
                 .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial))
                 .collect(toList());
     }
 
-    private List<TimelineHearingSummary> populateTimeLineHearingSummariesWithApplicants(final Hearing hearing, final UUID applicationId) {
-        final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId());
+    private List<TimelineHearingSummary> populateTimeLineHearingSummariesWithApplicants(final Hearing hearing,
+                                                                                        final UUID applicationId,
+                                                                                        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+        final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
         return hearing.getHearingDays()
                 .stream()
                 .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, applicationId))
