@@ -78,12 +78,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetDraftResult() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetDraftResult() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate");
     }
 
     @Test
@@ -108,12 +108,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinitions() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinitions() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS, "Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate");
     }
 
     @Test
