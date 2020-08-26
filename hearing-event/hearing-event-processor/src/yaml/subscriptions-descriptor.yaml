@@ -268,10 +268,6 @@ subscriptions_descriptor:
         -  name: public.listing.hearing-rescheduled
            schema_uri: http://cpp.moj.gov.uk/listing/json/schema/event/public-listing.hearing-rescheduled.json
 
-      # Staging Enforcement
-        - name: public.stagingenforcement.enforce-financial-imposition-acknowledgement
-          schema_uri: http://cpp.moj.gov.uk/stagingenforcement/json/schema/event/public-enforce-financial-imposition-acknowledgement.json
-
       # Progression Hearing Detail Changed
         - name: public.progression.events.case-or-application-ejected
           schema_uri: http://justice.gov.uk/progression/courts/case-or-application-ejected

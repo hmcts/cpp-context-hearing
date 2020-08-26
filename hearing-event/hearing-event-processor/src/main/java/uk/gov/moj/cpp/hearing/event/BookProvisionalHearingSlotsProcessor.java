@@ -15,12 +15,16 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.listing.common.azure.ProvisionalBookingService;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
+
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +36,8 @@ public class BookProvisionalHearingSlotsProcessor {
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
     private final ProvisionalBookingService provisionalBookingService;
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     @Inject
     public BookProvisionalHearingSlotsProcessor(final Sender sender,
@@ -54,9 +60,16 @@ public class BookProvisionalHearingSlotsProcessor {
         final BookProvisionalHearingSlots bookProvisionalHearingSlots = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), BookProvisionalHearingSlots.class);
         final JsonArrayBuilder arrayBuilder = createArrayBuilder();
         bookProvisionalHearingSlots.getSlots().forEach(
-                csi -> arrayBuilder.add(
-                        createObjectBuilder().add("courtScheduleId", csi.toString()).build()
-                )
+                bookProvisionalHearingSlotsCommand -> {
+                    final String hearingStartTimeStr = Objects.nonNull(bookProvisionalHearingSlotsCommand.getHearingStartTime()) ?
+                            bookProvisionalHearingSlotsCommand.getHearingStartTime().format(DATE_TIME_FORMATTER): StringUtils.EMPTY;
+                    arrayBuilder.add(
+                            createObjectBuilder().add("courtScheduleId", bookProvisionalHearingSlotsCommand.getCourtScheduleId().toString())
+                                    .add("hearingStartTime", hearingStartTimeStr)
+                                    .build()
+                    );
+                }
+
         );
 
         final Response response = provisionalBookingService.bookSlots(arrayBuilder.build());

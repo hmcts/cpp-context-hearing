@@ -37,7 +37,6 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.event.delegates.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDetailsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
@@ -82,9 +81,6 @@ public class PublishResultsEventProcessorTest {
 
     @Mock
     private Sender sender;
-
-    @Mock
-    private AdjournHearingDelegate adjournHearingDelegate;
 
     @Mock
     private UpdateResultLineStatusDelegate updateResultLineStatusDelegate;
@@ -191,8 +187,6 @@ public class PublishResultsEventProcessorTest {
         verify(publishResultsDelegate).shareResults(event, sender, resultsShared);
 
         verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
-
-        verify(adjournHearingDelegate).execute(resultsShared, event);
     }
 
     @Test

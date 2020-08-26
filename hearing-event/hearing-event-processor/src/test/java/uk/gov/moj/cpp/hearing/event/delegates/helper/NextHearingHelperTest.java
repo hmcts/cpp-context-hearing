@@ -146,6 +146,20 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
     }
 
     @Test
+    public void shouldPopulateNextHearingForCrownCourtHearingFixedDateWithoutTime() {
+        final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-crowncourt-fixed-date_without_time.json");
+
+        setupMocks(event);
+
+        final ResultDefinition resultDefinition = jsonObjectToObjectConverter
+                                                          .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
+
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
+
+        assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2020-08-25T00:00Z"));
+    }
+
+    @Test
     public void shouldPopulateNextHearingForMagistrateCourtHearing() {
         final JsonEnvelope event = getJsonEnvelop("/data/hearing.results-shared-with-nexthearing-magistratescourt.json");
         setupMocks(event);

@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static java.time.ZonedDateTime.parse;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -29,6 +30,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -42,7 +44,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class BookProvisionalHearingSlotsCommandHandlerTest {
+public class ProvisionalHearingSlotInfoHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             BookProvisionalHearingSlots.class);
@@ -78,13 +80,15 @@ public class BookProvisionalHearingSlotsCommandHandlerTest {
         final UUID hearingId = UUID.randomUUID();
         final UUID courtScheduleId1 = UUID.randomUUID();
         final UUID courtScheduleId2 = UUID.randomUUID();
+        final ZonedDateTime hearingStartTime = parse("2020-08-21T11:00:00.000Z");
 
         setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
         when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
 
         final JsonObject bookCommand = createObjectBuilder().add("hearingId", hearingId.toString())
                 .add("slots", createArrayBuilder()
-                        .add(createObjectBuilder().add("courtScheduleId", courtScheduleId1.toString()).build())
+                        .add(createObjectBuilder().add("courtScheduleId", courtScheduleId1.toString())
+                                .add("hearingStartTime", hearingStartTime.toString()).build())
                         .add(createObjectBuilder().add("courtScheduleId", courtScheduleId2.toString()).build())
                         .build()
                 )

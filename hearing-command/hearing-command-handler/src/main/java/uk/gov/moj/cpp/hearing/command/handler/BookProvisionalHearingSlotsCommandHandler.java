@@ -6,6 +6,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import java.util.ArrayList;
@@ -30,10 +31,11 @@ public class BookProvisionalHearingSlotsCommandHandler extends AbstractCommandHa
         }
 
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
-        final List<UUID> slots = new ArrayList<>();
+        final List<ProvisionalHearingSlotInfo> slots = new ArrayList<>();
         final JsonArray slotsArray = envelope.payloadAsJsonObject().getJsonArray("slots");
         for (int i = 0; i < slotsArray.size(); i++) {
-            slots.add(UUID.fromString(slotsArray.getJsonObject(i).getString("courtScheduleId")));
+            final ProvisionalHearingSlotInfo provisionalHearingSlotInfo = convertToObject(slotsArray.getJsonObject(i), ProvisionalHearingSlotInfo.class);
+            slots.add(provisionalHearingSlotInfo);
         }
 
         aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.bookProvisionalHearingSlots(hearingId, slots));

@@ -11,6 +11,7 @@ public class Constants {
     public static final String MAGISTRATE_RESULT_DEFINITION_ID = "70c98fa6-804d-11e8-adc0-fa7ae01bbebc";
     public static final String SPACE = " ";
     public static final String DATE_FORMATS = "[dd/MM/yyyy HH:mm][yyyy-MM-dd HH:mm][dd MMM yyyy HH:mm]";
+    public static final String DATE_FORMATS_WITHOUT_TIME = "[dd/MM/yyyy][yyyy-MM-dd][dd MMM yyyy]";
     public static final String EUROPE_LONDON = "Europe/London";
     public static final String COMMA_REGEX = "\\s*,\\s*";
     public static final int DAYS_IN_A_WEEK = 5;

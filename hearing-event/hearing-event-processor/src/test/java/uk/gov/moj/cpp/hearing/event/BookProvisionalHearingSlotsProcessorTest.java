@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
+import static uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo.bookProvisionalHearingSlotsCommand;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -19,6 +20,7 @@ import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.listing.common.azure.ProvisionalBookingService;
 
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.UUID;
 
@@ -62,10 +64,12 @@ public class BookProvisionalHearingSlotsProcessorTest {
         final UUID hearingId = randomUUID();
         final UUID courtScheduleId1 = randomUUID();
         final UUID courtScheduleId2 = randomUUID();
+        final ZonedDateTime hearingStartTime = ZonedDateTime.parse("2020-08-21T11:00:00.000Z");
 
         final BookProvisionalHearingSlots bookProvisionalHearingSlots = BookProvisionalHearingSlots.bookProvisionalHearingSlots()
                 .withHearingId(hearingId)
-                .withSlots(Arrays.asList(courtScheduleId1, courtScheduleId2))
+                .withSlots(Arrays.asList(bookProvisionalHearingSlotsCommand().setCourtScheduleId(courtScheduleId1).setHearingStartTime(hearingStartTime),
+                        bookProvisionalHearingSlotsCommand().setCourtScheduleId(courtScheduleId2)))
                 .build();
 
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.book-provisional-hearing-slots"),

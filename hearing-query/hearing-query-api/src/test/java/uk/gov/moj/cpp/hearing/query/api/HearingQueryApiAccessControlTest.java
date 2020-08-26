@@ -88,12 +88,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetApplicationDraftResult() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_APPLICATION_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_APPLICATION_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetApplicationDraftResult() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_APPLICATION_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_APPLICATION_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
     @Test
@@ -118,12 +118,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToGetHearingEventDefinition() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetHearingEventDefinition() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_HEARING_EVENT_DEFINITION, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
 
@@ -159,12 +159,12 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Court Associate");
     }
 
     @Test
     public void shouldNotAllowUserInAuthorisedGroupToSearchForCourtListPublishStatus() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers","System Users");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_COURT_LIST_PUBLISH_STATUS, "Listing Officers", "Court Clerks", "Legal Advisers","System Users", "Court Associate");
     }
 
     @Test
@@ -179,13 +179,13 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     @Test
     public void shouldAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers");
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
 
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetDefendantOutstandingFines() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers");
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_DEFENDANT_OUTSTANDING_FINES, "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
     @Test

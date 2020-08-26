@@ -32,6 +32,7 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
+import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
@@ -468,7 +469,7 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<UUID> slots) {
+    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots) {
 
         return apply(Stream.of(BookProvisionalHearingSlots.bookProvisionalHearingSlots()
                 .withHearingId(hearingId)

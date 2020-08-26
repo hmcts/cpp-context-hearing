@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
 import uk.gov.justice.domain.annotation.Event;
+import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,10 +18,11 @@ public class BookProvisionalHearingSlots implements Serializable {
 
     private final UUID hearingId;
 
-    private final List<UUID> slots;
+    private final List<ProvisionalHearingSlotInfo> slots;
 
     @JsonCreator
-    public BookProvisionalHearingSlots(@JsonProperty("hearingId") final UUID hearingId, @JsonProperty("slots") final List<UUID> slots) {
+    public BookProvisionalHearingSlots(@JsonProperty("hearingId") final UUID hearingId,
+                                       @JsonProperty("slots") final List<ProvisionalHearingSlotInfo> slots) {
         this.hearingId = hearingId;
         this.slots = new ArrayList<>(slots);
     }
@@ -29,8 +31,8 @@ public class BookProvisionalHearingSlots implements Serializable {
         return hearingId;
     }
 
-    public List<UUID> getSlots() {
-        return new ArrayList<>(slots);
+    public List<ProvisionalHearingSlotInfo> getSlots() {
+        return new ArrayList(slots);
     }
 
     public static BookProvisionalHearingSlotsBuilder bookProvisionalHearingSlots() {
@@ -39,7 +41,7 @@ public class BookProvisionalHearingSlots implements Serializable {
 
     public static final class BookProvisionalHearingSlotsBuilder {
         private UUID hearingId;
-        private List<UUID> slots;
+        private List<ProvisionalHearingSlotInfo> slots;
 
         private BookProvisionalHearingSlotsBuilder() {
         }
@@ -49,8 +51,8 @@ public class BookProvisionalHearingSlots implements Serializable {
             return this;
         }
 
-        public BookProvisionalHearingSlotsBuilder withSlots(final List<UUID> slots) {
-            this.slots = new ArrayList<>(slots);
+        public BookProvisionalHearingSlotsBuilder withSlots(final List<ProvisionalHearingSlotInfo> slots) {
+            this.slots = new ArrayList(slots);
             return this;
         }
 

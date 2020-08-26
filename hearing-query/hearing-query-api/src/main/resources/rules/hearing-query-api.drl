@@ -47,7 +47,7 @@ rule "Query - API - hearing.get-active-hearings-for-court-room"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-active-hearings-for-court-room");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers","Court Associate"));
   then
     $outcome.setSuccess(true);
 end
@@ -56,7 +56,7 @@ rule "Query - API - hearing.get-hearing-event-definition"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definition");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
   then
     $outcome.setSuccess(true);
 end
@@ -83,7 +83,7 @@ rule "Query - API - hearing.get-application-draft-result"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-application-draft-result");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
   then
     $outcome.setSuccess(true);
 end
@@ -101,7 +101,7 @@ rule "Query - API - hearing.retrieve-subscriptions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.retrieve-subscriptions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Court Associate"));
   then
     $outcome.setSuccess(true);
 end
@@ -119,7 +119,7 @@ rule "Query - API - hearing.get-cracked-ineffective-reason"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-cracked-ineffective-reason");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
   then
     $outcome.setSuccess(true);
 end
@@ -146,7 +146,7 @@ rule "Query - API - hearing.court.list.publish.status"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.court.list.publish.status");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers","System Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers","System Users","Court Associate"));
   then
     $outcome.setSuccess(true);
 end
@@ -173,7 +173,7 @@ rule "Query - API - hearing.defendant.outstanding-fines"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.defendant.outstanding-fines");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Court Associate"));
   then
     $outcome.setSuccess(true);
 end

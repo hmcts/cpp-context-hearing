@@ -30,7 +30,6 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.event.delegates.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDetailsDelegate;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
@@ -73,9 +72,6 @@ public class PublishResultsEventProcessor {
 
     @Inject
     private PublishResultsDelegate publishResultsDelegate;
-
-    @Inject
-    private AdjournHearingDelegate adjournHearingDelegate;
 
     @Inject
     private Sender sender;
@@ -122,9 +118,6 @@ public class PublishResultsEventProcessor {
         if (courtApplications != null && !courtApplications.isEmpty()) {
             // invoke command (resultsShared)
             updateDefendantWithApplicationDetailsDelegate.execute(sender, event, resultsShared);
-        }
-        if (hearing.getProsecutionCases() != null || courtApplications != null) {
-            adjournHearingDelegate.execute(resultsShared, event);
         }
 
         LOGGER.info("requested target size {}, saved target size {}", resultsShared.getTargets().size(), resultsShared.getSavedTargets().size());

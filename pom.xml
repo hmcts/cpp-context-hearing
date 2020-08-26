@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
@@ -27,11 +26,11 @@
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.103</coredomain.version>
         <criminal-court-public-model.version>1.0.103</criminal-court-public-model.version>
-        <referencedata.version>7.0.7</referencedata.version>
+        <referencedata.version>7.0.9</referencedata.version>
         <material.version>7.0.0</material.version>
         <results.version>7.0.4</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
-        <stagingenforcement.version>7.0.4</stagingenforcement.version>
+        <stagingenforcement.version>7.0.7</stagingenforcement.version>
         <progression.version>7.0.17</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
@@ -39,7 +38,7 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
-        <listing.version>7.0.4</listing.version>
+        <listing.version>7.0.8</listing.version>
     </properties>
 
     <modules>

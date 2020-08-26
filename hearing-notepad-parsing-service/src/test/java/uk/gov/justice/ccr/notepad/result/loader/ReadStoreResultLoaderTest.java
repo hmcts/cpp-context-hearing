@@ -155,7 +155,15 @@ public class ReadStoreResultLoaderTest {
                 .withEmailAddress1("xyz@gmail.com")
                 .build()
         );
+
+        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet2 = new HashSet<>();
+        nameAddressSet2.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
+                .withName("EMC Test")
+                .withEmailAddress1("emc@test.com")
+                .build());
         resultPromptDynamicListNameAddress.put("protectedperson", nameAddressSet);
+        resultPromptDynamicListNameAddress.put("electronicmonitoringcontractor", nameAddressSet2);
+
 
         given(resultsQueryService.getAllFixedLists(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
         given(resultsQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
@@ -203,26 +211,29 @@ public class ReadStoreResultLoaderTest {
 
         //then
         final ResultPrompt resultPromptWithNameAddressList = resultPrompts.stream().filter(resultPrompt -> resultPrompt.getId() .toString().equals( "3054909b-15b6-499f-b44f-67b2b1215c72")).findFirst().get();
-        assertThat(resultPrompts, hasSize(23));
-        assertThat(resultPrompts.get(0).getPromptOrder(), is(1));
-        assertThat(resultPrompts.get(0).getReference(), is(nullValue()));
-        assertThat(resultPrompts.get(0).getDurationSequence(), is(1));
-        assertThat(resultPrompts.get(7).getFixedList().size(), is(9));
-        assertThat(resultPrompts.get(7).getFixedList(),hasItems("Aberdeen Sheriff Court District", "Bedfordshire YOT", "Blackfriars Crown Court", "Central Criminal Court", "Leicester and Rutland Magistrates' Court",
+        assertThat(resultPrompts, hasSize(35));
+        assertThat(resultPrompts.get(0).getPromptOrder(), is(100));
+        assertThat(resultPrompts.get(0).getReference(), is("electronicmonitoringcontractorOrganisationName"));
+        assertThat(resultPrompts.get(0).getNameAddressList().size(), is(1));
+        assertThat(resultPrompts.get(12).getPromptOrder(), is(1));
+        assertThat(resultPrompts.get(12).getReference(), is(nullValue()));
+        assertThat(resultPrompts.get(12).getDurationSequence(), is(1));
+        assertThat(resultPrompts.get(19).getFixedList().size(), is(9));
+        assertThat(resultPrompts.get(19).getFixedList(),hasItems("Aberdeen Sheriff Court District", "Bedfordshire YOT", "Blackfriars Crown Court", "Central Criminal Court", "Leicester and Rutland Magistrates' Court",
                 "North and East Hertfordshire Magistrates' Court", "North and West Cumbria Magistrates' Court", "Sussex (Eastern) Magistrates' Court", "West Cross Court District"));
-        assertThat(resultPrompts.get(10).getReference(), is("HCHOUSE"));
-        assertThat(resultPrompts.get(10).getType(), is(ResultType.FIXL));
-        assertThat(resultPrompts.get(10).getFixedList().size(), is(2));
-        assertThat(resultPrompts.get(10).getDurationSequence(), is(0));
-        assertThat(resultPrompts.get(11).getReference(), is("HTYPE"));
-        assertThat(resultPrompts.get(11).getType(), is(ResultType.FIXL));
-        assertThat(resultPrompts.get(11).getFixedList().size(), is(27));
-        assertThat(resultPrompts.get(12).getType(), is(ResultType.FIXLO));
-        assertThat(resultPrompts.get(13).getType(), is(ResultType.FIXLOM));
-        assertThat(resultPrompts.get(3).getKeywords(), hasItems("years"));
-        assertThat(resultPrompts.get(0).getHidden(), is(false));
-        assertThat(resultPrompts.get(3).getWelshDurationElement(), is("Flynedd"));
-        assertThat(resultPrompts.get(3).getDurationElement(), is("Years"));
+        assertThat(resultPrompts.get(22).getReference(), is("HCHOUSE"));
+        assertThat(resultPrompts.get(22).getType(), is(ResultType.FIXL));
+        assertThat(resultPrompts.get(22).getFixedList().size(), is(2));
+        assertThat(resultPrompts.get(22).getDurationSequence(), is(0));
+        assertThat(resultPrompts.get(23).getReference(), is("HTYPE"));
+        assertThat(resultPrompts.get(23).getType(), is(ResultType.FIXL));
+        assertThat(resultPrompts.get(23).getFixedList().size(), is(27));
+        assertThat(resultPrompts.get(24).getType(), is(ResultType.FIXLO));
+        assertThat(resultPrompts.get(25).getType(), is(ResultType.FIXLOM));
+        assertThat(resultPrompts.get(15).getKeywords(), hasItems("years"));
+        assertThat(resultPrompts.get(12).getHidden(), is(false));
+        assertThat(resultPrompts.get(15).getWelshDurationElement(), is("Flynedd"));
+        assertThat(resultPrompts.get(15).getDurationElement(), is("Years"));
         assertThat(resultPromptWithNameAddressList.getNameAddressList().size(), is(1));
     }
 

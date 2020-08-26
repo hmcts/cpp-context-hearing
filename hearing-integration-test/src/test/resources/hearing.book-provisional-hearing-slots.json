@@ -1,10 +1,12 @@
 {
   "slots": [
     {
-      "courtScheduleId": "UUID1"
+      "courtScheduleId": "UUID1",
+      "hearingStartTime": "HEARING_START_TIME1"
     },
     {
-      "courtScheduleId": "UUID2"
+      "courtScheduleId": "UUID2",
+      "hearingStartTime": "HEARING_START_TIME2"
     }
   ]
 }

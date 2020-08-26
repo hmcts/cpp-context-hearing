@@ -106,7 +106,7 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         assertThat(Arrays.asList(p3.getCode().length(), p3.getLabel(), p3.getType(), p3.getRequired())
                 , containsInAnyOrder(Arrays.asList(36, "Address Line 1", ADDRESS, Boolean.TRUE).toArray()));
         assertThat(Arrays.asList(p4.getCode().length(), p4.getLabel(), p4.getType(), p4.getNameEmail())
-                , containsInAnyOrder(Arrays.asList(36, "Minor creditor name and address first name", NAMEADDRESS, Boolean.TRUE).toArray()));
+                , containsInAnyOrder(Arrays.asList(36, "Minor creditor name and address first name", null, Boolean.TRUE).toArray()));
         final List<Children> childrenList = p2.getChildren();
         final Children c1 = childrenList.get(0);
         final Children c2 = childrenList.get(1);

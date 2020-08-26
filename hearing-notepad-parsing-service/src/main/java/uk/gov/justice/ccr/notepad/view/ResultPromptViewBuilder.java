@@ -153,6 +153,8 @@ public class ResultPromptViewBuilder {
               });
 
               sortChildrenBySequence(nameAddressChildren.getChildrenList());
+              promptChoice.setType(null);
+              promptChoice.setNameAddressList(null);
           });
         }
     }

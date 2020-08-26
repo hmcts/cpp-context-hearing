@@ -60,6 +60,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.UpdateDefendantAttendanceCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
@@ -114,6 +115,8 @@ import org.hamcrest.Matchers;
 public class UseCases {
 
     private static final String FIELD_OVERRIDE = "override";
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public static <T> Consumer<T> asDefault() {
         return c -> {
@@ -1082,11 +1085,13 @@ public class UseCases {
 
     }
 
-    public static void bookHearingSlots(final RequestSpecification requestSpec, final UUID hearingId, final List<UUID> courtScheduleIds) throws Exception {
+    public static void bookHearingSlots(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots) throws Exception {
 
         final String commandPayloadString = getStringFromResource("hearing.book-provisional-hearing-slots.json")
-                .replace("UUID1", courtScheduleIds.get(0).toString())
-                .replace("UUID2", courtScheduleIds.get(1).toString());
+                .replace("UUID1", hearingSlots.get(0).getCourtScheduleId().toString())
+                .replace("UUID2", hearingSlots.get(1).getCourtScheduleId().toString())
+                .replace("HEARING_START_TIME1", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER))
+                .replace("HEARING_START_TIME2", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER));
 
         makeCommand(requestSpec, "hearing.book-provisional-hearing-slots")
                 .ofType("application/vnd.hearing.book-provisional-hearing-slots+json")

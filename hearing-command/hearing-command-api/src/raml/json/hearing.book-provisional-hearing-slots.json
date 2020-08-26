@@ -1,10 +1,12 @@
 {
   "slots": [
     {
-      "courtScheduleId": "8322f37a-ed45-4757-8de7-da3dc12545a1"
+      "courtScheduleId": "8322f37a-ed45-4757-8de7-da3dc12545a1",
+      "hearingStartTime": "2020-08-25T10:00:00.000Z"
     },
     {
-      "courtScheduleId": "da7a3221-bebb-4a9a-aa1b-afdd76ad1353"
+      "courtScheduleId": "da7a3221-bebb-4a9a-aa1b-afdd76ad1353",
+      "hearingStartTime": "2020-08-27T11:00:00.000Z"
     }
   ]
 }

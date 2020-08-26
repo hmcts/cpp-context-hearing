@@ -18,6 +18,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.COMMA_REGEX;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.CROWN_COURT_RESULT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DATE_FORMATS;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DATE_FORMATS_WITHOUT_TIME;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.DAYS_IN_A_WEEK;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EUROPE_LONDON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MAGISTRATE_RESULT_DEFINITION_ID;
@@ -65,6 +66,7 @@ import uk.gov.moj.cpp.hearing.event.service.HearingTypeReverseLookup;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -342,7 +344,8 @@ public class NextHearingHelper {
         if (!isEmpty(date)) {
             String listingTime = time;
             if (isEmpty(listingTime)) {
-                listingTime = START_OF_DAY_TIME;
+                return ZonedDateTime.of(LocalDate.parse(date,DateTimeFormatter.ofPattern(DATE_FORMATS_WITHOUT_TIME)), LocalTime.parse(START_OF_DAY_TIME), UTC);
+
             }
             return ZonedDateTime.parse(date.concat(SPACE).concat(listingTime), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
         }

@@ -22,6 +22,7 @@ public class NameAddressRefDataEndPointMapper {
     private static final String ATTENDANCE_CENTER_KEY ="attendanceCentreNameContact".toLowerCase();
     private static final String BASS_PROVIDER_KEY ="bASSProvider".toLowerCase();
     private static final String EMC_RESPONSIBLE_OFFICER_KEY = "electronicMonitoringContractorResponsibleOfficer".toLowerCase();
+    private static final String EMC_KEY = "electronicmonitoringcontractor".toLowerCase();
     private static final String LOCAL_AUTHORITY_KEY  = "localAuthorityNameAndAddress".toLowerCase();
     private static final String ORIG_DESG_LOCAL_AUTHORITY_KEY  = "originalDesignatedLocalAuthorityForTheRemand".toLowerCase();
     private static final String NEW_DESG_LOCAL_AUTHORTY_KEY = "theNewDesignatedLocalAuthorityDesignatedIs".toLowerCase();
@@ -188,11 +189,13 @@ public class NameAddressRefDataEndPointMapper {
     }
 
     private void setEMCOrganisationNameAddress(final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress) {
-        resultPromptDynamicListNameAddress.put(EMC_RESPONSIBLE_OFFICER_KEY, resultsQueryService.getEMCOrganisationNameAddress(jsonEnvelope).payload().getJsonArray(ORG_TYPE).getValuesAs(JsonObject.class).stream()
+        final Set<ResultPromptDynamicListNameAddress> resultPromptDynamicListNameAddressSet = resultsQueryService.getEMCOrganisationNameAddress(jsonEnvelope).payload().getJsonArray(ORG_TYPE).getValuesAs(JsonObject.class).stream()
                 .map(regionalOrganisation -> ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
                         .withName(regionalOrganisation.getString(ORG_NAME, null))
                         .withEmailAddress1(regionalOrganisation.getString(EMAIL_ADDRESS, null))
-                        .build()).collect(toSet()));
+                        .build()).collect(toSet());
+        resultPromptDynamicListNameAddress.put(EMC_RESPONSIBLE_OFFICER_KEY, resultPromptDynamicListNameAddressSet);
+        resultPromptDynamicListNameAddress.put(EMC_KEY, resultPromptDynamicListNameAddressSet);
     }
 
     private void setLocalAuthorityNameAddress(final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress) {
