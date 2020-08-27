@@ -355,6 +355,16 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithOffenceDateCode(final Integer offenceDateCode) {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                            .setOffenceDateCode(offenceDateCode)
+                    ).build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingTemplateWithDefendantJudicialResultsForMagistrates() {
             return InitiateHearingCommand.initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
@@ -830,13 +840,13 @@ public class TestTemplates {
 
         public static UpdateOffencesForDefendantCommand addOffencesForDefendantTemplate(final TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
-                    .setAddedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToAdd())))
+                    .setAddedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToAdd(), args.getOffenceDateCode())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
         public static UpdateOffencesForDefendantCommand updateOffencesForDefendantTemplate(final TemplateArguments args) {
             return UpdateOffencesForDefendantCommand.updateOffencesForDefendantCommand()
-                    .setUpdatedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToUpdate())))
+                    .setUpdatedOffences(asList(defendantCaseOffences(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffencesToUpdate(), args.getOffenceDateCode())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
 
@@ -845,8 +855,7 @@ public class TestTemplates {
                     .setDeletedOffences(asList(deletedOffence(args.getProsecutionCaseId(), args.getDefendantId(), args.getOffenceToDelete())))
                     .setModifiedDate(PAST_LOCAL_DATE.next());
         }
-
-        public static DefendantCaseOffences defendantCaseOffences(final UUID prosecutionCaseId, final UUID defendantId, final List<UUID> offenceIds) {
+        public static DefendantCaseOffences defendantCaseOffences(final UUID prosecutionCaseId, final UUID defendantId, final List<UUID> offenceIds, final Integer offenceDateCode) {
             return DefendantCaseOffences.defendantCaseOffences()
                     .withProsecutionCaseId(prosecutionCaseId)
                     .withDefendantId(defendantId)
@@ -906,6 +915,7 @@ public class TestTemplates {
                                     .withProceedingsConcluded(true)
                                     .withIsDiscontinued(true)
                                     .withIntroducedAfterInitialProceedings(true)
+                                    .withOffenceDateCode(offenceDateCode)
                                     .build())
                             .collect(Collectors.toList())
                     );
@@ -922,6 +932,7 @@ public class TestTemplates {
 
             private UUID prosecutionCaseId;
             private UUID defendantId;
+            private Integer offenceDateCode;
             private List<UUID> offencesToAdd = new ArrayList<>();
             private List<UUID> offencesToUpdate = new ArrayList<>();
             private List<UUID> offenceToDelete = new ArrayList<>();
@@ -976,6 +987,14 @@ public class TestTemplates {
                 return this;
             }
 
+            public Integer getOffenceDateCode() {
+                return offenceDateCode;
+            }
+
+            public TemplateArguments setOffenceDateCode(final Integer offenceDateCode) {
+                this.offenceDateCode = offenceDateCode;
+                return this;
+            }
         }
     }
 

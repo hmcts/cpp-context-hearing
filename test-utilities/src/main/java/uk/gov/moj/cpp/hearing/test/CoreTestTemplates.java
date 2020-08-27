@@ -243,7 +243,8 @@ public class CoreTestTemplates {
                     .withOrderIndex(INTEGER.next())
                     .withIntroducedAfterInitialProceedings(true)
                     .withIsDiscontinued(true)
-                    .withProceedingsConcluded(true);
+                    .withProceedingsConcluded(true)
+                    .withOffenceDateCode(args.getOffenceDateCode());
         }
 
 
@@ -272,6 +273,7 @@ public class CoreTestTemplates {
                 .withIsDiscontinued(true)
                 .withIntroducedAfterInitialProceedings(true)
                 .withLaidDate(PAST_LOCAL_DATE.next())
+                .withOffenceDateCode(args.getOffenceDateCode())
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
@@ -797,6 +799,8 @@ public class CoreTestTemplates {
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
+        private Integer offenceDateCode;
+
         public static <T, U> Map<T, U> toMap(final T t, final U u) {
             final Map<T, U> map = new HashMap<>();
             map.put(t, u);
@@ -916,6 +920,15 @@ public class CoreTestTemplates {
 
         public CoreTemplateArguments setCourtProceedingsInitiated(final ZonedDateTime courtProceedingsInitiated) {
             this.courtProceedingsInitiated = courtProceedingsInitiated;
+            return this;
+        }
+
+        public Integer getOffenceDateCode() {
+            return offenceDateCode;
+        }
+
+        public CoreTemplateArguments setOffenceDateCode(final Integer offenceDateCode) {
+            this.offenceDateCode = offenceDateCode;
             return this;
         }
     }

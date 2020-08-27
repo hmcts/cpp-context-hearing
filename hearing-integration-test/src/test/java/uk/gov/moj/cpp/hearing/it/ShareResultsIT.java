@@ -12,6 +12,8 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
@@ -29,9 +31,15 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defendant;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.addOffencesForDefendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithDefendantJudicialResultsForMagistrates;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffenceDateCode;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.welshInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultWithOutcomeCommandTemplate;
@@ -127,6 +135,8 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -536,6 +546,118 @@ public class ShareResultsIT extends AbstractIT {
         shareResultsShouldNotHaveDDCH(targets, hearingOne);
     }
 
+    @Test
+    public void shareResultShouldPublishOffenceDateCode() throws Exception {
+
+        //Given
+
+        final Integer offenceDateCode = 4;
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithOffenceDateCode(offenceDateCode);
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        //When
+        updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
+
+        stubGetReferenceDataResultDefinitionsDDCH();
+
+        //Then
+        shareAndVerifyOffenceDateCode(targets, hearingOne, offenceDateCode);
+
+    }
+
+    @Test
+    public void shareResultShouldPublishAddDefendantOffenceDateCode() throws Exception {
+
+        //Given
+
+        final Integer offenceDateCode = 4;
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithOffenceDateCode(offenceDateCode);
+
+        HearingDay hearingDay = initiateHearing.getHearing().getHearingDays().get(0);
+        hearingDay.setSittingDay(ZonedDateTime.now().plusDays(1));
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        final Integer newOffenceDateCode = 3;
+
+        //When
+
+        updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
+
+        addDefendant(hearingOne, newOffenceDateCode);
+
+        stubGetReferenceDataResultDefinitionsDDCH();
+
+        //Then
+        shareAndVerifyOffenceDateCode(targets, hearingOne, offenceDateCode, newOffenceDateCode);
+
+    }
+
+
+    @Test
+    public void shareResultShouldPublishOffenceDateCodeAfterNewOffenceAdded() throws Exception {
+
+        //Given
+
+        final Integer offenceDateCode = 4;
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithOffenceDateCode(offenceDateCode);
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        //When
+        updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
+
+        final Integer newOffenceDateCode = 3;
+
+        addOffence(hearingOne, newOffenceDateCode);
+
+        stubGetReferenceDataResultDefinitionsDDCH();
+
+        //Then
+        shareAndVerifyMultiOffenceOffenceDateCode(targets, hearingOne, offenceDateCode, newOffenceDateCode);
+
+    }
+
+    @Test
+    public void shareResultShouldPublishOffenceDateCodeAfterOffenceUpdated() throws Exception {
+
+        //Given
+
+        final Integer offenceDateCode = 4;
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithOffenceDateCode(offenceDateCode);
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        //When
+        updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
+
+        final Integer newOffenceDateCode = 3;
+
+        updateOffence(hearingOne, newOffenceDateCode);
+
+        stubGetReferenceDataResultDefinitionsDDCH();
+
+        //Then
+        shareAndVerifyMultiOffenceOffenceDateCode(targets, hearingOne, newOffenceDateCode);
+
+    }
+
     private void shareResultsShouldNotHaveDDCH(final List<Target> targets, final InitiateHearingCommandHelper hearingOne) {
         final DelegatedPowers courtClerk2 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Siouxsie").withLastName("Sioux")
@@ -635,6 +757,168 @@ public class ShareResultsIT extends AbstractIT {
 
     }
 
+    private void shareAndVerifyOffenceDateCode(final List<Target> targets, final InitiateHearingCommandHelper hearingOne, final Integer... offenceDateCodes) {
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearingOne.getHearingId()))
+                                .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
+                                        .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
+                                                .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)))))) {
+
+            shareResults(getRequestSpec(), hearingOne.getHearingId(), with(
+                    basicShareResultsCommandTemplate(),
+                    command -> command.setCourtClerk(courtClerk1)
+            ), targets);
+
+            JsonPath result = publicEventResulted.waitFor();
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].defendantCaseJudicialResults[0].cjsCode"), is("4592"));
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].defendantCaseJudicialResults[0].resultText"), is("Defendant's details changed"));
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].defendantCaseJudicialResults[0].judicialResultTypeId"), is("8c67b30a-418c-11e8-842f-0ed5f89f718b"));
+            assertThat(result.getInt("hearing.prosecutionCases[0].defendants[0].offences[0].offenceDateCode"), is(offenceDateCodes[0]));
+            if(offenceDateCodes.length > 1) {
+                assertThat(result.getInt("hearing.prosecutionCases[0].defendants[1].offences[0].offenceDateCode"), is(offenceDateCodes[1]));
+            }
+        }
+    }
+
+    private void shareAndVerifyMultiOffenceOffenceDateCode(final List<Target> targets, final InitiateHearingCommandHelper hearingOne, final Integer... offenceDateCodes) {
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearingOne.getHearingId()))
+                                .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
+                                        .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
+                                                .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)))))) {
+
+            shareResults(getRequestSpec(), hearingOne.getHearingId(), with(
+                    basicShareResultsCommandTemplate(),
+                    command -> command.setCourtClerk(courtClerk1)
+            ), targets);
+
+            JsonPath result = publicEventResulted.waitFor();
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].defendantCaseJudicialResults[0].cjsCode"), is("4592"));
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].defendantCaseJudicialResults[0].resultText"), is("Defendant's details changed"));
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].defendantCaseJudicialResults[0].judicialResultTypeId"), is("8c67b30a-418c-11e8-842f-0ed5f89f718b"));
+            assertThat(result.getInt("hearing.prosecutionCases[0].defendants[0].offences[0].offenceDateCode"), is(offenceDateCodes[0]));
+            if(offenceDateCodes.length > 1) {
+                assertThat(result.getInt("hearing.prosecutionCases[0].defendants[0].offences[1].offenceDateCode"), is(offenceDateCodes[1]));
+            }
+        }
+    }
+    private void addDefendant(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final Integer offenceDateCode) throws Exception {
+        UUID newDefendantId = randomUUID();
+        CoreTestTemplates.CoreTemplateArguments args = defaultArguments();
+        args.setStructure(toMap(newDefendantId, toMap(randomUUID(), TestUtilities.asList(randomUUID()))));
+        args.setCourtProceedingsInitiated(ZonedDateTime.now(ZoneOffset.UTC));
+        args.setOffenceDateCode(offenceDateCode);
+        Defendant addNewDefendant = defendant(hearingOne.getFirstCase().getId(), args,
+                new uk.gov.moj.cpp.hearing.test.Pair<>(newDefendantId, TestUtilities.asList(randomUUID())))
+                .withAssociatedPersons(TestUtilities.asList(associatedPerson(defaultArguments()).build()))
+                .withProsecutionCaseId(hearingOne.getFirstDefendantForFirstCase().getProsecutionCaseId())
+                .build();
+
+        UseCases.addDefendant(addNewDefendant);
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                        .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                        .with(ProsecutionCase::getDefendants, hasItem(isBean(Defendant.class)))
+                                        .with(p -> p.getDefendants().size(), is(2))
+                                )
+                        )));
+
+    }
+
+
+    public void addOffence(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final Integer offenceDateCode) throws Exception {
+
+        final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceAdded = h(UseCases.updateOffences(
+                addOffencesForDefendantTemplate(
+                        updateOffencesForDefendantArguments(
+                                hearingOne.getFirstCase().getId(),
+                                hearingOne.getFirstDefendantForFirstCase().getId()
+                        )
+                                .setOffencesToAdd(singletonList(randomUUID()))
+                                .setOffenceDateCode(offenceDateCode)
+                )
+        ));
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, hasItems(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceIdForFirstDefendant()))
+                                        ))
+                                        .with(Defendant::getOffences, hasItem(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceAdded.getFirstOffenceFromAddedOffences().getId()))
+                                                .with(Offence::getOffenceCode, is(offenceAdded.getFirstOffenceFromAddedOffences().getOffenceCode()))
+                                                .with(Offence::getWording, is(offenceAdded.getFirstOffenceFromAddedOffences().getWording()))
+                                                .with(Offence::getStartDate, is(offenceAdded.getFirstOffenceFromAddedOffences().getStartDate()))
+                                                .with(Offence::getEndDate, is(offenceAdded.getFirstOffenceFromAddedOffences().getEndDate()))
+                                                .with(Offence::getCount, is(offenceAdded.getFirstOffenceFromAddedOffences().getCount()))
+                                                .with(Offence::getConvictionDate, is(offenceAdded.getFirstOffenceFromAddedOffences().getConvictionDate()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+    }
+
+    private void updateOffence(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final Integer offenceDateCode) throws Exception {
+
+        final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceUpdates = h(UseCases.updateOffences(
+                updateOffencesForDefendantTemplate(
+                        updateOffencesForDefendantArguments(
+                                hearingOne.getFirstCase().getId(),
+                                hearingOne.getFirstDefendantForFirstCase().getId()
+                        )
+                                .setOffencesToUpdate(singletonList(hearingOne.getFirstOffenceIdForFirstDefendant()))
+                                .setOffenceDateCode(offenceDateCode)
+                )
+        ));
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, hasItem(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getId()))
+                                                .with(Offence::getOffenceCode, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getOffenceCode()))
+                                                .with(Offence::getWording, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getWording()))
+                                                .with(Offence::getStartDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getStartDate()))
+                                                .with(Offence::getEndDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getEndDate()))
+                                                .with(Offence::getCount, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getCount()))
+                                                .with(Offence::getLaaApplnReference, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getLaaApplnReference()))
+                                                .with(Offence::getIsDiscontinued, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIsDiscontinued()))
+                                                .with(Offence::getIntroducedAfterInitialProceedings, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIntroducedAfterInitialProceedings()))
+                                                .with(Offence::getProceedingsConcluded, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getProceedingsConcluded()))
+
+                                        ))
+                                ))
+                        ))
+                )
+        );
+    }
     private void shareAndVerifyDDCH(final List<Target> targets, final InitiateHearingCommandHelper hearingOne) {
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")

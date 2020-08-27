@@ -1,13 +1,8 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.Boolean.TRUE;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.core.Is.is;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
-import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -27,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.jayway.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
