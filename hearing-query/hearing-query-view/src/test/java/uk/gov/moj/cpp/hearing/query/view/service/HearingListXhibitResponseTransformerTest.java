@@ -8,11 +8,11 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.INACTIVE;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.ADJOURNED;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.FINISHED;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.INPROGRESS;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.STARTED;
@@ -24,6 +24,10 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingEvent;
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialRole;
+import uk.gov.justice.core.courts.JudicialRoleType;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -39,6 +43,7 @@ import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -434,6 +439,158 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getCppUrn(), is(courtApplications.get(0).getApplicationReference()));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+    }
+
+    @Test
+    public void shouldTransformWithAdjournedWhenLastEventIsPaused() {
+        final UUID courtCentreId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID hearing2Id= randomUUID();
+
+        final List<Hearing> hearingList = Arrays.asList(Hearing.hearing()
+                .withId(hearingId)
+                .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                .withType(HearingType.hearingType().withId(randomUUID()).withDescription("hearingTypeDescription").build())
+                .withJudiciary(asList(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
+                .withCourtCentre(CourtCentre.courtCentre()
+                        .withRoomId(courtRoomId)
+                        .withName(COURT_NAME)
+                        .withId(courtCentreId)
+                        .build())
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withId(randomUUID())
+                        .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN("case urn").build())
+                        .withDefendants(asList(Defendant.defendant()
+                                .withId(randomUUID())
+                                .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
+                                .withOffences(asList(Offence.offence()
+                                        .withId(randomUUID())
+                                        .build()))
+                                .build()))
+                        .build()))
+                .build(),
+                Hearing.hearing()
+                        .withId(hearing2Id)
+                        .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                        .withType(HearingType.hearingType().withId(randomUUID()).withDescription("hearingTypeDescription").build())
+                        .withJudiciary(asList(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
+                        .withCourtCentre(CourtCentre.courtCentre()
+                                .withRoomId(courtRoomId)
+                                .withName(COURT_NAME)
+                                .withId(courtCentreId)
+                                .build())
+                        .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                                .withId(randomUUID())
+                                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN("case urn").build())
+                                .withDefendants(asList(Defendant.defendant()
+                                        .withId(randomUUID())
+                                        .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
+                                        .withOffences(asList(Offence.offence()
+                                                .withId(randomUUID())
+                                                .withJudicialResults(asList(JudicialResult.judicialResult()
+                                                        .withJudicialResultId(randomUUID())
+                                                        .build()))
+                                                .build()))
+                                        .build()))
+                                .build()))
+                        .build());
+
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearing2Id)).thenReturn(Optional.of(hearingEvent));
+        final Set<UUID> activeHearingIds = new HashSet<>();
+        activeHearingIds.add(hearingId);
+        final Map<UUID, UUID> eventDefinitionsIds = new HashMap<>();
+        final UUID finishedEventDefinitionsId = EventDefinitions.FINISHED.getEventDefinitionsId();
+        final UUID adjournedEventDefinitionsId = EventDefinitions.PAUSED.getEventDefinitionsId();
+        eventDefinitionsIds.putIfAbsent(hearingId, finishedEventDefinitionsId);
+        eventDefinitionsIds.putIfAbsent(hearing2Id, adjournedEventDefinitionsId);
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingId(hearingId).withHearingEventDefinitionId(adjournedEventDefinitionsId).build();
+        final HearingEvent hearing2Event = HearingEvent.hearingEvent().withHearingId(hearing2Id).withHearingEventDefinitionId(finishedEventDefinitionsId).build();
+
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearing2Id)).thenReturn(Optional.of(hearing2Event));
+        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
+        when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
+        when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+        final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
+        final CaseDetail caseDetail = courtRoom.getCases().getCasesDetails().get(0);
+
+        assertThat(caseDetail.getHearingprogress(), is(ADJOURNED.getProgressCode()));
+        assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
+        assertThat(caseDetail.getActivecase(), is(ACTIVE.getStatusCode()));
+        assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+
+
+        final CourtRoom courtRoomForSecondHearing = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
+        final CaseDetail caseDetailForSecondHearing = courtRoomForSecondHearing.getCases().getCasesDetails().get(1);
+        assertThat(caseDetailForSecondHearing.getHearingprogress(), is(FINISHED.getProgressCode()));
+        assertThat(caseDetailForSecondHearing.getActivecase(), is(INACTIVE.getStatusCode()));
+
+    }
+
+    @Test
+    public void shouldTransformWithInProgressWhenLastEventIsResume() {
+        final UUID courtCentreId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+        final UUID hearingId = randomUUID();
+
+
+        final List<Hearing> hearingList = Arrays.asList(Hearing.hearing()
+                        .withId(hearingId)
+                        .withHearingDays(asList(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build()))
+                        .withType(HearingType.hearingType().withId(randomUUID()).withDescription("hearingTypeDescription").build())
+                        .withJudiciary(asList(JudicialRole.judicialRole().withJudicialId(randomUUID()).withJudicialRoleType(JudicialRoleType.judicialRoleType().withJudiciaryType("circuit").build()).build()))
+                        .withCourtCentre(CourtCentre.courtCentre()
+                                .withRoomId(courtRoomId)
+                                .withName(COURT_NAME)
+                                .withId(courtCentreId)
+                                .build())
+                        .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                                .withId(randomUUID())
+                                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier().withCaseURN("case urn").build())
+                                .withDefendants(asList(Defendant.defendant()
+                                        .withId(randomUUID())
+                                        .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
+                                        .withOffences(asList(Offence.offence()
+                                                .withId(randomUUID())
+                                                .build()))
+                                        .build()))
+                                .build()))
+                        .build());
+
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
+        final Set<UUID> activeHearingIds = new HashSet<>();
+        final Map<UUID, UUID> eventDefinitionsIds = new HashMap<>();
+        final UUID resumeEventDefinitionsId = EventDefinitions.RESUME.getEventDefinitionsId();
+        eventDefinitionsIds.putIfAbsent(hearingId, resumeEventDefinitionsId);
+        final HearingEvent hearingEvent = HearingEvent.hearingEvent().withHearingId(hearingId).withHearingEventDefinitionId(resumeEventDefinitionsId).build();
+
+        when(hearingEventsToHearingMapper.getHearingList()).thenReturn(hearingList);
+        when(hearingEventsToHearingMapper.getAllHearingEventBy(hearingId)).thenReturn(Optional.of(hearingEvent));
+        when(hearingEventsToHearingMapper.getHearingIdAndEventDefinitionIds()).thenReturn(eventDefinitionsIds);
+        when(hearingEventsToHearingMapper.getActiveHearingIds()).thenReturn(activeHearingIds);
+        when(commonXhibitReferenceDataService.getCourtRoomMappingBy(any(), any())).thenReturn(courtRoomMapping);
+        when(courtRoomMapping.getCrestCourtRoomName()).thenReturn("x");
+        when(courtRoomMapping.getCrestCourtSiteUUID()).thenReturn(randomUUID());
+
+        final CurrentCourtStatus currentCourtStatus = hearingListXhibitResponseTransformer.transformFrom(hearingEventsToHearingMapper);
+        final CourtRoom courtRoom = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
+        final CaseDetail caseDetail = courtRoom.getCases().getCasesDetails().get(0);
+
+        assertThat(caseDetail.getHearingprogress(), is(INPROGRESS.getProgressCode()));
+        assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
+        assertThat(caseDetail.getActivecase(), is(INACTIVE.getStatusCode()));
+        assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+
+
     }
 
     private void mockHearingTypeId() {

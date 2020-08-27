@@ -16,6 +16,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant.defendant;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.INACTIVE;
+import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.ADJOURNED;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.FINISHED;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.INPROGRESS;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.STARTED;
@@ -134,20 +135,11 @@ public class HearingListXhibitResponseTransformer {
 
         final Set<UUID> activeHearingIds = hearingEventsToHearingMapper.getActiveHearingIds();
 
-        final BigInteger isActiveHearing = activeHearingIds.contains(hearing.getId()) ? ACTIVE.getStatusCode() : INACTIVE.getStatusCode();
-
-        BigInteger hearingprogessValue = ACTIVE.getStatusCode().equals(isActiveHearing) ? INPROGRESS.getProgressCode() : STARTED.getProgressCode();
-
-        final Optional<HearingEvent> latestEventOpt = hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId());
-        if (latestEventOpt.isPresent()) {
-            final HearingEvent latestEvent = latestEventOpt.get();
-            final UUID latestHearingEventDefinitionId = latestEvent.getHearingEventDefinitionId();
-            final boolean finishedHearingDefinitionsId = EventDefinitions.FINISHED.getEventDefinitionsId().equals(latestHearingEventDefinitionId);
-            hearingprogessValue = finishedHearingDefinitionsId ? FINISHED.getProgressCode() : hearingprogessValue;
-        }
+        final CaseStatusCode hearingStatusCode = activeHearingIds.contains(hearing.getId()) ? ACTIVE : INACTIVE;
+        final ProgessStatusCode hearingProgressCode = getHearingProgressCode(hearingEventsToHearingMapper, hearing, hearingStatusCode);
 
         if (courtRoom == null) {
-            final Cases cases = getCases(hearing, hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId()).orElse(null), isActiveHearing, hearingprogessValue);
+            final Cases cases = getCases(hearing, hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId()).orElse(null), hearingStatusCode.getStatusCode(), hearingProgressCode.getProgressCode());
             courtRoom = courtRoom()
                     .withCourtRoomName(courtRoomMapping.getCrestCourtRoomName())
                     .withCases(cases)
@@ -159,12 +151,53 @@ public class HearingListXhibitResponseTransformer {
             courtRoomMap.put(courtRoomKey, courtRoom);
         } else {
             final Optional<HearingEvent> hearingEventBy = hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId());
-            final List<CaseDetail> casesDetails = getCases(hearing, hearingEventBy.orElse(null), isActiveHearing, hearingprogessValue).getCasesDetails();
+            final List<CaseDetail> casesDetails = getCases(hearing, hearingEventBy.orElse(null), hearingStatusCode.getStatusCode(), hearingProgressCode.getProgressCode()).getCasesDetails();
 
             courtRoom.getCases().getCasesDetails().addAll(casesDetails);
             courtRoom.getLinkedCaseIds().addAll(getLinkedCaseIds(hearing.getCourtApplications()));
         }
         return courtRoom;
+    }
+
+    /**
+     * Returns ProgressStatusCode for hearing.
+     * It returns ADJOURNED when latest event is Paused event.
+     * It returns FINISHED when latest event is Finished event.
+     *
+     * @param hearingEventsToHearingMapper
+     * @param hearing
+     * @param hearingStatusCode
+     * @return progress status code for hearing
+     */
+    private ProgessStatusCode getHearingProgressCode(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final CaseStatusCode hearingStatusCode) {
+
+        ProgessStatusCode hearingProgressCode;
+
+        if (ACTIVE.equals(hearingStatusCode)) {
+            hearingProgressCode =  INPROGRESS;
+        } else {
+            hearingProgressCode =  STARTED;
+        }
+
+        return getProgressCodeRegardingLastEvent(hearingEventsToHearingMapper, hearing, hearingProgressCode);
+
+    }
+
+    private ProgessStatusCode getProgressCodeRegardingLastEvent(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final ProgessStatusCode hearingProgressCode) {
+        final Optional<HearingEvent> latestEventOpt = hearingEventsToHearingMapper.getAllHearingEventBy(hearing.getId());
+
+        if (latestEventOpt.isPresent()) {
+            final UUID latestHearingEventDefinitionId = latestEventOpt.get().getHearingEventDefinitionId();
+            if (EventDefinitions.FINISHED.getEventDefinitionsId().equals(latestHearingEventDefinitionId)) {
+                return FINISHED;
+            } else if (EventDefinitions.PAUSED.getEventDefinitionsId().equals(latestHearingEventDefinitionId)) {
+                return ADJOURNED;
+            } else if (EventDefinitions.RESUME.getEventDefinitionsId().equals(latestHearingEventDefinitionId)) {
+                return INPROGRESS;
+            }
+        }
+
+        return hearingProgressCode;
     }
 
     private List<UUID> getLinkedCaseIds(final List<CourtApplication> courtApplications) {

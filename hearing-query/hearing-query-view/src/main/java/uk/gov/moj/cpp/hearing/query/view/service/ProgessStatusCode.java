@@ -5,7 +5,8 @@ import java.math.BigInteger;
 public enum ProgessStatusCode {
     FINISHED(BigInteger.valueOf(9)),
     INPROGRESS(BigInteger.valueOf(5)),
-    STARTED(BigInteger.valueOf(0));
+    STARTED(BigInteger.valueOf(0)),
+    ADJOURNED(BigInteger.valueOf(8));
 
     private final BigInteger progressCode;
 
