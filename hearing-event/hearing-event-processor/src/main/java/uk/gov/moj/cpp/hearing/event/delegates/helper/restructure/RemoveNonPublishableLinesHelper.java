@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
 import static java.util.Comparator.comparing;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
@@ -20,6 +22,7 @@ public class RemoveNonPublishableLinesHelper {
     }
 
     public static List<TreeNode<ResultLine>> removeNonPublishableResults(final List<TreeNode<ResultLine>> treeNodeList) {
+
         final List<TreeNode<ResultLine>> leafTreeNodes = treeNodeList.stream()
                 .filter(node -> node.isLeaf() && !node.isStandalone())
                 .sorted(comparing(node -> node.getResultDefinition().getData().getRank()))
@@ -37,16 +40,23 @@ public class RemoveNonPublishableLinesHelper {
                         judicialResultPrompts.forEach(promptPair -> parent.get().getJudicialResult().getJudicialResultPrompts().addAll(promptPair.getValue()));
                         parent.get().getChildren().remove(treeNode);
                         candidateNodeForRemoval.add(treeNode);
-                        parent.get().getJudicialResult().setNextHearing(treeNode.getJudicialResult().getNextHearing());
+                        //Only set next hearing object if the parent node doesn't have it
+                        if(nextHearingOnlyExistsOnChildNode(treeNode, parent.get())) {
+                            parent.get().getJudicialResult().setNextHearing(treeNode.getJudicialResult().getNextHearing());
+                        }
                     }
                 }
         );
-        candidateNodeForRemoval.stream().forEach(node -> {
+        candidateNodeForRemoval.forEach(node -> {
             node.removeAllParents();
             node.removeAllChildren();
         });
         treeNodeList.removeAll(candidateNodeForRemoval);
         return treeNodeList;
+    }
+
+    private static boolean nextHearingOnlyExistsOnChildNode(TreeNode<ResultLine> childNode, TreeNode<ResultLine> parent) {
+        return isNull(parent.getJudicialResult().getNextHearing()) && nonNull(childNode.getJudicialResult().getNextHearing());
     }
 
     private static void populatePrompts(final TreeNode<ResultLine> treeNode, final List<Pair<Integer, List<JudicialResultPrompt>>> rankAndJudicialResultPromptPairs) {
