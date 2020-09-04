@@ -5,11 +5,12 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static uk.gov.justice.core.courts.Defendant.*;
-import static uk.gov.justice.core.courts.Hearing.*;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.justice.core.courts.Defendant.defendant;
+import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
-import static uk.gov.justice.core.courts.ProsecutionCase.*;
+import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -34,8 +35,6 @@ import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
 
 public class PleaDelegateTest {
 
@@ -672,6 +671,115 @@ public class PleaDelegateTest {
                 .withOffenceId(offenceId)
                 .withPlea(Plea.plea()
                         .withPleaValue(PleaValue.PARDON)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaIsAdmits() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.ADMITS)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaIsGuiltyToALesserOffenceNamely() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.GUILTY_TO_A_LESSER_OFFENCE_NAMELY)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenPleaIsGuiltyToAnAlternativeOffenceNotChargedNamely() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.GUILTY_TO_AN_ALTERNATIVE_OFFENCE_NOT_CHARGED_NAMELY)
+                        .build()
+                ).build();
+
+        final Stream<Object> objectStream = pleaDelegate.updatePlea(hearingId, pleaModel);
+        assertThat(objectStream, is(notNullValue()));
+
+        final List<Object> events = new ArrayList<>();
+        objectStream.forEach(os -> events.add(os));
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+    }
+
+
+    @Test
+    public void shouldAddConvictionDateRemovedEventWhenPleaIsDenies() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final Hearing hearing = getHearing(offenceId, prosecutionCaseId, hearingId);
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(offenceId)
+                .withPlea(Plea.plea()
+                        .withPleaValue(PleaValue.DENIES)
                         .build()
                 ).build();
 

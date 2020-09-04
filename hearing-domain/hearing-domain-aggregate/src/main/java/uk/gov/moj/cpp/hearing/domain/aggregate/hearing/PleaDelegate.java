@@ -2,12 +2,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
+import static uk.gov.justice.core.courts.PleaValue.ADMITS;
 import static uk.gov.justice.core.courts.PleaValue.AUTREFOIS_CONVICT;
 import static uk.gov.justice.core.courts.PleaValue.CHANGE_TO_GUILTY_AFTER_SWORN_IN;
 import static uk.gov.justice.core.courts.PleaValue.CHANGE_TO_GUILTY_MAGISTRATES_COURT;
 import static uk.gov.justice.core.courts.PleaValue.CHANGE_TO_GUILTY_NO_SWORN_IN;
 import static uk.gov.justice.core.courts.PleaValue.CONSENTS;
 import static uk.gov.justice.core.courts.PleaValue.GUILTY;
+import static uk.gov.justice.core.courts.PleaValue.GUILTY_TO_AN_ALTERNATIVE_OFFENCE_NOT_CHARGED_NAMELY;
+import static uk.gov.justice.core.courts.PleaValue.GUILTY_TO_A_LESSER_OFFENCE_NAMELY;
 import static uk.gov.justice.core.courts.PleaValue.MCA_GUILTY;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
@@ -128,6 +131,9 @@ public class PleaDelegate implements Serializable {
                 CONSENTS,
                 CHANGE_TO_GUILTY_AFTER_SWORN_IN,
                 CHANGE_TO_GUILTY_NO_SWORN_IN,
-                CHANGE_TO_GUILTY_MAGISTRATES_COURT).contains(pleaValue);
+                CHANGE_TO_GUILTY_MAGISTRATES_COURT,
+                GUILTY_TO_A_LESSER_OFFENCE_NAMELY,
+                GUILTY_TO_AN_ALTERNATIVE_OFFENCE_NOT_CHARGED_NAMELY,
+                ADMITS).contains(pleaValue);
     }
 }
