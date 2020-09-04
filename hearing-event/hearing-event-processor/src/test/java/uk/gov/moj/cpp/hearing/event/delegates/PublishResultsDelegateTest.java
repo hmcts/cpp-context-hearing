@@ -1,23 +1,45 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Captor;
-import org.mockito.Mock;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Spy;
-import uk.gov.justice.core.courts.JudicialResult;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Offence;
+import static java.lang.System.lineSeparator;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+
 import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialRole;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
@@ -32,41 +54,22 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.Alcoho
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 
-import javax.json.JsonObject;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import static java.lang.System.lineSeparator;
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
-import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
+import org.mockito.Spy;
 
 public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
@@ -111,7 +114,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shareResults() throws IOException {
-        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(JsonEnvelope.class), any(LocalDate.class))).thenReturn(new ArrayList<>());
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         target.shareResults(envelope, sender, resultsShared);
@@ -134,7 +136,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shareResultsWithEnrichedVerdictType() throws IOException {
-        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(JsonEnvelope.class), any(LocalDate.class))).thenReturn(new ArrayList<>());
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         List<VerdictType> allVerdictTypes = new ArrayList<>();
@@ -185,7 +186,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
 
     @Test
     public void shareResultsWithEnrichedAlcoholMethodLevels() throws IOException {
-        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(JsonEnvelope.class), any(LocalDate.class))).thenReturn(new ArrayList<>());
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
 
@@ -259,7 +259,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile("hearing.results-shared-ddch.json", ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
 
-        when(relistReferenceDataService.getWithdrawnResultDefinitionUuids(any(JsonEnvelope.class), any(LocalDate.class))).thenReturn(new ArrayList<>());
         final ResultDefinition resultDefinition = new ResultDefinition();
         resultDefinition.setId(randomUUID());
         resultDefinition.setLabel("Defendant Details Changed");
@@ -291,7 +290,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void whenAnyJudicialResulCategorytIsFinal_Then_IsDiposed_Should_BeSetToTrue() throws IOException {
+    public void whenAnyJudicialResultCategorytIsFinal_Then_IsDiposed_Should_BeSetToTrue() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
         setJudicialResultsWithCategoryOf(resultsShared, Category.FINAL);
 
@@ -448,6 +447,28 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2019-11-08"));
         assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getJudicialResults().get(0).getJudicialResultPrompts(), nullValue());
         assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getDefendantCaseJudicialResults(), nullValue());
+    }
+
+    @Test
+    public void shouldShareResultsWithAcquittalDateForOffenceLevelJudicialResults() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE, ResultsShared.class);
+
+        target.shareResults(dummyEnvelope, sender, resultsShared);
+
+        verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
+        assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAquittalDate().toString(), is("2020-08-19"));
+    }
+
+    @Test
+    public void shouldShareResultsWithoutUpdatingAcquittalDateForOffenceLevelJudicialResults() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE, ResultsShared.class);
+
+        target.shareResults(dummyEnvelope, sender, resultsShared);
+
+        verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
+        assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAquittalDate().toString(), is("2020-08-18"));
     }
 
     private void setJudicialResultsWithCategoryOf(final ResultsShared expected, final Category category) {

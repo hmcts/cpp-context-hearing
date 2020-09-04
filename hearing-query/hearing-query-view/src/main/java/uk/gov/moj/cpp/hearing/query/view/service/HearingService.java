@@ -20,19 +20,16 @@ import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
-import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Now;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
@@ -109,16 +106,9 @@ public class HearingService {
     @Inject
     private HearingJPAMapper hearingJPAMapper;
     @Inject
-    private HearingTypeJPAMapper hearingTypeJPAMapper;
-    @Inject
-    private HearingDayJPAMapper hearingDayJPAMapper;
-    @Inject
     private TargetJPAMapper targetJPAMapper;
     @Inject
-    private ProsecutionCaseIdentifierJPAMapper prosecutionCaseIdentifierJPAMapper;
-    @Inject
     private GetHearingsTransformer getHearingTransformer;
-
     @Inject
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     @Inject
@@ -228,9 +218,9 @@ public class HearingService {
     }
 
     private void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
-        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach( d -> d.getOffences().removeIf(o -> o.isShadowListed()));
+        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach( d -> d.getOffences().removeIf(Offence::isShadowListed));
         filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
-        filteredHearings.stream().forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
+        filteredHearings.forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
         filteredHearings.removeIf(x -> x.getProsecutionCases().isEmpty());
     }
 
@@ -265,24 +255,26 @@ public class HearingService {
     }
 
     private void addDefendantDetailsToQueryResult(final HashMap<UUID, CourtRoom> courtRooms, final ProsecutionCase pc, final UUID roomUUID) {
-        for (final Defendant defendant : pc.getDefendants()) {
-            DefendantDetail.Builder builder = DefendantDetail.defendantDetail()
+        pc.getDefendants().forEach(defendant -> {
+            final DefendantDetail.Builder builder = DefendantDetail.defendantDetail()
                     .withDefendantId(defendant.getId().getId());
-            if (defendant.getPersonDefendant() != null) {
+            if (nonNull(defendant.getPersonDefendant())) {
                 final Person personDetails = defendant.getPersonDefendant().getPersonDetails();
-                if (personDetails != null) {
-                    builder = builder.withFirstName(personDetails.getFirstName())
+                if (nonNull(personDetails)) {
+                    builder.withFirstName(personDetails.getFirstName())
                             .withLastName(personDetails.getLastName())
-                            .withDateOfBirth(nonNull(personDetails.getDateOfBirth()) ? personDetails.getDateOfBirth().toString() : null)
                             .withNationalInsuranceNumber(personDetails.getNationalInsuranceNumber());
+
+                    if (nonNull(personDetails.getDateOfBirth())) {
+                        builder.withDateOfBirth(personDetails.getDateOfBirth().toString());
+                    }
                 }
             }
-            if (defendant.getLegalEntityOrganisation() != null) {
-                builder = builder.withLegalEntityOrganizationName(defendant.getLegalEntityOrganisation().getName());
+            if (nonNull(defendant.getLegalEntityOrganisation())) {
+                builder.withLegalEntityOrganizationName(defendant.getLegalEntityOrganisation().getName());
             }
-
             courtRooms.get(roomUUID).getDefendantDetails().add(builder.build());
-        }
+        });
     }
 
     public Optional<Hearing> getHearingById(final UUID hearingId) {
@@ -378,7 +370,7 @@ public class HearingService {
         return crackedIneffectiveVacatedTrialTypes
                 .getCrackedIneffectiveVacatedTrialTypes()
                 .stream()
-                .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trialTypeId))
+                .filter(crackedIneffectiveTrial -> trialTypeId.equals(crackedIneffectiveTrial.getId()))
                 .findFirst();
     }
 
@@ -542,7 +534,7 @@ public class HearingService {
     }
 
     private List<HearingEvent> getHearingEvents(final List<HearingEventPojo> hearingEventPojos) {
-        final List<HearingEvent> hearingEvents = new ArrayList();
+        final List<HearingEvent> hearingEvents = new ArrayList<>();
         for (final HearingEventPojo hearingEventPojo : hearingEventPojos) {
             final HearingEvent hearingEvent = new HearingEvent();
             hearingEvent.setHearingId(hearingEventPojo.getHearingId());

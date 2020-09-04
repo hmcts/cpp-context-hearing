@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 import static java.lang.Boolean.TRUE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -18,9 +17,9 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
+import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
@@ -50,9 +49,9 @@ import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -111,6 +110,7 @@ public class PublishResultsDelegate {
         appealDate.ifPresent(localDate -> updateResultLineOrderDate(resultsShared, localDate));
 
         final List<TreeNode<ResultLine>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared);
+
         mapApplicationLevelJudicialResults(resultsShared, restructuredResults);
 
         if (resultsShared.getHearing().getProsecutionCases() != null && !resultsSharedFilter.filterTargets(resultsShared, t -> t.getApplicationId() == null).getTargets().isEmpty()) {
@@ -119,13 +119,13 @@ public class PublishResultsDelegate {
 
             enrichOffenceFactsAlcoholLevelsData(context, resultsShared.getHearing());
 
-            mapAcquittalDate(context, resultsShared);
-
             mapDefendantLevelJudicialResults(resultsShared, restructuredResults);
 
             mapDefendantCaseLevelJudicialResults(resultsShared, restructuredResults);
 
             mapOffenceLevelJudicialResults(resultsShared, restructuredResults);
+
+            mapAcquittalDate(resultsShared);
 
             bailStatusHelper.mapBailStatuses(context, resultsShared);
 
@@ -157,8 +157,8 @@ public class PublishResultsDelegate {
                 .flatMap(def ->  def.getOffences() != null ? def.getOffences().stream() : Stream.empty())
                 .flatMap(off -> off.getJudicialResults() != null ? off.getJudicialResults().stream() :Stream.empty())
                 .filter(jr -> jr.getNextHearing() != null)
-                .map(jr -> jr.getNextHearing()).anyMatch(nh -> MAGISTRATES == nh.getJurisdictionType())) {
-            return  resultsShared.getTargets().stream().filter(t -> TRUE.equals(t.getShadowListed())).map(x -> x.getOffenceId()).collect(Collectors.toList());
+                .map(JudicialResult::getNextHearing).anyMatch(nh -> MAGISTRATES == nh.getJurisdictionType())) {
+            return  resultsShared.getTargets().stream().filter(t -> TRUE.equals(t.getShadowListed())).map(Target::getOffenceId).collect(Collectors.toList());
         }
         return emptyList();
     }
@@ -402,47 +402,35 @@ public class PublishResultsDelegate {
                 .map(TreeNode::getJudicialResult).collect(toList());
     }
 
-    private void mapAcquittalDate(final JsonEnvelope event, final ResultsShared resultsShared) {
-        final LocalDate on = resultsShared.getHearing().getHearingDays().stream()
-                .map(HearingDay::getSittingDay)
-                .map(ZonedDateTime::toLocalDate)
-                .min(comparing(LocalDate::toEpochDay))
-                .orElse(LocalDate.now());
-
-        //Get all withdrawn result definitions
-        final List<UUID> withdrawnResultDefinitionUuid = relistReferenceDataService.getWithdrawnResultDefinitionUuids(event, on);
-
-        //Set Acquittals (to support court extract) default is set to null
+    private void mapAcquittalDate(final ResultsShared resultsShared) {
         resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream())
-                .forEach(offence -> {
-                    if (nonNull(offence.getPlea()) &&
-                            offence.getPlea().getPleaValue() == PleaValue.NOT_GUILTY &&
-                            isResultLineFinal(withdrawnResultDefinitionUuid, resultsShared.getTargets(), offence.getId()) &&
-                            isNull(offence.getConvictionDate())) {
-                        final LocalDate orderDate = getOrderDate(withdrawnResultDefinitionUuid, resultsShared.getTargets(), offence.getId());
-                        offence.setAquittalDate(orderDate);
-                    }
-                });
+                .filter(this::isValidToSetAcquittalDate)
+                .forEach(offence -> getMaxOrderDate(offence.getJudicialResults()).ifPresent(offence::setAquittalDate));
     }
 
-    private LocalDate getOrderDate(final List<UUID> withdrawnResultDefinitionUuid, final List<Target> targets, final UUID offenceId) {
-        return targets.stream()
-                .filter(target -> target.getOffenceId().equals(offenceId))
-                .flatMap(target -> target.getResultLines().stream())
-                .filter(resultLine -> withdrawnResultDefinitionUuid.contains(resultLine.getResultDefinitionId()))
-                .map(ResultLine::getOrderedDate)
-                .collect(toList())
-                .get(0);
+    private boolean isValidToSetAcquittalDate(final Offence offence) {
+        return isNull(offence.getAquittalDate()) &&
+                isNotGuiltyPlea(offence) &&
+                hasFinalResult(offence.getJudicialResults()) &&
+                isNull(offence.getConvictionDate());
     }
 
-    private boolean isResultLineFinal(final List<UUID> withdrawnResultDefinitionUuid, final List<Target> targets, final UUID offenceId) {
-        return targets.stream()
-                .filter(target -> target.getApplicationId() == null)
-                .filter(target -> target.getOffenceId().equals(offenceId))
-                .flatMap(target -> target.getResultLines().stream())
-                .anyMatch(resultLine -> withdrawnResultDefinitionUuid.contains(resultLine.getResultDefinitionId()));
+    private boolean isNotGuiltyPlea(final Offence offence) {
+        return nonNull(offence.getPlea()) &&
+                offence.getPlea().getPleaValue() == PleaValue.NOT_GUILTY;
+    }
+
+    private Optional<LocalDate> getMaxOrderDate(final List<JudicialResult> judicialResults) {
+        return judicialResults.stream()
+                .filter(judicialResult -> judicialResult.getCategory() == Category.FINAL)
+                .map(JudicialResult::getOrderedDate)
+                .max(Comparator.naturalOrder());
+    }
+
+    private boolean hasFinalResult(final List<JudicialResult> judicialResults) {
+        return judicialResults.stream().anyMatch(result -> Category.FINAL == result.getCategory());
     }
 
     /**

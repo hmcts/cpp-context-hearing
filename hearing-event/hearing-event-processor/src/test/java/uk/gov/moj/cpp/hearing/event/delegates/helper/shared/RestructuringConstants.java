@@ -20,6 +20,8 @@ public class RestructuringConstants {
     public static final String RESULT_DEFINITIONS_JSON = "result-definitions.json";
     public static final String SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON = "scenario1-shortCode-SendToCCOnCB.json";
     public static final String HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON = "hearing.results-shared-with-no-prompts.json";
+    public static final String HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE = "hearing.results-shared-to-set-acquittal-date.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE = "hearing.results-shared-with-acquittal-date.json";
     public static final String DIRS_HEARING_JSON = "DIRS-hearing.json";
     public static final String FIXED_LIST_JSON = "fixed-list.json";
     public static final String CO_HEARING_EVENT_JSON = "CO-hearing-event.json";

@@ -11,6 +11,11 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @deprecated - This class has been retain to support existing events in the event log.
+ *
+ */
+@Deprecated
 @Event("hearing.event.hearing-adjourned")
 public class HearingAdjourned implements Serializable {
 

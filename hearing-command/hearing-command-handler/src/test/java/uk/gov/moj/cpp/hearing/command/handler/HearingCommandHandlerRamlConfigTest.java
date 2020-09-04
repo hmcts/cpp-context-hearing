@@ -45,7 +45,6 @@ public class HearingCommandHandlerRamlConfigTest {
                 UpdateDefendantCommandHandler.class,
                 HearingDetailChangeCommandHandler.class,
                 UploadSubscriptionsCommandHandler.class,
-                AdjournHearingCommandHandler.class,
                 UpdateDefendantAttendanceCommandHandler.class,
                 SaveHearingCaseNoteCommandHandler.class,
                 SaveApplicationResponseCommandHandler.class,

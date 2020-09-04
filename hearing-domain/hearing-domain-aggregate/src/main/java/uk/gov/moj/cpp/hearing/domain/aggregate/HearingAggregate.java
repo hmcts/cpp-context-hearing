@@ -31,12 +31,10 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
-import uk.gov.moj.cpp.external.domain.progression.relist.AdjournHearing;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
-import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.AdjournHearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ApplicantCounselDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ApplicationDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.CompanyRepresentativeDelegate;
@@ -119,7 +117,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 7L;
+    private static final long serialVersionUID = 8L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -146,8 +144,6 @@ public class HearingAggregate implements Aggregate {
     private final OffenceDelegate offenceDelegate = new OffenceDelegate(momento);
 
     private final VariantDirectoryDelegate variantDirectoryDelegate = new VariantDirectoryDelegate(momento);
-
-    private final AdjournHearingDelegate adjournHearingDelegate = new AdjournHearingDelegate(momento);
 
     private final ApplicationDelegate applicationDelegate = new ApplicationDelegate(momento);
 
@@ -353,10 +349,6 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> deleteOffence(final UUID offenceId, final UUID hearingId) {
         return apply(this.offenceDelegate.deleteOffence(offenceId, hearingId));
-    }
-
-    public Stream<Object> adjournHearing(final AdjournHearing adjournHearing) {
-        return apply(this.adjournHearingDelegate.adjournHearing(adjournHearing));
     }
 
     public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDay) {

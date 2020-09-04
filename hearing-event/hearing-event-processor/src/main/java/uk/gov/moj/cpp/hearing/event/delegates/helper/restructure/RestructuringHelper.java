@@ -38,6 +38,7 @@ public class RestructuringHelper {
 
     public List<TreeNode<ResultLine>> restructure(final JsonEnvelope context, final ResultsShared resultsShared) {
         final List<TreeNode<ResultLine>> treeNodes = resultTreeBuilder.build(context, resultsShared);
+
         final List<TreeNode<ResultLine>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 
         updateResultText(
