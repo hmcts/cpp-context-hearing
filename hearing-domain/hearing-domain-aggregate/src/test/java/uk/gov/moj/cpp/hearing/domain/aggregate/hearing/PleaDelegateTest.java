@@ -2,10 +2,10 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
@@ -344,7 +344,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -371,7 +371,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -398,7 +398,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -425,7 +425,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -452,7 +452,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -479,7 +479,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -547,7 +547,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     @Test
@@ -574,7 +574,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     @Test
@@ -601,7 +601,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     @Test
@@ -628,7 +628,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     @Test
@@ -655,7 +655,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     @Test
@@ -682,7 +682,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     @Test
@@ -709,7 +709,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -736,7 +736,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
     @Test
@@ -763,7 +763,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateAdded);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateAdded.class)));
     }
 
 
@@ -791,7 +791,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
-        assertTrue(events.get(1) instanceof ConvictionDateRemoved);
+        assertThat(events.get(1), is(instanceOf(ConvictionDateRemoved.class)));
     }
 
     private Hearing getHearing(final UUID offenceId, final UUID prosecutionCaseId, final UUID hearingId) {
