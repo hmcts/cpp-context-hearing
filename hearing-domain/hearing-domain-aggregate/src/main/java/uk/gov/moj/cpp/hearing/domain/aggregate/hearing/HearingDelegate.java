@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
@@ -45,7 +46,30 @@ public class HearingDelegate implements Serializable {
     }
 
     public void handleHearingInitiated(HearingInitiated hearingInitiated) {
-        this.momento.setHearing(hearingInitiated.getHearing());
+        final Hearing hearing = hearingInitiated.getHearing();
+        this.momento.setHearing(hearing);
+
+        if (isNull(hearing) || isNull(hearing.getProsecutionCases())) {
+            return;
+        }
+
+        this.momento.getHearing().getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants().forEach(
+                        defendant -> defendant.getOffences().forEach(offence -> {
+
+                            final UUID offenceId = offence.getId();
+                            if (nonNull(offence.getConvictionDate())) {
+                                this.momento.getConvictionDates().put(offenceId, offence.getConvictionDate());
+                            }
+
+                            if (nonNull(offence.getPlea())) {
+                                this.momento.getPleas().put(offenceId, offence.getPlea());
+                            }
+
+                            if (nonNull(offence.getVerdict())) {
+                                this.momento.getVerdicts().put(offenceId, offence.getVerdict());
+                            }
+                        })));
     }
 
     public void handleHearingExtended(final HearingExtended hearingExtended) {
@@ -101,7 +125,9 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingInitiated(hearing));
     }
 
-    public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+    public Stream<Object> extend(final UUID hearingId,
+                                 final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases,
+                                 final List<UUID> shadowListedOffences) {
 
         return Stream.of(new HearingExtended(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
     }
@@ -114,7 +140,7 @@ public class HearingDelegate implements Serializable {
                                                final HearingLanguage hearingLanguage,
                                                final List<HearingDay> hearingDays,
                                                final List<JudicialRole> judiciary
-                                               ) {
+    ) {
 
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.change-hearing-detail' event as hearing not found", id));
@@ -133,7 +159,8 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingEventVacatedTrialCleared(hearingId));
     }
 
-    private HearingChangeIgnored generateHearingIgnoredMessage(final String reason, final UUID hearingId) {
+    private HearingChangeIgnored generateHearingIgnoredMessage(final String reason,
+                                                               final UUID hearingId) {
         return new HearingChangeIgnored(hearingId, reason);
     }
 
@@ -144,7 +171,8 @@ public class HearingDelegate implements Serializable {
                 .filter(o -> o.getCount() == null).collect(Collectors.toList());
     }
 
-    public Stream<Object> ignoreHearingInitiate(final List<Offence> offences, final UUID hearingId) {
+    public Stream<Object> ignoreHearingInitiate(final List<Offence> offences,
+                                                final UUID hearingId) {
         return Stream.of(new HearingInitiateIgnored(hearingId, offences));
     }
 
@@ -160,12 +188,11 @@ public class HearingDelegate implements Serializable {
     private boolean checkIfHearingDateAlreadyPassed() {
         return momento.getHearing().getHearingDays().stream()
                 .map(hearingDay -> hearingDay.getSittingDay().toLocalDate())
-                .filter(localDate -> (localDate.isAfter(LocalDate.now()) || localDate.isEqual(LocalDate.now())))
-                .collect(Collectors.toList()).isEmpty();
-
+                .noneMatch(localDate -> (localDate.isAfter(LocalDate.now()) || localDate.isEqual(LocalDate.now())));
     }
 
-    public Stream<Object> updateCourtApplication(final UUID hearingId, final CourtApplication courtApplication) {
+    public Stream<Object> updateCourtApplication(final UUID hearingId,
+                                                 final CourtApplication courtApplication) {
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.update-court-application' event as hearing not found", hearingId));
         }
@@ -178,7 +205,8 @@ public class HearingDelegate implements Serializable {
         }
     }
 
-    public void handleApplicationDetailChanged(final ApplicationDetailChanged applicationDetailChanged) {
+    public void handleApplicationDetailChanged(
+            final ApplicationDetailChanged applicationDetailChanged) {
         if (momento.getHearing() != null) {
             final Optional<CourtApplication> previousStoredApplication = momento.getHearing().getCourtApplications().stream()
                     .filter(courtApplication -> courtApplication.getId().equals(applicationDetailChanged.getCourtApplication().getId()))

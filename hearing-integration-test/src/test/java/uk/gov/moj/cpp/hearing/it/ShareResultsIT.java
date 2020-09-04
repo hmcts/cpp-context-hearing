@@ -165,6 +165,7 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID DISMISSED_RESULT_DEF_ID = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
     private static final UUID GUILTY_RESULT_DEF_ID = fromString("ce23a452-9015-4619-968f-1628d7a271c9");
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
+    private static final int TIMEOUT_IN_MS = 30000;
 
     @Before
     public void setUp() {
@@ -287,7 +288,8 @@ public class ShareResultsIT extends AbstractIT {
 
         final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
 
-        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, changeConvictionDate(initiateHearingCommandHelper));
+        final LocalDate convictionDateBasedOnVerdict = updateVerdictCommandHelper.getFirstVerdict().getVerdictDate();
+        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaWithoutChangingConvictionDate(initiateHearingCommandHelper), convictionDateBasedOnVerdict);
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
@@ -1263,7 +1265,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final CommandHelpers.UpdatePleaCommandHelper pleaOne = changeConvictionDate(initiateHearingCommandHelper);
 
-        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, pleaOne);
+        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, pleaOne, pleaOne.getFirstPleaDate());
 
         SaveDraftResultCommand saveDraftResultCommand;
 
@@ -1804,6 +1806,31 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
+    private CommandHelpers.UpdatePleaCommandHelper updatePleaWithoutChangingConvictionDate(final InitiateHearingCommandHelper hearingOne) {
+        try (final EventListener hearingPleaUpdatedListener = listenFor("public.hearing.plea-updated")
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
+                        ))
+                );
+             final EventListener convictionDateChangedListener = listenFor("public.hearing.offence-conviction-date-changed")
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
+                             ))
+                     )
+        ) {
+
+            final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
+                    UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, PleaValue.GUILTY,
+                                    false))
+            );
+
+            hearingPleaUpdatedListener.waitFor();
+            convictionDateChangedListener.expectNoneWithin(TIMEOUT_IN_MS);
+            return pleaOne;
+        }
+    }
+
     private void updateDefendantAttendance(final InitiateHearingCommandHelper hearingOne) {
         final UUID hearingId = hearingOne.getHearingId();
         final UUID defendantId = hearingOne.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId();
@@ -1844,7 +1871,7 @@ public class ShareResultsIT extends AbstractIT {
         ).build();
     }
 
-    private CrackedIneffectiveTrial getExpectedTrialType(final InitiateHearingCommandHelper hearingOne, final CommandHelpers.UpdatePleaCommandHelper pleaOne) {
+    private CrackedIneffectiveTrial getExpectedTrialType(final InitiateHearingCommandHelper hearingOne, final CommandHelpers.UpdatePleaCommandHelper pleaOne, final LocalDate convictionDateToUse) {
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         final CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
@@ -1872,7 +1899,7 @@ public class ShareResultsIT extends AbstractIT {
                                                         .with(IndicatedPlea::getIndicatedPleaDate, is(pleaOne.getFirstIndicatedPleaDate())))
                                                 .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
                                                         .with(AllocationDecision::getOffenceId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
-                                                .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))))))))));
+                                                .with(Offence::getConvictionDate, is(convictionDateToUse))))))))));
         return expectedTrialType;
     }
 

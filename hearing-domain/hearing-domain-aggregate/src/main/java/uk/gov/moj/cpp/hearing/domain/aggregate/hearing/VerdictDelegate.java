@@ -1,13 +1,14 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyPlea;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
+import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
+import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
 
-import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 
@@ -21,8 +22,6 @@ public class VerdictDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private static final String GUILTY = "GUILTY";
-
     private final HearingAggregateMomento momento;
 
     public VerdictDelegate(final HearingAggregateMomento momento) {
@@ -30,30 +29,24 @@ public class VerdictDelegate implements Serializable {
     }
 
     public void handleVerdictUpsert(final VerdictUpsert verdictUpsert) {
-        if (nonNull(verdictUpsert.getVerdict())) {
-            this.momento.getVerdicts().put(verdictUpsert.getVerdict().getOffenceId(), verdictUpsert.getVerdict());
+        final Verdict verdict = verdictUpsert.getVerdict();
+        if (nonNull(verdict)) {
+            this.momento.getVerdicts().put(verdict.getOffenceId(), verdict);
         }
     }
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
-
         final List<Object> events = new ArrayList<>();
 
+        final UUID offenceId = verdict.getOffenceId();
         final ProsecutionCase prosecutionCase = this.momento.getHearing().getProsecutionCases().stream()
                 .filter(pc -> pc.getDefendants().stream()
                         .flatMap(de -> de.getOffences().stream())
-                        .anyMatch(o -> o.getId().equals(verdict.getOffenceId())))
+                        .anyMatch(o -> o.getId().equals(offenceId)))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Offence id is not present"));
 
         verdict.setOriginatingHearingId(hearingId);
-
-        final Offence offence = this.momento.getHearing().getProsecutionCases().stream()
-                .flatMap(pc -> pc.getDefendants().stream())
-                .flatMap(de -> de.getOffences().stream())
-                .filter(o -> o.getId().equals(verdict.getOffenceId()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Offence id is not present"));
 
         final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
                 .setHearingId(hearingId)
@@ -61,19 +54,23 @@ public class VerdictDelegate implements Serializable {
 
         events.add(verdictUpsert);
 
-        if (verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && isNull(offence.getConvictionDate())) {
-            events.add(ConvictionDateAdded.convictionDateAdded()
-                    .setCaseId(prosecutionCase.getId())
-                    .setHearingId(hearingId)
-                    .setOffenceId(offence.getId())
-                    .setConvictionDate(verdict.getVerdictDate()));
-        }
+        final Plea existingOffencePlea = momento.getPleas().get(offenceId);
+        final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(offenceId);
+        final boolean guiltyPleaForOffenceAlreadySet = nonNull(existingOffencePlea) && isGuiltyPlea(existingOffencePlea.getPleaValue());
 
-        if (!verdict.getVerdictType().getCategoryType().startsWith(GUILTY) && nonNull(offence.getConvictionDate())) {
-            events.add(ConvictionDateRemoved.convictionDateRemoved()
+        if (isGuiltyVerdict(verdict.getVerdictType())) {
+            if (!convictionDateAlreadySetForOffence) {
+                events.add(convictionDateAdded()
+                        .setCaseId(prosecutionCase.getId())
+                        .setHearingId(hearingId)
+                        .setOffenceId(offenceId)
+                        .setConvictionDate(verdict.getVerdictDate()));
+            }
+        } else if (!guiltyPleaForOffenceAlreadySet && convictionDateAlreadySetForOffence) {
+            events.add(convictionDateRemoved()
                     .setCaseId(prosecutionCase.getId())
                     .setHearingId(hearingId)
-                    .setOffenceId(offence.getId()));
+                    .setOffenceId(offenceId));
         }
 
         return events.stream();

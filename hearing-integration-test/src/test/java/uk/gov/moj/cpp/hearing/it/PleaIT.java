@@ -49,6 +49,9 @@ import org.junit.Test;
 
 public class PleaIT extends AbstractIT {
 
+    public static final String PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED = "public.hearing.offence-conviction-date-removed";
+    public static final String PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED = "public.hearing.offence-conviction-date-changed";
+
     @Test
     public void updatePlea_toGuilty_shouldHaveConvictionDate() {
 
@@ -70,7 +73,7 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor("public.hearing.offence-conviction-date-changed")
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))
@@ -123,7 +126,7 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor("public.hearing.offence-conviction-date-changed")
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))
@@ -183,7 +186,7 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor("public.hearing.offence-conviction-date-removed")
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
@@ -236,13 +239,22 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor("public.hearing.offence-conviction-date-removed")
+        final EventListener convictionDateAddedListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
+
+        final UpdatePleaCommandHelper guiltyPlea = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY);
+
+        convictionDateAddedListener.waitFor();
+
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
 
 
-        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, INDICATED_NOT_GUILTY, true, NOT_GUILTY);
+        final UpdatePleaCommandHelper notGuiltyIndiatedPlea = getUpdatePleaCommandHelper(hearingOne, INDICATED_NOT_GUILTY, true, NOT_GUILTY);
 
         convictionDateListener.waitFor();
 
@@ -254,13 +266,13 @@ public class PleaIT extends AbstractIT {
                                         .with(Defendant::getOffences, first(isBean(Offence.class)
                                                 .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
                                                 .with(Offence::getPlea, isBean(Plea.class)
-                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
-                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue())))
+                                                        .with(Plea::getPleaDate, is(notGuiltyIndiatedPlea.getFirstPleaDate()))
+                                                        .with(Plea::getPleaValue, is(notGuiltyIndiatedPlea.getFirstPleaValue())))
                                                 .with(Offence::getIndicatedPlea, isBean(IndicatedPlea.class)
-                                                        .with(IndicatedPlea::getIndicatedPleaValue, is(pleaOne.getFirstIndicatedPleaValue()))
-                                                        .with(IndicatedPlea::getIndicatedPleaDate, is(pleaOne.getFirstIndicatedPleaDate())))
+                                                        .with(IndicatedPlea::getIndicatedPleaValue, is(notGuiltyIndiatedPlea.getFirstIndicatedPleaValue()))
+                                                        .with(IndicatedPlea::getIndicatedPleaDate, is(notGuiltyIndiatedPlea.getFirstIndicatedPleaDate())))
                                                 .with(Offence::getAllocationDecision, isBean(AllocationDecision.class)
-                                                        .with(AllocationDecision::getMotReasonId, is(pleaOne.getFirstAllocationDecisionMotReasonId())))
+                                                        .with(AllocationDecision::getMotReasonId, is(notGuiltyIndiatedPlea.getFirstAllocationDecisionMotReasonId())))
                                         ))
                                 ))
                         ))
@@ -291,14 +303,14 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor("public.hearing.offence-conviction-date-removed")
+        final EventListener convictionDateAddedListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
 
-        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY);
+        final UpdatePleaCommandHelper guiltyPlea = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY);
 
-        convictionDateListener.waitFor();
+        convictionDateAddedListener.waitFor();
 
         getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -308,14 +320,40 @@ public class PleaIT extends AbstractIT {
                                         .with(Defendant::getOffences, first(isBean(Offence.class)
                                                 .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
                                                 .with(Offence::getPlea, isBean(Plea.class)
-                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
-                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue()))
+                                                        .with(Plea::getPleaDate, is(guiltyPlea.getFirstPleaDate()))
+                                                        .with(Plea::getPleaValue, is(guiltyPlea.getFirstPleaValue()))
+                                                )
+                                                .with(Offence::getConvictionDate, is(guiltyPlea.getFirstPleaDate()))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        final EventListener convictionDateRemovedListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
+
+        final UpdatePleaCommandHelper notGuiltyPlea = getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY);
+
+        convictionDateRemovedListener.waitFor();
+
+        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaDate, is(notGuiltyPlea.getFirstPleaDate()))
+                                                        .with(Plea::getPleaValue, is(notGuiltyPlea.getFirstPleaValue()))
                                                 )
                                                 .with(Offence::getConvictionDate, is(nullValue()))
                                         ))
                                 ))
                         ))
-
                 )
         );
     }
@@ -372,9 +410,8 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void initiateHearing_shouldInheritNotGuiltyPlea_andNullConvictionDate() {
-        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(), hearing -> {
-            h(hearing).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next());
-        })));
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
+                hearing -> h(hearing).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next()))));
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY);
 
@@ -443,7 +480,7 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor("public.hearing.offence-conviction-date-changed")
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
                 .withFilter(isJson(allOf(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))
