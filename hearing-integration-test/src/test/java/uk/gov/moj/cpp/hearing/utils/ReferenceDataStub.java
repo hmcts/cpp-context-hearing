@@ -55,6 +55,7 @@ import javax.json.JsonValue;
 import javax.ws.rs.core.Response;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import org.apache.http.HttpHeaders;
 import org.mockito.Spy;
 
@@ -142,9 +143,6 @@ public class ReferenceDataStub {
     private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-court-mappings";
     private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-court-mappings";
 
-    private static final String REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_URL = "/referencedata-service/query/api/rest/referencedata/hearing-types";
-    private static final String REFERENCEDATA_QUERY_XHIBIT_HEARING_TYPES_MEDIA_TYPE = "application/vnd.referencedata.query.hearing-types+json";
-
     private static final String COURT_ROOM_MEDIA_TYPE = "application/vnd.referencedata.ou-courtrooms+json";
     private static final String COURT_ROOM_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/courtrooms";
 
@@ -156,12 +154,13 @@ public class ReferenceDataStub {
     /*todo These 2 data is for same stub, but different tests are trying to add different values, so we put static list to not loose data for other tests.
      * And these data prevent running tests on multiple JVM forks, Currently we support one JVM/MultipleThreads. see  hearing-integration-test/pom.xml
      */
-    private static final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList<>();
     public static final String ALCOHOL_LEVEL_METHOD_B_CODE = "B";
     public static final String ALCOHOL_LEVEL_METHOD_B_DESCRIPTION = "Breath";
 
-    @Spy
-    private ObjectMapper objectMapper;
+    public static final UUID INEFFECTIVE_TRIAL_TYPE_ID = UUID.fromString("9b738c6e-04fc-4e18-bc49-b599973af7e7");
+    public static final UUID VACATED_TRIAL_TYPE_ID = UUID.fromString("9c738c6e-04fc-4e18-bc49-b599973af7b8");
+    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "fullDescription");
+    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "fullDescription");
 
     private static List<JsonValue> createCourtRoomFixture() {
         String body = getPayload("referencedata.dyna.fixedlists.court.centre.json");
@@ -170,6 +169,7 @@ public class ReferenceDataStub {
     }
 
     public static void stubForReferenceDataResults() {
+        stubTrialTypes();
         stubGetReferenceDataResultDefinitionRules();
         stubGetReferenceDataResultDefinitionsForFirstDay();
         stubGetReferenceDataResultDefinitionsKeywordsForFirstDay();
@@ -184,7 +184,6 @@ public class ReferenceDataStub {
         changeCourtRoomsStubWithAdding();
         stubDynamicPromptFixedList();
         stubReferenceDataResultListForNameAddress();
-
     }
 
     public static void stubGetReferenceDataResultDefinitionsWithDefaultValues(final LocalDate orderedDate) {
@@ -339,10 +338,9 @@ public class ReferenceDataStub {
         stub(enforcementArea, REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_QUERY_URL, REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_MEDIA_TYPE, "nationalCourtCode", ouCode);
     }
 
-    public static void stubCrackedIOnEffectiveTrialTypes(List<CrackedIneffectiveVacatedTrialType> newCrackedIneffectiveVacatedTrialTypes) {
-        crackedIneffectiveVacatedTrialTypes.addAll(newCrackedIneffectiveVacatedTrialTypes);
+    public static void stubTrialTypes() {
         CrackedIneffectiveVacatedTrialTypes result = new CrackedIneffectiveVacatedTrialTypes();
-        result.setCrackedIneffectiveVacatedTrialTypes(crackedIneffectiveVacatedTrialTypes);
+        result.setCrackedIneffectiveVacatedTrialTypes(Lists.newArrayList(INEFFECTIVE_TRIAL_TYPE, VACATED_TRIAL_TYPE));
 
         stub(result, REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL,
                 REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE);
@@ -928,7 +926,7 @@ public class ReferenceDataStub {
         waitForStubToBeReady(COURT_ROOM_QUERY_URL, COURT_ROOM_MEDIA_TYPE);
     }
 
-    public static void stubGetReferenceDataCourtRoomMappings(final String courtRoom1Id, final String courtRoom2Id,String courtRoom3Id,String courtRoom4Id,String courtRoom5Id) {
+    public static void stubGetReferenceDataCourtRoomMappings(final String courtRoom1Id, final String courtRoom2Id, String courtRoom3Id, String courtRoom4Id, String courtRoom5Id) {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
 
         String payload = getPayload("stub-data/referencedata.query.cp-xhibit-courtroom-mappings.json").replace("COURT_ROOM1_ID", courtRoom1Id)

@@ -58,7 +58,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
@@ -91,7 +90,6 @@ import uk.gov.moj.cpp.hearing.constants.EmailStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -105,7 +103,6 @@ import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -116,7 +113,6 @@ import javax.json.JsonObject;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -134,25 +130,11 @@ public class NCESJourneyIT extends AbstractIT {
     private LocalDate orderedDate;
     private ZonedDateTime testStartTime;
 
-    @Before
-    public void begin() {
-        final UUID trialTypeId = randomUUID();
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
-    }
-
     private InitiateHearingCommandHelper getInitiateHearingCommandHelper() {
         testStartTime = ZonedDateTime.now();
         orderedDate = PAST_LOCAL_DATE.next();
         InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(), false));
         return hearingCommandHelper;
-    }
-
-
-    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
-        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
-
-        return trialList;
     }
 
     @Test
@@ -308,7 +290,7 @@ public class NCESJourneyIT extends AbstractIT {
 
         saveDraftApplicationOutcome(hearingId, applicationId, GRANTED, hearingCommandHelper);
 
-        //this steps sets offence ID to null on the target object and populates applciationId
+        //this steps sets offence ID to null on the target object and populates application ID
         shareApplicationResults(applicationId, hearingId, GRANTED, hearingCommandHelper, draftResultCommand);
 
         verifyEmailNotificationEvent(NOT_SENT, isJson(allOf(

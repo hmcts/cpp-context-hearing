@@ -2,11 +2,16 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
@@ -16,22 +21,16 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
-import org.hamcrest.Matchers;
 import org.junit.Test;
 
 public class SetHearingTrialTypeIT extends AbstractIT {
-    private static final UUID TRAIL_TYPE_ID_1 = randomUUID();
-    private static final UUID VACATE_REASON_ID = randomUUID();
     private static final UUID USER_ID = randomUUID();
 
     @Test
-    public void shouldSetInEffectiveTrialTypeToHearing() {
+    public void shouldSetIneffectiveTrialTypeToHearing() {
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         givenAUserHasLoggedInAsACourtClerk(USER_ID);
 
@@ -40,22 +39,19 @@ public class SetHearingTrialTypeIT extends AbstractIT {
 
         final TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearing.getId())
-                .withTrialTypeId(TRAIL_TYPE_ID_1)
+                .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
                 .build();
 
         UseCases.setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
 
-        List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = buildCrackedIneffectiveVacatedTrialTypes(TRAIL_TYPE_ID_1);
-        ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes(crackedIneffectiveVacatedTrialTypes);
-
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = crackedIneffectiveVacatedTrialTypes.get(0);
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
 
         CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
         Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, Matchers.is(hearing.getId()))
-                        .with(Hearing::getCrackedIneffectiveTrial, Matchers.is(expectedTrialType))
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
                 ));
     }
 
@@ -74,8 +70,8 @@ public class SetHearingTrialTypeIT extends AbstractIT {
 
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
-                        .with(Hearing::getIsEffectiveTrial, Matchers.is(TRUE))
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getIsEffectiveTrial, is(TRUE))
                 ));
     }
 
@@ -85,37 +81,22 @@ public class SetHearingTrialTypeIT extends AbstractIT {
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         givenAUserHasLoggedInAsACourtClerk(USER_ID);
 
-        List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = buildVacatedTrialTypes(VACATE_REASON_ID);
-        ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes(crackedIneffectiveVacatedTrialTypes);
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
         final TrialType addTrialType = TrialType.builder()
-                .withVacatedTrialReasonId(VACATE_REASON_ID)
+                .withVacatedTrialReasonId(VACATED_TRIAL_TYPE_ID)
                 .build();
 
         UseCases.setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType);
 
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = crackedIneffectiveVacatedTrialTypes.get(0);
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = VACATED_TRIAL_TYPE;
 
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), "", crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, Matchers.is(hearingOne.getHearingId()))
-                        .with(Hearing::getCrackedIneffectiveTrial, Matchers.is(expectedTrialType))
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
                 ));
     }
 
-    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
-        List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
-
-        return trialList;
-    }
-
-    private List<CrackedIneffectiveVacatedTrialType> buildVacatedTrialTypes(final UUID vacatedTrialReasonId) {
-        List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", null));
-
-        return trialList;
-    }
 }

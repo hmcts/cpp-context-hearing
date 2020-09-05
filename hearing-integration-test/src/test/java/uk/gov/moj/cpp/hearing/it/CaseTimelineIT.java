@@ -4,7 +4,6 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.AllOf.allOf;
@@ -19,7 +18,7 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -27,12 +26,9 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -52,9 +48,6 @@ public class CaseTimelineIT extends AbstractIT {
     }
 
     private void setUpHearing(final ZonedDateTime sittingDay) {
-        final UUID trialTypeId = randomUUID();
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
-
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         hearing = initiateHearingCommand.getHearing();
         hearingDay = hearing.getHearingDays().get(0);
@@ -62,21 +55,12 @@ public class CaseTimelineIT extends AbstractIT {
 
         h(initiateHearing(getRequestSpec(), initiateHearingCommand));
 
-
         final TrialType addTrialType = builder()
                 .withHearingId(hearing.getId())
-                .withTrialTypeId(trialTypeId)
+                .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
                 .build();
 
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
-
-    }
-
-    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
-        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
-
-        return trialList;
     }
 
     private void verifyTimeline(final String hearingDate) {

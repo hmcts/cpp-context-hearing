@@ -33,9 +33,6 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
     protected static UUID caseId;
     protected static UUID hearingTypeId;
 
-    private static CommandHelpers.InitiateHearingCommandHelper hearing;
-    private static ZonedDateTime eventTime;
-
     @BeforeClass
     public static void setUpBeforeClassAbstractPublishLatestCourtCentreHearingIT() {
         stubGetReferenceDataXhibitHearingTypes();

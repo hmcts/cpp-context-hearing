@@ -58,9 +58,10 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_CODE;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_ID;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllAlcoholLevelMethods;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
@@ -164,16 +165,11 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID DISMISSED_RESULT_DEF_ID = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
     private static final UUID GUILTY_RESULT_DEF_ID = fromString("ce23a452-9015-4619-968f-1628d7a271c9");
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
-    private static final UUID TRAIL_TYPE_ID = randomUUID();
-    private List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes;
-    private UUID TRAIL_TYPE_ID_1 = randomUUID();
 
     @Before
     public void setUp() {
         stubGetAllVerdictTypes();
         stubGetAllAlcoholLevelMethods();
-        crackedIneffectiveVacatedTrialTypes = buildCrackedIneffectiveVacatedTrialTypes(TRAIL_TYPE_ID_1);
-        stubCrackedIOnEffectiveTrialTypes(crackedIneffectiveVacatedTrialTypes);
     }
 
     @Test
@@ -218,14 +214,14 @@ public class ShareResultsIT extends AbstractIT {
 
     }
 
-    private void updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
+    private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
         updateDefendantAttendance(initiateHearingCommandHelper);
 
         stubCourtCentre(initiateHearingCommandHelper.getHearing());
 
         ProsecutionCounselIT.createFirstProsecutionCounsel(initiateHearingCommandHelper);
 
-        changeVerdict(initiateHearingCommandHelper, fromString(VERDICT_TYPE_GUILTY_ID), VERDICT_TYPE_GUILTY_CODE);
+        return changeVerdict(initiateHearingCommandHelper, fromString(VERDICT_TYPE_GUILTY_ID), VERDICT_TYPE_GUILTY_CODE);
     }
 
     private List<Target> completeSetupAndShareResults(AllNowsReferenceDataHelper allNows, InitiateHearingCommandHelper initiateHearingCommandHelper, SaveDraftResultCommand saveDraftResultCommand, LocalDate orderDate) {
@@ -285,7 +281,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdictCommandHelper = updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
 
         SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
 
@@ -995,7 +991,7 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
-    private void saveDraftResultsWithShadowListedFlag(final InitiateHearingCommandHelper hearing, final UUID targetId) throws IOException {
+    private void saveDraftResultsWithShadowListedFlag(final InitiateHearingCommandHelper hearing, final UUID targetId) {
         final JsonObject saveDraftResultsCommand = createObjectBuilder()
                 .add("draftResult", "draft results content")
                 .add("hearingId", hearing.getHearing().toString())
@@ -1147,13 +1143,13 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private CrackedIneffectiveTrial setCrackedIneffectiveTrial(final InitiateHearingCommandHelper hearingOne, final CommandHelpers.UpdatePleaCommandHelper pleaOne) {
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = crackedIneffectiveVacatedTrialTypes.get(0);
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
 
         CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
         TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())
-                .withTrialTypeId(TRAIL_TYPE_ID_1)
+                .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
                 .build();
 
         setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType);
@@ -1680,13 +1676,6 @@ public class ShareResultsIT extends AbstractIT {
         return allResultDefinitions;
     }
 
-    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
-        List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
-
-        return trialList;
-    }
-
     private void testApplicationDraftResult(final ApplicationDraftResultCommand applicationDraftResultCommand) {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -1856,14 +1845,13 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private CrackedIneffectiveTrial getExpectedTrialType(final InitiateHearingCommandHelper hearingOne, final CommandHelpers.UpdatePleaCommandHelper pleaOne) {
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(TRAIL_TYPE_ID, "code", "InEffective", "fullDescription");
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
         final CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
-        stubCrackedIOnEffectiveTrialTypes(singletonList(crackedIneffectiveVacatedTrialType));
 
         final TrialType addTrialType = TrialType.builder()
                 .withHearingId(hearingOne.getHearingId())
-                .withTrialTypeId(TRAIL_TYPE_ID)
+                .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
                 .build();
 
         setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType);
@@ -2046,9 +2034,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shouldShareResultForAGivenResultDefinitionIDAndLabelsCombination() {
         final List<Pair<UUID, List<String>>> resultCodeAndPromptLabels = generateResultDefinitionAndLabelCombination();
-        resultCodeAndPromptLabels.forEach(resultCodeAndPromptLabelsItem -> {
-            shareResultWithResultDefinitionAndLabel(resultCodeAndPromptLabelsItem.getKey(), resultCodeAndPromptLabelsItem.getValue());
-        });
+        resultCodeAndPromptLabels.forEach(resultCodeAndPromptLabelsItem -> shareResultWithResultDefinitionAndLabel(resultCodeAndPromptLabelsItem.getKey(), resultCodeAndPromptLabelsItem.getValue()));
     }
 
     private List<Pair<UUID, List<String>>> generateResultDefinitionAndLabelCombination() {

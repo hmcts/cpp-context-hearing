@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.anyOf;
@@ -20,18 +19,15 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -48,8 +44,6 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Before
     public void setUpHearingWithApplication() {
-        final UUID trialtypeId = randomUUID();
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(trialtypeId));
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOneHelper =
                 h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
@@ -57,7 +51,7 @@ public class ApplicationTimelineIT extends AbstractIT {
 
         addTrialType = builder()
                 .withHearingId(hearingOne.getId())
-                .withTrialTypeId(trialtypeId)
+                .withTrialTypeId(INEFFECTIVE_TRIAL_TYPE_ID)
                 .build();
 
         applicationId = hearingOne.getCourtApplications().get(0).getId();
@@ -134,13 +128,6 @@ public class ApplicationTimelineIT extends AbstractIT {
         hearingSummaryMap.put("applicant", String.format("%s %s", personDetails.getFirstName(), personDetails.getLastName()));
 
         return hearingSummaryMap;
-    }
-
-    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
-        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
-
-        return trialList;
     }
 
 }

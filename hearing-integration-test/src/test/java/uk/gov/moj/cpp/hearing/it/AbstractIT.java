@@ -7,17 +7,12 @@ import static java.time.format.DateTimeFormatter.ISO_LOCAL_DATE;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
-import static javax.ws.rs.core.Response.Status.OK;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
-import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubCrackedIOnEffectiveTrialTypes;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
@@ -30,10 +25,8 @@ import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreas;
 import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
-import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcConnectionProvider;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.hearing.utils.StubPerExecution;
 
@@ -45,9 +38,7 @@ import java.text.MessageFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -64,9 +55,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.json.JSONObject;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,9 +64,6 @@ public class AbstractIT {
     public static final Properties ENDPOINT_PROPERTIES = new Properties();
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
-    protected static final Header CPP_UID_HEADER = new Header(USER_ID, USER_ID_VALUE.toString());
-    protected static final Header CPP_UID_HEADER_AS_ADMIN = new Header(USER_ID, USER_ID_VALUE_AS_ADMIN.toString());
-    protected static final String PUBLIC_EVENT_TOPIC = "public.event";
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
     /**
@@ -125,12 +111,6 @@ public class AbstractIT {
         return new Header(USER_ID, getLoggedInUser().toString());
     }
 
-    protected static MultivaluedMap<String, Object> getLoggedInHeader() {
-        final MultivaluedMap<String, Object> header = new MultivaluedHashMap<>();
-        header.add(USER_ID, getLoggedInUser().toString());
-        return header;
-    }
-
     protected static MultivaluedMap<String, Object> getLoggedInSystemUserHeader() {
         final MultivaluedMap<String, Object> header = new MultivaluedHashMap<>();
         header.add(USER_ID, USER_ID_VALUE_AS_ADMIN);
@@ -170,10 +150,6 @@ public class AbstractIT {
 
     protected static Matcher<String> equalDate(final Temporal localDate) {
         return equalTo(ISO_LOCAL_DATE.format(localDate));
-    }
-
-    protected static Matcher<String> equalEnum(final Enum<?> e) {
-        return equalTo(e.name());
     }
 
     protected static String getString(final Object bean, final String name, final DateTimeFormatter dateTimeFormatter) {
@@ -245,11 +221,6 @@ public class AbstractIT {
         stubHearingEventDefinitions();
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-
-    }
-
     public static RequestSpecification getRequestSpec() {
         return requestSpec;
     }
@@ -274,20 +245,6 @@ public class AbstractIT {
     public void setUpPerTest() {
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
-        stubCrackedIOnEffectiveTrialTypes(buildCrackedIneffectiveVacatedTrialTypes(randomUUID()));
-    }
-
-
-    protected JSONObject getExistingHearing(final String hearingId) {
-        final String queryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearing"), hearingId);
-
-        final String url = getBaseUri() + "/" + queryAPIEndPoint;
-        final String mediaType = "application/vnd.hearing.get.hearing+json";
-
-        final String payload = poll(requestParams(url, mediaType).withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
-                .until(status().is(OK)).getPayload();
-        return new JSONObject(payload);
     }
 
     protected void stubLjaDetails(final CourtCentre courtCentre, final UUID prosecutionAuthorityId) {
@@ -361,13 +318,6 @@ public class AbstractIT {
 
         ReferenceDataStub.stub(localJusticeAreasResult, "123");
 
-    }
-
-    private List<CrackedIneffectiveVacatedTrialType> buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
-        final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
-
-        return trialList;
     }
 
 }
