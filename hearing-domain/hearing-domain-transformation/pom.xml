@@ -15,6 +15,7 @@
         <module>hearing-domain-transformation-for-corechanges</module>
         <module>hearing-domain-transformations-pilotdata</module>
         <module>hearing-domain-transformation-judicialresult-mandatory-attributes</module>
+        <module>hearing-domain-transformation-book-provisional-hearing-slots</module>
         <module>hearing-domain-transformation-dd-3100-prodfix</module>
     </modules>
 </project>
