@@ -27,7 +27,8 @@
     "noteType",
     "fundingType",
     "courtApplicationPartyType",
-    "attendanceType"
+    "attendanceType",
+    "defendantCaseJudicialResults[*].category"
   ],
   "events": [
     {
@@ -113,6 +114,12 @@
     {
       "eventName": "hearing.defendant-attendance-updated",
       "fieldsToBeIgnored": [
+      ]
+    },
+    {
+      "eventName": "hearing.event.publish-court-list-requested",
+      "fieldsToBeIgnored": [
+        "$.publishStatus"
       ]
     }
   ]
