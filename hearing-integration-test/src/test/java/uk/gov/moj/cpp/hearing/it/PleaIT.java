@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
@@ -13,6 +14,7 @@ import static uk.gov.justice.core.courts.PleaValue.CONSENTS;
 import static uk.gov.justice.core.courts.PleaValue.GUILTY;
 import static uk.gov.justice.core.courts.PleaValue.NOT_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updatePlea;
@@ -39,9 +41,16 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
+
+import java.time.LocalDate;
+import java.util.UUID;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
@@ -57,7 +66,7 @@ public class PleaIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -84,7 +93,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -110,7 +119,7 @@ public class PleaIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingTemplateForIndicatedPlea(INDICATED_GUILTY, false)));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -137,7 +146,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -170,7 +179,7 @@ public class PleaIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingTemplateForIndicatedPlea(INDICATED_NOT_GUILTY, true)));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -196,7 +205,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -223,7 +232,7 @@ public class PleaIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingTemplateForIndicatedPlea(INDICATED_NOT_GUILTY, true)));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -258,7 +267,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -287,7 +296,7 @@ public class PleaIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -312,7 +321,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateAddedListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -339,7 +348,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateRemovedListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -359,46 +368,33 @@ public class PleaIT extends AbstractIT {
     }
 
     @Test
-    public void initiateHearing_shouldInheritGuiltyPlea_andConvictionDate() {
-        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+    public void initiateAdjournedHearing_shouldUpdateGuiltyPleaWhenVerdictWasSetToGuiltyInEarlierHearing_andConvictionDateIsHearing1Date() {
+        final LocalDate convictionDate = LocalDate.now();
 
-        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY);
+        final CommandHelpers.InitiateHearingCommandHelper adjournedHearing = h(
+                UseCases.initiateHearing(getRequestSpec(),
+                        with(standardInitiateHearingTemplate(), i -> {
+                            final Offence offence = h(i).getFirstOffenceForFirstDefendantForFirstCase();
+                            offence.setConvictionDate(convictionDate);
+                            offence.setVerdict(getVerdict(convictionDate, offence.getId()));
+                            offence.setPlea(null);
+                            offence.setIndicatedPlea(null);
+                        })));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(adjournedHearing, null, false, GUILTY);
+
+        getHearingPollForMatch(adjournedHearing.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getId, is(adjournedHearing.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
                                 .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                         .with(Defendant::getOffences, first(isBean(Offence.class)
-                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getId, is(adjournedHearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
                                                 .with(Offence::getPlea, isBean(Plea.class)
                                                         .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
                                                         .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue()))
                                                 )
-                                                .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))
-                                        ))
-                                ))
-                        ))
-
-                )
-        );
-
-        final InitiateHearingCommandHelper hearingTwo = h(initiateHearing(getRequestSpec(), customStructureInitiateHearingTemplate(
-                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
-        )));
-
-        getHearingPollForMatch(hearingTwo.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
-                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(hearingTwo.getHearingId()))
-                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
-                                        .with(Defendant::getOffences, first(isBean(Offence.class)
-                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
-                                                .with(Offence::getPlea, isBean(Plea.class)
-                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
-                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue()))
-                                                )
-                                                .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))
+                                                .with(Offence::getConvictionDate, is(convictionDate))
                                         ))
                                 ))
                         ))
@@ -408,6 +404,19 @@ public class PleaIT extends AbstractIT {
 
     }
 
+    private Verdict getVerdict(final LocalDate convictionDate, final UUID offenceId) {
+        return Verdict.verdict().withVerdictDate(convictionDate)
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(randomUUID())
+                .withVerdictType(VerdictType.verdictType()
+                        .withCategoryType("Guilty")
+                        .withCategory("Guilty")
+                        .withId(randomUUID())
+                        .withDescription(STRING.next())
+                        .build())
+                .build();
+    }
+
     @Test
     public void initiateHearing_shouldInheritNotGuiltyPlea_andNullConvictionDate() {
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
@@ -415,7 +424,7 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY);
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -438,7 +447,7 @@ public class PleaIT extends AbstractIT {
                 toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
         )));
 
-        getHearingPollForMatch(hearingTwo.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingTwo.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingTwo.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -464,7 +473,7 @@ public class PleaIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -491,7 +500,7 @@ public class PleaIT extends AbstractIT {
 
         convictionDateListener.waitFor();
 
-        getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingOne.getHearingId()))
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
@@ -511,15 +520,18 @@ public class PleaIT extends AbstractIT {
         );
     }
 
-    private UpdatePleaCommandHelper getUpdatePleaCommandHelper(final InitiateHearingCommandHelper hearingOne,
+    private UpdatePleaCommandHelper getUpdatePleaCommandHelper(final InitiateHearingCommandHelper hearing,
                                                                final IndicatedPleaValue indicatedPleaValue,
                                                                final boolean isAllocationDecision,
                                                                final PleaValue pleaValue) {
+        final UUID firstOffenceId = hearing.getFirstOffenceForFirstDefendantForFirstCase().getId();
+        final UUID hearingId = hearing.getHearingId();
+        final UUID defendantId = hearing.getFirstDefendantForFirstCase().getId();
+        final UUID caseId = hearing.getFirstCase().getId();
+        final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearingId, firstOffenceId, defendantId, caseId, indicatedPleaValue, pleaValue, isAllocationDecision);
         return new UpdatePleaCommandHelper(
-                updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                        updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                                hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(),
-                                indicatedPleaValue, pleaValue, isAllocationDecision)
+                updatePlea(getRequestSpec(), hearingId, firstOffenceId,
+                        hearingUpdatePleaCommand
                 ));
     }
 

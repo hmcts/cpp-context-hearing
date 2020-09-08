@@ -202,7 +202,6 @@ public class InitiateHearingEventListener {
 
             if (shouldSetPlea) {
                 offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
-                offence.setConvictionDate(event.getPlea().getPleaValue() == GUILTY ? event.getPlea().getPleaDate() : null);
                 offenceRepository.save(offence);
             }
         }

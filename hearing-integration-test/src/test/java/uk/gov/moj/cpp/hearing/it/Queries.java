@@ -1,21 +1,19 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static javax.ws.rs.core.Response.Status.OK;
-import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.Assert.assertThat;
-import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getURL;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_WAIT_TIME_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
-import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -45,7 +43,7 @@ public class Queries {
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
-         poll(requestParams)
+        poll(requestParams)
                 .timeout(timeout, TimeUnit.SECONDS)
                 .until(
                         status().is(OK),
@@ -53,8 +51,13 @@ public class Queries {
                 );
     }
 
+    public static void getHearingPollForMatch(final UUID hearingId, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
+        getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, resultMatcher);
+
+    }
+
     public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
-        getHearingPollForMatch(hearingId, timeout, 3, resultMatcher);
+        getHearingPollForMatch(hearingId, timeout, DEFAULT_WAIT_TIME_IN_SEC, resultMatcher);
 
     }
 
@@ -71,7 +74,7 @@ public class Queries {
         waitForFewSeconds(waitTime);
 
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearing", hearingId), "application/vnd.hearing.get.hearing+json")
-               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher));
@@ -93,7 +96,7 @@ public class Queries {
     public static void getHearingsByDatePollForMatch(final UUID courtCentreId, final UUID roomId, final String date, final String startTime, final String endTime, final long timeout, final BeanMatcher<GetHearings> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get.hearings", date, startTime, endTime, courtCentreId, roomId), "application/vnd.hearing.get.hearings+json")
-               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
@@ -115,7 +118,7 @@ public class Queries {
     public static void getDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<TargetListResponse> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get-draft-result", hearingId), "application/vnd.hearing.get-draft-result+json")
-               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
@@ -138,7 +141,7 @@ public class Queries {
     public static void getApplicationDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<ApplicationTargetListResponse> resultMatcher) {
 
         final RequestParams requestParams = requestParams(getURL("hearing.get-application-draft-result", hearingId), "application/vnd.hearing.get-application-draft-result+json")
-               .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
         final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(ApplicationTargetListResponse.class, resultMatcher));

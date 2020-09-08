@@ -45,6 +45,7 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
 import java.io.StringReader;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -279,6 +280,8 @@ public class InitiateHearingEventListenerTest {
 
         final Offence offence = new Offence();
         offence.setId(snapshotKey);
+        final LocalDate convictionDate = LocalDate.now();
+        offence.setConvictionDate(convictionDate);
         when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
 
         final DelegatedPowers delegatedPowers = new DelegatedPowers();
@@ -301,6 +304,7 @@ public class InitiateHearingEventListenerTest {
 
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
+                .with(Offence::getConvictionDate, is(convictionDate))
                 .with(Offence::getPlea, isBean(Plea.class)
                         .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
                         .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
