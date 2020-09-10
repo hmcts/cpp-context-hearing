@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -69,6 +68,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingEventListenerTest {
+    private static final String GUILTY = "GUILTY";
 
     @Mock
     private HearingRepository hearingRepository;
@@ -268,7 +268,7 @@ public class InitiateHearingEventListenerTest {
                 .withOffenceId(randomUUID())
                 .withOriginatingHearingId(randomUUID())
                 .withPleaDate(PAST_LOCAL_DATE.next())
-                .withPleaValue(PleaValue.GUILTY)
+                .withPleaValue(GUILTY)
                 .withDelegatedPowers(delegatedPowersPojo)
                 .build();
 
@@ -304,7 +304,7 @@ public class InitiateHearingEventListenerTest {
 
         assertThat(offence, isBean(Offence.class)
                 .with(Offence::getId, is(snapshotKey))
-                .with(Offence::getConvictionDate, is(convictionDate))
+                .with(Offence::getConvictionDate, is(pleaPojo.getPleaDate()))
                 .with(Offence::getPlea, isBean(Plea.class)
                         .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
                         .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))

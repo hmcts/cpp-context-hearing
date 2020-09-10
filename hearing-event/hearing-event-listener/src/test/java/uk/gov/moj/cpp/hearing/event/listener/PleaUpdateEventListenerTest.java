@@ -20,7 +20,6 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -50,6 +49,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class PleaUpdateEventListenerTest {
+    private static final String GUILTY = "GUILTY";
 
     @Mock
     private OffenceRepository offenceRepository;
@@ -86,7 +86,7 @@ public class PleaUpdateEventListenerTest {
         final Plea pleaPojo = plea()
                 .withOffenceId(offenceId)
                 .withPleaDate(LocalDate.now())
-                .withPleaValue(PleaValue.GUILTY).build();
+                .withPleaValue(GUILTY).build();
         final PleaUpsert offencePleaUpdated = PleaUpsert.pleaUpsert()
                 .setHearingId(hearingId)
                 .setPleaModel(pleaModel()
@@ -142,7 +142,7 @@ public class PleaUpdateEventListenerTest {
         final Plea pleaPojo = plea()
                 .withOffenceId(offenceId)
                 .withPleaDate(LocalDate.now())
-                .withPleaValue(PleaValue.GUILTY)
+                .withPleaValue(GUILTY)
                 .withDelegatedPowers(delegatedPowers)
                 .build();
         final PleaUpsert offencePleaUpdated = PleaUpsert.pleaUpsert()
@@ -322,7 +322,7 @@ public class PleaUpdateEventListenerTest {
         final Plea pleaPojo = plea()
                 .withOffenceId(offenceId)
                 .withPleaDate(LocalDate.now())
-                .withPleaValue(PleaValue.GUILTY)
+                .withPleaValue(GUILTY)
                 .withDelegatedPowers(delegatedPowers)
                 .build();
         final IndicatedPlea indicatedPleaPojo = indicatedPlea()

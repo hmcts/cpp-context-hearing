@@ -15,6 +15,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -38,8 +39,18 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
 
     private AlcoholLevelMethodsReferenceDataLoader alcoholLevelMethodsReferenceDataLoader;
 
+    private PleaTypeReferenceDataLoader pleaTypeReferenceDataLoader;
+
     @Inject
-    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache, final LjaReferenceDataLoader ljaReferenceDataLoader, final FixedListLookup fixedListLookup, final BailStatusReferenceDataLoader bailStatusReferenceDataLoader, final ProsecutorDataLoader prosecutorDataLoader, final OrganisationalUnitLoader organisationalUnitLoader, final VerdictTypesReferenceDataLoader verdictTypesReferenceDataLoader, final AlcoholLevelMethodsReferenceDataLoader alcoholLevelMethodsReferenceDataLoader) {
+    public NowsReferenceDataServiceImpl(final NowsReferenceCache nowsReferenceCache,
+                                        final LjaReferenceDataLoader ljaReferenceDataLoader,
+                                        final FixedListLookup fixedListLookup,
+                                        final BailStatusReferenceDataLoader bailStatusReferenceDataLoader,
+                                        final ProsecutorDataLoader prosecutorDataLoader,
+                                        final OrganisationalUnitLoader organisationalUnitLoader,
+                                        final VerdictTypesReferenceDataLoader verdictTypesReferenceDataLoader,
+                                        final AlcoholLevelMethodsReferenceDataLoader alcoholLevelMethodsReferenceDataLoader,
+                                        final PleaTypeReferenceDataLoader pleaTypeReferenceDataLoader) {
         this.nowsReferenceCache = nowsReferenceCache;
         this.ljaReferenceDataLoader = ljaReferenceDataLoader;
         this.bailStatusReferenceDataLoader = bailStatusReferenceDataLoader;
@@ -48,6 +59,7 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
         this.organisationalUnitLoader = organisationalUnitLoader;
         this.verdictTypesReferenceDataLoader = verdictTypesReferenceDataLoader;
         this.alcoholLevelMethodsReferenceDataLoader = alcoholLevelMethodsReferenceDataLoader;
+        this.pleaTypeReferenceDataLoader = pleaTypeReferenceDataLoader;
     }
 
     @Override
@@ -103,5 +115,10 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
     @Override
     public List<AlcoholLevelMethod> getAlcoholLevelMethods(final JsonEnvelope context) {
         return alcoholLevelMethodsReferenceDataLoader.getAllAlcoholLevelMethods(context);
+    }
+
+    @Override
+    public Set<String> retrieveGuiltyPleaTypes(){
+        return pleaTypeReferenceDataLoader.retrieveGuiltyPleaTypes();
     }
 }

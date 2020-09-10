@@ -12,7 +12,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -25,6 +24,7 @@ import java.util.UUID;
 import org.junit.Test;
 
 public class HearingDelegateTest {
+    private static final String GUILTY = "GUILTY";
 
     private HearingAggregateMomento momento = new HearingAggregateMomento();
     private HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -46,7 +46,7 @@ public class HearingDelegateTest {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
         final Offence firstOffenceForFirstDefendantForFirstCase = hearing.getFirstOffenceForFirstDefendantForFirstCase();
         final UUID idOfFirstOffenceForFirstDefendantForFirstCase = firstOffenceForFirstDefendantForFirstCase.getId();
-        firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PleaValue.GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
+        firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
         firstOffenceForFirstDefendantForFirstCase.setVerdict(Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType("GUILTY").build()).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
         firstOffenceForFirstDefendantForFirstCase.setConvictionDate(convictionDateForFirstOffence);
         hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));

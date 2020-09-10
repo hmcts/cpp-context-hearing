@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.util.UUID.randomUUID;
 import static junit.framework.TestCase.assertTrue;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
@@ -20,7 +19,6 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
@@ -47,6 +45,8 @@ import org.junit.Test;
 
 public class OffenceAggregateTest {
 
+    private static final String GUILTY = "GUILTY";
+
     private OffenceAggregate offenceAggregate;
 
     @Before
@@ -71,7 +71,7 @@ public class OffenceAggregateTest {
         final UUID offenceId = randomUUID();
         final UUID hearingId = randomUUID();
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
-        final PleaValue value = PleaValue.GUILTY;
+
 
         final RegisteredHearingAgainstOffence registeredHearingAgainstOffence = RegisteredHearingAgainstOffence.builder()
                 .withHearingId(hearingId)
@@ -83,7 +83,7 @@ public class OffenceAggregateTest {
                         pleaModel().withPlea(plea()
                                 .withOffenceId(registeredHearingAgainstOffence.getOffenceId())
                                 .withPleaDate(pleaDate)
-                                .withPleaValue(PleaValue.GUILTY)
+                                .withPleaValue(GUILTY)
                                 .build()).build()));
 
         final FoundPleaForHearingToInherit foundPleaForHearingToInherit =
@@ -95,7 +95,7 @@ public class OffenceAggregateTest {
         assertThat(foundPleaForHearingToInherit.getHearingId(), is(registeredHearingAgainstOffence.getHearingId()));
         assertThat(foundPleaForHearingToInherit.getPlea().getOffenceId(), is(registeredHearingAgainstOffence.getOffenceId()));
         assertThat(foundPleaForHearingToInherit.getPlea().getPleaDate(), is(pleaDate));
-        assertThat(foundPleaForHearingToInherit.getPlea().getPleaValue(), is(value));
+        assertThat(foundPleaForHearingToInherit.getPlea().getPleaValue(), is(GUILTY));
     }
 
     @Test
@@ -168,7 +168,7 @@ public class OffenceAggregateTest {
         final UUID offenceId = randomUUID();
         final UUID hearingId = randomUUID();
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
-        final String value = PleaValue.GUILTY.toString();
+
         final DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
@@ -177,7 +177,7 @@ public class OffenceAggregateTest {
         final OffencePleaUpdated offencePleaUpdated = builder()
                 .withHearingId(hearingId)
                 .withPleaModel(pleaModel().withPlea(plea()
-                        .withPleaValue(PleaValue.GUILTY)
+                        .withPleaValue(GUILTY)
                         .withPleaDate(pleaDate)
                         .withOffenceId(offenceId)
                         .withDelegatedPowers(delegatedPowers)
@@ -191,7 +191,7 @@ public class OffenceAggregateTest {
         assertThat(offenceAggregate.getPlea().getHearingId(), is(hearingId));
         assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getOffenceId(), is(offenceId));
         assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getPleaDate(), is(pleaDate));
-        assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getPleaValue().toString(), is(value));
+        assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getPleaValue().toString(), is(GUILTY));
         assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getDelegatedPowers().getLastName(), is(delegatedPowers.getLastName()));
     }
 

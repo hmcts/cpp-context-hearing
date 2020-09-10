@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
-import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyPlea;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
@@ -18,6 +17,7 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -53,7 +53,7 @@ public class PleaDelegate implements Serializable {
                 .setPlea(plea));
     }
 
-    public Stream<Object> updatePlea(final UUID hearingId, final PleaModel pleaModel) {
+    public Stream<Object> updatePlea(final UUID hearingId, final PleaModel pleaModel, final Set<String> guiltyPleaTypes) {
 
         final UUID offenceId = pleaModel.getOffenceId();
         final ProsecutionCase prosecutionCase = this.momento.getHearing().getProsecutionCases().stream()
@@ -76,7 +76,7 @@ public class PleaDelegate implements Serializable {
         final boolean guiltyVerdictForOffenceAlreadySet = nonNull(existingOffenceVerdict) && isGuiltyVerdict(existingOffenceVerdict.getVerdictType());
 
         if (nonNull(plea)) {
-            if (isGuiltyPlea(plea.getPleaValue())) {
+            if (guiltyPleaTypes.contains(plea.getPleaValue())) {
                 // do not update conviction date, if already present for offence
                 if (!convictionDateAlreadySetForOffence) {
                     events.add(
@@ -126,4 +126,5 @@ public class PleaDelegate implements Serializable {
             pleaModel.getAllocationDecision().setOriginatingHearingId(hearingId);
         }
     }
+
 }

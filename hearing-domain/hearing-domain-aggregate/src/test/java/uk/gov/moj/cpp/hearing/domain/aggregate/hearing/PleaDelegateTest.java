@@ -12,7 +12,9 @@ import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
 import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.GUILTY_PLEA_VALUES;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.ALL_PLEAS;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.GUILTY_PLEA_LIST;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.Defendant;
@@ -22,7 +24,6 @@ import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -40,6 +41,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class PleaDelegateTest {
+    private static final String NOT_GUILTY = "NOT_GUILTY";
+    private static final String GUILTY = "GUILTY";
 
     private PleaDelegate pleaDelegate;
     private HearingAggregateMomento hearingAggregateMomento;
@@ -53,13 +56,13 @@ public class PleaDelegateTest {
     @Before
     public void setup() {
         hearingAggregateMomento = new HearingAggregateMomento();
-        pleaDelegate = new PleaDelegate(hearingAggregateMomento);
+        pleaDelegate  = new PleaDelegate(hearingAggregateMomento);
     }
 
     @Test
     public void shouldSetPleaIntoHearingAggregateMomento() {
 
-        final PleaValue pleaValue = PleaValue.NOT_GUILTY;
+        final String pleaValue = NOT_GUILTY;
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
 
         final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
@@ -121,7 +124,7 @@ public class PleaDelegateTest {
 
         final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
                 .setHearingId(HEARING_ID)
-                .setPleaModel(getPlea(PleaValue.GUILTY, PLEA_DATE));
+                .setPleaModel(getPlea(GUILTY, PLEA_DATE));
         pleaDelegate.handlePleaUpsert(pleaUpsert);
 
         assertThat(hearingAggregateMomento.getIndicatedPlea().size(), is(0));
@@ -135,7 +138,7 @@ public class PleaDelegateTest {
     @Test
     public void shouldSetAllValuesIntoHearingAggregateMomento() {
 
-        final PleaValue pleaValue = PleaValue.NOT_GUILTY;
+        final String pleaValue = NOT_GUILTY;
         final IndicatedPleaValue indicatedPleaValue = INDICATED_GUILTY;
         final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
 
@@ -199,7 +202,7 @@ public class PleaDelegateTest {
                         .build())
                 .build();
 
-        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel).collect(Collectors.toList());
+        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
@@ -236,7 +239,7 @@ public class PleaDelegateTest {
                         .build())
                 .build();
 
-        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel).collect(Collectors.toList());
+        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
@@ -251,16 +254,16 @@ public class PleaDelegateTest {
 
     @Test
     public void shouldAddConvictionDateWhenPleaIsGuiltyType() {
-        GUILTY_PLEA_VALUES.forEach(this::shouldAddConvictionDateAddedWhenPleaIsGuiltyType);
+        GUILTY_PLEA_LIST.forEach(this::shouldAddConvictionDateAddedWhenPleaIsGuiltyType);
     }
 
     @Test
     public void shouldAddConvictionDateWhenPleaIsGuiltyType_AdjournedHearingWithNotGuiltyPleaSet() {
-        GUILTY_PLEA_VALUES.forEach(gpv -> {
+        GUILTY_PLEA_LIST.forEach(gpv -> {
                     final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
                     final Offence firstOffenceForFirstDefendantForFirstCase = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
                     final UUID idOfFirstOffenceForFirstDefendantForFirstCase = firstOffenceForFirstDefendantForFirstCase.getId();
-                    firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PleaValue.NOT_GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
+                    firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(NOT_GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
                     firstOffenceForFirstDefendantForFirstCase.setVerdict(Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType("NOT GUILTY").build()).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
                     shouldAddConvictionDateAddedWhenPleaIsGuiltyType(hearing, gpv);
                 }
@@ -269,13 +272,13 @@ public class PleaDelegateTest {
 
     @Test
     public void shouldRemoveConvictionDateWhenPleaChangedToNotGuilty_ForAdjournedHearingWithInitialGuiltyPlea() {
-        for (PleaValue pleaValue : PleaValue.values()) {
-            if (!GUILTY_PLEA_VALUES.contains(pleaValue)) {
+        for (String pleaValue : ALL_PLEAS) {
+            if (!GUILTY_PLEA_LIST.contains(pleaValue)) {
                 final LocalDate convictionDateForFirstOffence = PAST_LOCAL_DATE.next();
                 final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
                 final Offence firstOffenceForFirstDefendantForFirstCase = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
                 final UUID idOfFirstOffenceForFirstDefendantForFirstCase = firstOffenceForFirstDefendantForFirstCase.getId();
-                firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PleaValue.GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
+                firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
                 firstOffenceForFirstDefendantForFirstCase.setVerdict(Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType("NOT GUILTY").build()).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
                 firstOffenceForFirstDefendantForFirstCase.setConvictionDate(convictionDateForFirstOffence);
 
@@ -283,8 +286,8 @@ public class PleaDelegateTest {
                 final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
                 events.forEach(hearingAggregate::apply);
 
-                final PleaModel pleaModel = getPlea(PleaValue.NOT_GUILTY, PLEA_DATE);
-                final List<Object> eventsAfterGuiltyPleaUpdate = hearingAggregate.updatePlea(HEARING_ID, pleaModel).collect(Collectors.toList());
+                final PleaModel pleaModel = getPlea(NOT_GUILTY, PLEA_DATE);
+                final List<Object> eventsAfterGuiltyPleaUpdate = hearingAggregate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
                 final PleaUpsert pleaUpsert = (PleaUpsert) eventsAfterGuiltyPleaUpdate.get(0);
                 assertThat(pleaUpsert, is(notNullValue()));
@@ -296,26 +299,26 @@ public class PleaDelegateTest {
 
     @Test
     public void shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty() {
-        for (PleaValue pleaValue : PleaValue.values()) {
-            if (!GUILTY_PLEA_VALUES.contains(pleaValue)) {
+        for (String pleaValue : ALL_PLEAS) {
+            if (!GUILTY_PLEA_LIST.contains(pleaValue)) {
                 shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty(pleaValue);
             }
         }
     }
 
-    private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(PleaValue guiltyPleaValue) {
+    private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(String guiltyPleaValue) {
         final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
         shouldAddConvictionDateAddedWhenPleaIsGuiltyType(hearing, guiltyPleaValue);
     }
 
-    private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(final Hearing hearing, final PleaValue guiltyPleaValue) {
+    private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(final Hearing hearing, final String guiltyPleaValue) {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
         events.forEach(hearingAggregate::apply);
 
         final PleaModel pleaModel = getPlea(guiltyPleaValue, PLEA_DATE);
-        List<Object> eventsAfterPleaUpdate = hearingAggregate.updatePlea(HEARING_ID, pleaModel).collect(Collectors.toList());
+        List<Object> eventsAfterPleaUpdate = hearingAggregate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
         final PleaUpsert pleaUpsert = (PleaUpsert) eventsAfterPleaUpdate.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
@@ -329,27 +332,27 @@ public class PleaDelegateTest {
         assertThat(convictionDateAdded.getConvictionDate(), is(PLEA_DATE));
     }
 
-    private void shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty(final PleaValue notGuiltyPleaValue) {
+    private void shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty(final String notGuiltyPleaValue) {
         final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
         events.forEach(hearingAggregate::apply);
 
         // this indicates a guilty plea was set previously
-        final PleaModel guiltyPleaModel = getPlea(PleaValue.GUILTY, PLEA_DATE);
-        final List<Object> eventsAfterSettingGuiltyPlea = hearingAggregate.updatePlea(HEARING_ID, guiltyPleaModel).collect(Collectors.toList());
+        final PleaModel guiltyPleaModel = getPlea(GUILTY, PLEA_DATE);
+        final List<Object> eventsAfterSettingGuiltyPlea = hearingAggregate.updatePlea(HEARING_ID, guiltyPleaModel, guiltyPleaTypes()).collect(Collectors.toList());
         eventsAfterSettingGuiltyPlea.forEach(hearingAggregate::apply);
 
         // now set plea to not guilty
         final PleaModel notGuiltyPleaModel = getPlea(notGuiltyPleaValue, PLEA_DATE);
-        final List<Object> eventsAfterSettingToNotGuilty = hearingAggregate.updatePlea(HEARING_ID, notGuiltyPleaModel).collect(Collectors.toList());
+        final List<Object> eventsAfterSettingToNotGuilty = hearingAggregate.updatePlea(HEARING_ID, notGuiltyPleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
         final PleaUpsert pleaUpsert = (PleaUpsert) eventsAfterSettingToNotGuilty.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
         assertTrue(eventsAfterSettingToNotGuilty.get(1) instanceof ConvictionDateRemoved);
     }
 
-    private PleaModel getPlea(final PleaValue pleaValue, final LocalDate pleaDate) {
+    private PleaModel getPlea(final String pleaValue, final LocalDate pleaDate) {
         return PleaModel.pleaModel()
                 .withProsecutionCaseId(CASE_ID)
                 .withDefendantId(DEFENDANT_ID)
@@ -380,6 +383,5 @@ public class PleaDelegateTest {
                 .withProsecutionCases(asList(prosecutionCase))
                 .build();
     }
-
 
 }

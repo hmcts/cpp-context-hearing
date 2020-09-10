@@ -58,7 +58,6 @@ import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
@@ -187,7 +186,7 @@ public class CoreTestTemplates {
                 .withSource(RandomGenerator.values(Source.values()).next());
     }
 
-    public static Plea.Builder plea(final UUID offenceId, final LocalDate convictionDate, final PleaValue pleaValue) {
+    public static Plea.Builder plea(final UUID offenceId, final LocalDate convictionDate, final String pleaValue) {
         return Plea.plea()
                 .withOffenceId(offenceId)
                 .withOriginatingHearingId(randomUUID())

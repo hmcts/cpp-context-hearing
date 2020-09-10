@@ -110,6 +110,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -264,8 +265,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.extend(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
-    public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea) {
-        return apply(pleaDelegate.updatePlea(hearingId, plea));
+    public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea, final Set<String> guiltyPleaTypes) {
+        return apply(pleaDelegate.updatePlea(hearingId, plea, guiltyPleaTypes));
     }
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
@@ -305,8 +306,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.clearVacatedTrial(id));
     }
 
-    public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict) {
-        return apply(this.verdictDelegate.updateVerdict(hearingId, verdict));
+    public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes) {
+        return apply(this.verdictDelegate.updateVerdict(hearingId, verdict, guiltyPleaTypes));
     }
 
     public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {

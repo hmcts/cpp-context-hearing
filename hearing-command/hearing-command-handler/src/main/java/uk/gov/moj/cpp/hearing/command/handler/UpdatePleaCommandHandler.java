@@ -7,6 +7,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateInheritedPleaCommand;
@@ -18,8 +19,13 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+
 @ServiceComponent(COMMAND_HANDLER)
 public class UpdatePleaCommandHandler extends AbstractCommandHandler {
+
+    @Inject
+    private ReferenceDataService referenceDataService;
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(UpdatePleaCommandHandler.class.getName());
@@ -32,7 +38,7 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
         final UpdatePleaCommand command = convertToObject(envelope, UpdatePleaCommand.class);
         for (final PleaModel plea : command.getPleas()) {
             aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                    hearingAggregate -> hearingAggregate.updatePlea(command.getHearingId(), plea));
+                    hearingAggregate -> hearingAggregate.updatePlea(command.getHearingId(), plea, referenceDataService.retrieveGuiltyPleaTypes()));
         }
     }
 

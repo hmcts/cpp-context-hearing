@@ -15,6 +15,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public interface ReferenceDataService {
@@ -41,4 +42,5 @@ public interface ReferenceDataService {
 
     List<AlcoholLevelMethod> getAlcoholLevelMethods(final JsonEnvelope context);
 
+    Set<String> retrieveGuiltyPleaTypes();
 }

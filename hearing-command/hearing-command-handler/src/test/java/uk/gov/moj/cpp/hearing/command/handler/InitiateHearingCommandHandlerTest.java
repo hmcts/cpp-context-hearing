@@ -42,7 +42,6 @@ import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Verdict;
@@ -103,6 +102,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class InitiateHearingCommandHandlerTest {
+    private static final String GUILTY = "GUILTY";
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
@@ -382,7 +382,7 @@ public class InitiateHearingCommandHandlerTest {
                 pleaModel().withPlea(plea()
                         .withOffenceId(offenceId)
                         .withPleaDate(pleaDate)
-                        .withPleaValue(PleaValue.valueOf(value))
+                        .withPleaValue(value)
                         .withOriginatingHearingId(originHearingId)
                         .build()).build()));
         setupMockedEventStream(offenceId, this.offenceEventStream, offenceAggregate);
@@ -427,7 +427,7 @@ public class InitiateHearingCommandHandlerTest {
                 .setPlea(plea()
                         .withOffenceId(randomUUID())
                         .withPleaDate(PAST_LOCAL_DATE.next())
-                        .withPleaValue(PleaValue.GUILTY)
+                        .withPleaValue(GUILTY)
                         .withDelegatedPowers(delegatedPowers)
                         .build());
 

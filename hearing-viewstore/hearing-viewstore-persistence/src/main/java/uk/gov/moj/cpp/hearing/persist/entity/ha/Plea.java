@@ -1,15 +1,11 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import uk.gov.justice.core.courts.PleaValue;
-
 import java.time.LocalDate;
 import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 
 @Embeddable
 public class Plea {
@@ -18,8 +14,7 @@ public class Plea {
     private LocalDate pleaDate;
 
     @Column(name = "plea_value")
-    @Enumerated(EnumType.STRING)
-    private PleaValue pleaValue;
+    private String pleaValue;
 
     @Column(name = "originating_hearing_id")
     private UUID originatingHearingId;
@@ -35,11 +30,11 @@ public class Plea {
         this.pleaDate = pleaDate;
     }
 
-    public PleaValue getPleaValue() {
+    public String getPleaValue() {
         return pleaValue;
     }
 
-    public void setPleaValue(PleaValue pleaValue) {
+    public void setPleaValue(String pleaValue) {
         this.pleaValue = pleaValue;
     }
 

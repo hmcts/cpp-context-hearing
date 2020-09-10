@@ -151,6 +151,9 @@ public class ReferenceDataStub {
 
     private static final String REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE = "application/vnd.reference-data.judiciaries+json";
     private static final String REFERENCE_DATA_JUDICIARIES_URL = "/referencedata-service/query/api/rest/referencedata/judiciaries";
+
+    private static final String REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE = "application/vnd.referencedata.plea-types+json";
+    private static final String REFERENCE_DATA_PLEA_TYPES_URL = "/referencedata-service/query/api/rest/referencedata/plea-types";
     /*todo These 2 data is for same stub, but different tests are trying to add different values, so we put static list to not loose data for other tests.
      * And these data prevent running tests on multiple JVM forks, Currently we support one JVM/MultipleThreads. see  hearing-integration-test/pom.xml
      */
@@ -301,6 +304,8 @@ public class ReferenceDataStub {
 
         stubGetAllVerdictTypes(allVerdictTypes);
     }
+
+
 
     public static void stubGetAllAlcoholLevelMethods() {
         final AllAlcoholLevelMethods allAlcoholLevelMethods = new AllAlcoholLevelMethods();
@@ -1014,4 +1019,19 @@ public class ReferenceDataStub {
 
         waitForStubToBeReady(REFERENCE_DATA_JUDICIARIES_URL, REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE);
     }
+
+    public static void stubPleaTypeGuiltyFlags(){
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+        String payload = getPayload("stub-data/referencedata.query.plea-types.json");
+
+        stubFor(get(urlPathMatching(REFERENCE_DATA_PLEA_TYPES_URL))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(REFERENCE_DATA_PLEA_TYPES_URL, REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE);
+    }
+
 }

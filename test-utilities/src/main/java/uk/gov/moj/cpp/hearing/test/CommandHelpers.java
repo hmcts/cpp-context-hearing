@@ -8,7 +8,6 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
@@ -202,7 +201,7 @@ public class CommandHelpers {
             return this.hearingUpdatePleaCommand.getPleas().get(0).getPlea().getPleaDate();
         }
 
-        public PleaValue getFirstPleaValue() {
+        public String getFirstPleaValue() {
             return this.hearingUpdatePleaCommand.getPleas().get(0).getPlea().getPleaValue();
         }
 

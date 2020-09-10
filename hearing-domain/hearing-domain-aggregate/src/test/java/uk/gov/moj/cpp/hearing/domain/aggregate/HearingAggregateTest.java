@@ -21,7 +21,6 @@ import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
@@ -63,6 +62,7 @@ import org.junit.rules.ExpectedException;
 
 public class HearingAggregateTest {
 
+    private static final String GUILTY = "GUILTY";
     private static final HearingAggregate HEARING_AGGREGATE = new HearingAggregate();
 
     @Rule
@@ -93,7 +93,7 @@ public class HearingAggregateTest {
         final UpdateHearingWithInheritedPleaCommand command = new UpdateHearingWithInheritedPleaCommand(
                 randomUUID(),
                 Plea.plea()
-                        .withPleaValue(PleaValue.GUILTY)
+                        .withPleaValue(GUILTY)
                         .withPleaDate(PAST_LOCAL_DATE.next())
                         .withOffenceId(randomUUID())
                         .withOriginatingHearingId(randomUUID())

@@ -29,7 +29,6 @@ import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -39,6 +38,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
@@ -50,7 +50,9 @@ import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -67,6 +69,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdatePleaCommandHandlerTest {
+    private static final String GUILTY = "GUILTY";
+    private static final String NOT_GUILTY = "NOT_GUILTY";
 
     private static InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
     private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
@@ -88,22 +92,27 @@ public class UpdatePleaCommandHandlerTest {
     private EventSource eventSource;
     @Mock
     private AggregateService aggregateService;
+    @Mock
+    private ReferenceDataService referenceDataService;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    private Set<String> guiltyPleaTypes;
 
     @Before
     public void setup() {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         setField(this.jsonObjectToObjectConverter, "objectMapper", objectMapper);
         setField(this.objectToJsonObjectConverter, "mapper", objectMapper);
+        guiltyPleaTypes = createGuiltyPleaTypes();
     }
 
     @Test
     public void testHearingAggregateUpdatePlea_toNotGuilty_shouldNotHaveConvictionDate() throws Throwable {
 
-        final PleaValue pleaValue = PleaValue.NOT_GUILTY;
+        final String pleaValue = NOT_GUILTY;
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
 
         final Plea plea = getPlea(pleaDate, pleaValue, null);
@@ -150,7 +159,7 @@ public class UpdatePleaCommandHandlerTest {
     @Test
     public void testHearingAggregateUpdatePlea_toGuilty_shouldHaveConvictionDateDelegated() throws Throwable {
 
-        final PleaValue pleaValue = PleaValue.GUILTY;
+        final String pleaValue = GUILTY;
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
         final DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
                 .withUserId(randomUUID())
@@ -171,7 +180,7 @@ public class UpdatePleaCommandHandlerTest {
 
         when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingAggregateEventStream);
         when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
-
+        when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes);
         final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.update-plea"),
                 objectToJsonObjectConverter.convert(updatePleaCommand));
 
@@ -209,7 +218,7 @@ public class UpdatePleaCommandHandlerTest {
     @Test
     public void testOffenceAggregateUpdatePlea_toNotGuilty() throws Throwable {
 
-        PleaValue pleaValue = PleaValue.NOT_GUILTY;
+        String pleaValue = NOT_GUILTY;
         LocalDate pleaDate = PAST_LOCAL_DATE.next();
 
         when(this.eventSource.getStreamById(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())).thenReturn(this.offenceAggregateEventStream);
@@ -308,7 +317,7 @@ public class UpdatePleaCommandHandlerTest {
 
         when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingAggregateEventStream);
         when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
-
+        when(this.referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes);
         final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.update-plea"),
                 objectToJsonObjectConverter.convert(command));
 
@@ -433,7 +442,7 @@ public class UpdatePleaCommandHandlerTest {
     @Test
     public void testOffenceAggregateUpdatePleaToGuilty() throws Throwable {
 
-        final PleaValue pleaValue = PleaValue.NOT_GUILTY;
+        final String pleaValue = NOT_GUILTY;
 
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
 
@@ -474,7 +483,7 @@ public class UpdatePleaCommandHandlerTest {
 
     }
 
-    private Plea getPlea(final LocalDate pleaDate, final PleaValue pleaValue, final DelegatedPowers delegatedPowers) {
+    private Plea getPlea(final LocalDate pleaDate, final String pleaValue, final DelegatedPowers delegatedPowers) {
         return Plea.plea()
                 .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
                 .withOriginatingHearingId(hearing.getHearingId())
@@ -513,5 +522,11 @@ public class UpdatePleaCommandHandlerTest {
                 .withIndicatedPlea(indicatedPlea)
                 .withAllocationDecision(allocationDecision)
         );
+    }
+
+    private Set<String> createGuiltyPleaTypes() {
+        Set<String> guiltyPleaTypes = new HashSet<>();
+        guiltyPleaTypes.add(GUILTY);
+        return guiltyPleaTypes;
     }
 }

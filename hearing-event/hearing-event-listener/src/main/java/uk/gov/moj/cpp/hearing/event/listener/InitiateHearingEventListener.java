@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static uk.gov.justice.core.courts.PleaValue.GUILTY;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S2201"})
 @ServiceComponent(EVENT_LISTENER)
 public class InitiateHearingEventListener {
-
+    private static final String GUILTY = "GUILTY";
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventListener.class.getName());
 
     @Inject
@@ -202,6 +201,7 @@ public class InitiateHearingEventListener {
 
             if (shouldSetPlea) {
                 offence.setPlea(pleaJPAMapper.toJPA(event.getPlea()));
+                offence.setConvictionDate(GUILTY.equals(event.getPlea().getPleaValue()) ? event.getPlea().getPleaDate() : null);
                 offenceRepository.save(offence);
             }
         }

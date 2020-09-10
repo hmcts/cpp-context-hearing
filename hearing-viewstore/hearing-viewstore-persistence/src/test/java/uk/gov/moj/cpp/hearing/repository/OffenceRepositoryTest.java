@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.repository;
 
 import static org.junit.Assert.assertEquals;
-import static uk.gov.justice.core.courts.PleaValue.GUILTY;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
@@ -25,7 +24,7 @@ import org.junit.runner.RunWith;
 
 @RunWith(CdiTestRunner.class)
 public class OffenceRepositoryTest {
-
+    private static final String GUILTY = "GUILTY";
     private static final List<uk.gov.justice.core.courts.Hearing> hearings = new ArrayList<>();
     private static final List<Offence> offences = new ArrayList<>();
 

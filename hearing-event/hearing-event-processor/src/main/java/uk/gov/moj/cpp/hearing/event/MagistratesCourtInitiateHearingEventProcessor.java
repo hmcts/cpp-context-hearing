@@ -7,7 +7,6 @@ import static uk.gov.justice.core.courts.PleaModel.pleaModel;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.moj.cpp.hearing.domain.event.PleaUpsert.pleaUpsert;
 
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -91,7 +90,7 @@ public class MagistratesCourtInitiateHearingEventProcessor {
                                 .withPlea(plea().withOriginatingHearingId(magsCourtHearingRecorded.getHearingId())
                                         .withOffenceId(offence.getId())
                                         .withPleaDate(offence.getPlea().getPleaDate())
-                                        .withPleaValue(PleaValue.valueOf(offence.getPlea().getValue()))
+                                        .withPleaValue(offence.getPlea().getValue())
                                         .build()
                                 ).build());
 

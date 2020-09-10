@@ -23,7 +23,6 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
@@ -55,6 +54,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -403,23 +403,23 @@ public class PublishResultsDelegate {
     }
 
     private void mapAcquittalDate(final ResultsShared resultsShared) {
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
         resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream())
-                .filter(this::isValidToSetAcquittalDate)
+                .filter(offence -> isValidToSetAcquittalDate(offence, guiltyPleaTypes))
                 .forEach(offence -> getMaxOrderDate(offence.getJudicialResults()).ifPresent(offence::setAquittalDate));
     }
 
-    private boolean isValidToSetAcquittalDate(final Offence offence) {
+    private boolean isValidToSetAcquittalDate(final Offence offence, final Set<String> guiltyPleaTypes) {
         return isNull(offence.getAquittalDate()) &&
-                isNotGuiltyPlea(offence) &&
+                isNotGuiltyPlea(offence, guiltyPleaTypes) &&
                 hasFinalResult(offence.getJudicialResults()) &&
                 isNull(offence.getConvictionDate());
     }
 
-    private boolean isNotGuiltyPlea(final Offence offence) {
-        return nonNull(offence.getPlea()) &&
-                offence.getPlea().getPleaValue() == PleaValue.NOT_GUILTY;
+    private boolean isNotGuiltyPlea(final Offence offence, final Set<String> guiltyPleaTypes) {
+        return nonNull(offence.getPlea()) && !guiltyPleaTypes.contains(offence.getPlea().getPleaValue());
     }
 
     private Optional<LocalDate> getMaxOrderDate(final List<JudicialResult> judicialResults) {

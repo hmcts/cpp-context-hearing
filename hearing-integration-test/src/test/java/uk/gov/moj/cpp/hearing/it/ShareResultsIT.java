@@ -69,6 +69,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllVerdictTy
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsDDCH;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsWithDefaultValues;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubPleaTypeGuiltyFlags;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
@@ -102,7 +103,6 @@ import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
@@ -166,11 +166,13 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID GUILTY_RESULT_DEF_ID = fromString("ce23a452-9015-4619-968f-1628d7a271c9");
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final int TIMEOUT_IN_MS = 30000;
+    private static final String GUILTY = "GUILTY";
 
     @Before
     public void setUp() {
         stubGetAllVerdictTypes();
         stubGetAllAlcoholLevelMethods();
+        stubPleaTypeGuiltyFlags();
     }
 
     @Test
@@ -1192,7 +1194,7 @@ public class ShareResultsIT extends AbstractIT {
 
             final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, PleaValue.GUILTY,
+                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY,
                                     false))
             );
 
@@ -1797,7 +1799,7 @@ public class ShareResultsIT extends AbstractIT {
 
             final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, PleaValue.GUILTY,
+                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY,
                                     false))
             );
 
@@ -1821,7 +1823,7 @@ public class ShareResultsIT extends AbstractIT {
 
             final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, PleaValue.GUILTY,
+                            updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY,
                                     false))
             );
 

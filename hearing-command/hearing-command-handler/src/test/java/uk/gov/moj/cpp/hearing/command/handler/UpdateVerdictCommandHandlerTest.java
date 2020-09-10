@@ -10,6 +10,7 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.command.handler.util.PleaTypeUtil.guiltyPleaTypes;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
@@ -30,6 +31,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.UpdateInheritedVerdictCommand;
@@ -79,6 +81,8 @@ public class UpdateVerdictCommandHandlerTest {
     private EventSource eventSource;
     @Mock
     private AggregateService aggregateService;
+    @Mock
+    private ReferenceDataService referenceDataService;
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
@@ -95,6 +99,7 @@ public class UpdateVerdictCommandHandlerTest {
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        when(referenceDataService.retrieveGuiltyPleaTypes()).thenReturn(guiltyPleaTypes());
     }
 
     @Test
@@ -276,5 +281,7 @@ public class UpdateVerdictCommandHandlerTest {
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
+
+
 
 }

@@ -22,7 +22,6 @@ import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -56,6 +55,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
 public class PleaUpdateEventProcessorTest {
+    private static final String GUILTY = "GUILTY";
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -102,7 +102,7 @@ public class PleaUpdateEventProcessorTest {
                         .withPlea(plea()
                                 .withOffenceId(offenceId)
                                 .withPleaDate(PAST_LOCAL_DATE.next())
-                                .withPleaValue(PleaValue.GUILTY)
+                                .withPleaValue(GUILTY)
                                 .build())
                         .build());
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),

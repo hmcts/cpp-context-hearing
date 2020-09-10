@@ -7,19 +7,25 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.UpdateInheritedVerdictCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.UpdateOffenceVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.inject.Inject;
+
 @ServiceComponent(COMMAND_HANDLER)
 public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
+    @Inject
+    private ReferenceDataService referenceDataService;
 
     private static final Logger LOGGER =
             LoggerFactory.getLogger(UpdateVerdictCommandHandler.class.getName());
@@ -31,13 +37,15 @@ public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.update-verdict event received {}", command.toObfuscatedDebugString());
         }
 
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
+
         final HearingUpdateVerdictCommand hearingUpdateVerdictCommand = convertToObject(command, HearingUpdateVerdictCommand.class);
 
         final UUID hearingId = hearingUpdateVerdictCommand.getHearingId();
 
         for (final Verdict verdict : hearingUpdateVerdictCommand.getVerdicts()) {
             aggregate(HearingAggregate.class, hearingId, command,
-                    hearingAggregate -> hearingAggregate.updateVerdict(hearingId, verdict));
+                    hearingAggregate -> hearingAggregate.updateVerdict(hearingId, verdict, guiltyPleaTypes));
         }
     }
 

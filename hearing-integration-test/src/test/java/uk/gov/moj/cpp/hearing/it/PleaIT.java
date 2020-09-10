@@ -10,9 +10,6 @@ import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
-import static uk.gov.justice.core.courts.PleaValue.CONSENTS;
-import static uk.gov.justice.core.courts.PleaValue.GUILTY;
-import static uk.gov.justice.core.courts.PleaValue.NOT_GUILTY;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
@@ -32,6 +29,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
+import org.junit.Before;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -39,7 +37,6 @@ import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -54,9 +51,18 @@ import java.util.UUID;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
 
 public class PleaIT extends AbstractIT {
+    private static final String GUILTY = "GUILTY";
+    private static final String NOT_GUILTY = "NOT_GUILTY";
+    private static final String CONSENTS = "CONSENTS";
+
+    @Before
+    public void setUp(){
+        ReferenceDataStub.stubPleaTypeGuiltyFlags();
+    }
 
     public static final String PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED = "public.hearing.offence-conviction-date-removed";
     public static final String PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED = "public.hearing.offence-conviction-date-changed";
@@ -523,7 +529,7 @@ public class PleaIT extends AbstractIT {
     private UpdatePleaCommandHelper getUpdatePleaCommandHelper(final InitiateHearingCommandHelper hearing,
                                                                final IndicatedPleaValue indicatedPleaValue,
                                                                final boolean isAllocationDecision,
-                                                               final PleaValue pleaValue) {
+                                                               final String pleaValue) {
         final UUID firstOffenceId = hearing.getFirstOffenceForFirstDefendantForFirstCase().getId();
         final UUID hearingId = hearing.getHearingId();
         final UUID defendantId = hearing.getFirstDefendantForFirstCase().getId();

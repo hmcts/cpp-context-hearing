@@ -48,7 +48,6 @@ import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PleaModel;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -491,7 +490,7 @@ public class TestTemplates {
                                                            final UUID defendantId,
                                                            final UUID prosecutionCaseId,
                                                            final IndicatedPleaValue indicatedPleaValue,
-                                                           final PleaValue pleaValue,
+                                                           final String pleaValue,
                                                            final boolean isAllocationDecision) {
 
 

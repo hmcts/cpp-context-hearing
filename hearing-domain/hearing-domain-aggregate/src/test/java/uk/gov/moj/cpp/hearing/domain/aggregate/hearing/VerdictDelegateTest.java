@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
@@ -20,7 +21,6 @@ import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
-import uk.gov.justice.core.courts.PleaValue;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -40,6 +40,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 public class VerdictDelegateTest {
+    private static final String PLEA_GUILTY = "GUILTY";
+    private static final String PLEA_NOT_GUILTY = "NOT_GUILTY";
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -59,7 +61,8 @@ public class VerdictDelegateTest {
 
         final VerdictUpsert verdictUpsert = (VerdictUpsert) hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
-                verdict.getFirstVerdict()
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList()).get(0);
 
         assertThat(verdictUpsert, isBean(VerdictUpsert.class)
@@ -105,7 +108,8 @@ public class VerdictDelegateTest {
 
         final VerdictUpsert verdictUpsert = (VerdictUpsert) hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
-                verdict.getFirstVerdict()
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList()).get(0);
 
         assertThat(verdictUpsert, isBean(VerdictUpsert.class)
@@ -138,7 +142,8 @@ public class VerdictDelegateTest {
 
         final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
-                verdict.getFirstVerdict()
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList()).get(1);
 
         assertThat(convictionDateAdded, isBean(ConvictionDateAdded.class)
@@ -168,14 +173,15 @@ public class VerdictDelegateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing.getHearing()));
 
-        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(hearingId, guiltyVerdict.getFirstVerdict())
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(hearingId, guiltyVerdict.getFirstVerdict(), guiltyPleaTypes())
                 .collect(Collectors.toList()).get(1);
         hearingAggregate.apply(convictionDateAdded);
 
         // updated to not guilty verdict set after setting a guilty verdict
         final ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) hearingAggregate.updateVerdict(
                 hearingId,
-                notGuiltyVerdict.getFirstVerdict()
+                notGuiltyVerdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList()).get(1);
 
         assertThat(convictionDateRemoved, isBean(ConvictionDateRemoved.class)
@@ -200,14 +206,15 @@ public class VerdictDelegateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing.getHearing()));
 
-        final List<Object> events = hearingAggregate.updatePlea(hearingId, getPleaModel(offenceId, PleaValue.GUILTY))
+        final List<Object> events = hearingAggregate.updatePlea(hearingId, getPleaModel(offenceId, PLEA_GUILTY), guiltyPleaTypes())
                 .collect(Collectors.toList());
         events.forEach(hearingAggregate::apply);
 
         // updated to not guilty verdict after setting a guilty plea
         final List<Object> eventsAfterUpdatingVerdict = hearingAggregate.updateVerdict(
                 hearingId,
-                notGuiltyVerdict.getFirstVerdict()
+                notGuiltyVerdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList());
 
         assertThat(eventsAfterUpdatingVerdict, hasSize(1));
@@ -238,7 +245,8 @@ public class VerdictDelegateTest {
 
         List<Object> events = hearingAggregate.updateVerdict(
                 hearingId,
-                firstGuiltyVerdict.getFirstVerdict()
+                firstGuiltyVerdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList());
 
         assertThat(events.size(), is(2));
@@ -250,7 +258,8 @@ public class VerdictDelegateTest {
         // updated to another guilty verdict after initially setting a guilty verdict
         List<Object> eventsAfterSecondGuiltyVerdictUpdate = hearingAggregate.updateVerdict(
                 hearingId,
-                secondGuiltyVerdict.getFirstVerdict()
+                secondGuiltyVerdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList());
         // should have not conviction added event
         assertThat(eventsAfterSecondGuiltyVerdictUpdate.size(), is(1));
@@ -263,7 +272,7 @@ public class VerdictDelegateTest {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
         final Offence firstOffenceForFirstDefendantForFirstCase = hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
         final UUID idOfFirstOffenceForFirstDefendantForFirstCase = firstOffenceForFirstDefendantForFirstCase.getId();
-        firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PleaValue.NOT_GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
+        firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PLEA_NOT_GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
 
         final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(
                 hearing.getHearingId(),
@@ -274,7 +283,8 @@ public class VerdictDelegateTest {
 
         final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
-                verdict.getFirstVerdict()
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList()).get(1);
 
         assertThat(convictionDateAdded, isBean(ConvictionDateAdded.class)
@@ -290,7 +300,7 @@ public class VerdictDelegateTest {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
         final Offence firstOffenceForFirstDefendantForFirstCase = hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
         final UUID idOfFirstOffenceForFirstDefendantForFirstCase = firstOffenceForFirstDefendantForFirstCase.getId();
-        firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PleaValue.GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
+        firstOffenceForFirstDefendantForFirstCase.setPlea(Plea.plea().withPleaValue(PLEA_GUILTY).withOffenceId(idOfFirstOffenceForFirstDefendantForFirstCase).build());
         firstOffenceForFirstDefendantForFirstCase.setConvictionDate(LocalDate.now());
 
         final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(
@@ -302,7 +312,8 @@ public class VerdictDelegateTest {
 
         final List<Object> events = hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
-                verdict.getFirstVerdict()
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
         ).collect(Collectors.toList());
 
         assertThat(events, hasSize(1));
@@ -324,11 +335,12 @@ public class VerdictDelegateTest {
 
         hearingAggregate.updateVerdict(
                 hearing.getHearingId(),
-                verdict.getFirstVerdict()
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
         );
     }
 
-    private PleaModel getPleaModel(final UUID offenceId, final PleaValue pleaValue) {
+    private PleaModel getPleaModel(final UUID offenceId, final String pleaValue) {
         return PleaModel.pleaModel()
                 .withOffenceId(offenceId)
                 .withPlea(Plea.plea()
