@@ -430,8 +430,9 @@ public class PublishResultsDelegate {
     }
 
     private boolean hasFinalResult(final List<JudicialResult> judicialResults) {
-        return judicialResults.stream().anyMatch(result -> Category.FINAL == result.getCategory());
+        return judicialResults != null && judicialResults.stream().filter(Objects::nonNull).anyMatch(result -> Category.FINAL == result.getCategory());
     }
+
 
     /**
      * get court of appeal results order date which will be entered as a prompt if any.
