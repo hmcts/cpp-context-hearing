@@ -22,11 +22,14 @@ public class Plea {
     @Embedded
     private DelegatedPowers delegatedPowers;
 
+    @Embedded
+    private LesserOrAlternativeOffenceForPlea lesserOrAlternativeOffence;
+
     public LocalDate getPleaDate() {
         return pleaDate;
     }
 
-    public void setPleaDate(LocalDate pleaDate) {
+    public void setPleaDate(final LocalDate pleaDate) {
         this.pleaDate = pleaDate;
     }
 
@@ -34,7 +37,7 @@ public class Plea {
         return pleaValue;
     }
 
-    public void setPleaValue(String pleaValue) {
+    public void setPleaValue(final String pleaValue) {
         this.pleaValue = pleaValue;
     }
 
@@ -42,7 +45,7 @@ public class Plea {
         return originatingHearingId;
     }
 
-    public void setOriginatingHearingId(UUID originatingHearingId) {
+    public void setOriginatingHearingId(final UUID originatingHearingId) {
         this.originatingHearingId = originatingHearingId;
     }
 
@@ -50,7 +53,15 @@ public class Plea {
         return delegatedPowers;
     }
 
-    public void setDelegatedPowers(DelegatedPowers delegatedPowers) {
+    public void setDelegatedPowers(final DelegatedPowers delegatedPowers) {
         this.delegatedPowers = delegatedPowers;
+    }
+
+    public LesserOrAlternativeOffenceForPlea getLesserOrAlternativeOffence() {
+        return lesserOrAlternativeOffence;
+    }
+
+    public void setLesserOrAlternativeOffence(final LesserOrAlternativeOffenceForPlea lesserOrAlternativeOffence) {
+        this.lesserOrAlternativeOffence = lesserOrAlternativeOffence;
     }
 }

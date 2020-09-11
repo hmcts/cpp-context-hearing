@@ -7,7 +7,7 @@ final class JPACompositeMappers {
     public static final AllocationDecisionJPAMapper ALLOCATION_DECISION_JPA_MAPPER = new AllocationDecisionJPAMapper(
             COURT_INDICATED_SENTENCE_JPA_MAPPER);
     public static final LaaApplnReferenceJPAMapper LAA_APPLN_REFERENCE_JPA_MAPPER = new LaaApplnReferenceJPAMapper();
-    public static final PleaJPAMapper PLEA_JPA_MAPPER = new PleaJPAMapper(new DelegatedPowersJPAMapper());
+    public static final PleaJPAMapper PLEA_JPA_MAPPER = new PleaJPAMapper(new DelegatedPowersJPAMapper(), new LesserOrAlternativeOffenceForPleaJPAMapper());
     public static final VerdictJPAMapper VERDICT_JPA_MAPPER = new VerdictJPAMapper(new JurorsJPAMapper(),
             new LesserOrAlternativeOffenceJPAMapper(), new VerdictTypeJPAMapper());
     public static final OffenceJPAMapper OFFENCE_JPA_MAPPER = new OffenceJPAMapper(new NotifiedPleaJPAMapper(),

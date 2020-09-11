@@ -11,10 +11,13 @@ import javax.inject.Inject;
 public class PleaJPAMapper {
 
     private DelegatedPowersJPAMapper delegatedPowersJPAMapper;
+    private LesserOrAlternativeOffenceForPleaJPAMapper lesserOrAlternativeOffenceForPleaJPAMapper;
 
     @Inject
-    public PleaJPAMapper(DelegatedPowersJPAMapper delegatedPowersJPAMapper) {
+    public PleaJPAMapper(final DelegatedPowersJPAMapper delegatedPowersJPAMapper,
+                         final LesserOrAlternativeOffenceForPleaJPAMapper lesserOrAlternativeOffenceForPleaJPAMapper) {
         this.delegatedPowersJPAMapper = delegatedPowersJPAMapper;
+        this.lesserOrAlternativeOffenceForPleaJPAMapper = lesserOrAlternativeOffenceForPleaJPAMapper;
     }
 
     //To keep cditester happy
@@ -27,6 +30,7 @@ public class PleaJPAMapper {
         }
         final Plea plea = new Plea();
         plea.setDelegatedPowers(delegatedPowersJPAMapper.toJPA(pojo.getDelegatedPowers()));
+        plea.setLesserOrAlternativeOffence(lesserOrAlternativeOffenceForPleaJPAMapper.toJPA(pojo.getLesserOrAlternativeOffence()));
         plea.setOriginatingHearingId(pojo.getOriginatingHearingId());
         plea.setPleaDate(pojo.getPleaDate());
         plea.setPleaValue(pojo.getPleaValue());
@@ -39,6 +43,7 @@ public class PleaJPAMapper {
         }
         return uk.gov.justice.core.courts.Plea.plea()
                 .withDelegatedPowers(delegatedPowersJPAMapper.fromJPA(entity.getDelegatedPowers()))
+                .withLesserOrAlternativeOffence(lesserOrAlternativeOffenceForPleaJPAMapper.fromJPA(entity.getLesserOrAlternativeOffence()))
                 .withPleaDate(entity.getPleaDate())
                 .withOriginatingHearingId(entity.getOriginatingHearingId())
                 .withPleaValue(entity.getPleaValue())

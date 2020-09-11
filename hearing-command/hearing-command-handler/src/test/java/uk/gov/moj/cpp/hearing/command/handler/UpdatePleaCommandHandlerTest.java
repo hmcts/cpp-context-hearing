@@ -27,6 +27,7 @@ import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Source;
@@ -73,8 +74,6 @@ public class UpdatePleaCommandHandlerTest {
     private static final String NOT_GUILTY = "NOT_GUILTY";
 
     private static InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
-    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingInitiated.class,
@@ -82,6 +81,7 @@ public class UpdatePleaCommandHandlerTest {
             OffencePleaUpdated.class,
             ConvictionDateAdded.class,
             ConvictionDateRemoved.class);
+    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @InjectMocks
     private UpdatePleaCommandHandler hearingCommandHandler;
     @Mock
@@ -147,6 +147,7 @@ public class UpdatePleaCommandHandlerTest {
                 .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
                 .with(Plea::getPleaDate, is(pleaDate))
                 .with(Plea::getPleaValue, is(pleaValue))
+                .with(Plea::getLesserOrAlternativeOffence, is(getLesserOrAlternativeOffence()))
         );
 
         assertThat(((JsonEnvelope) events.get(1)).metadata().name(), is("hearing.conviction-date-removed"));
@@ -201,6 +202,7 @@ public class UpdatePleaCommandHandlerTest {
                 .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
                 .with(Plea::getPleaDate, is(pleaDate))
                 .with(Plea::getPleaValue, is(pleaValue))
+                .with(Plea::getLesserOrAlternativeOffence, is(getLesserOrAlternativeOffence()))
                 .with(Plea::getDelegatedPowers, isBean(DelegatedPowers.class)
                         .with(DelegatedPowers::getFirstName, is(delegatedPowers.getFirstName()))
                         .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName()))
@@ -254,6 +256,7 @@ public class UpdatePleaCommandHandlerTest {
         assertThat(pleaUpsert.getPleaModel().getPlea(), isBean(Plea.class)
                 .with(Plea::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
                 .with(Plea::getPleaDate, is(pleaDate))
+                .with(Plea::getLesserOrAlternativeOffence, is(nullValue()))
                 .with(Plea::getPleaValue, is(pleaValue)));
     }
 
@@ -400,7 +403,7 @@ public class UpdatePleaCommandHandlerTest {
                 .with(AllocationDecision::getMotReasonDescription, is(motReasonDescription))
         );
         assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
-     }
+    }
 
     @Test
     public void testIndicatedPlea_WithAllocationDecision() throws Throwable {
@@ -490,7 +493,20 @@ public class UpdatePleaCommandHandlerTest {
                 .withPleaDate(pleaDate)
                 .withDelegatedPowers(delegatedPowers)
                 .withPleaValue(pleaValue)
+                .withLesserOrAlternativeOffence(getLesserOrAlternativeOffence())
                 .build();
+    }
+
+    private LesserOrAlternativeOffence getLesserOrAlternativeOffence() {
+        return
+                LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                        .withOffenceCode("MH04001")
+                        .withOffenceDefinitionId(UUID.fromString("33ebe963-26d6-41bd-b0c6-a1c1fe1b8a81"))
+                        .withOffenceLegislation("Contrary to regulations 12(1)(a), 49(1)(aa) and 52 of the Medicines for Human Use (Clinical Trials) Regulations 2004")
+                        .withOffenceLegislationWelsh("legislationWelsh")
+                        .withOffenceTitle("Start / cause to be started a clinical trial without authority")
+                        .withOffenceTitleWelsh("titleWelsh")
+                        .build();
     }
 
     private IndicatedPlea getIndicatedPlea(final IndicatedPleaValue indicatedPleaValue, final LocalDate pleaDate) {

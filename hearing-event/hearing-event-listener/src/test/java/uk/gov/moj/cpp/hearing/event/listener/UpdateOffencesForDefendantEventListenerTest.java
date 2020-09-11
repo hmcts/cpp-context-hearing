@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.mapping.DelegatedPowersJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.JurorsJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.LaaApplnReferenceJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.LesserOrAlternativeOffenceForPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.LesserOrAlternativeOffenceJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.NotifiedPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.OffenceFactsJPAMapper;
@@ -81,7 +82,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         setField(this.offenceJPAMapper, "indicatedPleaJPAMapper", new IndicatedPleaJPAMapper());
         setField(this.offenceJPAMapper, "offenceFactsJPAMapper", new OffenceFactsJPAMapper());
         setField(this.offenceJPAMapper, "allocationDecisionJPAMapper", new AllocationDecisionJPAMapper(new CourtIndicatedSentenceJPAMapper()));
-        setField(this.offenceJPAMapper, "pleaJPAMapper", new PleaJPAMapper(new DelegatedPowersJPAMapper()));
+        setField(this.offenceJPAMapper, "pleaJPAMapper", new PleaJPAMapper(new DelegatedPowersJPAMapper(), new LesserOrAlternativeOffenceForPleaJPAMapper()));
         setField(this.offenceJPAMapper, "verdictJPAMapper", new VerdictJPAMapper(new JurorsJPAMapper(), new LesserOrAlternativeOffenceJPAMapper(), new VerdictTypeJPAMapper()));
         setField(this.offenceJPAMapper, "laaApplnReferenceJPAMapper", new LaaApplnReferenceJPAMapper());
     }
