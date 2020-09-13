@@ -46,9 +46,6 @@ public class RestructureResultsIT extends AbstractIT {
     @Before
     public void setup() {
         fileResourceObjectMapper = new FileResourceObjectMapper();
-        stubRelistReferenceDataResults();
-        stubGetAllVerdictTypes();
-        stubGetAllAlcoholLevelMethods();
         setupNowsReferenceData(now());
     }
 

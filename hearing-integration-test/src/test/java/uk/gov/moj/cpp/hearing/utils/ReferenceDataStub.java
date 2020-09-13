@@ -19,6 +19,7 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsDDCH;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeReady;
 
@@ -187,6 +188,11 @@ public class ReferenceDataStub {
         changeCourtRoomsStubWithAdding();
         stubDynamicPromptFixedList();
         stubReferenceDataResultListForNameAddress();
+
+        stubGetAllVerdictTypes();
+        stubGetAllAlcoholLevelMethods();
+        stubGetReferenceDataResultDefinitionsDDCH();
+        stubPleaTypeGuiltyFlags();
     }
 
     public static void stubGetReferenceDataResultDefinitionsWithDefaultValues(final LocalDate orderedDate) {

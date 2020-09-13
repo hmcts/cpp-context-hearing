@@ -111,6 +111,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -315,7 +316,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> saveDraftResults(final UUID applicationId, final Target target, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {
-        return apply(resultsSharedDelegate.saveDraftResult(Target
+
+        final Target targetForEvent = Target
                 .target()
                 .withShadowListed(target.getShadowListed())
                 .withApplicationId(applicationId)
@@ -325,7 +327,16 @@ public class HearingAggregate implements Aggregate {
                 .withOffenceId(offenceId)
                 .withResultLines(resultLines)
                 .withTargetId(target.getTargetId())
-                .build()));
+                .build();
+
+        // Fix to ensure that no extra target IDs are created for the same combination of offence and defendant.
+        // The aggregate ensures that any extra target ID for the same combination of offence / defendant is rejected and not processed
+        if (isTargetValid(momento, target)) {
+            return apply(resultsSharedDelegate.saveDraftResult(targetForEvent));
+        }
+        return apply(resultsSharedDelegate.rejectSaveDraftResult(targetForEvent));
+
+
     }
 
     public Stream<Object> applicationDraftResults(final UUID targetId, final UUID applicationId, final UUID hearingId, final String draftResult, final CourtApplicationOutcomeType applicationOutcomeType, final LocalDate applicationOutcomeDate) {
@@ -468,5 +479,24 @@ public class HearingAggregate implements Aggregate {
                 .withHearingId(hearingId)
                 .withSlots(slots)
                 .build()));
+    }
+
+    private boolean isTargetValid(final HearingAggregateMomento momento, final Target newTarget) {
+        final Map<UUID, Target> existingTargets = momento.getTargets();
+        if (Objects.isNull(existingTargets) || existingTargets.isEmpty()) {
+            return true;
+        }
+
+        // ensuring that for an existing target ID, offence and defendant ID also match
+        if (existingTargets.containsKey(newTarget.getTargetId())) {
+            final Target existingTarget = existingTargets.get(newTarget.getTargetId());
+            return (existingTarget.getDefendantId().equals(newTarget.getDefendantId())
+                    && existingTarget.getOffenceId().equals(newTarget.getOffenceId()));
+        } else {
+            final boolean offenceDefendantPresentForAnotherTargetId = existingTargets.values().stream()
+                    .anyMatch(existingTarget -> existingTarget.getOffenceId().equals(newTarget.getOffenceId())
+                            && existingTarget.getDefendantId().equals(newTarget.getDefendantId()));
+            return !offenceDefendantPresentForAnotherTargetId;
+        }
     }
 }

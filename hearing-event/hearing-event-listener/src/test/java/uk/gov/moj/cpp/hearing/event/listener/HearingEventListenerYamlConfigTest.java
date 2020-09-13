@@ -45,6 +45,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
 
@@ -104,7 +105,8 @@ public class HearingEventListenerYamlConfigTest {
             CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value(),
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
-            BookProvisionalHearingSlots.class.getAnnotation(Event.class).value()
+            BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
+            SaveDraftResultFailed.class.getAnnotation(Event.class).value()
     );
 
     private final Map<String, String> handlerNames = new HashMap<>();

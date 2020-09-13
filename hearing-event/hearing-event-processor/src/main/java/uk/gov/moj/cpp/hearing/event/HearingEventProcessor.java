@@ -18,6 +18,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 
 import javax.inject.Inject;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 public class HearingEventProcessor {
 
     public static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
+    public static final String PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED = "public.hearing.save-draft-result-failed";
 
     public static final String PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED = "public.hearing.application-draft-resulted";
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
@@ -68,6 +70,26 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
 
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_DRAFT_RESULT_SAVED).apply(publicEventPayload));
+    }
+
+    @Handles("hearing.save-draft-result-failed")
+    public void handleSaveDraftResultFailedEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.save-draft-result-failed event received {}", event.toObfuscatedDebugString());
+        }
+
+        final Target target = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), SaveDraftResultFailed.class).getTarget();
+
+        final PublicHearingSaveDraftResultFailed publicEventSaveDraftResultFailed = PublicHearingSaveDraftResultFailed.publicHearingSaveDraftResultFailed()
+                .setDraftResult(target.getDraftResult())
+                .setHearingId(target.getHearingId())
+                .setDefendantId(target.getDefendantId())
+                .setOffenceId(target.getOffenceId())
+                .setTargetId(target.getTargetId());
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventSaveDraftResultFailed);
+
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED).apply(publicEventPayload));
     }
 
     @Handles("hearing.application-draft-resulted")

@@ -65,6 +65,7 @@ import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
@@ -92,6 +93,7 @@ public class ShareResultsCommandHandlerTest {
 
     public static final String HEARING_RESULTS_SHARED_EVENT_NAME = "hearing.results-shared";
     final static String DRAFT_RESULT_SAVED_EVENT_NAME = "hearing.draft-result-saved";
+    final static String SAVE_DRAFT_RESULT_FAILED_EVENT_NAME = "hearing.save-draft-result-failed";
     final static String APPLICATION_DRAFT_RESULT_EVENT_NAME = "hearing.application-draft-resulted";
 
     private static InitiateHearingCommand initiateHearingCommand;
@@ -103,7 +105,7 @@ public class ShareResultsCommandHandlerTest {
     private static ZonedDateTime sharedTime;
     private DefendantDetailsUpdated defendantDetailsUpdated;
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class, ApplicationDraftResulted.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class, ApplicationDraftResulted.class, SaveDraftResultFailed.class);
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
     @Mock
@@ -124,7 +126,7 @@ public class ShareResultsCommandHandlerTest {
     @BeforeClass
     public static void init() {
         initiateHearingCommand = standardInitiateHearingTemplate();
-        metadataId = UUID.randomUUID();
+        metadataId = randomUUID();
         sharedTime = new UtcClock().now();
         final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
                 Arrays.asList(LocalDate.now()),
@@ -132,7 +134,7 @@ public class ShareResultsCommandHandlerTest {
                 randomUUID(),
                 STRING.next(),
                 STRING.next(),
-                Arrays.asList(UUID.randomUUID()),
+                Arrays.asList(randomUUID()),
                 STRING.next(),
                 STRING.next(),
                 randomUUID()
@@ -142,7 +144,7 @@ public class ShareResultsCommandHandlerTest {
 
         final DefenceCounsel defenceCounsel = new DefenceCounsel(
                 Arrays.asList(LocalDate.now()),
-                Arrays.asList(UUID.randomUUID()),
+                Arrays.asList(randomUUID()),
                 STRING.next(),
                 randomUUID(),
                 STRING.next(),
@@ -156,11 +158,11 @@ public class ShareResultsCommandHandlerTest {
         nowsVariantsSavedEvent = NowsVariantsSavedEvent.nowsVariantsSavedEvent()
                 .setHearingId(initiateHearingCommand.getHearing().getId())
                 .setVariants(singletonList(Variant.variant()
-                        .setKey(VariantKey.variantKey().setDefendantId(UUID.randomUUID()))
+                        .setKey(VariantKey.variantKey().setDefendantId(randomUUID()))
                         .setValue(VariantValue.variantValue())
                 ));
 
-        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(UUID.randomUUID()).build(), null, null);
+        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(randomUUID()).build(), null, null);
 
     }
 
@@ -231,6 +233,75 @@ public class ShareResultsCommandHandlerTest {
 
     }
 
+    @Test
+    public void shouldRaiseSaveDraftResultFailedEventWhenDifferentTargetIdIsUsedForKnownOffenceDefendantCombination() throws Exception {
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final Target targetForOffence = saveDraftResultCommand.getTarget();
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+            apply(Stream.of(new DraftResultSaved(targetForOffence)));
+        }};
+
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+        final Target newTargetForSameOffence = getNewTarget(targetForOffence);
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(newTargetForSameOffence));
+
+        this.shareResultsCommandHandler.saveDraftResult(envelope);
+
+        final Optional<JsonEnvelope> found = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> SAVE_DRAFT_RESULT_FAILED_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        assertThat("expected:" + SAVE_DRAFT_RESULT_FAILED_EVENT_NAME, found.get(), IsNull.notNullValue());
+
+        assertThat(asPojo(found.get(), SaveDraftResultFailed.class), isBean(SaveDraftResultFailed.class)
+                .with(SaveDraftResultFailed::getTarget, isBean(Target.class)
+                        .with(Target::getTargetId, is(newTargetForSameOffence.getTargetId()))
+                        .with(Target::getDefendantId, is(newTargetForSameOffence.getDefendantId()))
+                        .with(Target::getDraftResult, is(newTargetForSameOffence.getDraftResult()))
+                        .with(Target::getHearingId, is(newTargetForSameOffence.getHearingId()))
+                        .with(Target::getOffenceId, is(newTargetForSameOffence.getOffenceId()))
+                )
+        );
+
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultFailedEventWhenKnownTargetIdUsedAnotherOffenceDefendantCombination() throws Exception {
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final Target targetForOffence = saveDraftResultCommand.getTarget();
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+            apply(Stream.of(new DraftResultSaved(targetForOffence)));
+        }};
+
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+        final Target targetWithKnownTargetIdAndDifferentOffenceId = getNewTarget(targetForOffence);
+        targetWithKnownTargetIdAndDifferentOffenceId.setTargetId(targetForOffence.getTargetId());
+        targetWithKnownTargetIdAndDifferentOffenceId.setOffenceId(randomUUID());
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(targetWithKnownTargetIdAndDifferentOffenceId));
+
+        this.shareResultsCommandHandler.saveDraftResult(envelope);
+
+        final Optional<JsonEnvelope> found = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> SAVE_DRAFT_RESULT_FAILED_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        assertThat("expected:" + SAVE_DRAFT_RESULT_FAILED_EVENT_NAME, found.get(), IsNull.notNullValue());
+
+        assertThat(asPojo(found.get(), SaveDraftResultFailed.class), isBean(SaveDraftResultFailed.class)
+                .with(SaveDraftResultFailed::getTarget, isBean(Target.class)
+                        .with(Target::getTargetId, is(targetWithKnownTargetIdAndDifferentOffenceId.getTargetId()))
+                        .with(Target::getDefendantId, is(targetWithKnownTargetIdAndDifferentOffenceId.getDefendantId()))
+                        .with(Target::getDraftResult, is(targetWithKnownTargetIdAndDifferentOffenceId.getDraftResult()))
+                        .with(Target::getHearingId, is(targetWithKnownTargetIdAndDifferentOffenceId.getHearingId()))
+                        .with(Target::getOffenceId, is(targetWithKnownTargetIdAndDifferentOffenceId.getOffenceId()))
+                )
+        );
+
+    }
+
 
     @Test
     public void shouldRaiseApplicationDraftResulted() throws Exception {
@@ -270,7 +341,7 @@ public class ShareResultsCommandHandlerTest {
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
 
         final CourtApplicationOutcomeType courtApplicationOutcomeType = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Admitted")
-                .withId(UUID.randomUUID())
+                .withId(randomUUID())
                 .withSequence(1).build();
 
         final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultWithOutcomeCommandTemplate(initiateHearingCommand.getHearing().getId(), applicationId, courtApplicationOutcomeType);
@@ -370,12 +441,12 @@ public class ShareResultsCommandHandlerTest {
                         .with(Target::getTargetId, is(targetDraft.getTargetId()))
                         .with(t -> t.getResultLines().size(), is(shareResultsCommand.getResultLines().size()))
                         .with(Target::getResultLines, first(isBean(ResultLine.class)
-                                .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
-                                .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
-                                .with(ResultLine::getPrompts, first(isBean(Prompt.class)
-                                        .with(Prompt::getId, is(promptIn.getId()))))
-                                .with(ResultLine::getChildResultLineIds, is(childResultLineIds))
-                                .with(ResultLine::getParentResultLineIds, is(parentResultLineIds))
+                                        .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
+                                        .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
+                                        .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                                .with(Prompt::getId, is(promptIn.getId()))))
+                                        .with(ResultLine::getChildResultLineIds, is(childResultLineIds))
+                                        .with(ResultLine::getParentResultLineIds, is(parentResultLineIds))
                                 )
                         )
                 ))
@@ -475,8 +546,18 @@ public class ShareResultsCommandHandlerTest {
                         .withApplicationId(courtApplication.getId())
                         .withApplicationResponseType(CourtApplicationResponseType.courtApplicationResponseType()
                                 .withDescription("Admitted")
-                                .withId(UUID.randomUUID())
+                                .withId(randomUUID())
                                 .withSequence(1).build())
                         .build());
+    }
+
+    private Target getNewTarget(final Target targetToCopyFrom) {
+        return Target.target()
+                .withHearingId(targetToCopyFrom.getHearingId())
+                .withDefendantId(targetToCopyFrom.getDefendantId())
+                .withDraftResult("")
+                .withOffenceId(targetToCopyFrom.getOffenceId())
+                .withTargetId(randomUUID())
+                .build();
     }
 }

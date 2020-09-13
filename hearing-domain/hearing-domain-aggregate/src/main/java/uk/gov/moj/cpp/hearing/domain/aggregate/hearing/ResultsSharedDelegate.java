@@ -2,7 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
-import static uk.gov.justice.core.courts.Target.*;
+import static uk.gov.justice.core.courts.Target.target;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -101,6 +102,10 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.of(new DraftResultSaved(target));
     }
 
+    public Stream<Object> rejectSaveDraftResult(final Target target) {
+        return Stream.of(new SaveDraftResultFailed(target));
+    }
+
     public Stream<Object> applicationDraftResult(final UUID targetId, final UUID applicationId, final UUID hearingId, final String draftResult, final CourtApplicationOutcomeType applicationOutcomeType, final LocalDate applicationOutcomeDate) {
         return Stream.of(ApplicationDraftResulted.applicationDraftResulted()
                 .setApplicationId(applicationId)
@@ -168,7 +173,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .build();
                         targets.put(target.getTargetId(), target);
                     }
-                    if(this.momento.getTargets().containsKey(rl.getTargetId())) {
+                    if (this.momento.getTargets().containsKey(rl.getTargetId())) {
                         target.setShadowListed(this.momento.getTargets().get(rl.getTargetId()).getShadowListed());
                     }
                     target.getResultLines().add(convert(rl));
@@ -192,7 +197,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(new ArrayList<>(momento.getSavedTargets().values()))
                 .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus());
-        if(!defendantDetailsChanged.isEmpty()) {
+        if (!defendantDetailsChanged.isEmpty()) {
             builder.withDefendantDetailsChanged(defendantDetailsChanged);
         }
         return Stream.concat(enrichHearing(resultLines), Stream.of(builder.build()));

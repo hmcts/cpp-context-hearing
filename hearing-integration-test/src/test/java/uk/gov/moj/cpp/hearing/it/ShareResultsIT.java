@@ -62,14 +62,10 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_T
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_CODE;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VERDICT_TYPE_GUILTY_ID;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllAlcoholLevelMethods;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllVerdictTypes;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsDDCH;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsWithDefaultValues;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubPleaTypeGuiltyFlags;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
@@ -115,6 +111,7 @@ import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
+import uk.gov.moj.cpp.hearing.event.PublicHearingSaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -170,9 +167,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Before
     public void setUp() {
-        stubGetAllVerdictTypes();
-        stubGetAllAlcoholLevelMethods();
-        stubPleaTypeGuiltyFlags();
+
     }
 
     @Test
@@ -371,13 +366,6 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    public void shareResults_shouldPublishResults_When_Result_Is_Deleted() {
-        LocalDate orderDate = PAST_LOCAL_DATE.next();
-
-        shareResults_shouldPublishResults_andVariantsShouldBeDrivenFromCompletedResultLines_andShouldPersistNows(true, orderDate);
-    }
-
-    @Test
     public void shareResults_whenOneOffenceIsDismissedAndOtherIsGuiltyInSingleHearing_expectNoPublicEventForDefendantCaseWithdrawnOrDismissed() {
 
         LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -480,8 +468,6 @@ public class ShareResultsIT extends AbstractIT {
     public void shareResultShouldNotPublishDDCHResultsWhenInitiateHearingHaveDDCHJudicialResult() {
 
         //Given and When
-
-        stubGetReferenceDataResultDefinitionsDDCH();
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithDefendantJudicialResults();
 
         final List<Target> targets = new ArrayList<>();
@@ -512,10 +498,28 @@ public class ShareResultsIT extends AbstractIT {
         //When
         updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
 
-        stubGetReferenceDataResultDefinitionsDDCH();
-
         //Then
         shareAndVerifyDDCH(targets, hearingOne);
+
+    }
+
+    @Test
+    public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownOffenceDefendantCombination() throws Exception {
+
+        //Given
+
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), PAST_LOCAL_DATE.next());
+
+        // use an unknown target ID for offence / defendant combination having previous draft result
+        saveDraftResultCommand.getTarget().setTargetId(randomUUID());
+
+        saveDraftResultWithInvalidTargetIdAndCheckForFailedEvent(saveDraftResultCommand);
 
     }
 
@@ -534,8 +538,6 @@ public class ShareResultsIT extends AbstractIT {
 
         //And
         updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
-
-        stubGetReferenceDataResultDefinitionsDDCH();
 
         //And
         shareAndVerifyDDCH(targets, hearingOne);
@@ -562,8 +564,6 @@ public class ShareResultsIT extends AbstractIT {
 
         //When
         updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
-
-        stubGetReferenceDataResultDefinitionsDDCH();
 
         //Then
         shareAndVerifyOffenceDateCode(targets, hearingOne, offenceDateCode);
@@ -594,8 +594,6 @@ public class ShareResultsIT extends AbstractIT {
 
         addDefendant(hearingOne, newOffenceDateCode);
 
-        stubGetReferenceDataResultDefinitionsDDCH();
-
         //Then
         shareAndVerifyOffenceDateCode(targets, hearingOne, offenceDateCode, newOffenceDateCode);
 
@@ -623,8 +621,6 @@ public class ShareResultsIT extends AbstractIT {
 
         addOffence(hearingOne, newOffenceDateCode);
 
-        stubGetReferenceDataResultDefinitionsDDCH();
-
         //Then
         shareAndVerifyMultiOffenceOffenceDateCode(targets, hearingOne, offenceDateCode, newOffenceDateCode);
 
@@ -650,8 +646,6 @@ public class ShareResultsIT extends AbstractIT {
         final Integer newOffenceDateCode = 3;
 
         updateOffence(hearingOne, newOffenceDateCode);
-
-        stubGetReferenceDataResultDefinitionsDDCH();
 
         //Then
         shareAndVerifyMultiOffenceOffenceDateCode(targets, hearingOne, newOffenceDateCode);
@@ -699,8 +693,6 @@ public class ShareResultsIT extends AbstractIT {
 
         //And
         updateDefendantDetails(initiateHearing, hearingOne, "Test", "Test");
-
-        stubGetReferenceDataResultDefinitionsDDCH();
 
         //And
         shareAndVerifyDDCH(targets, hearingOne);
@@ -1084,7 +1076,6 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private InitiateHearingCommandHelper createInitiateHearingCommandHelperForNextHearing(final InitiateHearingCommand initiateHearing, final LocalDate orderDate) {
-        stubGetReferenceDataResultDefinitionsDDCH();
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
         setupNowsReferenceData(LocalDate.now(), allNows.it());
 
@@ -1140,6 +1131,7 @@ public class ShareResultsIT extends AbstractIT {
                                 .withFixedListCode("fixedList1").withLabel(secondNowPrimaryPrompt.getLabel()).build())
                 ).build()
         ));
+        saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
 
         targets.add(saveDraftResultCommand2.getTarget());
 
@@ -1309,6 +1301,7 @@ public class ShareResultsIT extends AbstractIT {
                 getResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
                 getResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
         ));
+        saveDraftResultCommand.getTarget().setTargetId(targets.get(0).getTargetId());
 
         targets.add(saveDraftResultCommand.getTarget());
 
@@ -1543,7 +1536,7 @@ public class ShareResultsIT extends AbstractIT {
                     getAmendedResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
                     getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
             ));
-
+            saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
             targets.add(saveDraftResultCommand2.getTarget());
 
             testSaveDraftResult(saveDraftResultCommand2);
@@ -2278,6 +2271,30 @@ public class ShareResultsIT extends AbstractIT {
 
         saveDraftResultsWithShadowListedFlag(hearing, targetId);
         shareResultsAndValidateShadowListedOffences(hearing, targetId);
+    }
+
+    private void saveDraftResultWithInvalidTargetIdAndCheckForFailedEvent(final SaveDraftResultCommand saveDraftResultCommand) {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final Target target = saveDraftResultCommand.getTarget();
+
+        try (final EventListener publicEventFailed = listenFor("public.hearing.save-draft-result-failed")
+                .withFilter(convertStringTo(PublicHearingSaveDraftResultFailed.class, isBean(PublicHearingSaveDraftResultFailed.class)
+                        .with(PublicHearingSaveDraftResultFailed::getTargetId, is(target.getTargetId()))
+                        .with(PublicHearingSaveDraftResultFailed::getHearingId, is(target.getHearingId()))
+                        .with(PublicHearingSaveDraftResultFailed::getDefendantId, is(target.getDefendantId()))
+                        .with(PublicHearingSaveDraftResultFailed::getDraftResult, is(target.getDraftResult()))
+                        .with(PublicHearingSaveDraftResultFailed::getOffenceId, is(target.getOffenceId())
+                )))){
+
+            makeCommand(getRequestSpec(), "hearing.save-draft-result")
+                    .ofType("application/vnd.hearing.save-draft-result+json")
+                    .withArgs(saveDraftResultCommand.getTarget().getHearingId())
+                    .withPayload(saveDraftResultCommand.getTarget())
+                    .executeSuccessfully();
+
+            publicEventFailed.waitFor();
+        }
     }
 
 }

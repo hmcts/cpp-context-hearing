@@ -218,7 +218,25 @@ public class HearingEventProcessorTest {
         assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
         assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
         assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
-        //TODO json schema check ?
+    }
+
+    @Test
+    public void shouldPublishSaveDraftResultFailedPublicEvent() {
+        final String draftResult = "some random text";
+        final Target target = CoreTestTemplates.target(randomUUID(), randomUUID(), randomUUID(), randomUUID()).build();
+        final JsonEnvelope eventIn = createDraftResultSavedPrivateEvent(target);
+
+        this.hearingEventProcessor.handleSaveDraftResultFailedEvent(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED));
+        final PublicHearingSaveDraftResultFailed publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingSaveDraftResultFailed.class);
+        assertThat(publicEventOut.getDefendantId(), is(target.getDefendantId()));
+        assertThat(publicEventOut.getDraftResult(), is(target.getDraftResult()));
+        assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
+        assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
+        assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
     }
 
     @Test

@@ -180,7 +180,7 @@ public class EventPayloadTransformerTest {
             attributesToInclude.forEach(attribute -> judicialResult.add(attribute, false));
         }
 
-        final JsonObject judicialResults = createObjectBuilder().add(JUDICIAL_RESULTS_ATTRIBUTE, createArrayBuilder()
+            final JsonObject judicialResults = createObjectBuilder().add(JUDICIAL_RESULTS_ATTRIBUTE, createArrayBuilder()
                 .add(judicialResult)).build();
 
         return envelope()
