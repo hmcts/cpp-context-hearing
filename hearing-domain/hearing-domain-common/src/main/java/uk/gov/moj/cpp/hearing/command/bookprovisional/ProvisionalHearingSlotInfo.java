@@ -4,9 +4,6 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.UUID;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class ProvisionalHearingSlotInfo implements Serializable {
 
     private UUID courtScheduleId;
@@ -14,14 +11,6 @@ public class ProvisionalHearingSlotInfo implements Serializable {
     private ZonedDateTime hearingStartTime;
 
     public ProvisionalHearingSlotInfo() {}
-
-    @JsonCreator
-    private ProvisionalHearingSlotInfo(
-            @JsonProperty("courtScheduleId") final UUID courtScheduleId,
-            @JsonProperty("hearingStartTime") final ZonedDateTime hearingStartTime) {
-        this.courtScheduleId = courtScheduleId;
-        this.hearingStartTime = hearingStartTime;
-    }
 
     public ProvisionalHearingSlotInfo(final UUID courtScheduleId) {
         this.courtScheduleId = courtScheduleId;

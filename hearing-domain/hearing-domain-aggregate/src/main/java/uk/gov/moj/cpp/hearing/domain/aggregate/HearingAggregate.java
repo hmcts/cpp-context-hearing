@@ -108,6 +108,7 @@ import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -119,7 +120,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 8L;
+    private static final long serialVersionUID = 9L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -477,7 +478,7 @@ public class HearingAggregate implements Aggregate {
 
         return apply(Stream.of(BookProvisionalHearingSlots.bookProvisionalHearingSlots()
                 .withHearingId(hearingId)
-                .withSlots(slots)
+                .withSlots((new ArrayList<>(slots)))
                 .build()));
     }
 
