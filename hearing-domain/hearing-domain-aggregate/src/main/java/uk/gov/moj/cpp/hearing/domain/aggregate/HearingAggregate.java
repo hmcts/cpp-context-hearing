@@ -73,6 +73,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -218,6 +219,7 @@ public class HearingAggregate implements Aggregate {
                 when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate::onDefendantLegalaidStatusTobeUpdatedForHearing),
                 when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
                 when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> hearingDelegate.handleVacatedTrialCleared()),
+                when(TargetRemoved.class).apply(targetRemoved -> hearingDelegate.handleTargetRemoved(targetRemoved.getTargetId())),
                 otherwiseDoNothing()
         );
 
@@ -480,6 +482,10 @@ public class HearingAggregate implements Aggregate {
                 .withHearingId(hearingId)
                 .withSlots((new ArrayList<>(slots)))
                 .build()));
+    }
+
+    public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {
+        return hearingDelegate.removeTarget(hearingId, targetId);
     }
 
     private boolean isTargetValid(final HearingAggregateMomento momento, final Target newTarget) {

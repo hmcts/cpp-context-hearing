@@ -7,6 +7,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -14,6 +15,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
@@ -109,6 +111,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.PublicHearingSaveDraftResultFailed;
@@ -2294,6 +2297,52 @@ public class ShareResultsIT extends AbstractIT {
                     .executeSuccessfully();
 
             publicEventFailed.waitFor();
+        }
+    }
+
+    @Test
+    public void saveDraftResult_AndRemoveTargetAsSystemUser() throws Exception {
+
+        //Given
+
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
+
+        final List<Target> targets = new ArrayList<>();
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
+
+        final UUID targetId = targets.get(0).getTargetId();
+        final UUID hearingId = hearingOne.getHearingId();
+
+        getDraftResultsPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .with(TargetListResponse::getTargets, hasSize(1))
+        );
+
+        removeDraftTarget(hearingId, targetId);
+
+        getDraftResultsPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .with(TargetListResponse::getTargets, is(empty())));
+
+    }
+
+
+    private void removeDraftTarget(final UUID hearingId, final UUID targetId) {
+
+        try (final Utilities.EventListener targetRemovedEvent = listenFor("hearing.target-removed", "hearing.event")
+                .withFilter(convertStringTo(TargetRemoved.class, isBean(TargetRemoved.class)
+                        .with(TargetRemoved::getTargetId, is(targetId))
+                        .with(TargetRemoved::getHearingId, is(hearingId))
+                ))) {
+
+            final JsonObject payload = createObjectBuilder().add("targetIds", createArrayBuilder().add(targetId.toString()).build()).build();
+            makeCommand(getRequestSpec(), "hearing.remove-targets")
+                    .ofType("application/vnd.hearing.remove-targets+json")
+                    .withArgs(hearingId)
+                    .withCppUserId(USER_ID_VALUE_AS_ADMIN)
+                    .withPayload(payload.toString())
+                    .executeSuccessfully();
+
+            targetRemovedEvent.waitFor();
+
         }
     }
 

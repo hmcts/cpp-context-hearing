@@ -226,6 +226,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.book-provisional-hearing-slots");
     }
 
+    @Handles("hearing.remove-targets")
+    public void removeTargets(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.remove-targets");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *

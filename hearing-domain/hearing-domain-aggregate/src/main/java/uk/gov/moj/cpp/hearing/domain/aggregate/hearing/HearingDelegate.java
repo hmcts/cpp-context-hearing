@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -120,6 +121,10 @@ public class HearingDelegate implements Serializable {
         }
     }
 
+    public void handleTargetRemoved(final UUID targetId) {
+        this.momento.getTargets().remove(targetId);
+    }
+
     public Stream<Object> initiate(final Hearing hearing) {
 
         return Stream.of(new HearingInitiated(hearing));
@@ -214,5 +219,14 @@ public class HearingDelegate implements Serializable {
             previousStoredApplication.ifPresent(courtApplication -> momento.getHearing().getCourtApplications().remove(courtApplication));
             momento.getHearing().getCourtApplications().add(applicationDetailChanged.getCourtApplication());
         }
+    }
+
+    public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(generateHearingIgnoredMessage("Rejecting action for removing draft target as hearing is null", hearingId));
+        } else if (!this.momento.getTargets().containsKey(targetId)) {
+            return Stream.of(generateHearingIgnoredMessage("Rejecting action for removing draft target as target ID not present", hearingId));
+        }
+        return Stream.of(TargetRemoved.targetRemoved().setHearingId(hearingId).setTargetId(targetId));
     }
 }

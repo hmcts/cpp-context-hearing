@@ -205,7 +205,7 @@ subscriptions_descriptor:
         - name: hearing.case-defendants-updated-for-hearing
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.case-defendants-updated-for-hearing.json
 
-      # Publish court list
+        # Publish court list
         - name: hearing.event.publish-court-list-export-failed
           schema_uri: http://justice.gov.uk/hearing/event/listing.event.publish-court-list-export-failed.json
 
@@ -222,5 +222,8 @@ subscriptions_descriptor:
         # Hearing Rescheduled
         - name: hearing.events.vacated-trial-cleared
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.vacated-trial-cleared.json
+
+        - name: hearing.target-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.target-removed.json
 
       event_source_name: hearing

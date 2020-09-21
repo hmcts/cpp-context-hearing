@@ -224,6 +224,20 @@ public class HearingRepositoryTest {
         assertThat(hearingDay.getListingSequence(), is(hearings.get(0).getHearingDays().get(0).getListingSequence()));
     }
 
+    @Test
+    public void shouldRemoveTargetsFromHearing() {
+        final UUID firstHearingId = hearings.get(0).getId();
+        final Hearing firstHearing = hearingRepository.findBy(firstHearingId);
+        final UUID firstTargetId = firstHearing.getTargets().stream().findFirst().get().getId();
+
+        firstHearing.getTargets().removeIf(t -> t.getId().equals(firstTargetId));
+
+        hearingRepository.save(firstHearing);
+
+        final Hearing firstHearingPostTargetRemoval = hearingRepository.findBy(firstHearingId);
+        assertThat(firstHearingPostTargetRemoval.getTargets().stream().noneMatch(t -> t.getId().equals(firstTargetId)), is(true));
+    }
+
     private void saveHearingApplication(final Hearing hearing, final UUID applicationId) {
         final UUID hearingId = hearing.getId();
 

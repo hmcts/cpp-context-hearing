@@ -49,6 +49,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
     private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
     private static final String ACTION_NAME_SET_TRIAL_TYPE = "hearing.set-trial-type";
+    private static final String ACTION_NAME_REMOVE_TARGET = "hearing.remove-targets";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -641,6 +642,24 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToSetTrialType() {
         final Action action = createActionFor(ACTION_NAME_SET_TRIAL_TYPE);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToRemoveDraftTarget() {
+        final Action action = createActionFor(ACTION_NAME_REMOVE_TARGET);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "System Users"))
+                .willReturn(true);
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToRemoveDraftTarget() {
+        final Action action = createActionFor(ACTION_NAME_REMOVE_TARGET);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

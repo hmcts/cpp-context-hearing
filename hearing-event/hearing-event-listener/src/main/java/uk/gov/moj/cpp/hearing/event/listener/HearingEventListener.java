@@ -12,6 +12,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -74,6 +75,27 @@ public class HearingEventListener {
         hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
 
         hearingRepository.save(hearing);
+    }
+
+    @Handles("hearing.target-removed")
+    public void targetRemoved(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.target-removed event received {}", event.toObfuscatedDebugString());
+        }
+
+        final TargetRemoved targetRemoved = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), TargetRemoved.class);
+        final Hearing hearing = this.hearingRepository.findBy(targetRemoved.getHearingId());
+
+        hearing.getTargets().stream()
+                .filter(t -> t.getId().equals(targetRemoved.getTargetId()))
+                .findFirst()
+                .ifPresent(targetToRemove -> {
+                            hearing.getTargets().remove(targetToRemove);
+                            hearingRepository.save(hearing);
+                        }
+                );
+
+
     }
 
     @Handles("hearing.application-draft-resulted")

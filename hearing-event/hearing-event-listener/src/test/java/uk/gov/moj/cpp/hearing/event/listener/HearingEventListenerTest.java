@@ -4,8 +4,10 @@ import static java.lang.Boolean.TRUE;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -34,6 +36,7 @@ import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
@@ -404,6 +407,54 @@ public class HearingEventListenerTest {
                 .with(Hearing::getId, is(hearingId))
                 .with(Hearing::getVacatedTrialReasonId, is(vacateTrialTypeId))
         );
+    }
+
+    @Test
+    public void targetRemoved_IfPresent() {
+
+        final UUID hearingId = randomUUID();
+        final UUID targetId = randomUUID();
+        final TargetRemoved targetRemoved = new TargetRemoved(hearingId, targetId);
+        final Hearing dbHearing = new Hearing()
+                .setId(hearingId)
+                .setTargets(asSet(new Target()
+                        .setId(targetId)
+                ));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+
+        hearingEventListener.targetRemoved(envelopeFrom(metadataWithRandomUUID("hearing.target-removed"),
+                objectToJsonObjectConverter.convert(targetRemoved)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getTargets, is(empty()))
+        );
+    }
+
+    @Test
+    public void targetIgnoredForRemoval_IfNotPresent() {
+        // this is a specific test for production data scenario (as entries have been removed from viewstore manuallu)
+        final UUID hearingId = randomUUID();
+        final UUID unknownTargetId = randomUUID();
+        final TargetRemoved targetRemoved = new TargetRemoved(hearingId, unknownTargetId);
+        final Hearing dbHearing = new Hearing()
+                .setId(hearingId)
+                .setTargets(asSet(new Target()
+                        .setId(randomUUID())
+                ));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+
+        hearingEventListener.targetRemoved(envelopeFrom(metadataWithRandomUUID("hearing.target-removed"),
+                objectToJsonObjectConverter.convert(targetRemoved)
+        ));
+
+        verify(this.hearingRepository, never()).save(saveHearingCaptor.capture());
+
     }
 
 }

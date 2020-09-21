@@ -372,3 +372,12 @@ rule "Command - API - Action - hearing.book-provisional-hearing-slots"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.remove-targets"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.remove-targets");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
+  then
+    $outcome.setSuccess(true);
+end
