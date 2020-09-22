@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -15,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 import uk.gov.justice.core.courts.DefenceCounsel;
@@ -23,6 +25,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
@@ -30,6 +33,7 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
@@ -873,4 +877,30 @@ public class HearingAggregateTest {
         assertThat(prosecutionCounselChangeIgnored.getHearingId(), is(logEventCommand.getHearingId()));
         assertThat(prosecutionCounselChangeIgnored.getCaseURN(), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference()));
     }
+
+    @Test
+    public void shouldBookProvisionalHearingSlots() {
+        final UUID courtScheduleId1 = randomUUID();
+        final UUID courtScheduleId2 = randomUUID();
+        final List<ProvisionalHearingSlotInfo> provisionalHearingSlotInfos = asList(
+                new ProvisionalHearingSlotInfo(courtScheduleId1),
+                new ProvisionalHearingSlotInfo(courtScheduleId2));
+
+        final UUID hearingId = randomUUID();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Stream<Object> stream = hearingAggregate.bookProvisionalHearingSlots(hearingId, provisionalHearingSlotInfos);
+
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+
+        final BookProvisionalHearingSlots bookProvisionalHearingSlots = (BookProvisionalHearingSlots) objectList.get(0);
+        assertThat(bookProvisionalHearingSlots.getHearingId(), is(hearingId));
+
+        final List<ProvisionalHearingSlotInfo> slots = bookProvisionalHearingSlots.getSlots();
+        assertThat(slots.size(), is(provisionalHearingSlotInfos.size()));
+        assertThat(slots.get(0).getCourtScheduleId(), is(courtScheduleId1));
+        assertThat(slots.get(1).getCourtScheduleId(), is(courtScheduleId2));
+    }
+
 }

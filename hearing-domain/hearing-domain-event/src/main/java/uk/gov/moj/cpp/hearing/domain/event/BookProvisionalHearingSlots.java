@@ -37,11 +37,16 @@ public class BookProvisionalHearingSlots implements Serializable {
     }
 
     private void addSlotInfo(final Object slot) {
+        if (slot instanceof ProvisionalHearingSlotInfo) {
+            this.slots.add((ProvisionalHearingSlotInfo) slot);
+        }
+
         if (slot instanceof String) {
             final UUID slotUUID = UUID.fromString(slot.toString());
             final ProvisionalHearingSlotInfo provisionalHearingSlotInfo = new ProvisionalHearingSlotInfo().setCourtScheduleId(slotUUID);
             slots.add(provisionalHearingSlotInfo);
         }
+
         if (slot instanceof Map) {
             addSlotInfoFromMap((Map<String, Object>) slot);
         }
