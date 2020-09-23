@@ -11,6 +11,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import java.io.IOException;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
@@ -50,6 +51,46 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
         assertThat(results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get().getChildren().size(), is(0));
         assertThat(results.size(), is(3));
+    }
+
+    @Test
+    public void shouldBuildSimplePromptWithValues() {
+        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
+                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
+        final String promptValue = "abc";
+        final ResultsShared resultsShared = getResultsSharedWithPromptValue(resultDefinitionList, promptValue);
+        final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
+
+        assertThat(results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get().getChildren().size(), is(0));
+        assertThat(results.size(), is(3));
+        assertTrue(results.stream().filter(result -> nonNull(result.getJudicialResult()))
+                .map(TreeNode::getJudicialResult)
+                .filter(judicialResult -> nonNull(judicialResult.getJudicialResultPrompts()))
+                .flatMap(judicialResult -> judicialResult.getJudicialResultPrompts().stream())
+                .filter(judicialResultPrompt -> nonNull(judicialResultPrompt.getValue()))
+                .allMatch(judicialResultPrompt -> judicialResultPrompt.getValue().equals(promptValue)));
+    }
+
+    @Test
+    public void shouldBuildSimplePromptWithValuesCommaSeparated() {
+        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
+                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
+        final String promptValue = "abc###def";
+        final ResultsShared resultsShared = getResultsSharedWithPromptValue(resultDefinitionList, promptValue);
+        final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
+
+        assertThat(results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get().getChildren().size(), is(0));
+        assertThat(results.size(), is(3));
+        assertTrue(results.stream().filter(result -> nonNull(result.getJudicialResult()))
+                .map(TreeNode::getJudicialResult)
+                .filter(judicialResult -> nonNull(judicialResult.getJudicialResultPrompts()))
+                .flatMap(judicialResult -> judicialResult.getJudicialResultPrompts().stream())
+                .filter(judicialResultPrompt -> nonNull(judicialResultPrompt.getValue()))
+                .allMatch(judicialResultPrompt -> judicialResultPrompt.getValue().equals("abc, def")));
     }
 
     @Test
