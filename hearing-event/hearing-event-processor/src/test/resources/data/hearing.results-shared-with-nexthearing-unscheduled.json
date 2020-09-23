@@ -737,12 +737,6 @@
               "label": "Additional information",
               "value": "Adjournment reason prompt 1",
               "welshValue": ""
-            },
-            {
-              "id": "aa45c958-500e-44ed-851a-5efd6dd675a3",
-              "label": "Additional information",
-              "value": "Adjournment reason prompt 2",
-              "welshValue": ""
             }
           ],
           "resultDefinitionId": "1d55fdeb-7dbc-46ec-b3ff-7b15fe08a476",

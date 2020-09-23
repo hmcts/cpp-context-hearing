@@ -89,8 +89,6 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
     private final String hearingTypeDescription = "Plea & Trial Preparation";
     private final String expectedAdjournmentReason = "Adjournment reason: At request of the prosecution" + lineSeparator() +
             "Additional information Adjournment reason prompt 1" + lineSeparator() +
-            "Additional information Adjournment reason prompt 2" + lineSeparator() +
-            lineSeparator() +
             "Adjournment reason: At request of the prosecution" + lineSeparator() +
             "Additional information Second Reason prompt 1";
 

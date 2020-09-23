@@ -85,21 +85,16 @@ import org.slf4j.LoggerFactory;
 
 public class NextHearingHelper {
 
+    private static final String FAILED_TO_CREATE_NEXT_HEARING_MESSAGE = "Failed to create next hearing for result definition id=%s";
+    private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelper.class.getName());
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
-
     @Inject
     private CourtHouseReverseLookup courtHouseReverseLookup;
-
     @Inject
     private CourtRoomOuCodeReverseLookup courtRoomOuCodeReverseLookup;
-
     @Inject
     private ReferenceDataService referenceDataService;
-
-    private static final String FAILED_TO_CREATE_NEXT_HEARING_MESSAGE = "Failed to create next hearing for result definition id=%s";
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelper.class.getName());
 
     public Optional<NextHearing> getNextHearing(final JsonEnvelope context,
                                                 final ResultDefinition resultDefinition,
@@ -168,7 +163,7 @@ public class NextHearingHelper {
 
     private void populateDateToBeFixed(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, dateToBeFixed);
-        if(promptValue != null){
+        if (promptValue != null) {
             builder.withDateToBeFixed(Boolean.TRUE);
         }
     }
@@ -237,7 +232,7 @@ public class NextHearingHelper {
         final String adjournmentReasons = resultLines.stream()
                 .filter(resultLine -> this.isAdjournmentReasonResult(context, resultLine))
                 .map(this::getAdjournmentsReasons)
-                .collect(joining(format("%s%s", lineSeparator(), lineSeparator())));
+                .collect(joining(format("%s", lineSeparator())));
         LOGGER.info("Populating adjournment reason: {}", adjournmentReasons);
         builder.withAdjournmentReason(adjournmentReasons);
     }
@@ -254,9 +249,12 @@ public class NextHearingHelper {
 
         final String values = resultLine.getPrompts().stream()
                 .map(p -> format("%s %s", p.getLabel(), p.getValue()))
-                .collect(joining(lineSeparator()));
-
-        return format("%s%s%s", resultLine.getResultLabel(), lineSeparator(), values);
+                .collect(joining());
+        if (!values.isEmpty()) {
+            return format("%s%s%s", resultLine.getResultLabel(), lineSeparator(), values);
+        } else {
+            return resultLine.getResultLabel();
+        }
     }
 
     private ResultDefinition getResultDefinition(final JsonEnvelope context, final ResultLine resultLine) {
@@ -342,9 +340,9 @@ public class NextHearingHelper {
 
     private static ZonedDateTime convertDateTimeToUTC(String date, String time) {
         if (!isEmpty(date)) {
-            String listingTime = time;
+            final String listingTime = time;
             if (isEmpty(listingTime)) {
-                return ZonedDateTime.of(LocalDate.parse(date,DateTimeFormatter.ofPattern(DATE_FORMATS_WITHOUT_TIME)), LocalTime.parse(START_OF_DAY_TIME), UTC);
+                return ZonedDateTime.of(LocalDate.parse(date, DateTimeFormatter.ofPattern(DATE_FORMATS_WITHOUT_TIME)), LocalTime.parse(START_OF_DAY_TIME), UTC);
 
             }
             return ZonedDateTime.parse(date.concat(SPACE).concat(listingTime), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
