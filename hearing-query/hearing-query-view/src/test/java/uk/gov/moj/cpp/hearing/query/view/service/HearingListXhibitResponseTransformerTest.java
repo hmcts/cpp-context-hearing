@@ -8,6 +8,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
@@ -34,6 +35,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.test.utils.core.converter.JsonObjectToObjectConverterFactory;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
@@ -56,6 +58,8 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -100,20 +104,21 @@ public class HearingListXhibitResponseTransformerTest {
     @Mock
     private HearingEvent hearingEvent;
 
+    @Mock
+    private JudgeNameMapper judgeNameMapper;
+
     @InjectMocks
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
 
-    @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverterFactory().createJsonObjectToObjectConverter();
 
     @InjectMocks
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-
     @Before
     public void setUp() {
         setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
-        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+        when(judgeNameMapper.getJudgeName(hearing)).thenReturn("judgeName");
     }
 
     @Test
@@ -170,6 +175,8 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getHearingprogress(), is(STARTED.getProgressCode()));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+        verify(judgeNameMapper).getJudgeName(hearing);
+
     }
 
     @Test
@@ -225,6 +232,8 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getHearingprogress(), is(INPROGRESS.getProgressCode()));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+        verify(judgeNameMapper).getJudgeName(hearing);
+
     }
 
     @Test
@@ -283,6 +292,8 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getCppUrn(), is("ProsecutionAuthorityReference"));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+        verify(judgeNameMapper).getJudgeName(hearing);
+
     }
 
     @Test
@@ -343,6 +354,8 @@ public class HearingListXhibitResponseTransformerTest {
 
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+        verify(judgeNameMapper).getJudgeName(hearing);
+
     }
 
     @Test
@@ -392,6 +405,8 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getCppUrn(), is(courtApplications.get(0).getApplicationReference()));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+        verify(judgeNameMapper).getJudgeName(hearing);
+
     }
 
     @Test
@@ -439,6 +454,8 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(caseDetail.getCppUrn(), is(courtApplications.get(0).getApplicationReference()));
         assertThat(courtRoomName, is("x"));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
+        verify(judgeNameMapper).getJudgeName(hearing);
+
     }
 
     @Test
@@ -532,7 +549,6 @@ public class HearingListXhibitResponseTransformerTest {
         final CaseDetail caseDetailForSecondHearing = courtRoomForSecondHearing.getCases().getCasesDetails().get(1);
         assertThat(caseDetailForSecondHearing.getHearingprogress(), is(FINISHED.getProgressCode()));
         assertThat(caseDetailForSecondHearing.getActivecase(), is(INACTIVE.getStatusCode()));
-
     }
 
     @Test
@@ -589,8 +605,6 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
         assertThat(caseDetail.getActivecase(), is(INACTIVE.getStatusCode()));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
-
-
     }
 
     private void mockHearingTypeId() {

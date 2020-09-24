@@ -1,11 +1,9 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.justice.hearing.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail.caseDetail;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases.cases;
@@ -25,7 +23,6 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
-import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
@@ -48,11 +45,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
-import javax.json.JsonObject;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -60,18 +55,13 @@ import org.apache.commons.lang3.StringUtils;
 @ApplicationScoped
 public class HearingListXhibitResponseTransformer {
 
-    private static final String CIRCUIT = "circuit";
+    @Inject
+    private JudgeNameMapper judgeNameMapper;
 
     @Inject
     private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
 
     private static final DateTimeFormatter dateTimeFormatter = ofPattern("yyyy-MM-dd'T'HH:mm'Z'");
-
-    private static final String TITLE_PREFIX = "titlePrefix";
-    private static final String TITLE_JUDICIAL_PREFIX = "titleJudicialPrefix";
-    private static final String TITLE_SUFFIX = "titleSuffix";
-    private static final String FORENAMES = "forenames";
-    private static final String SURNAME = "surname";
 
     public CurrentCourtStatus transformFrom(final HearingEventsToHearingMapper hearingEventsToHearingMapper) {
         return currentCourtStatus()
@@ -98,8 +88,8 @@ public class HearingListXhibitResponseTransformer {
 
     private CourtSite getCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final Map<UUID, CourtSite> courtSiteMap) {
         final CourtRoomMapping courtRoomMapping = commonXhibitReferenceDataService.getCourtRoomMappingBy(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
-        CourtSite courtSite = courtSiteMap.get(courtRoomMapping.getCrestCourtSiteUUID()) ;
-        if(courtSite == null) {
+        CourtSite courtSite = courtSiteMap.get(courtRoomMapping.getCrestCourtSiteUUID());
+        if (courtSite == null) {
             courtSite = courtSite()
                     .withId(courtRoomMapping.getCrestCourtSiteUUID())
                     .withCourtSiteName(courtRoomMapping.getCrestCourtSiteName())
@@ -110,12 +100,12 @@ public class HearingListXhibitResponseTransformer {
         return courtSite;
     }
 
-    private List<CourtRoom> getCourtRoomsForCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final UUID crestCourtSiteId ) {
+    private List<CourtRoom> getCourtRoomsForCourtSite(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final UUID crestCourtSiteId) {
         final Map<UUID, CourtRoom> courtRoomMap = new HashMap<>();
         return hearingEventsToHearingMapper.getHearingList()
                 .stream()
                 .filter(hearing -> isHearingForCourtSite(crestCourtSiteId, hearing))
-                .map(hearing -> getCourtRoom(hearingEventsToHearingMapper, hearing, courtRoomMap ))
+                .map(hearing -> getCourtRoom(hearingEventsToHearingMapper, hearing, courtRoomMap))
                 .distinct()
                 .collect(toList());
     }
@@ -160,13 +150,9 @@ public class HearingListXhibitResponseTransformer {
     }
 
     /**
-     * Returns ProgressStatusCode for hearing.
-     * It returns ADJOURNED when latest event is Paused event.
-     * It returns FINISHED when latest event is Finished event.
+     * Returns ProgressStatusCode for hearing. It returns ADJOURNED when latest event is Paused
+     * event. It returns FINISHED when latest event is Finished event.
      *
-     * @param hearingEventsToHearingMapper
-     * @param hearing
-     * @param hearingStatusCode
      * @return progress status code for hearing
      */
     private ProgessStatusCode getHearingProgressCode(final HearingEventsToHearingMapper hearingEventsToHearingMapper, final Hearing hearing, final CaseStatusCode hearingStatusCode) {
@@ -174,9 +160,9 @@ public class HearingListXhibitResponseTransformer {
         ProgessStatusCode hearingProgressCode;
 
         if (ACTIVE.equals(hearingStatusCode)) {
-            hearingProgressCode =  INPROGRESS;
+            hearingProgressCode = INPROGRESS;
         } else {
-            hearingProgressCode =  STARTED;
+            hearingProgressCode = STARTED;
         }
 
         return getProgressCodeRegardingLastEvent(hearingEventsToHearingMapper, hearing, hearingProgressCode);
@@ -248,10 +234,10 @@ public class HearingListXhibitResponseTransformer {
                 .forEach(courtApplication -> {
                     final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication.getApplicant(), StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
                     caseDetailList.add(buildCaseDetail(hearing,
-                                        hearingEvent,
-                                        isActiveHearing, defendants,
-                                        courtApplication.getApplicationReference(),
-                                        hearingprogessValue));
+                            hearingEvent,
+                            isActiveHearing, defendants,
+                            courtApplication.getApplicationReference(),
+                            hearingprogessValue));
                 });
 
         return caseDetailList;
@@ -267,7 +253,7 @@ public class HearingListXhibitResponseTransformer {
                     .withMiddleName(applicant.getPersonDetails().getMiddleName())
                     .withLastName(applicant.getPersonDetails().getLastName()).build());
         }
-        return  asList(defendant().withFirstName(applicant.getOrganisation().getName()).build());
+        return asList(defendant().withFirstName(applicant.getOrganisation().getName()).build());
     }
 
     @SuppressWarnings("squid:S3655")
@@ -280,14 +266,14 @@ public class HearingListXhibitResponseTransformer {
         //get the hearingType by hearingType id from cache
         final String exhibitHearingTypeDescription = commonXhibitReferenceDataService.getXhibitHearingType(hearing.getType().getId()).getExhibitHearingDescription();
 
-        final CaseDetail caseDetail  = caseDetail()
+        final CaseDetail caseDetail = caseDetail()
                 .withActivecase(activecase)
                 .withHearingprogress(hearingprogessValue)
                 .withCppUrn(cppUrn)
                 .withCaseType(CROWN.name()) //TODO: this is wrong --> Single character case type (e.g. A – Appeal, T – Trial, S – Sentence).  Only supplied by XHIBIT cases.
                 .withHearingType(exhibitHearingTypeDescription)
                 .withDefendants(defendants)
-                .withJudgeName(getJudgeName(hearing))
+                .withJudgeName(judgeNameMapper.getJudgeName(hearing))
                 .withHearingEvent(hearingEvent)
                 .withNotBeforeTime(dateTimeFormatter.format(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().getSittingDay()))
                 .build();
@@ -298,36 +284,8 @@ public class HearingListXhibitResponseTransformer {
         return caseDetail;
     }
 
-    private String getJudgeName(final Hearing hearing) {
-        final Optional<JudicialRole> judicialRole = hearing
-                .getJudiciary()
-                .stream()
-                .filter(isCircuitJudge())
-                .findFirst();
 
-        if (judicialRole.isPresent()) {
-            return getJudiciaryFullName(commonXhibitReferenceDataService.getJudiciary(judicialRole.get().getJudicialId()));
-        }
-        return EMPTY;
-    }
 
-    private String getJudiciaryFullName(final JsonObject judiciary) {
-
-        final String titlePrefix = judiciary.getString(TITLE_PREFIX, EMPTY);
-        final String titleJudicialPrefix = judiciary.getString(TITLE_JUDICIAL_PREFIX, titlePrefix);
-        final String foreNames = judiciary.getString(FORENAMES);
-        final String sureName = judiciary.getString(SURNAME);
-        final String titleSuffix = judiciary.getString(TITLE_SUFFIX, EMPTY);
-
-        return format("%s %s %s %s", titleJudicialPrefix, foreNames, sureName, titleSuffix).trim();
-    }
-
-    private Predicate<JudicialRole> isCircuitJudge() {
-        return hearingJudicialRole -> {
-            final String judiciaryType = hearingJudicialRole.getJudicialRoleType().getJudiciaryType().toLowerCase();
-            return (judiciaryType.contains(CIRCUIT));
-        };
-    }
 
     private List<Defendant> getDefendants(final ProsecutionCase prosecutionCase, final boolean needToBeOmitted) {
 
