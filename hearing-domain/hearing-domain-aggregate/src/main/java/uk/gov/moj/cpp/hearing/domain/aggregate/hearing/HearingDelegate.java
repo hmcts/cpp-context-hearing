@@ -18,6 +18,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
@@ -219,6 +220,13 @@ public class HearingDelegate implements Serializable {
             previousStoredApplication.ifPresent(courtApplication -> momento.getHearing().getCourtApplications().remove(courtApplication));
             momento.getHearing().getCourtApplications().add(applicationDetailChanged.getCourtApplication());
         }
+    }
+
+    public Stream<Object> cancelHearingDays(final UUID hearingId, final List<HearingDay> hearingDays) {
+        if (isNull(this.momento.getHearing())) {
+            return Stream.of(generateHearingIgnoredMessage("Rejecting 'hearing.command.cancel-hearing-days' event as hearing not found", hearingId));
+        }
+        return Stream.of(new HearingDaysCancelled(hearingId, hearingDays));
     }
 
     public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {

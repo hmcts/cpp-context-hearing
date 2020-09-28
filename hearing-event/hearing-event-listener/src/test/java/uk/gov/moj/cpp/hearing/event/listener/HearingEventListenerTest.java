@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,16 +26,19 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplate
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
@@ -55,7 +59,11 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -410,6 +418,78 @@ public class HearingEventListenerTest {
     }
 
     @Test
+    public void shouldCancelHearingDaysWhenHearingNotNull() {
+        final ZonedDateTime sittingDay = ZonedDateTime.now();
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = new Hearing().setId(hearingId);
+        final List<HearingDay> hearingDayList = Arrays.asList(new HearingDay.Builder().withSittingDay(sittingDay).withIsCancelled(TRUE).build());
+        final HearingDaysCancelled hearingDaysCancelled = new HearingDaysCancelled(hearingId, hearingDayList);
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay hearingDayEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay();
+
+        hearingDayEntity.setSittingDay(sittingDay);
+        hearingDayEntity.setIsCancelled(null);
+        hearing.setHearingDays(new HashSet<>(Arrays.asList(hearingDayEntity)));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        hearingEventListener.cancelHearingDays(envelopeFrom(metadataWithRandomUUID("hearing.hearing-days-cancelled"),
+                objectToJsonObjectConverter.convert(hearingDaysCancelled)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getHearingDays, first(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)
+                        .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getIsCancelled, is(TRUE))))
+        );
+    }
+
+    @Test
+    public void shouldNotCancelHearingDaysWhenHearingNull() {
+        final UUID hearingId = randomUUID();
+        final List<HearingDay> hearingDayList = new ArrayList<>();
+        final HearingDaysCancelled hearingDaysCancelled = new HearingDaysCancelled(hearingId, hearingDayList);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(null);
+
+        hearingEventListener.cancelHearingDays(envelopeFrom(metadataWithRandomUUID("hearing.hearing-days-cancelled"),
+                objectToJsonObjectConverter.convert(hearingDaysCancelled)
+        ));
+
+        verify(this.hearingRepository, never()).save(any());
+    }
+
+    @Test
+    public void draftResultRemoved_shouldPersist_with_hasSharedResults_false() {
+
+        final UUID hearingId = randomUUID();
+        final Target targetOut = new Target();
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build());
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(true)
+                .setId(hearingId)
+                .setTargets(asSet(new Target()
+                        .setId(draftResultSaved.getTarget().getTargetId())
+                ));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+        when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
+
+        hearingEventListener.draftResultSaved(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved"),
+                objectToJsonObjectConverter.convert(draftResultSaved)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(false))
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getTargets, hasSize(1))
+                .with(Hearing::getTargets, first(is(targetOut)))
+        );
+    }
+
+    @Test
     public void targetRemoved_IfPresent() {
 
         final UUID hearingId = randomUUID();
@@ -456,5 +536,4 @@ public class HearingEventListenerTest {
         verify(this.hearingRepository, never()).save(saveHearingCaptor.capture());
 
     }
-
 }

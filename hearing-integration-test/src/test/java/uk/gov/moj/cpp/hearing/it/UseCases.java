@@ -12,6 +12,7 @@ import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.core.Is.is;
+import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -57,7 +58,6 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
@@ -329,7 +329,7 @@ public class UseCases {
                         .withDefenceCounselId(defenceCounselId)
                 , consumer).build();
 
-        final JsonObject payloadWithOverrideCourtRoomFlag = JsonObjects.createObjectBuilder(Utilities.JsonUtil.objectToJsonObject(logEvent))
+        final JsonObject payloadWithOverrideCourtRoomFlag = createObjectBuilder(Utilities.JsonUtil.objectToJsonObject(logEvent))
                 .add(FIELD_OVERRIDE, override)
                 .build();
 
@@ -710,7 +710,7 @@ public class UseCases {
                 eventName,
                 createObjectBuilder()
                         .add("defendant",
-                                uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build())
+                                createObjectBuilder(jsonObject).build())
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -960,7 +960,7 @@ public class UseCases {
                 eventName,
                 createObjectBuilder()
                         .add("foooo", "to test additional properties")
-                        .add("defendants", Json.createArrayBuilder().add(uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build()))
+                        .add("defendants", Json.createArrayBuilder().add(createObjectBuilder(jsonObject).build()))
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -979,7 +979,7 @@ public class UseCases {
                 getPublicTopicInstance().createProducer(),
                 eventName,
                 createObjectBuilder()
-                        .add("courtApplication", uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build())
+                        .add("courtApplication", createObjectBuilder(jsonObject).build())
                         .build(),
                 metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
 
@@ -1039,8 +1039,6 @@ public class UseCases {
 
         publicEventTopic.waitFor();
 
-        BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
-
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, Matchers.is(hearingId))
@@ -1070,7 +1068,7 @@ public class UseCases {
             final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
             final String payloadAsString = mapper.writeValueAsString(marker);
             final JsonObject jsonObject = mapper.readValue(payloadAsString, JsonObject.class);
-            arrayBuilder.add(uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(jsonObject).build());
+            arrayBuilder.add(createObjectBuilder(jsonObject).build());
         }
         final JsonObject payload = createObjectBuilder()
                 .add("prosecutionCaseId", prosecutionCaseId.toString())
@@ -1100,5 +1098,4 @@ public class UseCases {
                 .executeSuccessfully();
 
     }
-
 }

@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -68,18 +70,13 @@ public class HearingRepositoryTest {
 
     @BeforeClass
     public static void create() {
-
         final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
-
         hearings.add(initiateHearingCommand.getHearing());
-        //hearings.add(initiateHearingCommand.getHearing());
     }
 
     @Before
     public void setup() {
-
         hearings.forEach(hearing -> {
-
             final Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
             // because h2 incorrectly maps column type TEXT to VARCHAR(255)
             hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
@@ -87,7 +84,6 @@ public class HearingRepositoryTest {
             hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(randomUUID()).setHearing(hearingEntity)));
             hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
             hearingRepository.save(hearingEntity);
-
         });
     }
 
@@ -97,9 +93,80 @@ public class HearingRepositoryTest {
     }
 
     @Test
-    @Ignore("because of issues with hearing case note jsonb column")
-    public void shouldFindByStartDate() {
-        assertEquals(1, hearingRepository.findByFilters(hearings.get(0).getHearingDays().get(0).getSittingDay().toLocalDate(), hearings.get(0).getCourtCentre().getId(), hearings.get(0).getCourtCentre().getRoomId()).size());
+    public void shouldRetrieveNonEmptyListWhenFindByFiltersInvokedAndDataPresent() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
+        List<Hearing> hearingList = hearingRepository.findByFilters(hearing.getHearingDays().get(0).getSittingDay().toLocalDate(), hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId());
+        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearing.getId()))));
+    }
+
+    @Test
+    public void shouldExcludeVacatedHearingFromListWhenFindByFiltersInvoked() {
+        final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithVacatedStatus(true);
+        assertThat(hearingRepository.findByFilters(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), vacatedHearing.getCourtCentre().getId(), vacatedHearing.getCourtCentre().getRoomId()), empty());
+    }
+
+    @Test
+    public void shouldRetrieveHearingFromListWhenHearingDayCancelledNullOrFalseAndFindByFiltersInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledFalse = addHearingWithCancelledStatus(false);
+        List<Hearing> hearingList = hearingRepository.findByFilters(hearingWithCancelledFalse.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledFalse.getCourtCentre().getId(), hearingWithCancelledFalse.getCourtCentre().getRoomId());
+        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledFalse.getId()))));
+
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledNull = addHearingWithCancelledStatus(null);
+            hearingList = hearingRepository.findByFilters(hearingWithCancelledNull.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledNull.getCourtCentre().getId(), hearingWithCancelledNull.getCourtCentre().getRoomId());
+        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledNull.getId()))));
+    }
+
+    @Test
+    public void shouldExcludeHearingFromListWhenHearingDayCancelledTrueAndFindByFiltersInvoked() {
+        final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithCancelledStatus(true);
+        assertThat(hearingRepository.findByFilters(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), vacatedHearing.getCourtCentre().getId(), vacatedHearing.getCourtCentre().getRoomId()), empty());
+    }
+
+
+    @Test
+    public void shouldReturnNonEmptyListWhenFindByUserFiltersInvokedAndDataPresent() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
+        List<Hearing> hearingList = hearingRepository.findByUserFilters(hearing.getHearingDays().get(0).getSittingDay().toLocalDate(), hearing.getJudiciary().get(0).getUserId());
+        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearing.getId()))));
+    }
+
+    @Test
+    public void shouldExcludeVacatedHearingFromListWhenFindByUserFiltersInvoked() {
+        final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithVacatedStatus(true);
+        assertThat(hearingRepository.findByUserFilters(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), vacatedHearing.getJudiciary().get(0).getUserId()), empty());
+        final uk.gov.justice.core.courts.Hearing nonVacatedHearing = addHearingWithVacatedStatus(false);
+        assertThat(hearingRepository.findByUserFilters(nonVacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), nonVacatedHearing.getJudiciary().get(0).getUserId()),
+                hasItem(isBean(Hearing.class).with(Hearing::getId, is(nonVacatedHearing.getId()))));
+    }
+
+    @Test
+    public void shouldReturnNonEmptyListWhenFindHearingsInvokedAndDataPresent() {
+        final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
+        List<Hearing> hearingList = hearingRepository.findHearings(hearing.getHearingDays().get(0).getSittingDay().toLocalDate(), hearing.getCourtCentre().getId());
+        assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearing.getId()))));
+    }
+
+    @Test
+    public void shouldExcludeVacatedHearingFromListWhenVacatedTrueAndFindHearingsInvoked() {
+        final uk.gov.justice.core.courts.Hearing vacatedHearing = addHearingWithVacatedStatus(Boolean.TRUE);
+        assertThat(hearingRepository.findHearings(vacatedHearing.getHearingDays().get(0).getSittingDay().toLocalDate(), vacatedHearing.getCourtCentre().getId()), empty());
+    }
+
+    @Test
+    public void shouldRetrieveHearingFromListWhenHearingDayCancelledNullOrFalseAndFindHearingsInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledFalse = addHearingWithCancelledStatus(Boolean.FALSE);
+        List<Hearing> hearings = hearingRepository.findHearings(hearingWithCancelledFalse.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledFalse.getCourtCentre().getId());
+        assertThat(hearings, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledFalse.getId()))));
+
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledNull = addHearingWithCancelledStatus(null);
+        hearings = hearingRepository.findHearings(hearingWithCancelledNull.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledNull.getCourtCentre().getId());
+        assertThat(hearings, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledNull.getId()))));
+    }
+
+    @Test
+    public void shouldExcludeHearingFromListWhenHearingDayCancelledTrueAndFindHearingsInvoked() {
+        final uk.gov.justice.core.courts.Hearing hearingWithCancelledDays = addHearingWithCancelledStatus(true);
+        assertThat(hearingRepository.findHearings(hearingWithCancelledDays.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledDays.getCourtCentre().getId()), empty());
     }
 
     @Test
@@ -115,53 +182,53 @@ public class HearingRepositoryTest {
     }
 
     @Test
-    public void shouldFindCourtCenterByHearingID(){
+    public void shouldFindCourtCenterByHearingID() {
         final UUID hearingId = hearings.get(0).getId();
         final CourtCentre courtCenter = hearingRepository.findCourtCenterByHearingId(hearingId);
         assertNotNull(courtCenter);
     }
 
     @Test
-    public void shouldReturnNullWhenHearingIdIsAbsent(){
+    public void shouldReturnNullWhenHearingIdIsAbsent() {
         final CourtCentre courtCenter = hearingRepository.findCourtCenterByHearingId(randomUUID());
         assertNull(courtCenter);
     }
 
     @Test
-    public void shouldFindTargetsByHearingId(){
+    public void shouldFindTargetsByHearingId() {
         final UUID hearingId = hearings.get(0).getId();
         final List<Target> targets = hearingRepository.findTargetsByHearingId(hearingId);
         assertThat(targets.size(), is(1));
     }
 
     @Test
-    public void shouldReturnEmptyTargetsIfHearingDoNotHaveTargets(){
+    public void shouldReturnEmptyTargetsIfHearingDoNotHaveTargets() {
         final List<Target> targets = hearingRepository.findTargetsByHearingId(simpleHearing.getId());
         assertThat(targets.size(), is(0));
     }
 
     @Test
-    public void shouldFindApplicationDraftResultsByHearingId(){
+    public void shouldFindApplicationDraftResultsByHearingId() {
         final UUID hearingId = hearings.get(0).getId();
         final List<ApplicationDraftResult> applicationDraftResults = hearingRepository.findApplicationDraftResultsByHearingId(hearingId);
         assertThat(applicationDraftResults.size(), is(1));
     }
 
     @Test
-    public void shouldReturnEmptyApplicationDraftResultsIfHearingDoNotHaveApplicationDraftResults(){
+    public void shouldReturnEmptyApplicationDraftResultsIfHearingDoNotHaveApplicationDraftResults() {
         final List<ApplicationDraftResult> applicationDraftResults = hearingRepository.findApplicationDraftResultsByHearingId(simpleHearing.getId());
         assertThat(applicationDraftResults.size(), is(0));
     }
 
     @Test
-    public void shouldFindProsecutionCasesByHearingId(){
+    public void shouldFindProsecutionCasesByHearingId() {
         final UUID hearingId = hearings.get(0).getId();
         final List<ProsecutionCase> prosecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
         assertThat(prosecutionCases.size(), is(1));
     }
 
     @Test
-    public void shouldReturnEmptyProsecutionCasesIfHearingDoNotHaveTargets(){
+    public void shouldReturnEmptyProsecutionCasesIfHearingDoNotHaveTargets() {
         final List<ProsecutionCase> prosecutionCases =
                 hearingRepository.findProsecutionCasesByHearingId(simpleHearing.getId());
         assertThat(prosecutionCases.size(), is(0));
@@ -250,11 +317,6 @@ public class HearingRepositoryTest {
     }
 
     @Test
-    public void findByFilters() {
-
-    }
-
-    @Test
     public void findByHearingDate() {
 
         final uk.gov.justice.core.courts.Hearing hearing1 = addSampleHearing(false,
@@ -294,6 +356,27 @@ public class HearingRepositoryTest {
                     .build());
         }
         initiateHearingCommand.getHearing().setIsBoxHearing(isBoxHearing);
+
+        saveHearing(initiateHearingCommand);
+        return initiateHearingCommand.getHearing();
+    }
+
+    public uk.gov.justice.core.courts.Hearing addHearingWithVacatedStatus(final Boolean vacated) {
+        final InitiateHearingCommand initiateHearingCommand;
+        initiateHearingCommand = minimumInitiateHearingTemplate();
+        initiateHearingCommand.getHearing().setIsVacatedTrial(vacated);
+        saveHearing(initiateHearingCommand);
+        return initiateHearingCommand.getHearing();
+    }
+
+    public uk.gov.justice.core.courts.Hearing addHearingWithCancelledStatus(final Boolean cancelled) {
+        final InitiateHearingCommand initiateHearingCommand;
+        initiateHearingCommand = minimumInitiateHearingTemplate();
+        final List<uk.gov.justice.core.courts.HearingDay> hearingDays = initiateHearingCommand.getHearing().getHearingDays();
+        for (final uk.gov.justice.core.courts.HearingDay hearingDay : hearingDays) {
+            hearingDay.setIsCancelled(cancelled);
+        }
+        initiateHearingCommand.getHearing().setHearingDays(hearingDays);
         saveHearing(initiateHearingCommand);
         return initiateHearingCommand.getHearing();
     }

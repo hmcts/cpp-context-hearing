@@ -334,6 +334,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                     trialType.getReasonCode(),
+                    trialType.getDate(),
                     trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                     trialType.getId(),
                     trialType.getTrialType()))
@@ -347,6 +348,7 @@ public class HearingService {
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                     trialType.getReasonCode(),
+                    trialType.getDate(),
                     trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                     trialType.getId(),
                     trialType.getTrialType()))
@@ -379,19 +381,23 @@ public class HearingService {
     }
 
     @Transactional
-    public CrackedIneffectiveTrial fetchCrackedIneffectiveTrial(final UUID trailTypeId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+    public CrackedIneffectiveTrial fetchCrackedIneffectiveTrial(final UUID trialTypeId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
 
+        if(null == trialTypeId) {
+            return null;
+        }
 
         if (isNotEmpty(crackedIneffectiveVacatedTrialTypes.getCrackedIneffectiveVacatedTrialTypes())) {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = crackedIneffectiveVacatedTrialTypes
                     .getCrackedIneffectiveVacatedTrialTypes()
                     .stream()
-                    .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trailTypeId))
+                    .filter(crackedIneffectiveTrial -> crackedIneffectiveTrial.getId().equals(trialTypeId))
                     .findFirst();
 
             return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
                     trialType.getReasonCode(),
+                    trialType.getDate(),
                     trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
                     trialType.getId(),
                     trialType.getTrialType()))

@@ -32,6 +32,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Random;
@@ -66,7 +67,7 @@ public class TimelineHearingSummaryHelperTest {
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
     @Before
-    public void setup() throws IOException {
+    public void setup() {
         hearing = new Hearing();
         hearingDay = new HearingDay();
         final ZonedDateTime zonedDateTime = now().minusYears(1);
@@ -102,7 +103,7 @@ public class TimelineHearingSummaryHelperTest {
         prosecutionCase = new ProsecutionCase();
         prosecutionCase.setDefendants(defendants);
         hearing.setProsecutionCases(of(prosecutionCase));
-        crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), STRING.next(), randomUUID(), STRING.next());
+        crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
         applicationId = UUID.randomUUID();
     }
 
@@ -153,7 +154,7 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldHandleEmptyFields() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null, null, null));
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null));
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
@@ -163,5 +164,21 @@ public class TimelineHearingSummaryHelperTest {
         hearing.setProsecutionCases(of(prosecutionCase));
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial);
         assertThat(timeLineHearingSummary, is(notNullValue()));
+    }
+
+    @Test
+    public void shouldIndicateEffectiveOutcomeInTimelineHearingSummary() {
+        hearing.setIsEffectiveTrial(true);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null);
+        assertThat(timeLineHearingSummary.getOutcome(), is("Effective"));
+    }
+
+    @Test
+    public void shouldIndicateVacatedOutcomeInTimelineHearingSummary() {
+        hearing.setIsVacatedTrial(true);
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null);
+        assertThat(timeLineHearingSummary.getOutcome(), is("Vacated"));
     }
 }

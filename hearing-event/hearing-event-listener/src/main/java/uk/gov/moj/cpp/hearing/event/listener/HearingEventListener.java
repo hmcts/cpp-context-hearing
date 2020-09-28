@@ -4,13 +4,16 @@ import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
@@ -19,12 +22,15 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.exception.UnmatchedSittingDayException;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
-import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+
+import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -223,5 +229,30 @@ public class HearingEventListener {
         final HearingApplication hearingApplication = new HearingApplication();
         hearingApplication.setId(new HearingApplicationKey(registeredHearingAgainstApplication.getApplicationId(), registeredHearingAgainstApplication.getHearingId()));
         hearingApplicationRepository.save(hearingApplication);
+    }
+
+    @Handles("hearing.hearing-days-cancelled")
+    public void cancelHearingDays(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-days-cancelled event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingDaysCancelled hearingDaysCancelled = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), HearingDaysCancelled.class);
+        final Hearing hearing = hearingRepository.findBy(hearingDaysCancelled.getHearingId());
+
+        if (nonNull(hearing)) {
+            final List<HearingDay> cancelledDayList = hearingDaysCancelled.getHearingDays();
+            final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay> existingDaySet = hearing.getHearingDays();
+
+            existingDaySet.forEach(existingDay -> {
+                final uk.gov.justice.core.courts.HearingDay cancelledDay =
+                        cancelledDayList.stream().filter(source -> source.getSittingDay().toLocalDateTime().equals(existingDay.getSittingDay().toLocalDateTime())).
+                                findFirst().orElseThrow(() -> new UnmatchedSittingDayException("No match found for sitting day: " + existingDay.getSittingDay()));
+                existingDay.setIsCancelled(cancelledDay.getIsCancelled());
+            });
+            hearing.setHearingDays(existingDaySet);
+            hearingRepository.save(hearing);
+        }
     }
 }

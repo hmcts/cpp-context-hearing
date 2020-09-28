@@ -1025,13 +1025,13 @@ public class HearingServiceTest {
 
     private CrackedIneffectiveVacatedTrialTypes buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
         final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription"));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription",null));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
     private CrackedIneffectiveVacatedTrialTypes buildVacatedTrialTypes(final UUID vacatedTrialReasonId) {
         final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "fullDescription"));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "fullDescription",null));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }

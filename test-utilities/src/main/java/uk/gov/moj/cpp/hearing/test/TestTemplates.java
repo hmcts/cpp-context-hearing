@@ -18,11 +18,13 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
+import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
 import static uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand.updatePleaCommand;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.associatedPerson;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.hearingDay;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.legalEntityDefendant;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.organisation;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.personDefendant;
@@ -335,7 +337,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand minimumInitiateHearingTemplate() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
@@ -346,12 +348,21 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand standardInitiateHearingTemplate() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
                             .setJurisdictionType(CROWN)
                     ).build());
+        }
+
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithMultiHearingDays() {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                    ).withHearingDays(Arrays.asList(hearingDay().build(), hearingDay().build())).build());
         }
 
         public static InitiateHearingCommand standardInitiateHearingTemplateWithOffenceDateCode(final Integer offenceDateCode) {
@@ -364,8 +375,28 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithMultidayHearing() {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                    ).withHearingDays(Arrays.asList(hearingDay(PAST_ZONED_DATE_TIME.next()).build(), hearingDay(FUTURE_ZONED_DATE_TIME.next()).build()))
+                            .build());
+        }
+
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithPastMultidayHearing(ZonedDateTime resultSharedDate) {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                    ).withHearingDays(Arrays.asList(hearingDay(resultSharedDate.minusDays(1)).build(), hearingDay(resultSharedDate.minusDays(2)).build()))
+                            .build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingTemplateWithDefendantJudicialResultsForMagistrates() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)
@@ -375,7 +406,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(final List<CourtApplication> courtApplications) {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
@@ -385,7 +416,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand standardInitiateHearingTemplateWithJurisdictionMagistrate() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
@@ -394,7 +425,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand welshInitiateHearingTemplate() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(WELSH)
@@ -405,7 +436,7 @@ public class TestTemplates {
         public static InitiateHearingCommand standardInitiateHearingTemplateForIndicatedPlea(
                 final IndicatedPleaValue indicatedPleaValue,
                 final boolean isAllocationDecision) {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
@@ -416,7 +447,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForMagistrates() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
@@ -425,7 +456,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)
@@ -436,7 +467,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtId, final UUID courtRoomId, final String courtRoomName, final LocalDate localDate, final UUID defenceCounselId, final UUID caseId, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)
@@ -447,7 +478,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForDefendantTypeOrganisation() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(ORGANISATION)
                             .setHearingLanguage(ENGLISH)
@@ -458,7 +489,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand initiateHearingTemplateForCrownCourtOffenceCountNull() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(ORGANISATION)
                             .setHearingLanguage(ENGLISH)
@@ -470,7 +501,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand customStructureInitiateHearingTemplate(final Map<UUID, Map<UUID, List<UUID>>> structure) {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
@@ -650,7 +681,7 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand standardInitiateHearingTemplateWithDefendantJudicialResults() {
-            return InitiateHearingCommand.initiateHearingCommand()
+            return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)

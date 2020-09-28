@@ -134,6 +134,7 @@ public class PublishResultsDelegate {
             new ResultsSharedHelper().setIsDisposedFlagOnOffence(resultsShared);
             new BailStatusReasonHelper().setReason(resultsShared);
             new BailConditionsHelper().setBailConditions(resultsShared);
+            new ResultsSharedHelper().cancelFutureHearingDays(context, sender, resultsShared, objectToJsonObjectConverter);
             if (!isEmpty(resultsShared.getDefendantDetailsChanged())) {
                 mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH));
             }

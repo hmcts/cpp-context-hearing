@@ -223,6 +223,10 @@ subscriptions_descriptor:
         - name: hearing.events.vacated-trial-cleared
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.vacated-trial-cleared.json
 
+        # Hearing days cancelled
+        - name: hearing.hearing-days-cancelled
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.hearing-days-cancelled.json
+
         - name: hearing.target-removed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.target-removed.json
 

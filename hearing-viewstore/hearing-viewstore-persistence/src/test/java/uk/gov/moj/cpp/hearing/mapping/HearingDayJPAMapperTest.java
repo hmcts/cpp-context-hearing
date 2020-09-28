@@ -6,25 +6,22 @@ import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.services.test.utils.core.random.DateGenerator;
+import uk.gov.justice.services.test.utils.core.random.Generator;
+import uk.gov.justice.services.test.utils.core.random.ZonedDateTimeGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
+
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 import org.junit.Test;
 
 public class HearingDayJPAMapperTest {
 
     private HearingDayJPAMapper hearingDayJPAMapper = new HearingDayJPAMapper();
-
-    @SuppressWarnings("unchecked")
-    public static ElementAtListMatcher whenFirstHearingDay(final BeanMatcher<?> m, final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay entity) {
-        return ElementAtListMatcher.first(whenHearingDay((BeanMatcher<HearingDay>) m, entity));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static ElementAtListMatcher whenFirstHearingDay(final BeanMatcher<?> m, final HearingDay pojo) {
-        return ElementAtListMatcher.first(whenHearingDay((BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay>) m, pojo));
-    }
 
     public static BeanMatcher<HearingDay> whenHearingDay(final BeanMatcher<HearingDay> m,
                                                          final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay entity) {

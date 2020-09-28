@@ -161,10 +161,13 @@ public class ReferenceDataStub {
     public static final String ALCOHOL_LEVEL_METHOD_B_CODE = "B";
     public static final String ALCOHOL_LEVEL_METHOD_B_DESCRIPTION = "Breath";
 
-    public static final UUID INEFFECTIVE_TRIAL_TYPE_ID = UUID.fromString("9b738c6e-04fc-4e18-bc49-b599973af7e7");
-    public static final UUID VACATED_TRIAL_TYPE_ID = UUID.fromString("9c738c6e-04fc-4e18-bc49-b599973af7b8");
-    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "fullDescription");
-    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "fullDescription");
+    public static final UUID INEFFECTIVE_TRIAL_TYPE_ID = fromString("9b738c6e-04fc-4e18-bc49-b599973af7e7");
+    public static final UUID VACATED_TRIAL_TYPE_ID = fromString("9c738c6e-04fc-4e18-bc49-b599973af7b8");
+    public static final UUID CRACKED_TRIAL_TYPE_ID = fromString("9d738c6e-04fc-4e18-bc49-b599973af7c6");
+    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType CRACKED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(CRACKED_TRIAL_TYPE_ID, "code", "Cracked", "fullDescription", null);
+    private static final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList<>();
 
     private static List<JsonValue> createCourtRoomFixture() {
         String body = getPayload("referencedata.dyna.fixedlists.court.centre.json");
@@ -291,7 +294,7 @@ public class ReferenceDataStub {
                 .withCategory("Guilty")
                 .withCategoryType("GUILTY_BY_JURY_CONVICTED")
                 .withDescription("Guilty")
-                .withId(UUID.fromString(VERDICT_TYPE_GUILTY_ID))
+                .withId(fromString(VERDICT_TYPE_GUILTY_ID))
                 .withSequence(1)
                 .withCjsVerdictCode("G")
                 .build());
@@ -301,7 +304,7 @@ public class ReferenceDataStub {
                         .withCategory("Not Guilty")
                         .withCategoryType("NOT_GUILTY")
                         .withDescription("Not guilty by reason of insanity")
-                        .withId(UUID.fromString("c51ce410-c124-310e-8db5-e4b97fc2af39"))
+                        .withId(fromString("c51ce410-c124-310e-8db5-e4b97fc2af39"))
                         .withCjsVerdictCode("N")
                         .withSequence(13)
                         .build());
@@ -349,9 +352,18 @@ public class ReferenceDataStub {
         stub(enforcementArea, REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_QUERY_URL, REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_MEDIA_TYPE, "nationalCourtCode", ouCode);
     }
 
+    public static void stubCrackedInEffectiveTrialTypes(List<CrackedIneffectiveVacatedTrialType> newCrackedIneffectiveVacatedTrialTypes) {
+        crackedIneffectiveVacatedTrialTypes.addAll(newCrackedIneffectiveVacatedTrialTypes);
+        CrackedIneffectiveVacatedTrialTypes result = new CrackedIneffectiveVacatedTrialTypes();
+        result.setCrackedIneffectiveVacatedTrialTypes(crackedIneffectiveVacatedTrialTypes);
+
+        stub(result, REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL,
+                REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE);
+    }
+
     public static void stubTrialTypes() {
         CrackedIneffectiveVacatedTrialTypes result = new CrackedIneffectiveVacatedTrialTypes();
-        result.setCrackedIneffectiveVacatedTrialTypes(Lists.newArrayList(INEFFECTIVE_TRIAL_TYPE, VACATED_TRIAL_TYPE));
+        result.setCrackedIneffectiveVacatedTrialTypes(Lists.newArrayList(INEFFECTIVE_TRIAL_TYPE, VACATED_TRIAL_TYPE, CRACKED_TRIAL_TYPE));
 
         stub(result, REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL,
                 REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE);
@@ -810,7 +822,7 @@ public class ReferenceDataStub {
         final String urlPath = format(REFERENCE_DATA_RESULT_DEFINITIONS_RULE_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE)
                         .withBody(getPayload(responsePath))));
 
@@ -823,7 +835,7 @@ public class ReferenceDataStub {
         final String urlPath = format(REFERENCE_DATA_RESULT_BAIL_STATUSES_QUERY_URL, orderedDate.toString());
         stubFor(get(urlPathEqualTo(urlPath))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCE_DATA_RESULT_BAIL_STATUSES_MEDIA_TYPE)
                         .withBody(getPayload(responsePath))));
 
@@ -989,7 +1001,7 @@ public class ReferenceDataStub {
 
         stubFor(get(urlPathMatching(REFERENCEDATA_QUERY_ORGANISATION_UNITS_URL))
                 .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader("CPPID", UUID.randomUUID().toString())
+                        .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE)
                         .withBody(organisationunits.toString())));
 

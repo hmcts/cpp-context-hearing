@@ -1,0 +1,17 @@
+{
+  "hearingId": "cff4bfc7-4320-432e-aa07-2fefc8bc5051",
+  "hearingDays": [
+    {
+      "listedDurationMinutes": 30,
+      "listingSequence": 0,
+      "sittingDay": "2020-08-18T01:22:12.381Z",
+      "isCancelled": true
+    },
+    {
+      "listedDurationMinutes": 10,
+      "listingSequence": 1,
+      "sittingDay": "2020-08-19T01:22:12.381Z",
+      "isCancelled": true
+    }
+  ]
+}

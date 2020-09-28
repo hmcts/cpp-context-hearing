@@ -37,6 +37,11 @@ public class HearingDay {
     @Column(name = "listed_duration_minutes")
     private Integer listedDurationMinutes;
 
+    @Column(name = "is_cancelled")
+    private Boolean isCancelled;
+
+    //maskedOffences need to add
+
     public HearingDay() {
         //For JPA
     }
@@ -95,6 +100,14 @@ public class HearingDay {
 
     public void setDateTime(ZonedDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public Boolean getIsCancelled() {
+        return isCancelled;
+    }
+
+    public void setIsCancelled(final Boolean isCancelled) {
+        this.isCancelled = isCancelled;
     }
 
     @Override

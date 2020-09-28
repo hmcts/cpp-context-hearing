@@ -67,6 +67,7 @@ public class HearingCommandHandlerRamlConfigTest {
                 BookProvisionalHearingSlotsCommandHandler.class,
                 ClearVacatedReasonCommandHandler.class,
                 HearingVacatedTrialDetailUpdateCommandHandler.class,
+                CancelHearingDaysCommandHandler.class,
                 RemoveTargetsCommandHandler.class
         );
 

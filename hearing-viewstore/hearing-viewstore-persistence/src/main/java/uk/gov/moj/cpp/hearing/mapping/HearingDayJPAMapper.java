@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Objects.isNull;
+
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -18,7 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 public class HearingDayJPAMapper {
 
     HearingDay toJPA(final Hearing hearing, final uk.gov.justice.core.courts.HearingDay pojo) {
-        if (null == pojo) {
+        if (isNull(pojo)) {
             return null;
         }
         final HearingDay hearingDay = new HearingDay();
@@ -29,6 +31,7 @@ public class HearingDayJPAMapper {
         hearingDay.setListedDurationMinutes(pojo.getListedDurationMinutes());
         hearingDay.setListingSequence(pojo.getListingSequence());
         hearingDay.setSittingDay(pojo.getSittingDay());
+        hearingDay.setIsCancelled(pojo.getIsCancelled());
         return hearingDay;
     }
 
@@ -40,11 +43,12 @@ public class HearingDayJPAMapper {
                 .withListedDurationMinutes(entity.getListedDurationMinutes())
                 .withListingSequence(entity.getListingSequence())
                 .withSittingDay(entity.getSittingDay())
+                .withIsCancelled(entity.getIsCancelled())
                 .build();
     }
 
     public Set<HearingDay> toJPA(Hearing hearing, List<uk.gov.justice.core.courts.HearingDay> pojos) {
-        if (null == pojos) {
+        if (isNull(pojos)) {
             return new HashSet<>();
         }
         return pojos.stream().map(pojo -> toJPA(hearing, pojo)).collect(Collectors.toSet());

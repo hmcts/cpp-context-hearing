@@ -234,6 +234,10 @@ subscriptions_descriptor:
         - name: hearing.trial-vacated
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.trial-vacated.json
 
+      # Hearing Days Cancelled
+        - name: hearing.hearing-days-cancelled
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.hearing-days-cancelled.json
+
       event_source_name: hearing
 
     - name: public event subscription

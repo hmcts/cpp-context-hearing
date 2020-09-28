@@ -73,7 +73,6 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
-import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -99,6 +98,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
@@ -112,8 +112,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -482,6 +482,10 @@ public class HearingAggregate implements Aggregate {
                 .withHearingId(hearingId)
                 .withSlots((new ArrayList<>(slots)))
                 .build()));
+    }
+
+    public Stream<Object> cancelHearingDays(final UUID hearingId, final List<HearingDay> hearingDays) {
+        return this.apply(this.hearingDelegate.cancelHearingDays(hearingId, hearingDays));
     }
 
     public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {

@@ -1,13 +1,20 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static com.google.common.io.Resources.getResource;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.nio.charset.Charset.defaultCharset;
+import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,11 +25,13 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.messaging.JsonEnvelopeBuilder.envelope;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -35,6 +44,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
@@ -45,7 +55,9 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -251,7 +263,7 @@ public class HearingEventProcessorTest {
                         .withId(UUID.randomUUID())
                         .withSequence(1).build())
                 .setApplicationOutcomeDate(LocalDate.now());
-        final JsonEnvelope eventIn = createApplicationDraftResultedPrivateEvent(applicationDraftResulted);
+        final JsonEnvelope eventIn = createJsonEnvelope(applicationDraftResulted);
 
         this.hearingEventProcessor.publicApplicationDraftResultedPublicEvent(eventIn);
 
@@ -272,7 +284,7 @@ public class HearingEventProcessorTest {
     public void shouldTriggerPublicHearingTrialVacatedEventForEffectiveTrial() {
         final UUID hearingId = randomUUID();
         final HearingEffectiveTrial hearingEffectiveTrial = new HearingEffectiveTrial(hearingId, true);
-        final JsonEnvelope eventIn = createApplicationHearingEffectiveTrialPrivateEvent(hearingEffectiveTrial);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingEffectiveTrial);
 
         this.hearingEventProcessor.publicHearingEventEffectiveTrialSetPublicEvent(eventIn);
 
@@ -289,7 +301,7 @@ public class HearingEventProcessorTest {
         final UUID hearingId = randomUUID();
         final UUID trialTypeId = randomUUID();
         final HearingTrialType hearingTrialType = new HearingTrialType(hearingId, trialTypeId, "code", "cracked", "desc");
-        final JsonEnvelope eventIn = createApplicationHearingTrialPrivateEvent(hearingTrialType);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
 
         this.hearingEventProcessor.publicHearingEventTrialTypeSetPublicEvent(eventIn);
 
@@ -318,7 +330,7 @@ public class HearingEventProcessorTest {
         final UUID hearingId = randomUUID();
         final UUID trialTypeId = randomUUID();
         final HearingTrialVacated hearingTrialType = new HearingTrialVacated(hearingId, trialTypeId, "code", "cracked", "desc");
-        final JsonEnvelope eventIn = createApplicationHearingVacateTrialPrivateEvent(hearingTrialType);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
 
         this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(eventIn);
 
@@ -328,6 +340,32 @@ public class HearingEventProcessorTest {
         final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
         assertThat(publicEventOut.getHearingId(), is(hearingTrialType.getHearingId()));
         assertThat(publicEventOut.getVacatedTrialReasonId(), is(hearingTrialType.getVacatedTrialReasonId()));
+    }
+
+    @Test
+    public void shouldTriggerPublicHearingDaysCancelledForCrackedTrial() {
+        final UUID hearingId = randomUUID();
+        final ZonedDateTime futureSittingDay = FUTURE_ZONED_DATE_TIME.next();
+        final ZonedDateTime pastSittingDay = PAST_ZONED_DATE_TIME.next();
+        final List<HearingDay> hearingDayList = Arrays.asList(new HearingDay.Builder().withIsCancelled(true).withSittingDay(futureSittingDay).build(),
+                new HearingDay.Builder().withIsCancelled(false).withSittingDay(pastSittingDay).build());
+        final HearingDaysCancelled hearingDaysCancelled = new HearingDaysCancelled(hearingId, hearingDayList);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingDaysCancelled);
+
+        this.hearingEventProcessor.handleHearingDaysCancelled(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is("public.hearing.hearing-days-cancelled"));
+        final HearingDaysCancelled publicEvent = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), HearingDaysCancelled.class);
+        assertThat(publicEvent.getHearingId(), is(hearingDaysCancelled.getHearingId()));
+        List<HearingDay> hearingDays = publicEvent.getHearingDays();
+
+        assertThat(hearingDays.size(), is(2));
+        assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(true))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(of("UTC"))))));
+        assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(false))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(of("UTC"))))));
     }
 
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class<?> commandClass, int sendCount) {
@@ -407,30 +445,6 @@ public class HearingEventProcessorTest {
         return envelope().withPayloadOf(jsonObject, "target").with(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT)).build();
     }
 
-    private JsonEnvelope createApplicationDraftResultedPrivateEvent(final ApplicationDraftResulted applicationDraftResulted) {
-        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(applicationDraftResulted);
-        final Metadata metadata = metadataWithDefaults().build();
-        return envelopeFrom(metadata, jsonObject);
-    }
-
-    private JsonEnvelope createApplicationHearingEffectiveTrialPrivateEvent(final HearingEffectiveTrial hearingEffectiveTrial) {
-        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingEffectiveTrial);
-        final Metadata metadata = metadataWithDefaults().build();
-        return envelopeFrom(metadata, jsonObject);
-    }
-
-    private JsonEnvelope createApplicationHearingTrialPrivateEvent(final HearingTrialType hearingTrialType) {
-        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingTrialType);
-        final Metadata metadata = metadataWithDefaults().build();
-        return envelopeFrom(metadata, jsonObject);
-    }
-
-    private JsonEnvelope createApplicationHearingVacateTrialPrivateEvent(final HearingTrialVacated hearingTrialVacated) {
-        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingTrialVacated);
-        final Metadata metadata = metadataWithDefaults().build();
-        return envelopeFrom(metadata, jsonObject);
-    }
-
     private JsonEnvelope createDraftResultSavedPrivateEvent(String draftResult) {
 
         final JsonObjectBuilder result = createObjectBuilder()
@@ -442,6 +456,11 @@ public class HearingEventProcessorTest {
         return envelopeFrom(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT), result.build());
     }
 
+    private <T> JsonEnvelope createJsonEnvelope(final T payload) {
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(payload);
+        final Metadata metadata = metadataWithDefaults().build();
+        return envelopeFrom(metadata, jsonObject);
+    }
 
     private void fakeHearingDetailsAndProgressionCaseDetails() {
         final JsonObject hearingDetailsResponse = createObjectBuilder()

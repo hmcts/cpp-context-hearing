@@ -46,7 +46,7 @@ public class SetHearingTrialTypeIT extends AbstractIT {
 
         final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = INEFFECTIVE_TRIAL_TYPE;
 
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getDate(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
 
         Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -88,9 +88,9 @@ public class SetHearingTrialTypeIT extends AbstractIT {
 
         UseCases.setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType);
 
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = VACATED_TRIAL_TYPE;
+        final CrackedIneffectiveVacatedTrialType trialType = VACATED_TRIAL_TYPE;
 
-        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(crackedIneffectiveVacatedTrialType.getReasonCode(), crackedIneffectiveVacatedTrialType.getReasonFullDescription(), crackedIneffectiveVacatedTrialType.getId(), crackedIneffectiveVacatedTrialType.getTrialType());
+        CrackedIneffectiveTrial expectedTrialType = new CrackedIneffectiveTrial(trialType.getReasonCode(), trialType.getDate(), trialType.getReasonFullDescription(), trialType.getId(), trialType.getTrialType());
 
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)

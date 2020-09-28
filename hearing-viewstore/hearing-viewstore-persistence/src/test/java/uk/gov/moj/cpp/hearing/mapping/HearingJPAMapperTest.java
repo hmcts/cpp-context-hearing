@@ -165,6 +165,7 @@ public class HearingJPAMapperTest {
         hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
         hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
+        hearingEntity.setIsVacatedTrial(Boolean.TRUE);
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
         when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
@@ -229,6 +230,7 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
                 .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
                 .withValue(Hearing::getCourtApplications, null)
+                .with(Hearing::getIsVacatedTrial, is(Boolean.TRUE))
         );
     }
 
@@ -251,6 +253,7 @@ public class HearingJPAMapperTest {
                 .withDefendantAttendance(asList(mock(DefendantAttendance.class)))
                 .withHearingCaseNotes(asList(mock(HearingCaseNote.class)))
                 .withCourtApplications(asList())
+                .withIsVacatedTrial(Boolean.FALSE)
                 .build();
 
 
@@ -300,6 +303,7 @@ public class HearingJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
                 .withValue(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getCourtApplicationsJson, expectedCourtApplicationsJson)
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getIsVacatedTrial, is(Boolean.FALSE))
         );
     }
 

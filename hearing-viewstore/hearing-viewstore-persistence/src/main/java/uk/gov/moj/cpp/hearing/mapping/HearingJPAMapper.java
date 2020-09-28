@@ -100,6 +100,7 @@ public class HearingJPAMapper {
         hearing.setDefendantReferralReasons(defendantReferralReasonsJPAMapper.toJPA(hearing, pojo.getDefendantReferralReasons()));
         hearing.setHasSharedResults(pojo.getHasSharedResults());
         hearing.setIsBoxHearing(pojo.getIsBoxHearing());
+        hearing.setIsVacatedTrial(pojo.getIsVacatedTrial());
         hearing.setHearingCaseNotes(hearingCaseNoteJPAMapper.toJPA(hearing, pojo.getHearingCaseNotes()));
         hearing.setHearingDays(hearingDayJPAMapper.toJPA(hearing, pojo.getHearingDays()));
         hearing.setHearingLanguage(ofNullable(pojo.getHearingLanguage()).orElse(HearingLanguage.ENGLISH));
@@ -119,7 +120,7 @@ public class HearingJPAMapper {
             return null;
         }
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
-        if(!isEmpty(courtApplications)){
+        if (!isEmpty(courtApplications)) {
             courtApplications = courtApplications.stream().filter(ca -> !EJECTED.equals(ca.getApplicationStatus())).collect(toList());
         }
         return uk.gov.justice.core.courts.Hearing.hearing()
@@ -130,6 +131,7 @@ public class HearingJPAMapper {
                 .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
                 .withHasSharedResults(entity.getHasSharedResults())
                 .withIsBoxHearing(entity.getIsBoxHearing())
+                .withIsVacatedTrial(entity.getIsVacatedTrial())
                 .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
                 .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
                 .withHearingLanguage(entity.getHearingLanguage())

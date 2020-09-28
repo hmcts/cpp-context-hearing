@@ -37,6 +37,7 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
     public static final String COMMAND_LISTING_HEARING_RESCHEDULED = "hearing.command.clear-vacated-trial";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
     private final Enveloper enveloper;
     private final Sender sender;
@@ -184,6 +185,15 @@ public class HearingEventProcessor {
 
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(COMMAND_LISTING_HEARING_RESCHEDULED),
                 envelope.payloadAsJsonObject()));
+    }
 
+    @Handles("hearing.hearing-days-cancelled")
+    public void handleHearingDaysCancelled(final JsonEnvelope envelope) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.hearing-days-cancelled {}", envelope.toObfuscatedDebugString());
+        }
+
+        this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName("public.hearing.hearing-days-cancelled"),
+                envelope.payloadAsJsonObject()));
     }
 }

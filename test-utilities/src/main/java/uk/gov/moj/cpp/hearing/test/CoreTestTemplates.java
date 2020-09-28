@@ -14,6 +14,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOO
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.NI_NUMBER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_UTC_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.POST_CODE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.ORGANISATION;
@@ -97,7 +98,14 @@ public class CoreTestTemplates {
 
     public static HearingDay.Builder hearingDay() {
         return HearingDay.hearingDay()
-                .withSittingDay(RandomGenerator.PAST_UTC_DATE_TIME.next())
+                .withSittingDay(PAST_UTC_DATE_TIME.next())
+                .withListingSequence(INTEGER.next())
+                .withListedDurationMinutes(INTEGER.next());
+    }
+
+    public static HearingDay.Builder hearingDay(final ZonedDateTime sittingDate) {
+        return HearingDay.hearingDay()
+                .withSittingDay(sittingDate)
                 .withListingSequence(INTEGER.next())
                 .withListedDurationMinutes(INTEGER.next());
     }
@@ -160,6 +168,7 @@ public class CoreTestTemplates {
                 .withIsBenchChairman(BOOLEAN.next())
                 .withIsDeputy(BOOLEAN.next())
                 .withTitle(STRING.next())
+                .withUserId(randomUUID())
                 .withJudicialRoleType(args.jurisdictionType == JurisdictionType.CROWN ? circuitJudge() : magistrate());
     }
 

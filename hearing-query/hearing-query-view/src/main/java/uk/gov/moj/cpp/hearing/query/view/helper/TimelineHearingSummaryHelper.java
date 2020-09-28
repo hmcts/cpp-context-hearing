@@ -35,6 +35,9 @@ import org.apache.commons.lang3.StringUtils;
 
 public class TimelineHearingSummaryHelper {
 
+    private static final String HEARING_OUTCOME_EFFECTIVE = "Effective";
+    private static final String HEARING_OUTCOME_VACATED = "Vacated";
+
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
@@ -48,13 +51,24 @@ public class TimelineHearingSummaryHelper {
         timelineHearingSummaryBuilder.withHearingTime(hearingDay.getDateTime());
         timelineHearingSummaryBuilder.withEstimatedDuration(hearingDay.getListedDurationMinutes());
         final List<String> defendantNames = getDefendantNames(hearing);
+
         if (!defendantNames.isEmpty()) {
             timelineHearingSummaryBuilder.withDefendants(defendantNames);
         }
+
+        setHearingOutcome(hearing, crackedIneffectiveTrial, timelineHearingSummaryBuilder);
+
+        return timelineHearingSummaryBuilder;
+    }
+
+    private void setHearingOutcome(final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder) {
         if (nonNull(crackedIneffectiveTrial)) {
             timelineHearingSummaryBuilder.withOutcome(crackedIneffectiveTrial.getType());
+        } else if (nonNull(hearing.getIsEffectiveTrial()) && hearing.getIsEffectiveTrial()) {
+            timelineHearingSummaryBuilder.withOutcome(HEARING_OUTCOME_EFFECTIVE);
+        } else if (nonNull(hearing.getIsVacatedTrial()) && hearing.getIsVacatedTrial()) {
+            timelineHearingSummaryBuilder.withOutcome(HEARING_OUTCOME_VACATED);
         }
-        return timelineHearingSummaryBuilder;
     }
 
     public TimelineHearingSummary createTimeLineHearingSummary(final HearingDay hearingDay,
