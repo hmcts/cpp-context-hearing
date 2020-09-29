@@ -153,7 +153,6 @@ import com.jayway.restassured.path.json.JsonPath;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
-import org.junit.Before;
 import org.junit.Test;
 
 @SuppressWarnings({"squid:S2699"})
@@ -1802,10 +1801,9 @@ public class ShareResultsIT extends AbstractIT {
 
     private CommandHelpers.UpdatePleaCommandHelper updatePleaWithoutChangingConvictionDate(final InitiateHearingCommandHelper hearingOne) {
         try (final EventListener hearingPleaUpdatedListener = listenFor("public.hearing.plea-updated")
-                .withFilter(isJson(allOf(
-                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
-                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))
-                        ))
+                .withFilter(isJson(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
+                        )
                 );
              final EventListener convictionDateChangedListener = listenFor("public.hearing.offence-conviction-date-changed")
                      .withFilter(isJson(allOf(
