@@ -79,7 +79,7 @@ public class ResultTreeBuilder {
 
     private Map<UUID, TreeNode<ResultLine>> getTreeNodeMap(final JsonEnvelope context, final ResultsShared resultsShared) {
         final Map<UUID, TreeNode<ResultLine>> result = new HashMap<>();
-        for (final Target target : resultsShared.getTargets()) {
+        resultsShared.getTargets().forEach(target -> {
             final List<ResultLine> resultLines = target.getResultLines();
             resultLines
                     .stream()
@@ -96,7 +96,7 @@ public class ResultTreeBuilder {
                         final TreeNode<ResultLine> treeNode = getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
                         result.put(treeNode.getId(), treeNode);
                     });
-        }
+        });
         return result;
     }
 
@@ -152,6 +152,24 @@ public class ResultTreeBuilder {
                 .withResultWording(resultDefinition.getResultWording())
                 .withWelshResultWording(resultDefinition.getWelshResultWording());
 
+        //Set Parent Judicial Result Id and Judicial Result Type Id
+        if (!isEmpty(resultLine.getParentResultLineIds())) {
+            final List<UUID> parentResultLineIds = resultLine.getParentResultLineIds();
+            parentResultLineIds.forEach(parentResultLineId -> {
+                final ResultLine parentResultLine = getResultLine(resultLines, parentResultLineId);
+                if(nonNull(parentResultLine)) {
+                    builder.withParentJudicialResultId(parentResultLine.getResultLineId());
+                    builder.withParentJudicialResultTypeId(parentResultLine.getResultDefinitionId());
+                }
+            });
+        }
+
+        final ResultLine rootResultLine = getRootResultLine(resultLines, resultLine);
+        if (nonNull(rootResultLine)) {
+            builder.withRootJudicialResultId(rootResultLine.getResultLineId());
+            builder.withRootJudicialResultTypeId(rootResultLine.getResultDefinitionId());
+        }
+
         final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts());
 
         if (nonNull(judicialResultPrompts) && !judicialResultPrompts.isEmpty()) {
@@ -176,6 +194,25 @@ public class ResultTreeBuilder {
         }
 
         return builder.build();
+    }
+
+    ResultLine getRootResultLine(final List<ResultLine> resultLines, final ResultLine currentResultLine) {
+        if(isNull(currentResultLine) || isEmpty(currentResultLine.getParentResultLineIds())) {
+            return currentResultLine;
+        }
+
+        ResultLine resultLine = null;
+        final List<UUID> parentResultLineIds = currentResultLine.getParentResultLineIds();
+        for (final UUID parentResultLineId : parentResultLineIds) {
+            final ResultLine parentResultLine = getResultLine(resultLines, parentResultLineId);
+            resultLine = getRootResultLine(resultLines, parentResultLine);
+        }
+
+        return resultLine;
+    }
+
+    private ResultLine getResultLine(final List<ResultLine> resultLines, final UUID resultLineId) {
+        return resultLines.stream().filter(resultLine -> resultLineId.equals(resultLine.getResultLineId())).findFirst().orElse(null);
     }
 
     private TreeNode<ResultLine> getResultLineTreeNode(final Target target, final ResultLine resultLine, final TreeNode<ResultDefinition> resultDefinitionNode, final JudicialResult judicialResult) {

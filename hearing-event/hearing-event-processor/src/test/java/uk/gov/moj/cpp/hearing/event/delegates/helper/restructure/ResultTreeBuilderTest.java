@@ -1,7 +1,27 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.Objects.nonNull;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_MAGISTRATE_COURT_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_TO_HOSPITAL_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_ON_CONDITIONAL_BAIL_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
+
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -10,24 +30,10 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
-import static java.util.Objects.nonNull;
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_TO_HOSPITAL_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_ON_CONDITIONAL_BAIL_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_MAGISTRATE_COURT_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
+import org.junit.Before;
+import org.junit.Test;
 
 public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
@@ -178,5 +184,50 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
         assertThat(topLevelResultLineParents.size(), is(1));
         assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
+    }
+
+    @Test
+    public void shouldGetRootResultLineFromGrandChild() {
+        final ResultLine parent = buildResultLine(null);
+        final ResultLine child = buildResultLine(parent.getResultLineId());
+        final ResultLine grandChild = buildResultLine(child.getResultLineId());
+        final List<ResultLine> resultLineList = asList(parent, child, grandChild);
+        final ResultLine rootResultLine = target.getRootResultLine(resultLineList, grandChild);
+        assertThat(rootResultLine, is(notNullValue()));
+        assertThat(rootResultLine.getResultLineId(), is(parent.getResultLineId()));
+        assertThat(rootResultLine.getResultDefinitionId(), is(parent.getResultDefinitionId()));
+    }
+
+    @Test
+    public void shouldGetRootResultLineFromChild() {
+        final ResultLine parent = buildResultLine(null);
+        final ResultLine child = buildResultLine(parent.getResultLineId());
+        final List<ResultLine> resultLineList = asList(parent, child);
+        final ResultLine rootResultLine = target.getRootResultLine(resultLineList, child);
+        assertThat(rootResultLine, is(notNullValue()));
+        assertThat(rootResultLine.getResultLineId(), is(parent.getResultLineId()));
+        assertThat(rootResultLine.getResultDefinitionId(), is(parent.getResultDefinitionId()));
+    }
+
+    @Test
+    public void shouldGetRootResultLineFromParent() {
+        final ResultLine parent = buildResultLine(null);
+        final List<ResultLine> resultLineList = asList(parent);
+        final ResultLine rootResultLine = target.getRootResultLine(resultLineList, parent);
+        assertThat(rootResultLine, is(notNullValue()));
+        assertThat(rootResultLine.getResultLineId(), is(parent.getResultLineId()));
+        assertThat(rootResultLine.getResultDefinitionId(), is(parent.getResultDefinitionId()));
+    }
+
+    private ResultLine buildResultLine(UUID parentResultId) {
+        final ResultLine.Builder resultLineBuilder = ResultLine.resultLine()
+                .withResultLineId(randomUUID())
+                .withResultDefinitionId(randomUUID());
+
+        if (nonNull(parentResultId)) {
+            resultLineBuilder.withParentResultLineIds(singletonList(parentResultId));
+        }
+
+        return resultLineBuilder.build();
     }
 }
