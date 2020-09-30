@@ -243,7 +243,6 @@ public class ShareResultsIT extends AbstractIT {
 
     private void assertPublicHearingResultedHasCorrectPayload(final EventListener publicEventResultedListener, final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
         final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
-
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.id"), is(VERDICT_TYPE_GUILTY_ID));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.verdictCode"), is(VERDICT_TYPE_GUILTY_CODE));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.category"), is("Guilty"));
@@ -281,7 +280,10 @@ public class ShareResultsIT extends AbstractIT {
 
         final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
 
+        stubCourtRoom(hearing);
+
         final LocalDate convictionDateBasedOnVerdict = updateVerdictCommandHelper.getFirstVerdict().getVerdictDate();
+
         final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaWithoutChangingConvictionDate(initiateHearingCommandHelper), convictionDateBasedOnVerdict);
 
         try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
