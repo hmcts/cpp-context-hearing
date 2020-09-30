@@ -46,6 +46,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingEventDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingTrialTypeDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.InterpreterIntermediaryDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NowDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.OffenceDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.PleaDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ProsecutionCaseDelegate;
@@ -106,6 +107,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
+import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -162,6 +164,8 @@ public class HearingAggregate implements Aggregate {
     private final CompanyRepresentativeDelegate companyRepresentativeDelegate = new CompanyRepresentativeDelegate(momento);
 
     private final ProsecutionCaseDelegate prosecutionCaseDelegate = new ProsecutionCaseDelegate(momento);
+
+    private final NowDelegate nowDelegate = new NowDelegate(momento);
 
     @Override
     public Object apply(final Object event) {
@@ -220,6 +224,7 @@ public class HearingAggregate implements Aggregate {
                 when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
                 when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> hearingDelegate.handleVacatedTrialCleared()),
                 when(TargetRemoved.class).apply(targetRemoved -> hearingDelegate.handleTargetRemoved(targetRemoved.getTargetId())),
+                when(PendingNowsRequested.class).apply(nowDelegate::handlePendingNowsRequested),
                 otherwiseDoNothing()
         );
 

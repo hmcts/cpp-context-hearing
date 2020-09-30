@@ -49,6 +49,8 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
+import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
+import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -107,7 +109,9 @@ public class HearingEventListenerYamlConfigTest {
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
-            SaveDraftResultFailed.class.getAnnotation(Event.class).value()
+            SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
+            PendingNowsRequested.class.getAnnotation(Event.class).value(),
+            NowsRequested.class.getAnnotation(Event.class).value()
     );
 
     private final Map<String, String> handlerNames = new HashMap<>();

@@ -14,8 +14,10 @@
     },
     "defendantCaseOffences": {
       "$ref": "http://justice.gov.uk/core/courts/nowdocument/defendant-case-offence.json"
+    },
+    "createNowsRequest": {
+      "$ref": "http://justice.gov.uk/core/courts/createNowsRequest.json"
     }
-
   },
   "additionalProperties": false
 }
