@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 declare -rx CONTEXT_NAME=hearing
-declare -rx FRAMEWORK_VERSION=7.0.6
-declare -rx EVENT_STORE_VERSION=7.0.4
-declare -rx FRAMEWORK_LIBRARIES_VERSION=7.0.8
+declare -rx FRAMEWORK_VERSION=7.0.10
+declare -rx EVENT_STORE_VERSION=7.0.8
+declare -rx FRAMEWORK_LIBRARIES_VERSION=7.0.10
 
 function buildWars {
   echo
