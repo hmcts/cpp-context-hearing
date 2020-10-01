@@ -165,6 +165,7 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID GUILTY_RESULT_DEF_ID = fromString("ce23a452-9015-4619-968f-1628d7a271c9");
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final String GUILTY = "GUILTY";
+    private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
 
     @Test
     public void testEmptyDraftResultWhenNoDraftResultSaved() {
@@ -1002,9 +1003,8 @@ public class ShareResultsIT extends AbstractIT {
                 .with(PublicHearingDraftResultSaved::getHearingId, is(hearing.getHearingId()));
 
         final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = "public.hearing.draft-result-saved";
-        try (final EventListener publicEventResulted = listenFor("public.hearing.draft-result-saved")
-                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
+        try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
+                .withFilter(beanMatcher, PUBLIC_HEARING_DRAFT_RESULT_SAVED, expectedMetaDataContextUser)) {
             makeCommand(getRequestSpec(), "hearing.save-draft-result")
                     .ofType("application/vnd.hearing.save-draft-result+json")
                     .withArgs(hearing.getHearingId().toString())
@@ -1566,12 +1566,11 @@ public class ShareResultsIT extends AbstractIT {
                 .with(PublicHearingDraftResultSaved::getTargetId, is(target.getTargetId()))
                 .with(PublicHearingDraftResultSaved::getHearingId, is(target.getHearingId()))
                 .with(PublicHearingDraftResultSaved::getDefendantId, is(target.getDefendantId()))
-                .with(PublicHearingDraftResultSaved::getDraftResult, is(target.getDraftResult()))
                 .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
 
         final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = "public.hearing.draft-result-saved";
-        try (final EventListener publicEventResulted = listenFor("public.hearing.draft-result-saved")
+        final String expectedMetaDataName = PUBLIC_HEARING_DRAFT_RESULT_SAVED;
+        try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
                 .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
 
             makeCommand(getRequestSpec(), "hearing.save-draft-result")
@@ -1678,8 +1677,7 @@ public class ShareResultsIT extends AbstractIT {
 
         try (final EventListener publicEvent = listenFor("public.hearing.application-draft-resulted")
                 .withFilter(isJson(allOf(
-                        withJsonPath("$.hearingId", is(applicationDraftResultCommand.getHearingId().toString())),
-                        withJsonPath("$.draftResult", is(applicationDraftResultCommand.getDraftResult())))))) {
+                        withJsonPath("$.hearingId", is(applicationDraftResultCommand.getHearingId().toString())))))) {
             makeCommand(getRequestSpec(), "hearing.application-draft-result")
                     .ofType("application/vnd.hearing.application-draft-result+json")
                     .withPayload(applicationDraftResultCommand)
@@ -2284,7 +2282,6 @@ public class ShareResultsIT extends AbstractIT {
                         .with(PublicHearingSaveDraftResultFailed::getTargetId, is(target.getTargetId()))
                         .with(PublicHearingSaveDraftResultFailed::getHearingId, is(target.getHearingId()))
                         .with(PublicHearingSaveDraftResultFailed::getDefendantId, is(target.getDefendantId()))
-                        .with(PublicHearingSaveDraftResultFailed::getDraftResult, is(target.getDraftResult()))
                         .with(PublicHearingSaveDraftResultFailed::getOffenceId, is(target.getOffenceId())
                         )))) {
 

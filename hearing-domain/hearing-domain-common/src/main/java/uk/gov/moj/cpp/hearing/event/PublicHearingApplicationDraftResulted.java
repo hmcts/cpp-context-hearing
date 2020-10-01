@@ -11,7 +11,6 @@ public class PublicHearingApplicationDraftResulted {
     private UUID applicationId;
     private UUID hearingId;
     private UUID targetId;
-    private String draftResult;
     private CourtApplicationOutcomeType applicationOutcomeType;
     private LocalDate applicationOutcomeDate;
 
@@ -43,15 +42,6 @@ public class PublicHearingApplicationDraftResulted {
 
     public PublicHearingApplicationDraftResulted setTargetId(UUID targetId) {
         this.targetId = targetId;
-        return this;
-    }
-
-    public String getDraftResult() {
-        return draftResult;
-    }
-
-    public PublicHearingApplicationDraftResulted setDraftResult(String draftResult) {
-        this.draftResult = draftResult;
         return this;
     }
 

@@ -125,6 +125,7 @@ public class NCESJourneyIT extends AbstractIT {
     private static final UUID RD_FINE = fromString("969f150c-cd05-46b0-9dd9-30891efcc766");
     private static final UUID RD_FIDICI = fromString("de946ddc-ad77-44b1-8480-8bbc251cdcfb");
     private static final String PUBLIC_EVENT_STAGINGENFORCEMENT_ENFORCE_FINANCIAL_IMPOSITION_ACKNOWLEDGEMENT = "public.stagingenforcement.enforce-financial-imposition-acknowledgement";
+    private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     private final String FIRST_ACK_ACCOUNT_NUMBER = randomNumeric(9);
     private final String SECOND_ACK_ACCOUNT_NUMBER = randomNumeric(9);
     private LocalDate orderedDate;
@@ -561,13 +562,11 @@ public class NCESJourneyIT extends AbstractIT {
                 .with(PublicHearingDraftResultSaved::getTargetId, is(target.getTargetId()))
                 .with(PublicHearingDraftResultSaved::getHearingId, is(target.getHearingId()))
                 .with(PublicHearingDraftResultSaved::getDefendantId, is(target.getDefendantId()))
-                .with(PublicHearingDraftResultSaved::getDraftResult, is(target.getDraftResult()))
                 .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
 
         final String expectedMetaDataContextUser = getLoggedInUser().toString();
-        final String expectedMetaDataName = "public.hearing.draft-result-saved";
-        try (final EventListener publicEventResulted = listenFor("public.hearing.draft-result-saved")
-                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
+        try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
+                .withFilter(beanMatcher, PUBLIC_HEARING_DRAFT_RESULT_SAVED, expectedMetaDataContextUser)) {
 
             makeCommand(getRequestSpec(), "hearing.save-draft-result")
                     .ofType("application/vnd.hearing.save-draft-result+json")
@@ -663,8 +662,7 @@ public class NCESJourneyIT extends AbstractIT {
 
         try (final EventListener publicEvent = listenFor("public.hearing.application-draft-resulted")
                 .withFilter(isJson(allOf(
-                        withJsonPath("$.hearingId", is(applicationDraftResultCommand.getHearingId().toString())),
-                        withJsonPath("$.draftResult", is(applicationDraftResultCommand.getDraftResult())))))) {
+                        withJsonPath("$.hearingId", is(applicationDraftResultCommand.getHearingId().toString())))))) {
             makeCommand(getRequestSpec(), "hearing.application-draft-result")
                     .ofType("application/vnd.hearing.application-draft-result+json")
                     .withPayload(applicationDraftResultCommand)

@@ -14,17 +14,13 @@
     },
     "offenceId": {
       "$ref": "#/definitions/uuid"
-    },
-    "draftResult": {
-      "type": "string"
     }
   },
   "required": [
     "defendantId",
     "hearingId",
     "offenceId",
-    "targetId",
-    "draftResult"
+    "targetId"
   ],
   "definitions": {
     "uuid": {

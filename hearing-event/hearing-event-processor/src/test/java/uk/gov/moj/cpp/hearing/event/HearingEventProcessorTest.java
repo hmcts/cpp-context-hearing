@@ -226,7 +226,6 @@ public class HearingEventProcessorTest {
         assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED));
         final PublicHearingDraftResultSaved publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingDraftResultSaved.class);
         assertThat(publicEventOut.getDefendantId(), is(target.getDefendantId()));
-        assertThat(publicEventOut.getDraftResult(), is(target.getDraftResult()));
         assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
         assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
         assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
@@ -245,7 +244,6 @@ public class HearingEventProcessorTest {
         assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED));
         final PublicHearingSaveDraftResultFailed publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingSaveDraftResultFailed.class);
         assertThat(publicEventOut.getDefendantId(), is(target.getDefendantId()));
-        assertThat(publicEventOut.getDraftResult(), is(target.getDraftResult()));
         assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
         assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
         assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
@@ -271,7 +269,6 @@ public class HearingEventProcessorTest {
         final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
         assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED));
         final PublicHearingApplicationDraftResulted publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingApplicationDraftResulted.class);
-        assertThat(publicEventOut.getDraftResult(), is(applicationDraftResulted.getDraftResult()));
         assertThat(publicEventOut.getHearingId(), is(applicationDraftResulted.getHearingId()));
         assertThat(publicEventOut.getApplicationId(), is(applicationDraftResulted.getApplicationId()));
         assertThat(publicEventOut.getTargetId(), is(applicationDraftResulted.getTargetId()));

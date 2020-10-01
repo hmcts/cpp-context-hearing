@@ -62,7 +62,6 @@ public class HearingEventProcessor {
         final Target target = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSaved.class).getTarget();
 
         final PublicHearingDraftResultSaved publicHearingDraftResultSaved = PublicHearingDraftResultSaved.publicHearingDraftResultSaved()
-                .setDraftResult(target.getDraftResult())
                 .setHearingId(target.getHearingId())
                 .setDefendantId(target.getDefendantId())
                 .setOffenceId(target.getOffenceId())
@@ -82,7 +81,6 @@ public class HearingEventProcessor {
         final Target target = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), SaveDraftResultFailed.class).getTarget();
 
         final PublicHearingSaveDraftResultFailed publicEventSaveDraftResultFailed = PublicHearingSaveDraftResultFailed.publicHearingSaveDraftResultFailed()
-                .setDraftResult(target.getDraftResult())
                 .setHearingId(target.getHearingId())
                 .setDefendantId(target.getDefendantId())
                 .setOffenceId(target.getOffenceId())
@@ -102,7 +100,6 @@ public class HearingEventProcessor {
         final ApplicationDraftResulted applicationDraftResulted = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ApplicationDraftResulted.class);
 
         final PublicHearingApplicationDraftResulted publicHearingApplicationDraftResulted = PublicHearingApplicationDraftResulted.publicHearingApplicationDraftResulted()
-                .setDraftResult(applicationDraftResulted.getDraftResult())
                 .setHearingId(applicationDraftResulted.getHearingId())
                 .setApplicationId(applicationDraftResulted.getApplicationId())
                 .setTargetId(applicationDraftResulted.getTargetId())

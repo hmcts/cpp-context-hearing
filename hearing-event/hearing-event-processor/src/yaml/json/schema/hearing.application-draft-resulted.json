@@ -12,9 +12,6 @@
     "targetId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
-    "draftResult": {
-      "type": "string"
-    },
     "applicationOutcomeType": {
       "$ref": "http://justice.gov.uk/core/courts/courtApplicationOutcomeType.json"
     },
@@ -25,8 +22,7 @@
   "required": [
     "hearingId",
     "targetId",
-    "applicationId",
-    "draftResult"
+    "applicationId"
   ],
   "additionalProperties": true
 }

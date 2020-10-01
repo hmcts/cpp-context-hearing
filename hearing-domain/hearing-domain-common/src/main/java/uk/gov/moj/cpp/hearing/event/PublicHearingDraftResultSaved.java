@@ -9,7 +9,6 @@ public class PublicHearingDraftResultSaved {
     private UUID hearingId;
     private UUID targetId;
     private UUID offenceId;
-    private String draftResult;
 
     public static PublicHearingDraftResultSaved publicHearingDraftResultSaved() {
         return new PublicHearingDraftResultSaved();
@@ -48,15 +47,6 @@ public class PublicHearingDraftResultSaved {
 
     public PublicHearingDraftResultSaved setOffenceId(UUID offenceId) {
         this.offenceId = offenceId;
-        return this;
-    }
-
-    public String getDraftResult() {
-        return draftResult;
-    }
-
-    public PublicHearingDraftResultSaved setDraftResult(String draftResult) {
-        this.draftResult = draftResult;
         return this;
     }
 }
