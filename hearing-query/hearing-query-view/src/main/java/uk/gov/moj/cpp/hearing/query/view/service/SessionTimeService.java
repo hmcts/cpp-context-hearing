@@ -2,31 +2,27 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.lang.String.format;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.UUID.fromString;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.common.SessionTimeUUIDService;
 import uk.gov.moj.cpp.hearing.persist.entity.sessiontime.SessionTime;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.repository.SessionTimeRepository;
 
-import java.time.LocalDate;
-import java.util.UUID;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.ws.rs.NotFoundException;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @ApplicationScoped
 public class SessionTimeService {
 
     @Inject
     private StringToJsonObjectConverter stringToJsonObjectConverter;
-
-    @Inject
-    private UtcClock utcClock;
 
     @Inject
     private SessionTimeUUIDService uuidService;
@@ -37,9 +33,7 @@ public class SessionTimeService {
     public SessionTimeResponse getSessionTime(final JsonObject payload) {
         final UUID courtHouseId = fromString(payload.getString("courtHouseId"));
         final UUID courtRoomId = fromString(payload.getString("courtRoomId"));
-
-        final LocalDate courtSessionDate = utcClock.now().toLocalDate();
-
+        final LocalDate courtSessionDate = ofNullable(payload.getString("courtSessionDate", null)).map(LocalDate::parse).orElse(LocalDate.now());
         final UUID courtSessionId = uuidService.getCourtSessionId(courtHouseId, courtRoomId, courtSessionDate);
 
         final SessionTime sessionTime = sessionTimeRepository.findBy(courtSessionId);

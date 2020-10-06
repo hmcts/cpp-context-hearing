@@ -1,21 +1,26 @@
 package uk.gov.moj.cpp.hearing.command.sessiontime;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
+@SuppressWarnings({"squid:S1067"})
 public class RecordSessionTime {
 
     private UUID courtHouseId;
     private UUID courtRoomId;
+    private LocalDate courtSessionDate;
     private CourtSession amCourtSession;
     private CourtSession pmCourtSession;
 
     public RecordSessionTime(final UUID courtHouseId,
                              final UUID courtRoomId,
+                             LocalDate courtSessionDate,
                              final CourtSession amCourtSession,
                              final CourtSession pmCourtSession) {
         this.courtHouseId = courtHouseId;
         this.courtRoomId = courtRoomId;
+        this.courtSessionDate = courtSessionDate;
         this.amCourtSession = amCourtSession;
         this.pmCourtSession = pmCourtSession;
     }
@@ -52,6 +57,14 @@ public class RecordSessionTime {
         this.pmCourtSession = pmCourtSession;
     }
 
+    public LocalDate getCourtSessionDate() {
+        return courtSessionDate;
+    }
+
+    public void setCourtSessionDate(LocalDate courtSessionDate) {
+        this.courtSessionDate = courtSessionDate;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -63,13 +76,14 @@ public class RecordSessionTime {
         final RecordSessionTime that = (RecordSessionTime) o;
         return Objects.equals(courtHouseId, that.courtHouseId) &&
                 Objects.equals(courtRoomId, that.courtRoomId) &&
+                Objects.equals(courtSessionDate, that.courtSessionDate) &&
                 Objects.equals(amCourtSession, that.amCourtSession) &&
                 Objects.equals(pmCourtSession, that.pmCourtSession);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(courtHouseId, courtRoomId, amCourtSession, pmCourtSession);
+        return Objects.hash(courtHouseId, courtRoomId, courtSessionDate, amCourtSession, pmCourtSession);
     }
 
     @Override
@@ -77,6 +91,7 @@ public class RecordSessionTime {
         return "RecordSessionTime{" +
                 "courtHouseId=" + courtHouseId +
                 ", courtRoomId=" + courtRoomId +
+                ", courtSessionDate=" + courtSessionDate +
                 ", amCourtSession=" + amCourtSession +
                 ", pmCourtSession=" + pmCourtSession +
                 '}';

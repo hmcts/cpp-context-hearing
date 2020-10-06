@@ -9,21 +9,6 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.justice.services.common.util.UtcClock;
-import uk.gov.moj.cpp.hearing.common.SessionTimeUUIDService;
-import uk.gov.moj.cpp.hearing.persist.entity.sessiontime.SessionTime;
-import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
-import uk.gov.moj.cpp.hearing.repository.SessionTimeRepository;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.UUID;
-
-import javax.json.JsonObject;
-import javax.ws.rs.NotFoundException;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,6 +16,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.moj.cpp.hearing.common.SessionTimeUUIDService;
+import uk.gov.moj.cpp.hearing.persist.entity.sessiontime.SessionTime;
+import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
+import uk.gov.moj.cpp.hearing.repository.SessionTimeRepository;
+
+import javax.json.JsonObject;
+import javax.ws.rs.NotFoundException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.UUID;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SessionTimeServiceTest {
@@ -40,9 +37,6 @@ public class SessionTimeServiceTest {
 
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter;
-
-    @Mock
-    private UtcClock utcClock;
 
     @Mock
     private SessionTimeUUIDService uuidService;
@@ -71,7 +65,6 @@ public class SessionTimeServiceTest {
                 .add("courtHouseId", courtHouseId.toString())
                 .add("courtRoomId", courtRoomId.toString()).build();
 
-        when(utcClock.now()).thenReturn(courtSessionDate);
         when(uuidService.getCourtSessionId(courtHouseId, courtRoomId, courtSessionDate.toLocalDate())).thenReturn(courtSessionId);
         when(sessionTimeRepository.findBy(courtSessionId)).thenReturn(sessionTime);
 
@@ -86,20 +79,47 @@ public class SessionTimeServiceTest {
     }
 
     @Test
+    public void shouldFindSessionTimeByGivenDate() {
+
+        final UUID courtSessionId = randomUUID();
+        final UUID courtHouseId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+
+        final LocalDate courtSessionDate = LocalDate.of(2020, 07, 07);
+
+        final SessionTime sessionTime = buildSessionTime(courtSessionId, courtHouseId, courtRoomId, courtSessionDate, true);
+
+        final JsonObject payload = createObjectBuilder()
+                .add("courtHouseId", courtHouseId.toString())
+                .add("courtRoomId", courtRoomId.toString())
+                .add("courtSessionDate", courtSessionDate.toString()).build();
+
+        when(uuidService.getCourtSessionId(courtHouseId, courtRoomId, courtSessionDate)).thenReturn(courtSessionId);
+        when(sessionTimeRepository.findBy(courtSessionId)).thenReturn(sessionTime);
+
+        final SessionTimeResponse sessionTimeResponse = sessionTimeService.getSessionTime(payload);
+
+        assertThat(sessionTimeResponse.getCourtSessionId(), is(courtSessionId));
+        assertThat(sessionTimeResponse.getCourtHouseId(), is(courtHouseId));
+        assertThat(sessionTimeResponse.getCourtRoomId(), is(courtRoomId));
+        assertThat(sessionTimeResponse.getCourtSessionDate(), is(courtSessionDate));
+        assertThat(sessionTimeResponse.getAmCourtSession().toString(), is(sessionTime.getAmCourtSession().toString()));
+        assertThat(sessionTimeResponse.getPmCourtSession().toString(), is(sessionTime.getPmCourtSession().toString()));
+    }
+
+    @Test
     public void shouldThrowNotFoundExceptionWhenInvalidRequests() {
 
         final UUID courtSessionId = randomUUID();
 
         final UUID courtHouseId = randomUUID();
         final UUID courtRoomId = randomUUID();
-        final ZonedDateTime courtSessionDate = ZonedDateTime.now();
 
         final JsonObject payload = createObjectBuilder()
                 .add("courtHouseId", courtHouseId.toString())
                 .add("courtRoomId", courtRoomId.toString()).build();
 
-        when(utcClock.now()).thenReturn(courtSessionDate);
-        when(uuidService.getCourtSessionId(courtHouseId, courtRoomId, courtSessionDate.toLocalDate())).thenReturn(courtSessionId);
+        when(uuidService.getCourtSessionId(courtHouseId, courtRoomId, LocalDate.now())).thenReturn(courtSessionId);
         when(sessionTimeRepository.findBy(courtSessionId)).thenReturn(null);
 
         try {

@@ -17,19 +17,18 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
+import com.jayway.restassured.response.Response;
+import org.junit.Test;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
+import java.time.LocalDate;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class SessionTimeIT extends AbstractIT {
 
@@ -50,8 +49,9 @@ public class SessionTimeIT extends AbstractIT {
         final boolean chair3 = false;
         final UUID courtHouseId = randomUUID();
         final UUID courtRoomId = randomUUID();
-        saveSessionTime(courtHouseId, courtRoomId, courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3);
-        final String payload = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId),
+        final LocalDate courtSessionDate = LocalDate.of(2020, 12, 12);
+        saveSessionTime(courtHouseId, courtRoomId, courtSessionDate, courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3);
+        final String payload = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate.toString(),
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
@@ -80,7 +80,7 @@ public class SessionTimeIT extends AbstractIT {
     @Test
     public void shouldThrowExceptionWhenInvalidQueryRequest() throws Exception {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        saveSessionTime(randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), STRING.next(), STRING.next(), STRING.next(), true, false, false);
+        saveSessionTime(randomUUID(), randomUUID(), LocalDate.now(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), randomUUID(), STRING.next(), STRING.next(), STRING.next(), true, false, false);
         final String payload = poll(requestParams(getURL("hearing.query.session-time", randomUUID(), randomUUID()),
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
@@ -102,10 +102,12 @@ public class SessionTimeIT extends AbstractIT {
         final boolean chair2 = false;
         final UUID courtHouseId = randomUUID();
         final UUID courtRoomId = randomUUID();
+        final LocalDate courtSessionDate = LocalDate.now();
 
         final JsonObjectBuilder recordSessionTime1 = Json.createObjectBuilder();
         recordSessionTime1.add("courtHouseId", courtHouseId.toString());
         recordSessionTime1.add("courtRoomId", courtRoomId.toString());
+        recordSessionTime1.add("courtSessionDate", courtSessionDate.toString());
 
         final JsonObjectBuilder courtSession = Json.createObjectBuilder();
         final JsonArrayBuilder judiciaryList = Json.createArrayBuilder();
@@ -116,7 +118,7 @@ public class SessionTimeIT extends AbstractIT {
         recordSessionTime1.add("amCourtSession", courtSession);
         updateSessionTimeCommand(recordSessionTime1.build());
 
-        final String payloadAfter1 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId),
+        final String payloadAfter1 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate.toString(),
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
@@ -134,6 +136,8 @@ public class SessionTimeIT extends AbstractIT {
         final JsonObjectBuilder recordSessionTime2 = Json.createObjectBuilder();
         recordSessionTime2.add("courtHouseId", courtHouseId.toString());
         recordSessionTime2.add("courtRoomId", courtRoomId.toString());
+        recordSessionTime2.add("courtSessionDate", courtSessionDate.toString());
+
 
         final JsonObjectBuilder amCourtSession2 = Json.createObjectBuilder();
         final JsonArrayBuilder judiciaryList2 = Json.createArrayBuilder();
@@ -153,7 +157,7 @@ public class SessionTimeIT extends AbstractIT {
 
         updateSessionTimeCommand(recordSessionTime2.build());
 
-        final String payloadAfter2 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId),
+        final String payloadAfter2 = poll(requestParams(getURL("hearing.query.session-time", courtHouseId, courtRoomId)+"?courtSessionDate="+ courtSessionDate.toString(),
                 "application/vnd.hearing.query.session-time+json").withHeader(USER_ID, getLoggedInUser()))
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(
@@ -174,6 +178,7 @@ public class SessionTimeIT extends AbstractIT {
 
     private void saveSessionTime(final UUID courtHouseId,
                                  final UUID courtRoomId,
+                                 final LocalDate courtSessionDate,
                                  final UUID courtAssociateId,
                                  final UUID courtClerkId,
                                  final UUID legalAdviserId,
@@ -187,7 +192,7 @@ public class SessionTimeIT extends AbstractIT {
                                  final boolean chair2,
                                  final boolean chair3
     ) {
-        final JsonObject command = recordSessionTime(courtHouseId, courtRoomId, courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3);
+        final JsonObject command = recordSessionTime(courtHouseId, courtRoomId, courtSessionDate, courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3);
         updateSessionTimeCommand(command);
     }
 
@@ -234,7 +239,7 @@ public class SessionTimeIT extends AbstractIT {
         assertThat(judiciariesAm.getJsonObject(0).getBoolean("benchChairman"), is(chair1));
     }
     private JsonObject recordSessionTime(final UUID courtHouseId, final UUID courtRoomId,
-                                         final UUID courtAssociateId,
+                                         final LocalDate courtSessionDate, final UUID courtAssociateId,
                                          final UUID courtClerkId,
                                          final UUID legalAdviserId,
                                          final UUID jud1,
@@ -251,6 +256,7 @@ public class SessionTimeIT extends AbstractIT {
         final JsonObjectBuilder recordSessionTime = Json.createObjectBuilder();
         recordSessionTime.add("courtHouseId", courtHouseId.toString());
         recordSessionTime.add("courtRoomId", courtRoomId.toString());
+        recordSessionTime.add("courtSessionDate", courtSessionDate.toString());
         recordSessionTime.add("amCourtSession", courtSession("10:00", "13:00", courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3));
         recordSessionTime.add("pmCourtSession", courtSession("14:00", "18:00", courtAssociateId, courtClerkId, legalAdviserId, jud1, jud2, jud3, jud1Name, jud2Name, jud3Name, chair1, chair2, chair3));
 

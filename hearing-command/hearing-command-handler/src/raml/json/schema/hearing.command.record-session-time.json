@@ -102,6 +102,9 @@
     "courtRoomId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
+    "courtSessionDate": {
+      "type": "string"
+    },
     "amCourtSession": {
       "$ref": "#/definitions/courtSession"
     },

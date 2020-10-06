@@ -423,6 +423,10 @@ protocols: [ HTTP, HTTPS ]
          responseType: application/vnd.hearing.query.session-time+json
          name: hearing.query.session-time
       ...
+    queryParameters:
+      courtSessionDate:
+        description: Court session Date
+        type: string
     responses:
           200:
              description: OK

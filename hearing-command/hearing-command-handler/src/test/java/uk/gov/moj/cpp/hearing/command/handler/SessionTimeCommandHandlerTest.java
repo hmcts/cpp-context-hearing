@@ -11,6 +11,13 @@ import static uk.gov.justice.services.messaging.Envelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
 import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
 
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -32,14 +39,6 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -81,12 +80,12 @@ public class SessionTimeCommandHandlerTest {
 
         final UUID courtHouseId = randomUUID();
         final UUID courtRoomId = randomUUID();
+        final LocalDate courtSessionDate = LocalDate.now();
 
-        final RecordSessionTime payload = recordSessionTime(courtHouseId, courtRoomId);
+        final RecordSessionTime payload = recordSessionTime(courtHouseId, courtRoomId, courtSessionDate);
         final Envelope<RecordSessionTime> envelope = envelopeFrom(metadata, payload);
 
         final UUID courtSessionId = randomUUID();
-        final LocalDate courtSessionDate = now();
         when(utcClock.now()).thenReturn(ZonedDateTime.now());
         when(uuidService.getCourtSessionId(any(UUID.class), any(UUID.class), any(LocalDate.class))).thenReturn(courtSessionId);
         when(eventSource.getStreamById(courtSessionId)).thenReturn(eventStream);
@@ -102,7 +101,8 @@ public class SessionTimeCommandHandlerTest {
         Assert.assertEquals("hearing.event.session-time-recorded", actualEventProduced.metadata().name());
     }
 
-    private RecordSessionTime recordSessionTime(final UUID courtHouseId, final UUID courtRoomId) {
+    private RecordSessionTime recordSessionTime(final UUID courtHouseId, final UUID courtRoomId,
+                                                final LocalDate courtSessionDate) {
 
         final CourtSession courtSession = new CourtSession();
         courtSession.setCourtAssociateId(randomUUID());
@@ -111,7 +111,7 @@ public class SessionTimeCommandHandlerTest {
         courtSession.setEndTime("");
         courtSession.setStartTime("");
 
-        return new RecordSessionTime(courtHouseId, courtRoomId, courtSession, courtSession);
+        return new RecordSessionTime(courtHouseId, courtRoomId, courtSessionDate, courtSession, courtSession);
     }
 
 }
