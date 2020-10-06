@@ -381,3 +381,13 @@ rule "Command - API - Action - hearing.remove-targets"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action -  hearing.change-hearing-detail"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.change-hearing-detail");
+   eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end
+

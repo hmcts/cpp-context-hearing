@@ -2,8 +2,6 @@ package uk.gov.moj.cpp.hearing.command.api;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -224,6 +222,11 @@ public class HearingCommandApi {
     @Handles("hearing.book-provisional-hearing-slots")
     public void bookProvisionalHearingSlots(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.book-provisional-hearing-slots");
+    }
+
+    @Handles("hearing.change-hearing-detail")
+    public void updateHearingDetails(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope,"hearing.command.change-hearing-detail");
     }
 
     @Handles("hearing.remove-targets")
