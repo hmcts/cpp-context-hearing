@@ -88,6 +88,7 @@ import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryAdded;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
@@ -225,6 +226,11 @@ public class HearingAggregate implements Aggregate {
                 when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> hearingDelegate.handleVacatedTrialCleared()),
                 when(TargetRemoved.class).apply(targetRemoved -> hearingDelegate.handleTargetRemoved(targetRemoved.getTargetId())),
                 when(PendingNowsRequested.class).apply(nowDelegate::handlePendingNowsRequested),
+                when(MasterDefendantIdAdded.class).apply(masterDefendantIdAdded ->
+                        hearingDelegate.handleMasterDefendantIdAdded(
+                                masterDefendantIdAdded.getProsecutionCaseId(),
+                                masterDefendantIdAdded.getDefendantId(),
+                                masterDefendantIdAdded.getMasterDefendantId())),
                 otherwiseDoNothing()
         );
 
@@ -495,6 +501,10 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {
         return hearingDelegate.removeTarget(hearingId, targetId);
+    }
+
+    public Stream<Object> addMasterDefendantIdToDefendant(final UUID hearingId, final UUID prosecutionCaseId, final UUID defendantId, final UUID masterDefendantId) {
+        return hearingDelegate.addMasterDefendantIdToDefendant(hearingId, prosecutionCaseId, defendantId, masterDefendantId);
     }
 
     private boolean isTargetValid(final HearingAggregateMomento momento, final Target newTarget) {

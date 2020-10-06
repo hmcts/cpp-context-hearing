@@ -1,17 +1,21 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -57,5 +61,50 @@ public class HearingDelegateTest {
         assertThat(momento.getConvictionDates(), hasEntry(idOfFirstOffenceForFirstDefendantForFirstCase, convictionDateForFirstOffence));
     }
 
+    @Test
+    public void shouldAddMasterDefendantIdToDefendant(){
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID defendantId4 = UUID.randomUUID();
+        final UUID masterDefendantId = UUID.randomUUID();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+        momento.getHearing().setProsecutionCases(
+                asList(
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCaseId1)
+                                .withDefendants(
+                                        asList(
+                                                Defendant.defendant()
+                                                        .withId(defendantId1)
+                                                        .build(),
+                                                Defendant.defendant()
+                                                        .withId(defendantId2)
+                                                        .build()
+                                        )
+                                )
+                                .build(),
+                        ProsecutionCase.prosecutionCase()
+                                .withId(prosecutionCaseId2)
+                                .withDefendants(
+                                        asList(
+                                                Defendant.defendant()
+                                                        .withId(defendantId3)
+                                                        .build(),
+                                                Defendant.defendant()
+                                                        .withId(defendantId4)
+                                                        .build()
+                                        )
+                                )
+                                .build()));
+        hearingDelegate.handleMasterDefendantIdAdded(prosecutionCaseId1, defendantId1, masterDefendantId);
+        assertThat(momento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId(),is(masterDefendantId));
+        assertNull(momento.getHearing().getProsecutionCases().get(0).getDefendants().get(1).getMasterDefendantId());
+        assertNull(momento.getHearing().getProsecutionCases().get(1).getDefendants().get(1).getMasterDefendantId());
+        assertNull(momento.getHearing().getProsecutionCases().get(1).getDefendants().get(1).getMasterDefendantId());
+    }
 
 }

@@ -66,7 +66,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails");
+            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails", "addMasterDefendantIdToDefendant");
 
     public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -487,6 +487,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.removeTargets(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.remove-targets");
+    }
+
+    @Test
+    public void shouldPassThroughAddMasterDefendantIdRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.add-master-defendant-id-to-defendant");
+
+        hearingCommandApi.addMasterDefendantIdToDefendant(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-master-defendant-id-to-defendant");
     }
 
     private JsonEnvelope buildDummyJsonRequestEnvelopeWithName(final String name) {

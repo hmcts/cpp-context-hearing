@@ -391,3 +391,11 @@ rule "Command - API - Action -  hearing.change-hearing-detail"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.add-master-defendant-id-to-defendant"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-master-defendant-id-to-defendant");
+   eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end

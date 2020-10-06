@@ -50,6 +50,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
     private static final String ACTION_NAME_SET_TRIAL_TYPE = "hearing.set-trial-type";
     private static final String ACTION_NAME_REMOVE_TARGET = "hearing.remove-targets";
+    private static final String ACTION_NAME_MASTER_DEFENDANT_ID = "hearing.add-master-defendant-id-to-defendant";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -665,5 +666,18 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
+
+    @Test
+    public void shouldAllowSystemUserToAddMasterDefendantId() {
+        final Action action = createActionFor(ACTION_NAME_MASTER_DEFENDANT_ID);
+        given(this.userAndGroupProvider.isSystemUser(action))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+
 
 }

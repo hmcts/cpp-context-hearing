@@ -234,6 +234,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.remove-targets");
     }
 
+    @Handles("hearing.add-master-defendant-id-to-defendant")
+    public void addMasterDefendantIdToDefendant(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.add-master-defendant-id-to-defendant");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *
