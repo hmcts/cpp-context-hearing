@@ -18,10 +18,10 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
     private static final Logger LOGGER =
             LoggerFactory.getLogger(HearingDetailChangeCommandHandler.class.getName());
 
-    @Handles("hearing.command.change-hearing-detail")
+    @Handles("hearing.change-hearing-detail")
     public void changeHearingDetail(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.change-hearing-detail event received {}", envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.change-hearing-detail event received {}", envelope.toObfuscatedDebugString());
         }
 
         final HearingDetailsUpdateCommand hearingDetailsUpdateCommand = convertToObject(envelope, HearingDetailsUpdateCommand.class);
