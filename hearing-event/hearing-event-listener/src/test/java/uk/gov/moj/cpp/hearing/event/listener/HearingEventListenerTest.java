@@ -1,6 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static com.google.common.io.Resources.getResource;
 import static java.lang.Boolean.TRUE;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,6 +26,8 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.targetTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
@@ -33,6 +38,7 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
@@ -49,14 +55,17 @@ import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -64,10 +73,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+
+import javax.json.JsonObject;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
+import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -104,6 +118,11 @@ public class HearingEventListenerTest {
     private ApplicationDraftResultJPAMapper applicationDraftResultJPAMapper;
     @Mock
     private HearingApplicationRepository hearingApplicationRepository;
+
+    private static final String LAST_SHARED_DATE = "lastSharedDate";
+    private static final String DIRTY = "dirty";
+    private static final String RESULTS = "results";
+    private static final String CHILD_RESULT_LINES = "childResultLines";
 
     @Before
     public void setUp() {
@@ -173,13 +192,26 @@ public class HearingEventListenerTest {
     @Test
     public void resultsShared_shouldPersist_with_hasSharedResults_true() {
         final ResultsShared resultsShared = resultsSharedTemplate();
+        final List<uk.gov.justice.core.courts.Target> targets = asList(targetTemplate());
+        final Target target = new Target()
+                .setId(randomUUID());
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        final Defendant defendant = new Defendant();
+        final Set<Defendant> defendants = asSet(defendant);
+        prosecutionCase.setDefendants(defendants);
 
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(false)
+                .setTargets(asSet(target))
+                .setProsecutionCases(asSet(prosecutionCase))
                 .setId(resultsShared.getHearingId()
                 );
 
         when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
+        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target));
+        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
+                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
+        when(targetJPAMapper.fromJPA(asSet(target), asSet(prosecutionCase))).thenReturn(targets);
 
         hearingEventListener.resultsShared(envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared)
@@ -189,6 +221,7 @@ public class HearingEventListenerTest {
 
         assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
                 .with(Hearing::getHasSharedResults, is(true))
+                .with(Hearing::getTargets, hasSize(1))
                 .with(Hearing::getId, is(resultsShared.getHearingId()))
         );
     }
@@ -535,5 +568,23 @@ public class HearingEventListenerTest {
 
         verify(this.hearingRepository, never()).save(saveHearingCaptor.capture());
 
+    }
+
+    @Test
+    public void testDraftResults() throws IOException {
+        final ZonedDateTime sharedTime = ZonedDateTime.now(UTC);
+        final String draftResults = getDraftResultFromResource("hearing.draft-result.json");
+        final String enrichedDraftResultAsString = hearingEventListener.enrichDraftResult(draftResults, sharedTime);
+        final JsonObject enrichedDraftResultJson = new StringToJsonObjectConverter().convert(enrichedDraftResultAsString);
+        assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getString(LAST_SHARED_DATE), is(sharedTime.toLocalDate().toString()));
+        assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getBoolean(DIRTY), is(false));
+        assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getString(LAST_SHARED_DATE), is(sharedTime.toLocalDate().toString()));
+        assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
+        assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getString(LAST_SHARED_DATE), is(sharedTime.toLocalDate().toString()));
+        assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
+    }
+
+    private String getDraftResultFromResource(final String path) throws IOException {
+        return Resources.toString(getResource(path), defaultCharset());
     }
 }

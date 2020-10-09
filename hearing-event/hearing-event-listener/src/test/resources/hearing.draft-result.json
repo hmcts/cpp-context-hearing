@@ -1,0 +1,148 @@
+{
+  "targetId": "bd6b26d0-0a11-11eb-85f7-3db6c1f6ccc7",
+  "caseId": "dbed9b37-d2a4-4e70-adb5-44ec4bfe4784",
+  "caseUrn": "39GD9692220",
+  "defendantId": "cae65915-3f01-4151-bb56-94f204522dd7",
+  "masterDefendantId": "cae65915-3f01-4151-bb56-94f204522dd7",
+  "offenceId": "82e67c94-4674-41f2-9cd8-d0dc46a9f388",
+  "defendantFirstName": "Laurianne",
+  "defendantLastName": "Thiel",
+  "addMoreResults": false,
+  "requestApproval": true,
+  "results": [
+    {
+      "resultLineId": "4b7b5389-0218-4739-9cfc-7672371bf165",
+      "originalText": "cd",
+      "resultCode": "554c2622-c1cc-459e-a98d-b7f317ab065c",
+      "resultLevel": "O",
+      "isCompleted": true,
+      "ignoreResult": false,
+      "parts": [
+        {
+          "value": "Conditional discharge",
+          "type": "RESULT",
+          "state": "RESOLVED",
+          "resultChoices": [
+          ]
+        },
+        {
+          "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+          "label": "Period of conditional discharge",
+          "value": [
+            {
+              "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+              "label": "Years",
+              "value": "1",
+              "type": "INT",
+              "state": "RESOLVED",
+              "promptRef": "periodofConditionalDischarge",
+              "hidden": false,
+              "resultChoices": [
+              ],
+              "welshLabel": "Flynedd"
+            }
+          ],
+          "type": "DURATION",
+          "state": "RESOLVED",
+          "promptRef": "periodofConditionalDischarge",
+          "hidden": false,
+          "resultChoices": [
+          ]
+        }
+      ],
+      "choices": [
+        {
+          "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+          "value": [
+            {
+              "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+              "value": "1",
+              "label": "Years",
+              "type": "INT",
+              "promptRef": "periodofConditionalDischarge",
+              "hidden": false,
+              "readOnly": false,
+              "welshLabel": "Flynedd"
+            }
+          ],
+          "label": "Period of conditional discharge",
+          "type": "DURATION",
+          "required": true,
+          "promptRef": "periodofConditionalDischarge",
+          "hidden": false,
+          "readOnly": false,
+          "durationSequence": 1,
+          "children": [
+            {
+              "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+              "value": "1",
+              "label": "Years",
+              "type": "INT",
+              "promptRef": "periodofConditionalDischarge",
+              "hidden": false,
+              "readOnly": false,
+              "welshLabel": "Flynedd"
+            },
+            {
+              "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+              "label": "Months",
+              "type": "INT",
+              "promptRef": "periodofConditionalDischarge",
+              "hidden": false,
+              "readOnly": false,
+              "welshLabel": "Mis"
+            },
+            {
+              "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+              "label": "Weeks",
+              "type": "INT",
+              "promptRef": "periodofConditionalDischarge",
+              "hidden": false,
+              "readOnly": false,
+              "welshLabel": "Wythnos"
+            },
+            {
+              "code": "d3205319-84cf-4c5b-9d7a-7e4bb1865054",
+              "label": "Days",
+              "type": "INT",
+              "promptRef": "periodofConditionalDischarge",
+              "hidden": false,
+              "readOnly": false,
+              "welshLabel": "Niwrnod"
+            }
+          ]
+        }
+      ],
+      "isEditing": false,
+      "noResultFound": false,
+      "dirty": true,
+      "orderedDate": "2020-10-10",
+      "parentResultLineIds": [
+      ],
+      "childResultLines": [
+        {
+          "resultLineId": "4b7b5389-0218-4739-9cfc-7672371bf166",
+          "originalText": "cd",
+          "resultCode": "554c2622-c1cc-459e-a98d-b7f317ab065c",
+          "resultLevel": "O",
+          "isCompleted": true,
+          "ignoreResult": false,
+          "childResultLines": [
+            {
+              "resultLineId": "4b7b5389-0218-4739-9cfc-7672371bf167",
+              "originalText": "cd",
+              "resultCode": "554c2622-c1cc-459e-a98d-b7f317ab065c",
+              "resultLevel": "O",
+              "isCompleted": true,
+              "ignoreResult": false,
+              "childResultLines": []
+            }
+          ]
+        }
+      ],
+      "hasBeenGrouped": true,
+      "hideOneOfResultSelection": false
+    }
+  ],
+  "lastUpdatedAt": 1602235701058
+}
