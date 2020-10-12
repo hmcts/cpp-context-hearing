@@ -177,72 +177,8 @@ public class HearingEventListener {
                 final List<Target> targets = targetJPAMapper.fromJPA(Sets.newHashSet(listOfTargets), Sets.newHashSet(listOfProsecutionCases));
                 hearing.setHasSharedResults(true);
                 hearing.getTargets().clear();
-                targets.forEach(targetIn -> {
-                    final String draftResult = targetIn.getDraftResult();
-                    if (isNotBlank(draftResult)) {
-                        final String updatedDraftResult = enrichDraftResult(draftResult, resultsShared.getSharedTime());
-                        targetIn.setDraftResult(updatedDraftResult);
-                        hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
-                    }
-                });
+                targets.forEach(targetIn -> updateDraftResult(hearing, targetIn, resultsShared.getSharedTime()));
                 hearingRepository.save(hearing);
-            }
-        }
-    }
-
-    public String enrichDraftResult(final String draftResult, final ZonedDateTime sharedTime) {
-        final BiConsumer<JsonNode, ZonedDateTime> consumer = (node, sharedDateTime) -> {
-            final ObjectNode child = (ObjectNode) node;
-            if (node.has(LAST_SHARED_DATE)) {
-                child.remove(LAST_SHARED_DATE);
-            }
-
-            if (node.has(DIRTY)) {
-                child.remove(DIRTY);
-            }
-
-            ((ObjectNode) node).put(LAST_SHARED_DATE, sharedDateTime.toLocalDate().toString());
-            ((ObjectNode) node).put(DIRTY, Boolean.FALSE);
-        };
-
-        try {
-            final ObjectMapper mapper = new ObjectMapper();
-            final JsonFactory factory = mapper.getFactory();
-            final JsonParser parser = factory.createParser(draftResult);
-            final JsonNode actualObj = mapper.readTree(parser);
-            final ObjectNode objectnode = (ObjectNode) actualObj;
-
-            if (actualObj.has(REQUEST_APPROVAL)) {
-                objectnode.remove(REQUEST_APPROVAL);
-            }
-
-            if (actualObj.has(LAST_UPDATED_AT)) {
-                objectnode.remove(LAST_UPDATED_AT);
-            }
-
-            objectnode.put(REQUEST_APPROVAL, Boolean.FALSE);
-            objectnode.put(LAST_UPDATED_AT, now().toEpochMilli());
-
-            final JsonNode arrNode = actualObj.get(RESULTS);
-            if (arrNode.isArray()) {
-                for (final JsonNode objNode : arrNode) {
-                    consumer.accept(objNode, sharedTime);
-                    final JsonNode childResultLineNodes = objNode.get(CHILD_RESULT_LINES);
-                    enrichAllChildrenNodesWithLastSharedDate(childResultLineNodes, sharedTime, consumer);
-                }
-            }
-            return actualObj.toString();
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-    private void enrichAllChildrenNodesWithLastSharedDate(final JsonNode childResultLineNodes, final ZonedDateTime sharedTime, final BiConsumer<JsonNode, ZonedDateTime> consumer) {
-        if (nonNull(childResultLineNodes) && childResultLineNodes.isArray()) {
-            for (final JsonNode node : childResultLineNodes) {
-                consumer.accept(node, sharedTime);
-                final JsonNode childNodes = node.get(CHILD_RESULT_LINES);
-                enrichAllChildrenNodesWithLastSharedDate(childNodes, sharedTime, consumer);
             }
         }
     }
@@ -340,6 +276,74 @@ public class HearingEventListener {
             });
             hearing.setHearingDays(existingDaySet);
             hearingRepository.save(hearing);
+        }
+    }
+
+    public String enrichDraftResult(final String draftResult, final ZonedDateTime sharedTime) {
+        final BiConsumer<JsonNode, ZonedDateTime> consumer = (node, sharedDateTime) -> {
+            final ObjectNode child = (ObjectNode) node;
+            if (node.has(LAST_SHARED_DATE)) {
+                child.remove(LAST_SHARED_DATE);
+            }
+
+            if (node.has(DIRTY)) {
+                child.remove(DIRTY);
+            }
+
+            ((ObjectNode) node).put(LAST_SHARED_DATE, sharedDateTime.toLocalDate().toString());
+            ((ObjectNode) node).put(DIRTY, Boolean.FALSE);
+        };
+
+        try {
+            final ObjectMapper mapper = new ObjectMapper();
+            final JsonFactory factory = mapper.getFactory();
+            final JsonParser parser = factory.createParser(draftResult);
+            final JsonNode actualObj = mapper.readTree(parser);
+            final ObjectNode objectnode = (ObjectNode) actualObj;
+
+            if (actualObj.has(REQUEST_APPROVAL)) {
+                objectnode.remove(REQUEST_APPROVAL);
+            }
+
+            if (actualObj.has(LAST_UPDATED_AT)) {
+                objectnode.remove(LAST_UPDATED_AT);
+            }
+
+            objectnode.put(REQUEST_APPROVAL, Boolean.FALSE);
+            objectnode.put(LAST_UPDATED_AT, now().toEpochMilli());
+
+            final JsonNode arrNode = actualObj.get(RESULTS);
+            if (nonNull(arrNode) && arrNode.isArray()) {
+                for (final JsonNode objNode : arrNode) {
+                    consumer.accept(objNode, sharedTime);
+                    final JsonNode childResultLineNodes = objNode.get(CHILD_RESULT_LINES);
+                    enrichAllChildrenNodesWithLastSharedDate(childResultLineNodes, sharedTime, consumer);
+                }
+            }
+            return actualObj.toString();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+
+    private void enrichAllChildrenNodesWithLastSharedDate(final JsonNode childResultLineNodes, final ZonedDateTime sharedTime, final BiConsumer<JsonNode, ZonedDateTime> consumer) {
+        if (nonNull(childResultLineNodes) && childResultLineNodes.isArray()) {
+            for (final JsonNode node : childResultLineNodes) {
+                consumer.accept(node, sharedTime);
+                final JsonNode childNodes = node.get(CHILD_RESULT_LINES);
+                enrichAllChildrenNodesWithLastSharedDate(childNodes, sharedTime, consumer);
+            }
+        }
+    }
+
+    private void updateDraftResult(Hearing hearing, Target targetIn, ZonedDateTime sharedDateTime) {
+        final String draftResult = targetIn.getDraftResult();
+        if (isNotBlank(draftResult)) {
+            final String updatedDraftResult = enrichDraftResult(draftResult, sharedDateTime);
+            if(isNotBlank(updatedDraftResult)) {
+                targetIn.setDraftResult(updatedDraftResult);
+                hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
+            }
         }
     }
 }

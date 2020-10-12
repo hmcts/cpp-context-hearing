@@ -167,7 +167,7 @@ public class TestTemplates {
         return Target.target()
                 .withHearingId(randomUUID())
                 .withDefendantId(randomUUID())
-                .withDraftResult(STRING.next())
+                .withDraftResult("{}")
                 .withOffenceId(randomUUID())
                 .withTargetId(randomUUID())
                 .withResultLines(asList(
