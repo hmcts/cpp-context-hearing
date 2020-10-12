@@ -1,0 +1,47 @@
+{
+  "hearing": {
+    "id": "HEARING_ID",
+    "type": {
+      "description": "SibVZ",
+      "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+    },
+    "courtCentre": {
+      "address": {
+        "address1": "OBbDqkGkKvlYAlAEjW",
+        "address2": "RCjjxd",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "AA11 1AA"
+      },
+      "id": "COURTCENTRE_ID",
+      "name": "vAbFNgGQbTxZOivcFITQorEpVThvMVrm",
+      "roomId": "f1ead1d2-4b26-3230-b781-508d6aaafd26",
+      "roomName": "RNjspDgocPvq"
+    },
+    "jurisdictionType": "MAGISTRATES",
+    "hearingLanguage": "ENGLISH",
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 35,
+        "listingSequence": 12,
+        "sittingDay": "2019-08-01T09:00:00.000Z"
+      }
+    ],
+    "judiciary": [
+      {
+        "firstName": "hQIEsMcod",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "JUDICIAL_ID",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "dc5c768b-5dc7-3a08-8531-934b34601977",
+          "judiciaryType": "MCKCsjbGOX"
+        },
+        "lastName": "oYxNmWlN",
+        "title": "Miss",
+        "userId": "USER_ID"
+      }
+    ]
+  }
+}

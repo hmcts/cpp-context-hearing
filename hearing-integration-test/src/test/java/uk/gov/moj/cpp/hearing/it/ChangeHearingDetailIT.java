@@ -1,12 +1,17 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtCentre;
@@ -17,18 +22,67 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.UUID;
 
+import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class ChangeHearingDetailIT extends AbstractIT {
+
+    @Test
+    public void shouldUpdateHearingByCallingEndpointDirectly() throws Exception {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        final UUID newCourtCentreId = randomUUID();
+        final UUID newJudicialId = randomUUID();
+        final UUID newUserId = randomUUID();
+
+        sendchangeHearingDetailCommand(hearingOne, newCourtCentreId, newJudicialId, newUserId);
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                .with(CourtCentre::getId, is(newCourtCentreId))
+                        )
+                        .with(Hearing::getJudiciary, first(isBean(JudicialRole.class)
+                                .with(JudicialRole::getJudicialId, is(newJudicialId))
+                                .with(JudicialRole::getUserId, is(newUserId))
+                                .with(JudicialRole::getUserId, not(hearingOne.getHearing().getJudiciary().get(0).getUserId()))
+                                .with(JudicialRole::getJudicialId, not(hearingOne.getHearing().getJudiciary().get(0).getJudicialId()))
+                        ))
+                ));
+    }
+
+
+    private void sendchangeHearingDetailCommand(final CommandHelpers.InitiateHearingCommandHelper hearing, final UUID courtCentreId, final UUID judicialId, final UUID userId) throws IOException {
+        final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        final String eventPayloadString = getStringFromResource("hearing.change-hearing-detail.json")
+                .replaceAll("HEARING_ID", hearing.getHearing().getId().toString())
+                .replaceAll("COURTCENTRE_ID", courtCentreId.toString())
+                .replaceAll("JUDICIAL_ID", judicialId.toString())
+                .replaceAll("USER_ID", userId.toString());
+
+        makeCommand(getRequestSpec(), "hearing.change-hearing-detail")
+                .ofType("application/vnd.hearing.change-hearing-detail+json")
+                .withArgs(hearing.getHearing().getId())
+                .withPayload(eventPayloadString)
+                .executeSuccessfully();
+
+
+    }
 
     @Test
     public void shouldUpdateHearing() throws Exception {
@@ -96,7 +150,7 @@ public class ChangeHearingDetailIT extends AbstractIT {
                                 .with(JudicialRole::getFirstName, is(hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getFirstName()))
                                 .with(JudicialRole::getMiddleName, is(hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getMiddleName()))
                                 .with(JudicialRole::getLastName, is(hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getLastName()))
-                                .withValue(jr->jr.getJudicialRoleType().getJudiciaryType(), hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getJudicialRoleType().getJudiciaryType())
+                                .withValue(jr -> jr.getJudicialRoleType().getJudiciaryType(), hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getJudicialRoleType().getJudiciaryType())
                                 .with(JudicialRole::getIsDeputy, is(hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getIsDeputy()))
                                 .with(JudicialRole::getIsBenchChairman, is(hearingDetailsUpdateCommand.getHearing().getJudiciary().get(0).getIsBenchChairman()))
                         ))

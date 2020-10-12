@@ -226,7 +226,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.change-hearing-detail")
     public void updateHearingDetails(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope,"hearing.command.change-hearing-detail");
+        sendEnvelopeWithName(envelope,"hearing.change-hearing-detail");
     }
 
     @Handles("hearing.remove-targets")
