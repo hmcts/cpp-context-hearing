@@ -4,7 +4,14 @@ import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
 import static uk.gov.justice.core.courts.Target.target;
 
-import uk.gov.justice.core.courts.*;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -186,7 +193,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withSharedTime(sharedTime)
                 .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants())
-                .withHearing(nullifyTheEmptyCaseMarkers(this.momento.getHearing()))
+                .withHearing(this.momento.getHearing())
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(new ArrayList<>(momento.getSavedTargets().values()))
                 .withCompletedResultLinesStatus(this.momento.getCompletedResultLinesStatus());
@@ -195,17 +202,7 @@ public class ResultsSharedDelegate implements Serializable {
         }
         return Stream.concat(enrichHearing(resultLines), Stream.of(builder.build()));
     }
-    public Hearing nullifyTheEmptyCaseMarkers(final Hearing hearing) {
-        if( null != hearing && null != hearing.getProsecutionCases()) {
-                hearing.getProsecutionCases().stream().forEach(x -> {
-                    if(null != x.getCaseMarkers() && x.getCaseMarkers().isEmpty()) {
-                        x.setCaseMarkers(null);
-                    }
-                });
-        }
-        return hearing;
 
-    }
     private Stream<Object> enrichHearing(final List<SharedResultsCommandResultLine> resultLines) {
         setSharedResults(resultLines);
         updateCounsels();
