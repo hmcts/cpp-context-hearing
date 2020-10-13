@@ -79,6 +79,7 @@ public class ChangeHearingDetailIT extends AbstractIT {
                 .ofType("application/vnd.hearing.change-hearing-detail+json")
                 .withArgs(hearing.getHearing().getId())
                 .withPayload(eventPayloadString)
+                .withCppUserId(USER_ID_VALUE_AS_ADMIN)
                 .executeSuccessfully();
 
 
