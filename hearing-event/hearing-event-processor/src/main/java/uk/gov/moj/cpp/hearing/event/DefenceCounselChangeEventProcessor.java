@@ -6,7 +6,6 @@ import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
-import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
@@ -20,9 +19,6 @@ public class DefenceCounselChangeEventProcessor {
     private static final Logger LOGGER = getLogger(DefenceCounselChangeEventProcessor.class);
 
     @Inject
-    private Enveloper enveloper;
-
-    @Inject
     private Sender sender;
 
     @Handles("hearing.defence-counsel-change-ignored")
@@ -33,6 +29,28 @@ public class DefenceCounselChangeEventProcessor {
 
         sender.send(envelop(event.payloadAsJsonObject())
                 .withName("public.hearing.defence-counsel-change-ignored")
+                .withMetadataFrom(event));
+    }
+
+    @Handles("hearing.defence-counsel-updated")
+    public void publishPublicDefenceCounselUpdatedEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.defence-counsel-updated event received {}", event.toObfuscatedDebugString());
+        }
+
+        sender.send(envelop(event.payloadAsJsonObject())
+                .withName("public.hearing.defence-counsel-updated")
+                .withMetadataFrom(event));
+    }
+
+    @Handles("hearing.defence-counsel-removed")
+    public void publishPublicDefenceCounselRemovedEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.defence-counsel-removed event received {}", event.toObfuscatedDebugString());
+        }
+
+        sender.send(envelop(event.payloadAsJsonObject())
+                .withName("public.hearing.defence-counsel-removed")
                 .withMetadataFrom(event));
     }
 

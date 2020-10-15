@@ -193,9 +193,21 @@ subscriptions_descriptor:
         - name: hearing.defence-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json
 
-      # Prosecution Counsel
+        - name: hearing.defence-counsel-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-removed.json
+
+        - name: hearing.defence-counsel-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-updated.json
+
+        # Prosecution Counsel
         - name: hearing.prosecution-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-added.json
+
+        - name: hearing.prosecution-counsel-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-removed.json
+
+        - name: hearing.prosecution-counsel-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-updated.json
 
       # Defence Counsel Change Ignored
         - name: hearing.defence-counsel-change-ignored

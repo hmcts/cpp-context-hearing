@@ -2,10 +2,12 @@ package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.core.Is.is;
@@ -34,14 +36,11 @@ import uk.gov.justice.hearing.courts.UpdateProsecutionCounsel;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.steps.data.HearingEventDefinitionData;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import com.jayway.restassured.path.json.JsonPath;
@@ -85,7 +84,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addProsecutionCounsel_shouldAdd() throws Exception {
+    public void addProsecutionCounsel_shouldAdd() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -156,27 +155,53 @@ public class ProsecutionCounselIT extends AbstractIT {
     }
 
     @Test
-    public void removeProsecutionCounsel_shouldRemove() throws Exception {
+    public void removeProsecutionCounsel_shouldRemove() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
+        final Utilities.EventListener publicProsecutionCounselAdded = listenFor("public.hearing.prosecution-counsel-added")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
+
+        final Utilities.EventListener publicProsecutionCounselRemoved = listenFor("public.hearing.prosecution-counsel-removed")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
+
         ProsecutionCounsel firstProsecutionCounsel = createFirstProsecutionCounsel(hearingOne);
-        //remove first PC
+
+        publicProsecutionCounselAdded.waitFor();
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearing.prosecutionCounsels", hasSize(1)))));
+
+
+        //remove PC
         UseCases.removeProsecutionCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveProsecutionCounsel(hearingOne.getHearingId(), firstProsecutionCounsel.getId())
         );
-        createSecondProsecutionCounsel(hearingOne);
 
+        publicProsecutionCounselRemoved.waitFor();
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearing.prosecutionCounsels", empty()))));
 
     }
 
     @Test
-    public void updateProsecutionCounsel_shouldUpdate() throws Exception {
+    public void updateProsecutionCounsel_shouldUpdate() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        ProsecutionCounsel firstProsecutionCounsel = createFirstProsecutionCounsel(hearingOne);
+        final Utilities.EventListener publicProsecutionCounselUpdated = listenFor("public.hearing.prosecution-counsel-updated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
 
+        ProsecutionCounsel firstProsecutionCounsel = createFirstProsecutionCounsel(hearingOne);
 
         //Updating Prosecution counsel
         firstProsecutionCounsel.setFirstName("DummyFirstName");
@@ -184,13 +209,16 @@ public class ProsecutionCounselIT extends AbstractIT {
         firstProsecutionCounsel.setStatus("DummyStatus");
         firstProsecutionCounsel.setTitle("UpdateTitle");
         firstProsecutionCounsel.setMiddleName("DummyMiddleName");
-        firstProsecutionCounsel.setAttendanceDays(Arrays.asList(LocalDate.now().plusDays(1)));
+        firstProsecutionCounsel.setAttendanceDays(singletonList(LocalDate.now().plusDays(1)));
 
         final UpdateProsecutionCounsel firstProsecutionCounselUpdateCommand = UseCases.updateProsecutionCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateProsecutionCounselCommandTemplate(hearingOne.getHearingId(), firstProsecutionCounsel)
         );
 
         ProsecutionCounsel firstProsecutionCounselUpdated = firstProsecutionCounselUpdateCommand.getProsecutionCounsel();
+
+        publicProsecutionCounselUpdated.waitFor();
+
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
@@ -211,7 +239,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     }
 
     @Test
-    public void testUpdateProsecutionCounselWhenProsecutionCounselIsRemovedThenProsecutionCounselShouldNotBeUpdated() throws Exception {
+    public void testUpdateProsecutionCounselWhenProsecutionCounselIsRemovedThenProsecutionCounselShouldNotBeUpdated() {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         ProsecutionCounsel firstProsecutionCounsel = createFirstProsecutionCounsel(hearingOne);
@@ -265,7 +293,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addProsecutionCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() throws Exception {
+    public void addProsecutionCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -273,7 +301,7 @@ public class ProsecutionCounselIT extends AbstractIT {
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 
-        final LogEventCommand logEventCommand = logEvent(randomUUID(),requestSpec, asDefault(), hearingOne.it(),
+        final LogEventCommand logEventCommand = logEvent(randomUUID(), requestSpec, asDefault(), hearingOne.it(),
                 hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING);
 
         //Add Prosecution Counsel
@@ -292,7 +320,7 @@ public class ProsecutionCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addProsecutionCounsel_failedCheckin_SJPCases_wherePARisPopulated() throws Exception {
+    public void addProsecutionCounsel_failedCheckin_SJPCases_wherePARisPopulated() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
@@ -318,10 +346,6 @@ public class ProsecutionCounselIT extends AbstractIT {
 
         assertThat(jsonPath.getString("caseURN"), is(prosecutionAuthorityReference));
         assertThat(caseURN, isEmptyOrNullString());
-    }
-
-    private HearingEventDefinitionData hearingDefinitionData(final List<HearingEventDefinition> hearingEventDefinitions) {
-        return new HearingEventDefinitionData(randomUUID(), hearingEventDefinitions);
     }
 
 }

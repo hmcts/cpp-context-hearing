@@ -100,6 +100,12 @@ subscriptions_descriptor:
         - name: public.hearing.defence-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json
 
+        - name: public.hearing.defence-counsel-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-removed.json
+
+        - name: public.hearing.defence-counsel-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-updated.json
+
       # Defence Counsel Change Ignored
         - name: public.hearing.defence-counsel-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-defence-counsel-change-ignored.json
@@ -108,9 +114,16 @@ subscriptions_descriptor:
         - name: public.hearing.prosecution-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-added.json
 
+        - name: public.hearing.prosecution-counsel-removed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-removed.json
+
+        - name: public.hearing.prosecution-counsel-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-updated.json
+
       # Prosecution Counsel Change Ignored
         - name: public.hearing.prosecution-counsel-change-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-prosecution-counsel-change-ignored.json
+
       # NCES Notification
         - name: public.hearing.event.nces-notification-requested
           schema_uri: http://justice.gov.uk/hearing/json/schema/event/public-nces-notification-requested.json

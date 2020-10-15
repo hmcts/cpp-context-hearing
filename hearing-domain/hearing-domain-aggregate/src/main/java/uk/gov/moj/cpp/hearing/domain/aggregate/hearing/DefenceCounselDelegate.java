@@ -33,6 +33,7 @@ public class DefenceCounselDelegate implements Serializable {
         final DefenceCounsel defenceCounsel = defenceCounselUpdated.getDefenceCounsel();
         this.momento.getDefenceCounsels().put(defenceCounsel.getId(), defenceCounsel);
     }
+
     public Stream<Object> addDefenceCounsel(final DefenceCounsel defenceCounsel, final UUID hearingId, boolean isHearingEnded) {
         final Hearing hearing = this.momento.getHearing();
 

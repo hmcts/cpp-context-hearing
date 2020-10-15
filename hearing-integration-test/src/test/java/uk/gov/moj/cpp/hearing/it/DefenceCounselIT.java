@@ -7,6 +7,7 @@ import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.isEmptyOrNullString;
 import static org.hamcrest.core.Is.is;
@@ -81,7 +82,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addDefenceCounsel_shouldAdd() throws Exception {
+    public void addDefenceCounsel_shouldAdd() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -123,7 +124,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void removeDefenceCounsel_shouldRemove() throws Exception {
+    public void removeDefenceCounsel_shouldRemove() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -146,14 +147,30 @@ public class DefenceCounselIT extends AbstractIT {
                                 withJsonPath("$.hearing.defenceCounsels.[0].defendants.[0]", is(firstDefenceCounsel.getDefendants().get(0).toString()))
                         )));
 
+        final Utilities.EventListener publicDefenceCounselRemoved = listenFor("public.hearing.defence-counsel-removed")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
+
         //remove first DC
         UseCases.removeDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 new RemoveDefenceCounsel(hearingOne.getHearingId(), firstDefenceCounsel.getId())
         );
+
+        publicDefenceCounselRemoved.waitFor();
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearing.defenceCounsels", empty()))));
+
+        // add another defence counsel.
         final AddDefenceCounsel secondDefenceCounselCommand = UseCases.addDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 addDefenceCounselCommandTemplate(hearingOne.getHearingId())
         );
+
         DefenceCounsel secondDefenceCounsel = secondDefenceCounselCommand.getDefenceCounsel();
+
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
                 .until(status().is(OK),
@@ -173,9 +190,12 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void updateDefenceCounsel_shouldUpdate() throws Exception {
+    public void updateDefenceCounsel_shouldUpdate() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final Utilities.EventListener publicDefenceCounselUpdated = listenFor("public.hearing.defence-counsel-updated")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
 
         DefenceCounsel firstDefenceCounsel = createFirstDefenceCounsel(hearingOne);
 
@@ -191,6 +211,8 @@ public class DefenceCounselIT extends AbstractIT {
         final UpdateDefenceCounsel firstDefenceCounselReAddCommand = UseCases.updateDefenceCounsel(getRequestSpec(), hearingOne.getHearingId(),
                 updateDefenceCounselCommandTemplate(hearingOne.getHearingId(), firstDefenceCounsel)
         );
+
+        publicDefenceCounselUpdated.waitFor();
 
         DefenceCounsel firstDefenceCounselUpdated = firstDefenceCounselReAddCommand.getDefenceCounsel();
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
@@ -213,7 +235,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void testUpdateDefenceCounselWhenDefenceCounselIsRemovedThenDefenceCounselShouldNotBeUpdated() throws Exception {
+    public void testUpdateDefenceCounselWhenDefenceCounselIsRemovedThenDefenceCounselShouldNotBeUpdated() {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         DefenceCounsel firstDefenceCounsel = createFirstDefenceCounsel(hearingOne);
@@ -278,7 +300,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void testUpdateDefenceCounselWithPreviouslySetValues() throws Exception {
+    public void testUpdateDefenceCounselWithPreviouslySetValues() {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         DefenceCounsel firstDefenceCounsel = createFirstDefenceCounsel(hearingOne);
@@ -340,7 +362,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addDefenceCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() throws Exception {
+    public void addDefenceCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -367,7 +389,7 @@ public class DefenceCounselIT extends AbstractIT {
     }
 
     @Test
-    public void addDefenceCounsel_failedCheckin_SJPCases_wherePARisPopulated() throws Exception {
+    public void addDefenceCounsel_failedCheckin_SJPCases_wherePARisPopulated() {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
@@ -375,7 +397,7 @@ public class DefenceCounselIT extends AbstractIT {
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 
-        final LogEventCommand logEventCommand = logEvent(randomUUID(),requestSpec, asDefault(), hearingOne.it(),
+        final LogEventCommand logEventCommand = logEvent(randomUUID(), requestSpec, asDefault(), hearingOne.it(),
                 hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING);
 
         //Add Defence Counsel
