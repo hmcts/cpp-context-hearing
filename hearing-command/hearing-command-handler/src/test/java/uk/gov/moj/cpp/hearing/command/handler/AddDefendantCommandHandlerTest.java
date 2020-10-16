@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.handler;//package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.lang.String.format;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.core.AllOf.allOf;
 import static org.junit.Assert.assertThat;
@@ -17,6 +18,8 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 
+import org.junit.Rule;
+import org.junit.rules.ExpectedException;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -29,6 +32,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.exception.HearingNotFoundException;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
@@ -79,6 +83,9 @@ public class AddDefendantCommandHandlerTest {
 
     @InjectMocks
     private AddDefendantCommandHandler addDefendantCommandHandler;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setup() {
@@ -218,6 +225,37 @@ public class AddDefendantCommandHandlerTest {
                         payloadIsJson(allOf(withJsonPath("$.hearingId", is(arbitraryHearingObject.getHearingId().toString())),
                                 withJsonPath("$.defendant.id", is(arbitraryDefendant.getId().toString())))))
         ));
+    }
+
+    @Test
+    public void shouldNotAddDefendantWhenThereAreNoHearingsAvailableForAssociatedProsecutionCase() throws EventStreamException {
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
+        CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            Hearing hearing = arbitraryHearingObject.getHearing();
+            HearingDay hearingDay = hearing.getHearingDays().get(0);
+            hearingDay.setSittingDay(ZonedDateTime.now());
+            apply(new HearingInitiated(hearing));
+        }};
+        final CaseAggregate caseAggregate = new CaseAggregate();
+        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
+        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+        when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
+        when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
+
+        JsonObject payload = Json.createObjectBuilder()
+                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        expectedException.expect(HearingNotFoundException.class);
+        expectedException.expectMessage(format("Defendant '%s' can't be added to Prosecution Case '%s' ", arbitraryDefendant.getId(), arbitraryDefendant.getProsecutionCaseId()));
+        
+        addDefendantCommandHandler.addDefendant(envelope);
+
     }
 
     @SuppressWarnings("unchecked")
