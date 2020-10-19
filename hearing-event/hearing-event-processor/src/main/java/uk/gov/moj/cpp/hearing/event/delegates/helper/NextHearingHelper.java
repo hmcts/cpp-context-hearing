@@ -1,6 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
-import static com.google.common.base.CharMatcher.DIGIT;
+import static com.google.common.base.CharMatcher.digit;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 import static java.lang.String.format;
@@ -83,6 +83,7 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("squid:CallToDeprecatedMethod")
 public class NextHearingHelper {
 
     private static final String FAILED_TO_CREATE_NEXT_HEARING_MESSAGE = "Failed to create next hearing for result definition id=%s";
@@ -360,13 +361,13 @@ public class NextHearingHelper {
 
             Stream.of(durationValue.split(COMMA_REGEX)).map(String::toLowerCase).collect(toList()).forEach(durationElement -> {
                 if (durationElement.contains(DurationElements.WEEKS.name().toLowerCase())) {
-                    estimateMinutes[0] += parseInt(DIGIT.retainFrom(durationElement)) * DAYS_IN_A_WEEK * MINUTES_IN_A_DAY;
+                    estimateMinutes[0] += parseInt(digit().retainFrom(durationElement)) * DAYS_IN_A_WEEK * MINUTES_IN_A_DAY;
                 } else if (durationElement.contains(DAYS.name().toLowerCase())) {
-                    estimateMinutes[0] += parseInt(DIGIT.retainFrom(durationElement)) * MINUTES_IN_A_DAY;
+                    estimateMinutes[0] += parseInt(digit().retainFrom(durationElement)) * MINUTES_IN_A_DAY;
                 } else if (durationElement.contains(HOURS.name().toLowerCase())) {
-                    estimateMinutes[0] += parseLong(DIGIT.retainFrom(durationElement)) * MINUTES_IN_HOUR;
+                    estimateMinutes[0] += parseLong(digit().retainFrom(durationElement)) * MINUTES_IN_HOUR;
                 } else if (durationElement.contains(MINUTES.name().toLowerCase())) {
-                    estimateMinutes[0] += parseLong(DIGIT.retainFrom(durationElement));
+                    estimateMinutes[0] += parseLong(digit().retainFrom(durationElement));
                 }
             });
         }

@@ -6,6 +6,8 @@ import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -39,6 +41,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.json.JsonObject;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -56,6 +60,11 @@ public class TimelineHearingSummaryHelperTest {
     private HearingType hearingType;
     private CourtCentre courtCentre;
     private CrackedIneffectiveTrial crackedIneffectiveTrial;
+    private JsonObject allCourtRooms;
+    private String courtCentreName;
+    private String courtRoomName;
+    private UUID courtCentreId;
+    private UUID courtRoomId;
     @InjectMocks
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     private Person person;
@@ -67,13 +76,19 @@ public class TimelineHearingSummaryHelperTest {
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
     @Before
-    public void setup() {
+    public void setup() throws IOException {
+        courtCentreId = UUID.randomUUID();
+        courtRoomId = UUID.randomUUID();
+        courtCentreName = STRING.next();
+        courtRoomName = STRING.next();
         hearing = new Hearing();
         hearingDay = new HearingDay();
         final ZonedDateTime zonedDateTime = now().minusYears(1);
         hearingDay.setDate(zonedDateTime.toLocalDate());
         hearingDay.setDateTime(zonedDateTime);
         hearingDay.setListedDurationMinutes(new Random().nextInt());
+        hearingDay.setCourtCentreId(courtCentreId);
+        hearingDay.setCourtRoomId(courtRoomId);
         hearing.setHearingDays(of(hearingDay));
         hearingType = new HearingType();
         hearingType.setDescription(STRING.next());
@@ -105,18 +120,19 @@ public class TimelineHearingSummaryHelperTest {
         hearing.setProsecutionCases(of(prosecutionCase));
         crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
         applicationId = UUID.randomUUID();
+        allCourtRooms = buildCourtRoomsJson();
     }
 
     @Test
     public void shouldCreateTimelineHearingSummary() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
-        assertThat(timeLineHearingSummary.getCourtHouse(), is(hearing.getCourtCentre().getName()));
-        assertThat(timeLineHearingSummary.getCourtRoom(), is(hearing.getCourtCentre().getRoomName()));
+        assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
+        assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
         assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
@@ -130,15 +146,15 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId);
 
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
-        assertThat(timeLineHearingSummary.getCourtHouse(), is(hearing.getCourtCentre().getName()));
-        assertThat(timeLineHearingSummary.getCourtRoom(), is(hearing.getCourtCentre().getRoomName()));
+        assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
+        assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
@@ -154,7 +170,7 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldHandleEmptyFields() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null));
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null),createObjectBuilder().build());
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
@@ -162,7 +178,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldHandleEmptyFields2() {
         prosecutionCase = new ProsecutionCase();
         hearing.setProsecutionCases(of(prosecutionCase));
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
@@ -170,7 +186,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateEffectiveOutcomeInTimelineHearingSummary() {
         hearing.setIsEffectiveTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null);
         assertThat(timeLineHearingSummary.getOutcome(), is("Effective"));
     }
 
@@ -178,7 +194,35 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateVacatedOutcomeInTimelineHearingSummary() {
         hearing.setIsVacatedTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null);
         assertThat(timeLineHearingSummary.getOutcome(), is("Vacated"));
+    }
+
+    private JsonObject buildCourtRoomsJson() {
+        return createObjectBuilder()
+                .add("organisationunits", createArrayBuilder()
+                        .add(createObjectBuilder()
+                                .add("id", "60853c27-8a9d-349a-aeb5-7f5049a774dd")
+                                .add("oucodeL3Name", "Dummy Court Centre Name")
+                                .add("courtrooms", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", "67348d5d-4742-3ba6-9e9b-29a7595b5c3e")
+                                                .add("courtroomName", "Dummy Court Room 1")))
+                                .build())
+                        .add(createObjectBuilder()
+                            .add("id", courtCentreId.toString())
+                            .add("oucodeL3Name", courtCentreName)
+                            .add("courtrooms", createArrayBuilder()
+                                    .add(createObjectBuilder()
+                                            .add("id", courtRoomId.toString())
+                                            .add("courtroomName", "Dummy Court Room 2")))
+                            .add("courtrooms", createArrayBuilder()
+                                    .add(createObjectBuilder()
+                                            .add("id", courtRoomId.toString())
+                                            .add("courtroomName", courtRoomName)))
+                            .build())
+                        .build()
+                )
+                .build();
     }
 }

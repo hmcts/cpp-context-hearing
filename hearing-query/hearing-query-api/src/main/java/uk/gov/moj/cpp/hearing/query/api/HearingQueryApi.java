@@ -155,14 +155,18 @@ public class HearingQueryApi {
     @Handles("hearing.case.timeline")
     public JsonEnvelope getCaseTimeline(final JsonEnvelope query) {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
-        final Envelope<Timeline> envelope = this.hearingQueryView.getTimeline(query, crackedIneffectiveVacatedTrialTypes);
+        final JsonObject allCourtRooms = referenceDataService.getAllCourtRooms(query);
+
+        final Envelope<Timeline> envelope = this.hearingQueryView.getTimeline(query, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
         return getJsonEnvelope(envelope);
     }
 
     @Handles("hearing.application.timeline")
     public JsonEnvelope getApplicationTimeline(final JsonEnvelope query) {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
-        final Envelope<Timeline> envelope = this.hearingQueryView.getTimelineByApplicationId(query, crackedIneffectiveVacatedTrialTypes);
+        final JsonObject allCourtRooms = referenceDataService.getAllCourtRooms(query);
+
+        final Envelope<Timeline> envelope = this.hearingQueryView.getTimelineByApplicationId(query, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
         return getJsonEnvelope(envelope);
     }
 

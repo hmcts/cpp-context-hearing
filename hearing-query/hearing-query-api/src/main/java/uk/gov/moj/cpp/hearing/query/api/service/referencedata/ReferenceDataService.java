@@ -9,6 +9,7 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -20,9 +21,14 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ReferenceDataService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceDataService.class);
     private static final String GET_ALL_CRACKED_INEFFECTIVE_TRIAL_TYPES = "referencedata.query.cracked-ineffective-vacated-trial-types";
     private static final String XHIBIT_EVENT_MAPPINGS = "referencedata.query.cp-xhibit-hearing-event-mappings";
+    private static final String REFERENCEDATA_QUERY_COURT_CENTRES = "referencedata.query.courtrooms";
 
     @Inject
     @ServiceComponent(QUERY_API)
@@ -57,6 +63,21 @@ public class ReferenceDataService {
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, Json.createObjectBuilder().build());
 
         return requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
+    }
+
+    public JsonObject getAllCourtRooms(final JsonEnvelope eventEnvelope) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Attempting to get all court rooms...");
+        }
+
+        final JsonObject payload = createObjectBuilder()
+                .build();
+
+        final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(payload)
+                .withName(REFERENCEDATA_QUERY_COURT_CENTRES)
+                .withMetadataFrom(eventEnvelope);
+
+        return requester.requestAsAdmin(requestEnvelope, JsonObject.class).payload();
     }
 
 }

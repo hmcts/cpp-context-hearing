@@ -32,6 +32,8 @@ public class HearingDayJPAMapper {
         hearingDay.setListingSequence(pojo.getListingSequence());
         hearingDay.setSittingDay(pojo.getSittingDay());
         hearingDay.setIsCancelled(pojo.getIsCancelled());
+        hearingDay.setCourtCentreId(pojo.getCourtCentreId());
+        hearingDay.setCourtRoomId(pojo.getCourtRoomId());
         return hearingDay;
     }
 
@@ -44,6 +46,8 @@ public class HearingDayJPAMapper {
                 .withListingSequence(entity.getListingSequence())
                 .withSittingDay(entity.getSittingDay())
                 .withIsCancelled(entity.getIsCancelled())
+                .withCourtCentreId(entity.getCourtCentreId())
+                .withCourtRoomId(entity.getCourtRoomId())
                 .build();
     }
 

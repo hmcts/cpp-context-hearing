@@ -1,7 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toSet;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
@@ -22,6 +25,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
@@ -38,6 +42,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
@@ -49,6 +54,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -870,7 +876,7 @@ public class HearingAggregateTest {
 
         hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
 
-        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -903,4 +909,36 @@ public class HearingAggregateTest {
         assertThat(slots.get(1).getCourtScheduleId(), is(courtScheduleId2));
     }
 
+
+    @Test
+    public void shouldCorrectHearingDaysWithoutCourtCentreIfNotAlreadySet() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        initiateHearingCommand
+                .getHearing()
+                .getHearingDays()
+                .forEach(hearingDay -> {
+                    hearingDay.setCourtRoomId(null);
+                    hearingDay.setCourtCentreId(null);
+                });
+
+        HearingAggregate hearingAggregate = new HearingAggregate();
+
+        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+
+        assertThat(result.getHearing(), is(initiateHearingCommand.getHearing()));
+
+        final HearingDaysWithoutCourtCentreCorrected event = new HearingDaysWithoutCourtCentreCorrected();
+        event.setId(randomUUID());
+        final UUID courtCentreId = randomUUID();
+        final UUID courtRoomId = randomUUID();
+
+        HearingDay hearingDay = new HearingDay(courtCentreId, courtRoomId, false,0, 0, ZonedDateTime.now());
+        event.setHearingDays(asList(hearingDay));
+        hearingAggregate.apply(event);
+
+        final List<HearingDay> actualHearingDays = result.getHearing().getHearingDays();
+        assertThat(actualHearingDays.stream().map(HearingDay::getCourtCentreId).collect(toSet()), is(of(courtCentreId)));
+        assertThat(actualHearingDays.stream().map(HearingDay::getCourtRoomId).collect(toSet()), is(of(courtRoomId)));
+    }
 }

@@ -328,12 +328,6 @@ public class ShareResultsIT extends AbstractIT {
         return now1MandatoryResultDefinition.getPrompts().get(0);
     }
 
-    private void stubCourtRoom(final Hearing hearing) {
-        CourtCentre courtCentre = hearing.getCourtCentre();
-        stubLjaDetails(courtCentre, hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
-        stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
-    }
-
     private InitiateHearingCommandHelper getHearingCommand(final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure) {
         return h(UseCases.initiateHearing(getRequestSpec(),
                 InitiateHearingCommand.initiateHearingCommand()

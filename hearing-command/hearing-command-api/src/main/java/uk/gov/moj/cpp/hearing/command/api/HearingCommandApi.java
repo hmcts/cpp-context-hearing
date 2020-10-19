@@ -250,4 +250,9 @@ public class HearingCommandApi {
                 .withName(name)
                 .withMetadataFrom(envelope));
     }
+
+    @Handles("hearing.correct-hearing-days-without-court-centre")
+    public void correctHearingDaysWithoutCourtCentre(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.correct-hearing-days-without-court-centre");
+    }
 }

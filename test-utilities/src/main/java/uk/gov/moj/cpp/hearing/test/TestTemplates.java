@@ -39,10 +39,12 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationRespondent;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAlias;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Jurors;
@@ -508,6 +510,23 @@ public class TestTemplates {
                             .setJurisdictionType(CROWN)
                             .setStructure(structure)
                     ).build());
+        }
+
+        public static InitiateHearingCommand withMultipleHearingDays(List<HearingDay> hearingDays) {
+            return InitiateHearingCommand.initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                            .setMinimumAssociatedPerson(true)
+                            .setMinimumDefenceOrganisation(true)
+                    )
+                            .withHearingDays(hearingDays)
+                            .withCourtCentre(CourtCentre.courtCentre()
+                                    .withId(hearingDays.get(0).getCourtCentreId())
+                                    .withName(STRING.next())
+                                    .withRoomId(hearingDays.get(0).getCourtRoomId()).build())
+                            .build());
         }
     }
 

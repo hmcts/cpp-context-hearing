@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -41,13 +43,13 @@ public class TimelineHearingSummaryHelper {
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-    private TimelineHearingSummaryBuilder createTimelineHearingSummaryBuilder(final HearingDay hearingDay, final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial) {
+    private TimelineHearingSummaryBuilder createTimelineHearingSummaryBuilder(final HearingDay hearingDay, final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final JsonObject allCourtRooms) {
         final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = new TimelineHearingSummaryBuilder();
         timelineHearingSummaryBuilder.withHearingId(hearing.getId());
         timelineHearingSummaryBuilder.withHearingDate(hearingDay.getDate());
         timelineHearingSummaryBuilder.withHearingType(null == hearing.getHearingType() ? null : hearing.getHearingType().getDescription());
-        timelineHearingSummaryBuilder.withCourtHouse(null == hearing.getCourtCentre() ? null : hearing.getCourtCentre().getName());
-        timelineHearingSummaryBuilder.withCourtRoom(null == hearing.getCourtCentre() ? null : hearing.getCourtCentre().getRoomName());
+        timelineHearingSummaryBuilder.withCourtHouse(getCourtCentreName(hearingDay, hearing, allCourtRooms));
+        timelineHearingSummaryBuilder.withCourtRoom(getCourtRoomName(hearingDay, hearing, allCourtRooms));
         timelineHearingSummaryBuilder.withHearingTime(hearingDay.getDateTime());
         timelineHearingSummaryBuilder.withEstimatedDuration(hearingDay.getListedDurationMinutes());
         final List<String> defendantNames = getDefendantNames(hearing);
@@ -73,16 +75,18 @@ public class TimelineHearingSummaryHelper {
 
     public TimelineHearingSummary createTimeLineHearingSummary(final HearingDay hearingDay,
                                                                final Hearing hearing,
-                                                               final CrackedIneffectiveTrial crackedIneffectiveTrial) {
-        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial);
+                                                               final CrackedIneffectiveTrial crackedIneffectiveTrial,
+                                                               final JsonObject allCourtRooms) {
+        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
         return timelineHearingSummaryBuilder.build();
     }
 
     public TimelineHearingSummary createTimeLineHearingSummary(final HearingDay hearingDay,
                                                                final Hearing hearing,
                                                                final CrackedIneffectiveTrial crackedIneffectiveTrial,
+                                                               final JsonObject allCourtRooms,
                                                                final UUID applicationId) {
-        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial);
+        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
         final List<String> applicantNames = getApplicantNames(hearing.getCourtApplicationsJson(), applicationId);
         if (!applicantNames.isEmpty()) {
             timelineHearingSummaryBuilder.withApplicants(applicantNames);
@@ -141,5 +145,63 @@ public class TimelineHearingSummaryHelper {
         return Stream.of(person.getFirstName(), person.getLastName())
                 .filter(s -> s != null && !s.isEmpty())
                 .collect(joining(" "));
+    }
+
+    private String getCourtCentreName(final HearingDay hearingDay, final Hearing hearing, final JsonObject allCourtRooms){
+        // First check hearingDay object
+        // Otherwise use courtCentre on top level of hearing
+
+        if (hearingDay.getCourtCentreId() != null) {
+            return searchCourtCentreName(allCourtRooms, hearingDay.getCourtCentreId());
+        } else if (hearing.getCourtCentre() != null){
+            return hearing.getCourtCentre().getName();
+        } else {
+            return null;
+        }
+    }
+
+    private String getCourtRoomName(final HearingDay hearingDay, final Hearing hearing, final JsonObject allCourtRooms){
+        // First check hearingDay object
+        // Otherwise use courtCentre on top level of hearing
+
+        if (hearingDay.getCourtCentreId() != null && hearingDay.getCourtRoomId() != null) {
+            return searchCourtRoomName(allCourtRooms, hearingDay.getCourtCentreId(), hearingDay.getCourtRoomId());
+        } else if (hearing.getCourtCentre() != null){
+            return hearing.getCourtCentre().getRoomName();
+        } else {
+            return null;
+        }
+    }
+
+    private String searchCourtCentreName(JsonObject allCourtRooms, UUID courtCentreId){
+        if (allCourtRooms == null || courtCentreId == null) {
+            return null;
+        }
+
+        return allCourtRooms.getJsonArray("organisationunits")
+                .stream()
+                .filter(x -> x.getValueType() == JsonValue.ValueType.OBJECT)
+                .map(x -> (JsonObject) x)
+                .filter(x -> x.getString("id").equals(courtCentreId.toString()))
+                .map(x -> x.getString("oucodeL3Name"))
+                .findFirst().orElse(null);
+    }
+
+    private String searchCourtRoomName(JsonObject allCourtRooms, UUID courtCentreId, UUID courtRoomId){
+        if (allCourtRooms == null || courtCentreId == null || courtRoomId == null) {
+            return null;
+        }
+
+        return allCourtRooms.getJsonArray("organisationunits")
+                .stream()
+                .filter(x -> x.getValueType() == JsonValue.ValueType.OBJECT)
+                .map(x -> (JsonObject) x)
+                .filter(x -> x.getString("id").equals(courtCentreId.toString()))
+                .filter(x -> x.containsKey("courtrooms"))
+                .flatMap(x -> x.getJsonArray("courtrooms").stream())
+                .map(x -> (JsonObject) x)
+                .filter(x -> x.getString("id").equals(courtRoomId.toString()))
+                .map(x -> x.getString("courtroomName"))
+                .findFirst().orElse(null);
     }
 }

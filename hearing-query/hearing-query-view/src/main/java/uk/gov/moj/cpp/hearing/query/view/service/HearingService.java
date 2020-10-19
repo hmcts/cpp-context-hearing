@@ -498,11 +498,10 @@ public class HearingService {
     }
 
     @Transactional
-    public Timeline getTimeLineByCaseId(final UUID caseId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
-
+    public Timeline getTimeLineByCaseId(final UUID caseId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findByCaseId(caseId)
                 .stream()
-                .map(e-> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes))
+                .map(e-> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes, allCourtRooms))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
@@ -510,32 +509,34 @@ public class HearingService {
     }
 
     @Transactional
-    public Timeline getTimeLineByApplicationId(final UUID applicationId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+    public Timeline getTimeLineByApplicationId(final UUID applicationId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
 
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findAllHearingsByApplicationId(applicationId)
                 .stream()
-                .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing, applicationId,crackedIneffectiveVacatedTrialTypes))
+                .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing,crackedIneffectiveVacatedTrialTypes, allCourtRooms, applicationId))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
         return new Timeline(hearingSummaries);
     }
 
-    private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+    private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
+
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms))
                 .collect(toList());
     }
 
     private List<TimelineHearingSummary> populateTimeLineHearingSummariesWithApplicants(final Hearing hearing,
-                                                                                        final UUID applicationId,
-                                                                                        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+                                                                                        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
+                                                                                        final JsonObject allCourtRooms,
+                                                                                        final UUID applicationId) {
         final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, applicationId))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId))
                 .collect(toList());
     }
 

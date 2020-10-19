@@ -68,6 +68,8 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayApplicationTimeline() {
+        stubCourtRoom(hearingOne);
+
         final String timelineQueryAPIEndPoint = format(ENDPOINT_PROPERTIES.getProperty("hearing.application.timeline"), applicationId);
         final String timelineURL = getBaseUri() + "/" + timelineQueryAPIEndPoint;
         final String mediaType = "application/vnd.hearing.application.timeline+json";

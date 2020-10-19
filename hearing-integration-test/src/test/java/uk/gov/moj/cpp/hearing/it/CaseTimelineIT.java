@@ -46,6 +46,7 @@ public class CaseTimelineIT extends AbstractIT {
     @Test
     public void shouldDisplayCaseTimeline() throws Exception {
         setUpHearing(now(ZoneId.of("UTC")).plusDays(1L));
+        stubCourtRoom(hearing);
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
         verifyTimeline(hearingDate);
 

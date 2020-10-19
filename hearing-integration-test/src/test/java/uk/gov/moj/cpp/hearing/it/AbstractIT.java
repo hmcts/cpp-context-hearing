@@ -13,10 +13,12 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.hearing.courts.referencedata.Address;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
@@ -318,6 +320,12 @@ public class AbstractIT {
 
         ReferenceDataStub.stub(localJusticeAreasResult, "123");
 
+    }
+
+    protected void stubCourtRoom(final Hearing hearing) {
+        CourtCentre courtCentre = hearing.getCourtCentre();
+        stubLjaDetails(courtCentre, hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
+        stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
     }
 
 }

@@ -185,9 +185,10 @@ public class HearingQueryView {
     }
 
 
-    public Envelope<Timeline> getTimeline(final JsonEnvelope envelope, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+    public Envelope<Timeline> getTimeline(final JsonEnvelope envelope, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
-        final Timeline timeline = hearingService.getTimeLineByCaseId(caseId.get(), crackedIneffectiveVacatedTrialTypes);
+
+        final Timeline timeline = hearingService.getTimeLineByCaseId(caseId.get(), crackedIneffectiveVacatedTrialTypes, allCourtRooms);
 
         return envelop(timeline)
                 .withName("hearing.timeline")
@@ -195,9 +196,11 @@ public class HearingQueryView {
     }
 
 
-    public Envelope<Timeline> getTimelineByApplicationId(final JsonEnvelope envelope, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes ) {
+    public Envelope<Timeline> getTimelineByApplicationId(final JsonEnvelope envelope, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final Optional<UUID> applicationId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
-        final Timeline timeline = hearingService.getTimeLineByApplicationId(applicationId.get(), crackedIneffectiveVacatedTrialTypes);
+
+        final Timeline timeline = hearingService.getTimeLineByApplicationId(applicationId.get(), crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+
         return envelop(timeline)
                 .withName("hearing.timeline")
                 .withMetadataFrom(envelope);

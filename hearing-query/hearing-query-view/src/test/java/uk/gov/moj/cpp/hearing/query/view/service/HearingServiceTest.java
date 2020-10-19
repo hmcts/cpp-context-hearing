@@ -727,17 +727,18 @@ public class HearingServiceTest {
         final HearingDay hearingDayMock = mock(HearingDay.class);
         final Set<HearingDay> hearingDays = new HashSet<>();
         hearingDays.add(hearingDayMock);
+        final JsonObject allCourtRooms = mock(JsonObject.class);
 
         final UUID caseId = randomUUID();
         when(hearingRepository.findByCaseId(caseId)).thenReturn(hearings);
         when(entity.getHearingDays()).thenReturn(hearingDays);
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
-        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any())).thenReturn(hearingSummary);
+        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any())).thenReturn(hearingSummary);
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
         final UUID trialTypeId = randomUUID();
-        final Timeline response = hearingService.getTimeLineByCaseId(caseId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+        final Timeline response = hearingService.getTimeLineByCaseId(caseId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), allCourtRooms);
 
         assertThat(response, instanceOf(Timeline.class));
         assertThat(response.getHearingSummaries().get(0), is(hearingSummary));
@@ -757,18 +758,20 @@ public class HearingServiceTest {
         final Set<HearingDay> hearingDays = new HashSet<>();
         hearingDays.add(hearingDayMock);
 
+        final JsonObject allCourtRooms = mock(JsonObject.class);
+
         final UUID applicationId = randomUUID();
         when(hearingRepository.findAllHearingsByApplicationId(applicationId)).thenReturn(hearings);
         when(entity.getHearingDays()).thenReturn(hearingDays);
 
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
-        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any())).thenReturn(hearingSummary);
+        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any())).thenReturn(hearingSummary);
 
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
         final UUID trialTypeId = randomUUID();
-        final Timeline response = hearingService.getTimeLineByApplicationId(applicationId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId));
+        final Timeline response = hearingService.getTimeLineByApplicationId(applicationId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), allCourtRooms);
 
         assertThat(response, instanceOf(Timeline.class));
         assertThat(response.getHearingSummaries().get(0), is(hearingSummary));

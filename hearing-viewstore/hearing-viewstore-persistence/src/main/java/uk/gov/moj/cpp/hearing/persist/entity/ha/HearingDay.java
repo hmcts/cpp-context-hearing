@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
@@ -41,6 +42,12 @@ public class HearingDay {
     private Boolean isCancelled;
 
     //maskedOffences need to add
+
+    @Column(name = "court_centre_id")
+    private UUID courtCentreId;
+
+    @Column(name = "court_room_id")
+    private UUID courtRoomId;
 
     public HearingDay() {
         //For JPA
@@ -108,6 +115,22 @@ public class HearingDay {
 
     public void setIsCancelled(final Boolean isCancelled) {
         this.isCancelled = isCancelled;
+    }
+
+    public UUID getCourtCentreId() {
+        return courtCentreId;
+    }
+
+    public void setCourtCentreId(final UUID courtCentreId) {
+        this.courtCentreId = courtCentreId;
+    }
+
+    public UUID getCourtRoomId() {
+        return courtRoomId;
+    }
+
+    public void setCourtRoomId(final UUID courtRoomId) {
+        this.courtRoomId = courtRoomId;
     }
 
     @Override

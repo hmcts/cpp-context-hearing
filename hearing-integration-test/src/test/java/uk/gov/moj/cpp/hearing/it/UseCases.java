@@ -16,7 +16,9 @@ import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.USER_ID_VALUE_AS_ADMIN;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getStringFromResource;
+import static uk.gov.moj.cpp.hearing.it.Utilities.JsonUtil.objectToJsonObject;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -30,6 +32,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
@@ -58,6 +61,7 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.messaging.JsonObjects;
 import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
@@ -329,7 +333,7 @@ public class UseCases {
                         .withDefenceCounselId(defenceCounselId)
                 , consumer).build();
 
-        final JsonObject payloadWithOverrideCourtRoomFlag = createObjectBuilder(Utilities.JsonUtil.objectToJsonObject(logEvent))
+        final JsonObject payloadWithOverrideCourtRoomFlag = JsonObjects.createObjectBuilder(objectToJsonObject(logEvent))
                 .add(FIELD_OVERRIDE, override)
                 .build();
 
@@ -988,7 +992,7 @@ public class UseCases {
                                                   final InterpreterIntermediary interpreterIntermediary) {
         try {
 
-            final JsonObject addInterpreterIntermediary = createObjectBuilder().add("interpreterIntermediary", Utilities.JsonUtil.objectToJsonObject(interpreterIntermediary)).build();
+            final JsonObject addInterpreterIntermediary = createObjectBuilder().add("interpreterIntermediary", objectToJsonObject(interpreterIntermediary)).build();
 
             makeCommand(requestSpec, "hearing.update-hearing")
                     .ofType("application/vnd.hearing.add-interpreter-intermediary+json")
@@ -1094,6 +1098,30 @@ public class UseCases {
                 .ofType("application/vnd.hearing.book-provisional-hearing-slots+json")
                 .withArgs(hearingId)
                 .withPayload(commandPayloadString)
+                .executeSuccessfully();
+
+    }
+
+    public static void correctHearingDaysWithoutCourtCentre(final RequestSpecification requestSpec, final UUID hearingId, final List<HearingDay> hearingDays) {
+
+        final JsonArrayBuilder hearingDayArrayBuilder = Json.createArrayBuilder();
+        hearingDays.forEach(d -> {
+            try {
+                hearingDayArrayBuilder.add(objectToJsonObject(d));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        final JsonObject commandPayload = Json.createObjectBuilder().add("id", hearingId.toString())
+                .add("hearingDays", hearingDayArrayBuilder).build();
+
+
+        makeCommand(requestSpec, "hearing.correct-hearing-days-without-court-centre")
+                .ofType("application/vnd.hearing.correct-hearing-days-without-court-centre+json")
+                .withArgs(hearingId)
+                .withPayload(commandPayload.toString())
+                .withCppUserId(USER_ID_VALUE_AS_ADMIN)
                 .executeSuccessfully();
 
     }

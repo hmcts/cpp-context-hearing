@@ -21,14 +21,14 @@ import org.apache.deltaspike.data.api.Repository;
 @Repository(forEntity = Hearing.class)
 public abstract class HearingRepository extends AbstractEntityRepository<Hearing, UUID> {
 
-    @Query(value = "SELECT hearing " +
-            "FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
-            "WHERE hearing.courtCentre.id = :courtCentreId " +
-            "AND hearing.courtCentre.roomId = :roomId " +
-            "AND day.date = :date " +
-            "AND (day.isCancelled is null or day.isCancelled != true) " +
-            "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
-            "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true)")
+    @Query(value = "with hearing_days as (select hd.hearing_id, coalesce(hd.court_room_id, h.room_id) as court_room_id, " +
+            "coalesce(hd.court_centre_id, h.court_centre_id) as court_centre_id from ha_hearing_day hd " +
+            "inner join ha_hearing h on h.id = hd.hearing_id where hd.date = :date " +
+            "AND (hd.is_cancelled is null or hd.is_cancelled != true)) " +
+            "select distinct hh.* from ha_hearing hh inner join hearing_days hd on hd.hearing_id = hh.id " +
+            "where hd.court_centre_id = :courtCentreId and hd.court_room_id = :roomId " +
+            "AND (hh.is_box_hearing IS null OR hh.is_box_hearing != true) " +
+            "AND (hh.is_vacated_trial IS null OR hh.is_vacated_trial != true) ", isNative = true)
     public abstract List<Hearing> findByFilters(@QueryParam("date") final LocalDate date,
                                                 @QueryParam("courtCentreId") final UUID courtCentreId,
                                                 @QueryParam("roomId") final UUID roomId);
@@ -40,16 +40,16 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     public abstract List<Hearing> findHearingsByDateAndCourtCentreList(@QueryParam("date") final LocalDate date,
                                                                        @QueryParam("courtCentreList") List<UUID> courtCentreList);
 
-    @Query(value = "SELECT hearing " +
-            "FROM Hearing hearing INNER JOIN hearing.hearingDays day " +
-            "WHERE hearing.courtCentre.id = :courtCentreId " +
-            "AND day.date = :date " +
-            "AND (day.isCancelled is null or day.isCancelled != true) " +
-            "AND (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
-            "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true)")
+    @Query(value = "with hearing_days as (select hd.hearing_id, coalesce(hd.court_room_id, h.room_id) as court_room_id, " +
+            "coalesce(hd.court_centre_id, h.court_centre_id) as court_centre_id from ha_hearing_day hd " +
+            "inner join ha_hearing h on h.id = hd.hearing_id where hd.date = :date " +
+            "AND (hd.is_cancelled is null or hd.is_cancelled != true)) " +
+            "select distinct hh.* from ha_hearing hh inner join hearing_days hd on hd.hearing_id = hh.id " +
+            "where hd.court_centre_id = :courtCentreId " +
+            "AND (hh.is_box_hearing IS null OR hh.is_box_hearing != true) " +
+            "AND (hh.is_vacated_trial IS null OR hh.is_vacated_trial != true) ", isNative = true)
     public abstract List<Hearing> findHearings(@QueryParam("date") final LocalDate date,
                                                @QueryParam("courtCentreId") final UUID courtCentreId);
-
 
     @Query(value = "SELECT distinct hearing " +
             "FROM Hearing hearing INNER JOIN hearing.hearingDays day INNER JOIN hearing.judicialRoles role " +

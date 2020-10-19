@@ -110,6 +110,24 @@ public class CoreTestTemplates {
                 .withListedDurationMinutes(INTEGER.next());
     }
 
+    public static HearingDay.Builder hearingDay(CourtCentre courtCentre) {
+        return HearingDay.hearingDay()
+                .withSittingDay(RandomGenerator.PAST_UTC_DATE_TIME.next())
+                .withListingSequence(INTEGER.next())
+                .withListedDurationMinutes(INTEGER.next())
+                .withCourtCentreId(courtCentre.getId())
+                .withCourtRoomId(courtCentre.getRoomId());
+    }
+
+    public static HearingDay.Builder hearingDay(ZonedDateTime sittingDay, int sequence) {
+        return HearingDay.hearingDay()
+                .withSittingDay(sittingDay)
+                .withListingSequence(sequence)
+                .withListedDurationMinutes(INTEGER.next())
+                .withCourtCentreId(randomUUID())
+                .withCourtRoomId(randomUUID());
+    }
+
     public static HearingDay.Builder hearingDayWithParam(final int year, final int month, final int day, final int seq) {
         final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
         return HearingDay.hearingDay()
@@ -557,12 +575,22 @@ public class CoreTestTemplates {
     }
 
     public static Hearing.Builder hearing(final CoreTemplateArguments args, final boolean withJudicialResults) {
-        final Hearing.Builder hearingBuilder = Hearing.hearing()
-                .withId(randomUUID())
+        final Hearing.Builder hearingBuilder = Hearing.hearing();
+        CourtCentre courtCentre;
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+            courtCentre = courtCentreWithArgs("welshCourtRoom").build();
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+            courtCentre = courtCentre().build();
+        }
+
+        hearingBuilder.withId(randomUUID())
                 .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(hearingDay().build()))
+                .withHearingDays(asList(hearingDay(courtCentre).build()))
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
@@ -571,15 +599,9 @@ public class CoreTestTemplates {
                                 .collect(toList())
                 )
 
-                .withCourtApplications(asList((new HearingFactory().courtApplication().build())));
+                .withCourtApplications(asList((new HearingFactory().courtApplication().build())))
+                .withCourtCentre(courtCentre);
 
-        if (args.hearingLanguage == WELSH) {
-            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
-            hearingBuilder.withCourtCentre(courtCentreWithArgs("welshCourtRoom").build());
-        } else {
-            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
-            hearingBuilder.withCourtCentre(courtCentre().build());
-        }
         return hearingBuilder;
     }
 

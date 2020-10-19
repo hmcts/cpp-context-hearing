@@ -442,3 +442,22 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
     responses:
       202:
         description: Request accepted
+
+/correct-hearing-days-without-court-centre:
+    post:
+      description: |
+        ...
+        (mapping):
+            requestType: application/vnd.hearing.correct-hearing-days-without-court-centre+json
+            name: hearing.correct-hearing-days-without-court-centre
+        ...
+      body:
+        application/vnd.hearing.correct-hearing-days-without-court-centre+json:
+            example:
+             !include json/hearing.correct-hearing-days-without-court-centre.json
+            schema:
+             !include json/schema/hearing.correct-hearing-days-without-court-centre.json
+      responses:
+            202:
+                description: OK
+

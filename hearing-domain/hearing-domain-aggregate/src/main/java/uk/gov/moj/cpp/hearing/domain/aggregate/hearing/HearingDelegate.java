@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
@@ -40,7 +41,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("squid:S00107")
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private final HearingAggregateMomento momento;
 
@@ -249,5 +250,24 @@ public class HearingDelegate implements Serializable {
 
     public Stream<Object> addMasterDefendantIdToDefendant(final UUID hearingId, final UUID prosecutionCaseId, final UUID defendantId, final UUID masterDefendantId) {
         return Stream.of(new MasterDefendantIdAdded(hearingId, prosecutionCaseId, defendantId, masterDefendantId));
+    }
+
+    public void handleHearingDaysWithoutCourtCentreCorrected(final HearingDaysWithoutCourtCentreCorrected hearingDaysWithoutCourtCentreCorrected) {
+
+        if (momento.getHearing() == null || momento.getHearing().getHearingDays() == null) {
+            return;
+        }
+
+        final uk.gov.justice.core.courts.HearingDay correctedHearingDay = hearingDaysWithoutCourtCentreCorrected.getHearingDays().get(0);
+
+        momento.getHearing().getHearingDays().forEach(hearingDay -> {
+            if (hearingDay.getCourtCentreId() == null) {
+                hearingDay.setCourtCentreId(correctedHearingDay.getCourtCentreId());
+            }
+
+            if (hearingDay.getCourtRoomId() == null) {
+                hearingDay.setCourtRoomId(correctedHearingDay.getCourtRoomId());
+            }
+        });
     }
 }

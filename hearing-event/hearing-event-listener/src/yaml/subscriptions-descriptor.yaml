@@ -230,4 +230,9 @@ subscriptions_descriptor:
         - name: hearing.target-removed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.target-removed.json
 
+        # Hearing Days Without Court Centre Corrected
+        - name: hearing.event.hearing-days-without-court-centre-corrected
+          schema_uri: http://cpp.moj.gov.uk/hearing/event/hearing-days-without-court-centre-corrected.json
+
+
       event_source_name: hearing

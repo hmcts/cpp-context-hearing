@@ -399,3 +399,12 @@ rule "Command - API - Action - hearing.add-master-defendant-id-to-defendant"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action -  hearing.correct-hearing-days-without-court-centre"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.correct-hearing-days-without-court-centre");
+   eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end
