@@ -1,14 +1,19 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
+import uk.gov.moj.cpp.accesscontrol.hearing.providers.HearingProvider;
 import uk.gov.moj.cpp.accesscontrol.test.utils.BaseDroolsAccessControlTest;
+import uk.gov.moj.cpp.accesscontrol.test.utils.matcher.OutcomeMatcher;
 
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.kie.api.runtime.ExecutionResults;
 import org.mockito.Mock;
@@ -50,10 +55,15 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
     private static final String ACTION_NAME_SET_TRIAL_TYPE = "hearing.set-trial-type";
     private static final String ACTION_NAME_REMOVE_TARGET = "hearing.remove-targets";
+    private static final String ACTION_NAME_REQUEST_APPROVAL = "hearing.request-approval";
     private static final String ACTION_NAME_MASTER_DEFENDANT_ID = "hearing.add-master-defendant-id-to-defendant";
+    private static final String ACTION_NAME_VALIDATE_RESULT_AMENDMENTS = "hearing.validate-result-amendments";
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
+
+    @Mock
+    private HearingProvider hearingProvider;
 
     @Test
     public void shouldAllowAuthorisedUserToInitiateHearing() {
@@ -451,7 +461,10 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
     @Override
     protected Map<Class, Object> getProviderMocks() {
-        return ImmutableMap.<Class, Object>builder().put(UserAndGroupProvider.class, this.userAndGroupProvider).build();
+        return ImmutableMap.<Class, Object>builder()
+                .put(UserAndGroupProvider.class, this.userAndGroupProvider)
+                .put(HearingProvider.class, this.hearingProvider)
+                .build();
     }
 
     @Test
@@ -662,6 +675,14 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     public void shouldNotAllowUnauthorisedUserToRemoveDraftTarget() {
         final Action action = createActionFor(ACTION_NAME_REMOVE_TARGET);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToRequestApproval() {
+        final Action action = createActionFor(ACTION_NAME_REQUEST_APPROVAL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
@@ -678,6 +699,32 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         assertSuccessfulOutcome(results);
     }
 
+    @Test
+    public void shouldAllowAuthorisedUserToValidateResultAmendments() {
+        final Action action = createActionFor(ACTION_NAME_VALIDATE_RESULT_AMENDMENTS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Associate", "Legal Advisers", "Court Clerks"))
+                .willReturn(true);
+        given(this.hearingProvider.isUserAllowedToApproveResultAmendment(action)).willReturn(true);
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
 
+    @Test
+    public void shouldAllowAuthorisedUserToRequestApproval() {
+        final Action action = createActionFor(ACTION_NAME_REQUEST_APPROVAL);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Associate", "Legal Advisers", "Court Clerks"))
+                .willReturn(true);
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
 
+    @Test
+    public void shouldNotAllowUnauthorisedUserToValidateResultAmendments() {
+        final Action action = createActionFor(ACTION_NAME_VALIDATE_RESULT_AMENDMENTS);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Associate", "Legal Advisers", "Court Clerks"))
+                .willReturn(true);
+        given(this.hearingProvider.isUserAllowedToApproveResultAmendment(action)).willReturn(false);
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
 }

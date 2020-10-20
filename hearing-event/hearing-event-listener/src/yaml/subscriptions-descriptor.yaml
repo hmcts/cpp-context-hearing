@@ -234,5 +234,12 @@ subscriptions_descriptor:
         - name: hearing.event.hearing-days-without-court-centre-corrected
           schema_uri: http://cpp.moj.gov.uk/hearing/event/hearing-days-without-court-centre-corrected.json
 
+        # Hearing Approval Requested
+        - name: hearing.event.approval-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-requested.json
+
+        # Hearing Validate Result Amendments Requested
+        - name: hearing.event.validate-result-amendments-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.validate-result-amendments-requested.json
 
       event_source_name: hearing

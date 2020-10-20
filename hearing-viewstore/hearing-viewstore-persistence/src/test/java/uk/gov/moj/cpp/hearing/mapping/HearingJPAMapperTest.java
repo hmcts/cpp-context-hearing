@@ -15,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
+import uk.gov.justice.core.courts.ApprovalRequest;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -86,6 +87,8 @@ public class HearingJPAMapperTest {
     private HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper;
     @Mock
     private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
+    @Mock
+    private ApprovalRequestedJPAMapper approvalRequestedJPAMapper;
 
     @Captor
     private ArgumentCaptor<List<CourtApplication>> courtApplicationCaptor;
@@ -166,6 +169,7 @@ public class HearingJPAMapperTest {
         hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
         hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
         hearingEntity.setIsVacatedTrial(Boolean.TRUE);
+        hearingEntity.setApprovalsRequested(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class)));
 
         CourtCentre courtCentreMock = mock(CourtCentre.class);
         when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
@@ -212,6 +216,9 @@ public class HearingJPAMapperTest {
         CompanyRepresentative companyRepresentativeMock = mock(CompanyRepresentative.class);
         when(hearingCompanyRepresentativeJPAMapper.fromJPA(hearingEntity.getCompanyRepresentatives())).thenReturn(asList(companyRepresentativeMock));
 
+        ApprovalRequest approvalRequestMock = mock(ApprovalRequest.class);
+        when(approvalRequestedJPAMapper.fromJPA(hearingEntity.getApprovalsRequested())).thenReturn(asList(approvalRequestMock));
+
         final List<CourtApplication> expectedCourtApplications = asList();
         when(courtApplicationsSerializer.courtApplications(hearingEntity.getCourtApplicationsJson())).thenReturn(expectedCourtApplications);
 
@@ -229,6 +236,8 @@ public class HearingJPAMapperTest {
                 .with(Hearing::getType, is(hearingTypeMock))
                 .with(Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
                 .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
+                .with(Hearing::getApprovalsRequested, first(is(approvalRequestMock)))
+
                 .withValue(Hearing::getCourtApplications, null)
                 .with(Hearing::getIsVacatedTrial, is(Boolean.TRUE))
         );
@@ -254,6 +263,7 @@ public class HearingJPAMapperTest {
                 .withHearingCaseNotes(asList(mock(HearingCaseNote.class)))
                 .withCourtApplications(asList())
                 .withIsVacatedTrial(Boolean.FALSE)
+                .withApprovalsRequested(asList(mock(ApprovalRequest.class)))
                 .build();
 
 
@@ -288,6 +298,9 @@ public class HearingJPAMapperTest {
 
         final String expectedCourtApplicationsJson = "**expectedCourtApplicationsJson**";
         when(courtApplicationsSerializer.json(hearing.getCourtApplications())).thenReturn(expectedCourtApplicationsJson);
+
+        uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested approvalRequestedMock = mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class);
+        when(approvalRequestedJPAMapper.toJPA(eq(hearing.getApprovalsRequested()))).thenReturn(asSet(approvalRequestedMock));
 
         assertThat(hearingJPAMapper.toJPA(hearing), isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing.class)
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing::getId, is(hearing.getId()))

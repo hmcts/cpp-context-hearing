@@ -38,10 +38,7 @@ public class HearingExtendedEventProcessorTest {
     private final Enveloper enveloper = createEnveloper();
 
     @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-
-    @Spy
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Mock
     private Sender sender;

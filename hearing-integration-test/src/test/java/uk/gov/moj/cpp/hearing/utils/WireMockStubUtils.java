@@ -170,6 +170,14 @@ public class WireMockStubUtils {
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)));
 
     }
+    public static void stubRequestApproval() {
+        InternalEndpointMockUtils.stubPingFor("hearing-service");
+
+        stubFor(post(urlPathEqualTo("/hearing-service/command/api/rest/hearing/request-approval"))
+                .withHeader(CONTENT_TYPE, equalTo("application/vnd.hearing.request-approval+json"))
+                .willReturn(aResponse().withStatus(SC_ACCEPTED)));
+
+    }
 
     public static void stubStagingenforcementOutstandingFines() {
         InternalEndpointMockUtils.stubPingFor("stagingenforcement-service");

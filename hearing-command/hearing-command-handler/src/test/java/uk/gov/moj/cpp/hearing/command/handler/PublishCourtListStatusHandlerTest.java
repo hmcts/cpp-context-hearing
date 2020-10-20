@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.publishing.events.PublishCourtListRequested
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -43,7 +42,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -78,10 +76,7 @@ public class PublishCourtListStatusHandlerTest {
     private CourtListAggregate courtListAggregate;
 
     @Spy
-    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-    @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
-    private ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
+    private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Captor
     private ArgumentCaptor<ZonedDateTime> zonedDateTimeArgumentCaptor;
@@ -177,6 +172,25 @@ public class PublishCourtListStatusHandlerTest {
 
     @Test
     public void shouldRequestPublicationOfACourtListEvenAfterOneFails() {
+
+        final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
+        final Set<UUID> payload = getPayloadOfMultipleCrownCourtCentres();
+        givenThatWeSuccessfullyGetAllOfTheCrownCourtCentres(payload);
+        givenThatWeSuccessfullyGetTheStreamForAnyPublishCourtRequest();
+        givenThatThePublishCourtListRequestAggregateExists();
+        final ZonedDateTime courtCentreOneRequestTime = utcClock.now();
+        final ZonedDateTime courtCentreTwoRequestTime = utcClock.now();
+
+        givenThatPublicationOfTheHearingListFailsToBeRequested(COURT_CENTRE_ID_ONE, courtCentreOneRequestTime);
+        givenThatPublicationOfTheHearingListIsSuccessfullyRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);
+
+        publishCourtListStatusHandler.publishHearingListsForCrownCourts(commandEnvelope);
+
+        verifyThatPublicationOfTheFinalCourtListWasRequested(COURT_CENTRE_ID_TWO, courtCentreTwoRequestTime);
+    }
+
+    @Test
+    public void shouldRequestPublicationOfACourtListEvenAfterOneFailsNew() {
 
         final JsonEnvelope commandEnvelope = generateEmptyCommandEnvelope();
         final Set<UUID> payload = getPayloadOfMultipleCrownCourtCentres();

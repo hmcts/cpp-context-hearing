@@ -1,21 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.Optional.ofNullable;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-
+import org.apache.commons.collections.CollectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
-import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
-import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
@@ -28,6 +20,9 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,13 +30,10 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.transaction.Transactional;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @SuppressWarnings({"squid:S2201"})
 @ServiceComponent(EVENT_LISTENER)
@@ -120,19 +112,19 @@ public class InitiateHearingEventListener {
 
         final Hearing hearingEntity = hearingRepository.findBy(hearingExtended.getHearingId());
 
-        if(nonNull(hearingExtended.getCourtApplication())){
+        if (nonNull(hearingExtended.getCourtApplication())) {
             final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), hearingExtended.getCourtApplication());
             hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
             hearingRepository.save(hearingEntity);
         }
-        if(CollectionUtils.isNotEmpty(hearingExtended.getProsecutionCases())){
+        if (CollectionUtils.isNotEmpty(hearingExtended.getProsecutionCases())) {
             hearingExtended.getProsecutionCases()
-                    .forEach(p-> {
-                        final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity,p);
-                        getOffencesForProsecutionCase(prosecutionCase).forEach(x -> updateOffenceForShadowListedStatus(hearingExtended.getShadowListedOffences(), x));
-                        prosecutionCaseRepository.save(prosecutionCase);
-                    }
-                        );
+                    .forEach(p -> {
+                                final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity, p);
+                                getOffencesForProsecutionCase(prosecutionCase).forEach(x -> updateOffenceForShadowListedStatus(hearingExtended.getShadowListedOffences(), x));
+                                prosecutionCaseRepository.save(prosecutionCase);
+                            }
+                    );
         }
 
     }

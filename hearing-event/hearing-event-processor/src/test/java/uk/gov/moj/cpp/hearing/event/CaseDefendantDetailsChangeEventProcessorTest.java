@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.caseDefendantDetailsChangedCommandTemplate;
 
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -40,10 +41,7 @@ public class CaseDefendantDetailsChangeEventProcessorTest {
     private final Enveloper enveloper = createEnveloper();
 
     @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-
-    @Spy
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Mock
     private Sender sender;

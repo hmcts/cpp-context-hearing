@@ -96,6 +96,9 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingApplication> hearingApplications = new HashSet<>();
 
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    private Set<ApprovalRequested> approvalsRequested= new HashSet<>();
+
     @Column(name = "trial_type_id")
     private UUID trialTypeId;
 
@@ -361,6 +364,15 @@ public class Hearing {
         this.vacatedTrialReasonId = vacatedTrialReasonId;
     }
 
+    @SuppressWarnings("squid:S2384")
+    public Set<ApprovalRequested> getApprovalsRequested() {
+        return approvalsRequested;
+    }
+
+    @SuppressWarnings("squid:S2384")
+    public void setApprovalsRequested(Set<ApprovalRequested> approvalsRequested) {
+        this.approvalsRequested = approvalsRequested;
+    }
 
     @Override
     public int hashCode() {

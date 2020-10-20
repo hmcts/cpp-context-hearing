@@ -33,6 +33,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.handler.exception.HearingNotFoundException;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
@@ -76,22 +77,16 @@ public class AddDefendantCommandHandlerTest {
     private AggregateService aggregateService;
 
     @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter= new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @InjectMocks
     private AddDefendantCommandHandler addDefendantCommandHandler;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
-    public void setup() {
-        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-    }
 
     @SuppressWarnings("unchecked")
     @Test
@@ -253,7 +248,7 @@ public class AddDefendantCommandHandlerTest {
 
         expectedException.expect(HearingNotFoundException.class);
         expectedException.expectMessage(format("Defendant '%s' can't be added to Prosecution Case '%s' ", arbitraryDefendant.getId(), arbitraryDefendant.getProsecutionCaseId()));
-        
+
         addDefendantCommandHandler.addDefendant(envelope);
 
     }

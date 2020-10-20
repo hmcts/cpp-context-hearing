@@ -17,6 +17,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.test.FileUtil;
 
@@ -34,20 +35,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CustodyTimeLimitCalculatorTest {
-
     @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
-    @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
-    private CustodyTimeLimitCalculator target = null;
-
-    @Before
-    public void setUp() {
-        target = new CustodyTimeLimitCalculator();
-        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
-        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
-    }
+    private CustodyTimeLimitCalculator target = new CustodyTimeLimitCalculator();
 
     @Test
     public void test1Offence1CTL() {

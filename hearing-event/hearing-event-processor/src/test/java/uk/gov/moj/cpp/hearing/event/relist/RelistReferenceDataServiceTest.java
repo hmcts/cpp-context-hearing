@@ -22,7 +22,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -49,9 +48,6 @@ public class RelistReferenceDataServiceTest {
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> captor;
-
-    @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Spy
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();

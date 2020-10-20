@@ -22,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommand
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import uk.gov.justice.core.courts.ApprovalType;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -51,7 +52,9 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -940,5 +943,45 @@ public class HearingAggregateTest {
         final List<HearingDay> actualHearingDays = result.getHearing().getHearingDays();
         assertThat(actualHearingDays.stream().map(HearingDay::getCourtCentreId).collect(toSet()), is(of(courtCentreId)));
         assertThat(actualHearingDays.stream().map(HearingDay::getCourtRoomId).collect(toSet()), is(of(courtRoomId)));
+    }
+
+    @Test
+    public void shouldRaiseEventOnRequestApprovalCommand() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.TRUE);
+        hearingAggregate.apply(new HearingInitiated(hearing));
+        final UUID userId = randomUUID();
+        final ZonedDateTime now = ZonedDateTime.now();
+        final ApprovalRequested approvalRequested = (ApprovalRequested)
+                hearingAggregate.approvalRequest(hearing.getId(), userId, now, ApprovalType.CHANGE)
+                        .findFirst()
+                        .orElse(null);
+        assertThat(approvalRequested, notNullValue());
+        assertThat(approvalRequested.getHearingId(), is(hearing.getId()));
+        assertThat(approvalRequested.getUserId(), is(userId));
+        assertThat(approvalRequested.getRequestApprovalTime(), is(now));
+
+    }
+
+    @Test
+    public void shouldRaiseEventOnValidateResultAmendmentsCommand() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.TRUE);
+        hearingAggregate.apply(new HearingInitiated(hearing));
+        final UUID userId = randomUUID();
+        final ZonedDateTime now = ZonedDateTime.now();
+        final ValidateResultAmendmentsRequested validateResultAmendmentsRequested = (ValidateResultAmendmentsRequested)
+                hearingAggregate.validateResultsAmendments(hearing.getId(), userId, now)
+                        .findFirst()
+                        .orElse(null);
+        assertThat(validateResultAmendmentsRequested, notNullValue());
+        assertThat(validateResultAmendmentsRequested.getHearingId(), is(hearing.getId()));
+        assertThat(validateResultAmendmentsRequested.getUserId(), is(userId));
+        assertThat(validateResultAmendmentsRequested.getValidateResultAmendmentsTime(), is(now));
+
     }
 }

@@ -14,6 +14,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.spi.DefaultJsonMetadata.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -35,7 +36,10 @@ import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -45,6 +49,7 @@ import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -93,6 +98,7 @@ public class HearingQueryViewTest {
     private DefendantRepository defendantRepository;
     @Mock
     private HearingService hearingService;
+
     @InjectMocks
     private HearingQueryView target;
 
@@ -154,6 +160,57 @@ public class HearingQueryViewTest {
         assertThat(results.payloadAsJsonObject().getString("pageName"), is(testPageName));
     }
 
+    @Test
+    public void shouldGetLatestHearingApprovalRequests() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
+        final ZonedDateTime requestApprovalTime = ZonedDateTime.now();
+
+        final uk.gov.justice.core.courts.Hearing hearing = hearing(hearingId, userId, requestApprovalTime);
+        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearing);
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes1 = getCrackedIneffectiveVacatedTrialTypes();
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.get-hearing"),
+                createObjectBuilder()
+                        .add("hearingId", hearingId.toString())
+                        .build());
+
+        when(hearingService.getHearingDetailsResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1)).thenReturn(hearingDetailsResponse);
+
+        final Envelope<HearingDetailsResponse> hearingEnvelope = target.findHearing(query, crackedIneffectiveVacatedTrialTypes1);
+        final uk.gov.justice.core.courts.Hearing actualHearing = hearingEnvelope.payload().getHearing();
+
+        verify(hearingService).getHearingDetailsResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1);
+        assertThat(hearingEnvelope.metadata().name(), is("hearing.get-hearing"));
+
+        assertThat(actualHearing.getId(), is(hearingId));
+        final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = actualHearing.getApprovalsRequested();
+        final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = approvalsRequested.get(0);
+        assertThat(approvalRequested.getHearingId(), is(hearingId));
+        assertThat(approvalRequested.getUserId(), is(userId));
+        assertThat(approvalRequested.getRequestApprovalTime(), is(requestApprovalTime));
+    }
+
+    private uk.gov.justice.core.courts.Hearing hearing(UUID hearingId, UUID userId, ZonedDateTime requestApprovalTime) {
+        final List<uk.gov.justice.core.courts.ApprovalRequest> approvalsRequested = new ArrayList();
+        final uk.gov.justice.core.courts.ApprovalRequest approvalRequested = new uk.gov.justice.core.courts.ApprovalRequest(CHANGE, hearingId, requestApprovalTime, userId);
+        approvalsRequested.add(approvalRequested);
+        final uk.gov.justice.core.courts.Hearing hearing = new uk.gov.justice.core.courts.Hearing.Builder().withId(hearingId).withApprovalsRequested(approvalsRequested).build();
+        hearing.setApprovalsRequested(approvalsRequested);
+        return hearing;
+    }
+
+    private CrackedIneffectiveVacatedTrialTypes getCrackedIneffectiveVacatedTrialTypes() {
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(randomUUID(), "", "", "", LocalDate.now());
+
+        final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList();
+        crackedIneffectiveVacatedTrialTypes.add(crackedIneffectiveVacatedTrialType);
+
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes1 = new CrackedIneffectiveVacatedTrialTypes();
+        crackedIneffectiveVacatedTrialTypes1.setCrackedIneffectiveVacatedTrialTypes(crackedIneffectiveVacatedTrialTypes);
+        return crackedIneffectiveVacatedTrialTypes1;
+    }
 
     @Test
     public void shouldReturnEmptyResult() {
@@ -169,7 +226,7 @@ public class HearingQueryViewTest {
 
 
         final LocalDate now = LocalDate.now();
-        Set<UUID>  hearingEventIds  = new HashSet<>();
+        Set<UUID> hearingEventIds = new HashSet<>();
         when(hearingService.getHearingsForWebPage(courtCentreIds, now, hearingEventIds)).thenReturn(currentCourtStatus);
 
         final JsonEnvelope query = envelopeFrom(
@@ -288,7 +345,7 @@ public class HearingQueryViewTest {
         final Envelope<NowListResponse> nows = target.findNows(query);
 
         verify(hearingService).getHearingById(HEARING_ID);
-        assertThat(nows.payload(), is((JsonObject)null));
+        assertThat(nows.payload(), is((JsonObject) null));
         assertThat(nows.metadata().name(), is("hearing.get-nows"));
     }
 

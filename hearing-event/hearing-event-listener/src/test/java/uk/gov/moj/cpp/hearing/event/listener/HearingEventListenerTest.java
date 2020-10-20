@@ -60,6 +60,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -118,6 +119,8 @@ public class HearingEventListenerTest {
     private ApplicationDraftResultJPAMapper applicationDraftResultJPAMapper;
     @Mock
     private HearingApplicationRepository hearingApplicationRepository;
+    @Mock
+    private ApprovalRequestedRepository approvalRequestedRepository;
 
     private static final String LAST_SHARED_DATE = "lastSharedDate";
     private static final String DIRTY = "dirty";
@@ -218,6 +221,7 @@ public class HearingEventListenerTest {
         ));
 
         verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        verify(this.approvalRequestedRepository).removeAllRequestApprovals(resultsShared.getHearingId());
 
         assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
                 .with(Hearing::getHasSharedResults, is(true))

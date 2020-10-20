@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="93" author="hearing" logicalFilePath="093-create-request-approval">
+
+        <createTable tableName="ha_request_approval">
+
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="user_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="requestApprovalTime" type="DATETIME TZ">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseColumnNames="hearing_id"
+                                 baseTableName="ha_request_approval"
+                                 constraintName="fk_request_approval"
+                                 referencedColumnNames="id"
+                                 referencedTableName="ha_hearing"/>
+    </changeSet>
+
+</databaseChangeLog>

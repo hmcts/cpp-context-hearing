@@ -24,8 +24,6 @@ import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -35,7 +33,6 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import java.util.List;
 import java.util.UUID;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -45,34 +42,25 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 public class PleaUpdateEventProcessorTest {
     private static final String GUILTY = "GUILTY";
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
+
     @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+
     @Spy
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
-    @Spy
-    @InjectMocks
-    private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(this.objectMapper);
-    @Spy
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+
     @Mock
     private Sender sender;
+
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
     @InjectMocks
     private PleaUpdateEventProcessor pleaUpdateEventProcessor;
 

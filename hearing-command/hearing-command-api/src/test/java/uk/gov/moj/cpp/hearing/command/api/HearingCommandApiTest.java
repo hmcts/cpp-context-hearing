@@ -28,6 +28,9 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
+import uk.gov.justice.services.test.utils.core.converter.JsonObjectToObjectConverterFactory;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
@@ -67,7 +70,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails", "addMasterDefendantIdToDefendant", "correctHearingDaysWithoutCourtCentre");
+            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails", "addMasterDefendantIdToDefendant","correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments");
 
     public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -77,19 +80,17 @@ public class HearingCommandApiTest {
     private static final String DUMMY_FIELD = "dummyField";
     private static final String DUMMY_FIELD_VALUE = "dummyFieldValue";
 
-    @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-
-    @Spy
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
-    @Spy
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
-
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
     private Map<String, String> notificationApiMethodsToHandlerNames;
     private Map<String, String> outstandingFinesCommandApiMethodsToHandlerNames;
     private Map<String, String> sessionTimeApiMethodsToHandlerNames;
+
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter= new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Mock
     private Sender sender;
@@ -476,6 +477,24 @@ public class HearingCommandApiTest {
         hearingCommandApi.applicationDraftResult(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.application-draft-result");
+    }
+
+    @Test
+    public void shouldPassThroughRequestApprovalCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.request-approval");
+
+        hearingCommandApi.requestApproval(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.request-approval");
+    }
+
+    @Test
+    public void shouldPassThroughValidateResultAmendmentsCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.validate-result-amendments");
+
+        hearingCommandApi.validateResultAmendments(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.validate-result-amendments");
     }
 
     @Test

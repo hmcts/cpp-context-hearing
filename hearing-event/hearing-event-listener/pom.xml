@@ -61,6 +61,13 @@
             <artifactId>test-utils-persistence</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-framework-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
 </project>

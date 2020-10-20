@@ -5,6 +5,7 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoN
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
+import uk.gov.justice.core.courts.ApprovalType;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -59,6 +60,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
@@ -108,6 +110,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
@@ -498,6 +501,19 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
+
+    public Stream<Object> approvalRequest(final UUID hearingId, final UUID userId,
+                                          final ZonedDateTime requestTime,
+                                          final ApprovalType approvalType) {
+
+        return apply(Stream.of(ApprovalRequested.approvalRequestedBuilder()
+                .withHearingId(hearingId)
+                .withUserId(userId)
+                .withRequestApprovalTime(requestTime)
+                .withApprovalType(approvalType)
+                .build()));
+    }
+
     public Stream<Object> cancelHearingDays(final UUID hearingId, final List<HearingDay> hearingDays) {
         return this.apply(this.hearingDelegate.cancelHearingDays(hearingId, hearingDays));
     }
@@ -527,5 +543,13 @@ public class HearingAggregate implements Aggregate {
                             && existingTarget.getDefendantId().equals(newTarget.getDefendantId()));
             return !offenceDefendantPresentForAnotherTargetId;
         }
+    }
+
+    public Stream<Object> validateResultsAmendments(final UUID hearingId, final UUID userId, final ZonedDateTime validateResultAmendmentsTime) {
+        return apply(Stream.of(ValidateResultAmendmentsRequested.validateResultAmendmentsRequested()
+                .withHearingId(hearingId)
+                .withUserId(userId)
+                .withValidateResultAmendmentsTime(validateResultAmendmentsTime)
+                .build()));
     }
 }

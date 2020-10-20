@@ -40,6 +40,7 @@ public class HearingJPAMapper {
     private HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper;
     private HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper;
     private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
+    private ApprovalRequestedJPAMapper approvalRequestedJPAMapper;
 
     @Inject
     public HearingJPAMapper(final CourtCentreJPAMapper courtCentreJPAMapper,
@@ -56,7 +57,8 @@ public class HearingJPAMapper {
                             final HearingRespondentCounselJPAMapper hearingRespondentCounselJPAMapper,
                             final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper,
                             final HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper,
-                            final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper) {
+                            final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper,
+                            final ApprovalRequestedJPAMapper approvalRequestedJPAMapper) {
         this.courtCentreJPAMapper = courtCentreJPAMapper;
         this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
         this.defendantAttendanceJPAMapper = defendantAttendanceJPAMapper;
@@ -72,6 +74,7 @@ public class HearingJPAMapper {
         this.hearingApplicantCounselJPAMapper = hearingApplicantCounselJPAMapper;
         this.hearingInterpreterIntermediaryJPAMapper = hearingInterpreterIntermediaryJPAMapper;
         this.hearingCompanyRepresentativeJPAMapper = hearingCompanyRepresentativeJPAMapper;
+        this.approvalRequestedJPAMapper = approvalRequestedJPAMapper;
     }
 
     //to keep cditester happy
@@ -112,6 +115,7 @@ public class HearingJPAMapper {
         hearing.setReportingRestrictionReason(pojo.getReportingRestrictionReason());
         hearing.setHearingType(hearingTypeJPAMapper.toJPA(pojo.getType()));
         hearing.setCourtApplicationsJson(courtApplicationsSerializer.json(pojo.getCourtApplications()));
+        hearing.setApprovalsRequested(approvalRequestedJPAMapper.toJPA(pojo.getApprovalsRequested()));
         return hearing;
     }
 
@@ -147,6 +151,7 @@ public class HearingJPAMapper {
                 .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
                 .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
                 .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
+                .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
                 .build();
     }
 

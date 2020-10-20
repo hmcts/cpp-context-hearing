@@ -71,6 +71,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 CancelHearingDaysCommandHandler.class,
                 RemoveTargetsCommandHandler.class,
                 AddMasterDefendantIdToDefendantCommandHandler.class,
+                RequestApprovalCommandHandler.class,
+                ValidateResultAmendmentsCommandHandler.class,
                 CorrectHearingDaysWithoutCourtCentreCommandHandler.class
         );
 

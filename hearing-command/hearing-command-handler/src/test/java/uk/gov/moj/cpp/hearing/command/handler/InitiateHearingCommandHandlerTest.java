@@ -3,10 +3,9 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.AllOf.allOf;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Plea.plea;
@@ -440,7 +439,7 @@ public class InitiateHearingCommandHandlerTest {
         final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
 
         JsonEnvelope jsonEnvelope = events.get(0);
-        assertThat(jsonEnvelope.metadata().name(), CoreMatchers.is("hearing.events.inherited-plea"));
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.events.inherited-plea"));
         assertThat(asPojo(jsonEnvelope, InheritedPlea.class),
                 BeanMatcher.isBean(InheritedPlea.class)
                         .with(InheritedPlea::getHearingId, is(input.getHearingId()))
@@ -474,7 +473,7 @@ public class InitiateHearingCommandHandlerTest {
 
         JsonEnvelope jsonEnvelope = events.get(0);
 
-        assertThat(jsonEnvelope.metadata().name(), CoreMatchers.is("hearing.events.inherited-verdict-added"));
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.events.inherited-verdict-added"));
         assertThat(asPojo(jsonEnvelope, InheritedVerdictAdded.class),
                 BeanMatcher.isBean(InheritedVerdictAdded.class)
                         .with(InheritedVerdictAdded::getHearingId, is(input.getHearingId()))

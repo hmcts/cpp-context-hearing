@@ -29,6 +29,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
@@ -59,6 +60,9 @@ public class HearingEventListener {
     private static final String LAST_UPDATED_AT = "lastUpdatedAt";
     private static final String RESULTS = "results";
     private static final String CHILD_RESULT_LINES = "childResultLines";
+
+    @Inject
+    private ApprovalRequestedRepository approvalRequestedRepository;
 
     @Inject
     private HearingRepository hearingRepository;
@@ -179,6 +183,7 @@ public class HearingEventListener {
                 hearing.getTargets().clear();
                 targets.forEach(targetIn -> updateDraftResult(hearing, targetIn, resultsShared.getSharedTime()));
                 hearingRepository.save(hearing);
+                approvalRequestedRepository.removeAllRequestApprovals(hearing.getId());
             }
         }
     }

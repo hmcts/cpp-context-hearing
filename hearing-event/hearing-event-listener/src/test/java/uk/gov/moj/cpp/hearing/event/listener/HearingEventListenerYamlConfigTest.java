@@ -2,51 +2,15 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.junit.Before;
+import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
-import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
-import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
-import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
-import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
-import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
-import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
-import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
-import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
-import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
-import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
-import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
-import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
-import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.*;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
@@ -61,10 +25,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.junit.Before;
-import org.junit.Test;
 
 public class HearingEventListenerYamlConfigTest {
 
@@ -152,7 +112,9 @@ public class HearingEventListenerYamlConfigTest {
                 SessionTimeEventListener.class,
                 HearingVacatedTrialDetailChangeEventListener.class,
                 TargetRemoved.class,
-                HearingDaysWithoutCourtCenterCorrectedEventListener.class));
+                HearingDaysWithoutCourtCenterCorrectedEventListener.class,
+                ApprovalRequestedEventListener.class,
+                ValidateResultAmendmentsRequestedEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

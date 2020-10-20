@@ -461,3 +461,39 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             202:
                 description: OK
 
+
+/request-approval:
+  post:
+    description: |
+      Request Approval:
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.request-approval+json
+        name: hearing.request-approval
+      ...
+    body:
+      application/vnd.hearing.request-approval+json:
+        schema: !include json/schema/hearing.request-approval.json
+        example: !include json/hearing.request-approval.json
+
+    responses:
+      202:
+        description: Request accepted
+
+/validate-result-amendments:
+  post:
+    description: |
+      Validate Result Amendments :
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.validate-result-amendments+json
+        name: hearing.validate-result-amendments
+      ...
+    body:
+      application/vnd.hearing.validate-result-amendments+json:
+        schema: !include json/schema/hearing.validate-result-amendments.json
+        example: !include json/hearing.validate-result-amendments.json
+
+    responses:
+      202:
+        description: Request accepted

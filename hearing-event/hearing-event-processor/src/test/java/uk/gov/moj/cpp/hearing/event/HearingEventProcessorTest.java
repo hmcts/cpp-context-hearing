@@ -1,8 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static com.google.common.io.Resources.getResource;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
 import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZoneId.of;
 import static java.time.ZonedDateTime.now;
@@ -11,14 +9,14 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -29,6 +27,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.COMMAND_REQUEST_APPROVAL;
 
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.HearingDay;
@@ -44,6 +43,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.hearing.command.result.RequestApprovalCommand;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
@@ -55,7 +55,6 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -76,6 +75,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -84,7 +84,6 @@ import org.mockito.Spy;
 @SuppressWarnings({"unchecked", "unused"})
 @RunWith(DataProviderRunner.class)
 public class HearingEventProcessorTest {
-
     private static final String HEARING_INITIATED_EVENT = "hearing.initiated";
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String DRAFT_RESULT_SAVED_PRIVATE_EVENT = "hearing.draft-result-saved";
@@ -171,6 +170,8 @@ public class HearingEventProcessorTest {
     private static final String FIELD_JUDGE_FIRST_NAME = "firstName";
     private static final String FIELD_JUDGE_LAST_NAME = "lastName";
     private static final String FIELD_JUDGE_TITLE = "title";
+    private static final UUID USER_ID = randomUUID();
+
     @Spy
     private final Enveloper enveloper = createEnveloper();
     @Spy
@@ -216,19 +217,22 @@ public class HearingEventProcessorTest {
     @Test
     public void shouldPublishDraftResultSavedPublicEvent() {
         final String draftResult = "some random text";
-        final Target target = CoreTestTemplates.target(randomUUID(), randomUUID(), randomUUID(), randomUUID()).build();
+        final Target target = CoreTestTemplates.target(HEARING_ID, USER_ID, randomUUID(), randomUUID()).build();
         final JsonEnvelope eventIn = createDraftResultSavedPrivateEvent(target);
-
+        final InOrder inOrder = inOrder(sender);
         this.hearingEventProcessor.publicDraftResultSavedPublicEvent(eventIn);
 
-        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        inOrder.verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+
         final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
-        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED));
-        final PublicHearingDraftResultSaved publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingDraftResultSaved.class);
-        assertThat(publicEventOut.getDefendantId(), is(target.getDefendantId()));
-        assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
-        assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
-        assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
+        assertThat(envelopeOut.metadata().name(), is(COMMAND_REQUEST_APPROVAL));
+
+        final RequestApprovalCommand requestApprovalCommand = jsonObjectToObjectConverter
+                .convert(envelopeOut.payloadAsJsonObject(), RequestApprovalCommand.class);
+
+        assertThat(requestApprovalCommand.getHearingId(), is(HEARING_ID));
+        assertThat(requestApprovalCommand.getUserId(), is(USER_ID));
+        assertThat(requestApprovalCommand.getApprovalType(), is(CHANGE));
     }
 
     @Test
@@ -439,7 +443,7 @@ public class HearingEventProcessorTest {
 
     private JsonEnvelope createDraftResultSavedPrivateEvent(final uk.gov.justice.core.courts.Target target) {
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(target);
-        return envelope().withPayloadOf(jsonObject, "target").with(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT)).build();
+        return envelope().withPayloadOf(jsonObject, "target").with(metadataWithRandomUUID(DRAFT_RESULT_SAVED_PRIVATE_EVENT).withUserId(USER_ID.toString())).build();
     }
 
     private JsonEnvelope createDraftResultSavedPrivateEvent(String draftResult) {

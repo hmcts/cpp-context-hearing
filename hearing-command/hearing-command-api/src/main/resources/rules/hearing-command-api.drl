@@ -5,6 +5,7 @@ import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import java.util.Arrays;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
+global uk.gov.moj.cpp.accesscontrol.hearing.providers.HearingProvider hearingProvider;
 
 rule "Command - API - Action - hearing.initiate"
   when
@@ -405,6 +406,27 @@ rule "Command - API - Action -  hearing.correct-hearing-days-without-court-centr
     $outcome: Outcome();
     $action: Action(name == "hearing.correct-hearing-days-without-court-centre");
    eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.request-approval"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.request-approval");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Associate", "Legal Advisers", "Court Clerks"));
+  then
+    $outcome.setSuccess(true);
+end
+
+
+rule "Command - API - Action - hearing.validate-result-amendments"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.validate-result-amendments");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Associate", "Legal Advisers", "Court Clerks")
+        && hearingProvider.isUserAllowedToApproveResultAmendment($action)
+   );
   then
     $outcome.setSuccess(true);
 end

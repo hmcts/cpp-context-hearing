@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.validate-result-amendments-requested.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "userId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "validateResultAmendmentsTime": {
+      "description": "The request approval date and time ",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "hearingId",
+    "userId",
+    "validateResultAmendmentsTime"
+  ],
+  "additionalProperties": false
+}

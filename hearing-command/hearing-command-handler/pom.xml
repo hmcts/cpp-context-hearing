@@ -95,5 +95,11 @@
             <version>${test-utils-enveloper-provider.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.utils</groupId>
+            <artifactId>test-utils-framework-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 </project>

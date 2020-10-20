@@ -8,6 +8,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
@@ -39,10 +40,10 @@ public class ReferenceDataServiceTest {
     private ReferenceDataService referenceDataService;
 
     @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter= new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Mock
     private Requester requester;

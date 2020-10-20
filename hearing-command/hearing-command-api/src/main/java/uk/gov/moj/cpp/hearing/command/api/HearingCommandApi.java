@@ -239,6 +239,16 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.add-master-defendant-id-to-defendant");
     }
 
+    @Handles("hearing.request-approval")
+    public void requestApproval(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.request-approval");
+    }
+
+    @Handles("hearing.validate-result-amendments")
+    public void validateResultAmendments(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.validate-result-amendments");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *

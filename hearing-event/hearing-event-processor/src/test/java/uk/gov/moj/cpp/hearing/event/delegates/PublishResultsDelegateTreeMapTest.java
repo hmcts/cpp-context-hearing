@@ -2,8 +2,12 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Spy;
+
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilder;
@@ -42,6 +46,10 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest {
 
     private ResultTreeBuilder resultTreeBuilder;
+
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Before
     public void setUp() throws IOException {

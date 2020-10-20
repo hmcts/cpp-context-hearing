@@ -50,13 +50,13 @@ public class InitiateHearingEventProcessorTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
-    @Spy
-    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
-    @Spy
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+
     @InjectMocks
     private InitiateHearingEventProcessor initiateHearingEventProcessor;
     @Mock

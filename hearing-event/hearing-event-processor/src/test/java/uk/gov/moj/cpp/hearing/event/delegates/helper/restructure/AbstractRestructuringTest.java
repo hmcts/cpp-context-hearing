@@ -131,11 +131,10 @@ public abstract class AbstractRestructuringTest {
     protected final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Spy
-    protected final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
-
+    protected JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    protected final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    protected ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Spy
     @InjectMocks

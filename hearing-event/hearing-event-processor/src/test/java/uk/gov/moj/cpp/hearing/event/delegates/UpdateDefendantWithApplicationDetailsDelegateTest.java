@@ -61,11 +61,7 @@ public class UpdateDefendantWithApplicationDetailsDelegateTest {
     private ResultsShared.Builder resultsSharedBuilder;
 
     @Spy
-    private final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
-
-    @Spy
-    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
-
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
