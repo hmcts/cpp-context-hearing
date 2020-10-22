@@ -89,11 +89,11 @@ public class CustodyTimeLimitCalculator {
             return null;
         }
 
-        final JudicialResultPrompt daysSpentPrompt = judicialResult.getJudicialResultPrompts().stream()
+        final int daysSpent= judicialResult.getJudicialResultPrompts().stream()
                 .filter(p -> CTL_DAYS_SPENT_PROMPT_REF.equalsIgnoreCase(p.getPromptReference()))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException(String.format("failed to find day spent in judicialResult %s", judicialResult.getJudicialResultId())));
-        final int daysSpent = Integer.parseInt(daysSpentPrompt.getValue().trim());
+                .map(judicialResultPrompt -> Integer.parseInt(judicialResultPrompt.getValue().trim()))
+                .orElse(DEFAULT_DEFENDANT_LEVEL_TIME_SPENT_DAYS);
 
         final LocalDate timeLimit = LocalDate.parse(timeLimitPrompt.get().getValue(), DateTimeFormatter.ofPattern(DATE_FORMAT));
         return new CustodyTimeLimit(daysSpent, timeLimit);
