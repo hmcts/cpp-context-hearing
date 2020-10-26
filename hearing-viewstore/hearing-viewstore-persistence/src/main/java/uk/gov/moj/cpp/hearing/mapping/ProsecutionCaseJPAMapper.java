@@ -44,7 +44,7 @@ public class ProsecutionCaseJPAMapper {
         prosecutionCase.setOriginatingOrganisation(pojo.getOriginatingOrganisation());
         prosecutionCase.setInitiationCode(pojo.getInitiationCode());
         prosecutionCase.setCaseStatus(pojo.getCaseStatus());
-        prosecutionCase.setMarkers(caseMarkerJPAMapper.toJPA(hearing, prosecutionCase, pojo.getCaseMarkers()));
+        prosecutionCase.setMarkers(caseMarkerJPAMapper.toJPA(hearing.getId(), prosecutionCase, pojo.getCaseMarkers()));
         prosecutionCase.setStatementOfFacts(pojo.getStatementOfFacts());
         prosecutionCase.setStatementOfFactsWelsh(pojo.getStatementOfFactsWelsh());
         prosecutionCase.setDefendants(defendantJPAMapper.toJPA(hearing, prosecutionCase, pojo.getDefendants()));

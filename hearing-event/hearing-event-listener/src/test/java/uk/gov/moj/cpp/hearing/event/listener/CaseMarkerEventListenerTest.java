@@ -10,16 +10,6 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -31,11 +21,23 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CaseMarkerEventListenerTest {
@@ -91,7 +93,7 @@ public class CaseMarkerEventListenerTest {
         caseMarkers.add(caseMarker);
 
         when(this.prosecutionCaseRepository.findBy(any())).thenReturn(prosecutionCase);
-        when(this.caseMarkerJPAMapper.toJPA(hearing, prosecutionCase, markers)).thenReturn(caseMarkers);
+        when(this.caseMarkerJPAMapper.toJPA(hearing.getId(), prosecutionCase, markers)).thenReturn(caseMarkers);
         this.caseMarkerEventListener.caseMarkersUpdated(envelopeFrom(metadataWithRandomUUID("hearing.events.case-markers-updated"),
                 objectToJsonObjectConverter.convert(caseMarkersUpdated)));
 

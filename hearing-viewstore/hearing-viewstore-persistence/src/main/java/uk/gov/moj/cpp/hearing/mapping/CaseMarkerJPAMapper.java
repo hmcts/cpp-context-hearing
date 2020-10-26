@@ -2,18 +2,12 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static javax.json.Json.createObjectBuilder;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CaseMarker;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
-import javax.enterprise.context.ApplicationScoped;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
+
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -21,6 +15,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonReader;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SuppressWarnings("squid:S1186")
 @ApplicationScoped
@@ -34,19 +36,19 @@ public class CaseMarkerJPAMapper {
 
     public CaseMarkerJPAMapper() {}
 
-    public Set<CaseMarker> toJPA(Hearing hearing, final ProsecutionCase prosecutionCase, final List<uk.gov.justice.core.courts.Marker> pojos) {
+    public Set<CaseMarker> toJPA(final UUID hearingId, final ProsecutionCase prosecutionCase, final List<uk.gov.justice.core.courts.Marker> pojos) {
         if (null == pojos) {
             return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, prosecutionCase, pojo)).collect(Collectors.toSet());
+        return pojos.stream().map(pojo -> toJPA(hearingId, prosecutionCase, pojo)).collect(Collectors.toSet());
     }
 
-    public CaseMarker toJPA(final Hearing hearing, final ProsecutionCase prosecutionCase, final uk.gov.justice.core.courts.Marker pojo) {
+    public CaseMarker toJPA(final UUID hearingId, final ProsecutionCase prosecutionCase, final uk.gov.justice.core.courts.Marker pojo) {
         if (null == pojo) {
             return null;
         }
         final CaseMarker caseMarker = new CaseMarker();
-        caseMarker.setId(new HearingSnapshotKey(pojo.getId(), hearing.getId()));
+        caseMarker.setId(new HearingSnapshotKey(pojo.getId(), hearingId));
         caseMarker.setProsecutionCase(prosecutionCase);
         caseMarker.setProsecutionCaseId(prosecutionCase.getId().getId());
 
