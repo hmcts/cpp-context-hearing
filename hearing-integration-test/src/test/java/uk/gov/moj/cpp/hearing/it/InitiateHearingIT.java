@@ -1,13 +1,24 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.core.AllOf.allOf;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
+import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
@@ -25,6 +36,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -74,10 +86,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import org.hamcrest.Matcher;
+import org.hamcrest.core.Is;
 import org.junit.Test;
 
 public class InitiateHearingIT extends AbstractIT {
@@ -1044,6 +1058,58 @@ public class InitiateHearingIT extends AbstractIT {
                                 ))
                         ))
         );
+    }
+
+    @Test
+    public void shouldRemoveHearingFromViewStoreAndRaisePublicEventWhenMarkedAsDuplicate() {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final Hearing hearing = hearingOne.getHearing();
+        final UUID hearingId = hearing.getId();
+        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
+        final UUID prosecutionCaseId = prosecutionCase.getId();
+        final Defendant defendant = prosecutionCase.getDefendants().get(0);
+        final UUID defendantId = defendant.getId();
+        final Offence offence = defendant.getOffences().get(0);
+        final UUID offenceId = offence.getId();
+
+
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingId))
+                )
+        );
+
+        try (final Utilities.EventListener publicEventResulted = listenFor("public.events.hearing.marked-as-duplicate")
+                .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))))
+                .withFilter(isJson(withJsonPath("$.prosecutionCaseIds[0]", Is.is(prosecutionCaseId.toString()))))
+                .withFilter(isJson(withJsonPath("$.defendantIds[0]", Is.is(defendantId.toString()))))
+                .withFilter(isJson(withJsonPath("$.offenceIds[0]", Is.is(offenceId.toString()))))) {
+            markHearingAsADuplicate(hearingId);
+            publicEventResulted.waitFor();
+        }
+
+        assertHearingHasBeenRemovedFromViewStore(hearingId);
+    }
+
+    private void markHearingAsADuplicate(final UUID hearingId) {
+        makeCommand(getRequestSpec(), "hearing.mark-as-duplicate")
+                .ofType("application/vnd.hearing.duplicate+json")
+                .withArgs(hearingId)
+                .withCppUserId(USER_ID_VALUE_AS_ADMIN)
+                .executeSuccessfully();
+    }
+
+    private void assertHearingHasBeenRemovedFromViewStore(final UUID hearingId) {
+        poll(requestParams(getURL("hearing.get.hearing", hearingId),
+                "application/vnd.hearing.get.hearing+json").withHeader(USER_ID, getLoggedInAdminUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withoutJsonPath("$.hearing.id")//,
+                        ))
+                );
     }
 
     public Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {

@@ -24,7 +24,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,18 +40,6 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.initiate event received {}", envelope.toObfuscatedDebugString());
         }
         final InitiateHearingCommand command = convertToObject(envelope, InitiateHearingCommand.class);
-        // initiate Hearing command must not contain verdict and plea
-        if (command.getHearing().getProsecutionCases() != null) {
-            command.getHearing().getProsecutionCases().stream()
-                    .flatMap(p -> p.getDefendants().stream())
-                    .collect(Collectors.toList())
-                    .stream()
-                    .flatMap(d -> d.getOffences().stream())
-                    .forEach(o -> {
-                        o.setVerdict(null);
-                        o.setPlea(null);
-                    });
-        }
 
         aggregate(HearingAggregate.class, command.getHearing().getId(), envelope, a -> a.initiate(command.getHearing()));
 

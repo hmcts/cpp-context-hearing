@@ -40,6 +40,23 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.clear-vacated-trial.json
             example: !include json/hearing.command.clear-vacated-trial.json
 
+  # Mark Hearing as Duplicate
+        application/vnd.hearing.command.mark-as-duplicate+json:
+            schema: !include json/schema/hearing.command.mark-as-duplicate.json
+            example: !include json/hearing.command.mark-as-duplicate.json
+
+        application/vnd.hearing.command.mark-as-duplicate-for-cases+json:
+            schema: !include json/schema/hearing.command.mark-as-duplicate-for-cases.json
+            example: !include json/hearing.command.mark-as-duplicate-for-cases.json
+
+        application/vnd.hearing.command.mark-as-duplicate-for-defendants+json:
+            schema: !include json/schema/hearing.command.mark-as-duplicate-for-defendants.json
+            example: !include json/hearing.command.mark-as-duplicate-for-defendants.json
+
+        application/vnd.hearing.command.mark-as-duplicate-for-offences+json:
+            schema: !include json/schema/hearing.command.mark-as-duplicate-for-offences.json
+            example: !include json/hearing.command.mark-as-duplicate-for-offences.json
+
 # Log Event
         application/vnd.hearing.command.log-hearing-event+json:
             example: !include json/hearing.command.log-hearing-event.json

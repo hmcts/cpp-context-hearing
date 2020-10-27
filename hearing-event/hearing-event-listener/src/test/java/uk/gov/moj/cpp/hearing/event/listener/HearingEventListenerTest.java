@@ -6,6 +6,7 @@ import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -15,6 +16,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithDefaults;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
@@ -90,6 +92,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -232,8 +235,8 @@ public class HearingEventListenerTest {
 
     @Test
     public void shouldRegisterHearingAgainstApplication() {
-        final UUID hearingId = UUID.randomUUID();
-        final UUID applicationId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
         final RegisteredHearingAgainstApplication registeredHearingAgainstApplication = new RegisteredHearingAgainstApplication(applicationId, hearingId);
 
         hearingEventListener.registerHearingAgainstApplication(envelopeFrom(metadataWithRandomUUID("hearing.events.registered-hearing-against-application"),
@@ -244,6 +247,31 @@ public class HearingEventListenerTest {
 
         assertThat(saveHearingApplicationCaptor.getValue().getId().getApplicationId(), is(applicationId));
         assertThat(saveHearingApplicationCaptor.getValue().getId().getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void shouldHandleHearingMarkedAsDuplicate() {
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = Mockito.mock(Hearing.class);
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        hearingEventListener.handleHearingMarkedAsDuplicate(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(hearingRepository).remove(hearing);
+    }
+
+    @Test
+    public void shouldHandleHearingMarkedAsDuplicateWhenExistingHearingNotFound() {
+        final UUID hearingId = randomUUID();
+        when(hearingRepository.findBy(hearingId)).thenReturn(null);
+
+        hearingEventListener.handleHearingMarkedAsDuplicate(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build()));
+
+        verify(hearingRepository, never()).remove(Mockito.any(Hearing.class));
     }
 
     private ResultsShared resultsSharedTemplate() {
@@ -351,7 +379,7 @@ public class HearingEventListenerTest {
         final UUID applicationId = randomUUID();
         final ApplicationDraftResult applicationDraftResult = new ApplicationDraftResult();
         final CourtApplicationOutcomeType courtApplicationOutcomeType = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Admitted")
-                .withId(UUID.randomUUID())
+                .withId(randomUUID())
                 .withSequence(1).build();
         final CourtApplicationOutcome courtApplicationOutcome = new CourtApplicationOutcome(applicationId, LocalDate.now(), courtApplicationOutcomeType, hearingId);
         final String applicationJson = "application json";

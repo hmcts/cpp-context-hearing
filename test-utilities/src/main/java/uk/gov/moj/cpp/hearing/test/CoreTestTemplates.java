@@ -273,17 +273,14 @@ public class CoreTestTemplates {
                     .withOffenceDateCode(args.getOffenceDateCode());
         }
 
-
         final Offence.Builder result = Offence.offence()
                 .withId(offenceId)
                 .withStartDate(PAST_LOCAL_DATE.next())
                 .withEndDate(PAST_LOCAL_DATE.next())
                 .withArrestDate(PAST_LOCAL_DATE.next())
                 .withChargeDate(PAST_LOCAL_DATE.next())
-
-                .withIndicatedPlea(indicatedPlea(offenceId, args.indicatedPlea).build())
+                .withIndicatedPlea(args.indicatedPlea == null ? null : indicatedPlea(offenceId, args.indicatedPlea).build())
                 .withNotifiedPlea(notifiedPlea(offenceId).build())
-
                 .withOffenceDefinitionId(randomUUID())
                 .withOffenceTitle(STRING.next())
                 .withOffenceTitleWelsh(STRING.next())
@@ -293,7 +290,7 @@ public class CoreTestTemplates {
                 .withOffenceLegislationWelsh(STRING.next())
                 .withWording(STRING.next())
                 .withWordingWelsh(STRING.next())
-                .withModeOfTrial(STRING.next())
+                .withModeOfTrial("Either Way")
                 .withOrderIndex(INTEGER.next())
                 .withProceedingsConcluded(true)
                 .withIsDiscontinued(true)

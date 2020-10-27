@@ -26,7 +26,7 @@ import java.util.UUID;
 
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -48,6 +48,7 @@ public class HearingAggregateMomento implements Serializable {
     private Map<UUID, LocalDate> convictionDates = new HashMap<>();
     private Map<UUID, Target> savedTargets = new HashMap<>();
     private boolean published = false;
+    private boolean duplicate = false;
 
     public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
         return hearingEvents;
@@ -151,5 +152,13 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, CompanyRepresentative> getCompanyRepresentatives() {
         return companyRepresentatives;
+    }
+
+    public boolean isDuplicate() {
+        return duplicate;
+    }
+
+    public void setDuplicate(final boolean duplicate) {
+        this.duplicate = duplicate;
     }
 }

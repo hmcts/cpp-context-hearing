@@ -70,7 +70,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails", "addMasterDefendantIdToDefendant","correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments");
+            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails", "addMasterDefendantIdToDefendant","correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing");
 
     public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -515,6 +515,15 @@ public class HearingCommandApiTest {
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.add-master-defendant-id-to-defendant");
     }
 
+    @Test
+    public void shouldPassThroughMarkAsDuplicateToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.mark-as-duplicate");
+
+        hearingCommandApi.markAsDuplicateHearing(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.mark-as-duplicate");
+    }
+
     private JsonEnvelope buildDummyJsonRequestEnvelopeWithName(final String name) {
         return envelopeFrom(metadataWithRandomUUID(name).withCausation(randomUUID())
                         .build(),
@@ -523,7 +532,8 @@ public class HearingCommandApiTest {
                         .build());
     }
 
-    private void assertEnvelopeIsPassedThroughWithName(final JsonObject originalPayload, final String expectedName) {
+    private void assertEnvelopeIsPassedThroughWithName(final JsonObject originalPayload,
+                                                       final String expectedName) {
         verify(sender).send(senderArgumentCaptor1.capture());
 
         final Envelope<JsonObject> actualSentEnvelope = senderArgumentCaptor1.getValue();
@@ -531,7 +541,8 @@ public class HearingCommandApiTest {
         assertThat(actualSentEnvelope.payload(), is(originalPayload));
     }
 
-    private <T> void assertHandlerMethodsArePassThrough(final Class<T> commandApiClass, final Map<String, String> methodsToHandlerNamesMap) {
+    private <T> void assertHandlerMethodsArePassThrough(final Class<T> commandApiClass,
+                                                        final Map<String, String> methodsToHandlerNamesMap) {
         for (final Map.Entry<String, String> entry : methodsToHandlerNamesMap.entrySet()) {
             assertThat(commandApiClass, isHandlerClass(COMMAND_API)
                     .with(method(entry.getKey())

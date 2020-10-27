@@ -4,17 +4,17 @@ import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
 
-import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.core.courts.Offence;
-
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
@@ -35,16 +35,14 @@ public class OffenceAggregate implements Aggregate {
 
     private List<UUID> hearingIds = new ArrayList<>();
 
-    public List<UUID> getHearingIds() {
-        return this.hearingIds;
-    }
-
+    @SuppressWarnings("squid:S2250")
     @Override
     public Object apply(final Object event) {
         return match(event).with(
                 when(OffencePleaUpdated.class).apply(plea -> this.offencePleaUpdated = plea),
                 when(OffenceVerdictUpdated.class).apply(verdict -> this.offenceVerdictUpdated = verdict),
                 when(RegisteredHearingAgainstOffence.class).apply(offence -> hearingIds.add(offence.getHearingId())),
+                when(HearingMarkedAsDuplicateForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 otherwiseDoNothing()
         );
     }
@@ -108,7 +106,7 @@ public class OffenceAggregate implements Aggregate {
     }
 
     public Stream<Object> lookupHearingsForDeleteOffenceOnOffence(final UUID offenceId) {
-        return this.hearingIds.isEmpty() ? Stream.empty() :apply(Stream.of(FoundHearingsForDeleteOffence.builder()
+        return this.hearingIds.isEmpty() ? Stream.empty() : apply(Stream.of(FoundHearingsForDeleteOffence.builder()
                 .withId(offenceId)
                 .withHearingIds(hearingIds)
                 .build()));
@@ -128,5 +126,9 @@ public class OffenceAggregate implements Aggregate {
         }
 
         return apply(streamBuilder.build());
+    }
+
+    public Stream<Object> markHearingAsDuplicate(final UUID offenceId, final UUID hearingId) {
+        return apply(Stream.of(new HearingMarkedAsDuplicateForOffence(offenceId, hearingId)));
     }
 }

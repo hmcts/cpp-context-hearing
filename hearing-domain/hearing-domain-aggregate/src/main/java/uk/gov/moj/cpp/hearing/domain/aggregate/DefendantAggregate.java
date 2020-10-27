@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.nces.ApplicationDetailsForDefendant;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithApplicationDetails;
@@ -47,6 +48,7 @@ public class DefendantAggregate implements Aggregate {
 
     private final Map<UUID, OffenceResult> offenceResults = new HashMap<>();
 
+    @SuppressWarnings("squid:S2250")
     @Override
     public Object apply(Object event) {
 
@@ -63,6 +65,7 @@ public class DefendantAggregate implements Aggregate {
                         }),
                         when(DefendantLegalAidStatusUpdated.class).apply(e -> {
                         }),
+                        when(HearingMarkedAsDuplicateForDefendant.class).apply(e -> hearingIds.remove(e.getHearingId())),
                         otherwiseDoNothing()
                 );
     }
@@ -90,7 +93,7 @@ public class DefendantAggregate implements Aggregate {
     }
 
     public Stream<Object> lookupHearingsForNewOffenceOnDefendant(final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
-        return  hearingIds.isEmpty() ? empty() :apply(Stream.of(FoundHearingsForNewOffence.foundHearingsForNewOffence()
+        return hearingIds.isEmpty() ? empty() : apply(Stream.of(FoundHearingsForNewOffence.foundHearingsForNewOffence()
                 .withDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withOffence(offence)
@@ -99,7 +102,7 @@ public class DefendantAggregate implements Aggregate {
     }
 
     public Stream<Object> updateDefendantLegalAidStatus(final UUID defendantId, final String legalAidStatus) {
-        if(!hearingIds.isEmpty()) {
+        if (!hearingIds.isEmpty()) {
             return apply(Stream.of(DefendantLegalAidStatusUpdated.defendantLegalAidStatusUpdatedBuilder()
                     .withDefendantId(defendantId)
                     .withLegalAidStatus(legalAidStatus)
@@ -123,23 +126,6 @@ public class DefendantAggregate implements Aggregate {
                 .withApplicationTypeId(updateDefendantWithApplicationDetails.getApplicationTypeId())
                 .withApplicationOutcomeTypeId(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId())
                 .build()));
-    }
-
-    public void handleUpdateDefendantWithFinancialOrder(final DefendantUpdateWithFinancialOrderDetails defendantUpdateWithFinancialOrderDetails) {
-        this.momento.setFinancialOrderForDefendant(defendantUpdateWithFinancialOrderDetails.getFinancialOrderForDefendant());
-    }
-
-    public void handleUpdateDefendantWithApplicationDetails(final DefendantUpdateWithApplicationDetails defendantWithApplicationDetails) {
-        this.momento.setApplicationDetailsForDefendant(defendantWithApplicationDetails.getApplicationDetailsForDefendant());
-    }
-
-    @SuppressWarnings({"squid:S1172"})
-    private void handleRemoveGrantedApplicationDetailsForDefendant(final RemoveGrantedApplicationDetailsForDefendant removeGrantedApplicationDetailsForDefendant) {
-        this.momento.setApplicationDetailsForDefendant(null);
-    }
-
-    public void setMomento(DefendantAggregateMomento momento) {
-        this.momento = momento;
     }
 
     public Stream<Object> updateOffenceResults(final UUID defendantId, final UUID caseId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> updatedResults) {
@@ -166,6 +152,28 @@ public class DefendantAggregate implements Aggregate {
 
         return apply(builder.build());
     }
+
+    public Stream<Object> markHearingAsDuplicate(final UUID defendantId, final UUID hearingId) {
+        return apply(Stream.of(new HearingMarkedAsDuplicateForDefendant(defendantId, hearingId)));
+    }
+
+    public void handleUpdateDefendantWithFinancialOrder(final DefendantUpdateWithFinancialOrderDetails defendantUpdateWithFinancialOrderDetails) {
+        this.momento.setFinancialOrderForDefendant(defendantUpdateWithFinancialOrderDetails.getFinancialOrderForDefendant());
+    }
+
+    public void handleUpdateDefendantWithApplicationDetails(final DefendantUpdateWithApplicationDetails defendantWithApplicationDetails) {
+        this.momento.setApplicationDetailsForDefendant(defendantWithApplicationDetails.getApplicationDetailsForDefendant());
+    }
+
+    @SuppressWarnings({"squid:S1172"})
+    private void handleRemoveGrantedApplicationDetailsForDefendant(final RemoveGrantedApplicationDetailsForDefendant removeGrantedApplicationDetailsForDefendant) {
+        this.momento.setApplicationDetailsForDefendant(null);
+    }
+
+    public void setMomento(final DefendantAggregateMomento momento) {
+        this.momento = momento;
+    }
+
 
     private void updateOffenceResults(final Map<UUID, OffenceResult> offenceResultsCopy, final List<UUID> offenceIds, final Map<UUID, OffenceResult> results) {
         offenceIds.stream().forEach(offenceId -> offenceResultsCopy.putIfAbsent(offenceId, OffenceResult.ADJOURNED));

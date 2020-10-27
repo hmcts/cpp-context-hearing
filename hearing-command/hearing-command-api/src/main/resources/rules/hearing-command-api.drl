@@ -392,15 +392,6 @@ rule "Command - API - Action -  hearing.change-hearing-detail"
     $outcome.setSuccess(true);
 end
 
-rule "Command - API - Action - hearing.add-master-defendant-id-to-defendant"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.add-master-defendant-id-to-defendant");
-   eval(userAndGroupProvider.isSystemUser($action));
-  then
-    $outcome.setSuccess(true);
-end
-
 rule "Command - API - Action -  hearing.correct-hearing-days-without-court-centre"
   when
     $outcome: Outcome();
@@ -427,6 +418,24 @@ rule "Command - API - Action - hearing.validate-result-amendments"
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Associate", "Legal Advisers", "Court Clerks")
         && hearingProvider.isUserAllowedToApproveResultAmendment($action)
    );
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.add-master-defendant-id-to-defendant"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-master-defendant-id-to-defendant");
+   eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.mark-as-duplicate"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.mark-as-duplicate");
+    eval(userAndGroupProvider.isSystemUser($action));
   then
     $outcome.setSuccess(true);
 end

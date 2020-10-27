@@ -22,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON;
@@ -34,12 +35,16 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
+import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -472,6 +477,38 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
         assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
         assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAquittalDate().toString(), is("2020-08-18"));
+    }
+
+    @Test
+    public void shouldSetIndicatedPleaOnShareResults() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON, ResultsShared.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+
+        target.shareResults(envelope, sender, resultsShared);
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
+
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+
+        final Plea plea = defendant.get().getOffences().get(0).getPlea();
+        assertThat(defendant.get().getOffences().get(0).getModeOfTrial(), is("Either Way"));
+        assertThat(plea.getPleaDate().toString(), is("2018-06-24"));
+        assertThat(plea.getPleaValue(), is("INDICATED_GUILTY"));
+        assertThat(plea.getOffenceId().toString(), is("47ecee20-0215-11ea-9bbd-b1f5a4493d17"));
+        assertThat(plea.getOriginatingHearingId().toString(), is("31048c0d-e937-49fb-bfc5-02abc56d3f6a"));
+
+        final IndicatedPlea indicatedPlea = defendant.get().getOffences().get(0).getIndicatedPlea();
+        assertThat(indicatedPlea.getIndicatedPleaDate().toString(), is("2018-06-24"));
+        assertThat(indicatedPlea.getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
+        assertThat(indicatedPlea.getOffenceId().toString(), is("47ecee20-0215-11ea-9bbd-b1f5a4493d17"));
+        assertThat(indicatedPlea.getOriginatingHearingId().toString(), is("31048c0d-e937-49fb-bfc5-02abc56d3f6a"));
+        assertThat(indicatedPlea.getSource(), is(Source.IN_COURT));
     }
 
     private void setJudicialResultsWithCategoryOf(final ResultsShared expected, final Category category) {

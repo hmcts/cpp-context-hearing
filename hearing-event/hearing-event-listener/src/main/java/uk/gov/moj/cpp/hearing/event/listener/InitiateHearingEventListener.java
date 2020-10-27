@@ -204,7 +204,7 @@ public class InitiateHearingEventListener {
     public void hearingInitiatedVerdictData(final JsonEnvelope envelop) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.inherited-plea event received {}", envelop.toObfuscatedDebugString());
+            LOGGER.debug("hearing.events.inherited-verdict-added event received {}", envelop.toObfuscatedDebugString());
         }
 
         final InheritedVerdictAdded event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), InheritedVerdictAdded.class);

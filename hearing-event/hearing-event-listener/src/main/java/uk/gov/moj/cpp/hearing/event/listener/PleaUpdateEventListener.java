@@ -58,20 +58,21 @@ public class PleaUpdateEventListener {
         if (nonNull(offence)) {
             if (Objects.nonNull(event.getPleaModel().getPlea())) {
                 offence.setPlea(pleaJpaMapper.toJPA(event.getPleaModel().getPlea()));
-            }else{
+            } else {
                 offence.setPlea(null);
             }
             if (Objects.nonNull(event.getPleaModel().getAllocationDecision())) {
                 offence.setAllocationDecision(allocationDecisionJPAMapper.toJPA(event.getPleaModel().getAllocationDecision()));
+            } else {
+                offence.setAllocationDecision(null);
             }
             if (Objects.nonNull(event.getPleaModel().getIndicatedPlea())) {
                 offence.setIndicatedPlea(indicatedPleaJPAMapper.toJPA(event.getPleaModel().getIndicatedPlea()));
-            }else{
+            } else {
                 offence.setIndicatedPlea(null);
             }
             offenceRepository.save(offence);
         }
-
     }
 
     private PleaUpsert convertToObject(final JsonEnvelope envelop) {

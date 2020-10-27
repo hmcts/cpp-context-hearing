@@ -118,11 +118,14 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.remove-targets+json
             name: hearing.remove-targets
         (mapping):
-            requestType: application/vnd.hearing.change-hearing-detail+json
-            name: hearing.change-hearing-detail
-        (mapping):
             requestType: application/vnd.hearing.master-defendant-id+json
             name: hearing.add-master-defendant-id-to-defendant
+        (mapping):
+            requestType: application/vnd.hearing.duplicate+json
+            name: hearing.mark-as-duplicate
+        (mapping):
+            requestType: application/vnd.hearing.change-hearing-detail+json
+            name: hearing.change-hearing-detail
         ...
       body:
         application/vnd.hearing.save-draft-result+json:
@@ -224,6 +227,7 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.master-defendant-id+json:
             example: !include json/hearing.add-master-defendant-id-to-defendant.json
             schema: !include json/schema/hearing.add-master-defendant-id-to-defendant.json
+        application/vnd.hearing.duplicate+json: !!null
       responses:
             202:
                 description: OK

@@ -47,6 +47,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -231,7 +232,7 @@ public class UpdateVerdictCommandHandlerTest {
         command.setVerdict(verdictTemplate(randomUUID(), TestTemplates.VerdictCategoryType.GUILTY));
 
         final OffenceAggregate aggregate = new OffenceAggregate();
-        aggregate.getHearingIds().add(randomUUID());
+        setField(aggregate, "hearingIds", Arrays.asList(randomUUID()));
 
         setupMockedEventStream(command.getVerdict().getOffenceId(), this.offenceAggregateEventStream, aggregate);
 
@@ -245,7 +246,6 @@ public class UpdateVerdictCommandHandlerTest {
         assertThat(((JsonEnvelope) events.get(0)).metadata().name(), is("hearing.offence-verdict-updated"));
 
         assertThat(((JsonEnvelope) events.get(1)).metadata().name(), is("hearing.events.enrich-update-verdict-with-associated-hearings"));
-
     }
 
     @Test
@@ -281,7 +281,6 @@ public class UpdateVerdictCommandHandlerTest {
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
-
 
 
 }

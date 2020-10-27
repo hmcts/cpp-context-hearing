@@ -73,7 +73,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 AddMasterDefendantIdToDefendantCommandHandler.class,
                 RequestApprovalCommandHandler.class,
                 ValidateResultAmendmentsCommandHandler.class,
-                CorrectHearingDaysWithoutCourtCentreCommandHandler.class
+                CorrectHearingDaysWithoutCourtCentreCommandHandler.class,
+                DuplicateHearingCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

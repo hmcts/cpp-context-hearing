@@ -20,11 +20,14 @@ import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -115,6 +118,8 @@ public class PublishResultsDelegate {
 
         if (resultsShared.getHearing().getProsecutionCases() != null && !resultsSharedFilter.filterTargets(resultsShared, t -> t.getApplicationId() == null).getTargets().isEmpty()) {
 
+            enrichOffencePleas(resultsShared.getHearing());
+
             enrichOffenceVerdictTypesData(context, resultsShared.getHearing());
 
             enrichOffenceFactsAlcoholLevelsData(context, resultsShared.getHearing());
@@ -140,9 +145,9 @@ public class PublishResultsDelegate {
             }
         }
         final PublicHearingResulted hearingResulted = PublicHearingResulted.publicHearingResulted()
-                        .setHearing(resultsShared.getHearing())
-                        .setSharedTime(resultsShared.getSharedTime())
-                        .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
+                .setHearing(resultsShared.getHearing())
+                .setSharedTime(resultsShared.getSharedTime())
+                .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
 
@@ -154,15 +159,16 @@ public class PublishResultsDelegate {
     }
 
     private List<UUID> getOffenceShadowListedForMagistratesNextHearing(final ResultsShared resultsShared) {
-        if(resultsShared.getHearing().getProsecutionCases().stream().flatMap(x -> x.getDefendants().stream())
-                .flatMap(def ->  def.getOffences() != null ? def.getOffences().stream() : Stream.empty())
-                .flatMap(off -> off.getJudicialResults() != null ? off.getJudicialResults().stream() :Stream.empty())
+        if (resultsShared.getHearing().getProsecutionCases().stream().flatMap(x -> x.getDefendants().stream())
+                .flatMap(def -> def.getOffences() != null ? def.getOffences().stream() : Stream.empty())
+                .flatMap(off -> off.getJudicialResults() != null ? off.getJudicialResults().stream() : Stream.empty())
                 .filter(jr -> jr.getNextHearing() != null)
                 .map(JudicialResult::getNextHearing).anyMatch(nh -> MAGISTRATES == nh.getJurisdictionType())) {
-            return  resultsShared.getTargets().stream().filter(t -> TRUE.equals(t.getShadowListed())).map(Target::getOffenceId).collect(Collectors.toList());
+            return resultsShared.getTargets().stream().filter(t -> TRUE.equals(t.getShadowListed())).map(Target::getOffenceId).collect(Collectors.toList());
         }
         return emptyList();
     }
+
     private void enrichOffenceVerdictTypesData(final JsonEnvelope context, final Hearing hearing) {
         final List<VerdictType> verdictTypes = referenceDataService.getVerdictTypes(context);
 
@@ -170,6 +176,23 @@ public class PublishResultsDelegate {
                 .forEach(prosecutionCase -> prosecutionCase.getDefendants().
                         forEach(defendant -> defendant.getOffences().stream().filter(offence -> offence.getVerdict() != null)
                                 .forEach(offence -> populateFullVerdictTypeData(offence, verdictTypes))));
+    }
+
+    private void enrichOffencePleas(final Hearing hearing) {
+        hearing.getProsecutionCases()
+                .forEach(prosecutionCase -> prosecutionCase.getDefendants().
+                        forEach(defendant -> defendant.getOffences().stream().filter(PublishResultUtil::needsIndicatedPleaSetFor)
+                                .forEach(offence -> populateIndicatedPlea(offence))));
+    }
+
+    private void populateIndicatedPlea(final Offence offence) {
+        offence.setIndicatedPlea(IndicatedPlea.indicatedPlea()
+                .withOriginatingHearingId(offence.getPlea().getOriginatingHearingId())
+                .withIndicatedPleaDate(offence.getPlea().getPleaDate())
+                .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY)
+                .withOffenceId(offence.getId())
+                .withSource(Source.IN_COURT)
+                .build());
     }
 
     private void enrichOffenceFactsAlcoholLevelsData(final JsonEnvelope context, final Hearing hearing) {

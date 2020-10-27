@@ -1,19 +1,15 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
-import static junit.framework.TestCase.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import uk.gov.moj.cpp.accesscontrol.hearing.providers.HearingProvider;
 import uk.gov.moj.cpp.accesscontrol.test.utils.BaseDroolsAccessControlTest;
-import uk.gov.moj.cpp.accesscontrol.test.utils.matcher.OutcomeMatcher;
 
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 import org.kie.api.runtime.ExecutionResults;
 import org.mockito.Mock;
@@ -690,16 +686,6 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
 
 
     @Test
-    public void shouldAllowSystemUserToAddMasterDefendantId() {
-        final Action action = createActionFor(ACTION_NAME_MASTER_DEFENDANT_ID);
-        given(this.userAndGroupProvider.isSystemUser(action))
-                .willReturn(true);
-
-        final ExecutionResults results = executeRulesWith(action);
-        assertSuccessfulOutcome(results);
-    }
-
-    @Test
     public void shouldAllowAuthorisedUserToValidateResultAmendments() {
         final Action action = createActionFor(ACTION_NAME_VALIDATE_RESULT_AMENDMENTS);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Associate", "Legal Advisers", "Court Clerks"))
@@ -727,4 +713,18 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
+
+
+    @Test
+    public void shouldAllowSystemUserToAddMasterDefendantId() {
+        final Action action = createActionFor(ACTION_NAME_MASTER_DEFENDANT_ID);
+        given(this.userAndGroupProvider.isSystemUser(action))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+
+
 }

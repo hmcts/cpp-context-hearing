@@ -13,6 +13,7 @@ public class RestructuringConstants {
     public static final String HEARING_RESULTS_SHARED_JSON = "hearing.results-shared.json";
     public static final String HEARING_RESULTS_SHARED_MULTIDAY_CRACKED_JSON = "hearing.results-shared-with-multiday-cracked.json";
     public static final String HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON = "hearing.results-shared-with-verdict-type.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-with-indicated-plea.json";
     public static final String HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON = "hearing.results-shared-with-offence-facts.json";
     public static final String HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON = "hearing.results-shared-with-optional-promptRef.json";
     public static final String IMP_TIMP_HEARING_RESULTS_SHARED_JSON = "imp-timp-hearing-results-shared.json";

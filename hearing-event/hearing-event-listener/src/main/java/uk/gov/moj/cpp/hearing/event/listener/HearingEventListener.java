@@ -38,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -349,6 +350,20 @@ public class HearingEventListener {
                 targetIn.setDraftResult(updatedDraftResult);
                 hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
             }
+        }
+    }
+
+    @Handles("hearing.events.marked-as-duplicate")
+    public void handleHearingMarkedAsDuplicate(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.marked-as-duplicate event received {}", event.toObfuscatedDebugString());
+        }
+
+        final UUID hearingId = UUID.fromString(event.payloadAsJsonObject().getString("hearingId"));
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+
+        if (hearing != null) {
+            hearingRepository.remove(hearing);
         }
     }
 }

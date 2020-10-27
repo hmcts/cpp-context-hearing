@@ -11,6 +11,7 @@ import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -29,11 +30,13 @@ public class CaseAggregate implements Aggregate {
 
     private List<UUID> hearingIds = new ArrayList<>();
 
+    @SuppressWarnings("squid:S2250")
     @Override
     public Object apply(final Object event) {
         return match(event).with(
                 when(RegisteredHearingAgainstCase.class).apply(e -> hearingIds.add(e.getHearingId())),
                 when(SendingSheetCompletedRecorded.class).apply(e -> sendingSheetCompleteProcessed = true),
+                when(HearingMarkedAsDuplicateForCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 otherwiseDoNothing());
     }
 
@@ -53,24 +56,24 @@ public class CaseAggregate implements Aggregate {
                         .build()));
     }
 
-    public Stream<Object> ejectCase(final UUID prosecutionCaseId, final List<UUID> hearingIds){
-        if(hearingIds.isEmpty() && !this.hearingIds.isEmpty()) {
+    public Stream<Object> ejectCase(final UUID prosecutionCaseId, final List<UUID> hearingIds) {
+        if (hearingIds.isEmpty() && !this.hearingIds.isEmpty()) {
             return apply(Stream.of(CaseEjected.aCaseEjected().withHearingIds(this.hearingIds).withProsecutionCaseId(prosecutionCaseId).build()));
-        } else if(hearingIds.isEmpty() && this.hearingIds.isEmpty()) {
+        } else if (hearingIds.isEmpty() && this.hearingIds.isEmpty()) {
             return apply(Stream.empty());
-        }
-        else {
+        } else {
             return apply(Stream.of(CaseEjected.aCaseEjected().withHearingIds(hearingIds).withProsecutionCaseId(prosecutionCaseId).build()));
         }
     }
 
-    public Stream<Object> caseDefendantsUpdated(final ProsecutionCase prosecutionCase){
-        if(!this.hearingIds.isEmpty()) {
+    public Stream<Object> caseDefendantsUpdated(final ProsecutionCase prosecutionCase) {
+        if (!this.hearingIds.isEmpty()) {
             return apply(Stream.of(CaseDefendantsUpdated.caseDefendantsUpdatd().withHearingIds(hearingIds).withProsecutionCase(prosecutionCase).build()));
         } else {
             return apply(Stream.empty());
         }
     }
+
     public List<UUID> getHearingIds() {
         return hearingIds;
     }
@@ -82,5 +85,9 @@ public class CaseAggregate implements Aggregate {
         } else {
             return Stream.empty();
         }
+    }
+
+    public Stream<Object> markHearingAsDuplicate(final UUID prosecutionCaseId, final UUID hearingId) {
+        return apply(Stream.of(new HearingMarkedAsDuplicateForCase(prosecutionCaseId, hearingId)));
     }
 }

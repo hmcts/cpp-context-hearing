@@ -239,6 +239,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.add-master-defendant-id-to-defendant");
     }
 
+    @Handles("hearing.mark-as-duplicate")
+    public void markAsDuplicateHearing(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.mark-as-duplicate");
+    }
+
     @Handles("hearing.request-approval")
     public void requestApproval(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.request-approval");

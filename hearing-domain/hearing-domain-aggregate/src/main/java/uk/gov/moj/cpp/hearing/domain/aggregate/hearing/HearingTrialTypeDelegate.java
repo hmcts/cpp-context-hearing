@@ -6,6 +6,7 @@ import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+
 import java.io.Serializable;
 import java.util.stream.Stream;
 
@@ -31,7 +32,6 @@ public class HearingTrialTypeDelegate implements Serializable {
             this.momento.getHearing().setIsEffectiveTrial(null);
         }
     }
-
 
     public void handleTrialTypeSetForHearing(final HearingTrialType hearingTrialType) {
         if (nonNull(hearingTrialType.getTrialTypeId())) {

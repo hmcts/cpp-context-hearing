@@ -11,6 +11,49 @@ import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.*;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
+import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
+import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
+import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
+import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
+import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
@@ -72,9 +115,13 @@ public class HearingEventListenerYamlConfigTest {
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
             SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
+            MasterDefendantIdAdded.class.getAnnotation(Event.class).value(),
+            HearingMarkedAsDuplicateForCase.class.getAnnotation(Event.class).value(),
+            HearingMarkedAsDuplicateForDefendant.class.getAnnotation(Event.class).value(),
+            HearingMarkedAsDuplicateForOffence.class.getAnnotation(Event.class).value(),
             PendingNowsRequested.class.getAnnotation(Event.class).value(),
-            NowsRequested.class.getAnnotation(Event.class).value(),
-            MasterDefendantIdAdded.class.getAnnotation(Event.class).value()
+            NowsRequested.class.getAnnotation(Event.class).value()
+
     );
 
     private final Map<String, String> handlerNames = new HashMap<>();

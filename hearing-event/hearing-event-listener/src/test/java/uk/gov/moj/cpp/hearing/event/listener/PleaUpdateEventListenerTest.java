@@ -3,7 +3,9 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.core.IsNull.nullValue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.AllocationDecision.allocationDecision;
 import static uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers;
@@ -306,7 +308,39 @@ public class PleaUpdateEventListenerTest {
         assertThat(offence.getId().getHearingId(), is(offenceAllocationDecision.getOriginatingHearingId()));
         assertThat(offence.getAllocationDecision().getAllocationDecisionDate(), is(offenceAllocationDecision.getAllocationDecisionDate()));
         assertThat(offence.getAllocationDecision().getMotReasonCode(), is(offenceAllocationDecision.getMotReasonCode()));
-        assertThat(offence.getAllocationDecision().getSequenceNumber(),is(offenceAllocationDecision.getSequenceNumber()));
+        assertThat(offence.getAllocationDecision().getSequenceNumber(), is(offenceAllocationDecision.getSequenceNumber()));
+    }
+
+
+    @Test
+    public void shouldClearAllocationDecisionIfNoneProvidedInUpdatedPlea() {
+
+        final UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision existingAllocationDecision = new uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision();
+        existingAllocationDecision.setAllocationDecisionDate(LocalDate.now());
+
+        final Offence offence = new Offence();
+        offence.setId(new HearingSnapshotKey(offenceId, hearingId));
+        offence.setAllocationDecision(existingAllocationDecision);
+
+        when(this.offenceRepository.findBy(offence.getId())).thenReturn(offence);
+
+        final PleaUpsert offencePleaUpdated = PleaUpsert.pleaUpsert()
+                .setHearingId(hearingId)
+                .setPleaModel(pleaModel()
+                        .withOffenceId(offenceId)
+                        .build());
+
+        pleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
+                objectToJsonObjectConverter.convert(offencePleaUpdated)));
+
+        verify(this.offenceRepository).save(offence);
+        verifyZeroInteractions(allocationDecisionJPAMapper);
+        
+        final AllocationDecision offenceAllocationDecision = offencePleaUpdated.getPleaModel().getAllocationDecision();
+        assertThat(offenceAllocationDecision, is(nullValue()));
     }
 
     @Test

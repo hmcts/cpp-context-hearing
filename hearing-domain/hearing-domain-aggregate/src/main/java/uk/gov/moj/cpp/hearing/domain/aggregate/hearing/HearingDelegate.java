@@ -25,6 +25,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
@@ -251,6 +252,19 @@ public class HearingDelegate implements Serializable {
     public Stream<Object> addMasterDefendantIdToDefendant(final UUID hearingId, final UUID prosecutionCaseId, final UUID defendantId, final UUID masterDefendantId) {
         return Stream.of(new MasterDefendantIdAdded(hearingId, prosecutionCaseId, defendantId, masterDefendantId));
     }
+
+    public Stream<Object> markAsDuplicate(final UUID hearingId) {
+        final List<UUID> prosecutionCaseIds = momento.getHearing().getProsecutionCases().stream().map(ProsecutionCase::getId).collect(Collectors.toList());
+        final List<UUID> defendantIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().map(Defendant::getId)).collect(Collectors.toList());
+        final List<UUID> offenceIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().flatMap(d -> d.getOffences().stream().map(Offence::getId))).collect(Collectors.toList());
+
+        return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId));
+    }
+
+    public void handleHearingMarkedAsDuplicate() {
+        this.momento.setDuplicate(true);
+    }
+
 
     public void handleHearingDaysWithoutCourtCentreCorrected(final HearingDaysWithoutCourtCentreCorrected hearingDaysWithoutCourtCentreCorrected) {
 

@@ -40,6 +40,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesCha
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateForIndicatedPlea;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithDefendantJudicialResultsForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffenceDateCode;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.welshInitiateHearingTemplate;
@@ -104,6 +105,7 @@ import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.TrialType;
@@ -242,7 +244,7 @@ public class ShareResultsIT extends AbstractIT {
         return targets;
     }
 
-    private void assertPublicHearingResultedHasCorrectPayload(final EventListener publicEventResultedListener, final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
+    private void assertPublicHearingResultedHasVerdictTypeInformation(final EventListener publicEventResultedListener, final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
         final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.id"), is(VERDICT_TYPE_GUILTY_ID));
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.verdictCode"), is(VERDICT_TYPE_GUILTY_CODE));
@@ -254,6 +256,19 @@ public class ShareResultsIT extends AbstractIT {
 
         assertHearingHasSharedResults(expectedTrialType, hearing);
     }
+
+    private void assertPublicHearingResultedHasIndicatedPleaInformation(final EventListener publicEventResultedListener, final Hearing hearing, final Plea updatedPlea) {
+        final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+        final Offence offence = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].indicatedPlea.indicatedPleaDate"), is(updatedPlea.getPleaDate().toString()));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].indicatedPlea.indicatedPleaValue"), is(INDICATED_GUILTY.toString()));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].indicatedPlea.offenceId"), is(offence.getId().toString()));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].indicatedPlea.originatingHearingId"), is(hearing.getId().toString()));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].indicatedPlea.source"), is(Source.IN_COURT.toString()));
+
+        assertHearingHasSharedResults(null, hearing);
+    }
+
 
     private void shareResultWithCourtClerk(final Hearing hearing, final List<Target> targets) {
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
@@ -299,7 +314,51 @@ public class ShareResultsIT extends AbstractIT {
                                         .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
 
             completeSetupAndShareResults(allNows, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
-            assertPublicHearingResultedHasCorrectPayload(publicEventResulted, expectedTrialType, hearing);
+            assertPublicHearingResultedHasVerdictTypeInformation(publicEventResulted, expectedTrialType, hearing);
+        }
+    }
+
+    @Test
+    public void shouldShareResultsWithIndicatedPleaInformationPopulatedFromIndicatedGuiltyPlea() {
+
+        LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+
+        final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplateForIndicatedPlea(null, false)));
+
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+
+        final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        stubCourtRoom(hearing);
+
+        final UUID caseId = hearing.getProsecutionCases().get(0).getId();
+        final UUID offenceId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final CommandHelpers.UpdatePleaCommandHelper updatedPlea;
+        try (final EventListener hearingPleaUpdatedListener = listenFor("public.hearing.plea-updated")
+                .withFilter(isJson(
+                        withJsonPath("$.offenceId", is(offenceId.toString())
+                        )
+                ))) {
+
+            updatedPlea = new CommandHelpers.UpdatePleaCommandHelper(
+                    UseCases.updatePlea(getRequestSpec(), hearing.getId(), offenceId,
+                            updatePleaTemplate(hearing.getId(), offenceId,
+                                    hearing.getProsecutionCases().get(0).getDefendants().get(0).getId(), caseId, null, "INDICATED_GUILTY", false))
+            );
+
+            hearingPleaUpdatedListener.waitFor();
+        }
+
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+                .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
+                        .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
+
+            completeSetupAndShareResults(allNows, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
+            assertPublicHearingResultedHasIndicatedPleaInformation(publicEventResulted, hearing, updatedPlea.getPlea());
         }
     }
 
@@ -1181,7 +1240,7 @@ public class ShareResultsIT extends AbstractIT {
             final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                             updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                                    hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY, false))
+                                    hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY, true))
             );
 
             convictionDateListener.waitFor();
@@ -1785,7 +1844,7 @@ public class ShareResultsIT extends AbstractIT {
             final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                             updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                                    hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY, false))
+                                    hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY, true))
             );
 
             convictionDateListener.waitFor();
@@ -1810,7 +1869,7 @@ public class ShareResultsIT extends AbstractIT {
             final CommandHelpers.UpdatePleaCommandHelper pleaOne = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
                             updatePleaTemplate(hearingOne.getHearingId(), hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                                    hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY, false))
+                                    hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstCase().getId(), INDICATED_GUILTY, GUILTY, true))
             );
 
             hearingPleaUpdatedListener.waitFor();

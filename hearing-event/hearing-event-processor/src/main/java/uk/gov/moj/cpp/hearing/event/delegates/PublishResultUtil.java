@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.util.Locale.ENGLISH;
 
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.InvalidDateFormatException;
 
 import java.time.LocalDate;
@@ -20,6 +21,9 @@ public class PublishResultUtil {
     private static final String CURRENCY_PROMPT_TYPE = "CURR";
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultUtil.class.getName());
     private static final String POUND_CURRENCY_LABEL = "£";
+    private static final String EITHER_WAY_OFFENCE = "Either Way";
+    private static final String INDICATED_PLEA = "INDICATED_GUILTY";
+
 
     private PublishResultUtil() {
 
@@ -41,6 +45,20 @@ public class PublishResultUtil {
             value = POUND_CURRENCY_LABEL + value;
         }
         return value;
+    }
+
+    /**
+     * Checks if an offence is: Either Way type, with No Allocation Decision and has an Indicated
+     * Guilty plea.
+     *
+     * @param offence - the offence to check
+     * @return TRUE if the offence is Either Way type, without an Allocation Decision and has
+     * Indicated Guilty plea.
+     */
+    public static boolean needsIndicatedPleaSetFor(final Offence offence) {
+        return EITHER_WAY_OFFENCE.equalsIgnoreCase(offence.getModeOfTrial())
+                && offence.getAllocationDecision() == null && offence.getPlea() != null
+                && INDICATED_PLEA.equalsIgnoreCase(offence.getPlea().getPleaValue());
     }
 
     private static boolean onlyIfNotEqualsToOutgoingFormat(final String format, final String value, final Locale locale) {

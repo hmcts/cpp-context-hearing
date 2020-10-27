@@ -84,6 +84,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
@@ -236,7 +237,7 @@ public class HearingAggregate implements Aggregate {
                                 masterDefendantIdAdded.getDefendantId(),
                                 masterDefendantIdAdded.getMasterDefendantId())),
                 when(HearingDaysWithoutCourtCentreCorrected.class).apply(hearingDelegate::handleHearingDaysWithoutCourtCentreCorrected),
-
+                when(HearingMarkedAsDuplicate.class).apply(duplicate -> hearingDelegate.handleHearingMarkedAsDuplicate()),
                 otherwiseDoNothing()
         );
 
@@ -284,6 +285,10 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> extend(final UUID hearingId, final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
         return apply(this.hearingDelegate.extend(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
+    }
+
+    public Stream<Object> markAsDuplicate(final UUID hearingId) {
+        return apply(this.hearingDelegate.markAsDuplicate(hearingId));
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea, final Set<String> guiltyPleaTypes) {
