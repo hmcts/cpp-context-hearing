@@ -78,6 +78,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
@@ -1078,6 +1079,32 @@ public class UseCases {
                 .add("hearingId", hearingId.toString())
                 .add("caseMarkers", arrayBuilder)
                 .build();
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                payload,
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+
+    public static void updateProsecutor(final UUID prosecutionCaseId, final List<UUID>  hearingIds, final CpsProsecutorUpdated cpsProsecutorUpdated) throws JsonProcessingException {
+
+        final String eventName = "public.progression.events.cps-prosecutor-updated";
+        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        for (final UUID hearingId : hearingIds) {
+            arrayBuilder.add(hearingId.toString());
+        }
+        final JsonObject payload = createObjectBuilder()
+                .add("prosecutionCaseId", prosecutionCaseId.toString())
+                .add("hearingIds", arrayBuilder.build())
+                .add("prosecutionAuthorityId", cpsProsecutorUpdated.getProsecutionAuthorityId().toString())
+                .add("prosecutionAuthorityReference", cpsProsecutorUpdated.getProsecutionAuthorityReference())
+                .add("prosecutionAuthorityCode", cpsProsecutorUpdated.getProsecutionAuthorityCode())
+                .add("prosecutionAuthorityName", cpsProsecutorUpdated.getProsecutionAuthorityName())
+                .add("caseURN", cpsProsecutorUpdated.getCaseURN())
+                .add("address", Utilities.JsonUtil.objectToJsonObject(cpsProsecutorUpdated.getAddress()))
+                .build();
+
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,

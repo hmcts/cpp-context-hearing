@@ -54,6 +54,10 @@ subscriptions_descriptor:
         - name: hearing.prosecution-counsel-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/prosecution-counsel-updated.json
 
+        # Prosecutor
+        - name: hearing.cps-prosecutor-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/cps-prosecutor-updated.json
+
         # Defense Counsel
         - name: hearing.defence-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defence-counsel-added.json

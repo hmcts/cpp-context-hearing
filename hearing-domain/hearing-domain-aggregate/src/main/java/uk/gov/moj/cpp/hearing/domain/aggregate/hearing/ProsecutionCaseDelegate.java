@@ -2,8 +2,10 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 
 import java.io.Serializable;
@@ -29,13 +31,35 @@ public class ProsecutionCaseDelegate implements Serializable {
 
     }
 
-    public Stream<Object> updateCaseMarkers(UUID hearingId, UUID prosecutionCaseId, List<Marker> markers) {
+    public void handleProsecutorUpdated(final CpsProsecutorUpdated cpsProsecutorUpdated) {
+        this.momento.getHearing().getProsecutionCases().stream()
+                .filter(prosecutionCase -> prosecutionCase.getId().equals(cpsProsecutorUpdated.getProsecutionCaseId()))
+                .findFirst()
+                .ifPresent(prosecutionCase -> setProsecutor(prosecutionCase, cpsProsecutorUpdated));
+    }
+
+    public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, List<Marker> markers) {
         if (!this.momento.isPublished()) {
             return Stream.of(CaseMarkersUpdated.caseMarkersUpdated()
                     .setHearingId(hearingId)
                     .setProsecutionCaseId(prosecutionCaseId)
                     .setCaseMarkers(markers)
             );
+        }
+        return Stream.empty();
+    }
+
+    public Stream<Object> updateProsecutor(final UUID hearingId, final UUID prosecutionCaseId, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
+        if (!this.momento.isPublished()) {
+            return Stream.of(CpsProsecutorUpdated.cpsProsecutorUpdated()
+                    .setHearingId(hearingId)
+                    .setProsecutionCaseId(prosecutionCaseId)
+                    .setProsecutionAuthorityId(prosecutionCaseIdentifier.getProsecutionAuthorityId())
+                    .setProsecutionAuthorityCode(prosecutionCaseIdentifier.getProsecutionAuthorityCode())
+                    .setProsecutionAuthorityName(prosecutionCaseIdentifier.getProsecutionAuthorityName())
+                    .setProsecutionAuthorityReference(prosecutionCaseIdentifier.getProsecutionAuthorityReference())
+                    .setCaseURN(prosecutionCaseIdentifier.getCaseURN())
+                    .setAddress(prosecutionCaseIdentifier.getAddress()));
         }
         return Stream.empty();
     }
@@ -68,5 +92,15 @@ public class ProsecutionCaseDelegate implements Serializable {
 
     private void setCaseMarkers(final ProsecutionCase prosecutionCase, final List<Marker> markers) {
         prosecutionCase.setCaseMarkers(markers);
+    }
+
+    private void setProsecutor(final ProsecutionCase prosecutionCase, final CpsProsecutorUpdated cpsProsecutorUpdated) {
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier =  prosecutionCase.getProsecutionCaseIdentifier();
+        prosecutionCaseIdentifier.setProsecutionAuthorityId(cpsProsecutorUpdated.getProsecutionAuthorityId());
+        prosecutionCaseIdentifier.setProsecutionAuthorityCode(cpsProsecutorUpdated.getProsecutionAuthorityCode());
+        prosecutionCaseIdentifier.setProsecutionAuthorityReference(cpsProsecutorUpdated.getProsecutionAuthorityReference());
+        prosecutionCaseIdentifier.setProsecutionAuthorityName(cpsProsecutorUpdated.getProsecutionAuthorityName());
+        prosecutionCaseIdentifier.setCaseURN(cpsProsecutorUpdated.getCaseURN());
+        prosecutionCaseIdentifier.setAddress(cpsProsecutorUpdated.getAddress());
     }
 }

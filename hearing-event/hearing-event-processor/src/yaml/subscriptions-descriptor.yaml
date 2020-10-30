@@ -313,4 +313,8 @@ subscriptions_descriptor:
         - name: public.listing.vacated-trial-updated
           schema_uri: http://cpp.moj.gov.uk/listing/json/schema/event/public-listing-vacated-trial-updated.json
 
+        # Hearing CPS Prosecutor Updated
+        - name: public.progression.events.cps-prosecutor-updated
+          schema_uri: http://moj.gov.uk/cpp/progression/events/public.progression.event.case-cps-prosecutor-updated.json
+
       event_source_name: public.event.source
