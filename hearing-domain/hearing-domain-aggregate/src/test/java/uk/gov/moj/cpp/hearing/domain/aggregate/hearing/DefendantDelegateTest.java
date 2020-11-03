@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 import static uk.gov.justice.core.courts.Hearing.hearing;
 import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
@@ -311,6 +311,44 @@ public class DefendantDelegateTest {
         assertThat(defendantDelegate.getMomento().getHearing().getProsecutionCases().get(0).getDefendants().get(0).getAssociatedDefenceOrganisation(), notNullValue());
     }
 
+    @Test
+    public void shouldSetMasterDefendantIdFromAggregateWhenMasterDefendantIdDoesNotPresentInTheEvent() {
+
+        HearingAggregateMomento memento = new HearingAggregateMomento();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
+        memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
+        DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsWithDefenceOrganisation(prosecutionCaseId, defendantId, "Tim", null, "Karke",
+                getDate("2015-09-08"), "UK", address);
+
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
+
+        Defendant defendantInAggregate = defendantDelegate.getMomento().getHearing().getProsecutionCases().get(0).getDefendants().get(0);
+        assertThat(defendantInAggregate.getMasterDefendantId(), is(defendantInAggregate.getId()));
+
+    }
+
+    @Test
+    public void shouldSetMasterDefendantIdFromEventWhenMasterDefendantIdPresentsInTheEvent() {
+
+        HearingAggregateMomento memento = new HearingAggregateMomento();
+        final Address address = Address.address().withAddress1("address11").withAddress2("address2").withAddress3("address3").withAddress4("address4").withAddress5("address5").withPostcode("xyz").build();
+        Defendant defendant = createIndividualDefendant(prosecutionCaseId, offenceId, defendantId, "Tim", null, "Karke", getDate("2015-09-08"), "UK", address);
+        memento.setHearing(createHearing(prosecutionCaseId, hearingId, defendant));
+        DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
+
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendantDetails = createUpdatedDefendantDetailsWithDefenceOrganisation(prosecutionCaseId, defendantId, "Tim", null, "Karke",
+                getDate("2015-09-08"), "UK", address);
+        updatedDefendantDetails.setMasterDefendantId(randomUUID());
+
+        defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
+
+        assertThat(defendantDelegate.getMomento().getHearing().getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId(), is(updatedDefendantDetails.getMasterDefendantId()));
+
+    }
+
     private uk.gov.moj.cpp.hearing.command.defendant.Defendant createUpdatedDefendantDetailsForOrganisation(final UUID prosecutionCaseId, final UUID defendantId, final String organisationName, final Address address) {
 
         uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
@@ -389,6 +427,7 @@ public class DefendantDelegateTest {
     private Defendant createIndividualDefendant(final UUID prosecutionCaseId, final UUID offenceId, final UUID defendantId, final String firstName, final String middleName, final String lastName, final LocalDate dateOfBirth, final String nationality, final Address address) {
         return defendant()
                 .withId(defendantId)
+                .withMasterDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withPersonDefendant(
                         PersonDefendant.personDefendant()

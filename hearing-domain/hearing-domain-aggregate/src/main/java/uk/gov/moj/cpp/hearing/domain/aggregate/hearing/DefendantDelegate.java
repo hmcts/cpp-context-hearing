@@ -140,7 +140,7 @@ public class DefendantDelegate implements Serializable {
                 .setWitnessStatement(defendantIn.getWitnessStatement())
                 .setWitnessStatementWelsh(defendantIn.getWitnessStatementWelsh())
                 .setProsecutionCaseId(defendantIn.getProsecutionCaseId())
-                .setMasterDefendantId(defendantIn.getMasterDefendantId())
+                .setMasterDefendantId(nonNull(defendantIn.getMasterDefendantId()) ? defendantIn.getMasterDefendantId() : defendant.getMasterDefendantId())
                 .setAssociatedDefenceOrganisation(defendantIn.getAssociatedDefenceOrganisation())
                 .setIsYouth(defendantIn.getIsYouth())
                 .setAliases(defendantIn.getAliases());

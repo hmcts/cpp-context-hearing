@@ -338,7 +338,7 @@ public class PleaUpdateEventListenerTest {
 
         verify(this.offenceRepository).save(offence);
         verifyZeroInteractions(allocationDecisionJPAMapper);
-        
+
         final AllocationDecision offenceAllocationDecision = offencePleaUpdated.getPleaModel().getAllocationDecision();
         assertThat(offenceAllocationDecision, is(nullValue()));
     }
