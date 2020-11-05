@@ -43,7 +43,7 @@ public class ProsecutionCaseDelegate implements Serializable {
             return Stream.of(CaseMarkersUpdated.caseMarkersUpdated()
                     .setHearingId(hearingId)
                     .setProsecutionCaseId(prosecutionCaseId)
-                    .setCaseMarkers(markers)
+                    .setCaseMarkers(markers == null || markers.isEmpty() ? null : markers)
             );
         }
         return Stream.empty();
@@ -91,7 +91,7 @@ public class ProsecutionCaseDelegate implements Serializable {
     }
 
     private void setCaseMarkers(final ProsecutionCase prosecutionCase, final List<Marker> markers) {
-        prosecutionCase.setCaseMarkers(markers);
+        prosecutionCase.setCaseMarkers(markers == null || markers.isEmpty() ? null : markers);
     }
 
     private void setProsecutor(final ProsecutionCase prosecutionCase, final CpsProsecutorUpdated cpsProsecutorUpdated) {

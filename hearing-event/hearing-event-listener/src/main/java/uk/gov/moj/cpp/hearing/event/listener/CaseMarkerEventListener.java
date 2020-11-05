@@ -33,7 +33,9 @@ public class CaseMarkerEventListener {
         final CaseMarkersUpdated caseMarkersUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CaseMarkersUpdated.class);
         final ProsecutionCase prosecutionCase = prosecutionCaseRepository.findBy(new HearingSnapshotKey(caseMarkersUpdated.getProsecutionCaseId(), caseMarkersUpdated.getHearingId()));
         prosecutionCase.getMarkers().clear();
-        prosecutionCase.getMarkers().addAll(caseMarkerJPAMapper.toJPA(caseMarkersUpdated.getHearingId(), prosecutionCase, caseMarkersUpdated.getCaseMarkers()));
+        if (null != caseMarkersUpdated.getCaseMarkers() && !caseMarkersUpdated.getCaseMarkers().isEmpty()) {
+            prosecutionCase.getMarkers().addAll(caseMarkerJPAMapper.toJPA(caseMarkersUpdated.getHearingId(), prosecutionCase, caseMarkersUpdated.getCaseMarkers()));
+        }
         prosecutionCaseRepository.save(prosecutionCase);
     }
 }

@@ -121,7 +121,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddProsecutionCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_PROSECUTION_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "CPS", "Advocates"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "CPS", "Advocates", "Non CPS Prosecutors"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
