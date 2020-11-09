@@ -36,11 +36,14 @@ public class ApprovalRequestedEventListener {
     public void approvalRequested(final JsonEnvelope envelope) {
         final ApprovalRequest convert = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), ApprovalRequest.class);
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested approvalRequested = approvalRequestJPAMapper.toJPA(convert);
+        final List<ApprovalRequested> approvalsRequested = approvalRequestedRepository.findApprovalsRequestByHearingId(approvalRequested.getHearingId());
         if (approvalRequested.getApprovalType().equals(ApprovalType.APPROVAL)) {
-            final List<ApprovalRequested> approvalsRequested = approvalRequestedRepository.findApprovalsRequestByHearingId(approvalRequested.getHearingId());
             if (!approvalsRequested.isEmpty()) {
                 approvalRequestedRepository.removeAllRequestApprovalsForApprovalType(approvalsRequested.get(0).getHearingId(), CHANGE);
             }
+        } else {
+            approvalsRequested.stream().filter(x -> x.getUserId().equals(convert.getUserId())).forEach(x -> approvalRequestedRepository.remove(x));
+
         }
         approvalRequestedRepository.save(approvalRequested);
     }

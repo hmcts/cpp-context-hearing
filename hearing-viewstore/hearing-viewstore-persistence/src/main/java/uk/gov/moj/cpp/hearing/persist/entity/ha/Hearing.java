@@ -96,7 +96,7 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingApplication> hearingApplications = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
     private Set<ApprovalRequested> approvalsRequested= new HashSet<>();
 
     @Column(name = "trial_type_id")
