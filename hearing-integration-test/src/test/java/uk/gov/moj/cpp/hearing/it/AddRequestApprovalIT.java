@@ -7,6 +7,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.ApprovalType.APPROVAL;
 import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
@@ -96,7 +97,22 @@ public class AddRequestApprovalIT extends AbstractIT {
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
-                        .with(Hearing::getApprovalsRequested, Matchers.hasSize(Is.is(1)))
+                        .with(Hearing::getApprovalsRequested, hasSize(Is.is(1)))
+                        .with(Hearing::getApprovalsRequested, first(isBean(ApprovalRequest.class)
+                                .with(ApprovalRequest::getHearingId, is(hearingId))
+                                .with(ApprovalRequest::getUserId, is(userId))
+                                .with(ApprovalRequest::getApprovalType, is(CHANGE))
+                        ))));
+
+        saveDraftResultCommand.getTarget().setResultLines(singletonList(
+                standardResultLineTemplate(randomUUID(), resultDefinitionID, orderedDate)
+                        .build()));
+        testSaveDraftResult(saveDraftResultCommand);
+
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingId))
+                        .with(Hearing::getApprovalsRequested, hasSize(Is.is(1)))
                         .with(Hearing::getApprovalsRequested, first(isBean(ApprovalRequest.class)
                                 .with(ApprovalRequest::getHearingId, is(hearingId))
                                 .with(ApprovalRequest::getUserId, is(userId))
@@ -120,7 +136,7 @@ public class AddRequestApprovalIT extends AbstractIT {
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
-                        .with(Hearing::getApprovalsRequested, Matchers.hasSize(Is.is(1)))
+                        .with(Hearing::getApprovalsRequested, hasSize(Is.is(1)))
                         .with(Hearing::getApprovalsRequested, first(isBean(ApprovalRequest.class)
                                         .with(ApprovalRequest::getHearingId, is(hearingId))
                                         .with(ApprovalRequest::getUserId, is(userId))
@@ -143,7 +159,7 @@ public class AddRequestApprovalIT extends AbstractIT {
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))
-                        .with(Hearing::getApprovalsRequested, Matchers.hasSize(Is.is(0))
+                        .with(Hearing::getApprovalsRequested, hasSize(Is.is(0))
                         )));
 
 
