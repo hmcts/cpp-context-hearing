@@ -51,7 +51,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("imp 2Y 4 M 9d sus 5 m 6 w 7 d ");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true,  false , "label",mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -64,6 +64,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         );
         assertThat(result.getResultLevel()
                 , is("O")
+        );
+        assertThat(result.isConditionalMandatory()
+                , is(false)
         );
         assertThat(result.getParts().size()
                 , is(4)
@@ -104,7 +107,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("CrEdit bail reMand");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, false , "", mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -116,6 +119,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         );
         assertThat(result.getResultLevel()
                 , is("D")
+        );
+        assertThat(result.isConditionalMandatory()
+                , is(false)
         );
         assertThat(Arrays.asList(part1.getValue(), part1.getState(), part1.getType())
                 , containsInAnyOrder(Arrays.asList("Credit for time remanded on bail", RESOLVED, RESULT).toArray()));
@@ -132,7 +138,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("imp 2 yr 8 m conc");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, false, "", mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -144,6 +150,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         );
         assertThat(result.getResultLevel()
                 , is("O")
+        );
+        assertThat(result.isConditionalMandatory()
+                , is(false)
         );
         assertThat(result.getParts().size()
                 , is(3)
@@ -169,7 +178,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("2 yr m imp 18 $20 23:23 3/3/1980 [2y]");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, createChildResultDefinitions(), true, false, "", mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -186,6 +195,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         );
         assertThat(result.getResultLevel()
                 , is("O")
+        );
+        assertThat(result.isConditionalMandatory()
+                , is(false)
         );
         assertThat(result.getParts().size()
                 , is(8)
@@ -216,7 +228,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("alc req conc 78 £2,000 2 mo ");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, false, "",mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -251,7 +263,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("Curfew");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, false, "", mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
 
@@ -277,7 +289,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("resTr Ord prd Fur");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true,false, "", mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -289,6 +301,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         assertThat(result.getResultLevel() == null
                 , is(true)
         );
+
         assertThat(result.getParts().size()
                 , is(4)
         );
@@ -310,7 +323,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("resT Ord prd Furth");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, false , "", mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);
@@ -321,6 +334,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         );
         assertThat(result.getResultLevel()
                 , is("O")
+        );
+        assertThat(result.isConditionalMandatory()
+                , is(false)
         );
         assertThat(result.getParts().size()
                 , is(4)
@@ -343,7 +359,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("imp 2 y 8 m sus 6 y conc 7 y 8 m 89 w 90 d");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, false, "",  mockPromptChoices);
 
         Part part1 = result.getParts().get(0);
         Part part2 = result.getParts().get(1);
@@ -356,6 +372,9 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         );
         assertThat(result.getResultLevel()
                 , is("O")
+        );
+        assertThat(result.isConditionalMandatory()
+                , is(false)
         );
         assertThat(result.getParts().size()
                 , is(6)
@@ -393,7 +412,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         List<Part> parts = new PartsResolver().getParts("aaaAAaaaa 34 £23.00 conc");
         Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
 
-        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        ResultDefinitionView result = target.buildFromKnowledge(parts, knowledge, new ArrayList<>(), true,false, "", mockPromptChoices);
 
         Part p1 = result.getParts().get(0);
         Part p2 = result.getParts().get(1);

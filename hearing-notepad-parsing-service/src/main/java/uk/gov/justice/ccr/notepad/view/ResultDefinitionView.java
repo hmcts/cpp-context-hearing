@@ -1,11 +1,12 @@
 package uk.gov.justice.ccr.notepad.view;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -16,6 +17,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
         "orderedDate",
         "parts",
         "childResultDefinitions",
+        "label",
+        "conditionalMandatory",
         "excludedFromResults"
 
 })
@@ -32,6 +35,10 @@ public class ResultDefinitionView {
     private List<Part> parts = new ArrayList<>();
 
     private List<ChildResultDefinition> childResultDefinitions = new ArrayList<>();
+
+    private String label;
+
+    private Boolean conditionalMandatory;
 
     private List<PromptChoice> promptChoices = new ArrayList<>();
 
@@ -66,11 +73,15 @@ public class ResultDefinitionView {
     }
 
     public List<Part> getParts() {
-        return parts;
+         return Optional.ofNullable(parts).orElse(new ArrayList<>(parts));
     }
 
     public void setParts(final List<Part> parts) {
-        this.parts = parts;
+        if(!parts.isEmpty()) {
+            this.parts = new ArrayList<>(parts);
+        } else {
+            this.parts = null;
+        }
     }
 
     public String getResultLineId() {
@@ -90,7 +101,11 @@ public class ResultDefinitionView {
     }
 
     public void setChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
-        this.childResultDefinitions = childResultDefinitions;
+        if(childResultDefinitions !=null) {
+            this.childResultDefinitions = new ArrayList<>(childResultDefinitions);
+        } else {
+            this.childResultDefinitions = null;
+        }
     }
 
     public List<PromptChoice> getPromptChoices() {
@@ -98,6 +113,22 @@ public class ResultDefinitionView {
     }
 
     public void setPromptChoices(final List<PromptChoice> promptChoices) {
-        this.promptChoices = promptChoices;
+            this.promptChoices = promptChoices;
+    }
+
+    public String getLabel() {
+        return label;
+    }
+
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
+    public Boolean isConditionalMandatory() {
+        return conditionalMandatory;
+    }
+
+    public void setConditionalMandatory(Boolean conditionalMandatory) {
+        this.conditionalMandatory = conditionalMandatory;
     }
 }

@@ -54,7 +54,7 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
     public void buildFromKnowledge() throws Exception {
         final List<Part> parts = new PartsResolver().getParts("parp");
         final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
-        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(), true, mockPromptChoices);
+        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(), true,  false , "", mockPromptChoices);
 
         final Knowledge knowledgeResultPrompt = processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now());
         final String code = randomUUID().toString();
@@ -163,7 +163,7 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
     public void shouldBuildFromKnowledgeWithOneOf() throws Exception {
         final List<Part> parts = new PartsResolver().getParts("ATRNR");
         final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
-        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(),true, mockPromptChoices);
+        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(),true, false , "", mockPromptChoices);
         final String code = randomUUID().toString();
         final Set<NameAddress> nameAddressList = new HashSet<>();
         NameAddress nameAddress1 = NameAddress.nameAddress()

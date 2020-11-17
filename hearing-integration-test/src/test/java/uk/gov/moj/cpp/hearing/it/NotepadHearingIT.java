@@ -42,6 +42,7 @@ public class NotepadHearingIT extends AbstractIT {
                 withJsonPath("$.parts[0].state", is("RESOLVED")),
                 withJsonPath("$.parts[0].type", is("RESULT")),
                 withJsonPath("$.excludedFromResults", is(false)),
+                withJsonPath("$.conditionalMandatory", is(false)),
                 withJsonPath("$.promptChoices", hasSize(7)),
                 withJsonPath("$.childResultDefinitions", hasSize(2)),
                 withJsonPath("$.childResultDefinitions[?(@.code == 'dada120c-160a-49a9-b040-e8b6b7128d67')].childResultCodes", empty()),

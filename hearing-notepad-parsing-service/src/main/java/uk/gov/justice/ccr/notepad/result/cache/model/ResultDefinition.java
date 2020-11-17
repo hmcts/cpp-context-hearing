@@ -3,12 +3,7 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toCollection;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -28,6 +23,7 @@ public class ResultDefinition {
     private Boolean d20;
     private Boolean rollUpPrompts;
     private Boolean publishedForNows;
+    private Boolean conditionalMandatory;
 
     public final String getId() {
         return id;
@@ -143,6 +139,14 @@ public class ResultDefinition {
         this.publishedForNows = publishedForNows;
     }
 
+    public Boolean getConditonalMandatory() {
+        return conditionalMandatory;
+    }
+
+    public void setConditonalMandatory(Boolean conditonalMandatory) {
+        this.conditionalMandatory = conditonalMandatory;
+    }
+
     @Override
     public String toString() {
         return "ResultDefinition{" +
@@ -161,6 +165,7 @@ public class ResultDefinition {
                 ", isD20=" + d20 +
                 ", isRollUpPrompts=" + rollUpPrompts +
                 ", isPublishedForNows=" + publishedForNows +
+                ", isConditionalMandatory=" + conditionalMandatory +
                 '}';
     }
 
@@ -173,8 +178,14 @@ public class ResultDefinition {
     }
 
     public void setChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
-        this.childResultDefinitions = childResultDefinitions;
+        if(childResultDefinitions != null) {
+            this.childResultDefinitions = new ArrayList<>(childResultDefinitions);
+        } else {
+            this.childResultDefinitions = null;
+        }
     }
+
+
 
     public static class Builder {
 
@@ -192,6 +203,7 @@ public class ResultDefinition {
         private Boolean isD20;
         private Boolean isRollUpPrompts;
         private Boolean isPublishedForNows;
+        private Boolean isConditonalMandatory;
         private List<ChildResultDefinition> isChildResultDefinitions;
 
         public Builder withId(final String id) {
@@ -215,7 +227,7 @@ public class ResultDefinition {
         }
 
         public Builder withKeywords(final Set<String> keywords) {
-            this.keywords = keywords;
+            this.keywords = new HashSet<>(keywords);
             return this;
         }
 
@@ -265,7 +277,12 @@ public class ResultDefinition {
         }
 
         public Builder withChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
-            isChildResultDefinitions = childResultDefinitions;
+            isChildResultDefinitions = new ArrayList<>(childResultDefinitions);
+            return this;
+        }
+
+        public Builder withConditionalMandatory(final Boolean conditionalMandatory) {
+            isConditonalMandatory = conditionalMandatory;
             return this;
         }
 
@@ -285,6 +302,7 @@ public class ResultDefinition {
             resultDefinition.setD20(this.isD20);
             resultDefinition.setRollUpPrompts(this.isRollUpPrompts);
             resultDefinition.setPublishedForNows(this.isPublishedForNows);
+            resultDefinition.setConditonalMandatory(this.isConditonalMandatory);
             resultDefinition.setChildResultDefinitions(CollectionUtils.isNotEmpty(this.isChildResultDefinitions) ? new ArrayList<>(this.isChildResultDefinitions) : emptyList());
             return resultDefinition;
         }

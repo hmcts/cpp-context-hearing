@@ -39,7 +39,7 @@ public class ResultDefinitionViewBuilder {
         return null;
     }
 
-    public ResultDefinitionView buildFromKnowledge(final List<Part> parts, final Knowledge knowledge, final List<ChildResultDefinition> childResultDefinitions, final Boolean excludedFromResults, final List<PromptChoice> promptChoices) {
+    public ResultDefinitionView buildFromKnowledge(final List<Part> parts, final Knowledge knowledge, final List<ChildResultDefinition> childResultDefinitions, final Boolean excludedFromResults, final Boolean booleanResult, final String label, final List<PromptChoice> promptChoices) {
         final ResultDefinitionView resultDefinitionView = new ResultDefinitionView();
         final List<String> partValues = parts.stream().map(v -> v.getValue().toString().toLowerCase()).collect(Collectors.toList());
         if (knowledge.isThisPerfectMatch()) {
@@ -49,6 +49,8 @@ public class ResultDefinitionViewBuilder {
             resultDefinitionView.setResultLevel(firstQualifiedPartInResultDefinition.getResultLevel());
             resultDefinitionView.setParts(buildParts(knowledge, partValues, parts));
             resultDefinitionView.setChildResultDefinitions(childResultDefinitions);
+            resultDefinitionView.setConditionalMandatory(booleanResult);
+            resultDefinitionView.setLabel(label);
             resultDefinitionView.setExcludedFromResults(excludedFromResults);
             resultDefinitionView.setPromptChoices(promptChoices);
 
@@ -186,7 +188,7 @@ public class ResultDefinitionViewBuilder {
     }
 
     private List<Part> buildParts(final Knowledge knowledge, final List<String> partValues, final List<Part> parts) {
-        int firstQualifiedPartInResultDefinitionIndex = getIndex(partValues, knowledge);
+        final int firstQualifiedPartInResultDefinitionIndex = getIndex(partValues, knowledge);
 
         for (int i = 0; i < parts.size(); i++) {
             final Part part = parts.get(i);

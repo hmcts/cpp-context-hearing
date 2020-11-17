@@ -1,18 +1,11 @@
 package uk.gov.justice.ccr.notepad;
 
 
-import static java.util.Objects.nonNull;
-
+import org.apache.commons.collections.CollectionUtils;
 import uk.gov.justice.ccr.notepad.process.ChildResultDefinitionDetail;
 import uk.gov.justice.ccr.notepad.process.Knowledge;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
-import uk.gov.justice.ccr.notepad.view.ChildResultDefinition;
-import uk.gov.justice.ccr.notepad.view.Part;
-import uk.gov.justice.ccr.notepad.view.PromptChoice;
-import uk.gov.justice.ccr.notepad.view.ResultDefinitionView;
-import uk.gov.justice.ccr.notepad.view.ResultDefinitionViewBuilder;
-import uk.gov.justice.ccr.notepad.view.ResultPromptView;
-import uk.gov.justice.ccr.notepad.view.ResultPromptViewBuilder;
+import uk.gov.justice.ccr.notepad.view.*;
 import uk.gov.justice.ccr.notepad.view.parser.PartsResolver;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -22,14 +15,13 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import javax.inject.Inject;
+import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-import javax.json.JsonObject;
-
-import org.apache.commons.collections.CollectionUtils;
+import static java.util.Objects.nonNull;
 
 @ServiceComponent(Component.QUERY_API)
 public class NotepadResultServiceApi {
@@ -56,7 +48,7 @@ public class NotepadResultServiceApi {
         final LocalDate orderedDate = LocalDates.from(payload.getString("orderedDate"));
         lazyResultCacheLoad(envelope, orderedDate);
         final String originalText = payload.getString("originalText");
-        List<Part> parts = new PartsResolver().getParts(originalText);
+        final List<Part> parts = new PartsResolver().getParts(originalText);
         final Knowledge knowledge = parsingFacade.processParts(parts, orderedDate);
         return enveloper.withMetadataFrom(envelope, "hearing.notepad.parse-result-definition-response")
                 .apply(objectToJsonObjectConverter.convert(buildResultDefinitionView(
@@ -96,20 +88,30 @@ public class NotepadResultServiceApi {
 
             promptChoices = getResultPromptChoices(resultDefinitionId, orderedDate).getPromptChoices();
         }
-        final Boolean excludedFromResults = getExcludedFromResultsFromResultDefinition(orderedDate, resultDefinitionId);
-        final ResultDefinitionView buildFromKnowledge = resultDefinitionViewBuilder.buildFromKnowledge(parts, knowledge, childResultDefinitions, excludedFromResults, promptChoices);
+        final ResultDefinition resultDefinition = parsingFacade.retrieveResultDefinitionById(resultDefinitionId, orderedDate);
+        final Boolean excludedFromResults = getExcludedFromResultsFromResultDefinition(resultDefinition);
+        final Boolean booleanResult = getBooleanResultFromResultDefinition(resultDefinition);
+        final String label = nonNull(resultDefinition) ? resultDefinition.getLabel() : null;
+        final ResultDefinitionView buildFromKnowledge = resultDefinitionViewBuilder.buildFromKnowledge(parts, knowledge, childResultDefinitions, excludedFromResults, booleanResult,label, promptChoices);
         buildFromKnowledge.setOriginalText(originalText);
         buildFromKnowledge.setOrderedDate(orderedDate.toString());
         return buildFromKnowledge;
     }
 
-    private Boolean getExcludedFromResultsFromResultDefinition(final LocalDate orderedDate, final String resultDefinitionId) {
-        final ResultDefinition resultDefinition = parsingFacade.retrieveResultDefinitionById(resultDefinitionId, orderedDate);
+    private Boolean getExcludedFromResultsFromResultDefinition(final ResultDefinition resultDefinition) {
         Boolean excludedFromResults = Boolean.FALSE;
         if(nonNull(resultDefinition) && nonNull(resultDefinition.getExcludedFromResults()) ) {
             excludedFromResults = resultDefinition.getExcludedFromResults();
         }
         return excludedFromResults;
+    }
+
+    private Boolean getBooleanResultFromResultDefinition(final ResultDefinition resultDefinition) {
+        Boolean booleanResult = Boolean.FALSE;
+        if(nonNull(resultDefinition) && nonNull(resultDefinition.getConditonalMandatory()) ) {
+            booleanResult = resultDefinition.getConditonalMandatory();
+        }
+        return booleanResult;
     }
 
     private List<ChildResultDefinition> transformChildResultDefinitionsView(List<ResultDefinition> resultDefinitions, List<uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition> childResultDefinitions) {
@@ -122,7 +124,7 @@ public class NotepadResultServiceApi {
                     childResultDefinition.setRuleType(getRuleType(resultDefinition.getId(), childResultDefinitions));
                     childResultDefinition.setExcludedFromResults(resultDefinition.getExcludedFromResults());
                     if(CollectionUtils.isNotEmpty(resultDefinition.getChildResultDefinitions())) {
-                        childResultDefinition.setChildResultCodes(resultDefinition.getChildResultDefinitions().stream().map(crd -> crd.getChildResultDefinitionId()).collect(Collectors.toList()));
+                        childResultDefinition.setChildResultCodes(resultDefinition.getChildResultDefinitions().stream().map(uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition ::getChildResultDefinitionId).collect(Collectors.toList()));
                     }
                     return childResultDefinition;
                 })

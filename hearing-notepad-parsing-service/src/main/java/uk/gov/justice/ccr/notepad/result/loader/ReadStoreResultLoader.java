@@ -126,6 +126,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                                                     getBooleanOrNull(jsonObjectResultDefinition, "excludedFromResults"),
                                                     getBooleanOrNull(jsonObjectResultDefinition, "alwaysPublished")));
                                     resultDefinition.setPublishedForNows(getBooleanOrFalse(jsonObjectResultDefinition, "publishedForNows"));
+                                    resultDefinition.setConditonalMandatory(getBooleanOrFalse(jsonObjectResultDefinition, "isBooleanResult"));
                                     resultDefinitions.add(resultDefinition);
                                 }
                         ));
@@ -154,7 +155,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     }
 
     private Boolean getBooleanOrFalse(final JsonObject jsonObject, final String key) {
-        return jsonObject.containsKey(key) ? jsonObject.getBoolean(key) : false;
+        return jsonObject.containsKey(key) && jsonObject.getBoolean(key);
     }
 
     private List<List<String>> getKeywordsGroups(final JsonObject resultDefinition) {

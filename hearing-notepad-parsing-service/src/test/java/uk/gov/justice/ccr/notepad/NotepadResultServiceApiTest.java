@@ -1,7 +1,6 @@
 package uk.gov.justice.ccr.notepad;
 
 import com.google.common.collect.Lists;
-import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -22,7 +21,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -77,6 +75,9 @@ public class NotepadResultServiceApiTest {
     private ArgumentCaptor<Boolean> excludedFromResults;
 
     @Captor
+    private ArgumentCaptor<Boolean> booleanResult;
+
+    @Captor
     private ArgumentCaptor<List<uk.gov.justice.ccr.notepad.view.ChildResultDefinition>> childResultDefinitionsCaptor;
 
     @Captor
@@ -106,14 +107,22 @@ public class NotepadResultServiceApiTest {
                 .add("orderedDate", orderedDate)
                 .add("excludedFromResults", true)
                 .build();
+        final ResultDefinition resultDefinition = ResultDefinition.builder()
+                .withId(resultDefinitionId.toString())
+                .withLabel("label")
+                .withConditionalMandatory(false)
+                .withExcludedFromResults(true)
+                .withAlwaysPublished(false)
+                .build();
         when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), any())).thenReturn(resultDefinitionView);
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), anyBoolean(), anyString(), any())).thenReturn(resultDefinitionView);
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
         when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(resultDefinitionId.toString());
         when(parsingFacade.processPrompt(resultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
         when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
         when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
         when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(mock(ChildResultDefinitionDetail.class));
+        when(parsingFacade.retrieveResultDefinitionById(resultDefinitionId.toString(),LocalDate.parse(orderedDate))).thenReturn(resultDefinition);
 
         testObj.getResultDefinition(jsonEnvelope);
 
@@ -124,7 +133,7 @@ public class NotepadResultServiceApiTest {
         verify(parsingFacade).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
         verify(resultDefinitionView).setOriginalText("imp sus");
         verify(resultDefinitionView).setOrderedDate(orderedDate);
-        verify(resultDefinitionViewBuilder).buildFromKnowledge(any(), any(), any(), anyBoolean(), eq(mockPromptChoices));
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(any(), any(), any(), anyBoolean(), anyBoolean(), anyString(),eq(mockPromptChoices));
         verify(objectToJsonObjectConverter).convert(any());
         verify(enveloper).withMetadataFrom(any(), any());
 
@@ -142,10 +151,12 @@ public class NotepadResultServiceApiTest {
                 .add("orderedDate", orderedDate)
                 .add("excludedFromResults", true)
                 .build();
+
         when(jsonEnvelope.payloadAsJsonObject()).thenReturn(payload);
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), any())).thenReturn(resultDefinitionView);
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(),anyBoolean(), anyString(), any())).thenReturn(resultDefinitionView);
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
         when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(null);
+
 
         testObj.getResultDefinition(jsonEnvelope);
 
@@ -156,7 +167,7 @@ public class NotepadResultServiceApiTest {
         verify(parsingFacade).lazyLoad(any(JsonEnvelope.class), localDateArgumentCaptor.capture());
         verify(resultDefinitionView).setOriginalText("imp sus");
         verify(resultDefinitionView).setOrderedDate(orderedDate);
-        verify(resultDefinitionViewBuilder).buildFromKnowledge(any(), any(), any(), anyBoolean(), eq(null));
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(any(), any(), any(), anyBoolean(),anyBoolean(), anyString(), eq(null));
         verify(objectToJsonObjectConverter).convert(any());
         verify(enveloper).withMetadataFrom(any(), any());
 
@@ -197,7 +208,7 @@ public class NotepadResultServiceApiTest {
         ChildResultDefinitionDetail childResultDefinitionDetail = new ChildResultDefinitionDetail(createResultDefinition(parentResultDefinitionId, Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)),
                 createResultDefinitions(Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)));
 
-        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), any())).thenReturn(new ResultDefinitionView());
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(new ResultDefinitionView());
         when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(parentResultDefinitionId.toString());
         when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
         final String orderedDate = "2014-06-04";
@@ -208,7 +219,7 @@ public class NotepadResultServiceApiTest {
         final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
                 "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
 
-        verify(resultDefinitionViewBuilder).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture(), any());
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture(),booleanResult.capture(), anyString(), any());
         verify(parsingFacade).processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate));
         verify(resultPromptViewBuilder).buildFromKnowledge(promptKnowledge);
         verify(resultPromptView).getPromptChoices();
