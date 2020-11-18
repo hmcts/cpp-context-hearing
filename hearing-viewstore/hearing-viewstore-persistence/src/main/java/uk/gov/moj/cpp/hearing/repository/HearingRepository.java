@@ -89,15 +89,15 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
             "WHERE hearing.id = :hearingId", singleResult = OPTIONAL)
     public abstract CourtCentre findCourtCenterByHearingId(@QueryParam("hearingId") final UUID hearingId);
 
-    @Query(value = "SELECT hearing.targets FROM Hearing hearing " +
-            "WHERE hearing.id = :hearingId")
+    @Query(value = "SELECT target FROM Target target " +
+            "WHERE target.hearing.id = :hearingId")
     public abstract List<Target> findTargetsByHearingId(@QueryParam("hearingId") final UUID hearingId);
 
     @Query(value = "SELECT hearing.applicationDraftResults FROM Hearing hearing " +
             "WHERE hearing.id = :hearingId")
     public abstract List<ApplicationDraftResult> findApplicationDraftResultsByHearingId(@QueryParam("hearingId") final UUID hearingId);
 
-    @Query(value = "SELECT hearing.prosecutionCases FROM Hearing hearing " +
-            "WHERE hearing.id = :hearingId")
+    @Query(value = "SELECT prosecutionCase FROM ProsecutionCase prosecutionCase " +
+            "WHERE prosecutionCase.hearing.id = :hearingId")
     public abstract List<ProsecutionCase> findProsecutionCasesByHearingId(@QueryParam("hearingId") final UUID hearingId);
 }

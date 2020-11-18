@@ -22,7 +22,7 @@ public class Target {
     @Id
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "hearing_id")
     private Hearing hearing;
 
