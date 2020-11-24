@@ -61,6 +61,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.update-defence-counsel+json
             name: hearing.update-defence-counsel
         (mapping):
+            requestType: application/vnd.hearing.save-multiple-draft-results+json
+            name: hearing.save-multiple-draft-results
+        (mapping):
             requestType: application/vnd.hearing.save-draft-result+json
             name: hearing.save-draft-result
         (mapping):
@@ -133,6 +136,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
              !include json/hearing.save-draft-result.json
             schema:
              !include json/schema/hearing.save-draft-result.json
+        application/vnd.hearing.save-multiple-draft-results+json:
+            example:
+             !include json/hearing.save-multiple-draft-results.json
+            schema:
+             !include json/schema/hearing.save-multiple-draft-results.json
         application/vnd.hearing.add-prosecution-counsel+json:
             example:
              !include json/hearing.add-prosecution-counsel.json

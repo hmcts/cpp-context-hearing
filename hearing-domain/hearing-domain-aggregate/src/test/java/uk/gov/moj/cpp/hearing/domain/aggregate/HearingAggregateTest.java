@@ -13,6 +13,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -22,14 +23,8 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommand
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import uk.gov.justice.core.courts.ApprovalType;
-import uk.gov.justice.core.courts.DefenceCounsel;
-import uk.gov.justice.core.courts.DelegatedPowers;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ProsecutionCounsel;
+import org.hamcrest.MatcherAssert;
+import uk.gov.justice.core.courts.*;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -52,16 +47,11 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.*;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -912,6 +902,77 @@ public class HearingAggregateTest {
         assertThat(slots.get(1).getCourtScheduleId(), is(courtScheduleId2));
     }
 
+
+
+    @Test
+    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValid(){
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(randomUUID())
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
+        final Optional<MultipleDraftResulstSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResulstSaved ).map(x -> (MultipleDraftResulstSaved)x).findFirst();
+        MatcherAssert.assertThat("MultipleDraftResulstSaved not present", multipleDraftResulstSaved.orElse(null), notNullValue() );
+
+    }
+
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenAllTargetsAreNotValid(){
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final Target dupTarget = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(dupTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
+        final Optional<MultipleDraftResulstSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResulstSaved ).map(x -> (MultipleDraftResulstSaved)x).findFirst();
+        MatcherAssert.assertThat("MultipleDraftResulstSaved present", multipleDraftResulstSaved.orElse(null), nullValue());
+
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultErrorWhenAllTargetsAreNotValid(){
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final Target dupTarget = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(dupTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x  -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed)x).findFirst();
+        MatcherAssert.assertThat("SaveDraftResultFailed not present", saveDraftResultFailed.orElse(null), nullValue());
+
+    }
 
     @Test
     public void shouldCorrectHearingDaysWithoutCourtCentreIfNotAlreadySet() {

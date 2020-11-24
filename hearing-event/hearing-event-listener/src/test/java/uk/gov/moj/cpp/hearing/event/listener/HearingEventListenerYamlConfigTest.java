@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResulstSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
@@ -118,7 +119,8 @@ public class HearingEventListenerYamlConfigTest {
             HearingMarkedAsDuplicateForDefendant.class.getAnnotation(Event.class).value(),
             HearingMarkedAsDuplicateForOffence.class.getAnnotation(Event.class).value(),
             PendingNowsRequested.class.getAnnotation(Event.class).value(),
-            NowsRequested.class.getAnnotation(Event.class).value()
+            NowsRequested.class.getAnnotation(Event.class).value(),
+            MultipleDraftResulstSaved.class.getAnnotation(Event.class).value()
 
     );
 

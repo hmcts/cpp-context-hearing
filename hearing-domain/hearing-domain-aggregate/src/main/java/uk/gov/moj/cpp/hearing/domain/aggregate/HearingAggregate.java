@@ -35,6 +35,7 @@ import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ApplicantCounselDelegate;
@@ -61,7 +62,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.*;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
@@ -109,22 +110,12 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
-import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -342,6 +333,22 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines) {
         return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged()));
     }
+
+
+
+    public Stream<Object> saveAllDraftResults(final List<Target> targets) {
+        final List<Object>  appliedTargetEvent = targets.stream().map(x -> saveDraftResults(x.getApplicationId(), x, x.getDefendantId(), x.getHearingId(), x.getOffenceId(), x.getDraftResult(), x.getResultLines()))
+                .map(s -> s.collect(Collectors.toList())).flatMap(x -> x.stream()).collect(Collectors.toList());
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = appliedTargetEvent.stream().filter(x -> x instanceof SaveDraftResultFailed).map(s -> (SaveDraftResultFailed)s).findFirst();
+        if(saveDraftResultFailed.isPresent()){
+            return Stream.of(saveDraftResultFailed);
+        }
+        else {
+            appliedTargetEvent.add(new MultipleDraftResulstSaved(targets));
+            return appliedTargetEvent.stream();
+        }
+    }
+
 
     public Stream<Object> saveDraftResults(final UUID applicationId, final Target target, final UUID defendantId, final UUID hearingId, final UUID offenceId, final String draftResult, final List<ResultLine> resultLines) {
 

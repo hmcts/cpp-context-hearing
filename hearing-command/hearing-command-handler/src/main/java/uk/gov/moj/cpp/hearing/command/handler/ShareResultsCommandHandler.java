@@ -6,9 +6,11 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
+import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -38,6 +40,17 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
                     aggregate -> aggregate.saveDraftResults(target.getApplicationId(), target, target.getDefendantId(), target.getHearingId(),
                             target.getOffenceId(), target.getDraftResult(), target.getResultLines()));
         }
+    }
+
+    @Handles("hearing.command.save-multiple-draft-results")
+    public void saveMultipleDraftResult(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.save-multiple-draft-results message received {}", envelope.toObfuscatedDebugString());
+        }
+        final SaveMultipleResultsCommand saveMultipleResultsCommand = convertToObject(envelope, SaveMultipleResultsCommand.class);
+        final EventStream eventStream = eventSource.getStreamById(saveMultipleResultsCommand.getHearingId());
+        final HearingAggregate hearingAggregate = aggregateService.get(eventStream, HearingAggregate.class);
+        eventStream.append(hearingAggregate.saveAllDraftResults(saveMultipleResultsCommand.getTargets()).map(enveloper.withMetadataFrom(envelope)));
     }
 
     @Handles("hearing.command.application-draft-result")

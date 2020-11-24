@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 public class HearingEventProcessor {
 
     public static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
+    public static final String PUBLIC_HEARING_MULTIPLE_DRAFT_RESULTS_SAVED = "public.hearing.multiple-draft-results-saved";
     public static final String PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED = "public.hearing.save-draft-result-failed";
 
     public static final String PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED = "public.hearing.application-draft-resulted";
@@ -116,6 +117,14 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventSaveDraftResultFailed);
 
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED).apply(publicEventPayload));
+    }
+
+    @Handles("hearing.multiple-draft-results-saved")
+    public void handleMultipleDraftResultFailedEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.multiple-draft-results-saved {}", event.toObfuscatedDebugString());
+        }
+        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_MULTIPLE_DRAFT_RESULTS_SAVED).apply(event.payloadAsJsonObject()));
     }
 
     @Handles("hearing.application-draft-resulted")

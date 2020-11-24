@@ -69,6 +69,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.save-draft-result");
     }
 
+    @Handles("hearing.save-multiple-draft-results")
+    public void saveMultipleDraftResult(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.save-multiple-draft-results");
+    }
+
     @Handles("hearing.application-draft-result")
     public void applicationDraftResult(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.application-draft-result");

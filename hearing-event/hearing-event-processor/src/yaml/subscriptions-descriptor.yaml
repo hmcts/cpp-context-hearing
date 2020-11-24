@@ -79,6 +79,10 @@ subscriptions_descriptor:
         - name: hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json
 
+        # Save multiple Draft Results
+        - name: hearing.multiple-draft-results-saved
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/multiple-draft-results-saved.json
+
         - name: hearing.save-draft-result-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/save-draft-result-failed.json
 

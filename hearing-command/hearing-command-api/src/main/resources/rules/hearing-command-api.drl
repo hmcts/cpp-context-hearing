@@ -52,6 +52,15 @@ rule "Command - API - Action - hearing.save-draft-result"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.save-multiple-draft-results"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.save-multiple-draft-results");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.application-draft-result"
   when
     $outcome: Outcome();
