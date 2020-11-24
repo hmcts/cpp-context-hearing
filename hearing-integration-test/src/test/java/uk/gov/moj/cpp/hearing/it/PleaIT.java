@@ -440,30 +440,6 @@ public class PleaIT extends AbstractIT {
 
                 )
         );
-
-        final InitiateHearingCommandHelper hearingTwo = h(initiateHearing(getRequestSpec(), customStructureInitiateHearingTemplate(
-                toMap(hearingOne.getFirstCase().getId(), toMap(hearingOne.getFirstDefendantForFirstCase().getId(), asList(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
-        )));
-
-        getHearingPollForMatch(hearingTwo.getHearingId(), isBean(HearingDetailsResponse.class)
-                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                        .with(Hearing::getId, is(hearingTwo.getHearingId()))
-                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
-                                        .with(Defendant::getOffences, first(isBean(Offence.class)
-                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
-                                                .with(Offence::getPlea, isBean(Plea.class)
-                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
-                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue()))
-                                                )
-                                                .with(Offence::getConvictionDate, is(nullValue()))
-                                        ))
-                                ))
-                        ))
-
-                )
-        );
-
     }
 
     @Test

@@ -22,20 +22,6 @@ subscriptions_descriptor:
         - name: hearing.command.register-hearing-against-case
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.register-hearing-against-case.json
 
-        # Inherit Plea after Initiate Hearing
-        - name: hearing.events.found-plea-for-hearing-to-inherit
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-plea-for-hearing-to-inherit.json
-
-        - name: hearing.command.update-hearing-with-inherited-plea
-          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.update-hearing-with-inherited-plea.json
-
-        # Inherit verdict after Initiate Hearing
-        - name: hearing.events.found-verdict-for-hearing-to-inherit
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-verdict-for-hearing-to-inherit.json
-
-        - name: hearing.command.update-hearing-with-inherited-verdict
-          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.command.update-hearing-with-inherited-verdict.json
-
         # Sending Sheet Complete
         - name: hearing.record-sending-sheet-complete
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/record-sending-sheet-complete.json

@@ -1,8 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -18,7 +16,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
@@ -30,9 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.json.JsonObject;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tngtech.java.junit.dataprovider.DataProviderRunner;
 import org.junit.Before;
 import org.junit.Test;
@@ -151,50 +145,4 @@ public class InitiateHearingEventProcessorTest {
                         .thatMatchesSchema()
         );
     }
-
-
-    @Test
-    public void hearingInitiateOffencePlea() {
-
-        final UUID offenceId = randomUUID();
-        final UUID caseId = randomUUID();
-        final UUID defendantId = randomUUID();
-        final UUID hearingId = randomUUID();
-        final UUID originHearingId = randomUUID();
-        final String pleaDate = "2017-01-01";
-        final String value = "GUILTY";
-
-        final JsonObject payload = createObjectBuilder()
-                .add("offenceId", offenceId.toString())
-                .add("caseId", caseId.toString())
-                .add("defendantId", defendantId.toString())
-                .add("hearingId", hearingId.toString())
-                .add("originHearingId", originHearingId.toString())
-                .add("pleaDate", pleaDate)
-                .add("value", value)
-                .build();
-
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.found-plea-for-hearing-to-inherit"), payload);
-
-        this.initiateHearingEventProcessor.hearingInitiateOffencePlea(event);
-
-        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
-
-        assertThat(
-                this.envelopeArgumentCaptor.getValue(), jsonEnvelope(
-                        metadata().withName("hearing.command.update-hearing-with-inherited-plea"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.offenceId", is(offenceId.toString())),
-                                withJsonPath("$.caseId", is(caseId.toString())),
-                                withJsonPath("$.defendantId", is(defendantId.toString())),
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.originHearingId", is(originHearingId.toString())),
-                                withJsonPath("$.pleaDate", is(pleaDate)),
-                                withJsonPath("$.value", is(value))
-                                )
-                        )
-                )
-        );
-    }
-
 }

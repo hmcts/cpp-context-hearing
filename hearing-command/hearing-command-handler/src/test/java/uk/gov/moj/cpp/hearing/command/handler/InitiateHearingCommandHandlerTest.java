@@ -19,7 +19,6 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
@@ -31,7 +30,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
@@ -40,7 +38,6 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Verdict;
@@ -58,14 +55,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
@@ -88,7 +83,6 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -106,7 +100,6 @@ public class InitiateHearingCommandHandlerTest {
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
             HearingInitiated.class,
-            FoundPleaForHearingToInherit.class,
             InheritedPlea.class,
             RegisteredHearingAgainstDefendant.class,
             RegisteredHearingAgainstOffence.class,
@@ -399,110 +392,8 @@ public class InitiateHearingCommandHandlerTest {
                                 withJsonPath("$.hearingId", is(hearingId.toString()))
                         ))).thatMatchesSchema()
         );
-
-        assertThat((JsonEnvelope) events.get(1),
-                jsonEnvelope(
-                        withMetadataEnvelopedFrom(command)
-                                .withName("hearing.events.found-plea-for-hearing-to-inherit"),
-                        payloadIsJson(allOf(
-                                withJsonPath("$.hearingId", is(hearingId.toString())),
-                                withJsonPath("$.plea.originatingHearingId", is(originHearingId.toString())),
-                                withJsonPath("$.plea.pleaDate", is(pleaDate.toString())),
-                                withJsonPath("$.plea.pleaValue", is(value))
-                        )))
-        );
     }
 
-    @Test
-    public void initiateHearingOffencePlea() throws Throwable {
-
-        final DelegatedPowers delegatedPowers = DelegatedPowers.delegatedPowers()
-                .withUserId(UUID.randomUUID())
-                .withFirstName(STRING.next())
-                .withLastName(STRING.next()).build();
-
-        final UpdateHearingWithInheritedPleaCommand input = UpdateHearingWithInheritedPleaCommand.updateHearingWithInheritedPleaCommand()
-                .setHearingId(UUID.randomUUID())
-                .setPlea(plea()
-                        .withOffenceId(randomUUID())
-                        .withPleaDate(PAST_LOCAL_DATE.next())
-                        .withPleaValue(GUILTY)
-                        .withDelegatedPowers(delegatedPowers)
-                        .build());
-
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(input));
-
-        setupMockedEventStream(input.getHearingId(), this.hearingEventStream, new HearingAggregate());
-
-        this.hearingCommandHandler.initiateHearingOffencePlea(command);
-
-        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
-
-        JsonEnvelope jsonEnvelope = events.get(0);
-        assertThat(jsonEnvelope.metadata().name(), is("hearing.events.inherited-plea"));
-        assertThat(asPojo(jsonEnvelope, InheritedPlea.class),
-                BeanMatcher.isBean(InheritedPlea.class)
-                        .with(InheritedPlea::getHearingId, is(input.getHearingId()))
-                        .with(InheritedPlea::getPlea, isBean(Plea.class)
-                                .with(Plea::getOffenceId, is(input.getPlea().getOffenceId()))
-                                .with(Plea::getOriginatingHearingId, is(input.getPlea().getOriginatingHearingId()))
-                                .with(Plea::getPleaDate, is(input.getPlea().getPleaDate()))
-                                .with(Plea::getPleaValue, is(input.getPlea().getPleaValue()))
-                                .with(Plea::getDelegatedPowers, isBean(
-                                        DelegatedPowers.class)
-                                        .with(DelegatedPowers::getUserId, is(delegatedPowers.getUserId()))
-                                        .with(DelegatedPowers::getFirstName, is(delegatedPowers.getFirstName()))
-                                        .with(DelegatedPowers::getLastName, is(delegatedPowers.getLastName())))));
-
-    }
-
-    @Test
-    public void initiateHearingOffenceVerdict() throws Throwable {
-
-        final UpdateHearingWithInheritedVerdictCommand input = UpdateHearingWithInheritedVerdictCommand.updateHearingWithInheritedVerdictCommand()
-                .setHearingId(UUID.randomUUID())
-                .setVerdict(verdictTemplate(randomUUID(), TestTemplates.VerdictCategoryType.GUILTY));
-
-        final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(input));
-
-        setupMockedEventStream(input.getHearingId(), this.hearingEventStream, new HearingAggregate());
-
-        this.hearingCommandHandler.initiateHearingOffenceVerdict(command);
-
-        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
-
-        JsonEnvelope jsonEnvelope = events.get(0);
-
-        assertThat(jsonEnvelope.metadata().name(), is("hearing.events.inherited-verdict-added"));
-        assertThat(asPojo(jsonEnvelope, InheritedVerdictAdded.class),
-                BeanMatcher.isBean(InheritedVerdictAdded.class)
-                        .with(InheritedVerdictAdded::getHearingId, is(input.getHearingId()))
-                        .with(InheritedVerdictAdded::getVerdict, isBean(Verdict.class)
-                                .with(Verdict::getVerdictType, isBean(VerdictType.class)
-                                        .with(VerdictType::getCategory, is(input.getVerdict().getVerdictType().getCategory()))
-                                        .with(VerdictType::getCategoryType, is(input.getVerdict().getVerdictType().getCategoryType()))
-                                        .with(VerdictType::getId, is(input.getVerdict().getVerdictType().getId()))
-                                        .with(VerdictType::getDescription, is(input.getVerdict().getVerdictType().getDescription()))
-                                        .with(VerdictType::getSequence, is(input.getVerdict().getVerdictType().getSequence()))
-                                )
-                                .with(Verdict::getOffenceId, is(input.getVerdict().getOffenceId()))
-                                .with(Verdict::getVerdictDate, is(input.getVerdict().getVerdictDate()))
-                                .with(Verdict::getJurors, isBean(Jurors.class)
-                                        .with(Jurors::getNumberOfJurors, is(input.getVerdict().getJurors().getNumberOfJurors()))
-                                        .with(Jurors::getNumberOfSplitJurors, is(input.getVerdict().getJurors().getNumberOfSplitJurors()))
-                                        .with(Jurors::getUnanimous, is(input.getVerdict().getJurors().getUnanimous()))
-                                )
-                                .with(Verdict::getLesserOrAlternativeOffence, isBean(LesserOrAlternativeOffence.class)
-                                        .with(LesserOrAlternativeOffence::getOffenceDefinitionId, is(input.getVerdict().getLesserOrAlternativeOffence().getOffenceDefinitionId()))
-                                        .with(LesserOrAlternativeOffence::getOffenceCode, is(input.getVerdict().getLesserOrAlternativeOffence().getOffenceCode()))
-                                        .with(LesserOrAlternativeOffence::getOffenceTitle, is(input.getVerdict().getLesserOrAlternativeOffence().getOffenceTitle()))
-                                        .with(LesserOrAlternativeOffence::getOffenceTitleWelsh, is(input.getVerdict().getLesserOrAlternativeOffence().getOffenceTitleWelsh()))
-                                        .with(LesserOrAlternativeOffence::getOffenceLegislation, is(input.getVerdict().getLesserOrAlternativeOffence().getOffenceLegislation()))
-                                        .with(LesserOrAlternativeOffence::getOffenceLegislationWelsh, is(input.getVerdict().getLesserOrAlternativeOffence().getOffenceLegislationWelsh()))
-                                )
-                        )
-        );
-    }
 
     @Test
     public void recordHearingDefendant() throws EventStreamException {

@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -28,11 +28,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @SuppressWarnings({"squid:S2201"})
@@ -82,24 +83,6 @@ public class InitiateHearingEventListener {
         hearingRepository.save(hearingEntity);
     }
 
-    private List<Offence> getOffencesForHearing(final Hearing hearingEntity) {
-        return ofNullable(hearingEntity.getProsecutionCases()).orElse(new HashSet<>())
-                .stream()
-                .flatMap(x -> ofNullable(x.getDefendants()).orElse(new HashSet<>()).stream())
-                .flatMap(def -> ofNullable(def.getOffences()).orElse(new HashSet<>()).stream())
-                .collect(Collectors.toList());
-    }
-
-    private void updateOffenceForShadowListedStatus(final List<UUID> shadowListedOffences, final Offence offence) {
-        ofNullable(shadowListedOffences).orElseGet(() -> new ArrayList<>())
-                .stream()
-                .filter(x -> offence.getId().getId().equals(x))
-                .findFirst()
-                .ifPresent(x -> offence.setShadowListed(true));
-
-
-    }
-
     @Transactional
     @Handles("hearing.events.hearing-extended")
     public void hearingExtended(final JsonEnvelope event) {
@@ -117,23 +100,25 @@ public class InitiateHearingEventListener {
             hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
             hearingRepository.save(hearingEntity);
         }
-        if (CollectionUtils.isNotEmpty(hearingExtended.getProsecutionCases())) {
-            hearingExtended.getProsecutionCases()
-                    .forEach(p -> {
-                                final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity, p);
-                                getOffencesForProsecutionCase(prosecutionCase).forEach(x -> updateOffenceForShadowListedStatus(hearingExtended.getShadowListedOffences(), x));
-                                prosecutionCaseRepository.save(prosecutionCase);
-                            }
-                    );
+        if (isNotEmpty(hearingExtended.getProsecutionCases())) {
+            final List<uk.gov.justice.core.courts.ProsecutionCase> prosecutionCasesFromEntities = prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases());
+            hearingExtended.getProsecutionCases().forEach(
+                    prosecutionCaseRequest -> {
+                        final uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseEntity = prosecutionCasesFromEntities.stream()
+                                .filter(prosecutionCase -> prosecutionCase.getId().equals(prosecutionCaseRequest.getId()))
+                                .findFirst().orElse(null);
+                        uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseToBePersisted = null;
+                        if (nonNull(prosecutionCaseEntity)) {
+                            prosecutionCaseToBePersisted = createProsecutionCase(prosecutionCaseRequest, prosecutionCaseEntity);
+                        } else {
+                            prosecutionCaseToBePersisted = prosecutionCaseRequest;
+                        }
+                        final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity, prosecutionCaseToBePersisted);
+                        getOffencesForProsecutionCase(prosecutionCase).forEach(offence -> updateOffenceForShadowListedStatus(hearingExtended.getShadowListedOffences(), offence));
+                        prosecutionCaseRepository.save(prosecutionCase);
+                    }
+            );
         }
-
-    }
-
-    private List<Offence> getOffencesForProsecutionCase(final ProsecutionCase prosecutionCase) {
-        return prosecutionCase.getDefendants()
-                .stream()
-                .flatMap(def -> ofNullable(def.getOffences()).orElse(new HashSet<>()).stream())
-                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -222,6 +207,31 @@ public class InitiateHearingEventListener {
         }
     }
 
+    private List<Offence> getOffencesForHearing(final Hearing hearingEntity) {
+        return ofNullable(hearingEntity.getProsecutionCases()).orElse(new HashSet<>())
+                .stream()
+                .flatMap(x -> ofNullable(x.getDefendants()).orElse(new HashSet<>()).stream())
+                .flatMap(def -> ofNullable(def.getOffences()).orElse(new HashSet<>()).stream())
+                .collect(toList());
+    }
+
+    private void updateOffenceForShadowListedStatus(final List<UUID> shadowListedOffences, final Offence offence) {
+        ofNullable(shadowListedOffences).orElseGet(() -> new ArrayList<>())
+                .stream()
+                .filter(x -> offence.getId().getId().equals(x))
+                .findFirst()
+                .ifPresent(x -> offence.setShadowListed(true));
+
+
+    }
+
+    private List<Offence> getOffencesForProsecutionCase(final ProsecutionCase prosecutionCase) {
+        return prosecutionCase.getDefendants()
+                .stream()
+                .flatMap(def -> ofNullable(def.getOffences()).orElse(new HashSet<>()).stream())
+                .collect(toList());
+    }
+
     private boolean isPleaInherited(InheritedPlea event, Offence offence) {
         return !event.getHearingId().equals(offence.getPlea().getOriginatingHearingId());
     }
@@ -237,4 +247,86 @@ public class InitiateHearingEventListener {
             return o;
         }).orElseThrow(() -> new RuntimeException("Offence id is not found on hearing id: " + hearingId));
     }
+
+    private uk.gov.justice.core.courts.ProsecutionCase createProsecutionCase(final uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseRequest,
+                                                                             final uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseEntity) {
+        return uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseEntity.getId())
+                .withDefendants(addDefendants(prosecutionCaseEntity.getDefendants(), prosecutionCaseRequest.getDefendants()))
+                .withStatementOfFactsWelsh(prosecutionCaseEntity.getStatementOfFactsWelsh())
+                .withStatementOfFacts(prosecutionCaseEntity.getStatementOfFacts())
+                .withOriginatingOrganisation(prosecutionCaseEntity.getOriginatingOrganisation())
+                .withCaseStatus(prosecutionCaseEntity.getCaseStatus())
+                .withClassOfCase(prosecutionCaseEntity.getClassOfCase())
+                .withProsecutionCaseIdentifier(prosecutionCaseEntity.getProsecutionCaseIdentifier())
+                .withAppealProceedingsPending(prosecutionCaseEntity.getAppealProceedingsPending())
+                .withBreachProceedingsPending(prosecutionCaseEntity.getBreachProceedingsPending())
+                .withCaseMarkers(prosecutionCaseEntity.getCaseMarkers())
+                .withPoliceOfficerInCase(prosecutionCaseEntity.getPoliceOfficerInCase())
+                .withRemovalReason(prosecutionCaseEntity.getRemovalReason())
+                .withInitiationCode(prosecutionCaseEntity.getInitiationCode())
+                .withCpsOrganisation(prosecutionCaseEntity.getCpsOrganisation())
+                .withIsCpsOrgVerifyError(prosecutionCaseEntity.getIsCpsOrgVerifyError())
+                .build();
+    }
+
+    private static Defendant createDefendant(final Defendant defendant, final Defendant defendantEntity) {
+        return Defendant.defendant()
+                .withId(defendantEntity.getId())
+                .withOffences(addOffences(defendantEntity.getOffences(), defendant.getOffences()))
+                .withMasterDefendantId(defendantEntity.getMasterDefendantId())
+                .withPncId(defendantEntity.getPncId())
+                .withCroNumber(defendantEntity.getCroNumber())
+                .withPersonDefendant(defendantEntity.getPersonDefendant())
+                .withProsecutionCaseId(defendantEntity.getProsecutionCaseId())
+                .withProceedingsConcluded(defendantEntity.getProceedingsConcluded())
+                .withAssociatedPersons(defendantEntity.getAssociatedPersons())
+                .withCourtProceedingsInitiated(defendantEntity.getCourtProceedingsInitiated())
+                .withLegalEntityDefendant(defendantEntity.getLegalEntityDefendant())
+                .withDefenceOrganisation(defendantEntity.getDefenceOrganisation())
+                .withIsYouth(defendantEntity.getIsYouth())
+                .withNumberOfPreviousConvictionsCited(defendantEntity.getNumberOfPreviousConvictionsCited())
+                .withProsecutionAuthorityReference(defendantEntity.getProsecutionAuthorityReference())
+                .withAssociatedDefenceOrganisation(defendantEntity.getAssociatedDefenceOrganisation())
+                .withLegalAidStatus(defendantEntity.getLegalAidStatus())
+                .withMitigation(defendantEntity.getMitigation())
+                .withMitigationWelsh(defendantEntity.getMitigationWelsh())
+                .withWitnessStatement(defendantEntity.getWitnessStatement())
+                .withWitnessStatementWelsh(defendantEntity.getWitnessStatementWelsh())
+                .withAliases(defendantEntity.getAliases())
+                .withAssociationLockedByRepOrder(defendantEntity.getAssociationLockedByRepOrder())
+                .withDefendantCaseJudicialResults(defendantEntity.getDefendantCaseJudicialResults())
+                .build();
+    }
+
+    private static List<Defendant> addDefendants(final List<Defendant> defendantsEntities, final List<Defendant> defendantsRequest) {
+        final List<UUID> defendantIdsInEntities = defendantsEntities.stream().map(Defendant::getId).collect(toList());
+        defendantsRequest.forEach(defendant -> {
+            if (defendantIdsInEntities.contains(defendant.getId())) {
+                final Defendant defendantEntity = defendantsEntities.stream()
+                        .filter(def -> def.getId().equals(defendant.getId()))
+                        .findFirst()
+                        .orElse(null);
+                final Defendant defendantToBeAdded = createDefendant(defendant, defendantEntity);
+                defendantsEntities.removeIf(defToBeRemoved -> defToBeRemoved.getId().equals(defendant.getId()));
+                defendantsEntities.add(defendantToBeAdded);
+            } else {
+                defendantsEntities.add(defendant);
+            }
+        });
+        return defendantsEntities;
+    }
+
+    private static List<uk.gov.justice.core.courts.Offence> addOffences(final List<uk.gov.justice.core.courts.Offence> offencesEntities, final List<uk.gov.justice.core.courts.Offence> offencesRequest) {
+        final List<UUID> offencesIdsInEntities = offencesEntities.stream()
+                .map(uk.gov.justice.core.courts.Offence::getId)
+                .collect(toList());
+        offencesRequest.forEach(offence -> {
+            if (!offencesIdsInEntities.contains(offence.getId())) {
+                offencesEntities.add(offence);
+            }
+        });
+        return offencesEntities;
+    }
+
 }

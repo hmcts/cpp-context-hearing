@@ -90,22 +90,6 @@ public class InitiateHearingEventProcessor {
                 .build()));
     }
 
-    @Handles("hearing.events.found-plea-for-hearing-to-inherit")
-    public void hearingInitiateOffencePlea(final JsonEnvelope event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.found-plea-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
-        }
-        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-plea").apply(event.payloadAsJsonObject()));
-    }
-
-    @Handles("hearing.events.found-verdict-for-hearing-to-inherit")
-    public void hearingInitiateOffenceVerdict(final JsonEnvelope event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.found-verdict-for-hearing-to-inherit event received {}", event.toObfuscatedDebugString());
-        }
-        this.sender.send(this.enveloper.withMetadataFrom(event, "hearing.command.update-hearing-with-inherited-verdict").apply(event.payloadAsJsonObject()));
-    }
-
     @Handles("hearing.events.hearing-initiate-ignored")
     public void ignoreHearingInitiate(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {

@@ -12,8 +12,6 @@ import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearing
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
-import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
-import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
@@ -55,20 +53,6 @@ public class OffenceAggregate implements Aggregate {
                 .withOffenceId(offenceId)
                 .withHearingId(hearingId)
                 .build());
-
-        if (this.offencePleaUpdated != null) {
-            streamBuilder.add(new FoundPleaForHearingToInherit(
-                    hearingId,
-                    offencePleaUpdated.getPleaModel().getPlea()
-            ));
-        }
-
-        if (this.offenceVerdictUpdated != null) {
-            streamBuilder.add(new FoundVerdictForHearingToInherit(
-                    hearingId,
-                    offenceVerdictUpdated.getVerdict()
-            ));
-        }
 
         return apply(streamBuilder.build());
     }
