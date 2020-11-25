@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>7.0.62-multihander-SNAPSHOT</version>
+        <version>7.0.63-multihander-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-notepad-parsing-service</artifactId>
     <packaging>war</packaging>
