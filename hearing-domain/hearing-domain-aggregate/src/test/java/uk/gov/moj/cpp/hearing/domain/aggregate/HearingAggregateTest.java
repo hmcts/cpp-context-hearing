@@ -917,7 +917,7 @@ public class HearingAggregateTest {
         final List<Target> targetList = new ArrayList<>();
         targetList.add(target);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
-        final Optional<MultipleDraftResulstSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResulstSaved ).map(x -> (MultipleDraftResulstSaved)x).findFirst();
+        final Optional<MultipleDraftResultsSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved)x).findFirst();
         MatcherAssert.assertThat("MultipleDraftResulstSaved not present", multipleDraftResulstSaved.orElse(null), notNullValue() );
 
     }
@@ -943,7 +943,7 @@ public class HearingAggregateTest {
         targetList.add(target);
         targetList.add(dupTarget);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
-        final Optional<MultipleDraftResulstSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResulstSaved ).map(x -> (MultipleDraftResulstSaved)x).findFirst();
+        final Optional<MultipleDraftResultsSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved)x).findFirst();
         MatcherAssert.assertThat("MultipleDraftResulstSaved present", multipleDraftResulstSaved.orElse(null), nullValue());
 
     }

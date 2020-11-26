@@ -35,7 +35,6 @@ import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
-import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ApplicantCounselDelegate;
@@ -344,7 +343,7 @@ public class HearingAggregate implements Aggregate {
             return Stream.of(saveDraftResultFailed);
         }
         else {
-            appliedTargetEvent.add(new MultipleDraftResulstSaved(targets));
+            appliedTargetEvent.add(new MultipleDraftResultsSaved(targets.size()));
             return appliedTargetEvent.stream();
         }
     }
