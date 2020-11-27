@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.validate-result-amendments-requested.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validated.json",
   "type": "object",
   "properties": {
     "hearingId": {

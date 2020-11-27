@@ -6,7 +6,7 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidated;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 
@@ -16,7 +16,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
-public class ValidateResultAmendmentsRequestedEventListener {
+public class ResultAmendmentsValidatedEventListener {
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -25,9 +25,9 @@ public class ValidateResultAmendmentsRequestedEventListener {
     private ApprovalRequestedRepository approvalRequestedRepository;
 
     @Transactional
-    @Handles("hearing.event.validate-result-amendments-requested")
-    public void validateResultAmendmentsRequested(final JsonEnvelope envelope) {
-        final ValidateResultAmendmentsRequested validateResultAmendmentsRequested = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), ValidateResultAmendmentsRequested.class);
+    @Handles("hearing.event.result-amendments-validated")
+    public void resultAmendmentsValidated(final JsonEnvelope envelope) {
+        final ResultAmendmentsValidated validateResultAmendmentsRequested = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), ResultAmendmentsValidated.class);
 
         final List<ApprovalRequested> approvalsRequested = approvalRequestedRepository.findApprovalsRequestByHearingId(validateResultAmendmentsRequested.getHearingId());
         if (!approvalsRequested.isEmpty()) {

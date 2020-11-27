@@ -109,6 +109,11 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
@@ -564,7 +569,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> validateResultsAmendments(final UUID hearingId, final UUID userId, final ZonedDateTime validateResultAmendmentsTime) {
-        return apply(Stream.of(ValidateResultAmendmentsRequested.validateResultAmendmentsRequested()
+        return apply(Stream.of(ResultAmendmentsValidated.resultAmendmentsRequested()
                 .withHearingId(hearingId)
                 .withUserId(userId)
                 .withValidateResultAmendmentsTime(validateResultAmendmentsTime)

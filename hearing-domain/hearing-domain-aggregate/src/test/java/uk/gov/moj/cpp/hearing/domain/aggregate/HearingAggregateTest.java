@@ -1035,7 +1035,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(hearing));
         final UUID userId = randomUUID();
         final ZonedDateTime now = ZonedDateTime.now();
-        final ValidateResultAmendmentsRequested validateResultAmendmentsRequested = (ValidateResultAmendmentsRequested)
+        final ResultAmendmentsValidated validateResultAmendmentsRequested = (ResultAmendmentsValidated)
                 hearingAggregate.validateResultsAmendments(hearing.getId(), userId, now)
                         .findFirst()
                         .orElse(null);

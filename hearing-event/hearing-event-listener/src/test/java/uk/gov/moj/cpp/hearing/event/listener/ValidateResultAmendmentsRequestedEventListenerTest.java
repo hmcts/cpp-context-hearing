@@ -11,7 +11,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
-import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidated;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 
 import java.time.ZoneId;
@@ -41,7 +41,7 @@ public class ValidateResultAmendmentsRequestedEventListenerTest {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @InjectMocks
-    private ValidateResultAmendmentsRequestedEventListener validateResultAmendmentsRequestedEventListener;
+    private ResultAmendmentsValidatedEventListener validateResultAmendmentsRequestedEventListener;
 
     @Test
     public void shouldRecordSessionTime() {
@@ -49,10 +49,10 @@ public class ValidateResultAmendmentsRequestedEventListenerTest {
         final UUID userId = randomUUID();
         final ZonedDateTime validateResultAmendmentsTime = ZonedDateTime.now().withZoneSameInstant(ZoneId.of("UTC"));
 
-        final ValidateResultAmendmentsRequested validateResultAmendmentsRequested = new ValidateResultAmendmentsRequested(hearingId, userId, validateResultAmendmentsTime);
+        final ResultAmendmentsValidated validateResultAmendmentsRequested = new ResultAmendmentsValidated(hearingId, userId, validateResultAmendmentsTime);
         when(approvalRequestedRepository.findApprovalsRequestByHearingId(hearingId)).thenReturn(getApprovalRequesteds(hearingId, userId, validateResultAmendmentsTime));
 
-        validateResultAmendmentsRequestedEventListener.validateResultAmendmentsRequested(createJsonEnvelope(validateResultAmendmentsRequested));
+        validateResultAmendmentsRequestedEventListener.resultAmendmentsValidated(createJsonEnvelope(validateResultAmendmentsRequested));
 
         verify(approvalRequestedRepository).removeAllRequestApprovals(hearingId);
     }
@@ -64,7 +64,7 @@ public class ValidateResultAmendmentsRequestedEventListenerTest {
         return approvalsRequested;
     }
 
-    private JsonEnvelope createJsonEnvelope(final ValidateResultAmendmentsRequested validateResultAmendmentsRequested) {
+    private JsonEnvelope createJsonEnvelope(final ResultAmendmentsValidated validateResultAmendmentsRequested) {
         final JsonObject jsonObject = objectToJsonObjectConverter.convert(validateResultAmendmentsRequested);
         return envelopeFrom((Metadata) null, jsonObject);
     }

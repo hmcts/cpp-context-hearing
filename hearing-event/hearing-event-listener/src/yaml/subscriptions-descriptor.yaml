@@ -247,7 +247,7 @@ subscriptions_descriptor:
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-requested.json
 
         # Hearing Validate Result Amendments Requested
-        - name: hearing.event.validate-result-amendments-requested
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.validate-result-amendments-requested.json
+        - name: hearing.event.result-amendments-validated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validated.json
 
       event_source_name: hearing

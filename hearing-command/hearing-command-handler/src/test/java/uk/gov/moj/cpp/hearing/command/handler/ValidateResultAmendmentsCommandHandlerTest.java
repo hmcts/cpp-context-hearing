@@ -27,7 +27,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.event.result.ValidateResultAmendmentsRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidated;
 
 import java.io.IOException;
 import java.time.ZonedDateTime;
@@ -47,7 +47,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ValidateResultAmendmentsCommandHandlerTest {
 
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(ValidateResultAmendmentsRequested.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(ResultAmendmentsValidated.class);
 
     @Mock
     private EventStream hearingEventStream;
@@ -95,7 +95,7 @@ public class ValidateResultAmendmentsCommandHandlerTest {
 
         assertThat(
                 verifyAppendAndGetArgumentFrom(this.hearingEventStream),
-                streamContaining(jsonEnvelope(withMetadataEnvelopedFrom(commandEnvelope).withName("hearing.event.validate-result-amendments-requested"),
+                streamContaining(jsonEnvelope(withMetadataEnvelopedFrom(commandEnvelope).withName("hearing.event.result-amendments-validated"),
                         payloadIsJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())))))
                 ));
     }
