@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite.courtSite;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant.defendant;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.PublicNotices.publicNotices;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.ACTIVE;
 import static uk.gov.moj.cpp.hearing.query.view.service.CaseStatusCode.INACTIVE;
 import static uk.gov.moj.cpp.hearing.query.view.service.ProgessStatusCode.ADJOURNED;
@@ -23,6 +24,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingEvent;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases;
@@ -31,6 +33,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.PublicNotices;
 import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
 
@@ -39,12 +42,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -208,12 +213,13 @@ public class HearingListXhibitResponseTransformer {
         hearing.getProsecutionCases()
                 .forEach(prosecutionCase -> {
                     final List<Defendant> defendants = getDefendants(prosecutionCase, StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
+                    final PublicNotices publicNotices = getPublicNotices(prosecutionCase);
                     caseDetailsList.add(buildCaseDetail(hearing,
                             hearingEvent,
                             isActiveHearing,
                             defendants,
                             getCaseURN(prosecutionCase),
-                            hearingprogessValue));
+                            hearingprogessValue, publicNotices));
                 });
 
         return caseDetailsList;
@@ -233,11 +239,12 @@ public class HearingListXhibitResponseTransformer {
         hearing.getCourtApplications()
                 .forEach(courtApplication -> {
                     final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication.getApplicant(), StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
+                    final PublicNotices publicNotices = getPublicNoticesForCourtApplication(courtApplication.getApplicant());
                     caseDetailList.add(buildCaseDetail(hearing,
                             hearingEvent,
                             isActiveHearing, defendants,
                             courtApplication.getApplicationReference(),
-                            hearingprogessValue));
+                            hearingprogessValue, publicNotices));
                 });
 
         return caseDetailList;
@@ -262,7 +269,8 @@ public class HearingListXhibitResponseTransformer {
                                        final BigInteger activecase,
                                        final List<Defendant> defendants,
                                        final String cppUrn,
-                                       final BigInteger hearingprogessValue) {
+                                       final BigInteger hearingprogessValue,
+                                       final PublicNotices publicNotices) {
         //get the hearingType by hearingType id from cache
         final String exhibitHearingTypeDescription = commonXhibitReferenceDataService.getXhibitHearingType(hearing.getType().getId()).getExhibitHearingDescription();
 
@@ -276,6 +284,7 @@ public class HearingListXhibitResponseTransformer {
                 .withJudgeName(judgeNameMapper.getJudgeName(hearing))
                 .withHearingEvent(hearingEvent)
                 .withNotBeforeTime(dateTimeFormatter.format(hearing.getHearingDays().stream().max((x, y) -> x.getSittingDay().compareTo(y.getSittingDay())).get().getSittingDay()))
+                .withPublicNotices(publicNotices)
                 .build();
 
         caseDetail.setLinkedCaseIds(getLinkedCaseIds(hearing.getCourtApplications()));
@@ -283,8 +292,6 @@ public class HearingListXhibitResponseTransformer {
 
         return caseDetail;
     }
-
-
 
 
     private List<Defendant> getDefendants(final ProsecutionCase prosecutionCase, final boolean needToBeOmitted) {
@@ -297,5 +304,42 @@ public class HearingListXhibitResponseTransformer {
                         .withLastName(prosecutionCaseDefendant.getPersonDefendant().getPersonDetails().getLastName())
                         .build())
                 .collect(toList());
+    }
+
+    private PublicNotices getPublicNotices(final ProsecutionCase prosecutionCase) {
+        final Set<String> publicNoticesValue = new HashSet<>();
+        prosecutionCase.getDefendants()
+                .forEach(defendant -> defendant.getOffences().forEach(offence -> {
+                    if (Objects.nonNull(offence.getReportingRestrictions())) {
+                        getReportingRestrictionLabel(offence,publicNoticesValue);
+                    }
+                }));
+
+
+        return publicNotices().withPublicNotice(publicNoticesValue.stream().filter(Objects::nonNull).collect(Collectors.toList())).build();
+
+    }
+
+    private PublicNotices getPublicNoticesForCourtApplication(final CourtApplicationParty applicant) {
+        final Set<String> publicNoticesValue = new HashSet<>();
+        if (Objects.nonNull(applicant.getDefendant()) && Objects.nonNull(applicant.getDefendant().getOffences())) {
+
+            final List<Offence> offences = applicant.getDefendant().getOffences()
+                    .stream()
+                    .filter(offence -> Objects.nonNull(offence.getReportingRestrictions()))
+                    .collect(Collectors.toList());
+            offences
+                    .forEach(offence ->
+                            getReportingRestrictionLabel(offence,publicNoticesValue));
+        }
+        return publicNotices().withPublicNotice(publicNoticesValue.stream().filter(Objects::nonNull).collect(Collectors.toList())).build();
+
+    }
+
+    private Set<String> getReportingRestrictionLabel(final Offence offence,final Set<String> publicNoticesValue){
+        offence.getReportingRestrictions().forEach(
+                reportingRestriction ->
+                        ofNullable(reportingRestriction).ifPresent(restriction -> publicNoticesValue.add(restriction.getLabel())));
+        return publicNoticesValue;
     }
 }

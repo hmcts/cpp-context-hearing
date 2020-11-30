@@ -36,12 +36,14 @@ import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.LinkType;
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -188,6 +190,8 @@ public class HearingForTodayIT extends AbstractIT {
                                                 .withStartDate(now().plusDays(10))
                                                 .withOffenceTitle(OFFENCE_TITLE)
                                                 .withWording(OFFENCE_WORDING)
+                                                .withReportingRestrictions(Arrays.asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel("Yes")
+                                                        .withJudicialResultId(randomUUID()).build()))
                                                 .build()))
                                         .build()))
                                 .build()))

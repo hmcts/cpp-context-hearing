@@ -10,8 +10,10 @@ final class JPACompositeMappers {
     public static final PleaJPAMapper PLEA_JPA_MAPPER = new PleaJPAMapper(new DelegatedPowersJPAMapper(), new LesserOrAlternativeOffenceForPleaJPAMapper());
     public static final VerdictJPAMapper VERDICT_JPA_MAPPER = new VerdictJPAMapper(new JurorsJPAMapper(),
             new LesserOrAlternativeOffenceJPAMapper(), new VerdictTypeJPAMapper());
+    public static final ReportingRestrictionJPAMapper REPORTING_RESTRICTION_JPA_MAPPER = new ReportingRestrictionJPAMapper();
     public static final OffenceJPAMapper OFFENCE_JPA_MAPPER = new OffenceJPAMapper(new NotifiedPleaJPAMapper(),
-            INDICATED_PLEA_JPA_MAPPER, PLEA_JPA_MAPPER, new OffenceFactsJPAMapper(), VERDICT_JPA_MAPPER, ALLOCATION_DECISION_JPA_MAPPER, LAA_APPLN_REFERENCE_JPA_MAPPER);
+            INDICATED_PLEA_JPA_MAPPER, PLEA_JPA_MAPPER, new OffenceFactsJPAMapper(), VERDICT_JPA_MAPPER, ALLOCATION_DECISION_JPA_MAPPER,
+            LAA_APPLN_REFERENCE_JPA_MAPPER, REPORTING_RESTRICTION_JPA_MAPPER);
     public static final OrganisationJPAMapper ORGANISATION_JPA_MAPPER = new OrganisationJPAMapper(
             new AddressJPAMapper(), new ContactNumberJPAMapper());
     public static final PersonJPAMapper PERSON_JPA_MAPPER = new PersonJPAMapper(new AddressJPAMapper(),

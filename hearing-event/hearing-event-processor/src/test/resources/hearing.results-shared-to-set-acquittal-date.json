@@ -216,6 +216,23 @@
           "resultLabel": "Absolute discharge",
           "resultLineId": "00e6308c-ec10-4690-815d-959eefeec1b5",
           "sharedDate": "2020-08-19"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-09-23",
+          "prompts": [
+
+
+          ],
+          "resultDefinitionId": "a9b6e6af-cd04-4003-8f3d-18ad58f7f5a1",
+          "resultLabel": "Order made under Section 49 of the Children and Young Persons Act 1933 dispensing with the restrictions on publicity",
+          "resultLineId": "6b8ea13d-e656-4704-be14-1e32f502fa38",
+          "sharedDate": "2020-09-22",
+          "childResultLineIds": [],
+          "parentResultLineIds": []
         }
       ],
       "targetId": "493575f0-e1fc-11ea-90b4-c178bb8c1bec"

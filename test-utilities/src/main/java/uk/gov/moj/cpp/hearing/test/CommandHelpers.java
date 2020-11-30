@@ -37,8 +37,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-
 public class CommandHelpers {
 
     private CommandHelpers() {
@@ -186,6 +184,10 @@ public class CommandHelpers {
 
         public uk.gov.justice.core.courts.Offence getFirstOffenceForFirstDefendantForFirstCase() {
             return this.initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        }
+
+        public uk.gov.justice.core.courts.ReportingRestriction getFirstReportingRestrictionForFirstOffenceForFirstDefendantForFirstCase() {
+            return this.initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getReportingRestrictions().get(0);
         }
     }
 
@@ -374,6 +376,10 @@ public class CommandHelpers {
 
         public uk.gov.justice.core.courts.Offence getFirstOffenceFromUpdatedOffences() {
             return this.updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(0);
+        }
+
+        public uk.gov.justice.core.courts.ReportingRestriction getFirstReportingRestrictionFromUpdatedOffences() {
+            return this.updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(0).getReportingRestrictions().get(0);
         }
 
         public UUID getFirstOffenceIdFromDeletedOffences() {

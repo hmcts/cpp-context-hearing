@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.test;
 
 
+import static com.google.common.collect.ImmutableList.of;
+import static java.time.LocalDate.now;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -63,6 +65,7 @@ import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReferralReason;
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
@@ -77,7 +80,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +93,8 @@ public class CoreTestTemplates {
 
     private static final UUID BAIL_STATUS_ID = randomUUID();
     private static final String JSON_STRING = "json string";
+    private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
+    private static final String REPORTING_RESTRICTION_LABEL_SECOND = "Second";
 
     public static CoreTemplateArguments defaultArguments() {
         return new CoreTemplateArguments();
@@ -230,7 +234,7 @@ public class CoreTestTemplates {
                 .withMotReasonDescription(STRING.next())
                 .withMotReasonCode(STRING.next())
                 .withSequenceNumber(INTEGER.next())
-                .withAllocationDecisionDate(LocalDate.now())
+                .withAllocationDecisionDate(now())
                 .withCourtIndicatedSentence(courtIndicatedSentence().build());
     }
 
@@ -270,6 +274,14 @@ public class CoreTestTemplates {
                     .withIntroducedAfterInitialProceedings(true)
                     .withIsDiscontinued(true)
                     .withProceedingsConcluded(true)
+                    .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
+                            .withId(randomUUID())
+                            .withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                            .withJudicialResultId(randomUUID()).build(),
+                            ReportingRestriction.reportingRestriction()
+                            .withId(randomUUID())
+                            .withLabel(REPORTING_RESTRICTION_LABEL_SECOND)
+                            .withJudicialResultId(randomUUID()).build()))
                     .withOffenceDateCode(args.getOffenceDateCode());
         }
 
@@ -300,7 +312,13 @@ public class CoreTestTemplates {
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
-                        .build());
+                        .build())
+                .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
+                        .withId(randomUUID())
+                        .withJudicialResultId(randomUUID())
+                        .withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                        .withOrderedDate(now())
+                        .build()));
 
         if (!args.isOffenceCountNull) {
             result.withCount(INTEGER.next());
@@ -320,6 +338,14 @@ public class CoreTestTemplates {
         }
 
         return result;
+    }
+
+    public static ReportingRestriction.Builder reportingRestriction() {
+        return ReportingRestriction.reportingRestriction()
+                .withId(randomUUID())
+                .withJudicialResultId(randomUUID())
+                .withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                .withOrderedDate(now());
     }
 
     public static Address.Builder address() {
@@ -669,8 +695,8 @@ public class CoreTestTemplates {
                         singletonList(
                                 defenceCounsel()
                                         .withId(defenceCounselId)
-                                        .withAttendanceDays(Arrays.asList(LocalDate.now()))
-                                        .withDefendants(Arrays.asList(randomUUID()))
+                                        .withAttendanceDays(asList(now()))
+                                        .withDefendants(asList(randomUUID()))
                                         .withFirstName("John")
                                         .withLastName("Jones")
                                         .withTitle("Mr")

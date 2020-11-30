@@ -24,6 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Defendant;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Defendants;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Floating;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.MonthsOfYearType;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Publicnotices;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -33,10 +34,15 @@ import uk.gov.moj.cpp.hearing.xhibit.XmlUtils;
 
 import java.math.BigInteger;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.apache.commons.collections.CollectionUtils;
 
 @ApplicationScoped
 public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGenerator {
@@ -152,10 +158,12 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
         xhibitCaseDetails.setActivecase(cppCaseDetail.getActivecase());
         xhibitCaseDetails.setHearingtype(cppCaseDetail.getHearingType());
         xhibitCaseDetails.setDefendants(getDefendants(cppCaseDetail));
-        final String dateTime  = DateUtils.convertToLocalTime(cppCaseDetail.getNotBeforeTime());
+        final String dateTime = DateUtils.convertToLocalTime(cppCaseDetail.getNotBeforeTime());
         xhibitCaseDetails.setNotbeforetime(dateTime);
         xhibitCaseDetails.setJudgename(cppCaseDetail.getJudgeName());
-
+        if (Objects.nonNull(cppCaseDetail.getPublicNotices()) && CollectionUtils.isNotEmpty(cppCaseDetail.getPublicNotices().getPublicNotice())) {
+            xhibitCaseDetails.setPublicnotices(getPublicNotices(cppCaseDetail));
+        }
         if (null == hearingEvent) {
             xhibitCaseDetails.setTimestatusset(dateTime);
             xhibitCaseDetails.setHearingprogress(BigInteger.ZERO);
@@ -180,6 +188,18 @@ public class PublicDisplayCourtCentreXmlGenerator implements CourtCentreXmlGener
                     exhibitDefendants.getDefendant().add(exhibitDefendant);
                 });
         return exhibitDefendants;
+    }
+
+    private Publicnotices getPublicNotices(final CaseDetail cases) {
+        final Publicnotices exhibitPublicnotices = webPageObjectFactory.createPublicnotices();
+        if (CollectionUtils.isNotEmpty(cases.getPublicNotices().getPublicNotice()))  {
+                final List<String> pubNotices = new ArrayList<>();
+                pubNotices.addAll(cases.getPublicNotices().getPublicNotice().stream().filter(Objects::nonNull).collect(Collectors.toSet()));
+                pubNotices.forEach(publicNotice ->
+                        exhibitPublicnotices.getPublicnotice().add(publicNotice)
+                );
+        }
+        return exhibitPublicnotices;
     }
 }
 

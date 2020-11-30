@@ -21,6 +21,9 @@
                                         <lastname>Jong</lastname>
                                     </defendant>
                                 </defendants>
+                                <publicnotices>
+                                    <publicnotice>Yes</publicnotice>
+                                </publicnotices>
                                 <notbeforetime>15:00</notbeforetime>
                                 <currentstatus>
                                     <event>

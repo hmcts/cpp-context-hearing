@@ -1,16 +1,9 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
@@ -28,6 +21,8 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ReportingRestriction;
+import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
@@ -105,15 +100,15 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                 )
         );
 
-        final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceUpdates = h(UseCases.updateOffences(
-                updateOffencesForDefendantTemplate(
-                        updateOffencesForDefendantArguments(
-                                hearingOne.getFirstCase().getId(),
-                                hearingOne.getFirstDefendantForFirstCase().getId()
-                        )
-                                .setOffencesToUpdate(singletonList(hearingOne.getFirstOffenceIdForFirstDefendant()))
+        final UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand = updateOffencesForDefendantTemplate(
+                updateOffencesForDefendantArguments(
+                        hearingOne.getFirstCase().getId(),
+                        hearingOne.getFirstDefendantForFirstCase().getId()
                 )
-        ));
+                        .setOffencesToUpdate(singletonList(hearingOne.getFirstOffenceIdForFirstDefendant()))
+        );
+
+        final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceUpdates = h(UseCases.updateOffences(updateOffencesForDefendantCommand));
 
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -165,6 +160,79 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
                                 .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
                                         .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
                                         .with(Defendant::getOffences, is(emptyList()))
+                                ))
+                        ))
+                )
+        );
+    }
+
+    @Test
+    public void caseDefendantOffencesChanged_updateExistingOffenceByRemovingReportingRestrictions() throws Exception {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, hasItem(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getOffenceCode, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getOffenceCode()))
+                                                .with(Offence::getWording, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getWording()))
+                                                .with(Offence::getStartDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getStartDate()))
+                                                .with(Offence::getEndDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getEndDate()))
+                                                .with(Offence::getCount, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getCount()))
+                                                .with(Offence::getConvictionDate, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getConvictionDate()))
+                                                .with(Offence::getLaaApplnReference, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getLaaApplnReference()))
+                                                .with(Offence::getIsDiscontinued, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getIsDiscontinued()))
+                                                .with(Offence::getIntroducedAfterInitialProceedings, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getIntroducedAfterInitialProceedings()))
+                                                .with(Offence::getProceedingsConcluded, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getProceedingsConcluded()))
+                                                .with(Offence::getReportingRestrictions, first(isBean(ReportingRestriction.class)
+                                                        .with(ReportingRestriction::getId, is(hearingOne.getFirstReportingRestrictionForFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                        .with(ReportingRestriction::getJudicialResultId, is(hearingOne.getFirstReportingRestrictionForFirstOffenceForFirstDefendantForFirstCase().getJudicialResultId()))
+                                                        .with(ReportingRestriction::getLabel, is(hearingOne.getFirstReportingRestrictionForFirstOffenceForFirstDefendantForFirstCase().getLabel()))
+                                                        .with(ReportingRestriction::getOrderedDate, is(hearingOne.getFirstReportingRestrictionForFirstOffenceForFirstDefendantForFirstCase().getOrderedDate()))
+                                                ))
+                                        ))
+                                ))
+                        ))
+                )
+        );
+
+        final UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand = updateOffencesForDefendantTemplate(
+                updateOffencesForDefendantArguments(
+                        hearingOne.getFirstCase().getId(),
+                        hearingOne.getFirstDefendantForFirstCase().getId()
+                )
+                        .setOffencesToUpdate(singletonList(hearingOne.getFirstOffenceIdForFirstDefendant()))
+        );
+        updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(0).setReportingRestrictions(null);
+
+        final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceUpdates = h(UseCases.updateOffences(updateOffencesForDefendantCommand));
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getId, is(hearingOne.getFirstCase().getId()))
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getId, is(hearingOne.getFirstDefendantForFirstCase().getId()))
+                                        .with(Defendant::getOffences, hasItem(isBean(Offence.class)
+                                                .with(Offence::getId, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getId()))
+                                                .with(Offence::getOffenceCode, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getOffenceCode()))
+                                                .with(Offence::getWording, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getWording()))
+                                                .with(Offence::getStartDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getStartDate()))
+                                                .with(Offence::getEndDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getEndDate()))
+                                                .with(Offence::getCount, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getCount()))
+                                                .with(Offence::getConvictionDate, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getConvictionDate()))
+                                                .with(Offence::getLaaApplnReference, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getLaaApplnReference()))
+                                                .with(Offence::getIsDiscontinued, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIsDiscontinued()))
+                                                .with(Offence::getIntroducedAfterInitialProceedings, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getIntroducedAfterInitialProceedings()))
+                                                .with(Offence::getProceedingsConcluded, is(offenceUpdates.getFirstOffenceFromUpdatedOffences().getProceedingsConcluded()))
+                                                .with(Offence::getReportingRestrictions, empty())
+                                        ))
                                 ))
                         ))
                 )

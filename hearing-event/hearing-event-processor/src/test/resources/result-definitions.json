@@ -39594,7 +39594,10 @@
     }, {
       "childResultDefinitionId" : "bb90e801-0066-4bdf-85e6-8d64bc683f0c",
       "ruleType" : "atleastOneOf"
-    } ]
+    },{
+      "childResultDefinitionId" : "a9b6e6af-cd04-4003-8f3d-18ad58f7f5a1",
+      "ruleType" : "atleastOneOf"
+    }]
   }, {
     "id" : "3f4f9b75-418f-46ed-a311-230a6dbca6cb",
     "label" : "Credit for time remanded on bail",
@@ -49460,6 +49463,48 @@
     "publishedAsAPrompt" : false,
     "excludedFromResults" : false,
     "alwaysPublished" : true,
+    "urgent" : false,
+    "d20" : false,
+    "resultDefinitionRules" : [ ]
+  },{
+    "id" : "a9b6e6af-cd04-4003-8f3d-18ad58f7f5a1",
+    "label" : "Order made under Section 49 of the Children and Young Persons Act 1933 dispensing with the restrictions on publicity",
+    "shortCode" : "D49",
+    "level" : "O",
+    "rank" : 60000,
+    "wordGroups" : [ {
+      "wordGroup" : [ "Order", "49", "publicity" ]
+    } ],
+    "userGroups" : [ ],
+    "prompts" : [ {
+      "id" : "8b419e6d-c248-4f9e-8638-470d237022b1",
+      "label" : "Details of reporting restriction",
+      "welshLabel" : null,
+      "resultPromptRule" : "mandatory",
+      "type" : "TXT",
+      "sequence" : 100,
+      "duration" : null,
+      "wordGroup" : null,
+      "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+      "fixedListId" : null,
+      "qual" : null,
+      "reference" : null,
+      "courtExtract" : "Y",
+      "durationSequence" : null
+    } ],
+    "isAvailableForCourtExtract" : true,
+    "financial" : false,
+    "category" : "A",
+    "cjsCode" : "4509",
+    "adjournment" : false,
+    "convicted" : false,
+    "postHearingCustodyStatus" : "A",
+    "resultDefinitionGroup" : "PressOn",
+    "terminatesOffenceProceedings" : false,
+    "lifeDuration" : false,
+    "publishedAsAPrompt" : false,
+    "excludedFromResults" : false,
+    "alwaysPublished" : false,
     "urgent" : false,
     "d20" : false,
     "resultDefinitionRules" : [ ]

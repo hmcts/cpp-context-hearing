@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.test;
 
+import static java.time.LocalDate.now;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
@@ -54,6 +55,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
@@ -133,7 +135,7 @@ public class TestTemplates {
 
     public static InterpreterIntermediary addInterpreterIntermediaryCommandTemplate(final Attendant attendant) {
         return new InterpreterIntermediary(
-                Arrays.asList(LocalDate.now()),
+                Arrays.asList(now()),
                 attendant,
                 STRING.next(),
                 randomUUID(),
@@ -149,7 +151,7 @@ public class TestTemplates {
 
             final Attendant attendant = new Attendant(AttendantType.WITNESS, null, STRING.next());
             final InterpreterIntermediary interpreterIntermediary = new InterpreterIntermediary(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     attendant,
                     STRING.next(),
                     randomUUID(),
@@ -681,7 +683,7 @@ public class TestTemplates {
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
                     .withResultLabel(IMPRISONMENT)
-                    .withSharedDate(LocalDate.now())
+                    .withSharedDate(now())
                     .withResultDefinitionId(resultDefinitionId)
                     .withPrompts(
                             asList(
@@ -726,7 +728,7 @@ public class TestTemplates {
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
                     .withResultLabel(IMPRISONMENT)
-                    .withSharedDate(LocalDate.now())
+                    .withSharedDate(now())
                     .withResultDefinitionId(resultDefinitionId)
                     .withPrompts(
                             asList(
@@ -760,7 +762,7 @@ public class TestTemplates {
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
                     .withResultLabel(IMPRISONMENT)
-                    .withSharedDate(LocalDate.now())
+                    .withSharedDate(now())
                     .withResultDefinitionId(resultDefinitionId)
                     .withAmendmentReason(STRING.next())
                     .withAmendmentReasonId(randomUUID())
@@ -770,7 +772,7 @@ public class TestTemplates {
                             .withLastName(STRING.next())
                             .withFirstName(STRING.next())
                             .build())
-                    .withAmendmentDate(LocalDate.now())
+                    .withAmendmentDate(now())
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()
@@ -834,7 +836,7 @@ public class TestTemplates {
                     .setTargetId(UUID.randomUUID())
                     .setApplicationId(applicationId)
                     .setApplicationOutcomeType(applicationOutCome)
-                    .setApplicationOutcomeDate(LocalDate.now());
+                    .setApplicationOutcomeDate(now());
         }
     }
 
@@ -931,14 +933,14 @@ public class TestTemplates {
                                             .withSequenceNumber(INTEGER.next())
                                             .build())
                                     .withLaaApplnReference(LaaReference.laaReference()
-                                            .withStatusDate(LocalDate.now())
+                                            .withStatusDate(now())
                                             .withApplicationReference(STRING.next())
                                             .withStatusId(UUID.randomUUID())
                                             .withStatusCode(STRING.next())
                                             .withStatusDescription(STRING.next())
                                             .build())
                                     .withLaaApplnReference(LaaReference.laaReference()
-                                            .withStatusDate(LocalDate.now())
+                                            .withStatusDate(now())
                                             .withApplicationReference(STRING.next())
                                             .withStatusId(UUID.randomUUID())
                                             .withStatusCode(STRING.next())
@@ -965,6 +967,12 @@ public class TestTemplates {
                                     .withIsDiscontinued(true)
                                     .withIntroducedAfterInitialProceedings(true)
                                     .withOffenceDateCode(offenceDateCode)
+                                    .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction()
+                                            .withJudicialResultId(randomUUID())
+                                            .withLabel(STRING.next())
+                                            .withId(randomUUID())
+                                            .withOrderedDate(PAST_LOCAL_DATE.next())
+                                            .build()))
                                     .build())
                             .collect(Collectors.toList())
                     );
@@ -1065,7 +1073,7 @@ public class TestTemplates {
 
         public static AddDefenceCounsel addDefenceCounselCommandTemplate(final UUID hearingId) {
             final DefenceCounsel defenceCounsel = new DefenceCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
                     randomUUID(),
@@ -1080,7 +1088,7 @@ public class TestTemplates {
 
         public static AddDefenceCounsel addDefenceCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
             final DefenceCounsel defenceCounsel = new DefenceCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
                     randomUUID(),
@@ -1104,7 +1112,7 @@ public class TestTemplates {
 
         public static UpdateDefenceCounsel updateDefenceCounselCommandTemplate(final UUID hearingId) {
             final DefenceCounsel defenceCounsel = new DefenceCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
                     randomUUID(),
@@ -1128,7 +1136,7 @@ public class TestTemplates {
 
         public static AddProsecutionCounsel addProsecutionCounselCommandTemplate(final UUID hearingId) {
             final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1143,7 +1151,7 @@ public class TestTemplates {
 
         public static AddProsecutionCounsel addProsecutionCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
             final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1168,7 +1176,7 @@ public class TestTemplates {
         public static AddApplicantCounsel addApplicantCounselCommandTemplate(final UUID hearingId) {
             final ApplicantCounsel applicantCounsel = new ApplicantCounsel(
                     Arrays.asList(UUID.randomUUID()),
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1182,7 +1190,7 @@ public class TestTemplates {
         public static AddApplicantCounsel addApplicantCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
             final ApplicantCounsel applicantCounsel = new ApplicantCounsel(
                     Arrays.asList(UUID.randomUUID()),
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1204,7 +1212,7 @@ public class TestTemplates {
 
         public static UpdateProsecutionCounsel updateProsecutionCounselCommandTemplate(final UUID hearingId) {
             final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1229,7 +1237,7 @@ public class TestTemplates {
         public static UpdateApplicantCounsel updateApplicantCounselCommandTemplate(final UUID hearingId) {
             final ApplicantCounsel applicantCounsel = new ApplicantCounsel(
                     Arrays.asList(UUID.randomUUID()),
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1333,7 +1341,7 @@ public class TestTemplates {
                                     .setResultLineId(randomUUID())
                                     .setLastSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                             ))
-                    ).setReferenceDate(LocalDate.now());
+                    ).setReferenceDate(now());
         }
     }
 
@@ -1439,7 +1447,7 @@ public class TestTemplates {
 
         public static AddRespondentCounsel addRespondentCounselCommandTemplate(final UUID hearingId) {
             final RespondentCounsel respondentCounsel = new RespondentCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1453,7 +1461,7 @@ public class TestTemplates {
 
         public static AddRespondentCounsel addRespondentCounselCommandTemplateWithoutMiddleName(final UUID hearingId) {
             final RespondentCounsel respondentCounsel = new RespondentCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1476,7 +1484,7 @@ public class TestTemplates {
 
         public static UpdateRespondentCounsel updateRespondentCounselCommandTemplate(final UUID hearingId) {
             final RespondentCounsel respondentCounsel = new RespondentCounsel(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
@@ -1499,7 +1507,7 @@ public class TestTemplates {
 
         public static AddCompanyRepresentative addCompanyRepresentativeCommandTemplate(final UUID hearingId) {
             final CompanyRepresentative companyRepresentative = new CompanyRepresentative(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
                     randomUUID(),
@@ -1521,7 +1529,7 @@ public class TestTemplates {
 
         public static UpdateCompanyRepresentative updateCompanyRepresentativeCommandTemplate(final UUID hearingId) {
             final CompanyRepresentative companyRepresentative = new CompanyRepresentative(
-                    Arrays.asList(LocalDate.now()),
+                    Arrays.asList(now()),
                     Arrays.asList(UUID.randomUUID()),
                     STRING.next(),
                     randomUUID(),

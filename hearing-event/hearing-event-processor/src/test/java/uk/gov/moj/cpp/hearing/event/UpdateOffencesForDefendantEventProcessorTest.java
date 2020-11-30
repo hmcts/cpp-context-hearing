@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -14,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -63,7 +65,8 @@ public class UpdateOffencesForDefendantEventProcessorTest {
     @Test
     public void processPublicCaseDefendantOffencesChanged() {
 
-        final UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand = updateOffencesForDefendantTemplate(updateOffencesForDefendantArguments(randomUUID(), randomUUID()));
+        final UpdateOffencesForDefendantCommand updateOffencesForDefendantCommand = updateOffencesForDefendantTemplate(updateOffencesForDefendantArguments(randomUUID(), randomUUID())
+                .setOffencesToUpdate(asList(randomUUID())));
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.defendant-offences-changed"),
                 objectToJsonObjectConverter.convert(updateOffencesForDefendantCommand));
@@ -80,8 +83,8 @@ public class UpdateOffencesForDefendantEventProcessorTest {
                                 withJsonPath("$.updatedOffences[0].defendantId", is(updateOffencesForDefendantCommand.getUpdatedOffences()
                                         .get(0).getDefendantId().toString())),
                                 withJsonPath("$.updatedOffences[0].prosecutionCaseId", is(updateOffencesForDefendantCommand.getUpdatedOffences()
-                                        .get(0).getProsecutionCaseId().toString()))
-                                )
+                                        .get(0).getProsecutionCaseId().toString())),
+                                withJsonPath("$.updatedOffences[0].offences[0].reportingRestrictions[0]", notNullValue()))
                         )
                 )
         );

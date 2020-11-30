@@ -86,6 +86,7 @@ public class ExtendHearingIT extends AbstractIT {
         prosecutionCases.get(0).setId(caseId);
         prosecutionCases.get(0).getDefendants().get(0).setId(UUID.randomUUID());
         prosecutionCases.get(0).getDefendants().get(0).getOffences().get(0).setId(UUID.randomUUID());
+        prosecutionCases.get(0).getDefendants().get(0).getOffences().get(0).getReportingRestrictions().get(0).setId(UUID.randomUUID());
         prosecutionCases.get(0).getCaseMarkers().get(0).setId(UUID.randomUUID());
         return prosecutionCases;
     }

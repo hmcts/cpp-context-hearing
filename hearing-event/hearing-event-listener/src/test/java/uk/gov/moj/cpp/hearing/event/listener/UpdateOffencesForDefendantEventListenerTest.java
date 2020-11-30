@@ -1,13 +1,18 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.time.LocalDate.now;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -28,6 +33,7 @@ import uk.gov.moj.cpp.hearing.mapping.NotifiedPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.OffenceFactsJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.OffenceJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ReportingRestrictionJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.VerdictTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
@@ -40,15 +46,14 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.util.Collections;
 
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.nullValue;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateOffencesForDefendantEventListenerTest {
@@ -69,6 +74,9 @@ public class UpdateOffencesForDefendantEventListenerTest {
     private OffenceJPAMapper offenceJPAMapper;
 
     @Spy
+    private ReportingRestrictionJPAMapper reportingRestrictionJPAMapper;
+
+    @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Spy
@@ -85,6 +93,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         setField(this.offenceJPAMapper, "pleaJPAMapper", new PleaJPAMapper(new DelegatedPowersJPAMapper(), new LesserOrAlternativeOffenceForPleaJPAMapper()));
         setField(this.offenceJPAMapper, "verdictJPAMapper", new VerdictJPAMapper(new JurorsJPAMapper(), new LesserOrAlternativeOffenceJPAMapper(), new VerdictTypeJPAMapper()));
         setField(this.offenceJPAMapper, "laaApplnReferenceJPAMapper", new LaaApplnReferenceJPAMapper());
+        setField(this.offenceJPAMapper, "reportingRestrictionJPAMapper", new ReportingRestrictionJPAMapper());
     }
 
     @Test
@@ -120,6 +129,11 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
     @Test
     public void testUpdateOffence() {
+        final ReportingRestriction reportingRestriction = ReportingRestriction.reportingRestriction()
+                .withId(randomUUID())
+                .withJudicialResultId(randomUUID())
+                .withLabel("label")
+                .withOrderedDate(now()).build();
 
         final OffenceUpdated offenceUpdated = OffenceUpdated.offenceUpdated()
                 .withHearingId(randomUUID())
@@ -129,6 +143,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
                         .withIntroducedAfterInitialProceedings(true)
                         .withIsDiscontinued(true)
                         .withProceedingsConcluded(true)
+                        .withReportingRestrictions(asList(reportingRestriction))
                         .build());
 
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
@@ -163,6 +178,10 @@ public class UpdateOffencesForDefendantEventListenerTest {
         assertThat(offenceUpdated.getOffence().getProceedingsConcluded(), is(offenceOut.isProceedingsConcluded()));
         assertThat(offenceUpdated.getOffence().getIntroducedAfterInitialProceedings(), is(offenceOut.isIntroduceAfterInitialProceedings()));
         assertThat(offenceUpdated.getOffence().getIsDiscontinued(), is(offenceOut.isDiscontinued()));
+        assertThat(offenceUpdated.getOffence().getReportingRestrictions().get(0).getId(), is(reportingRestriction.getId()));
+        assertThat(offenceUpdated.getOffence().getReportingRestrictions().get(0).getJudicialResultId(), is(reportingRestriction.getJudicialResultId()));
+        assertThat(offenceUpdated.getOffence().getReportingRestrictions().get(0).getLabel(), is(reportingRestriction.getLabel()));
+        assertThat(offenceUpdated.getOffence().getReportingRestrictions().get(0).getOrderedDate(), is(reportingRestriction.getOrderedDate()));
     }
 
     @Test

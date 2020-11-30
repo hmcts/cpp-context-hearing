@@ -1,15 +1,32 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.*;
-import uk.gov.justice.hearing.courts.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static java.time.LocalDate.now;
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
+
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtApplicationRespondent;
+import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ReportingRestriction;
+import uk.gov.justice.hearing.courts.Applicant;
+import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
+import uk.gov.justice.hearing.courts.Defendants;
+import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.justice.hearing.courts.Offences;
+import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
+import uk.gov.justice.hearing.courts.ReportingRestrictions;
+import uk.gov.justice.hearing.courts.Respondents;
+import uk.gov.justice.hearing.courts.Type;
+
+import java.util.List;
 
 public class GetHearingsTransformer {
 
@@ -19,7 +36,7 @@ public class GetHearingsTransformer {
                 .withProsecutionCaseSummaries(
                         hearing.getProsecutionCases() == null ? emptyList() :
                                 hearing.getProsecutionCases().stream().map(pc -> summary(pc).build())
-                                        .collect(Collectors.toList())
+                                        .collect(toList())
                 );
     }
 
@@ -31,7 +48,7 @@ public class GetHearingsTransformer {
                 .withProsecutionCaseSummaries(
                         hearing.getProsecutionCases() == null ? emptyList() :
                                 hearing.getProsecutionCases().stream().map(pc -> summaryForToday(pc).build())
-                                        .collect(Collectors.toList())
+                                        .collect(toList())
                 );
     }
 
@@ -47,7 +64,7 @@ public class GetHearingsTransformer {
                 .withCourtApplicationSummaries(
                         hearing.getCourtApplications() == null ? emptyList() :
                                 hearing.getCourtApplications().stream().map(ca -> summary(ca).build())
-                                        .collect(Collectors.toList())
+                                        .collect(toList())
 
                 );
     }
@@ -55,7 +72,7 @@ public class GetHearingsTransformer {
     private List<HearingDay> getHearingDaysForToday(final List<HearingDay> hearingDays) {
         return hearingDays.stream().filter(hearingDay ->
                 now().equals(hearingDay.getSittingDay().toLocalDate())
-        ).collect(Collectors.toList());
+        ).collect(toList());
     }
 
     private Defendants.Builder summary(final Defendant defendant) {
@@ -72,6 +89,10 @@ public class GetHearingsTransformer {
             result.withOrganisationName(defendant.getLegalEntityDefendant().getOrganisation().getName());
         }
         result.withSynonym("is this from aliases ?");
+        if (defendant.getOffences() != null) {
+            result.withOffences(defendant.getOffences().stream().map(o -> summaryWithReportingRestrictions(o).build())
+                    .collect(toList()));
+        }
         return result;
     }
 
@@ -90,7 +111,7 @@ public class GetHearingsTransformer {
         result.withSynonym("is this from aliases ?");
         result.withOffences(defendant.getOffences() == null ? emptyList() :
                 defendant.getOffences().stream().map(o -> summaryForToday(o).build())
-                        .collect(Collectors.toList()));
+                        .collect(toList()));
         return result;
     }
 
@@ -102,6 +123,33 @@ public class GetHearingsTransformer {
         result.withOffenceTitleWelsh(offence.getOffenceTitleWelsh());
         result.withWording(offence.getWording());
         result.withWordingWelsh(offence.getWordingWelsh());
+
+        return result;
+    }
+
+    private Offences.Builder summaryWithReportingRestrictions(final Offence offence) {
+        final Offences.Builder result = Offences.offences();
+
+        result.withId(offence.getId());
+        result.withOffenceTitle(offence.getOffenceTitle());
+        result.withOffenceTitleWelsh(offence.getOffenceTitleWelsh());
+        result.withWording(offence.getWording());
+        result.withWordingWelsh(offence.getWordingWelsh());
+        if (offence.getReportingRestrictions() != null) {
+            result.withReportingRestrictions(offence.getReportingRestrictions().stream()
+                    .map(reportingRestriction -> summaryReportingRestriction(reportingRestriction).build())
+                    .collect(toList()));
+        }
+
+        return result;
+    }
+
+    private ReportingRestrictions.Builder summaryReportingRestriction(final ReportingRestriction reportingRestriction) {
+        final ReportingRestrictions.Builder result = ReportingRestrictions.reportingRestrictions();
+        result.withId(reportingRestriction.getId());
+        result.withJudicialResultId(reportingRestriction.getJudicialResultId());
+        result.withLabel(reportingRestriction.getLabel());
+        result.withOrderedDate(reportingRestriction.getOrderedDate());
 
         return result;
     }
@@ -120,7 +168,7 @@ public class GetHearingsTransformer {
                 .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier())
                 .withDefendants(prosecutionCase.getDefendants() == null ? emptyList() :
                         prosecutionCase.getDefendants().stream().map(d -> summary(d).build())
-                                .collect(Collectors.toList()));
+                                .collect(toList()));
     }
 
     private ProsecutionCaseSummaries.Builder summaryForToday(final ProsecutionCase prosecutionCase) {
@@ -129,7 +177,7 @@ public class GetHearingsTransformer {
                 .withProsecutionCaseIdentifier(prosecutionCase.getProsecutionCaseIdentifier())
                 .withDefendants(prosecutionCase.getDefendants() == null ? emptyList() :
                         prosecutionCase.getDefendants().stream().map(d -> summaryForToday(d).build())
-                                .collect(Collectors.toList()));
+                                .collect(toList()));
     }
 
     private Applicant.Builder summary(final CourtApplicationParty courtApplicationParty) {
@@ -181,7 +229,7 @@ public class GetHearingsTransformer {
                 : null);
         result.withRespondents(courtApplication.getRespondents() == null ? emptyList() :
                 courtApplication.getRespondents().stream().map(ca -> summary(ca).build())
-                        .collect(Collectors.toList())
+                        .collect(toList())
         );
         return result;
     }

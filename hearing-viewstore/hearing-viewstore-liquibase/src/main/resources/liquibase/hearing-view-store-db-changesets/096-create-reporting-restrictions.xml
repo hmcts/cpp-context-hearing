@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="96" author="hearing" logicalFilePath="096-create-reporting-restrictions">
+
+        <createTable tableName="ha_reporting_restriction">
+
+            <column name="id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="offence_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="hearing_id" type="UUID">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="judicial_result_id" type="UUID"/>
+
+            <column name="label" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+
+            <column name="ordered_date" type="DATE"/>
+        </createTable>
+
+        <addPrimaryKey columnNames="id, hearing_id" constraintName="pk_ha_reporting_restriction"
+                       tableName="ha_reporting_restriction"/>
+
+        <addForeignKeyConstraint baseColumnNames="offence_id, hearing_id" baseTableName="ha_reporting_restriction"
+                                 constraintName="fk_reporting_restriction_offence" referencedColumnNames="id, hearing_id"
+                                 referencedTableName="ha_offence"/>
+    </changeSet>
+
+</databaseChangeLog>

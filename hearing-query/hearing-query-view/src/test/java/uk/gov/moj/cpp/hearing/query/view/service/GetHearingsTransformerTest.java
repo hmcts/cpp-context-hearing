@@ -11,11 +11,14 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.hearing.courts.Applicant;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.justice.hearing.courts.Offences;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
+import uk.gov.justice.hearing.courts.ReportingRestrictions;
 import uk.gov.justice.hearing.courts.Respondents;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
@@ -40,9 +43,10 @@ public class GetHearingsTransformerTest {
         final CourtApplicationParty applicant = courtApplication.getApplicant();
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final Defendant defendant = prosecutionCase.getDefendants().get(0);
+        final ReportingRestriction reportingRestriction = defendant.getOffences().get(0).getReportingRestrictions().get(0);
         final CourtApplicationRespondent courtApplicationRespondent = courtApplication.getRespondents().get(0);
-        final Person respondantPerson = courtApplicationRespondent.getPartyDetails().getPersonDetails();
-        final CourtApplicationParty respondantParty = courtApplicationRespondent.getPartyDetails();
+        final Person respondentPerson = courtApplicationRespondent.getPartyDetails().getPersonDetails();
+        final CourtApplicationParty respondentParty = courtApplicationRespondent.getPartyDetails();
 
         assertThat(hearingSummary, isBean(HearingSummaries.class)
                 .withValue(HearingSummaries::getId, hearing.getId())
@@ -62,10 +66,10 @@ public class GetHearingsTransformerTest {
                                 .withValue(Applicant::getSynonym, applicant.getSynonym())
                         )
                         .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
-                                .withValue(Respondents::getFirstName, respondantPerson.getFirstName())
-                                .withValue(Respondents::getMiddleName, respondantPerson.getMiddleName())
-                                .withValue(Respondents::getLastName, respondantPerson.getLastName())
-                                .withValue(Respondents::getOrganisationName, respondantParty.getOrganisation().getName())
+                                .withValue(Respondents::getFirstName, respondentPerson.getFirstName())
+                                .withValue(Respondents::getMiddleName, respondentPerson.getMiddleName())
+                                .withValue(Respondents::getLastName, respondentPerson.getLastName())
+                                .withValue(Respondents::getOrganisationName, respondentParty.getOrganisation().getName())
                         ))
                 ))
                 .with(HearingSummaries::getProsecutionCaseSummaries, first(isBean(ProsecutionCaseSummaries.class)
@@ -75,6 +79,13 @@ public class GetHearingsTransformerTest {
                             .withValue(Defendants::getId, defendant.getId())
                             .withValue(Defendants::getMasterDefendantId, defendant.getMasterDefendantId())
                             .withValue(Defendants::getCourtProceedingsInitiated, defendant.getCourtProceedingsInitiated())))
+                        .with(ProsecutionCaseSummaries::getDefendants, first(isBean(Defendants.class)
+                                .with(Defendants::getOffences, first(isBean(Offences.class)
+                                        .with(Offences::getReportingRestrictions, first(isBean(ReportingRestrictions.class)
+                                                .withValue(ReportingRestrictions::getId, reportingRestriction.getId())
+                                                .withValue(ReportingRestrictions::getJudicialResultId, reportingRestriction.getJudicialResultId())
+                                                .withValue(ReportingRestrictions::getLabel, reportingRestriction.getLabel())
+                                                .withValue(ReportingRestrictions::getOrderedDate, reportingRestriction.getOrderedDate())))))))
                 ))
         );
 

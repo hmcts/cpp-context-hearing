@@ -26,6 +26,7 @@ import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
 import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
@@ -74,6 +75,7 @@ public class PublishResultsDelegate {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishResultsDelegate.class.getName());
     private static final String DDCH = "DDCH";
+    private static final String PRESS_ON = "PressOn";
 
     private final Enveloper enveloper;
 
@@ -395,10 +397,26 @@ public class PublishResultsDelegate {
                 .forEach(offence -> {
 
                     final List<JudicialResult> judicialResults = getOffenceLevelJudicialResults(results, offence.getId());
+                    final List<ReportingRestriction> restrictions = new ArrayList<>();
 
                     if (!judicialResults.isEmpty()) { //so that judicialResults doesn't have empty tag
                         setPromptsAsNullIfEmpty(judicialResults);
                         offence.setJudicialResults(judicialResults);
+                        judicialResults.forEach(result -> {
+                            if (PRESS_ON.equalsIgnoreCase(result.getResultDefinitionGroup())) {
+                                final ReportingRestriction reportingRestriction = ReportingRestriction.reportingRestriction()
+                                        .withId(UUID.randomUUID())
+                                        .withJudicialResultId(result.getJudicialResultId())
+                                        .withLabel(result.getLabel())
+                                        .withOrderedDate(result.getOrderedDate())
+                                        .build();
+                                restrictions.add(reportingRestriction);
+
+                            }
+                        });
+                         if (!restrictions.isEmpty()) {
+                             offence.setReportingRestrictions(restrictions);
+                        }
                     }
                 });
     }

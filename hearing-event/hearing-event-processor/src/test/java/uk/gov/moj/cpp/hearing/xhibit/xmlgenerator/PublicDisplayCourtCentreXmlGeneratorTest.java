@@ -21,6 +21,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite.courtSite;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Defendant.defendant;
+import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.PublicNotices.publicNotices;
 import static uk.gov.moj.cpp.hearing.xhibit.XmlTestUtils.assertXmlEquals;
 
 import uk.gov.justice.core.courts.Hearing;
@@ -37,6 +38,7 @@ import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Currentstatus;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Event;
 import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.ObjectFactory;
+import uk.gov.moj.cpp.hearing.domain.xhibit.generated.pd.Publicnotices;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -304,6 +306,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withDefendants(asList(defendant().withFirstName(defendantFirstName).withLastName(defendantLastName).build()))
                                                         .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                                                         .withNotBeforeTime("2020-04-04T23:09Z")
+                                                        .withPublicNotices(publicNotices().withPublicNotice(asList("Yes","Yes")).build())
                                                         .build()))
                                                 .build())
                                         .build()))
@@ -331,6 +334,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                                                         .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                                                         .withNotBeforeTime("2020-02-09T15:00Z")
+                                                        .withPublicNotices(publicNotices().withPublicNotice(asList("Yes")).build())
                                                         .build()))
                                                 .build())
                                         .build()))
@@ -358,6 +362,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                                                         .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                                                         .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                                                         .withNotBeforeTime("2020-03-30T15:00Z")
+                                                        .withPublicNotices(publicNotices().withPublicNotice(asList("Yes","No")).build())
                                                         .build()))
                                                 .build())
                                         .build()))
@@ -391,6 +396,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                 .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                 .withJudgeName("Mr Mark J Ainsworth-MAGISTRATE judge")
                 .withNotBeforeTime("2020-02-09T15:00Z")
+                .withPublicNotices(publicNotices().withPublicNotice(asList("D45")).build())
                 .build();
     }
 
@@ -404,13 +410,14 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
                 .withHearingType("hearingType")
                 .withDefendants(asList(defendant().withFirstName("Alexander").withMiddleName("de").withLastName("Jong").build()))
                 .withNotBeforeTime("2020-02-09T15:00Z")
+                .withPublicNotices(publicNotices().withPublicNotice(asList("Yes")).build())
                 .build();
     }
 
     private JsonEnvelope getHearingEnvelope() {
         Hearing hearing = new HearingFactory().createStandaloneApplicationHearing()
                 .withJudiciary(Arrays.asList(judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(JudicialRoleTypeEnum.CIRCUIT_JUDGE.toString()).build()),
-                                             judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(JudicialRoleTypeEnum.DISTRICT_JUDGE.toString()).build())))
+                        judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(JudicialRoleTypeEnum.DISTRICT_JUDGE.toString()).build())))
                 .build();
 
         HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse();
@@ -429,7 +436,7 @@ public class PublicDisplayCourtCentreXmlGeneratorTest {
     private JsonEnvelope getHearingEnvelopeJustWithMagistrate() {
         Hearing hearing = new HearingFactory().createStandaloneApplicationHearing()
                 .withJudiciary(Arrays.asList(judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(MAGISTRATE_JUDICIAL_ROLE_TYPE).build()),
-                                             judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(MAGISTRATE_JUDICIAL_ROLE_TYPE).build())))
+                        judicialRoleWithRequestedJudicialRole(JudicialRoleType.judicialRoleType().withJudiciaryType(MAGISTRATE_JUDICIAL_ROLE_TYPE).build())))
                 .build();
 
         HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse();

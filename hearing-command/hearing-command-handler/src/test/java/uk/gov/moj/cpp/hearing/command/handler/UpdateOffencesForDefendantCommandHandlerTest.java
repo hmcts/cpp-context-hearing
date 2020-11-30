@@ -173,6 +173,29 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
     }
 
     @Test
+    public void testUpdateCaseDefendantOffences_Sends_FoundHearingsForEditOffenceEvent() throws EventStreamException {
+        final CommandHelpers.UpdateOffencesForDefendantCommandHelper caseDefendantOffencesChanged =
+                h(with(updateOffencesForDefendantTemplate(updateOffencesForDefendantArguments(randomUUID(), randomUUID()).setOffencesToUpdate(singletonList(randomUUID()))), u -> {
+                    u.setAddedOffences(emptyList()).setDeletedOffences(emptyList());
+                }));
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.update-offences-for-defendant"), objectToJsonObjectConverter.convert(caseDefendantOffencesChanged.it()));
+
+        final OffenceAggregate offenceAggregate = new OffenceAggregate();
+        final UUID hearingId = randomUUID();
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(hearingId));
+        setupMockedEventStream(caseDefendantOffencesChanged.getFirstOffenceFromUpdatedOffences().getId(), this.eventStream, offenceAggregate);
+
+        updateOffencesForDefendantCommandHandler.updateOffencesForDefendant(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.found-hearings-for-edit-offence"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offence.id", is(caseDefendantOffencesChanged.getFirstOffenceFromUpdatedOffences().getId().toString()))
+                        )))));
+    }
+
+    @Test
     public void testUpdateCaseDefendantOffences_Sends_OffenceDeleteEvent() throws EventStreamException {
 
         final CommandHelpers.UpdateOffencesForDefendantCommandHelper caseDefendantOffencesChanged =

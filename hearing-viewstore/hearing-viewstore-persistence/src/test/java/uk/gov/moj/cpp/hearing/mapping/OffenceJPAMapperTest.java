@@ -1,20 +1,5 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import org.junit.Test;
-import uk.gov.justice.core.courts.AllocationDecision;
-import uk.gov.justice.core.courts.CustodyTimeLimit;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.NotifiedPlea;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.OffenceFacts;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.Verdict;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapperTest.whenAllocationDecision;
@@ -22,9 +7,28 @@ import static uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapperTest.whenIndi
 import static uk.gov.moj.cpp.hearing.mapping.NotifiedPleaJPAMapperTest.whenNotifiedPlea;
 import static uk.gov.moj.cpp.hearing.mapping.OffenceFactsJPAMapperTest.whenOffenceFacts;
 import static uk.gov.moj.cpp.hearing.mapping.PleaJPAMapperTest.whenPlea;
+import static uk.gov.moj.cpp.hearing.mapping.ReportingRestrictionJPAMapperTest.whenFirstReportingRestriction;
+import static uk.gov.moj.cpp.hearing.mapping.ReportingRestrictionJPAMapperTest.whenReportingRestriction;
 import static uk.gov.moj.cpp.hearing.mapping.VerdictJPAMapperTest.whenVerdict;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
+
+import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.CustodyTimeLimit;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.NotifiedPlea;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.OffenceFacts;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.ReportingRestriction;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
+
+import org.junit.Test;
 
 public class OffenceJPAMapperTest {
 
@@ -100,6 +104,8 @@ public class OffenceJPAMapperTest {
                         whenAllocationDecision(isBean(AllocationDecision.class), entity.getAllocationDecision()))
                 .with(Offence::getCustodyTimeLimit,
                         whenCustodyTimeLimit(isBean(CustodyTimeLimit.class), entity))
+                .with(Offence::getReportingRestrictions,
+                        whenFirstReportingRestriction(isBean(ReportingRestriction.class), (entity.getReportingRestrictions().iterator().next())))
                 ;
     }
 

@@ -121,6 +121,14 @@ public final class HearingJPADataTemplate {
 
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().add(offence);
                 });
+        randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.ReportingRestriction.class)
+                .forEach(reportingRestriction -> {
+                    reportingRestriction.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
+                    hearingEntity.getProsecutionCases().iterator().next()
+                            .getDefendants().iterator().next()
+                            .getOffences().iterator().next()
+                            .getReportingRestrictions().add(reportingRestriction);
+                });
         //
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)
                 .forEach(target -> {

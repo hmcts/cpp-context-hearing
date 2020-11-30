@@ -33,8 +33,8 @@ import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.test.utils.core.converter.JsonObjectToObjectConverterFactory;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
@@ -58,16 +58,14 @@ import java.util.UUID;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingListXhibitResponseTransformerTest {
     private static final String COURT_NAME = "Court 1";
+    private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
 
     private UUID hearingTypeId;
 
@@ -483,6 +481,8 @@ public class HearingListXhibitResponseTransformerTest {
                                 .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
                                 .withOffences(asList(Offence.offence()
                                         .withId(randomUUID())
+                                        .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                                .withJudicialResultId(randomUUID()).build()))
                                         .build()))
                                 .build()))
                         .build()))
@@ -508,6 +508,8 @@ public class HearingListXhibitResponseTransformerTest {
                                                 .withJudicialResults(asList(JudicialResult.judicialResult()
                                                         .withJudicialResultId(randomUUID())
                                                         .build()))
+                                                .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                                        .withJudicialResultId(randomUUID()).build()))
                                                 .build()))
                                         .build()))
                                 .build()))
@@ -543,7 +545,7 @@ public class HearingListXhibitResponseTransformerTest {
         assertThat(currentCourtStatus.getCourt().getCourtName(), is(COURT_NAME));
         assertThat(caseDetail.getActivecase(), is(ACTIVE.getStatusCode()));
         assertThat(currentCourtStatus.getCourt().getCourtSites().size(), is(1));
-
+        assertThat(caseDetail.getPublicNotices().getPublicNotice().size(),is(1));
 
         final CourtRoom courtRoomForSecondHearing = currentCourtStatus.getCourt().getCourtSites().get(0).getCourtRooms().get(0);
         final CaseDetail caseDetailForSecondHearing = courtRoomForSecondHearing.getCases().getCasesDetails().get(1);
@@ -576,6 +578,8 @@ public class HearingListXhibitResponseTransformerTest {
                                         .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(Person.person().build()).build())
                                         .withOffences(asList(Offence.offence()
                                                 .withId(randomUUID())
+                                                .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                                        .withJudicialResultId(randomUUID()).build()))
                                                 .build()))
                                         .build()))
                                 .build()))

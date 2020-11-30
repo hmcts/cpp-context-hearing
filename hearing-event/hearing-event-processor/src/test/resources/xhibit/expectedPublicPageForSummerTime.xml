@@ -21,6 +21,10 @@
                                         <lastname>Jong</lastname>
                                     </defendant>
                                 </defendants>
+                                <publicnotices>
+                                    <publicnotice>No</publicnotice>
+                                    <publicnotice>Yes</publicnotice>
+                                </publicnotices>
                                 <judgename>Mr Mark J Ainsworth-MAGISTRATE judge</judgename>
                                 <notbeforetime>16:00</notbeforetime>
                                 <currentstatus>

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
+import static java.time.ZonedDateTime.now;
 import static java.time.ZonedDateTime.parse;
 import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
@@ -23,6 +24,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ReportingRestriction;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.time.LocalDate;
@@ -52,6 +54,7 @@ public class HearingTestUtils {
         final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
         final Hearing hearing = buildHearing1(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
         final Offence offence1 = buildOffence1(hearing, defendant1);
+        offence1.setReportingRestrictions(asSet(buildReportingRestriction(hearing, offence1)));
         defendant1.getOffences().add(offence1);
         final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
         hearing.setJudicialRoles(asSet(judicialRole));
@@ -289,6 +292,16 @@ public class HearingTestUtils {
         offence.setUnanimous(false);
         */
         return offence;
+    }
+
+    private static ReportingRestriction buildReportingRestriction(final Hearing hearing, final Offence offence) {
+        ReportingRestriction reportingRestriction = new ReportingRestriction();
+        reportingRestriction.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
+        reportingRestriction.setJudicialResultId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()).getId());
+        reportingRestriction.setLabel("The result label provided from reference data during the resulting process");
+        reportingRestriction.setOffence(offence);
+        reportingRestriction.setOrderedDate(now().toLocalDate());
+        return reportingRestriction;
     }
 
     public static HearingDay buildHearingDate(final UUID ahearingId, final ZonedDateTime startDate) {

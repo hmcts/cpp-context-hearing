@@ -460,6 +460,10 @@
         {
           "childResultDefinitionId": "bb90e801-0066-4bdf-85e6-8d64bc683f0c",
           "ruleType": "atleastOneOf"
+        },
+        {
+          "childResultDefinitionId" : "a9b6e6af-cd04-4003-8f3d-18ad58f7f5a1",
+          "ruleType" : "atleastOneOf"
         }
       ]
     },

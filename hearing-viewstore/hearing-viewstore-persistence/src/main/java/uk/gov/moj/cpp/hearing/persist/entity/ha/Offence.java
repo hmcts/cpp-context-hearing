@@ -1,20 +1,26 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinColumns;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Entity
 @Table(name = "ha_offence")
+@SuppressWarnings("squid:S2384")
 public class Offence {
 
     @EmbeddedId
@@ -119,6 +125,9 @@ public class Offence {
 
     @Column(name = "laid_date")
     private LocalDate laidDate;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "offence", orphanRemoval = true)
+    private Set<ReportingRestriction> reportingRestrictions = new HashSet<>();
 
     public HearingSnapshotKey getId() {
         return id;
@@ -398,5 +407,13 @@ public class Offence {
 
     public void setShadowListed(boolean shadowListed) {
         this.shadowListed = shadowListed;
+    }
+
+    public Set<ReportingRestriction> getReportingRestrictions() {
+        return reportingRestrictions;
+    }
+
+    public void setReportingRestrictions(final Set<ReportingRestriction> reportingRestrictions) {
+        this.reportingRestrictions = reportingRestrictions;
     }
 }

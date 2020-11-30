@@ -95,10 +95,15 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
                 "                                    <defendant/>\n" +
                 "                                </defendants>";
 
+        final String expectedPublicNoticeXMLValueForPublic = "<publicnotices>\n" +
+                "                                    <publicnotice>Yes</publicnotice>\n" +
+                "                                </publicnotices>";
+
         assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
         assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));
         assertThat(filePayloadForPubDisplay, containsString("activecase>1</activecase"));
         assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForPublic));
+        assertThat(filePayloadForPubDisplay, containsString(expectedPublicNoticeXMLValueForPublic));
         assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
 
         assertThat(filePayloadForPubDisplay, containsString("<judgename>Recorder Mark J Ainsworth</judgename>"));

@@ -39,10 +39,13 @@ public class CaseDetail implements Serializable {
 
     private List<DefenceCounsel> defenceCounsels;
 
+    private PublicNotices publicNotices;
+
     public CaseDetail(final String caseNumber, final String caseType, final String cppUrn, final List<Defendant> defendants, final String hearingType, final String judgeName, final String notBeforeTime,
                       final HearingEvent hearingEvent,
                       final BigInteger activecase,
-                      final BigInteger hearingprogress) {
+                      final BigInteger hearingprogress,
+                      final PublicNotices publicNotices) {
         this.caseNumber = caseNumber;
         this.caseType = caseType;
         this.cppUrn = cppUrn;
@@ -53,6 +56,7 @@ public class CaseDetail implements Serializable {
         this.hearingEvent = hearingEvent;
         this.activeCase = activecase;
         this.hearingprogress = hearingprogress;
+        this.publicNotices = publicNotices;
     }
 
     public BigInteger getActivecase() {
@@ -94,6 +98,9 @@ public class CaseDetail implements Serializable {
     public HearingEvent getHearingEvent() {
         return hearingEvent;
     }
+
+    public PublicNotices getPublicNotices() { return publicNotices; }
+
 
     @SuppressWarnings("squid:AssignmentInSubExpressionCheck")
     public List<UUID> getLinkedCaseIds() {
@@ -149,6 +156,8 @@ public class CaseDetail implements Serializable {
             return false;
         if (getLinkedCaseIds() != null ? !getLinkedCaseIds().equals(that.getLinkedCaseIds()) : that.getLinkedCaseIds() != null)
             return false;
+        if (getPublicNotices() != null ? !getPublicNotices().equals(that.getPublicNotices()) : that.getPublicNotices() != null)
+            return false;
         return defenceCounsels != null ? defenceCounsels.equals(that.defenceCounsels) : that.defenceCounsels == null;
     }
 
@@ -166,6 +175,7 @@ public class CaseDetail implements Serializable {
         result = 31 * result + (getNotBeforeTime() != null ? getNotBeforeTime().hashCode() : 0);
         result = 31 * result + (getHearingEvent() != null ? getHearingEvent().hashCode() : 0);
         result = 31 * result + (getLinkedCaseIds() != null ? getLinkedCaseIds().hashCode() : 0);
+        result = 31 * result + (getPublicNotices() != null ? getPublicNotices().hashCode() : 0);
         result = 31 * result + (defenceCounsels != null ? defenceCounsels.hashCode() : 0);
         return result;
     }
@@ -185,6 +195,7 @@ public class CaseDetail implements Serializable {
                 ", hearingEvent=" + hearingEvent +
                 ", linkedCaseIds=" + linkedCaseIds +
                 ", defenceCounsels=" + defenceCounsels +
+                ", publicNotices=" + publicNotices +
                 '}';
     }
 
@@ -234,6 +245,8 @@ public class CaseDetail implements Serializable {
         private String notBeforeTime;
 
         private HearingEvent hearingEvent;
+
+        private PublicNotices publicNotices;
 
         public CaseDetail.Builder withCaseNumber(final String caseNumber) {
             this.caseNumber = caseNumber;
@@ -285,8 +298,14 @@ public class CaseDetail implements Serializable {
             return this;
         }
 
+        public Builder withPublicNotices(final PublicNotices publicNotices) {
+            this.publicNotices = publicNotices;
+            return this;
+        }
+
+
         public CaseDetail build() {
-            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent, activecase, hearingprogress);
+            return new CaseDetail(caseNumber, caseType, cppUrn, defendants, hearingType, judgeName, notBeforeTime, hearingEvent, activecase, hearingprogress,publicNotices);
         }
     }
 }

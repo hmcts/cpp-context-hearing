@@ -32,6 +32,8 @@ public class OffenceJPAMapper {
 
     private LaaApplnReferenceJPAMapper laaApplnReferenceJPAMapper;
 
+    private ReportingRestrictionJPAMapper reportingRestrictionJPAMapper;
+
     @Inject
     public OffenceJPAMapper(final NotifiedPleaJPAMapper notifiedPleaJPAMapper,
                             final IndicatedPleaJPAMapper indicatedPleaJPAMapper,
@@ -39,7 +41,8 @@ public class OffenceJPAMapper {
                             final OffenceFactsJPAMapper offenceFactsJPAMapper,
                             final VerdictJPAMapper verdictJPAMapper,
                             final AllocationDecisionJPAMapper allocationDecisionJPAMapper,
-                            final LaaApplnReferenceJPAMapper laaApplnReferenceJPAMapper) {
+                            final LaaApplnReferenceJPAMapper laaApplnReferenceJPAMapper,
+                            final ReportingRestrictionJPAMapper reportingRestrictionJPAMapper) {
         this.notifiedPleaJPAMapper = notifiedPleaJPAMapper;
         this.indicatedPleaJPAMapper = indicatedPleaJPAMapper;
         this.pleaJPAMapper = pleaJPAMapper;
@@ -47,6 +50,7 @@ public class OffenceJPAMapper {
         this.verdictJPAMapper = verdictJPAMapper;
         this.allocationDecisionJPAMapper = allocationDecisionJPAMapper;
         this.laaApplnReferenceJPAMapper = laaApplnReferenceJPAMapper;
+        this.reportingRestrictionJPAMapper = reportingRestrictionJPAMapper;
     }
 
     //To keep cditester happy
@@ -107,6 +111,9 @@ public class OffenceJPAMapper {
         if(Objects.nonNull(pojo.getProceedingsConcluded())) {
             offence.setProceedingsConcluded(pojo.getProceedingsConcluded());
         }
+        if(Objects.nonNull(pojo.getReportingRestrictions())) {
+            offence.setReportingRestrictions(reportingRestrictionJPAMapper.toJPA(hearing, pojo.getId(), pojo.getReportingRestrictions()));
+        }
         return offence;
     }
 
@@ -148,6 +155,7 @@ public class OffenceJPAMapper {
                 .withIsDiscontinued(entity.isDiscontinued())
                 .withIntroducedAfterInitialProceedings(entity.isIntroduceAfterInitialProceedings())
                 .withLaidDate(entity.getLaidDate())
+                .withReportingRestrictions(reportingRestrictionJPAMapper.fromJPA(entity.getReportingRestrictions()))
                 .build();
     }
 

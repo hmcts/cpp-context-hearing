@@ -19,6 +19,9 @@
                                         <firstname>Organisation X</firstname>
                                     </defendant>
                                 </defendants>
+                                <publicnotices>
+                                    <publicnotice>Yes</publicnotice>
+                                </publicnotices>
                                 <judgename>Mr Mark J Ainsworth-MAGISTRATE judge</judgename>
                                 <notbeforetime>00:09</notbeforetime>
                                 <currentstatus>
