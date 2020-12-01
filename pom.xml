@@ -25,7 +25,6 @@
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.125</coredomain.version>
-        <criminal-court-public-model.version>1.0.125</criminal-court-public-model.version>
         <referencedata.version>7.0.23</referencedata.version>
         <material.version>7.0.0</material.version>
         <results.version>7.0.33</results.version>
@@ -38,7 +37,7 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
-        <listing.version>7.0.45-CWR-35-SNAPSHOT</listing.version>
+        <listing.version>7.0.42</listing.version>
     </properties>
 
     <modules>
