@@ -35,6 +35,7 @@ import uk.gov.justice.core.courts.CustodialEstablishment;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
 import uk.gov.justice.core.courts.Ethnicity;
@@ -619,6 +620,38 @@ public class CoreTestTemplates {
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
                                 .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), withJudicialResults).build())
+                                .collect(toList())
+                )
+
+                .withCourtApplications(asList((new HearingFactory().courtApplication().build())))
+                .withCourtCentre(courtCentre);
+
+        return hearingBuilder;
+    }
+
+    public static Hearing.Builder hearingWithAllLevelJudicialResults(final CoreTemplateArguments args) {
+        final Hearing.Builder hearingBuilder = Hearing.hearing();
+        CourtCentre courtCentre;
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+            courtCentre = courtCentreWithArgs("welshCourtRoom").build();
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+            courtCentre = courtCentre().build();
+        }
+
+        hearingBuilder.withId(randomUUID())
+                .withType(hearingType(Optional.empty()).build())
+                .withJurisdictionType(args.jurisdictionType)
+                .withReportingRestrictionReason(STRING.next())
+                .withHearingDays(asList(hearingDay(courtCentre).build()))
+                .withDefendantJudicialResults(asList(DefendantJudicialResult.defendantJudicialResult().withMasterDefendantId(randomUUID()).build()))
+                .withJudiciary(singletonList(judiciaryRole(args).build()))
+                .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withProsecutionCases(
+                        args.structure.entrySet().stream()
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), true).build())
                                 .collect(toList())
                 )
 

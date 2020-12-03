@@ -409,6 +409,11 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithAllLevelJudicialResults() {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithAllLevelJudicialResults(defaultArguments()).build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(final List<CourtApplication> courtApplications) {
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()

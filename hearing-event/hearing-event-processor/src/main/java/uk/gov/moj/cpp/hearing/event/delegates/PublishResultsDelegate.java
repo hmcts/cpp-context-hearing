@@ -336,7 +336,10 @@ public class PublishResultsDelegate {
                     if (!judicialResults.isEmpty()) { //so that judicialResults doesn't have empty tag
                         setPromptsAsNullIfEmpty(judicialResults);
                         defendant.setDefendantCaseJudicialResults(judicialResults);
+                    } else {
+                        defendant.setDefendantCaseJudicialResults(null);
                     }
+
                 });
     }
 
@@ -358,6 +361,8 @@ public class PublishResultsDelegate {
         if (!defendantJudicialResults.isEmpty()) {
             setDefendantJudicialResultPromptsAsNullIfEmpty(defendantJudicialResults);
             resultsShared.getHearing().setDefendantJudicialResults(defendantJudicialResults);
+        } else {
+            resultsShared.getHearing().setDefendantJudicialResults(null);
         }
     }
 
@@ -417,6 +422,8 @@ public class PublishResultsDelegate {
                          if (!restrictions.isEmpty()) {
                              offence.setReportingRestrictions(restrictions);
                         }
+                    } else {
+                        offence.setJudicialResults(null);
                     }
                 });
     }

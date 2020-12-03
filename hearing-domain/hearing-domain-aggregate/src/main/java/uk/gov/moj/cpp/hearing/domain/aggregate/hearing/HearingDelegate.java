@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingResultsCleanerUtil.removeResultsFromHearing;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -132,14 +133,16 @@ public class HearingDelegate implements Serializable {
     public void handleMasterDefendantIdAdded(final UUID prosecutionCaseId, final UUID defendantId, final UUID masterDefendantId) {
         this.momento.getHearing().getProsecutionCases().stream()
                 .filter(prosecutionCase -> prosecutionCase.getId().equals(prosecutionCaseId))
-                .flatMap(p->p.getDefendants().stream())
-                .filter(d->d.getId().equals(defendantId))
-                .forEach(d->d.setMasterDefendantId(masterDefendantId));
+                .flatMap(p -> p.getDefendants().stream())
+                .filter(d -> d.getId().equals(defendantId))
+                .forEach(d -> d.setMasterDefendantId(masterDefendantId));
     }
 
     public Stream<Object> initiate(final Hearing hearing) {
 
-        return Stream.of(new HearingInitiated(hearing));
+        final Hearing hearingWithoutResults = removeResultsFromHearing(hearing);
+
+        return Stream.of(new HearingInitiated(hearingWithoutResults));
     }
 
     public Stream<Object> extend(final UUID hearingId,

@@ -1,22 +1,26 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.lang.System.lineSeparator;
+import static java.util.Arrays.asList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
+import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_CASE_LEVEL_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON;
@@ -32,6 +36,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -46,12 +51,9 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.VerdictType;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
@@ -197,7 +199,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON, ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
 
-        when(alcoholLevelMethodsReferenceDataLoader.getAllAlcoholLevelMethods(envelope)).thenReturn(Arrays.asList(
+        when(alcoholLevelMethodsReferenceDataLoader.getAllAlcoholLevelMethods(envelope)).thenReturn(asList(
                 new AlcoholLevelMethod(randomUUID(), 1, "A", "Blood"),
                 new AlcoholLevelMethod(randomUUID(), 2, "B", "Breath")));
 
@@ -509,6 +511,76 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         assertThat(indicatedPlea.getOffenceId().toString(), is("47ecee20-0215-11ea-9bbd-b1f5a4493d17"));
         assertThat(indicatedPlea.getOriginatingHearingId().toString(), is("31048c0d-e937-49fb-bfc5-02abc56d3f6a"));
         assertThat(indicatedPlea.getSource(), is(Source.IN_COURT));
+    }
+
+    @Test
+    public void shouldOnlyPopulateDefendantLevelResultsWhenResultLinesPresentForDefendantLevel() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON, ResultsShared.class);
+        final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
+
+        // deliberately polluting state of hearing with stale results
+        resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).setDefendantCaseJudicialResults(asList(judicialResult1));
+        resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).setDefendantCaseJudicialResults(asList(judicialResult1));
+
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        target.shareResults(envelope, sender, resultsShared);
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
+
+        assertThat(resultsShared.getHearing().getDefendantJudicialResults(), hasSize(2));
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getDefendantCaseJudicialResults(), nullValue());
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getJudicialResults(), nullValue());
+    }
+
+    @Test
+    public void shouldOnlyPopulateCaseLevelResultsWhenResultLinesPresentForCaseLevel() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_CASE_LEVEL_SHARED_JSON, ResultsShared.class);
+        final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
+        final DefendantJudicialResult defendantJudicialResult = DefendantJudicialResult.defendantJudicialResult().withMasterDefendantId(randomUUID()).withJudicialResult(judicialResult1).build();
+        // deliberately polluting state of hearing with stale results
+        resultsShared.getHearing().setDefendantJudicialResults(Arrays.asList(defendantJudicialResult));
+        resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setJudicialResults(asList(judicialResult1));
+
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        target.shareResults(envelope, sender, resultsShared);
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
+
+        assertThat(resultsShared.getHearing().getDefendantJudicialResults(), nullValue());
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getDefendantCaseJudicialResults(), hasSize(2));
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getJudicialResults(), nullValue());
+    }
+
+    @Test
+    public void shouldOnlyPopulateOffenceLevelResultsWhenResultLinesPresentForOffenceLevel() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
+        final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
+        final DefendantJudicialResult defendantJudicialResult = DefendantJudicialResult.defendantJudicialResult().withMasterDefendantId(randomUUID()).withJudicialResult(judicialResult1).build();
+
+        // deliberately polluting state of hearing with stale results
+        resultsShared.getHearing().setDefendantJudicialResults(asList(defendantJudicialResult));
+        resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).setDefendantCaseJudicialResults(asList(judicialResult1));
+
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        target.shareResults(envelope, sender, resultsShared);
+
+        verify(sender).send(envelopeArgumentCaptor.capture());
+
+        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
+
+        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
+
+        assertThat(resultsShared.getHearing().getDefendantJudicialResults(), nullValue());
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getDefendantCaseJudicialResults(), nullValue());
+        assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getJudicialResults(), hasSize(2));
     }
 
     private void setJudicialResultsWithCategoryOf(final ResultsShared expected, final Category category) {

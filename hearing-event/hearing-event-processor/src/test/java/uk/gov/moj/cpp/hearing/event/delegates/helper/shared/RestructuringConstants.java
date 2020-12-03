@@ -1,17 +1,18 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.shared;
 
+import static java.util.UUID.randomUUID;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+
 import uk.gov.justice.core.courts.HearingType;
 
 import java.time.LocalDate;
-
-import static java.util.UUID.randomUUID;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 
 public class RestructuringConstants {
     public static final int COURT_ROOM_ID = 54321;
     public static final String HEARING_RESULTS_SHARED_EVENT = "hearing.results-shared";
     public static final String HEARING_RESULTS_SHARED_JSON = "hearing.results-shared.json";
-    public static final String HEARING_RESULTS_SHARED_MULTIDAY_CRACKED_JSON = "hearing.results-shared-with-multiday-cracked.json";
+    public static final String HEARING_RESULTS_CASE_LEVEL_SHARED_JSON = "hearing.results-shared-case-level.json";
+    public static final String HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON = "hearing.results-shared-defendant-level.json";
     public static final String HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON = "hearing.results-shared-with-verdict-type.json";
     public static final String HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-with-indicated-plea.json";
     public static final String HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON = "hearing.results-shared-with-offence-facts.json";

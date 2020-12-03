@@ -8,10 +8,11 @@ import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
@@ -19,12 +20,20 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import org.hamcrest.MatcherAssert;
-import uk.gov.justice.core.courts.*;
+import uk.gov.justice.core.courts.ApprovalType;
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCounsel;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -47,11 +56,19 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.result.*;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidated;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -83,11 +100,33 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldInitiateHearing() {
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
 
         final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
 
-        assertThat(result.getHearing(), is(initiateHearingCommand.getHearing()));
+        assertThat(result.getHearing().getId(), is(initiateHearingCommand.getHearing().getId()));
+    }
+
+    @Test
+    public void shouldInitiateHearingWithAllResultsCleanedUp() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
+
+        final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+
+        final Hearing targetHearing = result.getHearing();
+        assertThat(targetHearing.getId(), is(initiateHearingCommand.getHearing().getId()));
+        assertThat(targetHearing.getDefendantJudicialResults(), nullValue());
+        assertThat(targetHearing.getProsecutionCases(), hasSize(greaterThanOrEqualTo(1)));
+        targetHearing.getProsecutionCases().forEach(pc -> {
+            assertThat(pc.getDefendants(), hasSize(greaterThanOrEqualTo(1)));
+            pc.getDefendants().forEach(d -> {
+                assertThat(d.getDefendantCaseJudicialResults(), nullValue());
+                assertThat(d.getOffences(), hasSize(greaterThanOrEqualTo(1)));
+                d.getOffences().forEach(o -> {
+                    assertThat(o.getJudicialResults(), nullValue());
+                });
+            });
+        });
     }
 
     @Test
@@ -918,7 +957,7 @@ public class HearingAggregateTest {
         targetList.add(target);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
         final Optional<MultipleDraftResultsSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved)x).findFirst();
-        MatcherAssert.assertThat("MultipleDraftResulstSaved not present", multipleDraftResulstSaved.orElse(null), notNullValue() );
+        assertThat("MultipleDraftResulstSaved not present", multipleDraftResulstSaved.orElse(null), notNullValue() );
 
     }
 
@@ -944,7 +983,7 @@ public class HearingAggregateTest {
         targetList.add(dupTarget);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
         final Optional<MultipleDraftResultsSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved)x).findFirst();
-        MatcherAssert.assertThat("MultipleDraftResulstSaved present", multipleDraftResulstSaved.orElse(null), nullValue());
+        assertThat("MultipleDraftResulstSaved present", multipleDraftResulstSaved.orElse(null), nullValue());
 
     }
 
@@ -970,7 +1009,7 @@ public class HearingAggregateTest {
         targetList.add(dupTarget);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList);
         final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x  -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed)x).findFirst();
-        MatcherAssert.assertThat("SaveDraftResultFailed not present", saveDraftResultFailed.orElse(null), nullValue());
+        assertThat("SaveDraftResultFailed not present", saveDraftResultFailed.orElse(null), nullValue());
 
     }
 
