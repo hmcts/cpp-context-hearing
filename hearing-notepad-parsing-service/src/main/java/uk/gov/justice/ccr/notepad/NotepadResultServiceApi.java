@@ -82,7 +82,7 @@ public class NotepadResultServiceApi {
         final String resultDefinitionId = resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(parts, knowledge);
         if (nonNull(resultDefinitionId)) {
             final ChildResultDefinitionDetail childResultDefinitionDetail = parsingFacade.retrieveChildResultDefinitionDetail(resultDefinitionId, orderedDate);
-            if (nonNull(childResultDefinitionDetail) && nonNull(childResultDefinitionDetail.getParentResultDefinition())) {
+            if (canTransformChildResultDefinitionsView(childResultDefinitionDetail)) {
                 childResultDefinitions = transformChildResultDefinitionsView(childResultDefinitionDetail.getResultDefinitions(), childResultDefinitionDetail.getParentResultDefinition().getChildResultDefinitions());
             }
 
@@ -96,6 +96,12 @@ public class NotepadResultServiceApi {
         buildFromKnowledge.setOriginalText(originalText);
         buildFromKnowledge.setOrderedDate(orderedDate.toString());
         return buildFromKnowledge;
+    }
+
+    private boolean canTransformChildResultDefinitionsView(final ChildResultDefinitionDetail childResultDefinitionDetail) {
+        return nonNull(childResultDefinitionDetail) && nonNull(childResultDefinitionDetail.getParentResultDefinition())
+                && nonNull(childResultDefinitionDetail.getResultDefinitions())
+                && nonNull(childResultDefinitionDetail.getParentResultDefinition().getChildResultDefinitions());
     }
 
     private Boolean getExcludedFromResultsFromResultDefinition(final ResultDefinition resultDefinition) {

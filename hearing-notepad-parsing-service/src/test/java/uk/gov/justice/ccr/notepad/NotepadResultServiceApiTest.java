@@ -30,6 +30,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Matchers.any;
@@ -256,6 +257,119 @@ public class NotepadResultServiceApiTest {
         assertThat(childResultDefinitionsCaptor.getValue().get(2).getChildResultCodes(), hasSize(1));
 
     }
+
+    @Test
+    public void buildResultDefinitionViewWhenResultDefinitionIsNull() {
+        final UUID parentResultDefinitionId = randomUUID();
+        final UUID childResultDefinitionId1 = randomUUID();
+        final UUID childResultDefinitionId2 = randomUUID();
+        final UUID childResultDefinitionId3 = randomUUID();
+
+        final ChildResultDefinitionDetail childResultDefinitionDetail = new ChildResultDefinitionDetail(createResultDefinition(parentResultDefinitionId, Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)),
+                null);
+
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(new ResultDefinitionView());
+        when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(parentResultDefinitionId.toString());
+        when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
+        final String orderedDate = "2014-06-04";
+        when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
+        when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
+        when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
+
+        final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
+                "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
+
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture(),booleanResult.capture(), anyString(), any());
+        verify(parsingFacade).processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate));
+        verify(resultPromptViewBuilder).buildFromKnowledge(promptKnowledge);
+        verify(resultPromptView).getPromptChoices();
+
+        assertThat(resultDefinitionView.getOriginalText()
+                , is("imp sus")
+        );
+        assertThat(resultDefinitionView.getOrderedDate(), is(orderedDate));
+        assertThat(resultDefinitionView.getResultLineId().length()
+                , is(36)
+        );
+
+        assertThat(childResultDefinitionsCaptor.getValue(), is(nullValue()));
+    }
+
+    @Test
+    public void buildResultDefinitionViewWhenParentResultDefinitionIsNull() {
+        final UUID parentResultDefinitionId = randomUUID();
+        final UUID childResultDefinitionId1 = randomUUID();
+        final UUID childResultDefinitionId2 = randomUUID();
+        final UUID childResultDefinitionId3 = randomUUID();
+
+        final ChildResultDefinitionDetail childResultDefinitionDetail = new ChildResultDefinitionDetail(null,
+                createResultDefinitions(Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)));
+
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(new ResultDefinitionView());
+        when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(parentResultDefinitionId.toString());
+        when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
+        final String orderedDate = "2014-06-04";
+        when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
+        when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
+        when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
+
+        final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
+                "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
+
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture(),booleanResult.capture(), anyString(), any());
+        verify(parsingFacade).processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate));
+        verify(resultPromptViewBuilder).buildFromKnowledge(promptKnowledge);
+        verify(resultPromptView).getPromptChoices();
+
+        assertThat(resultDefinitionView.getOriginalText()
+                , is("imp sus")
+        );
+        assertThat(resultDefinitionView.getOrderedDate(), is(orderedDate));
+        assertThat(resultDefinitionView.getResultLineId().length()
+                , is(36)
+        );
+        assertThat(childResultDefinitionsCaptor.getValue(), is(nullValue()));
+
+    }
+
+    @Test
+    public void buildResultDefinitionViewWhenParentResultDefinitionsChildIsNull() {
+        final UUID parentResultDefinitionId = randomUUID();
+        final UUID childResultDefinitionId1 = randomUUID();
+        final UUID childResultDefinitionId2 = randomUUID();
+        final UUID childResultDefinitionId3 = randomUUID();
+
+        ChildResultDefinitionDetail childResultDefinitionDetail = new ChildResultDefinitionDetail(createResultDefinition(parentResultDefinitionId, Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)),
+                createResultDefinitions(Arrays.asList(childResultDefinitionId1, childResultDefinitionId2, childResultDefinitionId3)));
+
+        childResultDefinitionDetail.getParentResultDefinition().setChildResultDefinitions(null);
+        when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(new ResultDefinitionView());
+        when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(parentResultDefinitionId.toString());
+        when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
+        final String orderedDate = "2014-06-04";
+        when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
+        when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
+        when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
+
+        final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
+                "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
+
+        verify(resultDefinitionViewBuilder).buildFromKnowledge(partsCaptor.capture(), knowledgeArgumentCaptor.capture(), childResultDefinitionsCaptor.capture(), excludedFromResults.capture(),booleanResult.capture(), anyString(), any());
+        verify(parsingFacade).processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate));
+        verify(resultPromptViewBuilder).buildFromKnowledge(promptKnowledge);
+        verify(resultPromptView).getPromptChoices();
+
+        assertThat(resultDefinitionView.getOriginalText()
+                , is("imp sus")
+        );
+        assertThat(resultDefinitionView.getOrderedDate(), is(orderedDate));
+        assertThat(resultDefinitionView.getResultLineId().length()
+                , is(36)
+        );
+        assertThat(childResultDefinitionsCaptor.getValue(), is(nullValue()));
+
+    }
+
 
     private List<ResultDefinition> createResultDefinitions(final List<UUID> childResultDefinitionIds) {
         return childResultDefinitionIds.stream()
