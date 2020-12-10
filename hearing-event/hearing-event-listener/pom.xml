@@ -70,4 +70,36 @@
 
     </dependencies>
 
+
+    <build>
+        <plugins>
+            <!-- MI schema contract validation tests jar dependency-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>uk.gov.moj.cpp.mi.reportdata</groupId>
+                                    <artifactId>mireportdata-hearing-event-listener</artifactId>
+                                    <version>RELEASE</version>
+                                    <classifier>tests</classifier>
+                                    <type>test-jar</type>
+                                    <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
