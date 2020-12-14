@@ -378,6 +378,10 @@ public class CommandHelpers {
             return this.updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(0);
         }
 
+        public uk.gov.justice.core.courts.Offence getSecondOffenceFromUpdatedOffences() {
+            return this.updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(1);
+        }
+
         public uk.gov.justice.core.courts.ReportingRestriction getFirstReportingRestrictionFromUpdatedOffences() {
             return this.updateOffencesForDefendantCommand.getUpdatedOffences().get(0).getOffences().get(0).getReportingRestrictions().get(0);
         }

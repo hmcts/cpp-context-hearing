@@ -119,6 +119,9 @@ subscriptions_descriptor:
         - name: hearing.events.found-hearings-for-delete-offence
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/found-hearings-for-delete-offence.json
 
+        - name: hearing.events.offence-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/offence-added.json
+
         - name: hearing.command.delete-offence-on-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/command.delete-offence-on-hearings.json
 

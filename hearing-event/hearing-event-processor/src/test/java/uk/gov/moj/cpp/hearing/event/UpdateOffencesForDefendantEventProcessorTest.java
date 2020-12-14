@@ -13,11 +13,13 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatch
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -28,8 +30,10 @@ import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
@@ -52,6 +56,10 @@ public class UpdateOffencesForDefendantEventProcessorTest {
 
     @Spy
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+
+    @Spy
+    private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
+
 
     @Mock
     private Sender sender;
@@ -173,6 +181,37 @@ public class UpdateOffencesForDefendantEventProcessorTest {
                         payloadIsJson(allOf(
                                 withJsonPath("$.id", is(offence.getId().toString())),
                                 withJsonPath("$.hearingIds[0]", is(offence.getHearingIds().get(0).toString()))
+                                )
+                        )
+                )
+        );
+    }
+
+    @Test
+    public void offenceAdded() {
+
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+
+        OffenceAdded offenceAdded = OffenceAdded.offenceAdded()
+                .withOffence(Offence.offence().withId(offenceId).build())
+                .withDefendantId(randomUUID())
+                .withHearingId(hearingId)
+                .withProsecutionCaseId(randomUUID());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.offence-added"),
+                objectToJsonObjectConverter.convert(offenceAdded));
+
+        updateOffencesForDefendantEventProcessor.addOffence(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(
+                toJsonEnvelope( this.envelopeArgumentCaptor.getValue()), jsonEnvelope(
+                        metadata().withName("hearing.command.register-hearing-against-offence"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.offenceId", is(offenceId.toString())),
+                                withJsonPath("$.hearingId", is(hearingId.toString()))
                                 )
                         )
                 )

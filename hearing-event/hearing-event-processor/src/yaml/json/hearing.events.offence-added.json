@@ -1,0 +1,25 @@
+{
+  "hearingId": "9a60027f-8328-4746-89f3-821e464d1d65",
+  "defendantId": "077ddbaf-1a77-4b40-8a2a-54ccf80e31b8",
+  "prosecutionCaseId": "f1ebe655-eeb3-4016-8f46-b4ad83c263a3",
+  "offence": {
+    "count": 0,
+    "id": "27c06ef4-3403-494b-81eb-0a605ffba8c2",
+    "modeOfTrial": "Indictable",
+    "offenceCode": "SX03001C",
+    "offenceDateCode": 1,
+    "offenceDefinitionId": "afbe82cf-0080-4388-80db-91e76511de0f",
+    "offenceLegislation": "Contrary to section 1(1) of the Criminal Law Act 1977.",
+    "offenceTitle": "Conspire to rape a girl 13 / 14 / 15 years of age",
+    "orderIndex": 501,
+    "reportingRestrictions": [
+      {
+        "id": "16a24beb-842d-4343-ab63-393acb953cc1",
+        "label": "Complainant's anonymity protected by virtue of Section 1 of the Sexual Offences Amendment Act 1992",
+        "orderedDate": "2020-12-10"
+      }
+    ],
+    "startDate": "2020-12-01",
+    "wording": "test"
+  }
+}
