@@ -249,6 +249,40 @@ public abstract class AbstractRestructuringTest {
                 ).withHearing(hearing().build()).build();
     }
 
+    protected ResultsShared getResultsSharedWithWelshPromptValue(List<ResultDefinition> resultDefinitions, String promptWelshValue) {
+        final List<ResultLine> resultLines = new ArrayList<>();
+
+        resultDefinitions.forEach(resultDefinition -> {
+            final List<Prompt> promptList = resultDefinition
+                    .getPrompts()
+                    .stream()
+                    .map(p -> Prompt.prompt()
+                            .withFixedListCode(null)
+                            .withHidden(p.isHidden())
+                            .withId(p.getId())
+                            .withLabel(null)
+                            .withPromptRef(p.getReference())
+                            .withValue(null).withWelshLabel(null)
+                            .withWelshValue(promptWelshValue).build())
+                    .collect(toList());
+
+            resultLines.add(resultLine()
+                    .withResultDefinitionId(resultDefinition.getId())
+                    .withPrompts(promptList)
+                    .withOrderedDate(REFERENCE_DATE)
+                    .withResultLineId(randomUUID())
+                    .build());
+        });
+
+        return builder().withTargets(Collections.singletonList(target().withResultLines(resultLines).build()))
+                .withCourtClerk(delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName("ClerkFirstName")
+                        .withLastName("ClerkLasttName")
+                        .build()
+                ).withHearing(hearing().build()).build();
+    }
+
     protected List<TreeNode<ResultLine>> filterBy(List<TreeNode<ResultLine>> inputList, Predicate<TreeNode<ResultLine>> predicate) {
         return inputList.stream().filter(predicate).collect(Collectors.toList());
     }

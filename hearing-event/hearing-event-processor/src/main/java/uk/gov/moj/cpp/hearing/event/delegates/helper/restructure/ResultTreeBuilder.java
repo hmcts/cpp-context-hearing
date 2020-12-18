@@ -100,6 +100,7 @@ public class ResultTreeBuilder {
         return result;
     }
 
+    @SuppressWarnings("squid:S3776")
     private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final ResultsShared resultsShared) {
         final Hearing hearing = resultsShared.getHearing();
         final DelegatedPowers courtClerk = resultsShared.getCourtClerk();
@@ -184,6 +185,9 @@ public class ResultTreeBuilder {
             final List<JudicialResultPrompt> judicialResultPromptList = judicialResultPrompts.stream().map(prompt -> {
                 if (nonNull(prompt.getValue())) {
                     prompt.setValue(prompt.getValue().replace(SEPARATOR, REPLACEMENT_COMMA));
+                }
+                if (nonNull(prompt.getWelshValue())) {
+                    prompt.setWelshValue(prompt.getWelshValue().replace(SEPARATOR, REPLACEMENT_COMMA));
                 }
                 return prompt;
             }).collect(toList());

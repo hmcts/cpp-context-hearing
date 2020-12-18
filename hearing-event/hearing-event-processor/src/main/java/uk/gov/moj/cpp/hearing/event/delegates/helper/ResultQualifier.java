@@ -63,6 +63,21 @@ public class ResultQualifier {
     private void setQualfierIfFound(final JudicialResultPrompt judicialResultPrompt, final AllFixedList allFixedList) {
 
         final String value = judicialResultPrompt.getValue();
+        final String welshValue = judicialResultPrompt.getWelshValue();
+        if (nonNull(welshValue)) {
+            final String welshResult = Stream.of(
+                    judicialResultPrompt
+                            .getWelshValue()
+                            .split(SEPARATOR))
+
+                    .map(s -> getQualifierFromFixedListWelsh(s, allFixedList))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(joining(","));
+            if (isNotEmpty(welshResult)) {
+                judicialResultPrompt.setQualifier(welshResult);
+            }
+        }
 
         if (nonNull(value)) {
             final String result = Stream.of(
@@ -87,6 +102,18 @@ public class ResultQualifier {
                 .map(FixedList::getElements)
                 .flatMap(Collection::stream)
                 .filter(e -> e.getValue().equalsIgnoreCase(value))
+                .map(FixedListElement::getCjsQualifier)
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
+
+    private Optional<String> getQualifierFromFixedListWelsh(final String welshValue, final AllFixedList allFixedList) {
+        return allFixedList
+                .getFixedListCollection()
+                .stream()
+                .map(FixedList::getElements)
+                .flatMap(Collection::stream)
+                .filter(e -> welshValue.equalsIgnoreCase(e.getWelshValue()))
                 .map(FixedListElement::getCjsQualifier)
                 .filter(Objects::nonNull)
                 .findFirst();

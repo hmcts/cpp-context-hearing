@@ -4,7 +4,7 @@ import static com.google.common.collect.ImmutableList.of;
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
@@ -195,4 +195,45 @@ public class ResultQualifierTest {
         assertThat(qualifierList.isPresent(), is(true));
         assertThat(qualifierList.get(), is("cjsQualifierValue1,cjsQualifierValue2,cjsQualifierValue3"));
     }
+
+    @Test
+    public void shouldConcatenateQualifiersWhenForMultipleWelshValues() {
+        when(referenceDataService.getAllFixedList(anyObject(), anyObject())).thenReturn(allFixedList().setFixedListCollection(
+                asList(FixedList.fixedList()
+                                .setId(UUID.randomUUID())
+                                .setStartDate(LocalDate.now())
+                                .setEndDate(LocalDate.now())
+                                .setElements(asList(FixedListElement.fixedListElement()
+                                                .setCode("code")
+                                                .setValue("value1")
+                                                .setWelshValue("welshCode1")
+                                                .setCjsQualifier("cjsQualifierValue1")
+                                        , FixedListElement.fixedListElement()
+                                                .setCode("code")
+                                                .setValue("value2")
+                                                .setWelshValue("welshCode2")
+                                                .setCjsQualifier("cjsQualifierValue2")))
+                        ,
+                        FixedList.fixedList()
+                                .setId(UUID.randomUUID())
+                                .setStartDate(LocalDate.now())
+                                .setEndDate(LocalDate.now())
+                                .setElements(asList(FixedListElement.fixedListElement()
+                                        .setCode("code")
+                                        .setValue("value3")
+                                        .setWelshValue("welshCode3")
+                                        .setCjsQualifier("cjsQualifierValue3")
+                                )))
+
+                )
+
+        );
+        final String qualifier = null;
+        final List<JudicialResultPrompt> judicialResultPromptList = of(judicialResultPrompt().withType("FIXL").withWelshValue("welshCode1###welshCode2###welshCode3").build());
+        final Optional<String> qualifierList = new ResultQualifier().populate(qualifier, judicialResultPromptList, this.referenceDataService, commandJsonEnvelope, now());
+        assertThat(qualifierList.isPresent(), is(true));
+        assertThat(qualifierList.get(), is("cjsQualifierValue1,cjsQualifierValue2,cjsQualifierValue3"));
+    }
+
+
 }

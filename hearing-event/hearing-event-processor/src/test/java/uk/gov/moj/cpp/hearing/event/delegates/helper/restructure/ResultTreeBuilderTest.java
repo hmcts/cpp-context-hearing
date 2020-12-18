@@ -8,7 +8,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
@@ -97,6 +97,26 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
                 .flatMap(judicialResult -> judicialResult.getJudicialResultPrompts().stream())
                 .filter(judicialResultPrompt -> nonNull(judicialResultPrompt.getValue()))
                 .allMatch(judicialResultPrompt -> judicialResultPrompt.getValue().equals("abc, def")));
+    }
+
+    @Test
+    public void shouldBuildSimplePromptWithWelshValuesCommaSeparated() {
+        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
+                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
+        final String promptValue = "abc###def";
+        final ResultsShared resultsShared = getResultsSharedWithWelshPromptValue(resultDefinitionList, promptValue);
+        final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
+
+        assertThat(results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get().getChildren().size(), is(0));
+        assertThat(results.size(), is(3));
+        assertTrue(results.stream().filter(result -> nonNull(result.getJudicialResult()))
+                .map(TreeNode::getJudicialResult)
+                .filter(judicialResult -> nonNull(judicialResult.getJudicialResultPrompts()))
+                .flatMap(judicialResult -> judicialResult.getJudicialResultPrompts().stream())
+                .filter(judicialResultPrompt -> nonNull(judicialResultPrompt.getValue()))
+                .allMatch(judicialResultPrompt -> judicialResultPrompt.getWelshValue().equals("abc, def")));
     }
 
     @Test
