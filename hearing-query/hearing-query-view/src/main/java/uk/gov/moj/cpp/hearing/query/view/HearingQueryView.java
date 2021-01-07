@@ -73,6 +73,7 @@ public class HearingQueryView {
 
     @Inject
     private HearingService hearingService;
+
     @Inject
     private DefendantRepository defendantRepository;
     @Inject
@@ -85,20 +86,21 @@ public class HearingQueryView {
     @Inject
     private CourtListRepository courtListRepository;
 
-    public Envelope<GetHearings> findHearings(final JsonEnvelope envelope) {
+    public Envelope<GetHearings> findHearings(final JsonEnvelope envelope,
+                                              final List<UUID> accessibleCasesId,
+                                              final boolean isDDJ) {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
         final UUID courtCentreId = UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID));
         final UUID roomId = payload.containsKey(FIELD_ROOM_ID) ? UUID.fromString(payload.getString(FIELD_ROOM_ID)) : null;
         final String startTime = payload.containsKey(FIELD_START_TIME) ? payload.getString(FIELD_START_TIME) : "00:00";
         final String endTime = payload.containsKey(FIELD_END_TIME) ? payload.getString(FIELD_END_TIME) : "23:59";
-        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId);
 
+        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesId, isDDJ);
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
                 .withMetadataFrom(envelope);
     }
-
 
     @SuppressWarnings({"squid:S3655"})
     public Envelope<GetHearings> findHearingsForToday(final JsonEnvelope envelope) {
@@ -111,9 +113,11 @@ public class HearingQueryView {
 
 
     public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope,
-                                                        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+                                                        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
+                                                        final List<UUID> accessibleCasesId,
+                                                        final boolean isDDJ) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(hearingId.get(), crackedIneffectiveVacatedTrialTypes);
+        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(hearingId.get(), crackedIneffectiveVacatedTrialTypes, accessibleCasesId, isDDJ);
 
         return envelop(hearingDetailsResponse)
                 .withName("hearing.get-hearing")

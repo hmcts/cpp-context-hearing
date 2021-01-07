@@ -62,6 +62,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -113,6 +114,8 @@ public class HearingService {
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     @Inject
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
+    @Inject
+    private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
 
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
                                                               final LocalDate localDate,
@@ -159,18 +162,26 @@ public class HearingService {
 
 
     @Transactional
-    public GetHearings getHearings(final LocalDate date, final String startTime, final String endTime, final UUID courtCentreId, final UUID roomId) {
+    public GetHearings getHearings(final LocalDate date, final String startTime,
+                                   final String endTime, final UUID courtCentreId,
+                                   final UUID roomId, final List<UUID> accessibleCasesId,
+                                   final boolean isDDJ) {
 
         if (null == date || null == courtCentreId) {
             return new GetHearings(null);
         }
 
-        final List<Hearing> source;
+        List<Hearing> source;
         if (null == roomId) {
             source = hearingRepository.findHearings(date, courtCentreId);
         } else {
             source = hearingRepository.findByFilters(date, courtCentreId, roomId);
         }
+
+        if (isDDJ) {
+            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesId);
+        }
+
         if (CollectionUtils.isEmpty(source)) {
             return new GetHearings(null);
         }
@@ -193,7 +204,6 @@ public class HearingService {
                         .collect(toList()))
                 .build();
     }
-
 
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
@@ -316,12 +326,17 @@ public class HearingService {
     }
 
     @Transactional
-    public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
+    public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
+                                                                final List<UUID> accessibleCasesId,
+                                                                final boolean isDDJ) {
         if (null == hearingId) {
             return new HearingDetailsResponse();
         }
 
-        final Hearing hearing = hearingRepository.findBy(hearingId);
+        Hearing hearing = hearingRepository.findBy(hearingId);
+        if(isDDJ) {
+            hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCasesId).stream().findFirst().orElse(null);
+         }
 
         if (hearing == null) {
             return new HearingDetailsResponse();
@@ -602,4 +617,5 @@ public class HearingService {
     private Integer sortListingSequence(final LocalDate date, final Hearing o1) {
         return o1.getHearingDays().stream().filter(d -> d.getDate().isEqual(date)).map(HearingDay::getListingSequence).findFirst().orElse(0);
     }
+
 }

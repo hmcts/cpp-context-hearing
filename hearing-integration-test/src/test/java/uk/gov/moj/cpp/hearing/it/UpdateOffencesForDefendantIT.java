@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.addOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.deleteOffencesForDefendantTemplate;
@@ -18,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -36,6 +38,8 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
 
     @Test
     public void caseDefendantOffencesChanged_addOffenceToExistingHearing() throws Exception {
+
+
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -76,6 +80,8 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
 
     @Test
     public void caseDefendantOffencesChanged_updateExistingOffence() throws Exception {
+
+
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
@@ -144,6 +150,8 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
     @Test
     public void caseDefendantOffencesChanged_deleteExistingOffence() throws Exception {
 
+
+
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         h(UseCases.updateOffences(
@@ -172,6 +180,7 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
 
     @Test
     public void caseDefendantOffencesChanged_updateExistingOffenceByRemovingReportingRestrictions() throws Exception {
+
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
@@ -245,6 +254,8 @@ public class UpdateOffencesForDefendantIT extends AbstractIT {
 
     @Test
     public void caseDefendantOffencesChanged_addNewOffenceToExistingHearing_updateExistingOffenceByRemovingReportingRestrictions() throws Exception {
+
+
 
         final UUID newOffenceId = UUID.randomUUID();
 

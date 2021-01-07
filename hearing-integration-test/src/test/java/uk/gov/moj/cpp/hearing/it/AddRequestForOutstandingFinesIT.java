@@ -12,6 +12,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.changeCourtRoomsStubWithAdding;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubStagingenforcementOutstandingFines;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Person;
@@ -46,6 +47,7 @@ public class AddRequestForOutstandingFinesIT extends AbstractIT {
     @Before
     public void setUp() {
         setUpPerTest();
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
         stubStagingenforcementOutstandingFines();
     }
 

@@ -1,5 +1,22 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.justice.services.test.utils.core.rest.RestClient;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import javax.json.JsonObject;
+import javax.ws.rs.core.Response;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Random;
+
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
 import static java.util.Optional.of;
@@ -19,26 +36,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
-
-import uk.gov.justice.services.test.utils.core.rest.RestClient;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Random;
-
-import javax.json.JsonObject;
-import javax.ws.rs.core.Response;
-
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends AbstractPublishLatestCourtCentreHearingIT {
 
@@ -54,6 +52,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     @Before
     public void setup() throws NoSuchAlgorithmException {
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
         eventTime = now().withZoneSameLocal(ZoneId.of("UTC"));
         hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), fromString(defenceCounselId), caseId, of(hearingTypeId))));
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);

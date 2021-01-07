@@ -1,17 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static org.hamcrest.CoreMatchers.is;
-import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
-import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.caseDefendantDetailsChangedCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-
+import org.junit.Test;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AssociatedPerson;
@@ -32,7 +21,17 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.util.function.Consumer;
 
-import org.junit.Test;
+import static org.hamcrest.CoreMatchers.is;
+import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantDetailsChangedCommandTemplates.caseDefendantDetailsChangedCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 public class CaseDefendantDetailsChangeIT extends AbstractIT {
 

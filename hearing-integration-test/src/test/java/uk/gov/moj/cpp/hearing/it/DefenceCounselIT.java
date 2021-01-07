@@ -1,5 +1,23 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.jayway.restassured.path.json.JsonPath;
+import org.junit.Test;
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.hearing.courts.AddDefenceCounsel;
+import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
+import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
@@ -29,24 +47,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefenceCounselCommandTemplates.updateDefenceCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-
-import uk.gov.justice.core.courts.DefenceCounsel;
-import uk.gov.justice.hearing.courts.AddDefenceCounsel;
-import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
-import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import com.jayway.restassured.path.json.JsonPath;
-import org.junit.Test;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 @SuppressWarnings("unchecked")
 public class DefenceCounselIT extends AbstractIT {
@@ -83,6 +84,7 @@ public class DefenceCounselIT extends AbstractIT {
 
     @Test
     public void addDefenceCounsel_shouldAdd() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -125,6 +127,7 @@ public class DefenceCounselIT extends AbstractIT {
 
     @Test
     public void removeDefenceCounsel_shouldRemove() {
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -192,6 +195,7 @@ public class DefenceCounselIT extends AbstractIT {
     @Test
     public void updateDefenceCounsel_shouldUpdate() {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final Utilities.EventListener publicDefenceCounselUpdated = listenFor("public.hearing.defence-counsel-updated")
@@ -236,6 +240,9 @@ public class DefenceCounselIT extends AbstractIT {
 
     @Test
     public void testUpdateDefenceCounselWhenDefenceCounselIsRemovedThenDefenceCounselShouldNotBeUpdated() {
+
+        final UUID userId = AbstractIT.getLoggedInUser();
+        stubUsersAndGroupsUserRoles(userId);
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         DefenceCounsel firstDefenceCounsel = createFirstDefenceCounsel(hearingOne);
@@ -252,7 +259,7 @@ public class DefenceCounselIT extends AbstractIT {
                 updateDefenceCounselCommandTemplate(hearingOne.getHearingId(), firstDefenceCounsel)
         );
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .withHeader(HeaderConstants.USER_ID, userId).build())
                 .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
                 .until(status().is(OK),
                         print(),
@@ -364,9 +371,13 @@ public class DefenceCounselIT extends AbstractIT {
     @Test
     public void addDefenceCounsel_failedCheckin_SPICases_whereCaseURNisPopulated() {
 
+        final UUID userId = randomUUID();
+        givenAUserHasLoggedInAsADefenceCounsel(userId);
+
+        stubUsersAndGroupsUserRoles(userId);
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        givenAUserHasLoggedInAsADefenceCounsel(randomUUID());
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 
@@ -391,9 +402,15 @@ public class DefenceCounselIT extends AbstractIT {
     @Test
     public void addDefenceCounsel_failedCheckin_SJPCases_wherePARisPopulated() {
 
+        final UUID userId = randomUUID();
+
+        givenAUserHasLoggedInAsADefenceCounsel(userId);
+
+        stubUsersAndGroupsUserRoles(userId);
+
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
-        givenAUserHasLoggedInAsADefenceCounsel(randomUUID());
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 

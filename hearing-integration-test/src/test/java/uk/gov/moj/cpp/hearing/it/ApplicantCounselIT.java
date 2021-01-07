@@ -1,5 +1,17 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.ApplicantCounsel;
+import uk.gov.justice.hearing.courts.AddApplicantCounsel;
+import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;
+import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -14,19 +26,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateApplicantCounselCommandTemplates.updateApplicantCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-
-import uk.gov.justice.core.courts.ApplicantCounsel;
-import uk.gov.justice.hearing.courts.AddApplicantCounsel;
-import uk.gov.justice.hearing.courts.RemoveApplicantCounsel;
-import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class ApplicantCounselIT extends AbstractIT {
@@ -133,6 +132,7 @@ public class ApplicantCounselIT extends AbstractIT {
 
     @Test
     public void updateApplicantCounsel_shouldUpdate() throws Exception {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 

@@ -13,6 +13,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_T
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Hearing;
@@ -33,6 +34,7 @@ public class SetHearingTrialTypeIT extends AbstractIT {
     public void shouldSetIneffectiveTrialTypeToHearing() {
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         givenAUserHasLoggedInAsACourtClerk(USER_ID);
+        stubUsersAndGroupsUserRoles(USER_ID);
 
         final Hearing hearing = initiateHearingCommand.getHearing();
         h(initiateHearing(getRequestSpec(), initiateHearingCommand));
@@ -60,6 +62,7 @@ public class SetHearingTrialTypeIT extends AbstractIT {
     public void shouldSetEffectiveTrialTypeToHearing() {
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         givenAUserHasLoggedInAsACourtClerk(USER_ID);
+        stubUsersAndGroupsUserRoles(USER_ID);
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
         final TrialType addTrialType = TrialType.builder()
@@ -80,6 +83,7 @@ public class SetHearingTrialTypeIT extends AbstractIT {
     public void shouldSetVacateTrialTypeToHearing() {
         InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         givenAUserHasLoggedInAsACourtClerk(USER_ID);
+        stubUsersAndGroupsUserRoles(USER_ID);
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
         final TrialType addTrialType = TrialType.builder()

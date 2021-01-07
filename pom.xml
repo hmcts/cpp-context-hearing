@@ -37,6 +37,7 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
+        <usersgroups.version>7.0.20-ddj-SNAPSHOT</usersgroups.version>
         <listing.version>7.0.42</listing.version>
     </properties>
 

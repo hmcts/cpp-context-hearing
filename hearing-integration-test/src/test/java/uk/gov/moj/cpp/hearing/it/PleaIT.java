@@ -1,33 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.util.UUID.randomUUID;
-import static org.codehaus.groovy.runtime.InvokerHelper.asList;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.core.IsNull.nullValue;
-import static org.junit.Assert.assertThat;
-import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
-import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
-import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
-import static uk.gov.moj.cpp.hearing.it.UseCases.updatePlea;
-import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.customStructureInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateForIndicatedPlea;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -47,8 +21,31 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
 import java.time.LocalDate;
 import java.util.UUID;
 
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertThat;
+import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
+import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.updatePlea;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateForIndicatedPlea;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 
 public class PleaIT extends AbstractIT {
@@ -61,6 +58,8 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void updatePlea_toGuilty_shouldHaveConvictionDate() {
+
+
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -113,6 +112,8 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void updateIndicatedPlea_toGuilty() {
+
+
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingTemplateForIndicatedPlea(INDICATED_GUILTY, false)));
@@ -174,6 +175,7 @@ public class PleaIT extends AbstractIT {
     @Test
     public void updateIndicatedPlea_toNotGuilty_WithAllocationDecision() {
 
+
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingTemplateForIndicatedPlea(INDICATED_NOT_GUILTY, true)));
 
@@ -226,6 +228,8 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void updateIndicatedPlea_toNotGuilty_WithAllocationDecision_AndPlea() {
+
+
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
                 standardInitiateHearingTemplateForIndicatedPlea(INDICATED_NOT_GUILTY, true)));
@@ -291,6 +295,7 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void updatePlea_toNotGuilty_shouldNotHaveConvictionDate() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -367,6 +372,7 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void initiateAdjournedHearing_shouldUpdateGuiltyPleaWhenVerdictWasSetToGuiltyInEarlierHearing_andConvictionDateIsHearing1Date() {
+
         final LocalDate convictionDate = LocalDate.now();
 
         final CommandHelpers.InitiateHearingCommandHelper adjournedHearing = h(
@@ -417,6 +423,7 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void initiateHearing_shouldInheritNotGuiltyPlea_andNullConvictionDate() {
+
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), with(standardInitiateHearingTemplate(),
                 hearing -> h(hearing).getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(PAST_LOCAL_DATE.next()))));
 
@@ -444,6 +451,9 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void updatePlea_toConsent_shouldHaveConvictionDate() {
+
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 

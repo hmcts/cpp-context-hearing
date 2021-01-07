@@ -1,5 +1,25 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import javax.json.JsonObject;
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.Month;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Arrays.asList;
@@ -29,28 +49,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
-import uk.gov.justice.services.common.converter.ZonedDateTimes;
-import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.json.JsonObject;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 @SuppressWarnings("unchecked")
 public class HearingEventsIT extends AbstractIT {
 
@@ -65,6 +63,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishEvent_givenStartOfHearing() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -101,6 +100,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_givenHearingForMags() {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
@@ -135,6 +135,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishEventWithWitness_givenStartOfHearing() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -171,6 +172,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishHearingIgnoredEvent_givenNoHearing() {
 
+
         final UUID hearingId = randomUUID();
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
@@ -183,6 +185,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishEvent_givenIdentifyDefendantEvent() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -217,6 +220,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishEventCorrection_givenStartHearingEvent() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -253,6 +257,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishMultipleEventsAndCorrection_shouldReturnInEventTimeOrder() {
+
 
         final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(2019, Month.APRIL, 10), LocalTime.of(22, 1), ZoneId.of("UTC"));
 
@@ -296,6 +301,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_hearingEventsUpdated() {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
@@ -337,6 +343,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishEvent_givenStartOfHearing_pauseActiveHearing() throws JsonProcessingException {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -402,6 +409,7 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_givenStartOfHearing_NoActiveHearingsReturned() throws JsonProcessingException {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -434,6 +442,7 @@ public class HearingEventsIT extends AbstractIT {
 
     @Test
     public void publishEventCorrection_givenStartHearingForMags() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 

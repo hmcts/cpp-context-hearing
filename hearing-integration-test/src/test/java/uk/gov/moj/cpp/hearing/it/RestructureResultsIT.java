@@ -1,5 +1,22 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Before;
+import org.junit.Test;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultPrompt;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
+import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
+
 import static java.time.LocalDate.now;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
@@ -16,28 +33,8 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllAlcoholLevelMethods;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllVerdictTypes;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.StubNowsReferenceData.setupNowsReferenceData;
-
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.JudicialResult;
-import uk.gov.justice.core.courts.JudicialResultPrompt;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
-import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
-import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-
-import org.junit.Before;
-import org.junit.Test;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 public class RestructureResultsIT extends AbstractIT {
 
@@ -51,6 +48,7 @@ public class RestructureResultsIT extends AbstractIT {
 
     @Test
     public void shouldRestructureCO() throws IOException {
+
 
         final InitiateHearingCommandHelper hearing = shareResults("restructure/CO-UI-payload.json");
 
@@ -72,6 +70,7 @@ public class RestructureResultsIT extends AbstractIT {
 
     @Test
     public void shouldRestructureDIRS() throws IOException {
+
         final InitiateHearingCommandHelper hearing = shareResults("restructure/DIRS-UI-payload.json");
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -92,6 +91,8 @@ public class RestructureResultsIT extends AbstractIT {
 
     @Test
     public void shouldRestructureSendToCCOnCB() throws IOException {
+
+
         final InitiateHearingCommandHelper hearing = shareResults("restructure/UI-payload-shortCode-SendToCCOnCB.json");
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")

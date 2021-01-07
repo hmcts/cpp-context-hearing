@@ -99,6 +99,9 @@ public class HearingQueryViewTest {
     @Mock
     private HearingService hearingService;
 
+    @Mock
+    private  List<UUID> prosecutionCasesIdsWithAccess;
+
     @InjectMocks
     private HearingQueryView target;
 
@@ -176,12 +179,12 @@ public class HearingQueryViewTest {
                         .add("hearingId", hearingId.toString())
                         .build());
 
-        when(hearingService.getHearingDetailsResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1)).thenReturn(hearingDetailsResponse);
+        when(hearingService.getHearingDetailsResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false)).thenReturn(hearingDetailsResponse);
 
-        final Envelope<HearingDetailsResponse> hearingEnvelope = target.findHearing(query, crackedIneffectiveVacatedTrialTypes1);
+        final Envelope<HearingDetailsResponse> hearingEnvelope = target.findHearing(query, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
         final uk.gov.justice.core.courts.Hearing actualHearing = hearingEnvelope.payload().getHearing();
 
-        verify(hearingService).getHearingDetailsResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1);
+        verify(hearingService).getHearingDetailsResponseById(hearingId, crackedIneffectiveVacatedTrialTypes1, prosecutionCasesIdsWithAccess, false);
         assertThat(hearingEnvelope.metadata().name(), is("hearing.get-hearing"));
 
         assertThat(actualHearing.getId(), is(hearingId));

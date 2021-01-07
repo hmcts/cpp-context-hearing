@@ -1,5 +1,15 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import javax.json.JsonObject;
+import java.util.UUID;
+
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.Matchers.is;
@@ -12,20 +22,13 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
-import org.junit.Test;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
-import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import javax.json.JsonObject;
-import java.util.UUID;
-
 @SuppressWarnings({"squid:S2699"})
 public class AddMasterDefendantIdToDefendantIT extends AbstractIT {
 
     @Test
     public void shouldAddMasterDefendantIdToDefendantAsSystemUser() {
+
+
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         final UUID hearingId = hearingOne.getHearingId();

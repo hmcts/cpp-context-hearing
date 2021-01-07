@@ -1,5 +1,25 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.ApplicationJurisdictionType;
+import uk.gov.justice.core.courts.ApplicationStatus;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.InitiationCode;
+import uk.gov.justice.core.courts.LinkType;
+import uk.gov.justice.core.courts.ReportingRestriction;
+import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
 import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -27,27 +47,6 @@ import static uk.gov.moj.cpp.hearing.it.Queries.getHearingForTodayPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
-
-import uk.gov.justice.core.courts.ApplicationJurisdictionType;
-import uk.gov.justice.core.courts.ApplicationStatus;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CourtApplicationType;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.InitiationCode;
-import uk.gov.justice.core.courts.LinkType;
-import uk.gov.justice.core.courts.ReportingRestriction;
-import uk.gov.justice.hearing.courts.GetHearings;
-import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
-import org.junit.Test;
 
 public class HearingForTodayIT extends AbstractIT {
 

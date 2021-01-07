@@ -39,6 +39,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response.Status;
 
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +59,11 @@ public class WireMockStubUtils {
     private static final String CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS = "application/vnd.progression.query.caseprogressiondetail+json";
     private static final String BASE_URI = "http://" + HOST + ":8080";
 
+    private final static String QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions";
+    private final static String CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "application/vnd.usersgroups.get-logged-in-user-permissions+json";
+
+    private static final String QUERY_ROLES_FOR_USER = "/usersgroups-service/query/api/rest/usersgroups/users/{0}/roles";
+    private static final String CONTENT_TYPE_QUERY_ROLES_FOR_USER = "application/vnd.usersgroups.roles+json";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WireMockStubUtils.class);
 
@@ -76,9 +82,79 @@ public class WireMockStubUtils {
                         .withHeader(CONTENT_TYPE, APPLICATION_JSON)
                         .withBody(response)));
 
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/8ac63b71-c154-4469-af51-db3528c4d0d3/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
+
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCases() {
+        final String response = getPayload("stub-data/usersgroups.permissions.json");
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithCases(final UUID case1, final UUID case2, final UUID case3, final UUID userId) {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-cases.json")
+                .replaceAll("%CASE_1%", case1.toString())
+                .replaceAll("%CASE_2%", case2.toString())
+                .replaceAll("%CASE_3%", case3.toString())
+                .replaceAll("%USER_ID%", userId.toString());
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(final UUID case1,final UUID userId) {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-filtered-cases.json")
+                .replaceAll("%CASE_1%", case1.toString())
+                .replaceAll("%USER_ID%", userId.toString());
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
+    public static void stubUsersAndGroupsUserRoles(final UUID userId) {
+        final String response = getPayload("stub-data/usergroups.get-roles-for-user.json");
+        final String url = format(QUERY_ROLES_FOR_USER, userId.toString());
+
+        final ResponseDefinitionBuilder responseDefBuilder = aResponse().withStatus(SC_OK)
+                .withHeader(ID, randomUUID().toString())
+                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                .withBody(response);
+        stubFor(get(urlPathEqualTo(url))
+                .willReturn(responseDefBuilder));
+
+        waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
+    }
+
+    public static void stubUsersAndGroupsUserRolesForDDJ(final UUID userId) {
+        final String response = getPayload("stub-data/usergroups.get-roles-for-user-ddj.json");
+        final String url = format(QUERY_ROLES_FOR_USER, userId.toString());
+
+        final ResponseDefinitionBuilder responseDefBuilder = aResponse().withStatus(SC_OK)
+                .withHeader(ID, randomUUID().toString())
+                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                .withBody(response);
+        stubFor(get(urlPathEqualTo(url))
+                .willReturn(responseDefBuilder));
+
+        waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
+    }
 
     public static void setupAsAuthorisedUser(final UUID userId) {
 

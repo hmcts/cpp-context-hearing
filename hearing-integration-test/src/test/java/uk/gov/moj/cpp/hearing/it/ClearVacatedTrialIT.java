@@ -1,5 +1,13 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.Boolean.FALSE;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -14,21 +22,13 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
-
 public class ClearVacatedTrialIT extends AbstractIT {
     private static final String MEDIA_TYPE = "application/vnd.hearing.get.hearing+json";
     private static final String EVENT = "hearing.get.hearing";
 
     @Test
     public void shouldRescheduleHearing() throws Exception {
+
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 

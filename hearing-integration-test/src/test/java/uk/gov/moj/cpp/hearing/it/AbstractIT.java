@@ -16,6 +16,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHeari
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Hearing;
@@ -245,6 +246,7 @@ public class AbstractIT {
 
     @Before
     public void setUpPerTest() {
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
     }

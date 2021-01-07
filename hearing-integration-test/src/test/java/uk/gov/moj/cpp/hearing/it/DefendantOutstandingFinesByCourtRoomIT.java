@@ -50,6 +50,8 @@ public class DefendantOutstandingFinesByCourtRoomIT extends AbstractIT {
     @Test
     public void shouldPostComputeOutstandingFines() throws Exception {
 
+
+
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final CourtCentre courtCentre = initiateHearingCommand.getHearing().getCourtCentre();
         final HearingDay hearingDay = initiateHearingCommand.getHearing().getHearingDays().get(0);

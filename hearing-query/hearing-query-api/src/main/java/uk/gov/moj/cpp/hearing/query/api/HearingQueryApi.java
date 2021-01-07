@@ -1,8 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import static javax.json.Json.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.annotation.Component;
@@ -15,6 +14,10 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
@@ -28,16 +31,19 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 
-import java.util.Set;
-import java.util.UUID;
-
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
+import javax.ws.rs.BadRequestException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static javax.json.Json.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
 @ServiceComponent(Component.QUERY_API)
 public class HearingQueryApi {
@@ -74,9 +80,26 @@ public class HearingQueryApi {
     @Inject
     private XhibitEventMapperCache xhibitEventMapperCache;
 
+    @Inject
+    private UsersAndGroupsService usersAndGroupsService;
+
+    @Inject
+    private AccessibleCases accessibleCasesO;
+
+    @Inject
+    private DDJChecker ddjChecker;
+
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
-        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearings(query);
+
+        final Optional<String> optionalUserId = query.metadata().userId();
+        if (!optionalUserId.isPresent()) {
+            throw new BadRequestException("No Logged in UserId found to perform hearings search");
+        }
+        final String userId = optionalUserId.get();
+        final boolean isDDJ = ddjChecker.isDDJ(userId);
+        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ);
+        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearings(query, accessibleCases, isDDJ);
         return getJsonEnvelope(envelope);
     }
 
@@ -88,8 +111,15 @@ public class HearingQueryApi {
 
     @Handles("hearing.get.hearing")
     public JsonEnvelope findHearing(final JsonEnvelope query) {
+        final Optional<String> optionalUserId = query.metadata().userId();
+        if (!optionalUserId.isPresent()) {
+            throw new BadRequestException("No Logged in UserId found to perform hearings search");
+        }
+        final String userId = optionalUserId.get();
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
-        final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes);
+        final boolean isDDJ = ddjChecker.isDDJ(userId);
+        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ);
+        final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCases, isDDJ);
         return getJsonEnvelope(envelope);
     }
 
@@ -231,5 +261,14 @@ public class HearingQueryApi {
     private JsonEnvelope getJsonEnvelope(final Envelope<?> getHearingsEnvelope) {
         final Envelope<JsonValue> jsonValueEnvelope = this.envelopePayloadTypeConverter.convert(getHearingsEnvelope, JsonValue.class);
         return jsonEnvelopeRepacker.repack(jsonValueEnvelope);
+    }
+
+    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJ){
+        List<UUID> accessibleCases = new ArrayList<>();
+        if (isDDJ){
+            final Permissions permissions = usersAndGroupsService.permissions(userId);
+            accessibleCases = accessibleCasesO.findCases(permissions, userId);
+        }
+        return accessibleCases;
     }
 }

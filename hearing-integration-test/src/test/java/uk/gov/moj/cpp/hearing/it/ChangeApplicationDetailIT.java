@@ -1,5 +1,15 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.HearingFactory;
+
+import javax.json.JsonObject;
+
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -12,22 +22,12 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.HearingFactory;
-
-import javax.json.JsonObject;
-
-import org.junit.Test;
-
 public class ChangeApplicationDetailIT extends AbstractIT {
     private final String eventName = "public.progression.events.hearing-extended";
 
     @Test
     public void changeApplicationDetailShouldApplied_When_Progression_Announce() throws Exception {
+
         //Given Application already Exist
         final ExtendHearingCommand extendHearingCommand = addApplication();
         final CourtApplication existingCourtApplication = extendHearingCommand.getCourtApplication();

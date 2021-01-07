@@ -1,5 +1,86 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.jayway.restassured.path.json.JsonPath;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
+import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.CustodialEstablishment;
+import uk.gov.justice.core.courts.DefenceOrganisation;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DefendantAttendance;
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.FundingType;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.HearingLanguage;
+import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Source;
+import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
+import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
+import uk.gov.moj.cpp.hearing.event.PublicHearingSaveDraftResultFailed;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+import uk.gov.moj.cpp.hearing.test.TestUtilities;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+
+import javax.json.JsonObject;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.Boolean.TRUE;
@@ -74,89 +155,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MIL
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
-import uk.gov.justice.core.courts.Address;
-import uk.gov.justice.core.courts.AllocationDecision;
-import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
-import uk.gov.justice.core.courts.AttendanceDay;
-import uk.gov.justice.core.courts.AttendanceType;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
-import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
-import uk.gov.justice.core.courts.CustodialEstablishment;
-import uk.gov.justice.core.courts.DefenceOrganisation;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.DefendantAttendance;
-import uk.gov.justice.core.courts.DelegatedPowers;
-import uk.gov.justice.core.courts.FundingType;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.HearingLanguage;
-import uk.gov.justice.core.courts.HearingType;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.IndicatedPleaValue;
-import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Organisation;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.justice.core.courts.PersonDefendant;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.Prompt;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Source;
-import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.progression.events.CaseDefendantDetails;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
-import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
-import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
-import uk.gov.moj.cpp.hearing.event.PublicHearingSaveDraftResultFailed;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
-import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
-import uk.gov.moj.cpp.hearing.test.TestUtilities;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.json.JsonObject;
-
-import com.jayway.restassured.path.json.JsonPath;
-import org.apache.commons.lang3.tuple.Pair;
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
-import org.junit.Test;
-
 @SuppressWarnings({"squid:S2699"})
 public class ShareResultsIT extends AbstractIT {
 
@@ -180,6 +178,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsForHearingWithMultipleCases() {
+
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
@@ -284,6 +283,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shouldShareResultsWithFullVerdictTypeInformation() {
 
+
         LocalDate orderDate = PAST_LOCAL_DATE.next();
 
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
@@ -320,6 +320,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsWithIndicatedPleaInformationPopulatedFromIndicatedGuiltyPlea() {
+
 
         LocalDate orderDate = PAST_LOCAL_DATE.next();
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
@@ -420,6 +421,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shareResults_whenOneOffenceIsDismissedAndOtherIsGuiltyInSingleHearing_expectNoPublicEventForDefendantCaseWithdrawnOrDismissed() {
 
+
         LocalDate orderDate = PAST_LOCAL_DATE.next();
 
         //Given
@@ -442,6 +444,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResults_whenAllOffencesAreDismissedOrWithdrawnInSingleHearing_expectRaisePublicEventForDefendantCaseWithDrawnOrDismissed() {
+
         //Given
         //Hearing Initiated
         LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -464,6 +467,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResults_whenAllOffencesAreDismissedInMultipleHearing_expectRaisePublicEventForDefendantCaseWithdrawnOrDismissed() {
+
 
         //Given
         // Hearing Initiated
@@ -519,6 +523,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shareResultShouldNotPublishDDCHResultsWhenInitiateHearingHaveDDCHJudicialResult() {
 
+
         //Given and When
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplateWithDefendantJudicialResults();
 
@@ -536,6 +541,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResultShouldPublishDDCHResultsWhenDefendantDetailsChanged() throws Exception {
+
 
         //Given
 
@@ -558,6 +564,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownOffenceDefendantCombination() throws Exception {
 
+
         //Given
 
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
@@ -577,6 +584,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResultShouldNotPublishDDCHResultsAfterDDCHShareAndAmendOtherResultAndReShare() throws Exception {
+
 
         //Given
 
@@ -603,6 +611,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shareResultShouldPublishOffenceDateCode() throws Exception {
 
+
         //Given
 
         final Integer offenceDateCode = 4;
@@ -624,6 +633,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResultShouldPublishAddDefendantOffenceDateCode() throws Exception {
+
 
         //Given
 
@@ -655,6 +665,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shareResultShouldPublishOffenceDateCodeAfterNewOffenceAdded() throws Exception {
 
+
         //Given
 
         final Integer offenceDateCode = 4;
@@ -680,6 +691,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResultShouldPublishOffenceDateCodeAfterOffenceUpdated() throws Exception {
+
 
         //Given
 
@@ -734,6 +746,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void reShareDefendantDetailsChangedShouldNotPublishDDCHResults() throws Exception {
 
+
         //Given
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
 
@@ -759,6 +772,8 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shareResultShouldPublishDefenceAssociationWhenDefenceAssociationAdded() throws Exception {
 
+
+
         //Given
 
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
@@ -780,6 +795,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResultShouldNotPublishDefenceAssociationWhenDefenceAssociationAddedLaterCleared() throws Exception {
+
 
         //Given
 
@@ -1393,6 +1409,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void shareResults_shouldSurfaceResultsLinesInGetHearings_resultLinesShouldBeAsLastSubmittedOnly() {
 
+
         LocalDate orderDate = PAST_LOCAL_DATE.next();
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
         setupResultDefinitionsReferenceData(orderDate, singletonList(allNows.getFirstNowDefinitionFirstResultDefinitionId()));
@@ -1422,6 +1439,7 @@ public class ShareResultsIT extends AbstractIT {
     @Test
     public void testApplicationDraftResultSaved() {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         final uk.gov.justice.core.courts.Hearing hearing = hearingOne.getHearing();
@@ -1434,6 +1452,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void testApplicationDraftResultWithApplicationOutcomeSaved() {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
         final UUID applicationId = hearingOne.getHearing().getCourtApplications().get(0).getId();
@@ -1463,6 +1482,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsInWelsh() {
+
 
         //Given
         //Hearing Initiated
@@ -1518,6 +1538,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shareResults_shouldPublishResults_andAmendAndReShareResultsAgain() {
+
 
         LocalDate orderDate = PAST_LOCAL_DATE.next();
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
@@ -2310,6 +2331,8 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsWithShadowListedOffence() throws Exception {
+
+
         LocalDate orderDate = PAST_LOCAL_DATE.next();
         stubGetReferenceDataResultDefinitionsWithDefaultValues(orderDate);
 
@@ -2350,6 +2373,9 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void saveDraftResult_AndRemoveTargetAsSystemUser() throws Exception {
+
+
+
 
         //Given
 

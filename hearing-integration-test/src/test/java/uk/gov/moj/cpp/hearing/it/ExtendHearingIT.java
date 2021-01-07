@@ -1,5 +1,18 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.HearingFactory;
+
+import javax.json.JsonObject;
+import java.util.List;
+import java.util.UUID;
+
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -11,21 +24,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.HearingFactory;
-
-import java.util.List;
-import java.util.UUID;
-
-import javax.json.JsonObject;
-
-import org.junit.Test;
 
 public class ExtendHearingIT extends AbstractIT {
 

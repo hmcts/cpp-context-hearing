@@ -1,33 +1,8 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static java.time.ZonedDateTime.now;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static uk.gov.justice.core.courts.ApprovalType.APPROVAL;
-import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
-import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
-import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplate;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.changeCourtRoomsStubWithAdding;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-
+import org.hamcrest.core.Is;
+import org.junit.Before;
+import org.junit.Test;
 import uk.gov.justice.core.courts.ApprovalRequest;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -51,10 +26,33 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-import org.hamcrest.Matchers;
-import org.hamcrest.core.Is;
-import org.junit.Before;
-import org.junit.Test;
+import static java.time.ZonedDateTime.now;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.core.courts.ApprovalType.APPROVAL;
+import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
+import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
+import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.changeCourtRoomsStubWithAdding;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 @SuppressWarnings("unchecked")
 public class AddRequestApprovalIT extends AbstractIT {
@@ -67,10 +65,14 @@ public class AddRequestApprovalIT extends AbstractIT {
     @Before
     public void setUp() {
         setUpPerTest();
+        final UUID userId = getLoggedInUser();
+        stubUsersAndGroupsUserRoles(userId);
+        stubUsersAndGroupsUserRoles(USER_ID_VALUE_AS_ADMIN);
     }
 
     @Test
     public void shouldPostApprovalRequests() throws Exception {
+
         final UUID userId = getLoggedInUser();
         final ZonedDateTime requestApprovalTime = now();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
@@ -121,11 +123,11 @@ public class AddRequestApprovalIT extends AbstractIT {
 
         makeCommand(getRequestSpec(), "hearing.request-approval")
                 .ofType("application/vnd.hearing.request-approval+json")
-                .withCppUserId(getLoggedInUser())
+                .withCppUserId(userId)
                 .withPayload(
                         RequestApprovalCommand.newBuilder()
                                 .withHearingId(hearingId)
-                                .withUserId(userId)
+                                .withUserId(getLoggedInUser())
                                 .withRequestApprovalTime(requestApprovalTime)
                                 .withApprovalType(APPROVAL)
                                 .build()
@@ -147,7 +149,7 @@ public class AddRequestApprovalIT extends AbstractIT {
 
         makeCommand(getRequestSpec(), "hearing.validate-result-amendments")
                 .ofType("application/vnd.hearing.validate-result-amendments+json")
-                .withCppUserId(getLoggedInUser())
+                .withCppUserId(userId)
                 .withPayload(
                         ValidateResultAmendmentsCommand.newBuilder()
                                 .withId(hearingId)

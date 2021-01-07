@@ -1,5 +1,17 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Test;
+import uk.gov.justice.core.courts.RespondentCounsel;
+import uk.gov.justice.hearing.courts.AddRespondentCounsel;
+import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
+import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -16,19 +28,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateRespondentCounselCommandTemplates.updateRespondentCounselCommandTemplate;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-
-import uk.gov.justice.core.courts.RespondentCounsel;
-import uk.gov.justice.hearing.courts.AddRespondentCounsel;
-import uk.gov.justice.hearing.courts.RemoveRespondentCounsel;
-import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 public class RespondentCounselIT extends AbstractIT {
@@ -59,6 +58,7 @@ public class RespondentCounselIT extends AbstractIT {
     @Test
     public void addRespondentCounsel_shouldAdd() throws Exception {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
@@ -87,6 +87,7 @@ public class RespondentCounselIT extends AbstractIT {
 
     @Test
     public void removeRespondentCounsel_shouldRemove() throws Exception {
+
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -138,6 +139,7 @@ public class RespondentCounselIT extends AbstractIT {
     @Test
     public void updateRespondentCounsel_shouldUpdate() throws Exception {
 
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
@@ -176,6 +178,8 @@ public class RespondentCounselIT extends AbstractIT {
 
     @Test
     public void testUpdateRespondentCounselWhenRespondentCounselIsRemovedThenRespondentCounselShouldNotBeUpdated() throws Exception {
+
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);
@@ -239,6 +243,8 @@ public class RespondentCounselIT extends AbstractIT {
 
     @Test
     public void testUpdateRespondentCounselWithPreviouslySetValues() throws Exception {
+
+
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         RespondentCounsel firstRespondentCounsel = createFirstRespondentCounsel(hearingOne);

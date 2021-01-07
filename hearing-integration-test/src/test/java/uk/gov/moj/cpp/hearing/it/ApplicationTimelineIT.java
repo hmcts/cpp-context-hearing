@@ -1,5 +1,18 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Before;
+import org.junit.Test;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
@@ -21,20 +34,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-
 public class ApplicationTimelineIT extends AbstractIT {
 
     private Hearing hearingOne;
@@ -44,6 +43,7 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Before
     public void setUpHearingWithApplication() {
+
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOneHelper =
                 h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
@@ -68,6 +68,7 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayApplicationTimeline() {
+
         stubCourtRoom(hearingOne);
 
         final String timelineQueryAPIEndPoint = format(ENDPOINT_PROPERTIES.getProperty("hearing.application.timeline"), applicationId);
@@ -94,6 +95,7 @@ public class ApplicationTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayApplicationMultiHearingTimeline() throws InterruptedException {
+
 
         setUpSecondHearingWithApplication();
 

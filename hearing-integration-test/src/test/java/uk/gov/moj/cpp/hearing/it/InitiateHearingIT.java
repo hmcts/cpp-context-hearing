@@ -37,6 +37,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -1062,6 +1063,8 @@ public class InitiateHearingIT extends AbstractIT {
 
     @Test
     public void shouldRemoveHearingFromViewStoreAndRaisePublicEventWhenMarkedAsDuplicate() {
+        stubUsersAndGroupsUserRoles(getLoggedInAdminUser());
+
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
         final Hearing hearing = hearingOne.getHearing();

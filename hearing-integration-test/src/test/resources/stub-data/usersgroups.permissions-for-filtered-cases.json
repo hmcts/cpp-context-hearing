@@ -1,0 +1,36 @@
+{
+  "groups": [
+    {
+      "groupId": "7e2f843e-d639-40b3-8611-8015f3a13333",
+      "groupName": "groupName1",
+      "prosecutingAuthority": "TFL"
+    },
+    {
+      "groupId": "7e2f843e-d639-40b3-8611-8015f3a13334",
+      "groupName": "groupName2",
+      "prosecutingAuthority": "TVL"
+    }
+  ],
+  "permissions": [
+    {
+      "action": "Access",
+      "object": "Case",
+      "source": "%USER_ID%",
+      "target": "%CASE_1%"
+    }
+  ],
+  "switchableRoles": [
+    {
+      "roleId": "7e2f843e-d639-40b3-8611-8015f3a13333",
+      "description": "description1",
+      "label": "label1",
+      "selectable": true
+    },
+    {
+      "roleId": "7e2f843e-d639-40b3-8611-8015f3a13334",
+      "description": "description2",
+      "label": "label2",
+      "selectable": false
+    }
+  ]
+}
