@@ -13,16 +13,22 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Test;
@@ -106,5 +112,154 @@ public class HearingDelegateTest {
         assertNull(momento.getHearing().getProsecutionCases().get(1).getDefendants().get(1).getMasterDefendantId());
         assertNull(momento.getHearing().getProsecutionCases().get(1).getDefendants().get(1).getMasterDefendantId());
     }
+
+    @Test
+    public void shouldHandleHearingExtendedWhenSameCaseHasDifferentDefendant() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID newDefendantID = UUID.randomUUID();
+        final UUID currentDefendantID = UUID.randomUUID();
+        final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, newDefendantID));
+        final List<ProsecutionCase> currentCases = caseList(createProsecutionCases(caseId, currentDefendantID));
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(currentCases)
+                .build());
+
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, extendedCases, null);
+
+        hearingDelegate.handleHearingExtended(hearingExtended);
+
+        assertThat(momento.getHearing(), is(notNullValue()));
+        final List<ProsecutionCase> prosecutionCases = momento.getHearing().getProsecutionCases();
+        assertThat(prosecutionCases, is(notNullValue()));
+        assertThat(prosecutionCases.size(), is(1));
+        assertThat(prosecutionCases.get(0).getDefendants().size(), is(2));
+        assertThat(prosecutionCases.stream()
+                .anyMatch(pc -> pc.getDefendants().stream()
+                        .anyMatch(d -> d.getId().equals(newDefendantID))), is(true));
+
+        assertThat(prosecutionCases.stream()
+                .anyMatch(pc -> pc.getDefendants().stream()
+                        .anyMatch(d -> d.getId().equals(currentDefendantID))), is(true));
+    }
+
+    @Test
+    public void shouldHandleHearingExtendedWhenHavingDifferentCase() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID newCaseId = UUID.randomUUID();
+        final UUID currentCaseId = UUID.randomUUID();
+        final UUID newDefendantID = UUID.randomUUID();
+        final UUID currentDefendantID = UUID.randomUUID();
+        final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(newCaseId, newDefendantID));
+        final List<ProsecutionCase> currentCases = caseList(createProsecutionCases(currentCaseId, currentDefendantID));
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(currentCases)
+                .build());
+
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, extendedCases, null);
+
+        hearingDelegate.handleHearingExtended(hearingExtended);
+
+        assertThat(momento.getHearing(), is(notNullValue()));
+        final List<ProsecutionCase> prosecutionCases = momento.getHearing().getProsecutionCases();
+        assertThat(prosecutionCases, is(notNullValue()));
+        assertThat(prosecutionCases.size(), is(2));
+        final Optional<ProsecutionCase> currentCase = prosecutionCases.stream()
+                .filter(pc -> pc.getId().equals(currentCaseId))
+                .findFirst();
+
+        assertThat(currentCase.isPresent(), is(true));
+        assertThat(currentCase.get().getDefendants().size(), is(1));
+        assertThat(currentCase.get().getDefendants().get(0).getId(), is(currentDefendantID));
+
+        final Optional<ProsecutionCase> newCase = prosecutionCases.stream()
+                .filter(pc -> pc.getId().equals(newCaseId))
+                .findFirst();
+
+        assertThat(newCase.isPresent(), is(true));
+        assertThat(newCase.get().getDefendants().size(), is(1));
+        assertThat(newCase.get().getDefendants().get(0).getId(), is(newDefendantID));
+    }
+
+    @Test
+    public void shouldHandleHearingExtendedWhenSameDefendantDifferentOffence() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantID = UUID.randomUUID();
+        final UUID newOffenceID = UUID.randomUUID();
+        final UUID currentOffenceID = UUID.randomUUID();
+        final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
+        final List<ProsecutionCase> currentCases = caseList(createProsecutionCases(caseId, defendantID, currentOffenceID));
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(currentCases)
+                .build());
+
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, extendedCases, null);
+
+        hearingDelegate.handleHearingExtended(hearingExtended);
+
+        assertThat(momento.getHearing(), is(notNullValue()));
+        final List<ProsecutionCase> prosecutionCases = momento.getHearing().getProsecutionCases();
+        assertThat(prosecutionCases, is(notNullValue()));
+        assertThat(prosecutionCases.size(), is(1));
+        assertThat(prosecutionCases.get(0).getDefendants().size(), is(1));
+        final Defendant defendant = prosecutionCases.get(0).getDefendants().get(0);
+        assertThat(defendant.getOffences().size(), is(2));
+        final Optional<Offence> currentOffence = defendant.getOffences().stream()
+                .filter(o -> o.getId().equals(currentOffenceID))
+                .findFirst();
+
+        assertThat(currentOffence.isPresent(), is(true));
+
+        final Optional<Offence> newOffence = defendant.getOffences().stream()
+                .filter(o -> o.getId().equals(newOffenceID))
+                .findFirst();
+
+        assertThat(newOffence.isPresent(), is(true));
+
+    }
+
+    private List<ProsecutionCase> caseList(ProsecutionCase... cases){
+        return new ArrayList(Arrays.asList(cases));
+    }
+
+    private ProsecutionCase createProsecutionCases(final UUID caseId, final UUID newDefendantID) {
+        final List<Defendant> defendants = new ArrayList<>();
+        defendants.add(Defendant.defendant()
+                .withId(newDefendantID)
+                .withOffences(new ArrayList<>())
+                .build());
+
+        return ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(defendants)
+                .build();
+    }
+
+    private ProsecutionCase createProsecutionCases(final UUID caseId, final UUID newDefendantID, final UUID offenceId) {
+        final List<Offence> offences = new ArrayList<>();
+        offences.add(Offence.offence()
+                .withId(offenceId)
+                .build());
+
+        final List<Defendant> defendants = new ArrayList<>();
+        defendants.add(Defendant.defendant()
+                .withId(newDefendantID)
+                .withOffences(offences)
+                .build());
+
+        return ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(defendants)
+                .build();
+    }
+
+
 
 }

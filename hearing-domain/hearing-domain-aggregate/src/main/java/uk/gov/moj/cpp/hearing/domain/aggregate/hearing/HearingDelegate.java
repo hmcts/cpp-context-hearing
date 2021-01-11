@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingResultsCleanerUtil.removeResultsFromHearing;
 
@@ -43,7 +44,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("squid:S00107")
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 5785404163781560623L;
 
     private final HearingAggregateMomento momento;
 
@@ -90,17 +91,23 @@ public class HearingDelegate implements Serializable {
         }
 
         if (nonNull(this.momento.getHearing()) && isNotEmpty(hearingExtended.getProsecutionCases())) {
-            final List<ProsecutionCase> oldProsecutionCases = this.momento.getHearing().getProsecutionCases();
-            final List<ProsecutionCase> newProsecutionCases = oldProsecutionCases == null ? new ArrayList<>() :
-                    oldProsecutionCases.stream()
-                            .filter(ca -> !(hearingExtended.getProsecutionCases().stream()
-                                    .map(ProsecutionCase::getId)
-                                    .collect(Collectors.toList()))
-                                    .contains(ca.getId()))
-                            .collect(Collectors.toList());
-            newProsecutionCases.addAll(hearingExtended.getProsecutionCases());
-            this.momento.getHearing().setProsecutionCases(newProsecutionCases);
+            hearingExtended.getProsecutionCases().forEach(
+                    extendedPC -> {
+                        final ProsecutionCase currentPC = this.momento.getHearing().getProsecutionCases().stream()
+                                .filter(prosecutionCase -> prosecutionCase.getId().equals(extendedPC.getId()))
+                                .findFirst().orElse(null);
+
+                        if (nonNull(currentPC)) {
+                            final ProsecutionCase mergedPC = createProsecutionCase(extendedPC, currentPC);
+                            this.momento.getHearing().getProsecutionCases().removeIf(caseToBeRemoved -> caseToBeRemoved.getId().equals(mergedPC.getId()));
+                            this.momento.getHearing().getProsecutionCases().add(mergedPC);
+                        } else {
+                            this.momento.getHearing().getProsecutionCases().add(extendedPC);
+                        }
+                    }
+            );
         }
+
     }
 
     public void handleHearingDetailChanged(HearingDetailChanged hearingDetailChanged) {
@@ -286,5 +293,87 @@ public class HearingDelegate implements Serializable {
                 hearingDay.setCourtRoomId(correctedHearingDay.getCourtRoomId());
             }
         });
+    }
+
+    private ProsecutionCase createProsecutionCase(final ProsecutionCase extendedPC, final ProsecutionCase current) {
+        return ProsecutionCase.prosecutionCase()
+                .withId(current.getId())
+                .withDefendants(addDefendants(current.getDefendants(), extendedPC.getDefendants()))
+                .withStatementOfFactsWelsh(current.getStatementOfFactsWelsh())
+                .withStatementOfFacts(current.getStatementOfFacts())
+                .withOriginatingOrganisation(current.getOriginatingOrganisation())
+                .withCaseStatus(current.getCaseStatus())
+                .withClassOfCase(current.getClassOfCase())
+                .withProsecutionCaseIdentifier(current.getProsecutionCaseIdentifier())
+                .withAppealProceedingsPending(current.getAppealProceedingsPending())
+                .withBreachProceedingsPending(current.getBreachProceedingsPending())
+                .withCaseMarkers(current.getCaseMarkers())
+                .withPoliceOfficerInCase(current.getPoliceOfficerInCase())
+                .withRemovalReason(current.getRemovalReason())
+                .withInitiationCode(current.getInitiationCode())
+                .withCpsOrganisation(current.getCpsOrganisation())
+                .withIsCpsOrgVerifyError(current.getIsCpsOrgVerifyError())
+                .build();
+
+    }
+
+    private List<Defendant> addDefendants(final List<Defendant> currentDefendants, final List<Defendant> extendedDefendants) {
+        final List<UUID> defendantIdsInEntities = currentDefendants.stream().map(Defendant::getId).collect(toList());
+        extendedDefendants.forEach(extended -> {
+            if (defendantIdsInEntities.contains(extended.getId())) {
+                final Defendant current = currentDefendants.stream()
+                        .filter(def -> def.getId().equals(extended.getId()))
+                        .findFirst()
+                        .orElse(null);
+                final Defendant defendantToBeAdded = createDefendant(extended, current);
+                currentDefendants.removeIf(defToBeRemoved -> defToBeRemoved.getId().equals(extended.getId()));
+                currentDefendants.add(defendantToBeAdded);
+            } else {
+                currentDefendants.add(extended);
+            }
+        });
+        return currentDefendants;
+    }
+
+    private static Defendant createDefendant(final Defendant extended, final Defendant current) {
+        return Defendant.defendant()
+                .withId(current.getId())
+                .withOffences(addOffences(current.getOffences(), extended.getOffences()))
+                .withMasterDefendantId(current.getMasterDefendantId())
+                .withPncId(current.getPncId())
+                .withCroNumber(current.getCroNumber())
+                .withPersonDefendant(current.getPersonDefendant())
+                .withProsecutionCaseId(current.getProsecutionCaseId())
+                .withProceedingsConcluded(current.getProceedingsConcluded())
+                .withAssociatedPersons(current.getAssociatedPersons())
+                .withCourtProceedingsInitiated(current.getCourtProceedingsInitiated())
+                .withLegalEntityDefendant(current.getLegalEntityDefendant())
+                .withDefenceOrganisation(current.getDefenceOrganisation())
+                .withIsYouth(current.getIsYouth())
+                .withNumberOfPreviousConvictionsCited(current.getNumberOfPreviousConvictionsCited())
+                .withProsecutionAuthorityReference(current.getProsecutionAuthorityReference())
+                .withAssociatedDefenceOrganisation(current.getAssociatedDefenceOrganisation())
+                .withLegalAidStatus(current.getLegalAidStatus())
+                .withMitigation(current.getMitigation())
+                .withMitigationWelsh(current.getMitigationWelsh())
+                .withWitnessStatement(current.getWitnessStatement())
+                .withWitnessStatementWelsh(current.getWitnessStatementWelsh())
+                .withAliases(current.getAliases())
+                .withAssociationLockedByRepOrder(current.getAssociationLockedByRepOrder())
+                .withDefendantCaseJudicialResults(current.getDefendantCaseJudicialResults())
+                .build();
+    }
+
+    private static List<Offence> addOffences(final List<Offence> currentOffences, final List<Offence> extendedOffences) {
+        final List<UUID> offencesIdsInCurrent = currentOffences.stream()
+                .map(Offence::getId)
+                .collect(toList());
+
+        extendedOffences.forEach(offence -> {
+            if (!offencesIdsInCurrent.contains(offence.getId())) {
+                currentOffences.add(offence);
+            }
+        });
+        return currentOffences;
     }
 }
