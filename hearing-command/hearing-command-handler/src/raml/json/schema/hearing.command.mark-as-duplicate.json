@@ -5,6 +5,9 @@
   "properties": {
     "hearingId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "overwriteWithResults": {
+      "type": "boolean"
     }
   },
   "required": [

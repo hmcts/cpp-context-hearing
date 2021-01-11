@@ -17,6 +17,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -33,6 +34,8 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ResultsSharedDelegate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
@@ -94,9 +97,62 @@ public class DuplicateHearingCommandHandlerTest {
         final UUID offenceId1 = randomUUID();
         final UUID offenceId2 = randomUUID();
 
-        final JsonEnvelope envelope = createMarkAsDuplicateCommandEnvelopeForHearing(hearingId, Arrays.asList(caseId1, caseId2), Arrays.asList(defendantId1, defendantId2), Arrays.asList(offenceId1, offenceId2));
+        final JsonEnvelope envelope = createMarkAsDuplicateCommandEnvelopeForHearing(hearingId, Arrays.asList(caseId1, caseId2), Arrays.asList(defendantId1, defendantId2), Arrays.asList(offenceId1, offenceId2), false);
         when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
         final HearingAggregate hearingAggregate = setInitialHearingDataIntoAggregate(hearingId, caseId1, caseId2, defendantId1, defendantId2, offenceId1, offenceId2);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        handler.markAsDuplicateHearing(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.marked-as-duplicate"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.prosecutionCaseIds[0]", is(caseId1.toString())),
+                                withJsonPath("$.prosecutionCaseIds[1]", is(caseId2.toString())),
+                                withJsonPath("$.defendantIds[0]", is(defendantId1.toString())),
+                                withJsonPath("$.defendantIds[1]", is(defendantId2.toString())),
+                                withJsonPath("$.offenceIds[0]", is(offenceId1.toString())),
+                                withJsonPath("$.offenceIds[1]", is(offenceId2.toString()))
+                        ))
+                )));
+    }
+
+    @Test
+    public void shouldNotCreateMarkAsDuplicateEventWhenResultsShared() throws EventStreamException {
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final JsonEnvelope envelope = createMarkAsDuplicateCommandEnvelopeForHearing(hearingId, Arrays.asList(caseId1, caseId2), Arrays.asList(defendantId1, defendantId2), Arrays.asList(offenceId1, offenceId2), false);
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
+        final HearingAggregate hearingAggregate = setInitialHearingDataIntoAggregate(hearingId, caseId1, caseId2, defendantId1, defendantId2, offenceId1, offenceId2);
+        setSharedResultsFor(hearingAggregate);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        handler.markAsDuplicateHearing(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream).count(), is(0l));
+    }
+
+    @Test
+    public void shouldCreateMarkAsDuplicateEventWhenResultsAreSharedAndOverwriteSpecified() throws EventStreamException {
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final JsonEnvelope envelope = createMarkAsDuplicateCommandEnvelopeForHearing(hearingId, Arrays.asList(caseId1, caseId2), Arrays.asList(defendantId1, defendantId2), Arrays.asList(offenceId1, offenceId2), true);
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
+        final HearingAggregate hearingAggregate = setInitialHearingDataIntoAggregate(hearingId, caseId1, caseId2, defendantId1, defendantId2, offenceId1, offenceId2);
+        setSharedResultsFor(hearingAggregate);
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         handler.markAsDuplicateHearing(envelope);
@@ -187,9 +243,13 @@ public class DuplicateHearingCommandHandlerTest {
         ));
     }
 
-    private JsonEnvelope createMarkAsDuplicateCommandEnvelopeForHearing(final UUID hearingId, final List<UUID> prosecutionCaseIds, final List<UUID> defendantIds, final List<UUID> offenceIds) {
+    private JsonEnvelope createMarkAsDuplicateCommandEnvelopeForHearing(final UUID hearingId, final List<UUID> prosecutionCaseIds, final List<UUID> defendantIds, final List<UUID> offenceIds, final boolean overwriteWithResults) {
         final JsonObjectBuilder payloadBuilder = createObjectBuilder()
                 .add("hearingId", hearingId.toString());
+
+        if (overwriteWithResults) {
+            payloadBuilder.add("overwriteWithResults", true);
+        }
 
         for (final UUID prosecutionCaseId : prosecutionCaseIds) {
             payloadBuilder.add("prosecutionCaseIds", createArrayBuilder().add(prosecutionCaseId.toString()));
@@ -244,5 +304,13 @@ public class DuplicateHearingCommandHandlerTest {
                 ))
                 .build());
         return hearingAggregate;
+    }
+
+    private void setSharedResultsFor(final HearingAggregate hearingAggregate) {
+        HearingAggregateMomento hearingAggregateMomento = new HearingAggregateMomento();
+        ResultsSharedDelegate resultsSharedDelegate = new ResultsSharedDelegate(null);
+        setField(hearingAggregateMomento, "published", true);
+        setField(resultsSharedDelegate, "momento", hearingAggregateMomento);
+        setField(hearingAggregate, "resultsSharedDelegate", resultsSharedDelegate);
     }
 }

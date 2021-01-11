@@ -315,4 +315,8 @@ public class ResultsSharedDelegate implements Serializable {
                 })
                 .collect(Collectors.toList());
     }
+
+    public boolean hasResultsShared() {
+        return momento != null && Boolean.TRUE.equals(momento.isPublished());
+    }
 }

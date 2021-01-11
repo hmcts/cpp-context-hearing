@@ -21,15 +21,11 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
-import uk.gov.justice.services.test.utils.common.helper.StoppedClock;
-import uk.gov.justice.services.test.utils.core.converter.JsonObjectToObjectConverterFactory;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -42,7 +38,6 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -70,7 +65,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets","updateHearingDetails", "addMasterDefendantIdToDefendant","correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult");
+            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult");
 
     public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -90,7 +85,7 @@ public class HearingCommandApiTest {
     private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter= new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @Mock
     private Sender sender;

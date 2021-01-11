@@ -61,7 +61,6 @@ import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
-import uk.gov.moj.cpp.hearing.domain.event.result.*;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
@@ -112,14 +111,23 @@ import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 import uk.gov.moj.cpp.hearing.nows.events.PendingNowsRequested;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -285,8 +293,21 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingDelegate.extend(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
-    public Stream<Object> markAsDuplicate(final UUID hearingId) {
-        return apply(this.hearingDelegate.markAsDuplicate(hearingId));
+    /**
+     * Marks a hearing as duplicate. Will not mark a hearing that has results as duplicate unless
+     * the overwrite flag has been provided.
+     *
+     * @param hearingId            - the id of the hearing to be marked as duplicate.
+     * @param overwriteWithResults - if TRUE then mark as duplicate, even if the hearing has
+     *                             results.
+     * @return mark as duplicate event, or no events.
+     */
+    public Stream<Object> markAsDuplicate(final UUID hearingId, final boolean overwriteWithResults) {
+        if (resultsSharedDelegate.hasResultsShared() && !overwriteWithResults) {
+            return Stream.empty();
+        } else {
+            return apply(this.hearingDelegate.markAsDuplicate(hearingId));
+        }
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final PleaModel plea, final Set<String> guiltyPleaTypes) {
@@ -339,15 +360,13 @@ public class HearingAggregate implements Aggregate {
     }
 
 
-
     public Stream<Object> saveAllDraftResults(final List<Target> targets) {
-        final List<Object>  appliedTargetEvent = targets.stream().map(x -> saveDraftResults(x.getApplicationId(), x, x.getDefendantId(), x.getHearingId(), x.getOffenceId(), x.getDraftResult(), x.getResultLines()))
+        final List<Object> appliedTargetEvent = targets.stream().map(x -> saveDraftResults(x.getApplicationId(), x, x.getDefendantId(), x.getHearingId(), x.getOffenceId(), x.getDraftResult(), x.getResultLines()))
                 .map(s -> s.collect(Collectors.toList())).flatMap(x -> x.stream()).collect(Collectors.toList());
-        final Optional<SaveDraftResultFailed> saveDraftResultFailed = appliedTargetEvent.stream().filter(x -> x instanceof SaveDraftResultFailed).map(s -> (SaveDraftResultFailed)s).findFirst();
-        if(saveDraftResultFailed.isPresent()){
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = appliedTargetEvent.stream().filter(x -> x instanceof SaveDraftResultFailed).map(s -> (SaveDraftResultFailed) s).findFirst();
+        if (saveDraftResultFailed.isPresent()) {
             return Stream.of(saveDraftResultFailed);
-        }
-        else {
+        } else {
             appliedTargetEvent.add(new MultipleDraftResultsSaved(targets.size()));
             return appliedTargetEvent.stream();
         }

@@ -34,6 +34,7 @@ public class DuplicateHearingCommandHandler extends AbstractCommandHandler {
             LoggerFactory.getLogger(DuplicateHearingCommandHandler.class.getName());
 
     private static final String HEARING_ID_FIELD = "hearingId";
+    private static final String OVERWRITE_RESULTS_FIELD = "overwriteWithResults";
 
     /**
      * Initial command to mark a hearing as a duplicate (called from command-api).
@@ -48,8 +49,11 @@ public class DuplicateHearingCommandHandler extends AbstractCommandHandler {
         }
 
         final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString(HEARING_ID_FIELD));
+        final boolean overwriteWithResults = envelope.payloadAsJsonObject().getBoolean(OVERWRITE_RESULTS_FIELD, false);
 
-        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.markAsDuplicate(hearingId));
+        LOGGER.info("Marking hearing with id {} as duplicate, overwriting results is: {}", hearingId, overwriteWithResults);
+
+        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.markAsDuplicate(hearingId, overwriteWithResults));
     }
 
     /**
