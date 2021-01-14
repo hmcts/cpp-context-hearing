@@ -4,6 +4,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
@@ -90,6 +91,8 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import javax.json.JsonObject;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.core.Is;
@@ -1096,9 +1099,13 @@ public class InitiateHearingIT extends AbstractIT {
     }
 
     private void markHearingAsADuplicate(final UUID hearingId) {
+        final JsonObject payload = createObjectBuilder()
+                .build();
+
         makeCommand(getRequestSpec(), "hearing.mark-as-duplicate")
                 .ofType("application/vnd.hearing.duplicate+json")
                 .withArgs(hearingId)
+                .withPayload(payload.toString())
                 .withCppUserId(USER_ID_VALUE_AS_ADMIN)
                 .executeSuccessfully();
     }
