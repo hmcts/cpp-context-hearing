@@ -65,7 +65,7 @@ rule "Query - API - hearing.get-hearing-event-log"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-log");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users"));
   then
     $outcome.setSuccess(true);
 end
