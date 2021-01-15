@@ -92,6 +92,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -308,6 +309,52 @@ public class HearingServiceTest {
                 "10:15", "14:30", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
 
         assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+    }
+
+    @Test
+    public void shouldFindHearingListAndSortBySittingDate() {
+
+        final uk.gov.justice.core.courts.HearingDay hearingDay = uk.gov.justice.core.courts.HearingDay.hearingDay()
+                .withSittingDay(START_DATE_1)
+                .withListedDurationMinutes(2)
+                .withListingSequence(5)
+                .build();
+
+        final uk.gov.justice.core.courts.HearingDay hearingDay2 = uk.gov.justice.core.courts.HearingDay.hearingDay()
+                .withSittingDay(START_DATE_1.plusHours(1))
+                .withListedDurationMinutes(2)
+                .withListingSequence(5)
+                .build();
+
+        final LocalDate startDateStartOfDay = START_DATE_1.toLocalDate();
+        final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
+
+        final Hearing hearingEntity = hearingHelper.it();
+        final Hearing hearingEntity2 = hearingHelper.it();
+        final UUID hearingSummaryId = hearingEntity.getId();
+        final UUID hearingSummaryId2 = hearingEntity2.getId();
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withId(hearingSummaryId).withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().build())).build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo2 = uk.gov.justice.core.courts.Hearing.hearing().withId(hearingSummaryId2).withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().build())).build();
+
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId).withHearingDays(Arrays.asList(hearingDay));
+        final HearingSummaries.Builder hearingSummariesBuilder2 = HearingSummaries.hearingSummaries().withId(hearingSummaryId2).withHearingDays(Arrays.asList(hearingDay2));
+        final List<Hearing> hearings = asList(hearingEntity2, hearingEntity);
+
+        when(hearingRepository.findByFilters(startDateStartOfDay, hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId())).thenReturn(hearings);
+        when(hearingJPAMapper.fromJPA(eq(hearingEntity))).thenReturn(hearingPojo);
+        when(hearingJPAMapper.fromJPA(eq(hearingEntity2))).thenReturn(hearingPojo2);
+        when(getHearingsTransformer.summary(eq(hearingPojo))).thenReturn(hearingSummariesBuilder);
+        when(getHearingsTransformer.summary(eq(hearingPojo2))).thenReturn(hearingSummariesBuilder2);
+        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
+
+        final GetHearings response = hearingService.getHearings(START_DATE_1.toLocalDate(),
+                "10:15", "14:30", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
+
+        final List<HearingSummaries> hearingSummaries = response.getHearingSummaries();
+        assertThat(hearingSummaries.get(0).getId(), is(hearingSummaryId));
+        assertThat(hearingSummaries.get(1).getId(), is(hearingSummaryId2));
+
     }
 
     @Test
@@ -592,48 +639,6 @@ public class HearingServiceTest {
 
     }
 
-    @Test
-    public void shouldFindHearingListWhenStartDateAndEndDateAreAfterSittingDateWithSortedListingSequence() {
-
-        final uk.gov.justice.core.courts.ProsecutionCaseIdentifier prosecutionCaseIdentifier = uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
-                .withCaseURN("8C720B32E45B")
-                .withProsecutionAuthorityCode("AUTH CODE")
-                .withProsecutionAuthorityId(UUID.fromString("1dbab0cf-3822-46ff-b3ea-ddcf99e71ab9"))
-                .withProsecutionAuthorityReference("AUTH REF")
-                .build();
-
-        final uk.gov.justice.core.courts.HearingType hearingType = uk.gov.justice.core.courts.HearingType.hearingType()
-                .withId(UUID.fromString("019556b2-a25e-4ea7-b3f1-8c89d14b02e0"))
-                .withDescription("TRIAL")
-                .build();
-
-        final uk.gov.justice.core.courts.HearingDay hearingDay = uk.gov.justice.core.courts.HearingDay.hearingDay()
-                .withSittingDay(START_DATE_1)
-                .withListedDurationMinutes(2)
-                .withListingSequence(5)
-                .build();
-
-        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
-
-        //  final HearingTestUtils.HearingHelper hearingHelper = helper(HearingTestUtils.buildHearing());
-        final Hearing hearingEntity = HearingTestUtils.buildHearing();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(singletonList(ProsecutionCase.prosecutionCase().build())).build();
-        final UUID hearingSummaryId = randomUUID();
-        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
-
-        final List<Hearing> hearings = buildHearingAndHearingDays();
-        when(hearingRepository.findByFilters(startDateStartOfDay, hearingEntity.getCourtCentre().getId(),
-                hearingEntity.getCourtCentre().getRoomId())).thenReturn(hearings);
-        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
-        when(getHearingsTransformer.summary(hearingPojo)).thenReturn(hearingSummariesBuilder);
-
-        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
-
-        final GetHearings response = hearingService.getHearings(startDateStartOfDay,
-                "09:00", "17:00", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
-        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
-        assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
-    }
 
     @Test
     public void shouldFindHearingListWhenJudicialUserIsMatched() {
@@ -1153,5 +1158,10 @@ public class HearingServiceTest {
         final Set<Defendant> defendants = asSet(defendant);
         prosecutionCase.setDefendants(defendants);
         return asSet(prosecutionCase);
+    }
+
+    private HearingDay plusTime(HearingDay hearingDay, long hour){
+        hearingDay.setSittingDay(hearingDay.getSittingDay().plusHours(hour));
+        return hearingDay;
     }
 }

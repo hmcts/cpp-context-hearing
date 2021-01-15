@@ -4,6 +4,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
@@ -193,14 +194,15 @@ public class HearingService {
             filteredHearings = filterNonEndedHearings(filteredHearings);
         }
 
-        //sorting listSequence for hearing day
-        filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
-
         return GetHearings.getHearings()
                 .withHearingSummaries(filteredHearings.stream()
                         .map(ha -> hearingJPAMapper.fromJPA(ha))
                         .filter(ha -> isNotEmpty(ha.getProsecutionCases()) || isNotEmpty(ha.getCourtApplications()))
                         .map(h -> getHearingTransformer.summary(h).build())
+                        .sorted(comparing(hearingSummaries -> hearingSummaries.getHearingDays().stream()
+                                .filter(hd -> date.equals(hd.getSittingDay().toLocalDate()))
+                                .findFirst().get()
+                                .getSittingDay()))
                         .collect(toList()))
                 .build();
     }
