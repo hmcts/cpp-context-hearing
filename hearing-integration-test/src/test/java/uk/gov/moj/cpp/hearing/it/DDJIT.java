@@ -18,7 +18,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithCases;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCases;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRolesForDDJ;
 
@@ -235,7 +235,6 @@ public class DDJIT extends AbstractIT {
     @Test
     public void initiateHearingWithNoHearingCasesForDDJ() {
 
-        stubUsersAndGroupsUserRolesForDDJ(getLoggedInUser());
         final UUID case1 = randomUUID();
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
@@ -293,7 +292,7 @@ public class DDJIT extends AbstractIT {
                 )
         );
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithoutCases();
+        stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ();
 
         Queries.getHearingsByDatePollForMatch(
                 hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,

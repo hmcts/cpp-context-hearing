@@ -18,22 +18,16 @@
       "action": "GrantAccess"
     },
     {
-      "action": "Access",
-      "object": "Case",
-      "source": "%USER_ID%",
-      "target": "%CASE_1%"
+      "action": "groupName1",
+      "object": "TFL",
+      "source": "7e2f843e-d639-40b3-8611-8015f3a13333",
+      "target": "7e2f843e-d639-40b3-8611-8015f3a13334"
     },
     {
-      "action": "Access",
-      "object": "Case",
-      "source": "%USER_ID%",
-      "target": "%CASE_2%"
-    },
-    {
-      "action": "Access",
-      "object": "Case",
-      "source": "%USER_ID%",
-      "target": "%CASE_3%"
+      "action": "groupName2",
+      "object": "TVL",
+      "source": "7e2f843e-d639-40b3-8611-8015f3a13333",
+      "target": "7e2f843e-d639-40b3-8611-8015f3a13334"
     }
   ],
   "switchableRoles": [
@@ -41,7 +35,7 @@
       "roleId": "7e2f843e-d639-40b3-8611-8015f3a13333",
       "description": "description1",
       "label": "label1",
-      "selectable": false
+      "selectable": true
     },
     {
       "roleId": "7e2f843e-d639-40b3-8611-8015f3a13334",

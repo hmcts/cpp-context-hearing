@@ -100,7 +100,6 @@ public class HearingEventsIT extends AbstractIT {
     @Test
     public void publishEvent_givenHearingForMags() {
 
-
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());

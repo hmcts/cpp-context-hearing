@@ -98,6 +98,18 @@ public class WireMockStubUtils {
 
     }
 
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ() {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-DDJ.json");
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithCases(final UUID case1, final UUID case2, final UUID case3, final UUID userId) {
         final String response = getPayload("stub-data/usersgroups.permissions-for-cases.json")
                 .replaceAll("%CASE_1%", case1.toString())

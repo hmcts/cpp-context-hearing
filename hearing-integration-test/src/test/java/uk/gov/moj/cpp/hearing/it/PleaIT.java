@@ -45,7 +45,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplat
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 
 public class PleaIT extends AbstractIT {
@@ -451,9 +450,6 @@ public class PleaIT extends AbstractIT {
 
     @Test
     public void updatePlea_toConsent_shouldHaveConvictionDate() {
-
-        stubUsersAndGroupsUserRoles(getLoggedInUser());
-
 
         final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 

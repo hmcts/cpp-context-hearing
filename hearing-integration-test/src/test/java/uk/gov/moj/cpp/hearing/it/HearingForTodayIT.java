@@ -47,6 +47,7 @@ import static uk.gov.moj.cpp.hearing.it.Queries.getHearingForTodayPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 public class HearingForTodayIT extends AbstractIT {
 
@@ -63,6 +64,7 @@ public class HearingForTodayIT extends AbstractIT {
     public void shouldRetrieveHearingForTodayForLoggedOnUser() {
         final UUID userId = randomUUID();
         setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();
@@ -96,6 +98,7 @@ public class HearingForTodayIT extends AbstractIT {
     public void shouldRetrieveApplicationHearingForTodayForLoggedOnUser() {
         final UUID userId = randomUUID();
         setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final UUID hearingId = randomUUID();
         final UUID courtCentreId = randomUUID();

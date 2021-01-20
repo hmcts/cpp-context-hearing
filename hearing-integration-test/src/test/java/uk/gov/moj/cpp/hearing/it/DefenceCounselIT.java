@@ -127,7 +127,6 @@ public class DefenceCounselIT extends AbstractIT {
 
     @Test
     public void removeDefenceCounsel_shouldRemove() {
-        stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
@@ -411,6 +410,7 @@ public class DefenceCounselIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForMagistrates()));
 
+        givenAUserHasLoggedInAsADefenceCounsel(randomUUID());
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 

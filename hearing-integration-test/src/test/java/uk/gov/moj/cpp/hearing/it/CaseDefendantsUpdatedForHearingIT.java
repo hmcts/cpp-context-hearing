@@ -21,6 +21,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
 
@@ -28,6 +29,7 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
 
     @Test
     public void testCaseDefendantsUpdated() throws IOException {
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final UUID hearingId = hearingOne.getHearingId();

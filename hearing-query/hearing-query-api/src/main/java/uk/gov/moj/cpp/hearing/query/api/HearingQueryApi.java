@@ -97,8 +97,9 @@ public class HearingQueryApi {
             throw new BadRequestException("No Logged in UserId found to perform hearings search");
         }
         final String userId = optionalUserId.get();
-        final boolean isDDJ = ddjChecker.isDDJ(userId);
-        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ);
+        final Permissions permissions = usersAndGroupsService.permissions(userId);
+        final boolean isDDJ = ddjChecker.isDDJ(permissions);
+        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ, permissions);
         final Envelope<GetHearings> envelope = this.hearingQueryView.findHearings(query, accessibleCases, isDDJ);
         return getJsonEnvelope(envelope);
     }
@@ -117,8 +118,9 @@ public class HearingQueryApi {
         }
         final String userId = optionalUserId.get();
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
-        final boolean isDDJ = ddjChecker.isDDJ(userId);
-        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ);
+        final Permissions permissions = usersAndGroupsService.permissions(userId);
+        final boolean isDDJ = ddjChecker.isDDJ(permissions);
+        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ, permissions);
         final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCases, isDDJ);
         return getJsonEnvelope(envelope);
     }
@@ -263,10 +265,9 @@ public class HearingQueryApi {
         return jsonEnvelopeRepacker.repack(jsonValueEnvelope);
     }
 
-    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJ){
+    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJ, final Permissions permissions){
         List<UUID> accessibleCases = new ArrayList<>();
         if (isDDJ){
-            final Permissions permissions = usersAndGroupsService.permissions(userId);
             accessibleCases = accessibleCasesO.findCases(permissions, userId);
         }
         return accessibleCases;

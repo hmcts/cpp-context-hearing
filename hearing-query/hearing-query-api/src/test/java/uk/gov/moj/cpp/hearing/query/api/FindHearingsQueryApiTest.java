@@ -1,18 +1,15 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import static javax.json.Json.createObjectBuilder;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
@@ -20,24 +17,18 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
-import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 
+import javax.ws.rs.BadRequestException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.ws.rs.BadRequestException;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -98,13 +89,13 @@ public class FindHearingsQueryApiTest {
         when(jsonInputEnvelope.metadata()).thenReturn(metadata);
         when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
-        when(ddjChecker.isDDJ(userId.toString())).thenReturn(true);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(true);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
         when(hearingQueryView.findHearings(jsonInputEnvelope, accessibleCaseList, false))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
-        verify(ddjChecker, times(1)).isDDJ(userId.toString());
+        verify(ddjChecker, times(1)).isDDJ(permissions);
         verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
@@ -116,13 +107,13 @@ public class FindHearingsQueryApiTest {
         when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
-        when(ddjChecker.isDDJ(userId.toString())).thenReturn(false);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(false);
         when(hearingQueryView.findHearings(jsonInputEnvelope, accessibleCaseList, false))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearings(jsonInputEnvelope);
         verify(accessibleCases, times(0)).findCases(permissions,userId.toString());
-        verify(usersAndGroupsService, times(0)).permissions(userId.toString());
-        verify(ddjChecker, times(1)).isDDJ(userId.toString());
+        verify(usersAndGroupsService, times(1)).permissions(userId.toString());
+        verify(ddjChecker, times(1)).isDDJ(permissions);
     }
 }

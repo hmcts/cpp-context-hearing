@@ -39,6 +39,8 @@ public class VerdictIT extends AbstractIT {
     public void updateVerdict_whenPreviousCategoryTypeIsNotGuiltyTypeAndCurrentCategoryIsGuiltyType_shouldUpdateConvictionDateToVerdictDate() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
 
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(
@@ -103,6 +105,8 @@ public class VerdictIT extends AbstractIT {
     @Test
     public void updateVerdict_whenPreviousCategoryTypeIsGuiltyAndCurrentCategoryTypeIsNotGuilty_shouldClearConvictionDateToNull() {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
 
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne =
@@ -168,6 +172,8 @@ public class VerdictIT extends AbstractIT {
 
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
 
 
         final LocalDate previousConvictionDate = PAST_LOCAL_DATE.next();

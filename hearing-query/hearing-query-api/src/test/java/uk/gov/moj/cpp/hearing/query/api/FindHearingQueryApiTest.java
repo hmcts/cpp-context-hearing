@@ -101,13 +101,13 @@ public class FindHearingQueryApiTest {
         when(jsonInputEnvelope.metadata()).thenReturn(metadata);
         when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
-        when(ddjChecker.isDDJ(userId.toString())).thenReturn(true);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(true);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
         when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), accessibleCaseList, true))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearing(jsonInputEnvelope);
-        verify(ddjChecker, times(1)).isDDJ(userId.toString());
+        verify(ddjChecker, times(1)).isDDJ(permissions);
         verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
@@ -120,15 +120,15 @@ public class FindHearingQueryApiTest {
         when(jsonInputEnvelope.metadata()).thenReturn(metadata);
         when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
-        when(ddjChecker.isDDJ(userId.toString())).thenReturn(false);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(false);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
         when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), accessibleCaseList, false))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearing(jsonInputEnvelope);
-        verify(ddjChecker, times(1)).isDDJ(userId.toString());
+        verify(ddjChecker, times(1)).isDDJ(permissions);
         verify(accessibleCases, times(0)).findCases(permissions,userId.toString());
-        verify(usersAndGroupsService, times(0)).permissions(userId.toString());
+        verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
 
     private CrackedIneffectiveVacatedTrialTypes getCrackedIneffectiveVacatedTrialTypes() {
