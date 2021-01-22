@@ -229,10 +229,12 @@ public class ResultQualifierTest {
 
         );
         final String qualifier = null;
-        final List<JudicialResultPrompt> judicialResultPromptList = of(judicialResultPrompt().withType("FIXL").withWelshValue("welshCode1###welshCode2###welshCode3").build());
+        JudicialResultPrompt judicialResultPrompt =judicialResultPrompt().withType("FIXL").withValue("value1###value2###value3").build();
+        final List<JudicialResultPrompt> judicialResultPromptList = of(judicialResultPrompt);
         final Optional<String> qualifierList = new ResultQualifier().populate(qualifier, judicialResultPromptList, this.referenceDataService, commandJsonEnvelope, now());
         assertThat(qualifierList.isPresent(), is(true));
         assertThat(qualifierList.get(), is("cjsQualifierValue1,cjsQualifierValue2,cjsQualifierValue3"));
+        assertThat(judicialResultPrompt.getWelshValue(), is("welshCode1, welshCode2, welshCode3"));
     }
 
 

@@ -10,6 +10,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.REPLACEMENT_COMMA;
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
 public class ResultQualifier {
 
     public static final String SEPARATOR = "###";
-    private static final List<String> fixedListTypes = asList("FIXL", "FIXLM");
+    private static final List<String> fixedListTypes = asList("FIXL", "FIXLM", "FIXLO", "FIXLOM");
 
     public Optional<String> populate(final String qualifier, final List<JudicialResultPrompt> judicialResultPromptList, final ReferenceDataService referenceDataService, final JsonEnvelope context, final LocalDate orderDate) {
 
@@ -40,6 +41,7 @@ public class ResultQualifier {
         if (!fixedListTypeJudicialResultPrompts.isEmpty()) {
             final AllFixedList allFixedList = referenceDataService.getAllFixedList(context, orderDate);
             fixedListTypeJudicialResultPrompts.forEach(j -> setQualfierIfFound(j, allFixedList));
+            fixedListTypeJudicialResultPrompts.forEach(j -> setWelshValueIfFound(j, allFixedList));
         }
 
         final String promptQualifiers = ofNullable(judicialResultPromptList)
@@ -58,6 +60,36 @@ public class ResultQualifier {
             result = of(qualifier);
         }
         return result;
+    }
+
+    public void setWelshValueIfFound(final JudicialResultPrompt judicialResultPrompt, final AllFixedList allFixedList) {
+        final String value = judicialResultPrompt.getValue();
+        if (nonNull(value)) {
+            final String welshResult = Stream.of(
+                    judicialResultPrompt
+                            .getValue()
+                            .split(SEPARATOR))
+
+                    .map(s -> getFixedListWelshValue(s, allFixedList))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(joining(REPLACEMENT_COMMA));
+            if (isNotEmpty(welshResult)) {
+                judicialResultPrompt.setWelshValue(welshResult);
+            }
+        }
+    }
+
+    private Optional<String> getFixedListWelshValue(final String value, final AllFixedList allFixedList) {
+        return allFixedList
+                .getFixedListCollection()
+                .stream()
+                .map(FixedList::getElements)
+                .flatMap(Collection::stream)
+                .filter(e -> value.equalsIgnoreCase(e.getValue()))
+                .map(FixedListElement::getWelshValue)
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
     private void setQualfierIfFound(final JudicialResultPrompt judicialResultPrompt, final AllFixedList allFixedList) {
