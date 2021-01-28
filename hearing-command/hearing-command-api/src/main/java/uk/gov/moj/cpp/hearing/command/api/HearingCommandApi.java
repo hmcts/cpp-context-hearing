@@ -259,6 +259,16 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.validate-result-amendments");
     }
 
+    @Handles("hearing.correct-hearing-days-without-court-centre")
+    public void correctHearingDaysWithoutCourtCentre(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.correct-hearing-days-without-court-centre");
+    }
+
+    @Handles("hearing.update-resultline-shared-dates")
+    public void updateResultLineSharedDates(final JsonEnvelope envelope){
+        sendEnvelopeWithName(envelope, "hearing.command.update-resultline-shared-dates");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *
@@ -269,10 +279,5 @@ public class HearingCommandApi {
         sender.send(Enveloper.envelop(envelope.payloadAsJsonObject())
                 .withName(name)
                 .withMetadataFrom(envelope));
-    }
-
-    @Handles("hearing.correct-hearing-days-without-court-centre")
-    public void correctHearingDaysWithoutCourtCentre(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.correct-hearing-days-without-court-centre");
     }
 }

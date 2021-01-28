@@ -448,3 +448,12 @@ rule "Command - API - Action - hearing.mark-as-duplicate"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.update-resultline-shared-dates"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.update-resultline-shared-dates");
+    eval(userAndGroupProvider.isSystemUser($action));
+  then
+    $outcome.setSuccess(true);
+end

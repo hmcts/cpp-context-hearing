@@ -35,6 +35,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingResultLineSharedDatesUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
@@ -120,7 +121,8 @@ public class HearingEventListenerYamlConfigTest {
             HearingMarkedAsDuplicateForOffence.class.getAnnotation(Event.class).value(),
             PendingNowsRequested.class.getAnnotation(Event.class).value(),
             NowsRequested.class.getAnnotation(Event.class).value(),
-            MultipleDraftResultsSaved.class.getAnnotation(Event.class).value()
+            MultipleDraftResultsSaved.class.getAnnotation(Event.class).value(),
+            HearingResultLineSharedDatesUpdated.class.getAnnotation(Event.class).value()
 
     );
 

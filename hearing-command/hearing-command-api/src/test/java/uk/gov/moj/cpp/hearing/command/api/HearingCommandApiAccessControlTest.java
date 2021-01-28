@@ -54,7 +54,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_REQUEST_APPROVAL = "hearing.request-approval";
     private static final String ACTION_NAME_MASTER_DEFENDANT_ID = "hearing.add-master-defendant-id-to-defendant";
     private static final String ACTION_NAME_VALIDATE_RESULT_AMENDMENTS = "hearing.validate-result-amendments";
-
+    private static final String ACTION_NAME_UPDATE_RESULTLINE_SHARED_DATES = "hearing.update-resultline-shared-dates";
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
 
@@ -725,6 +725,25 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         assertSuccessfulOutcome(results);
     }
 
+    @Test
+    public void shouldAllowSystemUserToUpdateResultLineSharedDates() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_RESULTLINE_SHARED_DATES);
+        given(this.userAndGroupProvider.isSystemUser(action))
+                .willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToUpdateResultLineSharedDates() {
+        final Action action = createActionFor(ACTION_NAME_UPDATE_RESULTLINE_SHARED_DATES);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Associate", "Legal Advisers", "Court Clerks"))
+                .willReturn(true);
+        given(this.hearingProvider.isUserAllowedToApproveResultAmendment(action)).willReturn(false);
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
 
 
 }
