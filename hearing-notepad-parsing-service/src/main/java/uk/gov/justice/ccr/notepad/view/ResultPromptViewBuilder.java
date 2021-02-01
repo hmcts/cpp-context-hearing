@@ -1,8 +1,14 @@
 package uk.gov.justice.ccr.notepad.view;
 
 
-import com.google.common.collect.Lists;
-import org.apache.commons.collections.CollectionUtils;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.INT;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
+
 import uk.gov.justice.ccr.notepad.process.Knowledge;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 
@@ -15,13 +21,8 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.INT;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
+import com.google.common.collect.Lists;
+import org.apache.commons.collections.CollectionUtils;
 
 public class ResultPromptViewBuilder {
 
@@ -87,7 +88,7 @@ public class ResultPromptViewBuilder {
             final PromptChoice promptChoice = promptChoices.stream().filter(v -> v.getLabel().equals(s)).findFirst().get();
             integers.forEach(integer -> {
                 final PromptChoice pc = promptChoices.get(integer);
-                promptChoice.addChildren(new Children(pc.getCode(),pc.getDurationElement(), pc.getPromptRef(), INT, pc.getWelshDurationElement()));
+                promptChoice.addChildren(new Children(pc.getCode(),pc.getDurationElement(), pc.getPromptRef(), pc.getWelshDurationElement(), INT));
                 promptChoice.setVisible(true);
             });
         });
@@ -107,7 +108,7 @@ public class ResultPromptViewBuilder {
     private void setNameAdressFields(final List<PromptChoice> promptChoices, final PromptChoice promptChoice, final Integer integer) {
         final PromptChoice pc = promptChoices.get(integer);
         if(!containsIgnoreCase(pc.getLabel(), TITLE)) {
-            promptChoice.addChildren(new Children(pc.getLabel(), pc.getPromptRef(), TXT, pc.getPromptOrder()));
+            promptChoice.addChildren(new Children(pc.getLabel(), pc.getPromptRef(), TXT, pc.getPromptOrder(), pc.getPartName()));
             promptChoice.setVisible(true);
             if(CollectionUtils.isNotEmpty(pc.getNameAddressList())) {
                 promptChoice.setNameAddressList(pc.getNameAddressList());
@@ -141,12 +142,12 @@ public class ResultPromptViewBuilder {
         if(childNameAddressPrompt !=null && !childNameAddressPrompt.isEmpty()) {
             childNameAddressPrompt.forEach((s, integers)-> {
 
-              final Children nameAddressChildren = new Children(s , "", promptChoice.getPromptRef(), ResultType.NAMEADDRESS);
+              final Children nameAddressChildren = new Children(s , "", promptChoice.getPromptRef(), ResultType.NAMEADDRESS, promptChoice.getPartName());
               promptChoice.addChildren(nameAddressChildren);
               integers.forEach(integer -> {
                   final PromptChoice pc = promptChoices.get(integer);
                   if(!containsIgnoreCase(pc.getLabel(), TITLE)) {
-                      nameAddressChildren.addChildrenList(new Children(pc.getLabel(), pc.getPromptRef(), TXT));
+                      nameAddressChildren.addChildrenList(new Children(pc.getLabel(), pc.getPromptRef(), TXT, pc.getPartName()));
                       setAttributesFromChildren(nameAddressChildren, pc);
                   }
 
@@ -181,11 +182,11 @@ public class ResultPromptViewBuilder {
     private void groupDurationPromptWithInOneOff(List<PromptChoice> promptChoices, Map<String, List<Integer>> childDurationPrompt, PromptChoice promptChoice) {
         if (childDurationPrompt != null && !childDurationPrompt.isEmpty()) {
             childDurationPrompt.forEach((s, integers) -> {
-                final Children durationChildren = new Children(promptChoice.getCode(), s, promptChoice.getPromptRef(), DURATION);
+                final Children durationChildren = new Children(promptChoice.getCode(), s, promptChoice.getPromptRef(), null, DURATION);
                 promptChoice.addChildren(durationChildren);
                 integers.forEach(integer -> {
                     final PromptChoice pc = promptChoices.get(integer);
-                    durationChildren.addChildrenList(new Children(pc.getCode(), pc.getDurationElement(), pc.getPromptRef(), INT, promptChoice.getWelshDurationElement()));
+                    durationChildren.addChildrenList(new Children(pc.getCode(), pc.getDurationElement(), pc.getPromptRef(), promptChoice.getWelshDurationElement(), INT));
                 });
             });
         }

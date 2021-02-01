@@ -1,15 +1,15 @@
 package uk.gov.justice.ccr.notepad.view;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
+import static com.google.common.collect.Lists.newArrayList;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
 
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -28,7 +28,7 @@ public class Children {
     private String listLabel;
     private String addressType;
     private Boolean nameEmail;
-
+    private String partName;
     private int sequence;
     private String code;
 
@@ -53,20 +53,22 @@ public class Children {
         this.code = code;
     }
 
-    public Children(final String label,  final String promptRef, final ResultType type) {
+    public Children(final String label,  final String promptRef, final ResultType type, final String partName) {
         this.label = label;
         this.promptRef = promptRef;
         this.type = type;
+        this.partName = partName;
     }
 
-    public Children(final String code, final String label,  final String promptRef, final ResultType type) {
+    public Children(final String code, final String label,  final String promptRef, final ResultType type, final String partName) {
         this.code = code;
         this.label = label;
         this.promptRef = promptRef;
         this.type = type;
+        this.partName = partName;
     }
 
-    public Children(final String code, final String label,  final String promptRef, final ResultType type, final String welshLabel) {
+    public Children(final String code, final String label, final String promptRef, final String welshLabel, final ResultType type) {
         this.code = code;
         this.label = label;
         this.promptRef = promptRef;
@@ -74,11 +76,12 @@ public class Children {
         this.welshLabel = welshLabel;
     }
 
-    public Children(final String label, final String promptRef, final ResultType type, final int sequenceNumber) {
+    public Children(final String label, final String promptRef, final ResultType type, final int sequenceNumber, final String partName) {
         this.label = label;
         this.type = type;
         this.promptRef = promptRef;
         this.sequence = sequenceNumber;
+        this.partName = partName;
     }
 
     public String getLabel() { return label; }
@@ -164,5 +167,13 @@ public class Children {
 
     public void setNameEmail(Boolean nameEmail) {
         this.nameEmail = nameEmail;
+    }
+
+    public String getPartName() {
+        return partName;
+    }
+
+    public void setPartName(final String partName) {
+        this.partName = partName;
     }
 }
