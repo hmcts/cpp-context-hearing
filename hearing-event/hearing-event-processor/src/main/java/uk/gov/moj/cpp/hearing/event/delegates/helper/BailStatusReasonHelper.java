@@ -44,7 +44,7 @@ public class BailStatusReasonHelper {
                 .map(JudicialResult::getJudicialResultPrompts)
                 .flatMap(List::stream)
                 .filter(prompt -> PROMPT_REFERENCES.contains(prompt.getPromptReference()))
-                .map(JudicialResultPrompt::getValue)
+                .map(JudicialResultPrompt::getValue).distinct()
                 .collect(joining(lineSeparator()));
     }
 }

@@ -55,9 +55,12 @@ public class BailConditionsHelper {
         final StringBuilder bailConditionsBuilder = new StringBuilder();
         for (final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt : judicialResultsLabelAndResultPrompts) {
             final String label = judicialResultsLabelAndResultPrompt.getLabel();
-            bailConditionsBuilder.append(String.format("%s%n", label));
-            for (final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()) {
-                bailConditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+
+            if(!bailConditionsBuilder.toString().contains(label)) {
+                bailConditionsBuilder.append(String.format("%s%n", label));
+                for (final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()) {
+                    bailConditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+                }
             }
         }
         return bailConditionsBuilder;

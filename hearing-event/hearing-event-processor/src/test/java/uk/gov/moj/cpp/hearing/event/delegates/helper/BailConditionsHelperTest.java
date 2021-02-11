@@ -296,6 +296,18 @@ public class BailConditionsHelperTest {
                                                         .withRank(new BigDecimal(1))
                                                         .withJudicialResultPrompts(getJudicialResultPromptList())
                                                         .build()))
+                                                .build(), offence()
+                                                .withJudicialResults(asList(judicialResult()
+                                                        .withResultDefinitionGroup("Not a Bail Conditions")
+                                                        .withLabel("Bail condition: Date of hearing")
+                                                        .withRank(new BigDecimal(2))
+                                                        .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                        .build(), judicialResult()
+                                                        .withResultDefinitionGroup(resultDefinitionGroup)
+                                                        .withLabel("Bail condition: Time of hearing")
+                                                        .withRank(new BigDecimal(1))
+                                                        .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                        .build()))
                                                 .build()))
                                         .withPersonDefendant(buildPersonDefendant(bailStatus))
                                         .build())
@@ -346,7 +358,19 @@ public class BailConditionsHelperTest {
                                                         .withRank(new BigDecimal(1))
                                                         .withJudicialResultPrompts(getJudicialResultPromptList())
                                                         .build()))
-                                                .build()))
+                                                .build(), offence()
+                                                        .withJudicialResults(asList(judicialResult()
+                                                                .withResultDefinitionGroup("Not a Bail Conditions")
+                                                                .withLabel("Bail condition: Date of hearing")
+                                                                .withRank(new BigDecimal(2))
+                                                                .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                                .build(), judicialResult()
+                                                                .withResultDefinitionGroup("Bail Conditions")
+                                                                .withLabel("Bail condition: Time of hearing")
+                                                                .withRank(new BigDecimal(1))
+                                                                .withJudicialResultPrompts(getJudicialResultPromptList())
+                                                                .build()))
+                                                        .build()))
                                         .build())
                                 )
                                 .build()))
@@ -406,6 +430,10 @@ public class BailConditionsHelperTest {
                 .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getJudicialResults().get(0).setRank(null);
         resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getJudicialResults().get(1).setRank(null);
+        resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(2).getJudicialResults().get(0).setRank(null);
+        resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(2).getJudicialResults().get(1).setRank(null);
     }
 
     private void setResultDefinitionGroupAsNull(final ResultsShared resultsSharedTemplate) {
@@ -417,5 +445,9 @@ public class BailConditionsHelperTest {
                 .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getJudicialResults().get(0).setResultDefinitionGroup(null);
         resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getJudicialResults().get(1).setResultDefinitionGroup(null);
+        resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(2).getJudicialResults().get(0).setResultDefinitionGroup(null);
+        resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(2).getJudicialResults().get(1).setResultDefinitionGroup(null);
     }
 }
