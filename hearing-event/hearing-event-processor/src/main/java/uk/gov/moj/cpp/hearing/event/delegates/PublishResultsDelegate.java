@@ -385,14 +385,16 @@ public class PublishResultsDelegate {
         return results.stream()
                 .filter(node -> node.getLevel() == DEFENDANT)
                 .filter(node -> nonNull(node.getDefendantId()) && id.equals(node.getDefendantId()))
-                .map(TreeNode::getJudicialResult).collect(toList());
+                .map(node -> node.getJudicialResult().setOffenceId(node.getOffenceId()))
+                .collect(toList());
     }
 
     private List<JudicialResult> getDefendantCaseJudicialResults(final List<TreeNode<ResultLine>> results, final UUID id) {
         return results.stream()
                 .filter(node -> node.getLevel() == CASE)
                 .filter(node -> nonNull(node.getDefendantId()) && id.equals(node.getDefendantId()))
-                .map(TreeNode::getJudicialResult).collect(toList());
+                .map(node -> node.getJudicialResult().setOffenceId(node.getOffenceId())
+                ).collect(toList());
     }
 
     private void mapOffenceLevelJudicialResults(final ResultsShared resultsShared, final List<TreeNode<ResultLine>> results) {
@@ -419,8 +421,8 @@ public class PublishResultsDelegate {
 
                             }
                         });
-                         if (!restrictions.isEmpty()) {
-                             offence.setReportingRestrictions(restrictions);
+                        if (!restrictions.isEmpty()) {
+                            offence.setReportingRestrictions(restrictions);
                         }
                     } else {
                         offence.setJudicialResults(null);

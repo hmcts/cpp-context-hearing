@@ -69,6 +69,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -243,6 +244,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
                 .filter(defendant -> masterDefendantId.equals(defendant.getMasterDefendantId()))
                 .collect(toList());
 
+        assertEquals(0L, resultsShared.getHearing().getDefendantJudicialResults().stream().filter(djr -> Objects.isNull(djr.getJudicialResult().getOffenceId())).count());
         assertThat(prosecutionCaseDefendants, hasSize(2));
         final Defendant masterDefendant = prosecutionCaseDefendants
                 .stream()
@@ -257,8 +259,10 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
                 .findFirst()
                 .orElse(null);
         final UUID caseLevelResultLineId = fromString("cfa5ef9a-db03-470a-bbf7-dc1a79c9bfc5");
+        final UUID caseLevelResultOffenceId = fromString("914c5385-f1cc-471d-9a93-f81b48293cbb");
         // should add only case level results
         assertThat(otherDefendant.getDefendantCaseJudicialResults(), hasSize(1));
+        assertEquals(otherDefendant.getDefendantCaseJudicialResults().get(0).getOffenceId(), caseLevelResultOffenceId);
         assertEquals(caseLevelResultLineId, otherDefendant.getDefendantCaseJudicialResults().get(0).getJudicialResultId());
     }
 
@@ -519,7 +523,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         final JudicialResult judicialResult1 = judicialResult().withJudicialResultId(randomUUID()).build();
 
         // deliberately polluting state of hearing with stale results
-        resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).setDefendantCaseJudicialResults(asList(judicialResult1));
         resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).setDefendantCaseJudicialResults(asList(judicialResult1));
 
         final JsonEnvelope envelope = getEnvelope(resultsShared);
