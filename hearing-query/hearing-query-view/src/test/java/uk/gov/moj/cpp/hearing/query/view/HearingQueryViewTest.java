@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.query.view;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
@@ -12,6 +14,9 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyList;
+import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
@@ -25,6 +30,9 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -38,31 +46,40 @@ import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConverter;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
+import uk.gov.moj.cpp.hearing.test.FileUtil;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.persistence.NoResultException;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -98,9 +115,13 @@ public class HearingQueryViewTest {
     private DefendantRepository defendantRepository;
     @Mock
     private HearingService hearingService;
+    @Mock
+    private ReusableInformationMainConverter reusableInformationMainConverter;
+    @Mock
+    private ReusableInfoService reusableInfoService;
 
     @Mock
-    private  List<UUID> prosecutionCasesIdsWithAccess;
+    private List<UUID> prosecutionCasesIdsWithAccess;
 
     @InjectMocks
     private HearingQueryView target;
@@ -291,7 +312,7 @@ public class HearingQueryViewTest {
     public void should_send_an_empty_payload_when_no_result_from_courtroom() {
 
         final UUID courtCentreId = UUID.randomUUID();
-        final List<UUID> courtRoomIds = Arrays.asList(new UUID[]{UUID.randomUUID(), UUID.randomUUID()});
+        final List<UUID> courtRoomIds = asList(new UUID[]{UUID.randomUUID(), UUID.randomUUID()});
         final LocalDate hearingDate = LocalDate.now();
 
         when(hearingService.getHearingsByCourtRoomList(hearingDate, courtCentreId, courtRoomIds)).thenThrow(NoResultException.class);
@@ -318,7 +339,7 @@ public class HearingQueryViewTest {
         final UUID roomId1 = UUID.randomUUID();
         final UUID roomId2 = UUID.randomUUID();
 
-        when(hearingService.getHearingsByCourtRoomList(hearingDate, courtHouseId, Arrays.asList(roomId1, roomId2))).thenReturn(createDefendantInfo());
+        when(hearingService.getHearingsByCourtRoomList(hearingDate, courtHouseId, asList(roomId1, roomId2))).thenReturn(createDefendantInfo());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUID("hearing.defendant.info"),
                 createObjectBuilder()
@@ -328,7 +349,7 @@ public class HearingQueryViewTest {
                         .build());
 
         final JsonEnvelope result = target.getDefendantInfoFromCourtHouseId(query);
-        verify(hearingService).getHearingsByCourtRoomList(hearingDate, courtHouseId, Arrays.asList(roomId1, roomId2));
+        verify(hearingService).getHearingsByCourtRoomList(hearingDate, courtHouseId, asList(roomId1, roomId2));
         assertThat(result.metadata().name(), is("hearing.defendant.info"));
         assertTrue(result.payloadAsJsonObject().getJsonArray("courtRooms").size() == 1);
         assertTrue(result.payloadAsJsonObject().getJsonArray("courtRooms").getJsonObject(0).getString("courtRoomName").equalsIgnoreCase("Room-1"));
@@ -386,6 +407,85 @@ public class HearingQueryViewTest {
         assertThat(draftResult.metadata().name(), is("hearing.get-draft-result"));
     }
 
+    @Test
+    public void shouldGetViewStoreReusableInfoOnly() {
+        final UUID masterDefendantId = UUID.fromString("2e576a1b-2c62-476d-a556-4c24d6bbc1a2");
+        final List<Prompt> resultPrompts = new ArrayList<>();
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = Hearing.hearing().withProsecutionCases(asList(ProsecutionCase.prosecutionCase().withDefendants(asList(Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build())).build())).build();
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.query.reusable-info"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, String.valueOf(hearingId))
+                        .build());
+        JsonObject reusableInfo = null;
+        try {
+            JsonNode payload = objectMapper.readTree(FileUtil.getPayload("reusable-info-singledefendant.json"));
+            reusableInfo = objectMapper.treeToValue(payload, JsonObject.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        when(reusableInfoService.getViewStoreReusableInformation(anyList(), anyList())).thenReturn(reusableInfo);
+        when(hearingService.getHearingDomainById(hearingId)).thenReturn(Optional.of(hearing));
+
+        final JsonEnvelope resultEnvelope  = target.getReusableInformation(query, resultPrompts, emptyMap());
+
+        MatcherAssert.assertThat(resultEnvelope.payloadAsJsonObject().getJsonArray("reusablePrompts").size(), is(2));
+    }
+
+    @Test
+    public void shouldGetViewStoreAndCaseDetailReusableInfoCombined() {
+
+        final UUID promptId = randomUUID();
+        final List<Prompt> resultPrompts = prepareResultPromptsData(promptId);
+
+        final UUID masterDefendantId = UUID.fromString("2e576a1b-2c62-476d-a556-4c24d6bbc1a2");
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = Hearing.hearing().withId(hearingId).withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                .withDefendants(asList(Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build())).build())).build();
+        final JsonObject promptData = createObjectBuilder()
+                .add("value", "Brent Borough Council")
+                .add("masterDefendantId", masterDefendantId.toString())
+                .add("promptRef", "designatedLocalAuthority")
+                .build();
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.query.reusable-info"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, String.valueOf(hearingId))
+                        .build());
+        final Map<Defendant, List<JsonObject>> caseDetailInfo = new HashMap<>();
+        final Defendant defendant = Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build();
+        caseDetailInfo.put(defendant, asList(promptData));
+        JsonObject reusableInfo = null;
+        try {
+            JsonNode payload = objectMapper.readTree(FileUtil.getPayload("reusable-info-singledefendant.json"));
+            reusableInfo = objectMapper.treeToValue(payload, JsonObject.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        when(reusableInfoService.getCaseDetailReusableInformation(anyList(), anyList(), anyMap())).thenReturn(asList(promptData));
+        when(reusableInfoService.getViewStoreReusableInformation(anyList(), eq(asList(promptData)))).thenReturn(reusableInfo);
+        when(hearingService.getHearingDomainById(hearingId)).thenReturn(Optional.of(hearing));
+
+        final JsonObject result  = target.getReusableInformation(query, resultPrompts, emptyMap()).payloadAsJsonObject();
+        JsonArray reusablePrompts = result.getJsonArray("reusablePrompts");
+        JsonArray reusableResults = result.getJsonArray("reusableResults");
+
+        MatcherAssert.assertThat(reusablePrompts.size(), is(2));
+        MatcherAssert.assertThat(reusableResults.size(), is(1));
+    }
+
+    private List<Prompt> prepareResultPromptsData(final UUID promptId) {
+        final Prompt prompt1 = new Prompt();
+        prompt1.setId(promptId);
+        prompt1.setCacheDataPath("CacheDataPath");
+        prompt1.setCacheable(1);
+
+        return asList(prompt1);
+    }
+
     private DefendantSearch createDefendantSearch() {
         final DefendantSearch defendantSearch = new DefendantSearch();
         defendantSearch.setSurname("Stark");
@@ -400,7 +500,7 @@ public class HearingQueryViewTest {
         final DefendantInfoQueryResult defendantInfoQueryResult = new DefendantInfoQueryResult();
         defendantInfoQueryResult.getCourtRooms().add(
                 CourtRoom.courtRoom().withDefendantDetails(
-                        Arrays.asList(
+                        asList(
                                 DefendantDetail.defendantDetail().withDefendantId(UUID.randomUUID()).withDateOfBirth("1980-06-25 00:00:00").withFirstName("Mr").withLastName("Brown").build(),
                                 DefendantDetail.defendantDetail().withDefendantId(UUID.randomUUID()).withFirstName("Mrs").withLastName("Brown").withNationalInsuranceNumber("AB123456Z").build(),
                                 DefendantDetail.defendantDetail().withDefendantId(UUID.randomUUID()).withLegalEntityOrganizationName("ACME").build()

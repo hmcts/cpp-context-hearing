@@ -19,17 +19,21 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
-import uk.gov.moj.cpp.hearing.mapping.CustodialEstablishmentJPAMapper;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.CustodialEstablishment;
+import uk.gov.moj.cpp.hearing.mapping.AddressJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.AssociatedDefenceOrganisationJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ContactNumberJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
+import uk.gov.moj.cpp.hearing.mapping.CustodialEstablishmentJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.OrganisationJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedDefenceOrganisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CustodialEstablishment;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefenceOrganisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
@@ -66,6 +70,8 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
 
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+    @Spy
+    private OrganisationJPAMapper organisationJPAMapper;
 
     @Mock
     private AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper;
@@ -77,6 +83,8 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
         setField(this.courtApplicationsSerializer, "objectToJsonObjectConverter", objectToJsonObjectConverter);
         setField(this.caseDefendantDetailsUpdatedEventListener, "custodialEstablishmentJPAMapper", new CustodialEstablishmentJPAMapper());
+        setField(this.organisationJPAMapper, "addressJPAMapper", new AddressJPAMapper());
+        setField(this.organisationJPAMapper, "contactNumberJPAMapper", new ContactNumberJPAMapper());
     }
 
     @Test
@@ -125,8 +133,31 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
                                 .with(Person::getAdditionalNationalityCode, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getAdditionalNationalityCode()))
                                 .with(Person::getAdditionalNationalityId, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getPersonDetails().getAdditionalNationalityId()))
                         )
+                        .with(PersonDefendant::getEmployerOrganisation, isBean(Organisation.class)
+                                .with(Organisation::getIncorporationNumber, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getIncorporationNumber()))
+                                .with(Organisation::getRegisteredCharityNumber, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getRegisteredCharityNumber()))
+                                .with(Organisation::getName, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getName()))
+                                .with(Organisation::getAddress, isBean(Address.class)
+                                        .with(Address::getAddress1, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getAddress().getAddress1()))
+                                        .with(Address::getAddress2, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getAddress().getAddress2()))
+                                        .with(Address::getAddress3, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getAddress().getAddress3()))
+                                        .with(Address::getAddress4, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getAddress().getAddress4()))
+                                        .with(Address::getAddress5, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getAddress().getAddress5()))
+                                        .with(Address::getPostCode, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getAddress().getPostcode()))
+                                )
+                                .with(Organisation::getContact, isBean(Contact.class)
+                                        .with(Contact::getFax, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getContact().getFax()))
+                                        .with(Contact::getHome, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getContact().getHome()))
+                                        .with(Contact::getMobile, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getContact().getMobile()))
+                                        .with(Contact::getWork, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getContact().getWork()))
+                                        .with(Contact::getPrimaryEmail, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getContact().getPrimaryEmail()))
+                                        .with(Contact::getSecondaryEmail, is(defendantDetailsUpdated.getDefendant().getPersonDefendant().getEmployerOrganisation().getContact().getSecondaryEmail()))
+                                )
+                        )
 
                 )
+                .with(Defendant::getDefenceOrganisation, isBean(Organisation.class))
+                .with(Defendant::getLegalEntityOrganisation, isBean(Organisation.class))
         );
         assertAssociatedDefenceOrganisation(defendant, defendantexArgumentCaptor);
     }

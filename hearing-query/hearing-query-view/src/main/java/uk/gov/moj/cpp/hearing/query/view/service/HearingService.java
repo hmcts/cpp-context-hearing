@@ -8,6 +8,7 @@ import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -207,6 +208,7 @@ public class HearingService {
                 .build();
     }
 
+
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
         if (null == date || null == userId) {
@@ -292,6 +294,14 @@ public class HearingService {
     public Optional<Hearing> getHearingById(final UUID hearingId) {
         final Hearing hearing = hearingRepository.findBy(hearingId);
         return Optional.ofNullable(hearing);
+    }
+
+    public Optional<uk.gov.justice.core.courts.Hearing> getHearingDomainById(final UUID hearingId) {
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+        if (hearing != null) {
+            return of(hearingJPAMapper.fromJPA(hearing));
+        }
+        return empty();
     }
 
     public List<HearingEvent> getHearingEvents(final UUID courtCentreId, final UUID roomId, LocalDate date) {

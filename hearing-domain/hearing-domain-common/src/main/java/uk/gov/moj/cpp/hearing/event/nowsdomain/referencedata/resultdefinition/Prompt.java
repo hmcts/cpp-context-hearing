@@ -46,6 +46,10 @@ public class Prompt {
 
     private Boolean hidden;
 
+    private String cacheDataPath;
+
+    private Integer cacheable;
+
     public static Prompt prompt() {
         return new Prompt();
     }
@@ -193,12 +197,31 @@ public class Prompt {
         this.durationSequence = durationSequence;
         return this;
     }
+
     public Boolean isHidden() {
         return this.hidden;
     }
 
     public Prompt setHidden(final Boolean hidden) {
         this.hidden = hidden;
+        return this;
+    }
+
+    public String getCacheDataPath() {
+        return cacheDataPath;
+    }
+
+    public Prompt setCacheDataPath(final String cacheDataPath) {
+        this.cacheDataPath = cacheDataPath;
+        return this;
+    }
+
+    public Integer getCacheable() {
+        return cacheable;
+    }
+
+    public Prompt setCacheable(final Integer cacheable) {
+        this.cacheable = cacheable;
         return this;
     }
 }

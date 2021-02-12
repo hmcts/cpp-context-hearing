@@ -1,0 +1,25 @@
+{
+  "reusablePrompts": [
+    {
+      "type": "FIXLM",
+      "value": "indian###british",
+      "promptRef": "nationality",
+      "masterDefendantId": "2e576a1b-2c62-476d-a556-4c24d6bbc1a2"
+    },
+    {
+      "type": "INT",
+      "value": "123",
+      "promptRef": "defendantMobileNumber",
+      "masterDefendantId": "2e576a1b-2c62-476d-a556-4c24d6bbc1a2"
+    }
+  ],
+  "reusableResults": [
+    {
+      "value": [
+        "Curfew"
+      ],
+      "shortCode": "BAIC",
+      "masterDefendantId": "2e576a1b-2c62-476d-a556-4c24d6bbc1a2"
+    }
+  ]
+}

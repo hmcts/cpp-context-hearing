@@ -164,7 +164,8 @@ public class HearingEventListenerYamlConfigTest {
                 HearingDaysWithoutCourtCenterCorrectedEventListener.class,
                 ApprovalRequestedEventListener.class,
                 ResultAmendmentsValidatedEventListener.class,
-                CpsProsecutorUpdatedEventListener.class));
+                CpsProsecutorUpdatedEventListener.class,
+                ReusableInfoEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

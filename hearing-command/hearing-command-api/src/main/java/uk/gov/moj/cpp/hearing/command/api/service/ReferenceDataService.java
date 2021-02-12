@@ -27,7 +27,6 @@ public class ReferenceDataService {
     private Requester requester;
 
     public ResultDefinition getResults(final Envelope<?> envelope, final String shortCode) {
-
         final JsonObject getResultDefinitions = createObjectBuilder().add("shortCode", shortCode).build();
         final Envelope<JsonObject> requestEnvelope = Enveloper.envelop(getResultDefinitions)
                 .withName(RESULT_QUERY).withMetadataFrom(envelope);

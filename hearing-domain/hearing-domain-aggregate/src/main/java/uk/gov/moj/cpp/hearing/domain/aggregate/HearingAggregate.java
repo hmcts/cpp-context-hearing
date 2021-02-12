@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+import static uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved.reusableInfoSaved;
 
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.ApprovalType;
@@ -33,6 +34,8 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.command.ReusableInfo;
+import uk.gov.moj.cpp.hearing.command.ReusableInfoResults;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
@@ -134,7 +137,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -805390176650951417L;
+    private static final long serialVersionUID = -805390176650951421L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -592,6 +595,14 @@ public class HearingAggregate implements Aggregate {
                 .withHearingId(hearingId)
                 .withUserId(userId)
                 .withValidateResultAmendmentsTime(validateResultAmendmentsTime)
+                .build()));
+    }
+
+    public Stream<Object> saveReusableInfo(final UUID hearingId, final List<ReusableInfo> reusableInfoCaches, final List<ReusableInfoResults> reusableResultInfoCaches) {
+        return apply(Stream.of(reusableInfoSaved()
+                .withHearingId(hearingId)
+                .withPromptList(reusableInfoCaches)
+                .withResultsList(reusableResultInfoCaches)
                 .build()));
     }
 }

@@ -457,3 +457,12 @@ rule "Command - API - Action - hearing.update-resultline-shared-dates"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.reusable-info"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.reusable-info");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end

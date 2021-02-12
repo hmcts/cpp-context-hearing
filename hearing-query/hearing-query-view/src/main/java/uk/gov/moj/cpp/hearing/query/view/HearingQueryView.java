@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.query.view;
 import static java.time.LocalDate.now;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
@@ -11,6 +12,7 @@ import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
@@ -22,6 +24,7 @@ import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
@@ -30,12 +33,14 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListRespons
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -48,6 +53,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.persistence.NoResultException;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,6 +88,10 @@ public class HearingQueryView {
     private ObjectToJsonValueConverter objectToJsonValueConverter;
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    @Inject
+    private ObjectMapper mapper;
+    @Inject
+    private ReusableInfoService reusableInfoService;
 
     @Inject
     private CourtListRepository courtListRepository;
@@ -110,7 +120,6 @@ public class HearingQueryView {
                 .withName("hearing.get.hearings-for-today")
                 .withMetadataFrom(envelope);
     }
-
 
     public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope,
                                                         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
@@ -167,7 +176,7 @@ public class HearingQueryView {
         final Optional<Hearing> optionalHearing = hearingService.getHearingById(hearingId);
 
         if (!optionalHearing.isPresent()) {
-            return envelop((NowListResponse)null)
+            return envelop((NowListResponse) null)
                     .withName("hearing.get-nows")
                     .withMetadataFrom(envelope);
         }
@@ -225,7 +234,6 @@ public class HearingQueryView {
         }
         return enveloper.withMetadataFrom(query, "hearing.court.list.publish.status").apply(createObjectBuilder().add("publishCourtListStatus", builder.build()).build());
     }
-
 
 
     public JsonEnvelope getLatestHearingsByCourtCentres(final JsonEnvelope envelope,
@@ -294,5 +302,24 @@ public class HearingQueryView {
             LOGGER.error("### No defendant found with courtCentreId = '{}' , courtRoomIds = '{}' and hearingDate = '{}'", payload.getString(FIELD_COURT_CENTRE_ID), payload.getString(FIELD_COURT_ROOM_IDS), payload.getString(FIELD_HEARING_DATE));
             return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
         }
+    }
+
+    public JsonEnvelope getReusableInformation(final JsonEnvelope envelope, final List<Prompt> prompts, final Map<String, String> countryCodesMap) {
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final UUID hearingId = UUID.fromString(payload.getString(FIELD_HEARING_ID));
+        final Optional<uk.gov.justice.core.courts.Hearing> hearingEntity = hearingService.getHearingDomainById(hearingId);
+
+        if (!hearingEntity.isPresent()) {
+            return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+        }
+
+        final uk.gov.justice.core.courts.Hearing hearing = hearingEntity.get();
+        final Map<UUID, Defendant> defendants = hearing.getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .collect(toMap(Defendant::getMasterDefendantId, defendant -> defendant, (defendant1, defendant2) -> defendant1));
+
+        final List<JsonObject> reusableCaseDetailPrompts = reusableInfoService.getCaseDetailReusableInformation(defendants.values(), prompts, countryCodesMap);
+        final JsonObject reusableViewStorePrompts = reusableInfoService.getViewStoreReusableInformation(defendants.values(), reusableCaseDetailPrompts);
+        return envelopeFrom(envelope.metadata(), reusableViewStorePrompts);
     }
 }

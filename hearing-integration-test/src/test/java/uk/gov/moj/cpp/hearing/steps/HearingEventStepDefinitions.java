@@ -249,4 +249,9 @@ public class HearingEventStepDefinitions {
         poll(requestParams(url, mediaType).withHeader(USER_ID, userId))
                 .until(status().is(NOT_FOUND));
     }
+
+    private static String getQueryReusableInfoUrl(){
+        final String queryReusableInfoEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.query.reusable-info");
+        return format("%s/%s",getBaseUri(),queryReusableInfoEndPoint);
+    }
 }

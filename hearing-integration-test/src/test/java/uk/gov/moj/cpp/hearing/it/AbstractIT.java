@@ -69,6 +69,7 @@ public class AbstractIT {
     protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIT.class);
     private static final String ENDPOINT_PROPERTIES_FILE = "endpoint.properties";
+    protected static final String HEARING_CONTEXT = "hearing";
     /**
      * todo this is not a good pattern, only for fixing parallel runs without changing existing
      * codes too much

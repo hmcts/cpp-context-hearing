@@ -250,4 +250,8 @@ subscriptions_descriptor:
         - name: hearing.event.result-amendments-validated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validated.json
 
+        # Reuse Of Information
+        - name: hearing.event.reusable-info-saved
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.reusable-info-saved.json
+
       event_source_name: hearing

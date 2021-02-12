@@ -66,7 +66,7 @@ public class HearingCommandApiTest {
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant",
-            "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates");
+            "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo");
 
     public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -81,6 +81,7 @@ public class HearingCommandApiTest {
     private Map<String, String> notificationApiMethodsToHandlerNames;
     private Map<String, String> outstandingFinesCommandApiMethodsToHandlerNames;
     private Map<String, String> sessionTimeApiMethodsToHandlerNames;
+    private Map<String, String> reusableInfoApiMethodsToHandlerNames;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
@@ -110,6 +111,7 @@ public class HearingCommandApiTest {
         notificationApiMethodsToHandlerNames = apiMethodsToHandlerNames(NotificationCommandApi.class);
         outstandingFinesCommandApiMethodsToHandlerNames = apiMethodsToHandlerNames(OutstandingFinesCommandApi.class);
         sessionTimeApiMethodsToHandlerNames = apiMethodsToHandlerNames(SessionTimeCommandApi.class);
+        reusableInfoApiMethodsToHandlerNames = apiMethodsToHandlerNames(ReusableInfoCommandApi.class);
     }
 
     @Test
@@ -126,7 +128,8 @@ public class HearingCommandApiTest {
                 eventApiMethodsToHandlerNames.values().stream(),
                 notificationApiMethodsToHandlerNames.values().stream(),
                 outstandingFinesCommandApiMethodsToHandlerNames.values().stream(),
-                sessionTimeApiMethodsToHandlerNames.values().stream())
+                sessionTimeApiMethodsToHandlerNames.values().stream(),
+                reusableInfoApiMethodsToHandlerNames.values().stream())
                 .reduce(Stream::concat)
                 .orElseGet(Stream::empty)
                 .collect(toList());

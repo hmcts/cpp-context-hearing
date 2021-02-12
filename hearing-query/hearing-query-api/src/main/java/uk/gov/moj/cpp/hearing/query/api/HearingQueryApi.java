@@ -1,10 +1,14 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static javax.json.Json.createArrayBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.moj.cpp.FeatureToggle.REUSE_OF_INFORMATION;
+
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.annotation.Component;
+import uk.gov.justice.services.core.annotation.FeatureControl;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
@@ -14,6 +18,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
@@ -31,19 +36,21 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.ws.rs.BadRequestException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
 
-import static javax.json.Json.createArrayBuilder;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(Component.QUERY_API)
 public class HearingQueryApi {
@@ -240,6 +247,15 @@ public class HearingQueryApi {
     @Handles("hearing.defendant.outstanding-fine-requests")
     public JsonEnvelope getDefendantOutstandingFineRequests(final JsonEnvelope query) {
         return this.outstandingFineRequestsQueryView.getDefendantOutstandingFineRequests(query);
+    }
+
+    @Handles("hearing.query.reusable-info")
+    @FeatureControl(REUSE_OF_INFORMATION)
+    public JsonEnvelope getReusableInfo(final JsonEnvelope query) {
+        final JsonObject payload = query.payloadAsJsonObject();
+        final Map<String, String> countryCodesMap = referenceDataService.getCountryCodesMap();
+        final List<Prompt> prompts = referenceDataService.getCacheableResultPrompts(getString(payload, "orderedDate"));
+        return this.hearingQueryView.getReusableInformation(query, prompts, countryCodesMap);
     }
 
     @SuppressWarnings("squid:S2629")

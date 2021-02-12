@@ -79,6 +79,15 @@ rule "Query - API - hearing.get-draft-result"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.query.reusable-info"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.query.reusable-info");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "System Users", "Court Clerks", "Legal Advisers", "Court Associate","Judiciary"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.get-application-draft-result"
   when
     $outcome: Outcome();

@@ -1,0 +1,28 @@
+{
+  "reusablePrompts": [
+    {
+      "promptRef": "bailExceptionReason",
+      "masterDefendantId": "defendantId1",
+      "type": "TXT",
+      "value": "$STRING_VALUE_1"
+    },
+    {
+      "promptRef": "designatedLocalAuthority",
+      "masterDefendantId": "defendantId2",
+      "type": "FIXL",
+      "value": "$STRING_VALUE"
+    }
+  ],
+  "reusableResults": [
+    {
+      "shortCode": "BAIC",
+      "masterDefendantId": "String",
+      "value": ""
+    },
+    {
+      "shortCode": "BAIC1",
+      "masterDefendantId": "String",
+      "value": ""
+    }
+  ]
+}

@@ -517,3 +517,21 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
     responses:
       202:
         description: Request accepted
+
+/reusable-info/{hearingId}:
+  post:
+    description: |
+      Reuse of Information through Caching :
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.reusable-info+json
+        name: hearing.reusable-info
+      ...
+    body:
+      application/vnd.hearing.reusable-info+json:
+        schema: !include json/schema/hearing.reusable-info.json
+        example: !include json/hearing.reusable-info.json
+
+    responses:
+      202:
+        description: Request accepted

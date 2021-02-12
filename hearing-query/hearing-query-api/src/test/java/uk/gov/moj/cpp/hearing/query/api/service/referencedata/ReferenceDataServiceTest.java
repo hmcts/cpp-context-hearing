@@ -1,8 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
@@ -16,8 +19,13 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.requester.Requester;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+
+import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,6 +67,40 @@ public class ReferenceDataServiceTest {
         when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(crackedInEffectiveTrialTypesResponseEnvelope());
         final CrackedIneffectiveVacatedTrialTypes trialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         assertEquals(2, trialTypes.getCrackedIneffectiveVacatedTrialTypes().size());
+    }
+
+    @Test
+    public void shouldGetCacheableResultDefinitions() {
+        final String promptRef = "promptRef";
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(cacheableResultDefinitionsEnvelope(promptRef));
+        final List<Prompt> resultPrompts = referenceDataService.getCacheableResultPrompts(Optional.empty());
+        assertThat(resultPrompts.size(), is(1));
+        assertThat(resultPrompts.get(0).getReference(), is(promptRef));
+    }
+
+    private Envelope cacheableResultDefinitionsEnvelope(final String promptRef) {
+        return envelopeFrom(
+                metadataBuilder().
+                        withName("referencedata.get-all-result-definitions").
+                        withId(randomUUID()),
+                createObjectBuilder().add("resultDefinitions",
+                        createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("id", randomUUID().toString())
+                                        .add("prompts", createArrayBuilder()
+                                                .add(createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("reference", promptRef)
+                                                        .add("cacheable", 1)).build()))
+                                .add(createObjectBuilder()
+                                        .add("id", randomUUID().toString())
+                                        .add("prompts", createArrayBuilder()
+                                                .add(createObjectBuilder()
+                                                        .add("id", randomUUID().toString())
+                                                        .add("reference", promptRef)
+                                                        .add("cacheable", 1)).build()))
+                                .build())
+        );
     }
 
 

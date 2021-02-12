@@ -14,12 +14,12 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.mapping.AssociatedDefenceOrganisationJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CustodialEstablishmentJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.OrganisationJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AssociatedPerson;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
@@ -39,6 +39,8 @@ public class CaseDefendantDetailsUpdatedEventListener {
     private DefendantRepository defendantRepository;
     @Inject
     private CustodialEstablishmentJPAMapper custodialEstablishmentJPAMapper;
+    @Inject
+    private OrganisationJPAMapper organisationJPAMapper;
 
     @Inject
     private AssociatedDefenceOrganisationJPAMapper associatedDefenceOrganisationJPAMapper;
@@ -66,8 +68,8 @@ public class CaseDefendantDetailsUpdatedEventListener {
             defendant.setMitigation(defendantIn.getMitigation());
             defendant.setMitigationWelsh(defendantIn.getMitigationWelsh());
             defendant.setIsYouth(defendantIn.getIsYouth());
-            with(defendant.getDefenceOrganisation(), defendantIn.getDefenceOrganisation(), this::setOrganisation);
-            with(defendant.getLegalEntityOrganisation(), getLegalEntityDefendantOrganisation(defendantIn.getLegalEntityDefendant()), this::setOrganisation);
+            defendant.setDefenceOrganisation(organisationJPAMapper.toJPA(defendantIn.getDefenceOrganisation()));
+            defendant.setLegalEntityOrganisation(organisationJPAMapper.toJPA(getLegalEntityDefendantOrganisation(defendantIn.getLegalEntityDefendant())));
             with(defendant.getPersonDefendant(), defendantIn.getPersonDefendant(),
                     (personDefendantJpa, personDefendantPojo) -> {
                         if (nonNull(personDefendantJpa) && nonNull(personDefendantPojo)) {
@@ -80,7 +82,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
                             personDefendantJpa.setEmployerPayrollReference(personDefendantPojo.getEmployerPayrollReference());
                             personDefendantJpa.setPerceivedBirthYear(personDefendantPojo.getPerceivedBirthYear());
                             personDefendantJpa.setCustodialEstablishment(custodialEstablishmentJPAMapper.toJPA(personDefendantPojo.getCustodialEstablishment()));
-                            with(personDefendantJpa.getEmployerOrganisation(), personDefendantPojo.getEmployerOrganisation(), this::setOrganisation);
+                            personDefendantJpa.setEmployerOrganisation(organisationJPAMapper.toJPA(personDefendantPojo.getEmployerOrganisation()));
                             with(personDefendantJpa.getPersonDetails(), personDefendantPojo.getPersonDetails(), this::setPerson);
                         }
                     });
@@ -155,17 +157,6 @@ public class CaseDefendantDetailsUpdatedEventListener {
             contactJpa.setPrimaryEmail(contactPojo.getPrimaryEmail());
             contactJpa.setSecondaryEmail(contactPojo.getSecondaryEmail());
             contactJpa.setWork(contactPojo.getWork());
-        }
-    }
-
-    private void setOrganisation(final Organisation organisationJpa, final uk.gov.justice.core.courts.Organisation organisationPojo) {
-        if (nonNull(organisationJpa) && nonNull(organisationPojo)) {
-            organisationJpa.setId(randomUUID());
-            organisationJpa.setIncorporationNumber(organisationPojo.getIncorporationNumber());
-            organisationJpa.setName(organisationPojo.getName());
-            organisationJpa.setRegisteredCharityNumber(organisationPojo.getRegisteredCharityNumber());
-            with(organisationJpa.getContact(), organisationPojo.getContact(), this::setContact);
-            with(organisationJpa.getAddress(), organisationPojo.getAddress(), this::setAddress);
         }
     }
 
