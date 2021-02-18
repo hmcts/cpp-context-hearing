@@ -29,4 +29,12 @@ public class ResultAmendmentsValidatedEventListener {
 
         hearingRepository.findBy(validateResultAmendmentsRequested.getHearingId()).setHearingState(VALIDATED);
     }
+
+    @Transactional
+    @Handles("hearing.event.validate-result-amendments-requested")
+    @SuppressWarnings({"squid:S4144", "squid:S1186"})
+    //Dummy event to avoid DLQ caused due to event renaming
+    public void validateResultAmendmentsRequested(final JsonEnvelope envelope) {
+
+    }
 }

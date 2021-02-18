@@ -250,6 +250,9 @@ subscriptions_descriptor:
         - name: hearing.event.result-amendments-validated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validated.json
 
+        - name: hearing.event.validate-result-amendments-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.validate-result-amendments-requested.json
+
         # Hearing Amendments cancel
         - name: hearing.events.result-amendments-cancelled
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled.json
