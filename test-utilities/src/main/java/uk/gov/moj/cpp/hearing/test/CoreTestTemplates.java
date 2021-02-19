@@ -12,6 +12,7 @@ import static uk.gov.justice.core.courts.DefenceCounsel.defenceCounsel;
 import static uk.gov.justice.core.courts.FundingType.REPRESENTATION_ORDER;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
+import static uk.gov.justice.core.courts.SecondaryCJSCode.secondaryCJSCode;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.NI_NUMBER;
@@ -276,13 +277,13 @@ public class CoreTestTemplates {
                     .withIsDiscontinued(true)
                     .withProceedingsConcluded(true)
                     .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
-                            .withId(randomUUID())
-                            .withLabel(REPORTING_RESTRICTION_LABEL_YES)
-                            .withJudicialResultId(randomUUID()).build(),
+                                    .withId(randomUUID())
+                                    .withLabel(REPORTING_RESTRICTION_LABEL_YES)
+                                    .withJudicialResultId(randomUUID()).build(),
                             ReportingRestriction.reportingRestriction()
-                            .withId(randomUUID())
-                            .withLabel(REPORTING_RESTRICTION_LABEL_SECOND)
-                            .withJudicialResultId(randomUUID()).build()))
+                                    .withId(randomUUID())
+                                    .withLabel(REPORTING_RESTRICTION_LABEL_SECOND)
+                                    .withJudicialResultId(randomUUID()).build()))
                     .withOffenceDateCode(args.getOffenceDateCode());
         }
 
@@ -530,6 +531,13 @@ public class CoreTestTemplates {
                         .withJudicialResultTypeId(fromString("8c67b30a-418c-11e8-842f-0ed5f89f718b"))
                         .withLabel("Defendant's details changed")
                         .withCjsCode("4592")
+                        .withSecondaryCJSCodes(asList(secondaryCJSCode()
+                                .withCjsCode("1234")
+                                .withText("SecondaryCJSCode text1")
+                                .build(), secondaryCJSCode()
+                                .withCjsCode("5678")
+                                .withText("SecondaryCJSCode text2")
+                                .build()))
                         .build()))
                 .withOffences(
                         structure.getV().stream()
@@ -663,7 +671,7 @@ public class CoreTestTemplates {
 
 
     public static Hearing.Builder hearing(final CoreTemplateArguments args) {
-       return hearing(args, false);
+        return hearing(args, false);
     }
 
     public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {

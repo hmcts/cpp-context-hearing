@@ -1,8 +1,24 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Spy;
+import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITIONS_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITION_ASSESSMENTS_REPORTS_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_MAGISTRATE_COURT_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_TO_HOSPITAL_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_ON_CONDITIONAL_BAIL_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SEND_TO_CROWN_COURT_ON_CONDITIONAL_BAIL_ID;
 
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
@@ -21,26 +37,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doReturn;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_ON_CONDITIONAL_BAIL_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMANDED_IN_CUSTODY_TO_HOSPITAL_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SEND_TO_CROWN_COURT_ON_CONDITIONAL_BAIL_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITIONS_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITION_ASSESSMENTS_REPORTS_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_MAGISTRATE_COURT_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.Spy;
 
 
 public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest {
@@ -55,7 +54,7 @@ public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest
     public void setUp() throws IOException {
         super.setUp();
         doReturn(Optional.empty()).when(nextHearingHelper).getNextHearing(any(), any(), any(), any());
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
     }
 
     @Test

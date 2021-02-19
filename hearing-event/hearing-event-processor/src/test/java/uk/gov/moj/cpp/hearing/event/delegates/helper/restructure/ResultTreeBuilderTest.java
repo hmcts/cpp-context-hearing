@@ -1,14 +1,12 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
@@ -22,7 +20,9 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
 
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.SecondaryCJSCode;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
@@ -30,7 +30,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 
 import java.io.IOException;
 import java.util.List;
-import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,33 +37,39 @@ import org.junit.Test;
 public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     private ResultTreeBuilder target;
+    private List<ResultDefinition> resultDefinitionList;
 
     @Before
     public void setUp() throws IOException {
         super.setUp();
-        target = new ResultTreeBuilder(referenceDataService, nextHearingHelper);
+        target = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
+        resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
+                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
+                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
     }
 
     @Test
     public void shouldBuildSimpleTwoLayerTree() {
-        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
-                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
-
         final ResultsShared resultsShared = getResultsShared(resultDefinitionList);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
+        final TreeNode<ResultLine> firstTreeNode = results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get();
 
-        assertThat(results.stream().filter(jr -> fromString(REMAND_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get().getChildren().size(), is(0));
+        assertThat(firstTreeNode.getChildren().size(), is(0));
         assertThat(results.size(), is(3));
+
+        final TreeNode<ResultLine> secondTreeNode = results.stream().filter(jr -> fromString(REMANDED_IN_CUSTODY_ID).equals(jr.getResultDefinitionId())).findAny().get();
+        final JudicialResult judicialResult = secondTreeNode.getJudicialResult();
+        final List<SecondaryCJSCode> secondaryCjsCodes = judicialResult.getSecondaryCJSCodes();
+        assertThat(secondaryCjsCodes, hasSize(2));
+        assertThat(secondaryCjsCodes.get(0).getCjsCode(), notNullValue());
+        assertThat(secondaryCjsCodes.get(0).getText(), notNullValue());
+        assertThat(secondaryCjsCodes.get(1).getCjsCode(), notNullValue());
+        assertThat(secondaryCjsCodes.get(1).getText(), notNullValue());
     }
 
     @Test
     public void shouldBuildSimplePromptWithValues() {
-        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
-                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
         final String promptValue = "abc";
         final ResultsShared resultsShared = getResultsSharedWithPromptValue(resultDefinitionList, promptValue);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
@@ -81,10 +86,6 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildSimplePromptWithValuesCommaSeparated() {
-        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
-                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
         final String promptValue = "abc###def";
         final ResultsShared resultsShared = getResultsSharedWithPromptValue(resultDefinitionList, promptValue);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
@@ -101,10 +102,6 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Test
     public void shouldBuildSimplePromptWithWelshValuesCommaSeparated() {
-        final List<ResultDefinition> resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
-                REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
-                        REMANDED_IN_CUSTODY_TO_HOSPITAL_ID.equals(resultDefinition.getId().toString())).collect(toList());
         final String promptValue = "abc###def";
         final ResultsShared resultsShared = getResultsSharedWithWelshPromptValue(resultDefinitionList, promptValue);
         final List<TreeNode<ResultLine>> results = target.build(dummyEnvelope, resultsShared);
@@ -207,47 +204,14 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void shouldGetRootResultLineFromGrandChild() {
-        final ResultLine parent = buildResultLine(null);
-        final ResultLine child = buildResultLine(parent.getResultLineId());
-        final ResultLine grandChild = buildResultLine(child.getResultLineId());
-        final List<ResultLine> resultLineList = asList(parent, child, grandChild);
-        final ResultLine rootResultLine = target.getRootResultLine(resultLineList, grandChild);
-        assertThat(rootResultLine, is(notNullValue()));
-        assertThat(rootResultLine.getResultLineId(), is(parent.getResultLineId()));
-        assertThat(rootResultLine.getResultDefinitionId(), is(parent.getResultDefinitionId()));
-    }
+    public void shouldBuildSuccessfullyWithJudicialResult() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON, ResultsShared.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
 
-    @Test
-    public void shouldGetRootResultLineFromChild() {
-        final ResultLine parent = buildResultLine(null);
-        final ResultLine child = buildResultLine(parent.getResultLineId());
-        final List<ResultLine> resultLineList = asList(parent, child);
-        final ResultLine rootResultLine = target.getRootResultLine(resultLineList, child);
-        assertThat(rootResultLine, is(notNullValue()));
-        assertThat(rootResultLine.getResultLineId(), is(parent.getResultLineId()));
-        assertThat(rootResultLine.getResultDefinitionId(), is(parent.getResultDefinitionId()));
-    }
-
-    @Test
-    public void shouldGetRootResultLineFromParent() {
-        final ResultLine parent = buildResultLine(null);
-        final List<ResultLine> resultLineList = asList(parent);
-        final ResultLine rootResultLine = target.getRootResultLine(resultLineList, parent);
-        assertThat(rootResultLine, is(notNullValue()));
-        assertThat(rootResultLine.getResultLineId(), is(parent.getResultLineId()));
-        assertThat(rootResultLine.getResultDefinitionId(), is(parent.getResultDefinitionId()));
-    }
-
-    private ResultLine buildResultLine(UUID parentResultId) {
-        final ResultLine.Builder resultLineBuilder = ResultLine.resultLine()
-                .withResultLineId(randomUUID())
-                .withResultDefinitionId(randomUUID());
-
-        if (nonNull(parentResultId)) {
-            resultLineBuilder.withParentResultLineIds(singletonList(parentResultId));
-        }
-
-        return resultLineBuilder.build();
+        assertThat(resultLineTree.size(), is(9));
+        final List<TreeNode<ResultLine>> topLevelResultLineParents = filterBy(resultLineTree, r -> r.getParents().size() == 0 && r.getChildren().size() > 0);
+        assertThat(topLevelResultLineParents.size(), is(1));
+        assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
     }
 }

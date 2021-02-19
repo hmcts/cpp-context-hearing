@@ -1,7 +1,15 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
+
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
@@ -9,15 +17,8 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import java.io.IOException;
 import java.util.List;
 
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
+import org.junit.Before;
+import org.junit.Test;
 
 public class RestructureNextHearingHelperTest extends AbstractRestructuringTest {
 
@@ -26,7 +27,7 @@ public class RestructureNextHearingHelperTest extends AbstractRestructuringTest 
     @Before
     public void setUp() throws IOException {
         super.setUp();
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
     }
 
     @Test

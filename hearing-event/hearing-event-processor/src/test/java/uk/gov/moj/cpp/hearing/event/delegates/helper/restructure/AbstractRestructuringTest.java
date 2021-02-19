@@ -42,6 +42,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -135,6 +136,9 @@ public abstract class AbstractRestructuringTest {
 
     @Spy
     protected ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+
+    @Spy
+    protected final ResultLineHelper resultLineHelper = new ResultLineHelper();
 
     @Spy
     @InjectMocks

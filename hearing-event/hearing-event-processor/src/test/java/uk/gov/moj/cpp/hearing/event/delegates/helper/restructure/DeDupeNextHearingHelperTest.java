@@ -27,7 +27,7 @@ public class DeDupeNextHearingHelperTest extends AbstractRestructuringTest {
     @Before
     public void setUp() throws IOException {
         super.setUp();
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
     }
 
     @Test

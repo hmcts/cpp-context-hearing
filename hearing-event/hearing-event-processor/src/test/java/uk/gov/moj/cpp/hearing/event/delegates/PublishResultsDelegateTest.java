@@ -103,7 +103,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     private ArgumentCaptor<Hearing> custodyLimitCalculatorHearingIn;
 
     @Spy
-    private ResultTreeBuilder resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper);
+    private ResultTreeBuilder resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
 
     @Spy
     private RestructuringHelper restructringHelper = new RestructuringHelper(resultTreeBuilder);

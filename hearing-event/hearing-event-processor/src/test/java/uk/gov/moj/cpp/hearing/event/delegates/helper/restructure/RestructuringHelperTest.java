@@ -1,9 +1,19 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
-import org.apache.commons.lang3.StringUtils;
-import org.hamcrest.CoreMatchers;
-import org.junit.Before;
-import org.junit.Test;
+import static java.util.Objects.nonNull;
+import static java.util.UUID.fromString;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.CO_HEARING_EVENT_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DIRS_HEARING_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_TEXT_SPLIT_REGEX;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
+
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -15,19 +25,10 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import java.io.IOException;
 import java.util.List;
 
-import static java.util.Objects.nonNull;
-import static java.util.UUID.fromString;
-import static java.util.stream.Collectors.toList;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_TEXT_SPLIT_REGEX;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DIRS_HEARING_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.CO_HEARING_EVENT_JSON;
+import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.CoreMatchers;
+import org.junit.Before;
+import org.junit.Test;
 
 public class RestructuringHelperTest extends AbstractRestructuringTest {
 
@@ -37,7 +38,7 @@ public class RestructuringHelperTest extends AbstractRestructuringTest {
     @Before
     public void setUp() throws IOException {
         super.setUp();
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
         target = new RestructuringHelper(resultTreeBuilder);
     }
 

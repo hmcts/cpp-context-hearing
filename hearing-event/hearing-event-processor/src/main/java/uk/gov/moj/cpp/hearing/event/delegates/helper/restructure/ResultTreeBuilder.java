@@ -5,6 +5,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
+import static uk.gov.justice.core.courts.SecondaryCJSCode.secondaryCJSCode;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier.SEPARATOR;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT;
@@ -16,22 +18,24 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.T
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResult.Builder;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JudicialResultPromptDurationElement;
 import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.ResultDefinitionNotFoundException;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.JudicialResultPromptDurationHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.SecondaryCJSCode;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.math.BigDecimal;
@@ -48,11 +52,13 @@ import javax.inject.Inject;
 public class ResultTreeBuilder {
     private final ReferenceDataService referenceDataService;
     private final NextHearingHelper nextHearingHelper;
+    private final ResultLineHelper resultLineHelper;
 
     @Inject
-    public ResultTreeBuilder(final ReferenceDataService referenceDataService, final NextHearingHelper nextHearingHelper) {
+    public ResultTreeBuilder(final ReferenceDataService referenceDataService, final NextHearingHelper nextHearingHelper, final ResultLineHelper resultLineHelper) {
         this.referenceDataService = referenceDataService;
         this.nextHearingHelper = nextHearingHelper;
+        this.resultLineHelper = resultLineHelper;
     }
 
     public List<TreeNode<ResultLine>> build(final JsonEnvelope envelope, final ResultsShared resultsShared) {
@@ -93,7 +99,7 @@ public class ResultTreeBuilder {
                         }
 
                         final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, resultLines, resultsShared);
-                        final TreeNode<ResultLine> treeNode = getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
+                        final TreeNode<ResultLine> treeNode = resultLineHelper.getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
                         result.put(treeNode.getId(), treeNode);
                     });
         });
@@ -113,7 +119,7 @@ public class ResultTreeBuilder {
                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), hearing.getId(), resultLine.getOrderedDate()));
         }
 
-        final JudicialResult.Builder builder = JudicialResult.judicialResult()
+        final Builder builder = judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
                 .withAmendmentDate(resultLine.getAmendmentDate())
@@ -153,11 +159,14 @@ public class ResultTreeBuilder {
                 .withResultWording(resultDefinition.getResultWording())
                 .withWelshResultWording(resultDefinition.getWelshResultWording());
 
+        if (!isEmpty(resultDefinition.getSecondaryCJSCodes())) {
+            builder.withSecondaryCJSCodes(getSecondaryCjsCodeList(resultDefinition.getSecondaryCJSCodes()));
+        }
         //Set Parent Judicial Result Id and Judicial Result Type Id
         if (!isEmpty(resultLine.getParentResultLineIds())) {
             final List<UUID> parentResultLineIds = resultLine.getParentResultLineIds();
             parentResultLineIds.forEach(parentResultLineId -> {
-                final ResultLine parentResultLine = getResultLine(resultLines, parentResultLineId);
+                final ResultLine parentResultLine = resultLineHelper.findResultLine(resultLines, parentResultLineId);
                 if(nonNull(parentResultLine)) {
                     builder.withParentJudicialResultId(parentResultLine.getResultLineId());
                     builder.withParentJudicialResultTypeId(parentResultLine.getResultDefinitionId());
@@ -165,7 +174,7 @@ public class ResultTreeBuilder {
             });
         }
 
-        final ResultLine rootResultLine = getRootResultLine(resultLines, resultLine);
+        final ResultLine rootResultLine = resultLineHelper.getResultLine(resultLines, resultLine);
         if (nonNull(rootResultLine)) {
             builder.withRootJudicialResultId(rootResultLine.getResultLineId());
             builder.withRootJudicialResultTypeId(rootResultLine.getResultDefinitionId());
@@ -200,38 +209,6 @@ public class ResultTreeBuilder {
         return builder.build();
     }
 
-    ResultLine getRootResultLine(final List<ResultLine> resultLines, final ResultLine currentResultLine) {
-        if(isNull(currentResultLine) || isEmpty(currentResultLine.getParentResultLineIds())) {
-            return currentResultLine;
-        }
-
-        ResultLine resultLine = null;
-        final List<UUID> parentResultLineIds = currentResultLine.getParentResultLineIds();
-        for (final UUID parentResultLineId : parentResultLineIds) {
-            final ResultLine parentResultLine = getResultLine(resultLines, parentResultLineId);
-            resultLine = getRootResultLine(resultLines, parentResultLine);
-        }
-
-        return resultLine;
-    }
-
-    private ResultLine getResultLine(final List<ResultLine> resultLines, final UUID resultLineId) {
-        return resultLines.stream().filter(resultLine -> resultLineId.equals(resultLine.getResultLineId())).findFirst().orElse(null);
-    }
-
-    private TreeNode<ResultLine> getResultLineTreeNode(final Target target, final ResultLine resultLine, final TreeNode<ResultDefinition> resultDefinitionNode, final JudicialResult judicialResult) {
-        final TreeNode<ResultLine> treeNode = new TreeNode<>(resultLine.getResultLineId(), resultLine);
-        treeNode.setResultDefinition(resultDefinitionNode);
-        treeNode.setJudicialResult(judicialResult);
-        treeNode.setTargetId(target.getTargetId());
-        treeNode.setResultDefinitionId(resultDefinitionNode.getId());
-        treeNode.setApplicationId(target.getApplicationId());
-        treeNode.setDefendantId(target.getDefendantId());
-        treeNode.setOffenceId(target.getOffenceId());
-        treeNode.setLevel(resultLine.getLevel());
-        return treeNode;
-    }
-
     private DelegatedPowers getOrDefaultCourtClerkAsDelegatePowers(final Map<UUID, CompletedResultLineStatus> completedResultLinesStatusMap, final DelegatedPowers defaultCourtClerk, final UUID resultLineId) {
         final CompletedResultLineStatus completedResultLineStatus = completedResultLinesStatusMap.getOrDefault(resultLineId, null);
         final DelegatedPowers courtClerk = nonNull(completedResultLineStatus) ? completedResultLineStatus.getCourtClerk() : defaultCourtClerk;
@@ -252,5 +229,16 @@ public class ResultTreeBuilder {
                         }
                 )
                 .collect(toList());
+    }
+    
+    private List<uk.gov.justice.core.courts.SecondaryCJSCode> getSecondaryCjsCodeList(final List<SecondaryCJSCode> secondaryCJSCodes){
+        final List<uk.gov.justice.core.courts.SecondaryCJSCode> secondaryCJSCodeList = new ArrayList<>();
+        for (final SecondaryCJSCode secondaryCJSCode: secondaryCJSCodes) {
+            secondaryCJSCodeList.add(secondaryCJSCode()
+                    .withCjsCode(secondaryCJSCode.getCjsCode())
+                    .withText(secondaryCJSCode.getText())
+                    .build());
+        }
+        return secondaryCJSCodeList;
     }
 }

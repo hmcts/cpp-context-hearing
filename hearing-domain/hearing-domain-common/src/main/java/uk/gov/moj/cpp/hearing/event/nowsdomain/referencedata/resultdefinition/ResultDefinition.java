@@ -80,6 +80,8 @@ public class ResultDefinition {
 
     private List<ResultDefinitionRuleType> resultDefinitionRules = new ArrayList<>();
 
+    private List<SecondaryCJSCode> secondaryCJSCodes = new ArrayList<>();
+
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
     }
@@ -387,6 +389,15 @@ public class ResultDefinition {
 
     public ResultDefinition setWelshResultWording(final String welshResultWording) {
         this.welshResultWording = welshResultWording;
+        return this;
+    }
+
+    public List<SecondaryCJSCode> getSecondaryCJSCodes() {
+        return secondaryCJSCodes;
+    }
+
+    public ResultDefinition setSecondaryCJSCodes(final List<SecondaryCJSCode> secondaryCJSCodes) {
+        this.secondaryCJSCodes = secondaryCJSCodes;
         return this;
     }
 }

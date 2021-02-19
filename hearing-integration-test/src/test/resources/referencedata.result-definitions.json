@@ -45028,6 +45028,16 @@
       "convicted": "N",
       "d20": false,
       "cjsCode": "4592",
+      "secondaryCJSCodes": [
+        {
+          "cjsCode":"1234",
+          "text":"SecondaryCjsCode text1"
+        },
+        {
+          "cjsCode":"5678",
+          "text":"SecondaryCjsCode text2"
+        }
+      ],
       "postHearingCustodyStatus": "A",
       "jurisdiction": "B",
       "lCode": "DDCH",
