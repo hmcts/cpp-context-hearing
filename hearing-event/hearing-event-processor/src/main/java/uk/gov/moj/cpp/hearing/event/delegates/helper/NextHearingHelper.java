@@ -8,11 +8,14 @@ import static java.lang.System.lineSeparator;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static uk.gov.justice.core.courts.CourtCentre.courtCentre;
 import static uk.gov.justice.core.courts.NextHearing.nextHearing;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.ADJOURNMENT_REASONS;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.COMMA_REGEX;
@@ -116,7 +119,7 @@ public class NextHearingHelper {
         }
 
         LOGGER.warn("Cannot create nextHearing object for resultDefinition id={}", resultDefinitionId);
-        return Optional.empty();
+        return empty();
     }
 
     @SuppressWarnings({"squid:S1067"})
@@ -147,9 +150,11 @@ public class NextHearingHelper {
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
         final NextHearing.Builder builder = nextHearing();
 
-        populateListedStartDateTime(builder, promptsMap);
+        final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional = getCourtCentreOrganisationUnit(context, promptsMap);
+
+        populateListedStartDateTime(builder, promptsMap, courtCentreOrgOptional);
         populateEstimatedDuration(builder, promptsMap);
-        populateCourtCentre(builder, context, promptsMap);
+        populateCourtCentre(builder, context, promptsMap, courtCentreOrgOptional);
         populateAdjournmentReasons(builder, context, resultLines);
         populateHearingType(builder, context, promptsMap);
         populateJurisdictionType(builder, resultDefinition.getId().toString());
@@ -174,12 +179,15 @@ public class NextHearingHelper {
                 .collect(toMap(prompt -> valueOf(prompt.getPromptReference()), prompt -> prompt));
     }
 
-    private void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+    private void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final Optional<CourtCentreOrganisationUnit> courtCentreOrganisationUnit) {
         final String hDateValue = getPromptValue(promptsMap, HDATE);
         final String dateValue = hDateValue != null ? hDateValue : getPromptValue(promptsMap, fixedDate);
-        final String timeValue = getPromptValue(promptsMap, timeOfHearing);
-        LOGGER.info("Populating listed start date time using date: {} and time: {}", dateValue, timeValue);
-        builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, timeValue));
+        final String timeValueFromPrompt = getPromptValue(promptsMap, timeOfHearing);
+        final String defaultStartTimeForOrganisationUnit = courtCentreOrganisationUnit.map(CourtCentreOrganisationUnit::getDefaultStartTime).orElse(null);
+
+        final String timeToUse = isNotBlank(timeValueFromPrompt) ? timeValueFromPrompt : defaultStartTimeForOrganisationUnit;
+        LOGGER.info("Populating listed start date time using date: {} and time: {}", dateValue, timeToUse);
+        builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, timeToUse));
     }
 
     private String getPromptValue(final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearingPromptReference nextHearingPromptReference) {
@@ -264,9 +272,14 @@ public class NextHearingHelper {
 
     private void populateCourtCentre(final NextHearing.Builder builder,
                                      final JsonEnvelope context,
-                                     final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+                                     final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap,
+                                     Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional) {
 
-        final CourtCentre courtCentre = extractCourtCentre(context, promptsMap);
+        if (!courtCentreOrgOptional.isPresent()) {
+            return;
+        }
+
+        final CourtCentre courtCentre = extractCourtCentre(context, promptsMap, courtCentreOrgOptional.get());
         LOGGER.info("Populating court centre: {}", courtCentre);
         if (courtCentre != null) {
             builder.withCourtCentre(courtCentre);
@@ -274,21 +287,10 @@ public class NextHearingHelper {
     }
 
     private CourtCentre extractCourtCentre(final JsonEnvelope context,
-                                           final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+                                           final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap,
+                                           CourtCentreOrganisationUnit courtCentreOrg) {
 
-        Optional<JudicialResultPrompt> courtHouse = ofNullable(ofNullable(promptsMap.get(hCHOUSEOrganisationName)).orElse(promptsMap.get(HCHOUSE)));
-
-        if (!courtHouse.isPresent()) {
-            return null;
-        }
-        final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional = courtHouseReverseLookup.getCourtCentreByName(context, courtHouse.get().getValue());
-
-        if (!courtCentreOrgOptional.isPresent()) {
-            return null;
-        }
-        final CourtCentreOrganisationUnit courtCentreOrg = courtCentreOrgOptional.get();
-
-        final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
+        final CourtCentre.Builder courtCentreBuilder = courtCentre()
                 .withName(courtCentreOrg.getOucodeL3Name())
                 .withWelshName(courtCentreOrg.getOucodeL3WelshName())
                 .withPsaCode(parseInt(courtCentreOrg.getLja()))
@@ -322,6 +324,15 @@ public class NextHearingHelper {
         return courtCentreBuilder.build();
     }
 
+    private Optional<CourtCentreOrganisationUnit> getCourtCentreOrganisationUnit(final JsonEnvelope context, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        Optional<JudicialResultPrompt> courtHouse = ofNullable(ofNullable(promptsMap.get(hCHOUSEOrganisationName)).orElse(promptsMap.get(HCHOUSE)));
+
+        if (!courtHouse.isPresent()) {
+            return empty();
+        }
+        return courtHouseReverseLookup.getCourtCentreByName(context, courtHouse.get().getValue());
+    }
+
     private static void populateJurisdictionType(final NextHearing.Builder builder,
                                                  final String resultDefinitionId) {
         if (CROWN_COURT_RESULT_DEFINITION_ID.equals(resultDefinitionId)) {
@@ -339,14 +350,13 @@ public class NextHearingHelper {
                 || MAGISTRATE_RESULT_DEFINITION_ID.equals(resultDefinitionId);
     }
 
-    private static ZonedDateTime convertDateTimeToUTC(String date, String time) {
+    private static ZonedDateTime convertDateTimeToUTC(final String date, final String time) {
         if (!isEmpty(date)) {
-            final String listingTime = time;
-            if (isEmpty(listingTime)) {
+            if (isEmpty(time)) {
                 return ZonedDateTime.of(LocalDate.parse(date, DateTimeFormatter.ofPattern(DATE_FORMATS_WITHOUT_TIME)), LocalTime.parse(START_OF_DAY_TIME), UTC);
 
             }
-            return ZonedDateTime.parse(date.concat(SPACE).concat(listingTime), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
+            return ZonedDateTime.parse(date.concat(SPACE).concat(time), DateTimeFormatter.ofPattern(DATE_FORMATS).withZone(ZoneId.of(EUROPE_LONDON))).withZoneSameInstant(UTC);
         }
 
         return null;

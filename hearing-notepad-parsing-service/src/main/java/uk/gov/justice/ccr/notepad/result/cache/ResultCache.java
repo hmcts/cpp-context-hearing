@@ -206,7 +206,7 @@ public class ResultCache {
 
     private void putEntry(final LocalDate orderedDate, final String key, final Object value) {
         final String keyWithOrderedDate = getFormattedKey(key, orderedDate);
-        LOGGER.info("Add to cache key {} value {}", keyWithOrderedDate, value);
+        LOGGER.debug("Add to cache key {} value {}", keyWithOrderedDate, value);
         cache.asMap().put(keyWithOrderedDate, value);
     }
 
