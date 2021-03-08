@@ -42,12 +42,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ValidateResultAmendmentsCommandHandlerTest {
 
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(ResultAmendmentsValidated.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(ResultAmendmentsValidationFailed.class);
 
     @Mock
     private EventStream hearingEventStream;
@@ -74,7 +75,7 @@ public class ValidateResultAmendmentsCommandHandlerTest {
     }
 
     @Test
-    public void setValidateResultAmendments() throws EventStreamException, IOException {
+    public void shouleFailResultValidationsForReject() throws EventStreamException, IOException {
 
         //Given
         final UUID hearingId = UUID.randomUUID();
@@ -86,16 +87,16 @@ public class ValidateResultAmendmentsCommandHandlerTest {
 
         final JsonObject validateResultAmendments = createObjectBuilder()
                 .add("id", hearingId.toString())
-                .add("userId", userId.toString())
+                .add("validateAction", "REJECT")
                 .add("validateAmendmentsTime", validateAmendmentsTime.toString()).build();
 
         final JsonObject validateResultAmendmentsJsonObject = objectToJsonObjectConverter.convert(validateResultAmendments);
-        final JsonEnvelope commandEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.validate-result-amendments"), validateResultAmendmentsJsonObject);
+        final JsonEnvelope commandEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.validate-result-amendments").withUserId(UUID.randomUUID().toString()), validateResultAmendmentsJsonObject);
         validateResultAmendmentsCommandHandler.validateResultAmendments(commandEnvelope);
 
         assertThat(
                 verifyAppendAndGetArgumentFrom(this.hearingEventStream),
-                streamContaining(jsonEnvelope(withMetadataEnvelopedFrom(commandEnvelope).withName("hearing.event.result-amendments-validated"),
+                streamContaining(jsonEnvelope(withMetadataEnvelopedFrom(commandEnvelope).withName("hearing.event.result-amendments-validation-failed"),
                         payloadIsJson(allOf(withJsonPath("$.hearingId", is(hearingId.toString())))))
                 ));
     }

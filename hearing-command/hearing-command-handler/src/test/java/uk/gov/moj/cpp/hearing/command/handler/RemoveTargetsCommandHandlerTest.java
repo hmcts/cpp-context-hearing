@@ -15,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import org.junit.Ignore;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -25,6 +26,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -49,6 +51,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
+
 public class RemoveTargetsCommandHandlerTest {
 
     private static final String HEARING_COMMAND = "hearing.command.remove-targets";
@@ -89,36 +92,7 @@ public class RemoveTargetsCommandHandlerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
-    @Test
-    public void eventTargetRemovedShouldBeRaised() throws Exception {
 
-        CommandHelpers.InitiateHearingCommandHelper hearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
-        final UUID hearingId = hearingObject.getHearingId();
-        final UUID targetId = randomUUID();
-
-        final HearingAggregate hearingAggregate = new HearingAggregate() {{
-            apply(new HearingInitiated(hearingObject.getHearing()));
-            apply(new DraftResultSaved(new Target(null, randomUUID(), "some content", hearingId, null, randomUUID(), null, false, targetId)));
-        }};
-
-        when(this.eventSource.getStreamById(hearingObject.getHearingId())).thenReturn(this.hearingEventStream);
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
-
-        final JsonObject payload = createObjectBuilder()
-                .add("hearingId", hearingId.toString())
-                .add("targetIds", createArrayBuilder().add(targetId.toString()).build())
-                .build();
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(HEARING_COMMAND), payload);
-
-        handler.removeTargets(jsonEnvelope);
-
-        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
-
-        assertThat(asPojo(events.get(0), TargetRemoved.class), isBean(TargetRemoved.class)
-                .with(TargetRemoved::getHearingId, is(hearingId))
-                .with(TargetRemoved::getTargetId, is(targetId))
-        );
-    }
 
     @Test
     public void eventActionIgnoredShouldBeRaisedForInvalidTargetId() throws Exception {

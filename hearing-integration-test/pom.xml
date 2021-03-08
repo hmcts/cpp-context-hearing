@@ -44,7 +44,7 @@
             <scope>test</scope>
             <version>${project.version}</version>
         </dependency>
-        <!-- TODO need to get rid of the rest-assured dependency as framework have provided tools to achieve the same -->
+        <!--  need to get rid of the rest-assured dependency as framework have provided tools to achieve the same -->
         <dependency>
             <groupId>com.jayway.restassured</groupId>
             <artifactId>rest-assured</artifactId>

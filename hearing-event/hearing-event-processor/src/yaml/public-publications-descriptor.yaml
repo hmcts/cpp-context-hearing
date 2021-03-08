@@ -43,6 +43,9 @@ subscriptions_descriptor:
         - name: public.hearing.save-draft-result-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-save-draft-result-failed.json
 
+        - name: public.hearing.share-results-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-share-results-failed.json
+
         - name: public.hearing.application-draft-resulted
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-application-draft-resulted.json
 
@@ -144,5 +147,29 @@ subscriptions_descriptor:
         # Duplicate Hearing
         - name: public.events.hearing.marked-as-duplicate
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.marked-as-duplicate.json
+
+        - name: public.hearing.result-amendments-rejected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.result-amendments-rejected.json
+
+        - name: public.hearing.result-amendments-cancelled
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.result-amendments-cancelled.json
+
+        - name: public.hearing.result-amendments-validated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.result-amendments-validated.json
+
+        - name: public.hearing.approval-rejected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event.approval-rejected.json
+
+        - name: public.hearing.hearing-locked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event.hearing-locked.json
+
+        - name: public.hearing.hearing-locked-by-other-user
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event.hearing-locked-by-other-user.json
+
+        - name: public.hearing.approval-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.approval-requested.json
+
+        - name: public.hearing.result-amendments-validation-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validation-failed.json
 
       event_source_name: public.event.source

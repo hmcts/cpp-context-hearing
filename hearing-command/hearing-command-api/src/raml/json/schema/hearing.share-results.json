@@ -12,6 +12,9 @@
       "items": {
         "$ref": "#/definitions/resultLine"
       }
+    },
+    "newHearingState": {
+      "type": "string"
     }
   },
   "required": [

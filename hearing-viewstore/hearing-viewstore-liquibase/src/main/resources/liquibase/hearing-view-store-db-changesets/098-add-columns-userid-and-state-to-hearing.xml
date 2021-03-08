@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="097" author="hearing"
+               logicalFilePath="097-add-columns-userid-and-state-to-hearing.xml">
+        <addColumn tableName="ha_hearing">
+            <column name="hearing_state" type="text"/>
+        </addColumn>
+        <addColumn tableName="ha_hearing">
+            <column name="amended_by_user_id" type="UUID">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>

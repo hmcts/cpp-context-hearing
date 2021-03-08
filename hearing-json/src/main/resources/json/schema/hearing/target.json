@@ -10,6 +10,12 @@
     "targetId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     },
+    "reasonsList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
     "defendantId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     },

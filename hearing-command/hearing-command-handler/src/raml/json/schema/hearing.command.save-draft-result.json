@@ -12,6 +12,15 @@
         "$ref": "http://justice.gov.uk/core/courts/resultLine.json"
       }
     },
+    "reasonsList": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "userId": {
+      "type": "string"
+    },
     "defendantId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },

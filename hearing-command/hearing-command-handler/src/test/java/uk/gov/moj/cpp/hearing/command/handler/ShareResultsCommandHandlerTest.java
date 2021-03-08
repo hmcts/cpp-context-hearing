@@ -13,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelp
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultCommandTemplate;
@@ -21,6 +22,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import org.junit.Ignore;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtApplicationResponse;
@@ -54,6 +56,7 @@ import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
@@ -211,7 +214,7 @@ public class ShareResultsCommandHandlerTest {
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
         final Target targetIn = saveDraftResultCommand.getTarget();
 
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(targetIn));
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(targetIn));
 
         final ResultLine resultLineIn = targetIn.getResultLines().get(0);
         final DelegatedPowers delegatedPowers = resultLineIn.getDelegatedPowers();
@@ -241,13 +244,13 @@ public class ShareResultsCommandHandlerTest {
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-            apply(Stream.of(new DraftResultSaved(targetForOffence)));
+            apply(Stream.of(new DraftResultSaved(targetForOffence, HearingState.INITIALISED, randomUUID())));
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
 
         final Target newTargetForSameOffence = getNewTarget(targetForOffence);
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(newTargetForSameOffence));
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(newTargetForSameOffence));
 
         this.shareResultsCommandHandler.saveDraftResult(envelope);
 
@@ -274,7 +277,7 @@ public class ShareResultsCommandHandlerTest {
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-            apply(Stream.of(new DraftResultSaved(targetForOffence)));
+            apply(Stream.of(new DraftResultSaved(targetForOffence, HearingState.INITIALISED, randomUUID())));
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
@@ -283,7 +286,7 @@ public class ShareResultsCommandHandlerTest {
         targetWithKnownTargetIdAndDifferentOffenceId.setTargetId(targetForOffence.getTargetId());
         targetWithKnownTargetIdAndDifferentOffenceId.setOffenceId(randomUUID());
 
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result"), objectToJsonObjectConverter.convert(targetWithKnownTargetIdAndDifferentOffenceId));
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(targetWithKnownTargetIdAndDifferentOffenceId));
 
         this.shareResultsCommandHandler.saveDraftResult(envelope);
 
@@ -370,7 +373,7 @@ public class ShareResultsCommandHandlerTest {
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
-        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft));
+        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
         final int initialCourtApplicationCount = initiateHearingCommand.getHearing().getCourtApplications().size();
         final ApplicationResponseSaved applicationResponseSaved = getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0));
 
@@ -469,7 +472,7 @@ public class ShareResultsCommandHandlerTest {
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
-        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft));
+        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
         final ApplicationResponseSaved applicationResponseSaved = getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0));
 
         final HearingAggregate aggregate = new HearingAggregate() {{
@@ -556,6 +559,7 @@ public class ShareResultsCommandHandlerTest {
                 .withHearingId(targetToCopyFrom.getHearingId())
                 .withDefendantId(targetToCopyFrom.getDefendantId())
                 .withDraftResult("")
+                //.withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
                 .withOffenceId(targetToCopyFrom.getOffenceId())
                 .withTargetId(randomUUID())
                 .build();

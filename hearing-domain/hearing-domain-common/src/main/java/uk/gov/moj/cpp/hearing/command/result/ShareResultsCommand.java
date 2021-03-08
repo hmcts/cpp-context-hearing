@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 
 import java.io.Serializable;
 import java.util.List;
@@ -20,6 +21,8 @@ public final class ShareResultsCommand implements Serializable {
 
     private DelegatedPowers courtClerk;
 
+    private HearingState newHearingState;
+
     public ShareResultsCommand() {
     }
 
@@ -27,10 +30,12 @@ public final class ShareResultsCommand implements Serializable {
     private ShareResultsCommand(
             @JsonProperty("hearingId") final UUID hearingId,
             @JsonProperty("courtClerk") final DelegatedPowers courtClerk,
-            @JsonProperty("resultLines") final List<SharedResultsCommandResultLine> resultLines) {
+            @JsonProperty("resultLines") final List<SharedResultsCommandResultLine> resultLines,
+            @JsonProperty("newHearingState") final HearingState newHearingState) {
         this.hearingId = hearingId;
         this.courtClerk = courtClerk;
         this.resultLines = resultLines;
+        this.newHearingState = newHearingState;
     }
 
     public static ShareResultsCommand shareResultsCommand() {
@@ -41,6 +46,9 @@ public final class ShareResultsCommand implements Serializable {
         return hearingId;
     }
 
+    public HearingState getNewHearingState() {
+        return newHearingState;
+    }
     public ShareResultsCommand setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
         return this;

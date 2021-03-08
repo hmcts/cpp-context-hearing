@@ -368,6 +368,11 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.validate-result-amendments.json
             example: !include json/hearing.command.validate-result-amendments.json
 
+#  Amend hearing
+        application/vnd.hearing.command.change-cancel-amendments+json:
+            schema: !include json/schema/hearing.command.change-cancel-amendments.json
+            example: !include json/hearing.command.change-cancel-amendments.json
+
         application/vnd.hearing.command.update-resultline-shared-dates+json:
             schema: !include json/schema/hearing.command.update-resultline-shared-dates.json
             example: !include json/hearing.command.update-resultline-shared-dates.json

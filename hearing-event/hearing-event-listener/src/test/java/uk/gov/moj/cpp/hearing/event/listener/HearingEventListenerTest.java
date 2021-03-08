@@ -43,6 +43,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
@@ -140,7 +141,9 @@ public class HearingEventListenerTest {
 
         final UUID hearingId = randomUUID();
         final Target targetOut = new Target();
-        final DraftResultSaved draftResultSaved = new DraftResultSaved(CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build());
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(
+                CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build(),
+                HearingState.INITIALISED, randomUUID());
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(true)
                 .setId(hearingId)
@@ -170,7 +173,11 @@ public class HearingEventListenerTest {
 
         final UUID hearingId = randomUUID();
         final Target targetOut = new Target();
-        final DraftResultSaved draftResultSaved = new DraftResultSaved(CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build());
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(
+                CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build(),
+                HearingState.INITIALISED,
+                randomUUID()
+        );
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(false)
                 .setId(hearingId)
@@ -529,7 +536,11 @@ public class HearingEventListenerTest {
 
         final UUID hearingId = randomUUID();
         final Target targetOut = new Target();
-        final DraftResultSaved draftResultSaved = new DraftResultSaved(CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build());
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(
+                CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build(),
+                HearingState.INITIALISED,
+                randomUUID()
+        );
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(true)
                 .setId(hearingId)

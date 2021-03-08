@@ -4,6 +4,7 @@ import static java.time.Instant.now;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 
 import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.HearingDay;
@@ -12,15 +13,14 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
-import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.*;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -102,6 +102,8 @@ public class HearingEventListener {
                 .ifPresent(previousTarget -> hearing.getTargets().remove(previousTarget));
 
         hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
+        hearing.setHearingState(draftResultSaved.getHearingState());
+        hearing.setAmendedByUserId(draftResultSaved.getAmendedByUserId());
 
         hearingRepository.save(hearing);
     }
@@ -173,6 +175,7 @@ public class HearingEventListener {
                 .convert(event.payloadAsJsonObject(), ResultsShared.class);
 
         final Hearing hearing = hearingRepository.findBy(resultsShared.getHearing().getId());
+
         if (hearing == null) {
             LOGGER.error("Hearing not found");
         } else {
@@ -183,6 +186,7 @@ public class HearingEventListener {
                 hearing.setHasSharedResults(true);
                 hearing.getTargets().clear();
                 targets.forEach(targetIn -> updateDraftResult(hearing, targetIn, resultsShared.getSharedTime()));
+                hearing.setHearingState(HearingState.SHARED);
                 hearingRepository.save(hearing);
                 approvalRequestedRepository.removeAllRequestApprovals(hearing.getId());
             }
@@ -352,6 +356,46 @@ public class HearingEventListener {
             }
         }
     }
+
+    @Handles("hearing.events.result-amendments-cancelled")
+    public void sharedResultsAmendmentsCancelled(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.result-amendments-cancelled {}", event.toObfuscatedDebugString());
+        }
+        final ResultAmendmentsCancelled resultAmendmentsCancelled = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), ResultAmendmentsCancelled.class);
+        final Hearing hearing = hearingRepository.findBy(resultAmendmentsCancelled.getHearingId());
+        hearing.setHearingState(HearingState.SHARED);
+
+        final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearing.getId());
+        resultAmendmentsCancelled.getLatestSharedTargets().forEach(t -> t.setMasterDefendantId(targetJPAMapper.getMasterDefendantId(t.getDefendantId(), Sets.newHashSet(listOfProsecutionCases))));
+        hearing.setHasSharedResults(true);
+        hearing.setAmendedByUserId(null);
+        hearing.getTargets().clear();
+        hearing.setHearingState(SHARED);
+        resultAmendmentsCancelled.getLatestSharedTargets().forEach(targetIn -> updateDraftResult(hearing, targetIn, resultAmendmentsCancelled.getLastSharedDateTime()));
+        hearingRepository.save(hearing);
+        approvalRequestedRepository.removeAllRequestApprovals(hearing.getId());
+    }
+
+    @Handles("hearing.event.result-amendments-rejected")
+    public void resetDraftResultsToLasteSared(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.event.result-amendments-rejected {}", event.toObfuscatedDebugString());
+        }
+        final ResultAmendmentsRejected resultAmendmentsRejected = this.jsonObjectToObjectConverter
+                .convert(event.payloadAsJsonObject(), ResultAmendmentsRejected.class);
+        final Hearing hearing = hearingRepository.findBy(resultAmendmentsRejected.getHearingId());
+        final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearing.getId());
+        resultAmendmentsRejected.getLatestSharedTargets().forEach(t -> t.setMasterDefendantId(targetJPAMapper.getMasterDefendantId(t.getDefendantId(), Sets.newHashSet(listOfProsecutionCases))));
+        hearing.setHasSharedResults(true);
+        hearing.getTargets().clear();
+        hearing.setHearingState(SHARED);
+        resultAmendmentsRejected.getLatestSharedTargets().forEach(targetIn -> updateDraftResult(hearing, targetIn, resultAmendmentsRejected.getLastSharedDateTime()));
+        hearingRepository.save(hearing);
+        approvalRequestedRepository.removeAllRequestApprovals(hearing.getId());
+    }
+
 
     @Handles("hearing.events.marked-as-duplicate")
     public void handleHearingMarkedAsDuplicate(final JsonEnvelope event) {

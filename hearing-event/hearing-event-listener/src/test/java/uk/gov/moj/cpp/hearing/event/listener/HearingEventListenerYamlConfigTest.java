@@ -32,6 +32,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
+import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
@@ -53,9 +55,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
+import uk.gov.moj.cpp.hearing.domain.event.result.*;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
@@ -115,6 +115,7 @@ public class HearingEventListenerYamlConfigTest {
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),
             BookProvisionalHearingSlots.class.getAnnotation(Event.class).value(),
             SaveDraftResultFailed.class.getAnnotation(Event.class).value(),
+            ShareResultsFailed.class.getAnnotation(Event.class).value(),
             MasterDefendantIdAdded.class.getAnnotation(Event.class).value(),
             HearingMarkedAsDuplicateForCase.class.getAnnotation(Event.class).value(),
             HearingMarkedAsDuplicateForDefendant.class.getAnnotation(Event.class).value(),
@@ -122,7 +123,14 @@ public class HearingEventListenerYamlConfigTest {
             PendingNowsRequested.class.getAnnotation(Event.class).value(),
             NowsRequested.class.getAnnotation(Event.class).value(),
             MultipleDraftResultsSaved.class.getAnnotation(Event.class).value(),
-            HearingResultLineSharedDatesUpdated.class.getAnnotation(Event.class).value()
+            HearingResultLineSharedDatesUpdated.class.getAnnotation(Event.class).value(),
+            MultipleDraftResultsSaved.class.getAnnotation(Event.class).value(),
+            ResultAmendmentsCancellationFailed.class.getAnnotation(Event.class).value(),
+            ResultAmendmentsValidationFailed.class.getAnnotation(Event.class).value(),
+            ApprovalRequestedV2.class.getAnnotation(Event.class).value(),
+            HearingLocked.class.getAnnotation(Event.class).value(),
+            HearingLockedByOtherUser.class.getAnnotation(Event.class).value(),
+            ApprovalRequestRejected.class.getAnnotation(Event.class).value()
 
     );
 

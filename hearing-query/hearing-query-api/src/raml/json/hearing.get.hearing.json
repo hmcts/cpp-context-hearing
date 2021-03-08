@@ -250,6 +250,8 @@
       "description": "qm1rJUZb0f",
       "id": "9623a7ac-25bb-43f8-b219-2ae4cd8b05db"
     },
-    "trialTypeId": "92ff0722-c287-11e9-9cb5-2a2ae2dbcce4"
+    "trialTypeId": "92ff0722-c287-11e9-9cb5-2a2ae2dbcce4",
+    "hearingState": "INITIALISED",
+    "amendedByUserId": "a5519ace-b5bb-41ac-80b0-44f4f9681774"
   }
 }

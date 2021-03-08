@@ -21,5 +21,6 @@
     "hearingId",
     "offenceId",
     "targetId"
-  ]
+  ],
+  "additionalProperties": true
 }

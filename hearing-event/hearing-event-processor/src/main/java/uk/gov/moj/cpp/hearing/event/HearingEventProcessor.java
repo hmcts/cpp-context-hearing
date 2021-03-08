@@ -1,12 +1,9 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import static java.time.ZonedDateTime.now;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
-import uk.gov.justice.core.courts.ApprovalRequest;
-import uk.gov.justice.core.courts.ApprovalType;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -22,11 +19,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
-import uk.gov.moj.cpp.hearing.event.exception.UserIdNotFoundException;
+import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
-
-import java.util.Optional;
-import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -40,6 +34,7 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     public static final String PUBLIC_HEARING_MULTIPLE_DRAFT_RESULTS_SAVED = "public.hearing.multiple-draft-results-saved";
     public static final String PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED = "public.hearing.save-draft-result-failed";
+    public static final String PUBLIC_HEARING_SHARE_RESULTS_FAILED = "public.hearing.share-results-failed";
 
     public static final String PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED = "public.hearing.application-draft-resulted";
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
@@ -78,26 +73,7 @@ public class HearingEventProcessor {
 
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
 
-        this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_DRAFT_RESULT_SAVED).apply(publicEventPayload));
-
-        final JsonObject approvalRequestPayload = this.objectToJsonObjectConverter.convert(approvalRequest(event, target));
-
-        this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(COMMAND_REQUEST_APPROVAL), approvalRequestPayload));
-    }
-
-    private ApprovalRequest approvalRequest(final JsonEnvelope event, final Target target) {
-        UUID userId = null;
-        final Optional<String> optionalUserId = event.metadata().userId();
-        if (optionalUserId.isPresent()) {
-            userId = UUID.fromString(optionalUserId.get());
-        } else {
-            throw new UserIdNotFoundException(String.format("No UserId found for hearingId %s", target.getHearingId()));
-        }
-        return ApprovalRequest.approvalRequest()
-                .withApprovalType(ApprovalType.CHANGE)
-                .withHearingId(target.getHearingId())
-                .withUserId(userId)
-                .withRequestApprovalTime(now()).build();
+        this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
     }
 
     @Handles("hearing.save-draft-result-failed")
@@ -117,6 +93,25 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventSaveDraftResultFailed);
 
         this.sender.send(this.enveloper.withMetadataFrom(event, PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED).apply(publicEventPayload));
+    }
+
+    @Handles("hearing.share-results-failed")
+    public void handleShareResultsFailedEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.share-results-failed event received {}", event.toObfuscatedDebugString());
+        }
+
+        final ShareResultsFailed shareResultsFailed = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ShareResultsFailed.class);
+
+        final PublicHearingShareResultsFailed publicEventShareResultsFailed = PublicHearingShareResultsFailed.publicHearingShareResultsFailed()
+                .setHearingId(shareResultsFailed.getHearingId())
+                .setHearingState(shareResultsFailed.getHearingState())
+                .setAmendedByUserId(shareResultsFailed.getAmendedByUserId());
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicEventShareResultsFailed);
+        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(PUBLIC_HEARING_SHARE_RESULTS_FAILED);
+        sender.send(envelopeFrom(metadata, publicEventPayload));
+
     }
 
     @Handles("hearing.multiple-draft-results-saved")

@@ -466,3 +466,12 @@ rule "Command - API - Action - hearing.reusable-info"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.change-cancel-amendments"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.change-cancel-amendments");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end

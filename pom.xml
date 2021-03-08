@@ -25,7 +25,7 @@
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.135</coredomain.version>
-        <referencedata.version>7.0.36</referencedata.version>
+        <referencedata.version>7.0.37</referencedata.version>
         <material.version>7.0.0</material.version>
         <results.version>7.0.41</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
@@ -57,6 +57,7 @@
         <module>hearing-event-sources</module>
         <module>hearing-common</module>
     </modules>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -99,21 +100,21 @@
                 <artifactId>common-core-domain</artifactId>
                 <version>${coredomain.version}</version>
             </dependency>
-            <!-- TODO junit-dataprovider should come from test utils once moved -->
+            <!--  junit-dataprovider should come from test utils once moved -->
             <dependency>
                 <groupId>com.tngtech.java</groupId>
                 <artifactId>junit-dataprovider</artifactId>
                 <version>${junit-dataprovider.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- TODO datafactory should come from test utils once moved -->
+            <!--  datafactory should come from test utils once moved -->
             <dependency>
                 <groupId>org.fluttercode.datafactory</groupId>
                 <artifactId>datafactory</artifactId>
                 <version>${datafactory.version}</version>
                 <scope>test</scope>
             </dependency>
-            <!-- TODO remove this once techpod has fixed teh enveloper for FW5 -->
+            <!--  remove this once techpod has fixed teh enveloper for FW5 -->
             <dependency>
                 <groupId>uk.gov.justice.services</groupId>
                 <artifactId>test-utils-enveloper-provider</artifactId>

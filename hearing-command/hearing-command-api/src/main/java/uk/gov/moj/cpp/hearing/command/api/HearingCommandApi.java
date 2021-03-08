@@ -269,6 +269,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.update-resultline-shared-dates");
     }
 
+    @Handles("hearing.change-cancel-amendments")
+    public void cancelAmendments(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.change-cancel-amendments");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *

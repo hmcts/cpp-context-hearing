@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 
 import java.util.HashSet;
@@ -114,6 +115,12 @@ public class Hearing {
     @Column(name = "vacate_reason_id")
     private UUID vacatedTrialReasonId;
 
+    @Column(name = "hearing_state")
+    @Enumerated(EnumType.STRING)
+    private HearingState hearingState;
+
+    @Column(name = "amended_by_user_id")
+    private UUID amendedByUserId;
 
     public Hearing() {
         //For JPA
@@ -372,6 +379,22 @@ public class Hearing {
     @SuppressWarnings("squid:S2384")
     public void setApprovalsRequested(Set<ApprovalRequested> approvalsRequested) {
         this.approvalsRequested = approvalsRequested;
+    }
+
+    public HearingState getHearingState() {
+        return hearingState;
+    }
+
+    public void setHearingState(HearingState hearingState) {
+        this.hearingState = hearingState;
+    }
+
+    public UUID getAmendedByUserId() {
+        return amendedByUserId;
+    }
+
+    public void setAmendedByUserId(UUID amendedByUserId) {
+        this.amendedByUserId = amendedByUserId;
     }
 
     @Override

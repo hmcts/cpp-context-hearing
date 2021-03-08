@@ -14,6 +14,17 @@
     },
     "offenceId": {
       "$ref": "#/definitions/uuid"
+    },
+    "hearingState": {
+      "description": "The state of the hearing",
+      "enum": [
+        "INITIALISED",
+        "SHARED",
+        "SHARED_AMEND_LOCKED_ADMIN_ERROR",
+        "SHARED_AMEND_LOCKED_USER_ERROR",
+        "VALIDATED",
+        "APPROVAL_REQUESTED"
+      ]
     }
   },
   "required": [

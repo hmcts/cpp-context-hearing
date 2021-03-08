@@ -31,5 +31,6 @@
       "isModified": true,
       "isComplete": true
     }
-  ]
+  ],
+  "newHearingState": "INITIALISED"
 }

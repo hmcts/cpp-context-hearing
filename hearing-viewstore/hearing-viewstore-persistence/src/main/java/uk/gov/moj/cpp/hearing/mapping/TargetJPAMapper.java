@@ -82,7 +82,7 @@ public class TargetJPAMapper {
                 .collect(Collectors.toList());
     }
 
-    private UUID getMasterDefendantId(final UUID defendantId, final Set<ProsecutionCase> prosecutionCases) {
+    public UUID getMasterDefendantId(final UUID defendantId, final Set<ProsecutionCase> prosecutionCases) {
         return prosecutionCases
                 .stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())

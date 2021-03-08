@@ -249,6 +249,33 @@ subscriptions_descriptor:
         - name: hearing.events.marked-as-duplicate
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.marked-as-duplicate.json
 
+        - name: hearing.event.result-amendments-rejected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected.json
+
+        - name: hearing.events.result-amendments-cancelled
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled.json
+
+        - name: hearing.event.result-amendments-validated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validated.json
+
+        - name: hearing.event.result-amendments-validation-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validation-failed.json
+
+        - name: hearing.share-results-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.share-results-failed.json
+
+        - name: hearing.event.approval-rejected
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-rejected.json
+
+        - name: hearing.event.hearing-locked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.hearing-locked.json
+
+        - name: hearing.event.hearing-locked-by-other-user
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.hearing-locked-by-other-user.json
+
+        - name: hearing.event.approval-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-requested.json
+
       event_source_name: hearing
 
     - name: public event subscription

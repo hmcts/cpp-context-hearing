@@ -6,19 +6,18 @@
     "id": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
-    "userId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "validateAmendmentsTime": {
-      "description": "The request approval date and time ",
+    "validateAction": {
+      "description": "Validate or Reject amendments",
       "type": "string",
-      "format": "date-time"
+      "enum": [
+        "APPROVE",
+        "REJECT"
+      ]
     }
   },
   "required": [
     "id",
-    "userId",
-    "validateAmendmentsTime"
+    "validateAction"
   ],
-  "additionalProperties": false
+  "additionalProperties": true
 }

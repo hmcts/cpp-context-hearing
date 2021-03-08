@@ -17,6 +17,7 @@ import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,6 +41,8 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
     private final Map<UUID, CompanyRepresentative> companyRepresentatives = new HashMap<>();
     private final Map<UUID, InterpreterIntermediary> interpreterIntermediary = new HashMap<>();
+    private Map<UUID, Target> sharedTargets = new HashMap<>();
+    private Map<UUID, Target> transientTargets = new HashMap<>();
 
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
@@ -49,6 +52,7 @@ public class HearingAggregateMomento implements Serializable {
     private Map<UUID, Target> savedTargets = new HashMap<>();
     private boolean published = false;
     private boolean duplicate = false;
+    private ZonedDateTime lastSharedTime;
 
     public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
         return hearingEvents;
@@ -155,10 +159,34 @@ public class HearingAggregateMomento implements Serializable {
     }
 
     public boolean isDuplicate() {
-        return duplicate;
+        return this.duplicate;
     }
 
     public void setDuplicate(final boolean duplicate) {
         this.duplicate = duplicate;
+    }
+
+    public Map<UUID, Target> getSharedTargets() {
+        return this.sharedTargets;
+    }
+
+    public Map<UUID, Target> getTransientTargets() {
+        return this.transientTargets;
+    }
+
+    public void setSharedTargets(final Map<UUID, Target> sharedTargets) {
+        this.sharedTargets = sharedTargets;
+    }
+
+    public void setTransientTargets(final Map<UUID, Target> transientTargets) {
+        this.transientTargets = transientTargets;
+    }
+
+    public ZonedDateTime getLastSharedTime() {
+        return this.lastSharedTime;
+    }
+
+    public void setLastSharedTime(ZonedDateTime lastSharedTime) {
+        this.lastSharedTime = lastSharedTime;
     }
 }

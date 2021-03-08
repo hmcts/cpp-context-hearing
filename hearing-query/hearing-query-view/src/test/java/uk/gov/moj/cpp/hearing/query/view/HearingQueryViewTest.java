@@ -43,6 +43,7 @@ import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFact
 import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
@@ -191,7 +192,7 @@ public class HearingQueryViewTest {
         final ZonedDateTime requestApprovalTime = ZonedDateTime.now();
 
         final uk.gov.justice.core.courts.Hearing hearing = hearing(hearingId, userId, requestApprovalTime);
-        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearing);
+        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearing, HearingState.INITIALISED, randomUUID());
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes1 = getCrackedIneffectiveVacatedTrialTypes();
 
         final JsonEnvelope query = envelopeFrom(

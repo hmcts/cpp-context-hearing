@@ -16,7 +16,8 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStrea
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
-import uk.gov.justice.core.courts.ApprovalType;
+import org.hamcrest.MatcherAssert;
+
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -27,11 +28,12 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.spi.DefaultJsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 
 import java.io.IOException;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -43,12 +45,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFailed;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestApprovalCommandHandlerTest {
 
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(ApprovalRequested.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(ApprovalRequested.class, ApprovalRequestRejected.class, ResultAmendmentsCancellationFailed.class);
 
     @Mock
     private EventStream hearingEventStream;
@@ -80,7 +83,6 @@ public class RequestApprovalCommandHandlerTest {
         //Given
         final UUID hearingId = UUID.randomUUID();
         final UUID userId = UUID.randomUUID();
-        final ZonedDateTime requestTime = parse("2020-08-21T11:00:00.000Z");
 
         setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
         when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
@@ -88,20 +90,36 @@ public class RequestApprovalCommandHandlerTest {
         final JsonObject requestApproval = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("userId", userId.toString())
-                .add("requestApprovalTime", requestTime.toString())
-                .add("approvalType", ApprovalType.CHANGE.toString())
                 .build();
 
-        final JsonEnvelope commandEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.approval-requested"), objectToJsonObjectConverter.convert(requestApproval));
+//        final JsonEnvelope commandEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.approval-requested"), objectToJsonObjectConverter.convert(requestApproval));
+
+        final JsonEnvelope commandEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.approval-requested").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(requestApproval));
+
         requestApprovalCommandHandler.requestApproval(commandEnvelope);
 
         assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
-                jsonEnvelope(withMetadataEnvelopedFrom(commandEnvelope).withName("hearing.event.approval-requested"),
+                jsonEnvelope(withMetadataEnvelopedFrom(commandEnvelope).withName("hearing.event.approval-rejected"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", is(hearingId.toString())))))
         ));
     }
 
+    @Test
+    public void shouldEmitCancelAmendmentsFailedEvent() throws EventStreamException {
+        //Given
+        final UUID hearingId = UUID.randomUUID();
+        final UUID userId = UUID.randomUUID();
+        setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
+
+        final JsonObject requestApproval = createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .build();
+        final JsonEnvelope commandEnvelope = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.command.change-cancel-amendments").withUserId(userId.toString()), objectToJsonObjectConverter.convert(requestApproval));
+        requestApprovalCommandHandler.cancelAmendments(commandEnvelope);
+        MatcherAssert.assertThat("Event is not cancellationFailed", ((DefaultJsonEnvelope)verifyAppendAndGetArgumentFrom(hearingEventStream).findFirst().get()).metadata().name().equals("hearing.events.results-amendments-cancellation-failed"));
+    }
     @SuppressWarnings("unchecked")
     private <T extends Aggregate> void setupMockedEventStream(final UUID id, final EventStream eventStream, final T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);

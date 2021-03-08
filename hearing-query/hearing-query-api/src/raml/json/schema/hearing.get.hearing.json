@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://justice.gov.uk/json/schemas/hearing/hearing.get.hearing.json",
   "type": "object",
-  "additionalProperties": false,
+  "additionalProperties": true,
   "properties": {
     "hearing": {
       "$ref": "http://justice.gov.uk/core/courts/hearing.json"

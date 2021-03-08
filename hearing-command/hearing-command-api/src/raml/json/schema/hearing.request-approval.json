@@ -5,29 +5,11 @@
   "properties": {
     "hearingId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "userId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "requestApprovalTime": {
-      "description": "The request approval date and time ",
-      "type": "string",
-      "format": "date-time"
-    },
-    "approvalType": {
-      "description": "When draft result is saved, it is CHANGE and when request for approval is made it is APPROVAL",
-      "type": "string",
-      "enum": [
-        "CHANGE",
-        "APPROVAL"
-      ]
     }
   },
   "required": [
-    "hearingId",
-    "userId",
-    "requestApprovalTime",
-    "approvalType"
+    "hearingId"
+
   ],
   "additionalProperties": false
 }

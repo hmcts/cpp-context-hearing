@@ -17,7 +17,10 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
+import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
@@ -28,6 +31,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +57,17 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.setPublished(true);
         this.momento.setVariantDirectory(resultsShared.getVariantDirectory());
         this.momento.setSavedTargets(resultsShared.getTargets().stream().filter(Objects::nonNull).collect(Collectors.toMap(Target::getTargetId, target -> target, (target1, target2) -> target1)));
+        recordTargetsSharedAndResetTransientTargets();
+        this.momento.setLastSharedTime(resultsShared.getSharedTime());
+    }
+
+    private void recordTargetsSharedAndResetTransientTargets() {
+        final Collection<Target> transientValues = this.momento.getTransientTargets().values();
+        transientValues.stream().forEach(t -> {final Target target = this.momento.getSharedTargets().getOrDefault(t.getTargetId(), t);
+                                               target.setDraftResult(t.getDraftResult());
+                                               this.momento.getSharedTargets().put(t.getTargetId(), target);
+                                               });
+        this.momento.getTransientTargets().clear();
     }
 
     public void handleResultLinesStatusUpdated(ResultLinesStatusUpdated resultLinesStatusUpdated) {
@@ -87,6 +102,7 @@ public class ResultsSharedDelegate implements Serializable {
     public void handleDraftResultSaved(final DraftResultSaved draftResultSaved) {
         final Target target = draftResultSaved.getTarget();
         final UUID targetId = target.getTargetId();
+        updateTransientTargets(targetId, target);
         if (this.momento.getTargets().containsKey(targetId)) {
             // assuming existing target matches defendantId, offenceId
             this.momento.getTargets().get(targetId).setDraftResult(draftResultSaved.getTarget().getDraftResult());
@@ -98,14 +114,25 @@ public class ResultsSharedDelegate implements Serializable {
 
     }
 
-    public Stream<Object> saveDraftResult(final Target target) {
-        return Stream.of(new DraftResultSaved(target));
+    private void updateTransientTargets(final UUID targetId, final Target target) {
+        this.momento.getTransientTargets().put(targetId, target);
+    }
+
+    public Stream<Object> saveDraftResult(final Target target, final HearingState hearingState, final UUID userId) {
+        return Stream.of(new DraftResultSaved(target, hearingState, userId));
     }
 
     public Stream<Object> rejectSaveDraftResult(final Target target) {
         return Stream.of(new SaveDraftResultFailed(target));
     }
 
+    public Stream<Object> hearingLocked(final UUID hearingId) {
+        return Stream.of(HearingLocked.builder().withHearingId(hearingId).build());
+    }
+
+    public Stream<Object> hearingLockedByOtherUser(final UUID hearingId) {
+        return Stream.of(HearingLockedByOtherUser.builder().withHearingId(hearingId).build());
+    }
     public Stream<Object> applicationDraftResult(final UUID targetId, final UUID applicationId, final UUID hearingId, final String draftResult, final CourtApplicationOutcomeType applicationOutcomeType, final LocalDate applicationOutcomeDate) {
         return Stream.of(ApplicationDraftResulted.applicationDraftResulted()
                 .setApplicationId(applicationId)
@@ -157,6 +184,7 @@ public class ResultsSharedDelegate implements Serializable {
     public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final List<UUID> defendantDetailsChanged) {
         final Map<UUID, Target> finalTargets = new HashMap<>();
         final Map<UUID, Target> targets = new HashMap<>();
+
         resultLines.forEach(
                 rl -> {
                     Target target;

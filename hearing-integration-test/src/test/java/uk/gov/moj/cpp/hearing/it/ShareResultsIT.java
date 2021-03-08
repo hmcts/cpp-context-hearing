@@ -1,5 +1,88 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.jayway.restassured.path.json.JsonPath;
+import org.apache.commons.lang3.tuple.Pair;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
+import org.junit.Ignore;
+import org.junit.Test;
+import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
+import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationOutcome;
+import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.CustodialEstablishment;
+import uk.gov.justice.core.courts.DefenceOrganisation;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DefendantAttendance;
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.FundingType;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.HearingLanguage;
+import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Organisation;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Source;
+import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
+import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
+import uk.gov.moj.cpp.hearing.event.PublicHearingSaveDraftResultFailed;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowResultDefinitionRequirement;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.SecondaryCJSCode;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllNowsReferenceDataHelper;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.AllResultDefinitionsReferenceDataHelper;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+import uk.gov.moj.cpp.hearing.test.TestUtilities;
+import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+
+import javax.json.JsonObject;
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.Boolean.TRUE;
@@ -504,7 +587,6 @@ public class ShareResultsIT extends AbstractIT {
             final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
             setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, DISMISSED_RESULT_DEF_ID), DISMISSED_RESULT_DEF_ID, orderDate);
             targets.add(saveDraftResultCommand.getTarget());
-
             //when
             UseCases.shareResults(getRequestSpec(), initiateHearingCommandHelper.getHearingId(), with(
                     basicShareResultsCommandTemplate(),
@@ -592,6 +674,12 @@ public class ShareResultsIT extends AbstractIT {
         //Given
 
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
+        LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+        final UUID firstNowNonMandatoryResultDefinitionId = getResultDefinitionId(allNows, false);
+        final UUID secondNowPrimaryResultDefinitionId = getResultDefinitionId(allNows, true);
+        final AllResultDefinitionsReferenceDataHelper resultDefHelper = setupResultDefinitionsReferenceData(orderDate, asList(firstNowNonMandatoryResultDefinitionId, secondNowPrimaryResultDefinitionId));
+
 
         final List<Target> targets = new ArrayList<>();
 
@@ -604,6 +692,18 @@ public class ShareResultsIT extends AbstractIT {
 
         //And
         shareAndVerifyDDCH(targets, hearingOne);
+
+        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+
+        saveDraftResultCommand2.getTarget().setResultLines(asList(
+                getAmendedResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
+                getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
+        ));
+        saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
+        saveDraftResultCommand2.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
+        targets.add(saveDraftResultCommand2.getTarget());
+
+        testSaveDraftResult(saveDraftResultCommand2);
 
         //When
         amendResultsToShare(hearingOne, targets, initiateHearing.getHearing());
@@ -753,6 +853,12 @@ public class ShareResultsIT extends AbstractIT {
         //Given
         InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
 
+        LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+        final UUID firstNowNonMandatoryResultDefinitionId = getResultDefinitionId(allNows, false);
+        final UUID secondNowPrimaryResultDefinitionId = getResultDefinitionId(allNows, true);
+        final AllResultDefinitionsReferenceDataHelper resultDefHelper = setupResultDefinitionsReferenceData(orderDate, asList(firstNowNonMandatoryResultDefinitionId, secondNowPrimaryResultDefinitionId));
+
         final List<Target> targets = new ArrayList<>();
 
         final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
@@ -767,6 +873,18 @@ public class ShareResultsIT extends AbstractIT {
 
         //When
         updateDefendantDetails(initiateHearing, hearingOne, "Test2", "Test");
+
+        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+
+        saveDraftResultCommand2.getTarget().setResultLines(asList(
+                getAmendedResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
+                getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
+        ));
+        saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
+        saveDraftResultCommand2.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
+        targets.add(saveDraftResultCommand2.getTarget());
+
+        testSaveDraftResult(saveDraftResultCommand2);
 
         //Then
         shareResultsShouldNotHaveDDCH(targets, hearingOne);
@@ -1377,6 +1495,7 @@ public class ShareResultsIT extends AbstractIT {
                 getResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
         ));
         saveDraftResultCommand.getTarget().setTargetId(targets.get(0).getTargetId());
+        saveDraftResultCommand.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
 
         targets.add(saveDraftResultCommand.getTarget());
 
@@ -1617,6 +1736,7 @@ public class ShareResultsIT extends AbstractIT {
                     getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
             ));
             saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
+            saveDraftResultCommand2.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
             targets.add(saveDraftResultCommand2.getTarget());
 
             testSaveDraftResult(saveDraftResultCommand2);

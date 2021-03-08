@@ -19,6 +19,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
@@ -354,7 +355,11 @@ public class HearingService {
             return new HearingDetailsResponse();
         }
 
-        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(hearingJPAMapper.fromJPA(hearing));
+        final HearingDetailsResponse hearingDetailsResponse = new HearingDetailsResponse(
+                hearingJPAMapper.fromJPA(hearing),
+                getHearingState(hearing),
+                hearing.getAmendedByUserId()
+        );
 
         if (hearing.getTrialTypeId() != null) {
 
@@ -392,6 +397,18 @@ public class HearingService {
         }
 
         return hearingDetailsResponse;
+    }
+
+    private HearingState getHearingState(final Hearing hearing) {
+        HearingState hearingState = hearing.getHearingState();
+        if (hearing.getHearingState() == null ){
+            if (hearing.getHasSharedResults()) {
+                hearingState = HearingState.SHARED;
+            } else {
+                hearingState =  HearingState.INITIALISED;
+            }
+        }
+        return hearingState;
     }
 
     private Optional<CrackedIneffectiveVacatedTrialType> getCrackedIneffectiveVacatedTrialType(final UUID trialTypeId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {

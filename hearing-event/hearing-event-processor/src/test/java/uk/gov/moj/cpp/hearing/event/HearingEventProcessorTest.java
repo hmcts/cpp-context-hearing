@@ -28,6 +28,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.COMMAND_REQUEST_APPROVAL;
+import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED;
 
 import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.HearingDay;
@@ -44,6 +45,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.result.RequestApprovalCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
@@ -87,6 +89,7 @@ public class HearingEventProcessorTest {
     private static final String HEARING_INITIATED_EVENT = "hearing.initiated";
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String DRAFT_RESULT_SAVED_PRIVATE_EVENT = "hearing.draft-result-saved";
+    private static final String SHARE_RESULTS_FAILED_PRIVATE_EVENT = "hearing.share-results-failed";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_GENERIC_TYPE = "type";
     private static final String FIELD_LEVEL = "level";
@@ -130,6 +133,9 @@ public class HearingEventProcessorTest {
     private static final String FIELD_TARGET_ID = "targetId";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_DRAFT_RESULT = "draftResult";
+    private static final String FIELD_AMENDED_BY_USER_ID = "amendedByUserId";
+    private static final String FIELD_HEARING_STATE = "hearingState";
+
     private static final int DURATION = 15;
     private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
     private static final String HEARING_TYPE = "TRIAL";
@@ -154,6 +160,7 @@ public class HearingEventProcessorTest {
     private static final ZonedDateTime SHARED_TIME = PAST_ZONED_DATE_TIME.next();
     private static final UUID PERSON_ID = randomUUID();
     private static final UUID OFFENCE_ID = randomUUID();
+    private static final UUID AMENDED_BY_USER_ID = randomUUID();
     private static final UUID CASE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
     private static final UUID TARGET_ID = randomUUID();
@@ -222,17 +229,16 @@ public class HearingEventProcessorTest {
         final InOrder inOrder = inOrder(sender);
         this.hearingEventProcessor.publicDraftResultSavedPublicEvent(eventIn);
 
-        inOrder.verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+        inOrder.verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
 
         final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
-        assertThat(envelopeOut.metadata().name(), is(COMMAND_REQUEST_APPROVAL));
+        assertThat(envelopeOut.metadata().name(), is(PUBLIC_HEARING_DRAFT_RESULT_SAVED));
 
         final RequestApprovalCommand requestApprovalCommand = jsonObjectToObjectConverter
                 .convert(envelopeOut.payloadAsJsonObject(), RequestApprovalCommand.class);
 
         assertThat(requestApprovalCommand.getHearingId(), is(HEARING_ID));
-        assertThat(requestApprovalCommand.getUserId(), is(USER_ID));
-        assertThat(requestApprovalCommand.getApprovalType(), is(CHANGE));
+
     }
 
     @Test
@@ -251,6 +257,28 @@ public class HearingEventProcessorTest {
         assertThat(publicEventOut.getHearingId(), is(target.getHearingId()));
         assertThat(publicEventOut.getOffenceId(), is(target.getOffenceId()));
         assertThat(publicEventOut.getTargetId(), is(target.getTargetId()));
+    }
+
+    @Test
+    public void shouldPublishShareResultsFailedPublicEvent() {
+        final String draftResult = "some random text";
+
+        final JsonObjectBuilder result = createObjectBuilder()
+                .add(FIELD_AMENDED_BY_USER_ID, AMENDED_BY_USER_ID.toString())
+                .add(FIELD_HEARING_STATE, HearingState.INITIALISED.toString())
+                .add(FIELD_HEARING_ID, HEARING_ID.toString());
+
+        final JsonEnvelope eventIn = envelopeFrom(metadataWithRandomUUID(SHARE_RESULTS_FAILED_PRIVATE_EVENT), result.build());
+
+        this.hearingEventProcessor.handleShareResultsFailedEvent(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_SHARE_RESULTS_FAILED));
+        final PublicHearingShareResultsFailed publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingShareResultsFailed.class);
+        assertThat(publicEventOut.getHearingState(), is(HearingState.INITIALISED));
+        assertThat(publicEventOut.getHearingId(), is(HEARING_ID));
+        assertThat(publicEventOut.getAmendedByUserId(), is(AMENDED_BY_USER_ID));
     }
 
     @Test
