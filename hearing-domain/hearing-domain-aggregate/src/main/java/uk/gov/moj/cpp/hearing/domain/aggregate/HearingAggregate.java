@@ -135,7 +135,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -805390176650951422L;
+    private static final long serialVersionUID = 6189085435087215083L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
