@@ -639,7 +639,7 @@ public class HearingAggregate implements Aggregate {
                     .withHearingId(hearingId)
                     .withUserId(userId)
                     .build());
-            return streamBuilder.build();
+            return apply(streamBuilder.build());
         } else {
             return apply(Stream.of(ApprovalRequestRejected.approvalRejectedBuilder()
                     .withHearingId(hearingId)
