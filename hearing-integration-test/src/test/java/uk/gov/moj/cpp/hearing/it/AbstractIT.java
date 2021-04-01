@@ -13,12 +13,15 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.stubHearingEventDefinitions;
+import static uk.gov.moj.cpp.hearing.utils.ProgressionStub.stubGetProgressionProsecutionCases;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsSystemUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCases;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.hearing.courts.referencedata.Address;
 import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
@@ -42,6 +45,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.Temporal;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -247,6 +253,7 @@ public class AbstractIT {
 
     @Before
     public void setUpPerTest() {
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
         stubUsersAndGroupsGetLoggedInPermissionsWithoutCases();
         setupAsAuthorisedUser(getLoggedInUser());
         setupAsSystemUser(getLoggedInAdminUser());
@@ -327,8 +334,20 @@ public class AbstractIT {
 
     protected void stubCourtRoom(final Hearing hearing) {
         CourtCentre courtCentre = hearing.getCourtCentre();
-        stubLjaDetails(courtCentre, hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
         stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
     }
 
+    protected void stubCourtRoomForApplication(final Hearing hearing) {
+        CourtCentre courtCentre = hearing.getCourtCentre();
+        Optional.ofNullable(hearing.getCourtApplications().get(0).getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        Optional.ofNullable(hearing.getCourtApplications().get(0).getCourtOrder()).map(CourtOrder::getCourtOrderOffences).orElseGet(Collections::emptyList)
+                .forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
+    }
+
+    protected void stubProsecutionCases(final Hearing hearing) {
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubGetProgressionProsecutionCases(prosecutionCase.getId()));
+    }
 }

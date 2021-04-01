@@ -72,6 +72,7 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MIL
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 import static uk.gov.moj.cpp.hearing.utils.StubNowsReferenceData.setupNowsReferenceData;
+
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 public class CrackedAndIneffectiveHearingIT extends AbstractIT {
@@ -305,7 +306,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
     private void stubCourtCentre(final Hearing hearing) {
         final CourtCentre courtCentre = hearing.getCourtCentre();
-        stubLjaDetails(courtCentre, hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
         stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
     }
 

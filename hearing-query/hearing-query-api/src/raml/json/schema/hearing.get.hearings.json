@@ -94,7 +94,9 @@
             }
           }
         },
-        {"$ref": "#/definitions/personOrganisationDetails"}
+        {
+          "$ref": "#/definitions/personOrganisationDetails"
+        }
       ]
     },
     "courtApplicationSummary": {
@@ -106,41 +108,78 @@
         "applicationReference": {
           "type": "string"
         },
+        "caseSummaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/definitions/courtApplicationCaseSummary"
+          }
+        },
         "applicant": {
-          "allOf": [
-            {
-              "properties": {
-                "id": {
-                  "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
-                },
-                "synonym": {
-                  "type": "string"
-                }
-              }
-            },
-            {"$ref": "#/definitions/personOrganisationDetails"}
-          ]
+          "$ref": "#/definitions/courtApplicationPartySummary"
         },
         "respondents": {
           "type": "array",
           "minItems": 1,
           "items": {
-            "$ref": "#/definitions/respondent"
+            "$ref": "#/definitions/courtApplicationPartySummary"
+          }
+        },
+        "subject": {
+          "$ref": "#/definitions/courtApplicationPartySummary"
+        },
+        "type": {
+          "description": "The type of application made to court for judicial decision.  Taken from reference data",
+          "type": "object",
+          "properties": {
+            "type": {
+              "description": "The CJS Title for the court application type",
+              "type": "string"
+            },
+            "typeWelsh": {
+              "type": "string"
+            },
+            "legislation": {
+              "type": "string"
+            }
           }
         }
       }
     },
-    "respondent": {
-      "allOf": [
-        {
-          "properties": {
-            "id": {
-              "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
-            }
-          }
+    "courtApplicationPartySummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
         },
-        {"$ref": "#/definitions/personOrganisationDetails"}
-      ]
+        "firstName": {
+          "description": "The person forename",
+          "type": "string"
+        },
+        "middleName": {
+          "description": "The person middle name",
+          "type": "string"
+        },
+        "lastName": {
+          "description": "The person last name",
+          "type": "string"
+        },
+        "organisationName": {
+          "description": "The organisation name",
+          "type": "string"
+        }
+      }
+    },
+    "courtApplicationCaseSummary": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "prosecutionCaseIdentifier": {
+          "$ref": "http://justice.gov.uk/core/courts/prosecutionCaseIdentifier.json"
+        }
+      }
     },
     "personOrganisationDetails": {
       "type": "object",

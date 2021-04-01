@@ -8,12 +8,23 @@
     },
     "offenceId": {
       "$ref": "#/definitions/uuid"
+    },
+    "courtApplicationId": {
+      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,
-  "required": [
-    "caseId",
-    "offenceId"
+  "oneOf": [
+    {
+      "required": [
+        "caseId",
+        "offenceId"
+      ]
+    },{
+      "required": [
+        "courtApplicationId"
+      ]
+    }
   ],
   "definitions": {
     "uuid": {

@@ -82,6 +82,8 @@ public class ChangeHearingDetailIT extends AbstractIT {
     @Test
     public void shouldUpdateHearing() throws Exception {
 
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         HearingDetailsUpdateCommand hearingDetailsUpdateCommand = UseCases.updateHearing(HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()

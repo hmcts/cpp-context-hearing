@@ -49,7 +49,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffec
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConverter;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -372,23 +371,6 @@ public class HearingQueryViewTest {
         verify(hearingService).getHearingById(HEARING_ID);
         assertThat(nows.payload(), is((JsonObject) null));
         assertThat(nows.metadata().name(), is("hearing.get-nows"));
-    }
-
-    @Test
-    public void shouldNotGetApplicationDraftResultByNonExistingId() {
-        when(hearingService.getApplicationTargets(HEARING_ID)).thenReturn(new ApplicationTargetListResponse());
-
-        final JsonEnvelope query = envelopeFrom(
-                metadataWithRandomUUID("hearing.get-application-draft-result"),
-                createObjectBuilder()
-                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
-                        .build());
-
-        final Envelope<ApplicationTargetListResponse> applicationDraftResult = target.getApplicationDraftResult(query);
-
-        verify(hearingService).getApplicationTargets(HEARING_ID);
-        assertThat(applicationDraftResult.payload().getTargets(), Matchers.empty());
-        assertThat(applicationDraftResult.metadata().name(), is("hearing.get-application-draft-result"));
     }
 
     @Test

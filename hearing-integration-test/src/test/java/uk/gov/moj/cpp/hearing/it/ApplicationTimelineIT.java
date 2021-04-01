@@ -1,18 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
@@ -33,6 +20,20 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
+
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Organisation;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class ApplicationTimelineIT extends AbstractIT {
 
@@ -121,7 +122,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         Map<String, String> hearingSummaryMap = new HashMap<>();
 
         final HearingDay hearingDay = hearing.getHearingDays().get(0);
-        final Person personDetails = hearing.getCourtApplications().get(0).getApplicant().getPersonDetails();
+        final Organisation organisation = hearing.getCourtApplications().get(0).getApplicant().getOrganisation();
 
         hearingSummaryMap.put("hearingDate", hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy")));
         hearingSummaryMap.put("hearingTime", hearingDay.getSittingDay().toLocalTime().format(ofPattern("HH:mm")));
@@ -129,7 +130,7 @@ public class ApplicationTimelineIT extends AbstractIT {
         hearingSummaryMap.put("courtHouse", hearing.getCourtCentre().getName());
         hearingSummaryMap.put("courtRoom", hearing.getCourtCentre().getRoomName());
         hearingSummaryMap.put("listedDurationMinutes", hearingDay.getListedDurationMinutes().toString());
-        hearingSummaryMap.put("applicant", String.format("%s %s", personDetails.getFirstName(), personDetails.getLastName()));
+        hearingSummaryMap.put("applicant", organisation.getName());
 
         return hearingSummaryMap;
     }

@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.*;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.justice.core.courts.Defendant.defendant;
@@ -17,6 +19,8 @@ import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.GUILTY_P
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 
 import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
@@ -25,6 +29,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -33,6 +38,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -51,6 +57,7 @@ public class PleaDelegateTest {
     public static final UUID HEARING_ID = randomUUID();
     public static final UUID CASE_ID = randomUUID();
     public static final UUID DEFENDANT_ID = randomUUID();
+    private static final UUID APPLICATION_ID = randomUUID();
     public static final LocalDate PLEA_DATE = PAST_LOCAL_DATE.next();
 
     @Before
@@ -61,7 +68,9 @@ public class PleaDelegateTest {
 
     @Test
     public void shouldSetPleaIntoHearingAggregateMomento() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
 
+        this.hearingAggregateMomento.setHearing(hearing);
         final String pleaValue = NOT_GUILTY;
         final LocalDate pleaDate = PAST_LOCAL_DATE.next();
 
@@ -92,6 +101,9 @@ public class PleaDelegateTest {
     @Test
     public void shouldSetIndicatedPleaIntoHearingAggregateMomento() {
 
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+
+        this.hearingAggregateMomento.setHearing(hearing);
         final IndicatedPleaValue indicatedPleaValue = INDICATED_GUILTY;
         final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
 
@@ -121,7 +133,9 @@ public class PleaDelegateTest {
 
     @Test
     public void shouldSetAllocationDecisionIntoHearingAggregateMomento() {
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
 
+        this.hearingAggregateMomento.setHearing(hearing);
         final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
                 .setHearingId(HEARING_ID)
                 .setPleaModel(getPlea(GUILTY, PLEA_DATE));
@@ -137,6 +151,10 @@ public class PleaDelegateTest {
 
     @Test
     public void shouldSetAllValuesIntoHearingAggregateMomento() {
+
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+
+        this.hearingAggregateMomento.setHearing(hearing);
 
         final String pleaValue = NOT_GUILTY;
         final IndicatedPleaValue indicatedPleaValue = INDICATED_GUILTY;
@@ -214,6 +232,69 @@ public class PleaDelegateTest {
         assertThat(convictionDateAdded.getConvictionDate(), is(indicatedPleaDate));
         assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
         assertThat(convictionDateAdded.getCaseId(), is(CASE_ID));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenOffenceUnderCourtApplicationPleaIsGuilty() {
+
+        final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
+
+        final Hearing hearing = getHearing(OFFENCE_ID, APPLICATION_ID, HEARING_ID);
+
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withOffenceId(OFFENCE_ID)
+                .withPlea(Plea.plea()
+                        .withOffenceId(OFFENCE_ID)
+                        .withPleaDate(indicatedPleaDate)
+                        .withPleaValue(GUILTY)
+                        .build())
+                .build();
+
+        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        assertThat(convictionDateAdded, is(notNullValue()));
+        assertThat(convictionDateAdded.getOffenceId(), is(OFFENCE_ID));
+        assertThat(convictionDateAdded.getConvictionDate(), is(indicatedPleaDate));
+        assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
+        assertThat(convictionDateAdded.getCourtApplicationId(), is(APPLICATION_ID));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenCourtApplicationPleaIsGuilty() {
+
+        final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
+
+        final Hearing hearing = getHearing(OFFENCE_ID, APPLICATION_ID, HEARING_ID);
+
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final PleaModel pleaModel = PleaModel.pleaModel()
+                .withApplicationId(APPLICATION_ID)
+                .withPlea(Plea.plea()
+                        .withPleaDate(indicatedPleaDate)
+                        .withPleaValue(GUILTY)
+                        .build())
+                .build();
+
+        final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
+
+        final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
+        assertThat(pleaUpsert, is(notNullValue()));
+        assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        assertThat(convictionDateAdded, is(notNullValue()));
+        assertThat(convictionDateAdded.getOffenceId(), is(nullValue()));
+        assertThat(convictionDateAdded.getConvictionDate(), is(indicatedPleaDate));
+        assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
+        assertThat(convictionDateAdded.getCourtApplicationId(), is(APPLICATION_ID));
     }
 
     @Test
@@ -384,4 +465,30 @@ public class PleaDelegateTest {
                 .build();
     }
 
+    private Hearing getHearing(final UUID offenceId, final UUID courtApplicationId,final UUID hearingId) {
+
+        return hearing()
+                .withId(hearingId)
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                        .withId(courtApplicationId)
+                        .withCourtApplicationCases(Collections.singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(randomUUID())
+                                .withIsSJP(false)
+                                .withCaseStatus("ACTIVE")
+                                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                        .withCaseURN("caseURN")
+                                        .withProsecutionAuthorityId(randomUUID())
+                                        .withProsecutionAuthorityCode("ABC")
+                                        .build())
+                                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                                        .withOffenceDefinitionId(randomUUID())
+                                        .withOffenceCode("ABC")
+                                        .withOffenceTitle("ABC")
+                                        .withWording("ABC")
+                                        .withStartDate(LocalDate.now())
+                                        .withId(offenceId).build()))
+                                .build()))
+                        .build()))
+                .build();
+    }
 }

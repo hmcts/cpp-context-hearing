@@ -1,23 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.justice.core.courts.ApplicationStatus;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
-import uk.gov.justice.hearing.courts.GetHearings;
-import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.moj.cpp.hearing.command.eject.EjectCaseOrApplicationCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.HearingFactory;
-
-import javax.json.JsonObject;
-import java.time.ZoneId;
-import java.util.Collections;
-import java.util.UUID;
-
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
@@ -30,6 +12,27 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
+import uk.gov.justice.core.courts.ApplicationStatus;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
+import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.moj.cpp.hearing.command.eject.EjectCaseOrApplicationCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.HearingFactory;
+
+import java.time.ZoneId;
+import java.util.Collections;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
 public class EjectCaseApplicationIT extends AbstractIT {
     private static final String CASE_STATUS_EJECTED = "EJECTED";
     private final String eventName = "public.progression.events.hearing-extended";
@@ -37,6 +40,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
     private final String REMOVAL_REASON = "LEGAL";
 
     @Test
+    @Ignore("Need to revisit this scenario to decide what needs to be done with courtapplication's status when case is rejected")
     public void shouldEjectCaseAndApplication() throws Exception {
 
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
@@ -159,6 +163,7 @@ public class EjectCaseApplicationIT extends AbstractIT {
                         .withUserId(randomUUID().toString())
                         .build()
         );
+        //TODO need to revisit this to decide what needs to be done with courtapplication's status when case is rejected
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getId, is(hearingId))

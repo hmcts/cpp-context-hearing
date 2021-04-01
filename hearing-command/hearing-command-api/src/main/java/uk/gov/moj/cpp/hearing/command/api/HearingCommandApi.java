@@ -74,11 +74,6 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.save-multiple-draft-results");
     }
 
-    @Handles("hearing.application-draft-result")
-    public void applicationDraftResult(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.application-draft-result");
-    }
-
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.add-prosecution-counsel");
@@ -137,11 +132,6 @@ public class HearingCommandApi {
     @Handles("hearing.save-hearing-case-note")
     public void saveHearingCaseNote(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.save-hearing-case-note");
-    }
-
-    @Handles("hearing.save-application-response")
-    public void saveApplicationResponse(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope, "hearing.command.save-application-response");
     }
 
     @Handles("hearing.remove-respondent-counsel")

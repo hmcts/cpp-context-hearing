@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toSet;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -28,8 +29,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommand
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import org.junit.Ignore;
-
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -38,7 +37,6 @@ import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -62,12 +60,15 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.result.*;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
+import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -697,7 +698,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldAddDefenceCounselBeforeHearingEnded(){
+    public void shouldAddDefenceCounselBeforeHearingEnded() {
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
                 .withHearingId(randomUUID())
@@ -713,10 +714,10 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
-        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(),new ArrayList<>(),
-                "Margaret",randomUUID(),"Brown","H","Y","Ms", randomUUID());
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), new ArrayList<>(),
+                "Margaret", randomUUID(), "Brown", "H", "Y", "Ms", randomUUID());
 
-        final List<Object> events = HEARING_AGGREGATE.addDefenceCounsel(defenceCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = HEARING_AGGREGATE.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final DefenceCounselAdded defenceCounselAdded = (DefenceCounselAdded) events.get(0);
 
         assertThat(events, notNullValue());
@@ -724,7 +725,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSPICases(){
+    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSPICases() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -742,15 +743,15 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
-        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(),new ArrayList<>(),
-                "Leigh",randomUUID(),"Ann","H","Y","Ms", randomUUID());
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), new ArrayList<>(),
+                "Leigh", randomUUID(), "Ann", "H", "Y", "Ms", randomUUID());
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
 
-        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -759,7 +760,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSJPCases(){
+    public void shouldNotAllowedToAddDefenceCounsel_afterHearingEnded_forSJPCases() {
         final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -777,15 +778,15 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
-        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(),new ArrayList<>(),
-                "Leigh",randomUUID(),"Ann","H","Y","Ms", randomUUID());
+        final DefenceCounsel defenceCounsel = new DefenceCounsel(new ArrayList<>(), new ArrayList<>(),
+                "Leigh", randomUUID(), "Ann", "H", "Y", "Ms", randomUUID());
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
 
-        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -794,7 +795,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldAddProsecutionCounselBeforeHearingEnded(){
+    public void shouldAddProsecutionCounselBeforeHearingEnded() {
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(randomUUID())
                 .withHearingId(randomUUID())
@@ -811,19 +812,19 @@ public class HearingAggregateTest {
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
         final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
-                Arrays.asList(LocalDate.now()),
+                singletonList(LocalDate.now()),
                 STRING.next(),
                 randomUUID(),
                 STRING.next(),
                 STRING.next(),
-                Arrays.asList(UUID.randomUUID()),
+                singletonList(randomUUID()),
                 STRING.next(),
                 STRING.next(),
                 randomUUID()
 
         );
 
-        final List<Object> events = HEARING_AGGREGATE.addProsecutionCounsel(prosecutionCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = HEARING_AGGREGATE.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final ProsecutionCounselAdded prosecutionCounselAdded = (ProsecutionCounselAdded) events.get(0);
 
         assertThat(events, notNullValue());
@@ -831,7 +832,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSPICases(){
+    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSPICases() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -850,12 +851,12 @@ public class HearingAggregateTest {
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
         final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
-                Arrays.asList(LocalDate.now()),
+                singletonList(LocalDate.now()),
                 STRING.next(),
                 randomUUID(),
                 STRING.next(),
                 STRING.next(),
-                Arrays.asList(UUID.randomUUID()),
+                singletonList(randomUUID()),
                 STRING.next(),
                 STRING.next(),
                 randomUUID()
@@ -867,7 +868,7 @@ public class HearingAggregateTest {
 
         hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent).collect(Collectors.toList()).get(0);
 
-        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel,logEventCommand.getHearingId()).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
 
         assertThat(events, notNullValue());
@@ -876,7 +877,7 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSJPCases(){
+    public void shouldNotAllowedToAddProsecutionCounsel_afterHearingEnded_forSJPCases() {
         final InitiateHearingCommand initiateHearingCommand = initiateHearingTemplateForMagistrates();
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
@@ -895,12 +896,12 @@ public class HearingAggregateTest {
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
         final ProsecutionCounsel prosecutionCounsel = new ProsecutionCounsel(
-                Arrays.asList(LocalDate.now()),
+                singletonList(LocalDate.now()),
                 STRING.next(),
                 randomUUID(),
                 STRING.next(),
                 STRING.next(),
-                Arrays.asList(UUID.randomUUID()),
+                singletonList(randomUUID()),
                 STRING.next(),
                 STRING.next(),
                 randomUUID()
@@ -946,99 +947,341 @@ public class HearingAggregateTest {
     }
 
 
-
     @Test
-    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValid(){
+    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidDefendantOffence() {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
         final Target target = target().withTargetId(randomUUID())
                 .withDefendantId(randomUUID())
-               // .withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
-                .withHearingId(randomUUID())
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(randomUUID())
+                .build();
+        final Target target2 = target().withTargetId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withHearingId(hearingId)
                 .withResultLines(new ArrayList<>())
                 .withOffenceId(randomUUID())
                 .build();
         final List<Target> targetList = new ArrayList<>();
         targetList.add(target);
+        targetList.add(target2);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
-        final Optional<MultipleDraftResultsSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved)x).findFirst();
-        assertThat("MultipleDraftResulstSaved not present", multipleDraftResulstSaved.orElse(null), notNullValue() );
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("multipleDraftResultsSaved is present", multipleDraftResultsSaved.isPresent());
 
     }
 
     @Test
-    public void shouldNotRaiseMultipleDraftResultsSavedWhenAllTargetsAreNotValid(){
-        final HearingAggregate hearingAggregate = new HearingAggregate();
+    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplication() {
 
-        final UUID defendantId = randomUUID();
-        final UUID offenceId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
         final Target target = target().withTargetId(randomUUID())
-                .withDefendantId(defendantId)
-                //.withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
-                .withHearingId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
                 .withResultLines(new ArrayList<>())
-                .withOffenceId(offenceId)
                 .build();
-        final Target dupTarget = target().withTargetId(randomUUID())
-                .withDefendantId(defendantId)
-                //.withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
-                .withHearingId(randomUUID())
+        final Target target2 = target().withTargetId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
                 .withResultLines(new ArrayList<>())
-                .withOffenceId(offenceId)
                 .build();
         final List<Target> targetList = new ArrayList<>();
         targetList.add(target);
-        targetList.add(dupTarget);
+        targetList.add(target2);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
-        final Optional<MultipleDraftResultsSaved> multipleDraftResulstSaved = eventStream.filter(x  -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved)x).findFirst();
-        assertThat("MultipleDraftResulstSaved present", multipleDraftResulstSaved.orElse(null), nullValue());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved present", multipleDraftResultsSaved.isPresent());
 
     }
 
     @Test
-    public void shouldRaiseSaveDraftResultErrorWhenAllTargetsAreNotValid(){
+    public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplicationOffence() {
+
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        final Target target = target().withTargetId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
+                .withOffenceId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .build();
+        final Target target2 = target().withTargetId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
+                .withOffenceId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(target2);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved present", multipleDraftResultsSaved.isPresent());
 
-        Map<UUID, Target> existingTargets =  new HashMap<>();
+    }
 
-        final Target previousTarget = target().withTargetId(randomUUID())
-                .withDefendantId(randomUUID())
-                //     .withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
-                .withHearingId(randomUUID())
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenAnyTargetIsNotValid() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final Target invalidTarget = target().withTargetId(randomUUID())
+                .withHearingId(hearingId)
                 .withResultLines(new ArrayList<>())
                 .withOffenceId(randomUUID())
                 .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(invalidTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved not present", not(multipleDraftResultsSaved.isPresent()));
 
-        existingTargets.put(randomUUID(),previousTarget);
+    }
 
-        HearingAggregateMomento hearingAggregateMomento = mock(HearingAggregateMomento.class);
-        when(hearingAggregateMomento.getTargets()).thenReturn(existingTargets);
-
-        setField(hearingAggregate, "momento", hearingAggregateMomento);
-        final UUID defendantId = randomUUID();
-        final UUID offenceId = randomUUID();
-        final Target target = target().withTargetId(randomUUID())
-                .withDefendantId(defendantId)
-           //     .withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
-                .withHearingId(randomUUID())
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetDefendantOffence() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID targetId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final Target target = target()
+                .withTargetId(targetId)
+                .withDefendantId(randomUUID())
+                .withHearingId(hearingId)
                 .withResultLines(new ArrayList<>())
-                .withOffenceId(offenceId)
+                .withOffenceId(randomUUID())
                 .build();
-        final Target dupTarget = target().withTargetId(randomUUID())
-                .withDefendantId(defendantId)
-                .withHearingId(randomUUID())
-          //      .withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
+        final Target dupTarget = target()
+                .withTargetId(targetId)
+                .withDefendantId(randomUUID())
+                .withHearingId(hearingId)
                 .withResultLines(new ArrayList<>())
-                .withOffenceId(offenceId)
+                .withOffenceId(randomUUID())
                 .build();
         final List<Target> targetList = new ArrayList<>();
         targetList.add(target);
         targetList.add(dupTarget);
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
-        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x  -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed)x).findFirst();
-        assertThat("SaveDraftResultFailed not present", saveDraftResultFailed.orElse(null), nullValue());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved not present", !multipleDraftResultsSaved.isPresent());
 
     }
+
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplication() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID targetId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final Target target = target()
+                .withTargetId(targetId)
+                .withHearingId(hearingId)
+                .withApplicationId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .build();
+        final Target dupTarget = target().withTargetId(targetId)
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(dupTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved not present", not(multipleDraftResultsSaved.isPresent()));
+
+    }
+
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplicationOffence() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID targetId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final Target target = target()
+                .withTargetId(targetId)
+                .withHearingId(hearingId)
+                .withApplicationId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .build();
+        final Target dupTarget = target()
+                .withTargetId(targetId)
+                .withHearingId(hearingId)
+                .withApplicationId(randomUUID())
+                .withOffenceId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(dupTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved not present", not(multipleDraftResultsSaved.isPresent()));
+
+    }
+
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenNewTargetIsNotValid() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Target target = target()
+                .withTargetId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(randomUUID())
+                .withApplicationId(randomUUID())
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved not present", not(multipleDraftResultsSaved.isPresent()));
+
+    }
+
+    @Test
+    public void shouldNotRaiseMultipleDraftResultsSavedWhenAllTargetsAreNotValid() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final Target validTarget = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final Target inValidTarget = target().withTargetId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .withApplicationId(randomUUID())
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(validTarget);
+        targetList.add(inValidTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
+        assertThat("MultipleDraftResultsSaved not present", not(multipleDraftResultsSaved.isPresent()));
+
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultFailedWhenAnyTargetIsInvalid() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .withApplicationId(applicationId)
+                .build();
+        final List<Target> targets = new ArrayList<>();
+        targets.add(target);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targets, randomUUID());
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed) x).findFirst();
+        assertThat("SaveDraftResultFailed present", saveDraftResultFailed.isPresent());
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultFailedWhenDefenceOffenceIsAlreadyUsedInAnotherTarget() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+
+        final Target target2 = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final List<Target> targets = new ArrayList<>();
+        targets.add(target);
+        targets.add(target2);
+
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targets, randomUUID());
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed) x).findFirst();
+        assertThat("SaveDraftResultFailed is present", saveDraftResultFailed.isPresent());
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultFailedWhenApplicationOffenceIsAlreadyUsedInAnotherTarget() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final Target target = target().withTargetId(randomUUID())
+                .withApplicationId(applicationId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+
+        final Target target2 = target().withTargetId(randomUUID())
+                .withApplicationId(applicationId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final List<Target> targets = new ArrayList<>();
+        targets.add(target);
+        targets.add(target2);
+
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targets, randomUUID());
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed) x).findFirst();
+        assertThat("SaveDraftResultFailed is present", saveDraftResultFailed.isPresent());
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultFailedWhenApplicationIsAlreadyUsedInAnotherTarget() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
+
+        final Target target = target().withTargetId(randomUUID())
+                .withApplicationId(applicationId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .build();
+
+        final Target target2 = target().withTargetId(randomUUID())
+                .withApplicationId(applicationId)
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .build();
+        final List<Target> targets = new ArrayList<>();
+        targets.add(target);
+        targets.add(target2);
+
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targets, randomUUID());
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed) x).findFirst();
+        assertThat("SaveDraftResultFailed is present", saveDraftResultFailed.isPresent());
+    }
+
 
     @Test
     public void shouldCorrectHearingDaysWithoutCourtCentreIfNotAlreadySet() {
@@ -1055,7 +1298,6 @@ public class HearingAggregateTest {
         HearingAggregate hearingAggregate = new HearingAggregate();
 
         final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
-
         assertThat(result.getHearing(), is(initiateHearingCommand.getHearing()));
 
         final HearingDaysWithoutCourtCentreCorrected event = new HearingDaysWithoutCourtCentreCorrected();
@@ -1063,7 +1305,7 @@ public class HearingAggregateTest {
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
 
-        HearingDay hearingDay = new HearingDay(courtCentreId, courtRoomId, false,0, 0, ZonedDateTime.now());
+        HearingDay hearingDay = new HearingDay(courtCentreId, courtRoomId, false, 0, 0, ZonedDateTime.now());
         event.setHearingDays(asList(hearingDay));
         hearingAggregate.apply(event);
 
@@ -1094,6 +1336,49 @@ public class HearingAggregateTest {
         assertThat(approvalRequestRejected, notNullValue());
         assertThat(approvalRequestRejected.getHearingId(), is(hearing.getId()));
         assertThat(approvalRequestRejected.getUserId(), is(userId));
+
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultErrorWhenAllTargetsAreNotValid() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        Map<UUID, Target> existingTargets = new HashMap<>();
+
+        final Target previousTarget = target().withTargetId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(randomUUID())
+                .build();
+
+        existingTargets.put(randomUUID(), previousTarget);
+
+        HearingAggregateMomento hearingAggregateMomento = mock(HearingAggregateMomento.class);
+        when(hearingAggregateMomento.getTargets()).thenReturn(existingTargets);
+
+        setField(hearingAggregate, "momento", hearingAggregateMomento);
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final Target target = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final Target dupTarget = target().withTargetId(randomUUID())
+                .withDefendantId(defendantId)
+                .withHearingId(randomUUID())
+                .withResultLines(new ArrayList<>())
+                .withOffenceId(offenceId)
+                .build();
+        final List<Target> targetList = new ArrayList<>();
+        targetList.add(target);
+        targetList.add(dupTarget);
+        final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+        final Optional<SaveDraftResultFailed> saveDraftResultFailed = eventStream.filter(x -> x instanceof SaveDraftResultFailed).map(x -> (SaveDraftResultFailed) x).findFirst();
+        assertThat("SaveDraftResultFailed not present", saveDraftResultFailed.orElse(null), nullValue());
+
     }
 
     @Test
@@ -1110,6 +1395,5 @@ public class HearingAggregateTest {
                         .orElse(null);
         assertThat(validationFailed, notNullValue());
         assertThat(validationFailed.getHearingId(), is(hearing.getId()));
-
     }
 }

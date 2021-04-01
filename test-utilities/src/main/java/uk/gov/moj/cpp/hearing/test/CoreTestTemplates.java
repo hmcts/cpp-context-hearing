@@ -30,8 +30,11 @@ import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtIndicatedSentence;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.CustodialEstablishment;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.DefenceOrganisation;
@@ -219,13 +222,14 @@ public class CoreTestTemplates {
                 .withSource(RandomGenerator.values(Source.values()).next());
     }
 
-    public static Plea.Builder plea(final UUID offenceId, final LocalDate convictionDate, final String pleaValue) {
+    public static Plea.Builder plea(final UUID offenceId, final LocalDate convictionDate, final String pleaValue, final UUID courtapplicationId) {
         return Plea.plea()
                 .withOffenceId(offenceId)
                 .withOriginatingHearingId(randomUUID())
                 .withDelegatedPowers(delegatedPowers().build())
                 .withPleaDate(convictionDate)
-                .withPleaValue(pleaValue);
+                .withPleaValue(pleaValue)
+                .withApplicationId(courtapplicationId);
     }
 
     public static AllocationDecision.Builder allocationDecision(final UUID offenceId) {
@@ -632,7 +636,8 @@ public class CoreTestTemplates {
                 )
 
                 .withCourtApplications(asList((new HearingFactory().courtApplication().build())))
-                .withCourtCentre(courtCentre);
+                .withCourtCentre(courtCentre)
+                .withIsBoxHearing(args.getIsBoxHearing());
 
         return hearingBuilder;
     }
@@ -749,7 +754,106 @@ public class CoreTestTemplates {
                                 .collect(toList())
                 )
 
-                .withCourtApplications(asList((new HearingFactory().courtApplication().withLinkedCaseId(caseId).build())));
+                .withCourtApplications(asList((new HearingFactory().courtApplication()
+                        .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                .withProsecutionCaseId(caseId)
+                                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                        .withCaseURN("Case Reference")
+                                        .withProsecutionAuthorityId(randomUUID())
+                                        .withProsecutionAuthorityCode(STRING.next())
+                                        .build())
+                                .withIsSJP(false)
+                                .withCaseStatus("ACTIVE")
+                                .withOffences(singletonList(getOffence()))
+                                .build()))
+                        .withCourtOrder(CourtOrder.courtOrder()
+                                .withId(randomUUID())
+                                .withJudicialResultTypeId(randomUUID())
+                                .withLabel("label")
+                                .withOrderDate(localDate)
+                                .withStartDate(localDate)
+                                .withOrderingCourt(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
+                                .withOrderingHearingId(randomUUID())
+                                .withIsSJPOrder(false)
+                                .withCanBeSubjectOfBreachProceedings(false)
+                                .withCanBeSubjectOfVariationProceedings(false)
+                                .withCourtOrderOffences(singletonList(CourtOrderOffence.courtOrderOffence()
+                                        .withOffence(getOffence())
+                                        .withProsecutionCaseId(randomUUID())
+                                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifier(args).build())
+                                        .build()))
+                                .build())
+                        .build())));
+
+        if (args.hearingLanguage == WELSH) {
+            hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
+        } else {
+            hearingBuilder.withHearingLanguage(HearingLanguage.ENGLISH);
+        }
+        return hearingBuilder;
+    }
+
+    public static Hearing.Builder hearingWithCourtOrder(final CoreTemplateArguments args,
+                                                        final UUID courtId,
+                                                        final UUID courtRoomId,
+                                                        final String courtRoomName,
+                                                        final LocalDate localDate,
+                                                        final UUID defenceCounselId,
+                                                        final UUID caseId,
+                                                        final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+        final Random random = SecureRandom.getInstanceStrong();
+        final int min = 1;
+        final int max = 5;
+        final LocalDate dayAfter = localDate.plusDays(1);
+        final LocalDate daybefore = localDate.minusDays(1);
+
+        final Hearing.Builder hearingBuilder = Hearing.hearing()
+                .withId(randomUUID())
+                .withType(hearingType(hearingTypeId).build())
+                .withJurisdictionType(args.jurisdictionType)
+                .withReportingRestrictionReason(STRING.next())
+                .withHearingDays(asList(hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
+                        hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build()))
+                .withCourtCentre(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
+                .withJudiciary(singletonList(judiciaryRole(args).build()))
+                .withDefendantReferralReasons(singletonList(referralReason().build()))
+                .withDefenceCounsels(
+                        singletonList(
+                                defenceCounsel()
+                                        .withId(defenceCounselId)
+                                        .withAttendanceDays(asList(now()))
+                                        .withDefendants(asList(randomUUID()))
+                                        .withFirstName("John")
+                                        .withLastName("Jones")
+                                        .withTitle("Mr")
+                                        .withStatus("OPEN")
+                                        .build()))
+                .withProsecutionCases(
+                        args.structure.entrySet().stream()
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false).build())
+                                .collect(toList())
+                )
+                .withCourtApplications(asList((new HearingFactory().courtApplication()
+                        .withCourtApplicationCases(null)
+                        .withCourtOrder(CourtOrder.courtOrder()
+                                .withId(randomUUID())
+                                .withJudicialResultTypeId(randomUUID())
+                                .withLabel("label")
+                                .withOrderDate(localDate)
+                                .withStartDate(localDate)
+                                .withOrderingCourt(courtCentreWithArgs(courtId, courtRoomId, courtRoomName).build())
+                                .withOrderingHearingId(randomUUID())
+                                .withIsSJPOrder(false)
+                                .withCanBeSubjectOfBreachProceedings(false)
+                                .withCanBeSubjectOfVariationProceedings(false)
+                                .withCourtOrderOffences(singletonList(CourtOrderOffence.courtOrderOffence()
+                                        .withOffence(getOffence())
+                                        .withProsecutionCaseId(caseId)
+                                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifier(args).build())
+                                        .build()))
+                                .build())
+                        .build())));
 
         if (args.hearingLanguage == WELSH) {
             hearingBuilder.withHearingLanguage(HearingLanguage.WELSH);
@@ -862,6 +966,16 @@ public class CoreTestTemplates {
                 .build();
     }
 
+    private static Offence getOffence() {
+        return Offence.offence().withId(randomUUID())
+                .withOffenceDefinitionId(randomUUID())
+                .withOffenceCode("OFC")
+                .withOffenceTitle("OFC TITLE")
+                .withWording("WORDING")
+                .withStartDate(LocalDate.now())
+                .withOffenceLegislation("OffenceLegislation")
+                .build();
+    }
 
     public enum DefendantType {
         PERSON, ORGANISATION
@@ -890,6 +1004,7 @@ public class CoreTestTemplates {
         private boolean isOffenceCountNull = false;
         private boolean isAllocationDecision = true;
         private boolean putCustodialEstablishment = true;
+        private Boolean isBoxHearing;
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
@@ -1023,6 +1138,13 @@ public class CoreTestTemplates {
 
         public CoreTemplateArguments setOffenceDateCode(final Integer offenceDateCode) {
             this.offenceDateCode = offenceDateCode;
+            return this;
+        }
+
+        public Boolean getIsBoxHearing() { return isBoxHearing;}
+
+        public CoreTemplateArguments setIsBoxHearing(final boolean isBoxHearing){
+            this.isBoxHearing = isBoxHearing;
             return this;
         }
     }

@@ -35,11 +35,12 @@ import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.Attendant;
+import uk.gov.justice.core.courts.BreachType;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
+import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CourtApplicationRespondent;
+import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAlias;
@@ -48,17 +49,22 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
+import uk.gov.justice.core.courts.Jurisdiction;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.LinkType;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.OffenceActiveOrder;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
+import uk.gov.justice.core.courts.SummonsTemplateType;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -90,7 +96,6 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.offence.DefendantCaseOffences;
 import uk.gov.moj.cpp.hearing.command.offence.DeletedOffences;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
-import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
@@ -332,6 +337,41 @@ public class TestTemplates {
                 .build();
     }
 
+    public static Verdict applicationVerdictTemplate() {
+
+        final boolean unanimous = BOOLEAN.next();
+
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+
+        return Verdict.verdict()
+                .withVerdictType(VerdictType.verdictType()
+                        .withId(randomUUID())
+                        .withCategory(STRING.next())
+                        .withCategoryType("GUILTY")
+                        .withDescription(STRING.next())
+                        .withSequence(INTEGER.next())
+                        .build()
+                )
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                        .withOffenceDefinitionId(randomUUID())
+                        .withOffenceCode(STRING.next())
+                        .withOffenceTitle(STRING.next())
+                        .withOffenceTitleWelsh(STRING.next())
+                        .withOffenceLegislation(STRING.next())
+                        .withOffenceLegislationWelsh(STRING.next())
+                        .build()
+                )
+                .withJurors(Jurors.jurors()
+                        .withNumberOfJurors(integer(9, 12).next())
+                        .withNumberOfSplitJurors(numberOfSplitJurors)
+                        .withUnanimous(unanimous)
+                        .build()
+                )
+                .withApplicationId(randomUUID())
+                .build();
+    }
+
     public enum PleaValueType {GUILTY, NOT_GUILTY}
 
     public enum VerdictCategoryType {GUILTY, NOT_GUILTY, NO_VERDICT}
@@ -357,6 +397,16 @@ public class TestTemplates {
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
                             .setJurisdictionType(CROWN)
+                    ).build());
+        }
+
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithIsBoxHearing(final boolean isBoxHearing) {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                            .setIsBoxHearing(isBoxHearing)
                     ).build());
         }
 
@@ -415,6 +465,35 @@ public class TestTemplates {
         }
 
         public static InitiateHearingCommand standardInitiateHearingWithApplicationTemplate(final List<CourtApplication> courtApplications) {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN))
+                            .withCourtApplications(courtApplications)
+                            .build());
+        }
+
+        public static InitiateHearingCommand standardInitiateHearingWithDefaultApplicationTemplate(final UUID offenceId) {
+            final List<CourtApplication> courtApplications = Collections.singletonList((new HearingFactory()).courtApplication()
+                    .withCourtApplicationCases(Collections.singletonList(CourtApplicationCase.courtApplicationCase()
+                            .withProsecutionCaseId(randomUUID())
+                            .withIsSJP(false)
+                            .withCaseStatus("ACTIVE")
+                            .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                    .withCaseURN("caseURN")
+                                    .withProsecutionAuthorityId(randomUUID())
+                                    .withProsecutionAuthorityCode("ABC")
+                                    .build())
+                            .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                                    .withOffenceDefinitionId(randomUUID())
+                                    .withOffenceCode("ABC")
+                                    .withOffenceTitle("ABC")
+                                    .withWording("ABC")
+                                    .withStartDate(LocalDate.now())
+                                    .withId(offenceId).build()))
+                            .build()))
+                    .build());
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
@@ -548,11 +627,13 @@ public class TestTemplates {
                                                            final UUID prosecutionCaseId,
                                                            final IndicatedPleaValue indicatedPleaValue,
                                                            final String pleaValue,
-                                                           final boolean isAllocationDecision) {
+                                                           final boolean isAllocationDecision,
+                                                           final UUID courtApplicationId) {
 
 
             final PleaModel.Builder pleaModel = pleaModel().withDefendantId(defendantId)
                     .withOffenceId(offenceId)
+                    .withApplicationId(courtApplicationId)
                     .withProsecutionCaseId(prosecutionCaseId);
 
 
@@ -565,7 +646,7 @@ public class TestTemplates {
             }
 
             if (pleaValue != null) {
-                pleaModel.withPlea(CoreTestTemplates.plea(offenceId, PAST_LOCAL_DATE.next(), pleaValue).build());
+                pleaModel.withPlea(CoreTestTemplates.plea(offenceId, PAST_LOCAL_DATE.next(), pleaValue, courtApplicationId).build());
             }
 
             return updatePleaCommand().setHearingId(originatingHearingId).setPleas(
@@ -579,10 +660,18 @@ public class TestTemplates {
         }
 
         public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId, final VerdictCategoryType verdictCategoryType) {
-            return updateVerdictTemplate(hearingId, offenceId, verdictCategoryType, randomUUID(), STRING.next());
+            return updateVerdictTemplate(hearingId, offenceId, verdictCategoryType, randomUUID(), STRING.next(), null);
+        }
+
+        public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId, final VerdictCategoryType verdictCategoryType, final UUID applicationId) {
+            return updateVerdictTemplate(hearingId, offenceId, verdictCategoryType, randomUUID(), STRING.next(), applicationId);
         }
 
         public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId, final VerdictCategoryType verdictCategoryType, final UUID verdictTypeId, final String verdictCode) {
+            return updateVerdictTemplate(hearingId, offenceId,verdictCategoryType, verdictTypeId, verdictCode, null);
+        }
+
+        public static HearingUpdateVerdictCommand updateVerdictTemplate(final UUID hearingId, final UUID offenceId, final VerdictCategoryType verdictCategoryType, final UUID verdictTypeId, final String verdictCode, final UUID applicationId) {
 
             final boolean unanimous = BOOLEAN.next();
             final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
@@ -600,6 +689,7 @@ public class TestTemplates {
                                     .build()
                             )
                             .withOffenceId(offenceId)
+                            .withApplicationId(applicationId)
                             .withVerdictDate(PAST_LOCAL_DATE.next())
                             .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
                                     .withOffenceDefinitionId(randomUUID())
@@ -633,6 +723,14 @@ public class TestTemplates {
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplate(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
             return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE);
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplication(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
+            return saveDraftResultCommandTemplateWithApplication(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE);
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplicationAndOffence(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
+            return saveDraftResultCommandTemplateWithApplicationAndOffence(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE);
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
@@ -811,6 +909,47 @@ public class TestTemplates {
             return new SaveDraftResultCommand(target, null);
         }
 
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplication(
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
+                final UUID resultLineId, final UUID resultDefinitionId, final Boolean shadowListed) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final UUID offenceId ;
+            if(hearing.getCourtApplications().get(0).getCourtApplicationCases() != null){
+                offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
+            }else if(hearing.getCourtApplications().get(0).getCourtOrder() != null){
+                offenceId = hearing.getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getId();
+            }else{
+                offenceId = null;
+            }
+
+            final Target target = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withTargetId(UUID.randomUUID())
+                    .withApplicationId(hearing.getCourtApplications().get(0).getId())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .withShadowListed(shadowListed)
+                    .withOffenceId(offenceId)
+                    .build();
+            return new SaveDraftResultCommand(target, null);
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplicationAndOffence(
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
+                final UUID resultLineId, final UUID resultDefinitionId, final Boolean shadowListed) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final Target target = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withTargetId(UUID.randomUUID())
+                    .withApplicationId(hearing.getCourtApplications().get(0).getId())
+                    .withOffenceId(hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .withShadowListed(shadowListed)
+                    .build();
+            return new SaveDraftResultCommand(target, null);
+        }
+
         public static SaveDraftResultCommand saveDraftResultCommandTemplateForDeletedResult(final InitiateHearingCommand initiateHearingCommand,
                                                                                             final LocalDate orderedDate, final UUID resultLineId,
                                                                                             final UUID resultDefinitionId) {
@@ -828,21 +967,6 @@ public class TestTemplates {
             return new SaveDraftResultCommand(target, null);
         }
 
-        public static ApplicationDraftResultCommand applicationDraftResultCommandTemplate(final UUID hearingId) {
-            return ApplicationDraftResultCommand.applicationDraftResultCommand().setDraftResult("application draft result context")
-                    .setHearingId(hearingId)
-                    .setTargetId(UUID.randomUUID())
-                    .setApplicationId(UUID.randomUUID());
-        }
-
-        public static ApplicationDraftResultCommand applicationDraftResultWithOutcomeCommandTemplate(final UUID hearingId, final UUID applicationId, final CourtApplicationOutcomeType applicationOutCome) {
-            return ApplicationDraftResultCommand.applicationDraftResultCommand().setDraftResult("application draft result context")
-                    .setHearingId(hearingId)
-                    .setTargetId(UUID.randomUUID())
-                    .setApplicationId(applicationId)
-                    .setApplicationOutcomeType(applicationOutCome)
-                    .setApplicationOutcomeDate(now());
-        }
     }
 
     public static class ShareResultsCommandTemplates {
@@ -1554,23 +1678,55 @@ public class TestTemplates {
         final List<CourtApplication> courtApplications = new ArrayList<>();
         courtApplications.add(CourtApplication.courtApplication()
                 .withId(UUID.randomUUID())
-                .withLinkedCaseId(UUID.randomUUID())
+                //TODO need to revisit linked case scenario
+              /*  .withCourtApplicationCases(Collections.singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withProsecutionCaseId(UUID.randomUUID())
+                        .withProsecutionCaseReference("Case Reference")
+                        .withIsSJP(false)
+                        .build()))*/
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withId(UUID.randomUUID())
+                        .withSummonsRequired(false)
+                        .withNotificationRequired(false)
+                        .build())
                 .withApplicant(CourtApplicationParty.courtApplicationParty()
                         .withId(UUID.randomUUID())
-                        .withDefendant(uk.gov.justice.core.courts.Defendant.defendant()
-                                .withId(UUID.randomUUID())
+                        .withSummonsRequired(false)
+                        .withNotificationRequired(false)
+                        .withMasterDefendant(uk.gov.justice.core.courts.MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(UUID.randomUUID())
                                 .build())
                         .build())
-                .withRespondents(Arrays.asList(CourtApplicationRespondent.courtApplicationRespondent()
-                        .withPartyDetails(CourtApplicationParty.courtApplicationParty()
-                                .withId(UUID.randomUUID())
-                                .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority()
-                                        .withProsecutionAuthorityId(UUID.randomUUID())
+                .withRespondents(Arrays.asList(CourtApplicationParty.courtApplicationParty()
+                        .withId(UUID.randomUUID())
+                        .withSummonsRequired(false)
+                        .withNotificationRequired(false)
+                        .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority()
+                                .withProsecutionAuthorityId(UUID.randomUUID())
 
                                         .build())
-                                .build())
 
                         .build()))
+                .withType(CourtApplicationType.courtApplicationType()
+                        .withId(randomUUID())
+                        .withType("applicationType")
+                        .withCode("appCode")
+                        .withLegislation("appLegislation")
+                        .withCategoryCode("appCategory")
+                        .withLinkType(LinkType.LINKED)
+                        .withJurisdiction(Jurisdiction.EITHER)
+                        .withSummonsTemplateType(SummonsTemplateType.BREACH)
+                        .withBreachType(BreachType.NOT_APPLICABLE)
+                        .withAppealFlag(false)
+                        .withApplicantAppellantFlag(false)
+                        .withPleaApplicableFlag(false)
+                        .withCommrOfOathFlag(false)
+                        .withCourtOfAppealFlag(false)
+                        .withCourtExtractAvlFlag(false)
+                        .withProsecutorThirdPartyFlag(false)
+                        .withSpiOutApplicableFlag(false)
+                        .withOffenceActiveOrder(OffenceActiveOrder.NOT_APPLICABLE)
+                        .build())
                 .build());
         return courtApplications;
     }

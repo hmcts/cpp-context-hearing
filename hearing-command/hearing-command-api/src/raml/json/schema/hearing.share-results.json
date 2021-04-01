@@ -128,12 +128,6 @@
           "description": "Indicates that the result amendment was a delete",
           "type": "boolean"
         },
-        "applicationOutcome": {
-          "type": "object",
-          "items": {
-            "$ref": "http://justice.gov.uk/core/courts/courtApplicationOutcome.json"
-          }
-        },
         "childResultLineIds": {
           "type": "array",
           "items": {

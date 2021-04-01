@@ -1,13 +1,16 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.HearingResultsCleanerUtil.removeResultsFromHearing;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -35,7 +38,9 @@ import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,38 +61,53 @@ public class HearingDelegate implements Serializable {
         final Hearing hearing = hearingInitiated.getHearing();
         this.momento.setHearing(hearing);
 
-        if (isNull(hearing) || isNull(hearing.getProsecutionCases())) {
+        if(isNull(hearing)){
             return;
         }
+        if (nonNull(hearing.getProsecutionCases())) {
+            this.momento.getHearing().getProsecutionCases().forEach(
+                    prosecutionCase -> prosecutionCase.getDefendants().forEach(
+                            defendant -> defendant.getOffences().forEach(this::keepOffence)));
+        }
+        if (nonNull(hearing.getCourtApplications())) {
+            this.momento.getHearing().getCourtApplications().stream()
+                    .flatMap(a -> ofNullable(a.getCourtApplicationCases()).orElse(emptyList()).stream())
+                    .flatMap(c -> ofNullable(c.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                    .forEach(this::keepOffence);
 
-        this.momento.getHearing().getProsecutionCases().forEach(
-                prosecutionCase -> prosecutionCase.getDefendants().forEach(
-                        defendant -> defendant.getOffences().forEach(offence -> {
+            this.momento.getHearing().getCourtApplications().stream()
+                    .map(CourtApplication::getCourtOrder)
+                    .filter(Objects::nonNull)
+                    .flatMap(c -> c.getCourtOrderOffences().stream())
+                    .map(CourtOrderOffence::getOffence)
+                    .forEach(this::keepOffence);
+        }
+    }
 
-                            final UUID offenceId = offence.getId();
-                            if (nonNull(offence.getConvictionDate())) {
-                                this.momento.getConvictionDates().put(offenceId, offence.getConvictionDate());
-                            }
+    private void keepOffence(final Offence offence) {
+        final UUID offenceId = offence.getId();
+        if (nonNull(offence.getConvictionDate())) {
+            this.momento.getConvictionDates().put(offenceId, offence.getConvictionDate());
+        }
 
-                            if (nonNull(offence.getPlea())) {
-                                this.momento.getPleas().put(offenceId, offence.getPlea());
-                            }
+        if (nonNull(offence.getPlea())) {
+            this.momento.getPleas().put(offenceId, offence.getPlea());
+        }
 
-                            if (nonNull(offence.getVerdict())) {
-                                this.momento.getVerdicts().put(offenceId, offence.getVerdict());
-                            }
-                        })));
+        if (nonNull(offence.getVerdict())) {
+            this.momento.getVerdicts().put(offenceId, offence.getVerdict());
+        }
     }
 
     public void handleHearingExtended(final HearingExtended hearingExtended) {
-        if (nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getCourtApplication())) {
-            final List<CourtApplication> oldCourtApplications = this.momento.getHearing().getCourtApplications();
-            final List<CourtApplication> newCourtApplications = oldCourtApplications == null ? new ArrayList<>() :
-                    oldCourtApplications.stream()
-                            .filter(ca -> !ca.getId().equals(hearingExtended.getCourtApplication().getId()))
-                            .collect(Collectors.toList());
-            newCourtApplications.add(hearingExtended.getCourtApplication());
-            this.momento.getHearing().setCourtApplications(newCourtApplications);
+        updateCourtApplication(hearingExtended);
+
+        updateCourtCentre(hearingExtended);
+
+        updateHearingDays(hearingExtended);
+
+        if(nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getJurisdictionType())) {
+            this.momento.getHearing().setJurisdictionType(hearingExtended.getJurisdictionType());
         }
 
         if (nonNull(this.momento.getHearing()) && isNotEmpty(hearingExtended.getProsecutionCases())) {
@@ -108,6 +128,32 @@ public class HearingDelegate implements Serializable {
             );
         }
 
+    }
+
+    private void updateHearingDays(HearingExtended hearingExtended) {
+        if(nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getHearingDays())) {
+            this.momento.getHearing().setHearingDays(hearingExtended.getHearingDays());
+        }
+    }
+
+    private void updateCourtCentre(HearingExtended hearingExtended) {
+        if(nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getCourtCentre())) {
+            this.momento.getHearing().setCourtCentre(hearingExtended.getCourtCentre());
+        }
+    }
+
+    private void updateCourtApplication(HearingExtended hearingExtended) {
+        if (nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getCourtApplication())) {
+            final List<CourtApplication> oldCourtApplications = this.momento.getHearing().getCourtApplications();
+            final List<CourtApplication> newCourtApplications = oldCourtApplications == null ? new ArrayList<>() :
+                    oldCourtApplications.stream()
+                            .filter(ca -> !ca.getId().equals(hearingExtended.getCourtApplication().getId()))
+                            .collect(Collectors.toList());
+
+            newCourtApplications.add(hearingExtended.getCourtApplication());
+
+            this.momento.getHearing().setCourtApplications(newCourtApplications);
+        }
     }
 
     public void handleHearingDetailChanged(HearingDetailChanged hearingDetailChanged) {
@@ -153,10 +199,11 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> extend(final UUID hearingId,
+                                 final List<HearingDay> hearingDays, final CourtCentre courtCentre, final JurisdictionType jurisdictionType,
                                  final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases,
                                  final List<UUID> shadowListedOffences) {
 
-        return Stream.of(new HearingExtended(hearingId, courtApplication, prosecutionCases, shadowListedOffences));
+        return Stream.of(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences));
     }
 
     public Stream<Object> updateHearingDetails(final UUID id,

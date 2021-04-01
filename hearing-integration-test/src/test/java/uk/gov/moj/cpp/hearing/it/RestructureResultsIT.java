@@ -1,23 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.JudicialResult;
-import uk.gov.justice.core.courts.JudicialResultPrompt;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
-import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
-import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
-
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Stream;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.LocalDate.now;
@@ -39,6 +21,26 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.StubNowsReferenceData.setupNowsReferenceData;
+
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultPrompt;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
+import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Stream;
+
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
 
 public class RestructureResultsIT extends AbstractIT {
 
@@ -165,8 +167,7 @@ public class RestructureResultsIT extends AbstractIT {
 
         hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setId(offenceId.get());
 
-        stubLjaDetails(hearing.getHearing().getCourtCentre(),
-                hearing.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId());
+        hearing.getHearing().getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(hearing.getHearing().getCourtCentre(), prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 

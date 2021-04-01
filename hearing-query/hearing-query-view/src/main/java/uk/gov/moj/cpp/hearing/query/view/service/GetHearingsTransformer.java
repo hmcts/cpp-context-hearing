@@ -2,21 +2,26 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.time.LocalDate.now;
 import static java.util.Collections.emptyList;
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CourtApplicationRespondent;
 import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.hearing.courts.Applicant;
+import uk.gov.justice.hearing.courts.CaseSummaries;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.HearingSummaries;
@@ -24,17 +29,22 @@ import uk.gov.justice.hearing.courts.Offences;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.justice.hearing.courts.ReportingRestrictions;
 import uk.gov.justice.hearing.courts.Respondents;
+import uk.gov.justice.hearing.courts.Subject;
 import uk.gov.justice.hearing.courts.Type;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class GetHearingsTransformer {
 
     public HearingSummaries.Builder summary(final Hearing hearing) {
         return buildHearingSummary(hearing)
                 .withHearingDays(hearing.getHearingDays())
+                .withCourtApplicationSummaries(isEmpty(hearing.getCourtApplications()) ? emptyList() :
+                        hearing.getCourtApplications().stream().map(courtApplication -> summary(courtApplication).build())
+                                .collect(toList()))
                 .withProsecutionCaseSummaries(
-                        hearing.getProsecutionCases() == null ? emptyList() :
+                        isEmpty(hearing.getProsecutionCases()) ? emptyList() :
                                 hearing.getProsecutionCases().stream().map(pc -> summary(pc).build())
                                         .collect(toList())
                 );
@@ -180,7 +190,7 @@ public class GetHearingsTransformer {
                                 .collect(toList()));
     }
 
-    private Applicant.Builder summary(final CourtApplicationParty courtApplicationParty) {
+    private Applicant.Builder applicantSummary(final CourtApplicationParty courtApplicationParty) {
         final Applicant.Builder result = Applicant.applicant();
         result.withId(courtApplicationParty.getId());
         result.withSynonym(courtApplicationParty.getSynonym());
@@ -192,7 +202,7 @@ public class GetHearingsTransformer {
 
         if (courtApplicationParty.getOrganisation() != null) {
             result.withOrganisationName(courtApplicationParty.getOrganisation().getName());
-        }else if(courtApplicationParty.getProsecutingAuthority()!=null) {
+        } else if (courtApplicationParty.getProsecutingAuthority() != null) {
             result.withOrganisationName(courtApplicationParty.getProsecutingAuthority().getName());
         }
 
@@ -200,16 +210,48 @@ public class GetHearingsTransformer {
         return result;
     }
 
-    private Respondents.Builder summary(final CourtApplicationRespondent courtApplicationRespondent) {
-        final Respondents.Builder result = Respondents.respondents();
-        result.withId(courtApplicationRespondent.getPartyDetails().getId());
-        if (courtApplicationRespondent.getPartyDetails() != null && courtApplicationRespondent.getPartyDetails().getPersonDetails() != null) {
-            result.withFirstName(courtApplicationRespondent.getPartyDetails().getPersonDetails().getFirstName());
-            result.withLastName(courtApplicationRespondent.getPartyDetails().getPersonDetails().getLastName());
-            result.withMiddleName(courtApplicationRespondent.getPartyDetails().getPersonDetails().getMiddleName());
+    private Subject.Builder subjectSummary(final CourtApplicationParty courtApplicationParty) {
+        final Subject.Builder result = Subject.subject();
+        result.withId(courtApplicationParty.getId());
+        result.withSynonym(courtApplicationParty.getSynonym());
+
+        if (nonNull(courtApplicationParty.getMasterDefendant())) {
+            final MasterDefendant masterDefendant = courtApplicationParty.getMasterDefendant();
+            result.withMasterDefendantId(masterDefendant.getMasterDefendantId());
+            if (nonNull(masterDefendant.getPersonDefendant())) {
+                result.withFirstName(masterDefendant.getPersonDefendant().getPersonDetails().getFirstName());
+                result.withMiddleName(masterDefendant.getPersonDefendant().getPersonDetails().getMiddleName());
+                result.withLastName(masterDefendant.getPersonDefendant().getPersonDetails().getLastName());
+            } else if (nonNull(masterDefendant.getLegalEntityDefendant())) {
+                result.withOrganisationName(masterDefendant.getLegalEntityDefendant().getOrganisation().getName());
+            }
         }
-        if (courtApplicationRespondent.getPartyDetails() != null && courtApplicationRespondent.getPartyDetails().getOrganisation() != null) {
-            result.withOrganisationName(courtApplicationRespondent.getPartyDetails().getOrganisation().getName());
+
+        if (courtApplicationParty.getPersonDetails() != null) {
+            result.withFirstName(courtApplicationParty.getPersonDetails().getFirstName());
+            result.withMiddleName(courtApplicationParty.getPersonDetails().getMiddleName());
+            result.withLastName(courtApplicationParty.getPersonDetails().getLastName());
+        }
+
+        if (courtApplicationParty.getOrganisation() != null) {
+            result.withOrganisationName(courtApplicationParty.getOrganisation().getName());
+        } else if (courtApplicationParty.getProsecutingAuthority() != null) {
+            result.withOrganisationName(courtApplicationParty.getProsecutingAuthority().getName());
+        }
+
+        return result;
+    }
+
+    private Respondents.Builder respondentSummary(final CourtApplicationParty courtApplicationParty) {
+        final Respondents.Builder result = Respondents.respondents();
+        result.withId(courtApplicationParty.getId());
+        if (courtApplicationParty.getPersonDetails() != null) {
+            result.withFirstName(courtApplicationParty.getPersonDetails().getFirstName());
+            result.withLastName(courtApplicationParty.getPersonDetails().getLastName());
+            result.withMiddleName(courtApplicationParty.getPersonDetails().getMiddleName());
+        }
+        if (courtApplicationParty.getOrganisation() != null) {
+            result.withOrganisationName(courtApplicationParty.getOrganisation().getName());
         }
         return result;
     }
@@ -219,20 +261,45 @@ public class GetHearingsTransformer {
         final CourtApplicationSummaries.Builder result = CourtApplicationSummaries.courtApplicationSummaries();
         result.withId(courtApplication.getId());
         result.withApplicationReference(courtApplication.getApplicationReference());
-        result.withApplicant(summary(courtApplication.getApplicant()).build());
+        result.withApplicant(applicantSummary(courtApplication.getApplicant()).build());
+        result.withSubject(subjectSummary(courtApplication.getSubject()).build());
         result.withParentApplicationId(courtApplication.getParentApplicationId());
         result.withType(courtApplication.getType() != null ?
-                Type.type().withApplicationType(type.getApplicationType())
-                        .withApplicationLegislation(type.getApplicationLegislation())
-                        .withApplicationTypeWelsh(type.getApplicationTypeWelsh())
+                Type.type().withType(type.getType())
+                        .withLegislation(type.getLegislation())
+                        .withTypeWelsh(type.getTypeWelsh())
                         .build()
                 : null);
         result.withRespondents(courtApplication.getRespondents() == null ? emptyList() :
-                courtApplication.getRespondents().stream().map(ca -> summary(ca).build())
+                courtApplication.getRespondents().stream().map(ca -> respondentSummary(ca).build())
                         .collect(toList())
         );
+
+        if (isNotEmpty(courtApplication.getCourtApplicationCases())) {
+            result.withCaseSummaries(courtApplication.getCourtApplicationCases().stream()
+                    .map(cac -> CaseSummaries.caseSummaries()
+                            .withId(cac.getProsecutionCaseId())
+                            .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                    .withCaseURN(cac.getProsecutionCaseIdentifier().getCaseURN())
+                                    .withProsecutionAuthorityReference(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
+                                    .withProsecutionAuthorityCode(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
+                                    .withProsecutionAuthorityId(cac.getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                    .build())
+                            .build())
+                    .collect(Collectors.toList()));
+        } else if (nonNull(courtApplication.getCourtOrder())) {
+            result.withCaseSummaries(courtApplication.getCourtOrder().getCourtOrderOffences().stream()
+                    .map(coo -> CaseSummaries.caseSummaries()
+                            .withId(coo.getProsecutionCaseId())
+                            .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                                    .withCaseURN(coo.getProsecutionCaseIdentifier().getCaseURN())
+                                    .withProsecutionAuthorityReference(coo.getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
+                                    .withProsecutionAuthorityCode(coo.getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
+                                    .withProsecutionAuthorityId(coo.getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                    .build())
+                            .build())
+                    .collect(toList()));
+        }
         return result;
     }
-
-
 }

@@ -371,15 +371,6 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void shouldPassThroughSaveApplicationResponseRequestToCommandHandler() {
-        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-application-response");
-
-        hearingCommandApi.saveApplicationResponse(jsonRequestEnvelope);
-
-        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-application-response");
-    }
-
-    @Test
     public void shouldPassThroughUpdateDefenceCounselRequestToCommandHandler() {
         final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-defence-counsel");
 
@@ -470,15 +461,6 @@ public class HearingCommandApiTest {
     }
 
     @Test
-    public void shouldPassThroughApplicationDraftResultRequestToCommandHandler() {
-        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.application-draft-result");
-
-        hearingCommandApi.applicationDraftResult(jsonRequestEnvelope);
-
-        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.application-draft-result");
-    }
-
-    @Test
     public void shouldPassThroughRequestApprovalCommandHandler() {
         final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.request-approval");
 
@@ -495,6 +477,7 @@ public class HearingCommandApiTest {
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.validate-result-amendments");
     }
+
 
     @Test
     public void shouldPassThroughRemoveDraftTargetRequestToCommandHandler() {

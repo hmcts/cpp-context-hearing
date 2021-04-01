@@ -11,6 +11,8 @@ import static uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary.
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -23,7 +25,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -59,6 +60,9 @@ public class TimelineHearingSummaryHelper {
         }
 
         setHearingOutcome(hearing, crackedIneffectiveTrial, timelineHearingSummaryBuilder);
+        if(Boolean.TRUE.equals(hearing.getIsBoxHearing()) ) {
+            timelineHearingSummaryBuilder.withIsBoxHearing(hearing.getIsBoxHearing());
+        }
 
         return timelineHearingSummaryBuilder;
     }
@@ -106,13 +110,28 @@ public class TimelineHearingSummaryHelper {
     }
 
     private String extractDisplayName(final CourtApplicationParty applicant) {
-        Optional<String> displayName = Optional.empty();
-
-        if (Objects.nonNull(applicant.getPersonDetails())) {
+        Optional<String> displayName;
+        displayName = ofNullable(applicant.getProsecutingAuthority()).map(ProsecutingAuthority::getProsecutionAuthorityCode);
+        if (nonNull(applicant.getPersonDetails())) {
             displayName = ofNullable(Stream.of(applicant.getPersonDetails().getFirstName(),
                     applicant.getPersonDetails().getLastName())
                     .filter(StringUtils::isNotBlank).collect(Collectors.joining(" ")));
         }
+        if (nonNull(applicant.getOrganisation())) {
+            displayName = ofNullable(applicant.getOrganisation().getName()).filter(StringUtils::isNotBlank);
+        }
+        if (nonNull(applicant.getMasterDefendant())) {
+            final MasterDefendant masterDefendant = applicant.getMasterDefendant();
+            if (nonNull(masterDefendant.getPersonDefendant())) {
+                final uk.gov.justice.core.courts.PersonDefendant personDefendant = masterDefendant.getPersonDefendant();
+                displayName = ofNullable(Stream.of(personDefendant.getPersonDetails().getFirstName(), personDefendant.getPersonDetails().getLastName())
+                        .filter(StringUtils::isNotBlank).collect(Collectors.joining(" ")));
+            }
+            if (nonNull(masterDefendant.getLegalEntityDefendant())) {
+                displayName = ofNullable(masterDefendant.getLegalEntityDefendant().getOrganisation().getName()).filter(StringUtils::isNotBlank);
+            }
+        }
+
         return displayName.orElse(EMPTY);
     }
 

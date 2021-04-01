@@ -138,29 +138,6 @@ public class Queries {
 
     }
 
-    public static void getApplicationDraftResultsPollForMatch(final UUID hearingId, final long timeout, final BeanMatcher<ApplicationTargetListResponse> resultMatcher) {
-
-        final RequestParams requestParams = requestParams(getURL("hearing.get-application-draft-result", hearingId), "application/vnd.hearing.get-application-draft-result+json")
-                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
-                .build();
-
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(ApplicationTargetListResponse.class, resultMatcher));
-
-        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
-
-        ResponseData responseData = makeRequest(requestParams);
-
-        while (!expectedConditions.matches(responseData) && ZonedDateTime.now().isBefore(expiryTime)) {
-            sleep();
-            responseData = makeRequest(requestParams);
-        }
-
-        if (!expectedConditions.matches(responseData)) {
-            assertThat(responseData, expectedConditions);
-        }
-
-    }
-
     private static void sleep() {
         try {
             Thread.sleep(2000);

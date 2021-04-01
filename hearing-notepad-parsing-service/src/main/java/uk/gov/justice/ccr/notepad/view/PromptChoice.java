@@ -73,6 +73,10 @@ public class PromptChoice {
 
     private Boolean nameEmail;
 
+    private String minLength;
+
+    private String maxLength;
+
     public String getCode() {
         return code;
     }
@@ -242,5 +246,21 @@ public class PromptChoice {
 
     public void setNameEmail(final Boolean nameEmail) {
         this.nameEmail = nameEmail;
+    }
+
+    public String getMinLength() {
+        return minLength;
+    }
+
+    public void setMinLength(final String minLength) {
+        this.minLength = minLength;
+    }
+
+    public String getMaxLength() {
+        return maxLength;
+    }
+
+    public void setMaxLength(final String maxLength) {
+        this.maxLength = maxLength;
     }
 }

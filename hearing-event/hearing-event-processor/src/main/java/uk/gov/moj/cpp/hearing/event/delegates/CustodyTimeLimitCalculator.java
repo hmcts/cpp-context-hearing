@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static java.util.Optional.ofNullable;
+
 import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
@@ -11,10 +13,12 @@ import uk.gov.justice.core.courts.Offence;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings({"squid:S1612", "squid:S00112", "squid:S00108", "squid:S1166"})
 public class CustodyTimeLimitCalculator {
@@ -31,7 +35,7 @@ public class CustodyTimeLimitCalculator {
 
     public void calculate(Hearing hearing) {
         //go through the offences
-        hearing.getProsecutionCases().stream()
+        ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .flatMap(pc -> pc.getDefendants().stream())
                 .filter(CustodyTimeLimitCalculator::valid)
                 .forEach(this::calculate);

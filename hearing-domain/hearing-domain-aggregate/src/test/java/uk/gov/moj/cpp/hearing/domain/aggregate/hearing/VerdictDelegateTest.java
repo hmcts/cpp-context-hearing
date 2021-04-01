@@ -1,40 +1,65 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithDefaultApplicationTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType.GUILTY;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType.NOT_GUILTY;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import com.google.common.collect.Lists;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.MatcherAssert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -89,6 +114,73 @@ public class VerdictDelegateTest {
                                 .with(Jurors::getNumberOfSplitJurors, is(verdict.getFirstVerdict().getJurors().getNumberOfSplitJurors()))
                                 .with(Jurors::getUnanimous, is(verdict.getFirstVerdict().getJurors().getUnanimous()))
                         )));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenOffenceUnderCourtApplicationVerdictIsGuilty() {
+
+        final UUID offenceId = randomUUID();
+
+        final Hearing hearing = standardInitiateHearingWithDefaultApplicationTemplate(offenceId).getHearing();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(
+                hearing.getId(),
+                offenceId,
+                GUILTY));
+
+        final List<Object> events = hearingAggregate.updateVerdict(
+                hearing.getId(),
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
+        ).collect(Collectors.toList());
+
+        final VerdictUpsert verdictUpsert = (VerdictUpsert) events.get(0);
+        MatcherAssert.assertThat(verdictUpsert, CoreMatchers.is(notNullValue()));
+        MatcherAssert.assertThat(verdictUpsert.getHearingId(), CoreMatchers.is(hearing.getId()));
+        MatcherAssert.assertThat(verdictUpsert.getVerdict().getOffenceId(), CoreMatchers.is(offenceId));
+
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        MatcherAssert.assertThat(convictionDateAdded, CoreMatchers.is(notNullValue()));
+        MatcherAssert.assertThat(convictionDateAdded.getOffenceId(), CoreMatchers.is(offenceId));
+        MatcherAssert.assertThat(convictionDateAdded.getConvictionDate(), CoreMatchers.is(verdict.getFirstVerdict().getVerdictDate()));
+        MatcherAssert.assertThat(convictionDateAdded.getHearingId(), CoreMatchers.is(hearing.getId()));
+        MatcherAssert.assertThat(convictionDateAdded.getCourtApplicationId(), CoreMatchers.is(hearing.getCourtApplications().get(0).getId()));
+    }
+
+    @Test
+    public void shouldAddConvictionDateAddedEventWhenCourtApplicationVerdictIsGuilty() {
+        final UUID offenceId = randomUUID();
+        final Hearing hearing = standardInitiateHearingWithDefaultApplicationTemplate(offenceId).getHearing();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(
+                hearing.getId(),
+                null,
+                GUILTY,
+                hearing.getCourtApplications().get(0).getId()));
+
+        final List<Object> events = hearingAggregate.updateVerdict(
+                hearing.getId(),
+                verdict.getFirstVerdict(),
+                guiltyPleaTypes()
+        ).collect(Collectors.toList());
+
+        final VerdictUpsert verdictUpsert = (VerdictUpsert) events.get(0);
+        MatcherAssert.assertThat(verdictUpsert, CoreMatchers.is(notNullValue()));
+        MatcherAssert.assertThat(verdictUpsert.getHearingId(), CoreMatchers.is(hearing.getId()));
+        MatcherAssert.assertThat(verdictUpsert.getVerdict().getOffenceId(), CoreMatchers.is(nullValue()));
+
+        final ConvictionDateAdded convictionDateAdded = (ConvictionDateAdded) events.get(1);
+        MatcherAssert.assertThat(convictionDateAdded, CoreMatchers.is(notNullValue()));
+        MatcherAssert.assertThat(convictionDateAdded.getOffenceId(), CoreMatchers.is(nullValue()));
+        MatcherAssert.assertThat(convictionDateAdded.getConvictionDate(), CoreMatchers.is(verdict.getFirstVerdict().getVerdictDate()));
+        MatcherAssert.assertThat(convictionDateAdded.getHearingId(), CoreMatchers.is(hearing.getId()));
+        MatcherAssert.assertThat(convictionDateAdded.getCourtApplicationId(), CoreMatchers.is(hearing.getCourtApplications().get(0).getId()));
     }
 
     @Test
@@ -339,6 +431,140 @@ public class VerdictDelegateTest {
                 guiltyPleaTypes()
         );
     }
+
+    @Test
+    public void updateHearingAggregateAfterApplicationOffenceVerdictUpdateEventIsRaised() {
+        final UUID offenceId = randomUUID();
+        final List<CourtApplication> applications = singletonList(CourtApplication.courtApplication()
+                .withId(UUID.randomUUID())
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .build())
+                        .build())
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withOffences(singletonList(Offence.offence().withId(offenceId).build()))
+                        .withCaseStatus("ACTIVE")
+                        .build()))
+                .build());
+        CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingWithApplicationTemplate(applications));
+
+        final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(
+                hearing.getHearingId(),
+                offenceId,
+                GUILTY));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing.getHearing()));
+
+        hearingAggregate.updateVerdict(hearing.getHearingId(), verdict.getFirstVerdict(),guiltyPleaTypes()).collect(Collectors.toList()).get(0);
+
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLine sharedResultsCommandResultLine = new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                resultLineIn.getOrderedDate(),
+                resultLineIn.getSharedDate(),
+                resultLineIn.getResultLineId(),
+                targetDraft.getTargetId(),
+                targetDraft.getOffenceId(),
+                targetDraft.getDefendantId(),
+                resultLineIn.getResultDefinitionId(),
+                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                resultLineIn.getResultLabel(),
+                resultLineIn.getLevel().name(),
+                resultLineIn.getIsModified(),
+                resultLineIn.getIsComplete(),
+                targetDraft.getApplicationId(),
+                resultLineIn.getAmendmentReasonId(),
+                resultLineIn.getAmendmentReason(),
+                resultLineIn.getAmendmentDate(),
+                resultLineIn.getFourEyesApproval(),
+                resultLineIn.getApprovedDate(),
+                resultLineIn.getIsDeleted(),
+                null,
+                null
+        );
+        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED)
+                .collect(Collectors.toList()).get(0);
+
+        assertEquals("GUILTY", resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict().getVerdictType().getCategoryType());
+    }
+
+    @Test
+    public void updateHearingAggregateAfterApplicationVerdictUpdateEventIsRaised() {
+        final UUID offenceId = randomUUID();
+        final UUID applicationId = randomUUID();
+        final List<CourtApplication> applications = singletonList(CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .build())
+                        .build())
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withOffences(singletonList(Offence.offence().withId(offenceId).build()))
+                        .withCaseStatus("ACTIVE")
+                        .build()))
+                .build());
+        CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingWithApplicationTemplate(applications));
+
+        final CommandHelpers.UpdateVerdictCommandHelper verdict = h(updateVerdictTemplate(
+                hearing.getHearingId(),
+                null,
+                GUILTY,
+                applicationId));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing.getHearing()));
+
+        hearingAggregate.updateVerdict(hearing.getHearingId(), verdict.getFirstVerdict(),guiltyPleaTypes()).collect(Collectors.toList()).get(0);
+
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLine sharedResultsCommandResultLine = new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                resultLineIn.getOrderedDate(),
+                resultLineIn.getSharedDate(),
+                resultLineIn.getResultLineId(),
+                targetDraft.getTargetId(),
+                targetDraft.getOffenceId(),
+                targetDraft.getDefendantId(),
+                resultLineIn.getResultDefinitionId(),
+                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                resultLineIn.getResultLabel(),
+                resultLineIn.getLevel().name(),
+                resultLineIn.getIsModified(),
+                resultLineIn.getIsComplete(),
+                targetDraft.getApplicationId(),
+                resultLineIn.getAmendmentReasonId(),
+                resultLineIn.getAmendmentReason(),
+                resultLineIn.getAmendmentDate(),
+                resultLineIn.getFourEyesApproval(),
+                resultLineIn.getApprovedDate(),
+                resultLineIn.getIsDeleted(),
+                null,
+                null
+        );
+        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED)
+                .collect(Collectors.toList()).get(0);
+
+        assertEquals("GUILTY", resultsShared.getHearing().getCourtApplications().get(0).getVerdict().getVerdictType().getCategoryType());
+        assertEquals(null, resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict());
+    }
+
 
     private PleaModel getPleaModel(final UUID offenceId, final String pleaValue) {
         return PleaModel.pleaModel()

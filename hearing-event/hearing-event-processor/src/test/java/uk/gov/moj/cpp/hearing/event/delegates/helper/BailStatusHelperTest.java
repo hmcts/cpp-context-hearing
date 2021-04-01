@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -7,10 +8,16 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -93,6 +100,98 @@ public class BailStatusHelperTest {
 
     }
 
+    @Test
+    public void testMapBailStatuses_ShouldUpdateWhenCourtApplicationCasesExist() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithCourtApplicationCase("U", Lists.newArrayList("C", "U", "A"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant().getBailStatus();
+        assertNotNull(bailStatus);
+        assertThat(bailStatus.getId().toString(), is("fab947a3-c50c-4dbb-accf-b2758b1d2d6d"));
+        assertThat(bailStatus.getCode(), is("C"));
+        assertThat(bailStatus.getDescription(), is("Remanded into Custody"));
+
+
+
+    }
+
+    @Test
+    public void testMapBailStatuses_ShouldNotUpdateIfApplicableStatusNotFoundWhenCourtApplicationCasesExist() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithCourtApplicationCase("U", Lists.newArrayList("W", "Z"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant().getBailStatus();
+        assertNotNull(bailStatus);
+        assertThat(bailStatus.getCode(), is("U"));
+
+    }
+
+    @Test
+    public void shouldMapBailStatusesWithoutPersonDefendantWhenCourtApplicationCasesExist() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithoutPersonDefendantWithCourtApplicationCase(Lists.newArrayList("C", "U", "A"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        PersonDefendant personDefendant = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant();
+        assertNull(personDefendant);
+
+    }
+
+    @Test
+    public void testMapBailStatuses_ShouldUpdateWhenCourtApplicationCourtOrderExists() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithCourtApplicationCourtOrder("U", Lists.newArrayList("C", "U", "A"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant().getBailStatus();
+        assertNotNull(bailStatus);
+        assertThat(bailStatus.getId().toString(), is("fab947a3-c50c-4dbb-accf-b2758b1d2d6d"));
+        assertThat(bailStatus.getCode(), is("C"));
+        assertThat(bailStatus.getDescription(), is("Remanded into Custody"));
+    }
+
+    @Test
+    public void testMapBailStatuses_ShouldNotUpdateIfApplicableStatusNotFoundWhenCourtApplicationCourtOrderExists() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithCourtApplicationCourtOrder("U", Lists.newArrayList("W", "Z"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant().getBailStatus();
+        assertNotNull(bailStatus);
+        assertThat(bailStatus.getCode(), is("U"));
+
+    }
+
+    @Test
+    public void shouldMapBailStatusesWithoutPersonDefendantWhenCourtApplicationCourtOrderExists() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithoutPersonDefendantWithCourtApplicationCourtOrder(Lists.newArrayList("C", "U", "A"));
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+
+        PersonDefendant personDefendant = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant();
+        assertNull(personDefendant);
+
+    }
     private ResultsShared buildResultsSharedTemplate(final String defendantBailStatusCode, final List<String> postHearingCustodyStatuses) {
         final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
 
@@ -140,6 +239,118 @@ public class BailStatusHelperTest {
                                                 .build()))
                                         .build())
                                 )
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private ResultsShared buildResultsSharedTemplateWithCourtApplicationCase(final String defendantBailStatusCode, final List<String> postHearingCustodyStatuses) {
+        final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
+
+        final PersonDefendant personDefendant = PersonDefendant
+                .personDefendant().withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode(defendantBailStatusCode).build())
+                .build();
+        return ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withHearingDays(Arrays.asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                        .withOffences(singletonList(Offence.offence()
+                                                        .withJudicialResults(offenceJudicialResults)
+                                                        .build()))
+                                        .withCaseStatus("ACTIVE")
+                                        .build()))
+                                .withSubject(CourtApplicationParty.courtApplicationParty()
+                                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                                .withPersonDefendant(personDefendant)
+                                                .build())
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private ResultsShared buildResultsSharedTemplateWithCourtApplicationCourtOrder(final String defendantBailStatusCode, final List<String> postHearingCustodyStatuses) {
+        final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
+
+        final PersonDefendant personDefendant = PersonDefendant
+                .personDefendant().withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode(defendantBailStatusCode).build())
+                .build();
+        return ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withHearingDays(Arrays.asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                                .withCourtOrder(CourtOrder.courtOrder()
+                                        .withCourtOrderOffences(singletonList(CourtOrderOffence.courtOrderOffence()
+                                                .withOffence(Offence.offence()
+                                                        .withJudicialResults(offenceJudicialResults)
+                                                        .build())
+                                                .build())).build())
+                                .withSubject(CourtApplicationParty.courtApplicationParty()
+                                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                                .withPersonDefendant(personDefendant)
+                                                .build())
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private ResultsShared buildResultsSharedTemplateWithoutPersonDefendantWithCourtApplicationCase(final List<String> postHearingCustodyStatuses) {
+        final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
+
+        return ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withHearingDays(Arrays.asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                                        .withOffences(singletonList(Offence.offence()
+                                                        .withJudicialResults(offenceJudicialResults)
+                                                        .build()))
+                                        .withCaseStatus("ACTIVE")
+                                        .build()))
+                                .withSubject(CourtApplicationParty.courtApplicationParty()
+                                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                                .build())
+                                        .build())
+                                .build()))
+                        .build())
+                .build();
+    }
+
+    private ResultsShared buildResultsSharedTemplateWithoutPersonDefendantWithCourtApplicationCourtOrder(final List<String> postHearingCustodyStatuses) {
+        final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
+
+        return ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withHearingDays(Arrays.asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withCourtApplications(singletonList(CourtApplication.courtApplication()
+                                .withCourtOrder(CourtOrder.courtOrder()
+                                        .withCourtOrderOffences(singletonList(CourtOrderOffence.courtOrderOffence()
+                                                .withOffence(Offence.offence()
+                                                        .withJudicialResults(offenceJudicialResults)
+                                                        .build())
+                                                .build())).build())
+                                .withSubject(CourtApplicationParty.courtApplicationParty()
+                                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                                .build())
+                                        .build())
                                 .build()))
                         .build())
                 .build();

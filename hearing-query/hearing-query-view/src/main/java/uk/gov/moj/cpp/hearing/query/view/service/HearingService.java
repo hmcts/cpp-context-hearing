@@ -209,7 +209,6 @@ public class HearingService {
                 .build();
     }
 
-
     public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
         if (null == date || null == userId) {

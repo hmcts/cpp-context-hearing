@@ -1,21 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.jsonpath.ReadContext;
-import org.hamcrest.Matcher;
-import org.junit.Test;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.text.MessageFormat.format;
 import static java.time.ZonedDateTime.now;
@@ -34,8 +19,26 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_ID;
+
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import com.jayway.jsonpath.ReadContext;
+import org.hamcrest.Matcher;
+import org.junit.Test;
 
 public class CaseTimelineIT extends AbstractIT {
 
@@ -44,10 +47,12 @@ public class CaseTimelineIT extends AbstractIT {
 
     @Test
     public void shouldDisplayCaseTimeline() throws Exception {
-        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L));
+        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), null);
+        stubCourtRoom(hearing);
+        stubProsecutionCases(hearing);
         stubCourtRoom(hearing);
         final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
-        verifyTimeline(hearingDate);
+        verifyTimeline(hearingDate, false);
 
         final UUID caseId = hearing.getProsecutionCases().get(0).getId();
 
@@ -72,8 +77,26 @@ public class CaseTimelineIT extends AbstractIT {
 
     }
 
-    private void setUpHearing(final ZonedDateTime sittingDay) {
-        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+    @Test
+    public void shouldDisplayCaseTimelineWithIsBoxHearing() throws Exception {
+        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), true);
+        stubCourtRoom(hearing);
+        stubProsecutionCases(hearing);
+        final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
+        verifyTimeline(hearingDate, true);
+    }
+
+    @Test
+    public void shouldDisplayCaseTimelineWithOutIsBoxHearing() throws Exception {
+        setUpHearing(now(ZoneId.of("UTC")).plusDays(1L), false);
+        stubCourtRoom(hearing);
+        stubProsecutionCases(hearing);
+        final String hearingDate = hearingDay.getSittingDay().toLocalDate().format(ofPattern("dd MMM yyyy"));
+        verifyTimeline(hearingDate, false);
+    }
+
+    private void setUpHearing(final ZonedDateTime sittingDay, final Boolean isBoxHearing) {
+        final InitiateHearingCommand initiateHearingCommand = isBoxHearing == null ? standardInitiateHearingTemplate() :   standardInitiateHearingTemplateWithIsBoxHearing(isBoxHearing);
         hearing = initiateHearingCommand.getHearing();
         hearingDay = hearing.getHearingDays().get(0);
         hearingDay.setSittingDay(sittingDay);
@@ -88,7 +111,7 @@ public class CaseTimelineIT extends AbstractIT {
         setTrialType(getRequestSpec(), hearing.getId(), addTrialType);
     }
 
-    private void verifyTimeline(final String hearingDate) {
+    private void verifyTimeline(final String hearingDate, final boolean isBoxHearing) {
         final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
         final UUID prosecutionCaseId = prosecutionCase.getId();
 
@@ -109,8 +132,10 @@ public class CaseTimelineIT extends AbstractIT {
                 withJsonPath("$.hearingSummaries[0].hearingTime", is(hearingTime)),
                 withJsonPath("$.hearingSummaries[0].estimatedDuration", is(listedDurationMinutes)),
                 withJsonPath("$.hearingSummaries[0].defendants[0]", is(defendant)),
-                withJsonPath("$.hearingSummaries[0].outcome", is("InEffective"))
+                withJsonPath("$.hearingSummaries[0].outcome", is("InEffective")),
+                isBoxHearing ? withJsonPath("$.hearingSummaries[0].isBoxHearing", is(true)) : hasNoJsonPath("$.hearingSummaries[0].isBoxHearing")
         );
+
 
         pollForHearingSummaryTimeline(timelineMatcher, prosecutionCaseId);
     }

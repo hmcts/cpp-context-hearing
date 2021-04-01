@@ -44,7 +44,7 @@ public class OffenceRepositoryTest {
             i.getHearing().getProsecutionCases().stream()
                     .flatMap(p -> p.getDefendants().stream())
                     .flatMap(d -> d.getOffences().stream())
-                    .forEach(o -> o.setPlea(CoreTestTemplates.plea(o.getId(), o.getConvictionDate(), GUILTY).build()));
+                    .forEach(o -> o.setPlea(CoreTestTemplates.plea(o.getId(), o.getConvictionDate(), GUILTY, null).build()));
         });
 
         hearings.add(initiateHearingCommand.getHearing());

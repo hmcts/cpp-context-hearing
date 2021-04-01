@@ -8,15 +8,11 @@
     },
     "applicationTypeId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "applicationOutcomeTypeId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     }
   },
   "required": [
     "defendantId",
-    "applicationTypeId",
-    "applicationOutcomeTypeId"
+    "applicationTypeId"
   ],
   "additionalProperties": false
 }

@@ -16,7 +16,6 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory.createEnvelope;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -27,10 +26,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.COMMAND_REQUEST_APPROVAL;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED;
 
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -51,12 +48,10 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -280,34 +275,6 @@ public class HearingEventProcessorTest {
         assertThat(publicEventOut.getHearingId(), is(HEARING_ID));
         assertThat(publicEventOut.getAmendedByUserId(), is(AMENDED_BY_USER_ID));
     }
-
-    @Test
-    public void shouldPublishApplicationDraftResultedPublicEvent() {
-        final ApplicationDraftResulted applicationDraftResulted = ApplicationDraftResulted.applicationDraftResulted()
-                .setDraftResult("result")
-                .setTargetId(randomUUID())
-                .setHearingId(randomUUID())
-                .setApplicationId(randomUUID())
-                .setApplicationOutcomeType(CourtApplicationOutcomeType.courtApplicationOutcomeType()
-                        .withDescription("Granted")
-                        .withId(UUID.randomUUID())
-                        .withSequence(1).build())
-                .setApplicationOutcomeDate(LocalDate.now());
-        final JsonEnvelope eventIn = createJsonEnvelope(applicationDraftResulted);
-
-        this.hearingEventProcessor.publicApplicationDraftResultedPublicEvent(eventIn);
-
-        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
-        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
-        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_APPLICATION_DRAFT_RESULTED));
-        final PublicHearingApplicationDraftResulted publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingApplicationDraftResulted.class);
-        assertThat(publicEventOut.getHearingId(), is(applicationDraftResulted.getHearingId()));
-        assertThat(publicEventOut.getApplicationId(), is(applicationDraftResulted.getApplicationId()));
-        assertThat(publicEventOut.getTargetId(), is(applicationDraftResulted.getTargetId()));
-        assertThat(publicEventOut.getApplicationOutcomeType(), is(applicationDraftResulted.getApplicationOutcomeType()));
-        assertThat(publicEventOut.getApplicationOutcomeDate(), is(applicationDraftResulted.getApplicationOutcomeDate()));
-    }
-
 
     @Test
     public void shouldTriggerPublicHearingTrialVacatedEventForEffectiveTrial() {

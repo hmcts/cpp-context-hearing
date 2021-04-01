@@ -5,19 +5,26 @@ import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.LegalEntityDefendant.legalEntityDefendant;
+import static uk.gov.justice.core.courts.Organisation.organisation;
 import static uk.gov.justice.core.courts.Person.person;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.LegalEntityDefendant;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.services.test.utils.core.random.Generator;
 import uk.gov.justice.services.test.utils.core.random.StringGenerator;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
@@ -138,6 +145,45 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
         assertThat(timeLineHearingSummary.getDefendants().get(1), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
+    }
+
+    @Test
+    public void shouldCreateTimelineHearingSummaryWithIsBoxHearing() {
+        hearing.setIsBoxHearing(true);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
+        assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
+        assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
+        assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
+        assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
+        assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
+        assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
+        assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
+        assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
+        assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
+        assertThat(timeLineHearingSummary.getDefendants().get(1), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), is(true));
+    }
+
+    @Test
+    public void shouldCreateTimelineHearingSummaryWithoutIsBoxHearing() {
+        hearing.setIsBoxHearing(false);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
+        assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
+        assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
+        assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
+        assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
+        assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
+        assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
+        assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
+        assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
+        assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
+        assertThat(timeLineHearingSummary.getDefendants().get(1), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
 
     @Test
@@ -158,6 +204,31 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
+    }
+
+    @Test
+    public void shouldCreateTimelineHearingSummaryForApplicantOrganisationFilteredByApplicationId() {
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsOrganisation(applicationId)));
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId);
+
+        assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
+        assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
+    }
+
+    @Test
+    public void shouldCreateTimelineHearingSummaryForApplicantMasterDefendantilteredByApplicationId() {
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsMasterDefendant(applicationId)));
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId);
+
+        assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
+        assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
 
     private CourtApplication getCourtApplication(UUID applicationId) {
@@ -165,6 +236,23 @@ public class TimelineHearingSummaryHelperTest {
                 .withId(applicationId)
                 .withApplicant(CourtApplicationParty.courtApplicationParty()
                         .withPersonDetails(person().withFirstName(person.getFirstName()).withLastName(person.getLastName()).build())
+                        .build()).build();
+    }
+
+    private CourtApplication getCourtApplicationApplicantAsOrganisation(UUID applicationId) {
+        return CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withOrganisation(organisation().withName(organisation.getName()).build())
+                        .build()).build();
+    }
+
+    private CourtApplication getCourtApplicationApplicantAsMasterDefendant(UUID applicationId) {
+        return CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant().withLegalEntityDefendant(legalEntityDefendant()
+                                .withOrganisation(organisation().withName(organisation.getName()).build()).build()).build())
                         .build()).build();
     }
 

@@ -124,7 +124,6 @@ public class DefendantAggregate implements Aggregate {
         LOGGER.info("Nces-notification : updateDefendantWithApplicationDetails...........");
         return apply(ncesNotificationDecisionDelegate.updateDefendantWithApplicationDetails(ApplicationDetailsForDefendant.newBuilder()
                 .withApplicationTypeId(updateDefendantWithApplicationDetails.getApplicationTypeId())
-                .withApplicationOutcomeTypeId(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId())
                 .build()));
     }
 

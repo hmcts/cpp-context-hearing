@@ -15,6 +15,7 @@ public class RestructuringConstants {
     public static final String HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON = "hearing.results-shared-defendant-level.json";
     public static final String HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON = "hearing.results-shared-with-verdict-type.json";
     public static final String HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-with-indicated-plea.json";
+    public static final String HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-court-application-enrich-offence-data.json";
     public static final String HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON = "hearing.results-shared-with-offence-facts.json";
     public static final String HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON = "hearing.results-shared-with-optional-promptRef.json";
     public static final String IMP_TIMP_HEARING_RESULTS_SHARED_JSON = "imp-timp-hearing-results-shared.json";
@@ -24,7 +25,11 @@ public class RestructuringConstants {
     public static final String SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON = "scenario1-shortCode-SendToCCOnCB.json";
     public static final String HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON = "hearing.results-shared-with-no-prompts.json";
     public static final String HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE = "hearing.results-shared-to-set-acquittal-date.json";
+    public static final String HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES = "hearing.results-shared-to-set-acquittal-date-for-courtapplication-cases.json";
+    public static final String HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE_FOR_COURTORDER = "hearing.results-shared-to-set-acquittal-date-for-courtorder.json";
     public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE = "hearing.results-shared-with-acquittal-date.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES = "hearing.results-shared-with-acquittal-date-for-courtapplication-cases.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTORDER = "hearing.results-shared-with-acquittal-date-for-courtorder.json";
     public static final String DIRS_HEARING_JSON = "DIRS-hearing.json";
     public static final String FIXED_LIST_JSON = "fixed-list.json";
     public static final String CO_HEARING_EVENT_JSON = "CO-hearing-event.json";

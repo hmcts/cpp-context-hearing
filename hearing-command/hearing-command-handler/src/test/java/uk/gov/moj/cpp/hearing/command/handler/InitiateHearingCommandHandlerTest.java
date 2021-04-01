@@ -23,7 +23,6 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.verdictTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
@@ -35,13 +34,9 @@ import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.Jurors;
-import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
-import uk.gov.justice.core.courts.Verdict;
-import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -55,7 +50,6 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
-import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
@@ -71,8 +65,6 @@ import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
-import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 
 import java.time.LocalDate;
 import java.time.ZoneId;

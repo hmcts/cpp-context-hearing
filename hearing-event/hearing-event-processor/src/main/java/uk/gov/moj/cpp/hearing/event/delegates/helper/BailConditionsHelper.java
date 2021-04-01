@@ -6,10 +6,12 @@ import static java.util.Comparator.nullsLast;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
@@ -26,17 +28,35 @@ public class BailConditionsHelper {
     private static final String[] applicableBailStatusCodes = new String[]{"L", "P", "B"};
 
     public void setBailConditions(final ResultsShared resultsShared) {
-        resultsShared.getHearing()
-                .getProsecutionCases()
-                .stream()
+        ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .forEach(this::setBailConditions);
+
+        ofNullable(resultsShared.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(ca -> nonNull(ca.getSubject().getMasterDefendant()))
+                .filter(ca -> nonNull(ca.getSubject().getMasterDefendant().getPersonDefendant()))
+                .forEach(ca -> {
+                    final List<Offence> offences = getOffencesFromApplication(ca);
+                    setBailConditions(ca.getSubject().getMasterDefendant(), offences);
+                });
     }
 
     private void setBailConditions(final Defendant defendant) {
         if (nonNull((defendant.getPersonDefendant()))) {
             if (nonNull(defendant.getPersonDefendant().getBailStatus()) && Arrays.stream(applicableBailStatusCodes).anyMatch(defendant.getPersonDefendant().getBailStatus().getCode()::equals)) {
                 final String bailConditions = getBailConditions(defendant.getOffences());
+                defendant.getPersonDefendant().setBailConditions(bailConditions);
+            } else {
+                //Set Bail Conditions if Bail Status = ‘B’, ‘P’ or ‘L’. Otherwise field must be blank.
+                defendant.getPersonDefendant().setBailConditions("");
+            }
+        }
+    }
+
+    private void setBailConditions(final MasterDefendant defendant, final List<Offence> offences) {
+        if (nonNull((defendant.getPersonDefendant()))) {
+            if (nonNull(defendant.getPersonDefendant().getBailStatus()) && Arrays.stream(applicableBailStatusCodes).anyMatch(defendant.getPersonDefendant().getBailStatus().getCode()::equals)) {
+                final String bailConditions = getBailConditions(offences);
                 defendant.getPersonDefendant().setBailConditions(bailConditions);
             } else {
                 //Set Bail Conditions if Bail Status = ‘B’, ‘P’ or ‘L’. Otherwise field must be blank.
@@ -55,7 +75,6 @@ public class BailConditionsHelper {
         final StringBuilder bailConditionsBuilder = new StringBuilder();
         for (final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt : judicialResultsLabelAndResultPrompts) {
             final String label = judicialResultsLabelAndResultPrompt.getLabel();
-
             if(!bailConditionsBuilder.toString().contains(label)) {
                 bailConditionsBuilder.append(String.format("%s%n", label));
                 for (final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()) {

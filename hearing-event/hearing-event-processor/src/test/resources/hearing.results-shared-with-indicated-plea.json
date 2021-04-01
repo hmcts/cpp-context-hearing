@@ -50,7 +50,7 @@
           "applicationLegislation": "In accordance with section 14 of the Magistrates' Courts Act 1980",
           "applicationType": "Appearance to make statutory declaration",
           "id": "a1d421a1-4f0f-4c9f-8a20-a960e25a0894",
-          "linkType": "EITHER",
+          "linkType": "STANDALONE",
           "respondentSynonym": "Prosecutor"
         }
       }

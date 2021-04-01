@@ -8,9 +8,14 @@
             "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
             "lastName": "Hammes",
             "middleName": "Test",
-            "organisationName": "Testing Organisation Name",
-            "synonym": "Attendees"
+            "organisationName": "Testing Organisation Name"
           },
+          "caseSummaries": [
+            {
+              "caseURN": "Case Reference",
+              "id": "ee05fd53-ba7c-40e0-b4ed-f237d7e87705"
+            }
+          ],
           "applicationReference": "46YE772132",
           "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
           "respondents": [
@@ -20,7 +25,14 @@
               "lastName": "Ryan",
               "organisationName": "Responding Organisation Name"
             }
-          ]
+          ],
+          "subject": {
+            "firstName": "Bryce",
+            "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+            "lastName": "Hammes",
+            "middleName": "Test",
+            "organisationName": "Testing Organisation Name"
+          }
         }
       ],
       "hasSharedResults": true,
@@ -73,9 +85,21 @@
             "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
             "lastName": "Hammes",
             "middleName": "Test",
-            "organisationName": "Testing Organisation Name",
-            "synonym": "Attendees"
+            "organisationName": "Testing Organisation Name"
           },
+          "subject": {
+            "firstName": "Bryce",
+            "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+            "lastName": "Hammes",
+            "middleName": "Test",
+            "organisationName": "Testing Organisation Name"
+          },
+          "caseSummaries": [
+            {
+              "caseURN": "Case Reference",
+              "id": "ee05fd53-ba7c-40e0-b4ed-f237d7e87705"
+            }
+          ],
           "applicationReference": "19YO356897",
           "id": "9fc0a60e-44d0-45bd-a71b-dfc0953a6635",
           "respondents": [
@@ -85,7 +109,12 @@
               "lastName": "Ryan",
               "organisationName": "Responding Organisation Name"
             }
-          ]
+          ],
+          "type": {
+            "type": "applicationType",
+            "typeWelsh": "applicationTypeWelsh",
+            "legislation": "applicationLegislation"
+          }
         }
       ],
       "hasSharedResults": true,

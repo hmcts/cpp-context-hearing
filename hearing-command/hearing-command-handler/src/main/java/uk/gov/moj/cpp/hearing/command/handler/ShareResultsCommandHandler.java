@@ -11,7 +11,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
@@ -41,10 +40,8 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final Optional<String> userId = envelope.metadata().userId();
         final Target target = convertToObject(envelope, Target.class);
         if (target != null && userId.isPresent()) {
-
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
-                    aggregate -> aggregate.saveDraftResults(fromString(userId.get()), target.getApplicationId(), target, target.getReasonsList(), target.getDefendantId(), target.getHearingId(),
-                            target.getOffenceId(), target.getDraftResult(), target.getResultLines()));
+                    aggregate -> aggregate.saveDraftResults(fromString(userId.get()), target));
         }
     }
 
@@ -61,21 +58,10 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         eventStream.append(hearingAggregate.saveAllDraftResults(saveMultipleResultsCommand.getTargets(), fromString(userId.get())).map(Enveloper.toEnvelopeWithMetadataFrom(envelope)));
     }
 
-    @Handles("hearing.command.application-draft-result")
-    public void applicationDraftResult(final JsonEnvelope envelope) throws EventStreamException {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.application-draft-result event received {}", envelope.toObfuscatedDebugString());
-        }
-        final ApplicationDraftResultCommand applicationDraftResultCommand = convertToObject(envelope, ApplicationDraftResultCommand.class);
-        aggregate(HearingAggregate.class, applicationDraftResultCommand.getHearingId(), envelope,
-                aggregate -> aggregate.applicationDraftResults(applicationDraftResultCommand.getTargetId(), applicationDraftResultCommand.getApplicationId(), applicationDraftResultCommand.getHearingId(),
-                        applicationDraftResultCommand.getDraftResult(), applicationDraftResultCommand.getApplicationOutcomeType(), applicationDraftResultCommand.getApplicationOutcomeDate()));
-    }
-
     @Handles("hearing.command.share-results")
     public void shareResult(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.share-results event received {}",envelope.toObfuscatedDebugString());
+            LOGGER.debug("hearing.command.share-results event received {}", envelope.toObfuscatedDebugString());
         }
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,

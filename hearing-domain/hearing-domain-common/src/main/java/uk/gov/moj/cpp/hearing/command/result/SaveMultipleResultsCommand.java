@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Target;
 
 import java.io.Serializable;

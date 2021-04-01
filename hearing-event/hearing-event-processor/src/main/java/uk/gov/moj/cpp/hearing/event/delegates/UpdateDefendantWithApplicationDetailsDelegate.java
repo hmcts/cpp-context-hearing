@@ -3,12 +3,10 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 import static java.util.Optional.of;
 
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
-import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -52,16 +50,13 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
 
     private UpdateDefendantWithApplicationDetails getUpdateDefendantWithApplicationDetails(final CourtApplication courtApplication) {
         final Optional<UUID> applicationTypeId = getApplicationTypeId(courtApplication);
-        final Optional<UUID> applicationOutcomeTypeId = getApplicationOutcomeTypeId(courtApplication);
         final Optional<UUID> defendantId = getDefendantId(courtApplication);
 
         if (applicationTypeId.isPresent()
-                && applicationOutcomeTypeId.isPresent()
                 && defendantId.isPresent()) {
             return UpdateDefendantWithApplicationDetails.newBuilder()
                     .withDefendantId(defendantId.get())
                     .withApplicationTypeId(applicationTypeId.get())
-                    .withApplicationOutcomeTypeId(applicationOutcomeTypeId.get())
                     .build();
         }
         return null;
@@ -82,8 +77,8 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
     private Optional<UUID> getDefendantId(CourtApplication courtApplication) {
         return Optional.of(courtApplication)
                 .map(CourtApplication::getApplicant)
-                .map(CourtApplicationParty::getDefendant)
-                .map(Defendant::getId);
+                .map(CourtApplicationParty::getMasterDefendant)
+                .map(MasterDefendant::getMasterDefendantId);
     }
 
     private Optional<UUID> getApplicationTypeId(CourtApplication courtApplication) {
@@ -92,12 +87,6 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
                 .map(CourtApplicationType::getId);
     }
 
-    private Optional<UUID> getApplicationOutcomeTypeId(CourtApplication courtApplication) {
-        return of(courtApplication)
-                .map(CourtApplication::getApplicationOutcome)
-                .map(CourtApplicationOutcome::getApplicationOutcomeType)
-                .map(CourtApplicationOutcomeType::getId);
-    }
 
 
     private void sendNotify(Sender sender, JsonEnvelope event, UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails) {

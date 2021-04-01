@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+@SuppressWarnings({"squid:S2384"})
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ResultDefinition {
 
@@ -79,6 +80,10 @@ public class ResultDefinition {
     private String welshResultWording;
 
     private List<ResultDefinitionRuleType> resultDefinitionRules = new ArrayList<>();
+
+    private Boolean canBeSubjectOfBreach;
+
+    private Boolean canBeSubjectOfVariation;
 
     private List<SecondaryCJSCode> secondaryCJSCodes = new ArrayList<>();
 
@@ -344,6 +349,24 @@ public class ResultDefinition {
 
     public ResultDefinition setResultDefinitionRules(final List<ResultDefinitionRuleType> resultDefinitionRules) {
         this.resultDefinitionRules = resultDefinitionRules;
+        return this;
+    }
+
+    public Boolean getCanBeSubjectOfBreach() {
+        return canBeSubjectOfBreach;
+    }
+
+    public ResultDefinition setCanBeSubjectOfBreach(final Boolean canBeSubjectOfBreach) {
+        this.canBeSubjectOfBreach = canBeSubjectOfBreach;
+        return this;
+    }
+
+    public Boolean getCanBeSubjectOfVariation() {
+        return canBeSubjectOfVariation;
+    }
+
+    public ResultDefinition setCanBeSubjectOfVariation(final Boolean canBeSubjectOfVariation) {
+        this.canBeSubjectOfVariation = canBeSubjectOfVariation;
         return this;
     }
 

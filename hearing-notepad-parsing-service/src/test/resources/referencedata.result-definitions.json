@@ -460,7 +460,9 @@
           "type": "TXT",
           "sequence": 11,
           "hidden": false,
-          "reference": "HTYPE"
+          "reference": "HTYPE",
+          "min":"1",
+          "max": "4000"
         },
         {
           "id": "5aeb14be-6fe6-44c2-a827-5b8fb4a716b8",

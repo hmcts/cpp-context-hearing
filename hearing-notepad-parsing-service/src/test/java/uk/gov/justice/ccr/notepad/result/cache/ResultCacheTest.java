@@ -20,7 +20,6 @@ import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 
 import java.time.LocalDate;
 import java.util.UUID;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -31,6 +30,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItemInArray;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -55,18 +55,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptDynamicListNameAddress;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
-import uk.gov.justice.ccr.notepad.result.exception.CacheItemNotFoundException;
-import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
-import uk.gov.justice.services.common.converter.LocalDates;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -74,17 +64,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.google.common.cache.LoadingCache;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultCacheTest {
@@ -101,7 +80,9 @@ public class ResultCacheTest {
     private static final Set<String> KEYWORDS = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final Set<String> FIXED_LIST = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final String NAME = STRING.next();
-    private static  Set<ResultPromptDynamicListNameAddress> NAMEADDRESS_LIST = new HashSet<>();
+    public static final String MIN_LENGTH = "1";
+    public static final String MAX_LENGTH = "4000";
+    private static  Set<ResultPromptDynamicListNameAddress> NAME_ADDRESS_LIST = new HashSet<>();
     private static final int SEQUENCE = INTEGER.next();
     private static final String REFERENCE = STRING.next();
     private static final int DURATION_SEQUENCE = INTEGER.next();
@@ -331,6 +312,8 @@ public class ResultCacheTest {
         final Integer durationSequence2 = 0;
         final Boolean hidden2 = false;
         final Boolean nameEmail2 = false;
+        final String min = "1";
+        final String max = "4000";
 
         final HashSet<String> keywords2 = new HashSet<>();
         final String keyword_2_2 = STRING.next();
@@ -360,7 +343,9 @@ public class ResultCacheTest {
                 addressType,
                 partName1,
                 nameEmail1,
-                welshDurationElement1
+                welshDurationElement1,
+                min,
+                max
         ));
 
         resultPrompts.add(new ResultPrompt(
@@ -383,7 +368,9 @@ public class ResultCacheTest {
                 addressType,
                 partName2,
                 nameEmail2,
-                welshDurationElement2
+                welshDurationElement2,
+                min,
+                max
         ));
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(resultPrompts);
@@ -488,9 +475,9 @@ public class ResultCacheTest {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultPrompt> resultPrompts = new ArrayList<>();
-        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null,null, null, null, null, null, null, false, null, null,null, null, null, null));
+        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null,null, null, null, null, null, null, false, null, null,null, null, null, null, null, null));
         final UUID resultDefinitionIdToFind = randomUUID();
-        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, null, false, null, null, null, null,  null, null);
+        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, null, false, null, null, null, null,  null, null, null, null);
         resultPrompts.add(expectedResultPrompt);
 
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
@@ -513,7 +500,7 @@ public class ResultCacheTest {
 
         final HashSet<String> promptKeyWords = new HashSet<>();
         promptKeyWords.add(PROMPT_WORD);
-        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(),null,  promptKeyWords, null,null, null, null, null, false, null, null, null, null, null, null);
+        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(),null,  promptKeyWords, null,null, null, null, null, false, null, null, null, null, null, null, null, null);
         final List<ResultPrompt> prompts = newArrayList(resultPrompt);
 
         final ResultPromptSynonym givenResultPromptSynonym = new ResultPromptSynonym();
@@ -553,14 +540,14 @@ public class ResultCacheTest {
     }
 
     private List<ResultPrompt> prepareResultPrompts() {
-        NAMEADDRESS_LIST.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
+        NAME_ADDRESS_LIST.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
                 .withName(NAME)
                 .withAddressLine1(STRING.next())
                 .build());
         return newArrayList(
                 new ResultPrompt(PROMPT_ID.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST,NAMEADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME1, NAMEEMAIL, WELSH_DURATION),
-                new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE, RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST,NAMEADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME2, NAMEEMAIL, WELSH_DURATION)
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, NAME_ADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME1, NAMEEMAIL, WELSH_DURATION, MIN_LENGTH, MAX_LENGTH),
+                new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE, RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, NAME_ADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME2, NAMEEMAIL, WELSH_DURATION, MIN_LENGTH, MAX_LENGTH)
         );
     }
 

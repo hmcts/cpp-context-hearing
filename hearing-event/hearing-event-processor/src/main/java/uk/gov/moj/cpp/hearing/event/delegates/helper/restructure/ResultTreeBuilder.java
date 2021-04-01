@@ -157,7 +157,10 @@ public class ResultTreeBuilder {
                 .withRollUpPrompts(getBooleanValue(resultDefinition.getRollUpPrompts(), false))
                 .withPublishedForNows(getBooleanValue(resultDefinition.getPublishedForNows(), false))
                 .withResultWording(resultDefinition.getResultWording())
-                .withWelshResultWording(resultDefinition.getWelshResultWording());
+                .withWelshResultWording(resultDefinition.getWelshResultWording())
+                .withCanBeSubjectOfBreach(resultDefinition.getCanBeSubjectOfBreach())
+                .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
+                .withLevel(resultDefinition.getLevel());
 
         if (!isEmpty(resultDefinition.getSecondaryCJSCodes())) {
             builder.withSecondaryCJSCodes(getSecondaryCjsCodeList(resultDefinition.getSecondaryCJSCodes()));

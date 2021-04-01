@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -15,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
@@ -81,7 +83,14 @@ public class ReusableInfoService {
         return builder.build();
     }
 
-    public List<ReusableInfo> getReusableInfoForDefendants(final Collection<Defendant> defendants){
-        return reusableInfoRepository.findReusableInfoByMasterDefendantIds(defendants.stream().map(Defendant::getMasterDefendantId).collect(toList()));
+    public List<ReusableInfo> getReusableInfoForDefendants(final Collection<Defendant> defendants) {
+        final List<UUID> masterDefendantIds = defendants.stream()
+                .map(Defendant::getMasterDefendantId)
+                .collect(toList());
+
+        if (masterDefendantIds.isEmpty()) {
+            return emptyList();
+        }
+        return reusableInfoRepository.findReusableInfoByMasterDefendantIds(masterDefendantIds);
     }
 }

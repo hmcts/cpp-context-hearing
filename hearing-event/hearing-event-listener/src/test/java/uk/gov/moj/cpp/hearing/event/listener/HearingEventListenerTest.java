@@ -34,8 +34,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -51,13 +49,11 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
-import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
@@ -70,7 +66,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -343,83 +338,6 @@ public class HearingEventListenerTest {
                         standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
                 ))
                 .build();
-    }
-
-
-    @Test
-    public void applicationDraftResulted_shouldPersist() {
-
-        final UUID hearingId = randomUUID();
-        final ApplicationDraftResult applicationDraftResult = new ApplicationDraftResult();
-        final ApplicationDraftResulted applicationDraftResulted = ApplicationDraftResulted.applicationDraftResulted()
-                .setDraftResult("result")
-                .setTargetId(randomUUID())
-                .setHearingId(hearingId)
-                .setApplicationId(randomUUID());
-        final Hearing dbHearing = new Hearing()
-                .setHasSharedResults(true)
-                .setId(hearingId)
-                .setApplicationDraftResults(asSet(new ApplicationDraftResult()
-                        .setId(applicationDraftResulted.getTargetId())
-                ));
-
-        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
-        when(applicationDraftResultJPAMapper.toJPA(dbHearing, applicationDraftResulted.getTargetId(), applicationDraftResulted.getApplicationId(), applicationDraftResulted.getDraftResult())).thenReturn(applicationDraftResult);
-
-        hearingEventListener.applicationDraftResulted(envelopeFrom(metadataWithRandomUUID("hearing.application-draft-resulted"),
-                objectToJsonObjectConverter.convert(applicationDraftResulted)
-        ));
-
-        verify(this.hearingRepository).save(saveHearingCaptor.capture());
-
-        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
-                .with(Hearing::getId, is(hearingId))
-                .with(Hearing::getApplicationDraftResults, hasSize(1))
-                .with(Hearing::getApplicationDraftResults, first(is(applicationDraftResult)))
-        );
-    }
-
-    @Test
-    public void applicationDraftResultedWithOutcome_shouldPersist() {
-
-        final UUID hearingId = randomUUID();
-        final UUID applicationId = randomUUID();
-        final ApplicationDraftResult applicationDraftResult = new ApplicationDraftResult();
-        final CourtApplicationOutcomeType courtApplicationOutcomeType = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Admitted")
-                .withId(randomUUID())
-                .withSequence(1).build();
-        final CourtApplicationOutcome courtApplicationOutcome = new CourtApplicationOutcome(applicationId, LocalDate.now(), courtApplicationOutcomeType, hearingId);
-        final String applicationJson = "application json";
-        final ApplicationDraftResulted applicationDraftResulted = ApplicationDraftResulted.applicationDraftResulted()
-                .setDraftResult("result")
-                .setTargetId(randomUUID())
-                .setHearingId(hearingId)
-                .setApplicationId(applicationId)
-                .setApplicationOutcomeType(courtApplicationOutcomeType)
-                .setApplicationOutcomeDate(LocalDate.now());
-        final Hearing dbHearing = new Hearing()
-                .setHasSharedResults(true)
-                .setId(hearingId)
-                .setCourtApplicationsJson(applicationJson)
-                .setApplicationDraftResults(asSet(new ApplicationDraftResult()
-                        .setId(applicationDraftResulted.getTargetId())
-                ));
-
-        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
-        when(applicationDraftResultJPAMapper.toJPA(dbHearing, applicationDraftResulted.getTargetId(), applicationDraftResulted.getApplicationId(), applicationDraftResulted.getDraftResult())).thenReturn(applicationDraftResult);
-        when(hearingJPAMapper.saveApplicationOutcome(applicationJson, courtApplicationOutcome)).thenReturn(applicationJson);
-        hearingEventListener.applicationDraftResulted(envelopeFrom(metadataWithRandomUUID("hearing.application-draft-resulted"),
-                objectToJsonObjectConverter.convert(applicationDraftResulted)
-        ));
-
-        verify(this.hearingRepository).save(saveHearingCaptor.capture());
-
-        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
-                .with(Hearing::getId, is(hearingId))
-                .with(Hearing::getApplicationDraftResults, hasSize(1))
-                .with(Hearing::getApplicationDraftResults, first(is(applicationDraftResult)))
-                .with(Hearing::getCourtApplicationsJson, is(applicationJson))
-        );
     }
 
     @Test

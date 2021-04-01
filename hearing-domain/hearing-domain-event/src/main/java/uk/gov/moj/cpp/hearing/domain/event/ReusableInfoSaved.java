@@ -9,13 +9,14 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@SuppressWarnings({"squid:S2384", "squid:S1948"})
+@SuppressWarnings({"squid:S2384", "squid:S1948","PMD.BeanMembersShouldSerialize"})
 @Event("hearing.event.reusable-info-saved")
 public class ReusableInfoSaved implements Serializable {
 
     private UUID hearingId;
     private List<ReusableInfo> promptList;
     private List<ReusableInfoResults> resultsList;
+    private static final long serialVersionUID = 1L;
 
     public ReusableInfoSaved(final UUID hearingId, final List<ReusableInfo> promptList, final List<ReusableInfoResults> resultsList) {
         this.hearingId = hearingId;

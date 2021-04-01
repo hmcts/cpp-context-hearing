@@ -46,6 +46,7 @@ import org.apache.commons.collections.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings({"squid:S3398"})
 public class ReferenceDataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceDataService.class);
     private static final String GET_ALL_CRACKED_INEFFECTIVE_TRIAL_TYPES = "referencedata.query.cracked-ineffective-vacated-trial-types";

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
@@ -13,6 +14,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetad
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -77,9 +79,54 @@ public class ConvictionDateEventProcessorTest {
 
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(),
+        assertThat(toJsonEnvelope(this.envelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-changed"), payloadIsJson(allOf(
                         withJsonPath("$.offenceId", is(convictionDateAdded.getOffenceId().toString())),
+                        withJsonPath("$.convictionDate", is(convictionDateAdded.getConvictionDate().toString()))))));
+    }
+
+    @Test
+    public void publishOffenceConvictionDateChangedPublicEventForOffenceUnderApplication() {
+
+        ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.convictionDateAdded()
+                .setHearingId(randomUUID())
+                .setCourtApplicationId(randomUUID())
+                .setOffenceId(randomUUID())
+                .setConvictionDate(PAST_LOCAL_DATE.next());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+                objectToJsonObjectConverter.convert(convictionDateAdded));
+
+        this.convictionDateEventProcessor.publishOffenceConvictionDateChangedPublicEvent(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(toJsonEnvelope(this.envelopeArgumentCaptor.getValue()),
+                jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-changed"), payloadIsJson(allOf(
+                        withJsonPath("$.courtApplicationId", is(convictionDateAdded.getCourtApplicationId().toString())),
+                        withJsonPath("$.offenceId", is(convictionDateAdded.getOffenceId().toString())),
+                        withJsonPath("$.convictionDate", is(convictionDateAdded.getConvictionDate().toString()))))));
+    }
+
+    @Test
+    public void publishOffenceConvictionDateChangedPublicEventForApplication() {
+
+        ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.convictionDateAdded()
+                .setHearingId(randomUUID())
+                .setCourtApplicationId(randomUUID())
+                .setConvictionDate(PAST_LOCAL_DATE.next());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+                objectToJsonObjectConverter.convert(convictionDateAdded));
+
+        this.convictionDateEventProcessor.publishOffenceConvictionDateChangedPublicEvent(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(toJsonEnvelope(this.envelopeArgumentCaptor.getValue()),
+                jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-changed"), payloadIsJson(allOf(
+                        withJsonPath("$.courtApplicationId", is(convictionDateAdded.getCourtApplicationId().toString())),
+                        hasNoJsonPath("$.offenceId"),
                         withJsonPath("$.convictionDate", is(convictionDateAdded.getConvictionDate().toString()))))));
     }
 
@@ -99,9 +146,51 @@ public class ConvictionDateEventProcessorTest {
 
         verify(this.sender).send(this.envelopeArgumentCaptor.capture());
 
-        assertThat(envelopeArgumentCaptor.getValue(),
+        assertThat(toJsonEnvelope(this.envelopeArgumentCaptor.getValue()),
                 jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-removed"), payloadIsJson(
                         allOf(withJsonPath("$.offenceId", is(convictionDateRemoved.getOffenceId().toString()))))));
     }
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void publishOffenceConvictionDateRemovedPublicEventForOffenceUnderApplication() {
+
+        ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.convictionDateRemoved()
+                .setHearingId(randomUUID())
+                .setOffenceId(randomUUID())
+                .setCourtApplicationId(randomUUID());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+                objectToJsonObjectConverter.convert(convictionDateRemoved));
+
+        this.convictionDateEventProcessor.publishOffenceConvictionDateRemovedPublicEvent(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(toJsonEnvelope(this.envelopeArgumentCaptor.getValue()),
+                jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-removed"), payloadIsJson(
+                        allOf(withJsonPath("$.offenceId", is(convictionDateRemoved.getOffenceId().toString())),
+                                withJsonPath("$.courtApplicationId", is(convictionDateRemoved.getCourtApplicationId().toString()))))));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void publishOffenceConvictionDateRemovedPublicEventForApplication() {
+
+        ConvictionDateRemoved convictionDateRemoved = ConvictionDateRemoved.convictionDateRemoved()
+                .setHearingId(randomUUID())
+                .setCourtApplicationId(randomUUID());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+                objectToJsonObjectConverter.convert(convictionDateRemoved));
+
+        this.convictionDateEventProcessor.publishOffenceConvictionDateRemovedPublicEvent(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(toJsonEnvelope(this.envelopeArgumentCaptor.getValue()),
+                jsonEnvelope(metadata().withName("public.hearing.offence-conviction-date-removed"), payloadIsJson(
+                        allOf(hasNoJsonPath("$.offenceId"),
+                                withJsonPath("$.courtApplicationId", is(convictionDateRemoved.getCourtApplicationId().toString()))))));
+    }
 }

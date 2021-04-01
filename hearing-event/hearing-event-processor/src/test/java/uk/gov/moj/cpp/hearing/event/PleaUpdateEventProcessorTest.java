@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.domain.event.PleaUpsert.pleaUpsert;
+import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
@@ -67,13 +68,14 @@ public class PleaUpdateEventProcessorTest {
     private UUID offenceId;
     private UUID prosecutionCaseId;
     private UUID defendantId;
-
+    private UUID courtApplicationId;
 
     @Before
     public void initMocks() {
         this.offenceId = randomUUID();
         this.defendantId = randomUUID();
         this.prosecutionCaseId = randomUUID();
+        this.courtApplicationId = randomUUID();
         MockitoAnnotations.initMocks(this);
     }
 
@@ -101,9 +103,9 @@ public class PleaUpdateEventProcessorTest {
 
         List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
-        assertThat(events.get(0).metadata().name(), is("hearing.command.update-plea-against-offence"));
+        assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.update-plea-against-offence"));
 
-        final PleaUpsert pleaUpsertEvent = asPojo(events.get(0), PleaUpsert.class);
+        final PleaUpsert pleaUpsertEvent = asPojo(toJsonEnvelope(events.get(0)), PleaUpsert.class);
         assertThat(pleaUpsertEvent, isBean(PleaUpsert.class)
                 .with(PleaUpsert::getHearingId, is(pleaUpsert.getHearingId())));
 
@@ -115,11 +117,41 @@ public class PleaUpdateEventProcessorTest {
         assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(nullValue()));
         assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
 
-        assertThat(events.get(1).metadata().name(), is("public.hearing.plea-updated"));
+        assertThat(toJsonEnvelope(events.get(1)).metadata().name(), is("public.hearing.plea-updated"));
 
-        assertThat(asPojo(events.get(1), Plea.class), isBean(Plea.class)
+        assertThat(asPojo(toJsonEnvelope(events.get(1)), Plea.class), isBean(Plea.class)
                 .with(Plea::getOffenceId, is(pleaUpsertEvent.getPleaModel().getPlea().getOffenceId())));
     }
+
+    @Test
+    public void courtapplicationPleaUpdate() {
+        final PleaUpsert pleaUpsert = pleaUpsert()
+                .setHearingId(randomUUID())
+                .setPleaModel(pleaModel()
+                        .withProsecutionCaseId(prosecutionCaseId)
+                        .withApplicationId(courtApplicationId)
+                        .withDefendantId(defendantId)
+                        .withPlea(plea()
+                                .withOffenceId(offenceId)
+                                .withPleaDate(PAST_LOCAL_DATE.next())
+                                .withPleaValue(GUILTY)
+                                .build())
+                        .build());
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
+                objectToJsonObjectConverter.convert(pleaUpsert));
+
+        this.pleaUpdateEventProcessor.offencePleaUpdate(event);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+
+        assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("public.hearing.plea-updated"));
+
+        assertThat(asPojo(toJsonEnvelope(events.get(0)), Plea.class), isBean(Plea.class)
+                .with(Plea::getApplicationId, is(pleaUpsert.getPleaModel().getApplicationId())));
+    }
+
 
     @Test
     public void offenceIndicatedPleaUpdate() {
@@ -145,9 +177,9 @@ public class PleaUpdateEventProcessorTest {
 
         List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
-        assertThat(events.get(0).metadata().name(), is("hearing.command.update-plea-against-offence"));
+        assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.update-plea-against-offence"));
 
-        final PleaUpsert pleaUpsertEvent = asPojo(events.get(0), PleaUpsert.class);
+        final PleaUpsert pleaUpsertEvent = asPojo(toJsonEnvelope(events.get(0)), PleaUpsert.class);
         assertThat(pleaUpsertEvent, isBean(PleaUpsert.class)
                 .with(PleaUpsert::getHearingId, is(pleaUpsert.getHearingId())));
 
@@ -159,9 +191,9 @@ public class PleaUpdateEventProcessorTest {
         assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
         assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
 
-        assertThat(events.get(1).metadata().name(), is("public.hearing.plea-updated"));
+        assertThat(toJsonEnvelope(events.get(1)).metadata().name(), is("public.hearing.plea-updated"));
 
-        assertThat(asPojo(events.get(1), IndicatedPlea.class), isBean(IndicatedPlea.class)
+        assertThat(asPojo(toJsonEnvelope(events.get(1)), IndicatedPlea.class), isBean(IndicatedPlea.class)
                 .with(IndicatedPlea::getOffenceId, is(pleaUpsertEvent.getPleaModel().getIndicatedPlea().getOffenceId())));
     }
 
@@ -190,9 +222,9 @@ public class PleaUpdateEventProcessorTest {
 
         List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
-        assertThat(events.get(0).metadata().name(), is("hearing.command.update-plea-against-offence"));
+        assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.update-plea-against-offence"));
 
-        final PleaUpsert pleaUpsertEvent = asPojo(events.get(0), PleaUpsert.class);
+        final PleaUpsert pleaUpsertEvent = asPojo(toJsonEnvelope(events.get(0)), PleaUpsert.class);
         assertThat(pleaUpsertEvent, isBean(PleaUpsert.class)
                 .with(PleaUpsert::getHearingId, is(pleaUpsert.getHearingId())));
 
@@ -204,9 +236,9 @@ public class PleaUpdateEventProcessorTest {
         assertThat(pleaUpsert.getPleaModel().getPlea(), is(nullValue()));
         assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(nullValue()));
 
-        assertThat(events.get(1).metadata().name(), is("public.hearing.plea-updated"));
+        assertThat(toJsonEnvelope(events.get(1)).metadata().name(), is("public.hearing.plea-updated"));
 
-        assertThat(asPojo(events.get(1), AllocationDecision.class), isBean(AllocationDecision.class)
+        assertThat(asPojo(toJsonEnvelope(events.get(1)), AllocationDecision.class), isBean(AllocationDecision.class)
                 .with(AllocationDecision::getOffenceId, is(pleaUpsertEvent.getPleaModel().getAllocationDecision().getOffenceId())));
     }
 }

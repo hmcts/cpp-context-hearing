@@ -32,7 +32,6 @@ import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -51,7 +50,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
@@ -292,10 +290,8 @@ public class PublishResultsEventProcessorTest {
 
         final ResultsShared resultsShared = resultsSharedTemplateForSendingResultSharedForOffence(dismissedResultDeifinitionId);
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
-                objectToJsonObjectConverter.convert(resultsShared));
-        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
-                .thenReturn(prosecutorTemplate());
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared));
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId()))).thenReturn(prosecutorTemplate());
         when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
@@ -490,6 +486,14 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
+                .thenReturn(prosecutorTemplate());
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getApplicant().getProsecutingAuthority().getProsecutionAuthorityId())))
+                .thenReturn(prosecutorTemplate());
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getSubject().getProsecutingAuthority().getProsecutionAuthorityId())))
+                .thenReturn(prosecutorTemplate());
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getRespondents().get(0).getProsecutingAuthority().getProsecutionAuthorityId())))
+                .thenReturn(prosecutorTemplate());
+        when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getThirdParties().get(0).getProsecutingAuthority().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()

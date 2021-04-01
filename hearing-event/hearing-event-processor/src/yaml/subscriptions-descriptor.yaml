@@ -86,9 +86,6 @@ subscriptions_descriptor:
         - name: hearing.save-draft-result-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/save-draft-result-failed.json
 
-        - name: hearing.application-draft-resulted
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-draft-resulted.json
-
         # Update Verdict
         - name: hearing.hearing-offence-verdict-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-verdict-updated.json
@@ -157,10 +154,6 @@ subscriptions_descriptor:
         # Update Defendant Attendance
         - name: hearing.defendant-attendance-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-attendance-updated.json
-
-        # application response
-        - name: hearing.application-response-saved
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-response-saved.json
 
         # New Defendant added
         - name: hearing.defendant-added
@@ -275,6 +268,7 @@ subscriptions_descriptor:
 
         - name: hearing.event.approval-requested
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-requested.json
+
 
       event_source_name: hearing
 

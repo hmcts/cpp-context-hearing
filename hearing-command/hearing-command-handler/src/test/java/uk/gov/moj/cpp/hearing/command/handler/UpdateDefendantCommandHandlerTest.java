@@ -154,7 +154,6 @@ public class UpdateDefendantCommandHandlerTest {
 		UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails = UpdateDefendantWithApplicationDetails.newBuilder()
 				.withApplicationTypeId(applicationTypeId)
 				.withDefendantId(defendantId)
-				.withApplicationOutcomeTypeId(applicationOutcomeTypeId)
 				.build();
 
         defendantAggregate.apply(updateDefendantWithApplicationDetails);
@@ -169,9 +168,7 @@ public class UpdateDefendantCommandHandlerTest {
                 jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.event.defendant-update-with-application"),
                         payloadIsJson(
                                 allOf(
-                                        withJsonPath("$.applicationDetailsForDefendant.applicationTypeId", is(updateDefendantWithApplicationDetails.getApplicationTypeId().toString())),
-                                        withJsonPath("$.applicationDetailsForDefendant.applicationOutcomeTypeId", is(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId().toString())),
-                                        withJsonPath("$.applicationDetailsForDefendant.applicationOutcomeTypeId", is(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId().toString()))
+                                        withJsonPath("$.applicationDetailsForDefendant.applicationTypeId", is(updateDefendantWithApplicationDetails.getApplicationTypeId().toString()))
                                 )
                         ))));
 

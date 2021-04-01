@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
 import static javax.json.Json.createArrayBuilder;
+import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.moj.cpp.FeatureToggle.REUSE_OF_INFORMATION;
@@ -31,7 +32,7 @@ import uk.gov.moj.cpp.hearing.query.view.OutstandingFineRequestsQueryView;
 import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -156,12 +157,6 @@ public class HearingQueryApi {
         return getJsonEnvelope(envelope);
     }
 
-    @Handles("hearing.get-application-draft-result")
-    public JsonEnvelope getApplicationDraftResult(final JsonEnvelope query) {
-        final Envelope<ApplicationTargetListResponse> envelope = this.hearingQueryView.getApplicationDraftResult(query);
-        return getJsonEnvelope(envelope);
-    }
-
     @Handles("hearing.query.search-by-material-id")
     public JsonEnvelope searchByMaterialId(final JsonEnvelope query) {
         return this.hearingQueryView.searchByMaterialId(query);
@@ -196,8 +191,15 @@ public class HearingQueryApi {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         final JsonObject allCourtRooms = referenceDataService.getAllCourtRooms(query);
 
-        final Envelope<Timeline> envelope = this.hearingQueryView.getTimeline(query, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
-        return getJsonEnvelope(envelope);
+        final Envelope<Timeline> timelineForCase = this.hearingQueryView.getTimeline(query, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+
+        final List<TimelineHearingSummary> allTimelineHearingSummaries = new ArrayList<>(timelineForCase.payload().getHearingSummaries());
+
+        final Timeline timeline = new Timeline(allTimelineHearingSummaries);
+
+        return getJsonEnvelope(envelop(timeline)
+                .withName("hearing.timeline")
+                .withMetadataFrom(query));
     }
 
     @Handles("hearing.application.timeline")

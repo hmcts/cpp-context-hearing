@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
@@ -8,20 +9,24 @@ import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
-import uk.gov.justice.core.courts.CourtApplicationResponse;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.HearingLanguage;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 
-@SuppressWarnings({"squid:S00107", "squid:S3655"})
+@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:CommentedOutCodeLine", "squid:S1172"})
 @ApplicationScoped
 public class HearingJPAMapper {
 
@@ -167,45 +172,12 @@ public class HearingJPAMapper {
         return courtApplicationsSerializer.json(courtApplications);
     }
 
-    public String saveApplicationResponse(final String courtApplicationsJson, final CourtApplicationResponse courtApplicationResponse, final UUID applicationPartyId) {
-        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
-        if (courtApplications == null) {
-            courtApplications = emptyList();
-        }
-
-        Optional<CourtApplication> courtApplication = courtApplications.stream().filter(
-                ca -> ca.getId().equals(courtApplicationResponse.getApplicationId())
-        ).findFirst();
-
-        if (courtApplication.isPresent()) {
-            //The Admitted / denied flag should be only passed once for each application.
-            courtApplication.get().getRespondents().stream().filter(r -> r.getPartyDetails().getId().equals(applicationPartyId)).findFirst().get().setApplicationResponse(courtApplicationResponse);
-        }
-        return courtApplicationsSerializer.json(courtApplications);
-    }
-
-    public String saveApplicationOutcome(final String courtApplicationsJson, final CourtApplicationOutcome courtApplicationOutcome) {
-        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
-        if (courtApplications == null) {
-            courtApplications = emptyList();
-        }
-
-        Optional<CourtApplication> courtApplication = courtApplications.stream().filter(
-                ca -> ca.getId().equals(courtApplicationOutcome.getApplicationId())
-        ).findFirst();
-
-        courtApplication.ifPresent(application -> application.setApplicationOutcome(courtApplicationOutcome));
-
-        return courtApplicationsSerializer.json(courtApplications);
-    }
 
     public String updateLinkedApplicationStatus(final String courtApplicationsJson, final UUID prosecutionCaseId, final ApplicationStatus status) {
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
         if (courtApplications == null) {
             courtApplications = emptyList();
         }
-        courtApplications.stream().filter(
-                ca -> prosecutionCaseId.equals(ca.getLinkedCaseId())).forEach(ca -> ca.setApplicationStatus(status));
         return courtApplicationsSerializer.json(courtApplications);
     }
 
@@ -218,5 +190,137 @@ public class HearingJPAMapper {
                 ca -> ca.getId().equals(applicationId) ||
                         applicationId.equals(ca.getParentApplicationId())).forEach(ca -> ca.setApplicationStatus(status));
         return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    public String updateConvictedDateOnOffencesInCourtApplication(final String courtApplicationsJson,final UUID courtApplicationId, final UUID offenceId, final LocalDate convictedDate){
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        final List<CourtApplication> updatedCourtApplications = courtApplications.stream()
+                .map(application -> ! application.getId().equals(courtApplicationId)  ? application :
+                        CourtApplication.courtApplication().withValuesFrom(application)
+                        .withCourtApplicationCases(getCourtApplicationCasesWithConvictionDate(offenceId, convictedDate, application))
+                        .withCourtOrder(getCourtOrderWithConvictionDate(offenceId, convictedDate, application))
+                        .build())
+                .collect(toList());
+        return courtApplicationsSerializer.json(updatedCourtApplications);
+    }
+
+
+    private CourtOrder getCourtOrderWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final CourtApplication application) {
+        return application.getCourtOrder() == null ? null : of(application.getCourtOrder())
+                .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
+                        .withCourtOrderOffences(co.getCourtOrderOffences().stream()
+                                .map(o -> getCourtOrderOffenceWithConvictionDate(offenceId, convictedDate, o)).collect(toList())).build()).orElse(null);
+    }
+
+    private List<CourtApplicationCase> getCourtApplicationCasesWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final CourtApplication application) {
+        return application.getCourtApplicationCases() == null ? null : application.getCourtApplicationCases().stream()
+                .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
+                        .withOffences(applicationCase.getOffences().stream()
+                                .map(courtApplicationOffence -> getCourtApplicationOffenceWithConvictionDate(offenceId, convictedDate, courtApplicationOffence))
+                                .collect(toList()))
+                        .build())
+                .collect(toList());
+    }
+
+    private Offence getCourtApplicationOffenceWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final Offence offence) {
+        return !offence.getId().equals(offenceId) ? offence :
+                Offence.offence().withValuesFrom(offence)
+                        .withConvictionDate(convictedDate)
+                        .build();
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithConvictionDate(final UUID offenceId, final LocalDate convictedDate, final CourtOrderOffence o) {
+        return !o.getOffence().getId().equals(offenceId) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                        .withConvictionDate(convictedDate)
+                        .build())
+                .build();
+    }
+
+    public String updatePleaOnOffencesInCourtApplication(final String courtApplicationsJson, final Plea plea) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        final CourtApplication courtApplication = getCourtApplication(courtApplications, plea.getOffenceId());
+        final int index = courtApplications.indexOf(courtApplication);
+
+        final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
+                                .withCourtApplicationCases(courtApplication.getCourtApplicationCases() == null ? null : courtApplication.getCourtApplicationCases().stream()
+                                        .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
+                                                .withOffences(applicationCase.getOffences().stream()
+                                                        .map(courtApplicationOffence -> getCourtApplicationOffenceWithPlea(plea, courtApplicationOffence))
+                                                        .collect(toList()))
+                                                .build())
+                                        .collect(toList()))
+                                .withCourtOrder(courtApplication.getCourtOrder() == null ? null : of(courtApplication.getCourtOrder())
+                                        .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
+                                                .withCourtOrderOffences(co.getCourtOrderOffences().stream()
+                                                        .map(o -> getCourtOrderOffenceWithPlea(plea, o)).collect(toList())).build()).orElse(null))
+                                .build();
+
+        courtApplications.set(index, updatedCourtApplication);
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithPlea(final Plea plea, final CourtOrderOffence o) {
+        return !o.getOffence().getId().equals(plea.getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                        .withPlea(plea)
+                        .build())
+                .build();
+    }
+
+    private Offence getCourtApplicationOffenceWithPlea(final Plea plea, final Offence offence) {
+        return !offence.getId().equals(plea.getOffenceId()) ? offence :
+                Offence.offence().withValuesFrom(offence)
+                        .withPlea(plea)
+                        .build();
+    }
+
+    public String updateVerdictOnOffencesInCourtApplication(final String courtApplicationsJson, final Verdict verdict) {
+        final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
+        final CourtApplication courtApplication = getCourtApplication(courtApplications, verdict.getOffenceId());
+        final int index = courtApplications.indexOf(courtApplication);
+
+        final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
+                .withCourtApplicationCases(courtApplication.getCourtApplicationCases() == null ? null : courtApplication.getCourtApplicationCases().stream()
+                        .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
+                                .withOffences(applicationCase.getOffences().stream()
+                                        .map(courtApplicationOffence -> getCourtApplicationOffenceWithVerdict(verdict, courtApplicationOffence))
+                                        .collect(toList()))
+                                .build())
+                        .collect(toList()))
+                .withCourtOrder(courtApplication.getCourtOrder() == null ? null : of(courtApplication.getCourtOrder())
+                        .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
+                                .withCourtOrderOffences(co.getCourtOrderOffences().stream()
+                                        .map(o -> getCourtOrderOffenceWithVerdict(verdict, o)).collect(toList())).build()).orElse(null))
+                .build();
+
+        courtApplications.set(index, updatedCourtApplication);
+        return courtApplicationsSerializer.json(courtApplications);
+    }
+
+    private CourtOrderOffence getCourtOrderOffenceWithVerdict(final Verdict verdict, final CourtOrderOffence o) {
+        return !o.getOffence().getId().equals(verdict.getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                        .withVerdict(verdict)
+                        .build())
+                .build();
+    }
+
+    private Offence getCourtApplicationOffenceWithVerdict(final Verdict verdict, final Offence offence) {
+        return !offence.getId().equals(verdict.getOffenceId()) ? offence :
+                Offence.offence().withValuesFrom(offence)
+                        .withVerdict(verdict)
+                        .build();
+    }
+
+    private CourtApplication getCourtApplication(final List<CourtApplication> courtApplications, UUID offenceID){
+        return courtApplications.stream()
+                .filter(ca -> ofNullable(ca.getCourtApplicationCases()).orElse(emptyList()).stream()
+                        .flatMap(cac -> cac.getOffences().stream())
+                        .anyMatch(o -> o.getId().equals(offenceID)) ||
+                        (ca.getCourtOrder() != null &&
+                                ca.getCourtOrder().getCourtOrderOffences().stream().anyMatch(co -> co.getOffence().getId().equals(offenceID)))
+                )
+                .findFirst().get();
     }
 }

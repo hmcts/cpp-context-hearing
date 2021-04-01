@@ -228,6 +228,8 @@ public class ReadStoreResultLoader implements ResultLoader {
                     setNameAddressFields(promptJson, resultPrompt);
                     resultPrompt.setDurationSequence(promptJson.getInt("durationSequence", 0));
                     resultPrompt.setHidden(getBooleanOrNull(promptJson, "hidden"));
+                    resultPrompt.setMinLength(promptJson.getString("min", null));
+                    resultPrompt.setMaxLength(promptJson.getString("max", null));
                     resultPrompts.add(resultPrompt);
 
                 }));

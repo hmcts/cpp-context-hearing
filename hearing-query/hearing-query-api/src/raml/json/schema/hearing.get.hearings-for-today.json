@@ -128,14 +128,14 @@
           "description": "The type of application made to court for judicial decision.  Taken from reference data",
           "type": "object",
           "properties": {
-            "applicationType": {
+            "type": {
               "description": "The CJS Title for the court application type",
               "type": "string"
             },
-            "applicationTypeWelsh": {
+            "typeWelsh": {
               "type": "string"
             },
-            "applicationLegislation": {
+            "legislation": {
               "type": "string"
             }
           }

@@ -46,9 +46,6 @@ subscriptions_descriptor:
         - name: public.hearing.share-results-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-share-results-failed.json
 
-        - name: public.hearing.application-draft-resulted
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-application-draft-resulted.json
-
         # Pleas
         - name: public.hearing.plea-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-plea-updated.json
@@ -89,10 +86,6 @@ subscriptions_descriptor:
         # Hearing Adjourned
         - name: public.hearing.defendant-attendance-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-defendant-attendance-updated.json
-
-        # application response
-        - name: public.hearing.application-response-saved
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-application-response-saved.json
 
         # Company Representative
         - name: public.hearing.company-representative-change-ignored

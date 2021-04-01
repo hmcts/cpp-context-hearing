@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.DelegatedPowers;
 
 import java.io.Serializable;
@@ -33,7 +32,6 @@ public class SharedResultsCommandResultLine implements Serializable {
     private DelegatedPowers fourEyesApproval;
     private LocalDate approvedDate;
     private boolean isDeleted;
-    private CourtApplicationOutcome courtApplicationOutcome;
     private List<UUID> childResultLineIds;
     private List<UUID> parentResultLineIds;
 
@@ -60,7 +58,6 @@ public class SharedResultsCommandResultLine implements Serializable {
             @JsonProperty("fourEyesApproval") final DelegatedPowers fourEyesApproval,
             @JsonProperty("approvedDate") final LocalDate approvedDate,
             @JsonProperty("isDeleted") final boolean isDeleted,
-            @JsonProperty("applicationOutcome") final CourtApplicationOutcome courtApplicationOutcome,
             @JsonProperty("childResultLineIds") final List<UUID> childResultLineIds,
             @JsonProperty("parentResultLineIds") final List<UUID>  parentResultLineIds
     ) {
@@ -84,7 +81,6 @@ public class SharedResultsCommandResultLine implements Serializable {
         this.fourEyesApproval = fourEyesApproval;
         this.approvedDate = approvedDate;
         this.isDeleted = isDeleted;
-        this.courtApplicationOutcome = courtApplicationOutcome;
         this.childResultLineIds = childResultLineIds;
         this.parentResultLineIds = parentResultLineIds;
     }
@@ -249,14 +245,6 @@ public class SharedResultsCommandResultLine implements Serializable {
 
     public void setIsDeleted(final boolean isDeleted) {
         this.isDeleted = isDeleted;
-    }
-
-    public CourtApplicationOutcome getApplicationOutcome() {
-        return courtApplicationOutcome;
-    }
-
-    public void setApplicationOutcome(final CourtApplicationOutcome courtApplicationOutcome) {
-        this.courtApplicationOutcome = courtApplicationOutcome;
     }
 
     public List<UUID> getChildResultLineIds() {

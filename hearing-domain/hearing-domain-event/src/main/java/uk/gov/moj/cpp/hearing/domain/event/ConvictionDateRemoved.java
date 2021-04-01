@@ -16,6 +16,7 @@ public class ConvictionDateRemoved implements Serializable {
     private UUID caseId;
     private UUID hearingId;
     private UUID offenceId;
+    private UUID courtApplicationId;
 
     public ConvictionDateRemoved() {
     }
@@ -23,10 +24,12 @@ public class ConvictionDateRemoved implements Serializable {
     @JsonCreator
     public ConvictionDateRemoved(@JsonProperty("caseId") final UUID caseId,
                                  @JsonProperty("hearingId") final UUID hearingId,
-                                 @JsonProperty("offenceId") final UUID offenceId) {
+                                 @JsonProperty("offenceId") final UUID offenceId,
+                                 @JsonProperty("courtApplicationId") final UUID courtApplicationId) {
         this.caseId = caseId;
         this.hearingId = hearingId;
         this.offenceId = offenceId;
+        this.courtApplicationId = courtApplicationId;
     }
 
     public static ConvictionDateRemoved convictionDateRemoved() {
@@ -57,6 +60,15 @@ public class ConvictionDateRemoved implements Serializable {
 
     public ConvictionDateRemoved setOffenceId(UUID offenceId) {
         this.offenceId = offenceId;
+        return this;
+    }
+
+    public UUID getCourtApplicationId() {
+        return courtApplicationId;
+    }
+
+    public ConvictionDateRemoved setCourtApplicationId(UUID courtApplicationId) {
+        this.courtApplicationId = courtApplicationId;
         return this;
     }
 }

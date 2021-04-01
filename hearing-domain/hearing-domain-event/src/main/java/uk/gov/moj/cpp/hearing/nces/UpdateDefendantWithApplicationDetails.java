@@ -8,12 +8,10 @@ public class UpdateDefendantWithApplicationDetails implements Serializable {
 
     private final UUID defendantId;
     private final UUID applicationTypeId;
-    private final UUID applicationOutcomeTypeId;
 
-    public UpdateDefendantWithApplicationDetails(final UUID defendantId, final UUID applicationTypeId, final UUID applicationOutcomeTypeId) {
+    public UpdateDefendantWithApplicationDetails(final UUID defendantId, final UUID applicationTypeId) {
         this.defendantId = defendantId;
         this.applicationTypeId = applicationTypeId;
-        this.applicationOutcomeTypeId = applicationOutcomeTypeId;
     }
 
     public UUID getDefendantId() {
@@ -24,9 +22,6 @@ public class UpdateDefendantWithApplicationDetails implements Serializable {
         return applicationTypeId;
     }
 
-    public UUID getApplicationOutcomeTypeId() {
-        return applicationOutcomeTypeId;
-    }
 
     public static UpdateDefendantWithApplicationDetails.Builder newBuilder() {
         return new UpdateDefendantWithApplicationDetails.Builder();
@@ -35,7 +30,6 @@ public class UpdateDefendantWithApplicationDetails implements Serializable {
     public static final class Builder {
         private UUID defendantId;
         private UUID applicationTypeId;
-        private UUID applicationOutcomeTypeId;
 
         private Builder() {
         }
@@ -50,13 +44,8 @@ public class UpdateDefendantWithApplicationDetails implements Serializable {
             return this;
         }
 
-        public UpdateDefendantWithApplicationDetails.Builder withApplicationOutcomeTypeId(UUID applicationOutcomeTypeId) {
-            this.applicationOutcomeTypeId = applicationOutcomeTypeId;
-            return this;
-        }
-
         public UpdateDefendantWithApplicationDetails build() {
-            return new UpdateDefendantWithApplicationDetails(defendantId, applicationTypeId, applicationOutcomeTypeId);
+            return new UpdateDefendantWithApplicationDetails(defendantId, applicationTypeId);
         }
     }
 }

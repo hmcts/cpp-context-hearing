@@ -94,12 +94,6 @@
       "minItems": 1,
       "items": {
         "$ref": "http://justice.gov.uk/core/courts/resultPrompt.json"
-      },
-      "applicationOutcome": {
-        "type": "object",
-        "items": {
-          "$ref": "http://justice.gov.uk/core/courts/courtApplicationOutcome.json"
-        }
       }
     }
   },

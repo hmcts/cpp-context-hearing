@@ -20,9 +20,9 @@ import javax.json.Json;
 import javax.json.JsonObject;
 
 public class UsersAndGroupsService {
-    private final static String GET_LOGGED_IN_USER_PERMISSIONS = "usersgroups.get-logged-in-user-permissions";
-    private final static String ROLES_FOR_USER = "usersgroups.get-roles-for-user";
-    private final static String USER_ID = "userId";
+    private static final String GET_LOGGED_IN_USER_PERMISSIONS = "usersgroups.get-logged-in-user-permissions";
+    private static final String ROLES_FOR_USER = "usersgroups.get-roles-for-user";
+    private static final String USER_ID = "userId";
 
     @Inject
     private PermissionsMapper permissionsMapper;

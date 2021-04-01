@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.event.validate-result-amendments-requested")
+@SuppressWarnings({"PMD.BeanMembersShouldSerialize"})
 public class ValidateResultAmendmentsRequested implements Serializable {
     private static final long serialVersionUID = -5995314363348475391L;
 

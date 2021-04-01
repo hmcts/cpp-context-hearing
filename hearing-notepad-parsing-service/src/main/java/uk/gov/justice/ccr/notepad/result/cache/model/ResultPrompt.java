@@ -33,6 +33,8 @@ public class ResultPrompt {
     private String partName;
     private Boolean nameEmail;
     private String welshDurationElement;
+    private String minLength;
+    private String maxLength;
 
     public ResultPrompt() {
 
@@ -43,7 +45,8 @@ public class ResultPrompt {
                         final String durationElement, final Set<String> keywords,
                         final Set<String> fixedList, Set<ResultPromptDynamicListNameAddress> nameAddressList, final Integer promptOrder,
                         final String reference, final Integer durationSequence, final Boolean hidden,
-                        final String componentLabel, final String listLabel, final String addressType, final String partName, final Boolean nameEmail, final String welshDurationElement) {
+                        final String componentLabel, final String listLabel, final String addressType, final String partName, final Boolean nameEmail, final String welshDurationElement,
+                        final String minLength, final String maxLength) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.resultDefinitionLabel = resultDefinitionLabel;
@@ -64,6 +67,8 @@ public class ResultPrompt {
         this.partName = partName;
         this.nameEmail = nameEmail;
         this.welshDurationElement = welshDurationElement;
+        this.minLength = minLength;
+        this.maxLength = maxLength;
     }
 
     public String getId() {
@@ -234,6 +239,22 @@ public class ResultPrompt {
         this.nameEmail = nameEmail;
     }
 
+    public String getMinLength() {
+        return minLength;
+    }
+
+    public void setMinLength(final String minLength) {
+        this.minLength = minLength;
+    }
+
+    public String getMaxLength() {
+        return maxLength;
+    }
+
+    public void setMaxLength(final String maxLength) {
+        this.maxLength = maxLength;
+    }
+
     @Override
     public String toString() {
         if(nameAddressList != null) {
@@ -257,6 +278,8 @@ public class ResultPrompt {
                     ", addressType='" + addressType + '\'' +
                     ", partName='" + partName + '\'' +
                     ", nameEmail='" + nameEmail + '\'' +
+                    ", minLength='" + minLength + '\'' +
+                    ", maxLength='" + maxLength + '\'' +
                     '}';
         } else {
             return "ResultPrompt{" +
@@ -278,6 +301,8 @@ public class ResultPrompt {
                     ", addressType='" + addressType + '\'' +
                     ", partName='" + partName + '\'' +
                     ", nameEmail='" + nameEmail + '\'' +
+                    ", minLength='" + minLength + '\'' +
+                    ", maxLength='" + maxLength + '\'' +
                     '}';
         }
     }

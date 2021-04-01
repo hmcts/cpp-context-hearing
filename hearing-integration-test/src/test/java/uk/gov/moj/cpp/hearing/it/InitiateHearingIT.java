@@ -68,11 +68,15 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReferralReason;
+import uk.gov.justice.hearing.courts.Applicant;
+import uk.gov.justice.hearing.courts.CaseSummaries;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.Defendants;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
+import uk.gov.justice.hearing.courts.Respondents;
+import uk.gov.justice.hearing.courts.Subject;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -164,7 +168,7 @@ public class InitiateHearingIT extends AbstractIT {
                         ))
                 )
         );
-//TODO court applications
+
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
@@ -183,8 +187,35 @@ public class InitiateHearingIT extends AbstractIT {
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
+                                .with(HearingSummaries::getCourtApplicationSummaries, hasCourtApplicationSummaries(hearing.getCourtApplications()))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
                                         .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                                .withValue(Applicant::getFirstName, courtApplication.getApplicant().getPersonDetails().getFirstName())
+                                                .withValue(Applicant::getMiddleName, courtApplication.getApplicant().getPersonDetails().getMiddleName())
+                                                .withValue(Applicant::getLastName, courtApplication.getApplicant().getPersonDetails().getLastName())
+                                                .withValue(Applicant::getId, courtApplication.getApplicant().getId())
+                                                .withValue(Applicant::getOrganisationName, courtApplication.getApplicant().getOrganisation().getName())
+                                                .withValue(Applicant::getSynonym, courtApplication.getApplicant().getSynonym())
+                                        )
+                                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                                .withValue(Respondents::getFirstName, courtApplication.getRespondents().get(0).getPersonDetails().getFirstName())
+                                                .withValue(Respondents::getMiddleName, courtApplication.getRespondents().get(0).getPersonDetails().getMiddleName())
+                                                .withValue(Respondents::getLastName, courtApplication.getRespondents().get(0).getPersonDetails().getLastName())
+                                                .withValue(Respondents::getOrganisationName, courtApplication.getRespondents().get(0).getOrganisation().getName())
+                                        ))
+                                        .with(CourtApplicationSummaries::getCaseSummaries, first(isBean(CaseSummaries.class)
+                                                .withValue(CaseSummaries::getId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseId())
+                                                .with(CaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                                        .withValue(ProsecutionCaseIdentifier::getCaseURN, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getCaseURN())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))))
+                                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                                .withValue(Subject::getId, courtApplication.getSubject().getId())
+                                                .withValue(Subject::getFirstName, courtApplication.getSubject().getPersonDetails().getFirstName())
+                                                .withValue(Subject::getLastName, courtApplication.getSubject().getPersonDetails().getLastName())
+                                                .withValue(Subject::getMiddleName, courtApplication.getSubject().getPersonDetails().getMiddleName())
+                                                .withValue(Subject::getOrganisationName, courtApplication.getSubject().getOrganisation().getName()))
                                 ))
                         ))
         );
@@ -226,7 +257,7 @@ public class InitiateHearingIT extends AbstractIT {
 
                 )
         );
-//TODO court applications
+
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
                         .with(GetHearings::getHearingSummaries, first(isBean(HearingSummaries.class)
@@ -243,6 +274,32 @@ public class InitiateHearingIT extends AbstractIT {
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
                                         .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                                .withValue(Applicant::getFirstName, courtApplication.getApplicant().getPersonDetails().getFirstName())
+                                                .withValue(Applicant::getMiddleName, courtApplication.getApplicant().getPersonDetails().getMiddleName())
+                                                .withValue(Applicant::getLastName, courtApplication.getApplicant().getPersonDetails().getLastName())
+                                                .withValue(Applicant::getId, courtApplication.getApplicant().getId())
+                                                .withValue(Applicant::getOrganisationName, courtApplication.getApplicant().getOrganisation().getName())
+                                                .withValue(Applicant::getSynonym, courtApplication.getApplicant().getSynonym())
+                                        )
+                                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                                .withValue(Respondents::getFirstName, courtApplication.getRespondents().get(0).getPersonDetails().getFirstName())
+                                                .withValue(Respondents::getMiddleName, courtApplication.getRespondents().get(0).getPersonDetails().getMiddleName())
+                                                .withValue(Respondents::getLastName, courtApplication.getRespondents().get(0).getPersonDetails().getLastName())
+                                                .withValue(Respondents::getOrganisationName, courtApplication.getRespondents().get(0).getOrganisation().getName())
+                                        ))
+                                        .with(CourtApplicationSummaries::getCaseSummaries, first(isBean(CaseSummaries.class)
+                                                .withValue(CaseSummaries::getId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseId())
+                                                .with(CaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                                        .withValue(ProsecutionCaseIdentifier::getCaseURN, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getCaseURN())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))))
+                                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                                .withValue(Subject::getId, courtApplication.getSubject().getId())
+                                                .withValue(Subject::getFirstName, courtApplication.getSubject().getPersonDetails().getFirstName())
+                                                .withValue(Subject::getLastName, courtApplication.getSubject().getPersonDetails().getLastName())
+                                                .withValue(Subject::getMiddleName, courtApplication.getSubject().getPersonDetails().getMiddleName())
+                                                .withValue(Subject::getOrganisationName, courtApplication.getSubject().getOrganisation().getName()))
                                 ))
                         ))
         );
@@ -937,6 +994,32 @@ public class InitiateHearingIT extends AbstractIT {
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
                                         .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                        .with(CourtApplicationSummaries::getApplicant, isBean(Applicant.class)
+                                                .withValue(Applicant::getFirstName, courtApplication.getApplicant().getPersonDetails().getFirstName())
+                                                .withValue(Applicant::getMiddleName, courtApplication.getApplicant().getPersonDetails().getMiddleName())
+                                                .withValue(Applicant::getLastName, courtApplication.getApplicant().getPersonDetails().getLastName())
+                                                .withValue(Applicant::getId, courtApplication.getApplicant().getId())
+                                                .withValue(Applicant::getOrganisationName, courtApplication.getApplicant().getOrganisation().getName())
+                                                .withValue(Applicant::getSynonym, courtApplication.getApplicant().getSynonym())
+                                        )
+                                        .with(CourtApplicationSummaries::getRespondents, first(isBean(Respondents.class)
+                                                .withValue(Respondents::getFirstName, courtApplication.getRespondents().get(0).getPersonDetails().getFirstName())
+                                                .withValue(Respondents::getMiddleName, courtApplication.getRespondents().get(0).getPersonDetails().getMiddleName())
+                                                .withValue(Respondents::getLastName, courtApplication.getRespondents().get(0).getPersonDetails().getLastName())
+                                                .withValue(Respondents::getOrganisationName, courtApplication.getRespondents().get(0).getOrganisation().getName())
+                                        ))
+                                        .with(CourtApplicationSummaries::getCaseSummaries, first(isBean(CaseSummaries.class)
+                                                .withValue(CaseSummaries::getId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseId())
+                                                .with(CaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                                                        .withValue(ProsecutionCaseIdentifier::getCaseURN, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getCaseURN())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                                                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, courtApplication.getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityCode()))))
+                                        .with(CourtApplicationSummaries::getSubject, isBean(Subject.class)
+                                                .withValue(Subject::getId, courtApplication.getSubject().getId())
+                                                .withValue(Subject::getFirstName, courtApplication.getSubject().getPersonDetails().getFirstName())
+                                                .withValue(Subject::getLastName, courtApplication.getSubject().getPersonDetails().getLastName())
+                                                .withValue(Subject::getMiddleName, courtApplication.getSubject().getPersonDetails().getMiddleName())
+                                                .withValue(Subject::getOrganisationName, courtApplication.getSubject().getOrganisation().getName()))
                                 ))
                         ))
         );
@@ -1134,15 +1217,28 @@ public class InitiateHearingIT extends AbstractIT {
     public BeanMatcher<ProsecutionCaseSummaries> hasProsecutionCaseSummary(final ProsecutionCase prosecutionCase) {
         return isBean(ProsecutionCaseSummaries.class)
                 .withValue(ProsecutionCaseSummaries::getId, prosecutionCase.getId())
-                .with(ProsecutionCaseSummaries::getProsecutionCaseIdentifier,
-                        isBean(ProsecutionCaseIdentifier.class)
-                                .withValue(ProsecutionCaseIdentifier::getCaseURN, prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
-                                .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
-                                .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId())
-                                .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
-                .with(ProsecutionCaseSummaries::getDefendants,
-                        hasDefendantSummaries(prosecutionCase)
+                .with(ProsecutionCaseSummaries::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
+                        .withValue(ProsecutionCaseIdentifier::getCaseURN, prosecutionCase.getProsecutionCaseIdentifier().getCaseURN())
+                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityCode())
+                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityId, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId())
+                        .withValue(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityReference()))
+                .with(ProsecutionCaseSummaries::getDefendants, hasDefendantSummaries(prosecutionCase)
                 );
+    }
+
+    private Matcher<Iterable<CourtApplicationSummaries>> hasCourtApplicationSummaries(final List<CourtApplication> courtApplications) {
+        return hasItems(
+                courtApplications.stream().map(
+                        courtApplication -> hasCourtApplicationSummary(courtApplication)
+                ).toArray(BeanMatcher[]::new)
+        );
+
+    }
+
+    private BeanMatcher<CourtApplicationSummaries> hasCourtApplicationSummary(final CourtApplication courtApplication) {
+        return isBean(CourtApplicationSummaries.class)
+                .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                .with(CourtApplicationSummaries::getRespondents, hasRespondentsSummaries(courtApplication));
     }
 
     public Matcher<Iterable<Defendants>> hasDefendantSummaries(final ProsecutionCase prosecutionCase) {
@@ -1151,5 +1247,15 @@ public class InitiateHearingIT extends AbstractIT {
                         .withValue(Defendants::getId, defendant.getId())
                         .withValue(Defendants::getFirstName, defendant.getPersonDefendant().getPersonDetails().getFirstName()))
                 .toArray(BeanMatcher[]::new));
+    }
+
+    private Matcher<Iterable<Respondents>> hasRespondentsSummaries(final CourtApplication courtApplication) {
+        return hasItems(courtApplication.getRespondents().stream().map(respondent ->
+                isBean(Respondents.class)
+                        .withValue(Respondents::getId, respondent.getId())
+                        .withValue(Respondents::getFirstName, respondent.getPersonDetails().getFirstName())
+                        .withValue(Respondents::getMiddleName, respondent.getPersonDetails().getMiddleName())
+                        .withValue(Respondents::getLastName, respondent.getPersonDetails().getLastName())
+        ).toArray(BeanMatcher[]::new));
     }
 }

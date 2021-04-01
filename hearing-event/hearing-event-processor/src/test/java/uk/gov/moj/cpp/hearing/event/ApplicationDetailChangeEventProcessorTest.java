@@ -16,13 +16,11 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -57,7 +55,10 @@ public class ApplicationDetailChangeEventProcessorTest {
 
     @Test
     public void handleCourtApplicationChanged() throws Exception {
-        final CourtApplication arbitraryCourtApplication = CourtApplication.courtApplication().withId(randomUUID()).withLinkedCaseId(randomUUID()).build();
+        final CourtApplication arbitraryCourtApplication = CourtApplication.courtApplication()
+                .withId(randomUUID())
+                //.withLinkedCaseId(randomUUID()
+                .build();
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.court-application-updated"),
                 createObjectBuilder()

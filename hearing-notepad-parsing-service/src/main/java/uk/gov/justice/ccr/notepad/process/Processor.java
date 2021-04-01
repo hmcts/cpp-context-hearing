@@ -135,6 +135,8 @@ public class Processor {
         promptChoice.setDurationSequence(resultPrompt.getDurationSequence());
         promptChoice.setHidden(resultPrompt.getHidden());
         promptChoice.setNameEmail(resultPrompt.getNameEmail());
+        promptChoice.setMinLength(resultPrompt.getMinLength());
+        promptChoice.setMaxLength(resultPrompt.getMaxLength());
         return promptChoice;
     }
 

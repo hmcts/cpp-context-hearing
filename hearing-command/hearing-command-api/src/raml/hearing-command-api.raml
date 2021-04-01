@@ -76,9 +76,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             requestType: application/vnd.hearing.save-hearing-case-note+json
             name: hearing.save-hearing-case-note
         (mapping):
-            requestType: application/vnd.hearing.save-application-response+json
-            name: hearing.save-application-response
-        (mapping):
             requestType: application/vnd.hearing.add-respondent-counsel+json
             name: hearing.add-respondent-counsel
         (mapping):
@@ -190,9 +187,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.save-hearing-case-note+json:
             example: !include json/hearing.save-hearing-case-note.json
             schema: !include json/schema/hearing.save-hearing-case-note.json
-        application/vnd.hearing.save-application-response+json:
-            example: !include json/hearing.save-application-response.json
-            schema: !include json/schema/hearing.save-application-response.json
         application/vnd.hearing.add-respondent-counsel+json:
             example: !include json/hearing.add-respondent-counsel.json
             schema:  !include json/schema/hearing.add-respondent-counsel.json
@@ -354,21 +348,6 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             202:
                 description: OK
 
-/application-draft-result:
-  post:
-      description: |
-        ...
-        (mapping):
-            requestType: application/vnd.hearing.application-draft-result+json
-            name: hearing.application-draft-result
-        ...
-      body:
-        application/vnd.hearing.application-draft-result+json:
-            example: !include json/hearing.application-draft-result.json
-            schema: !include json/schema/hearing.application-draft-result.json
-      responses:
-            202:
-                description: OK
 
 /upload-subscriptions/{referenceDate}:
   post:

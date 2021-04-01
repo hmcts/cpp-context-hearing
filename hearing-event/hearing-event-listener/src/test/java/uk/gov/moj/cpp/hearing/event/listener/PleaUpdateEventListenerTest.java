@@ -4,6 +4,8 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -18,16 +20,19 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 
 import uk.gov.justice.core.courts.AllocationDecision;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.IndicatedPleaJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.PleaJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
@@ -35,14 +40,17 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -73,6 +81,12 @@ public class PleaUpdateEventListenerTest {
 
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Mock
+    private HearingRepository hearingRepository;
+
+    @Mock
+    private HearingJPAMapper hearingJPAMapper;
 
     @Before
     public void setup() {
@@ -444,5 +458,75 @@ public class PleaUpdateEventListenerTest {
         assertThat(offence.getPlea().getDelegatedPowers().getDelegatedPowersUserId(), is(delegatedPowers.getUserId()));
         assertThat(offence.getPlea().getDelegatedPowers().getDelegatedPowersFirstName(), is(delegatedPowers.getFirstName()));
         assertThat(offence.getPlea().getDelegatedPowers().getDelegatedPowersLastName(), is(delegatedPowers.getLastName()));
+    }
+
+    @Test
+    public void shouldUpdateCourtApplicationWithPlea(){
+        final UUID hearingId = randomUUID();
+        final UUID applicationId = randomUUID();
+        final PleaModel applicationPleaModel = PleaModel.pleaModel().withApplicationId(applicationId).withPlea(Plea.plea().withApplicationId(applicationId).build()).build();
+        final Plea applicationPleaForChecking = Plea.plea().withValuesFrom(applicationPleaModel.getPlea()).withOriginatingHearingId(hearingId).build();
+
+        final PleaUpsert courtApplicationPleaUpdated = PleaUpsert.pleaUpsert()
+                .setPleaModel(applicationPleaModel)
+                .setHearingId(hearingId);
+        final uk.gov.justice.core.courts.Hearing hearing = uk.gov.justice.core.courts.Hearing.hearing()
+                .withCourtApplications(Collections.singletonList(CourtApplication.courtApplication().withId(applicationId).build()))
+                .build();
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withPlea(applicationPleaForChecking).build();
+
+        final Hearing hearingEntity = new Hearing();
+        hearingEntity.setCourtApplicationsJson("[]");
+        final String str = objectToJsonObjectConverter.convert(courtApplication).toString();
+
+        when(hearingJPAMapper.fromJPA(any())).thenReturn(hearing);
+        when(hearingJPAMapper.addOrUpdateCourtApplication(any(),any() )).thenReturn("["+str+"]");
+        when(hearingRepository.findBy(any())).thenReturn(hearingEntity);
+
+
+        pleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
+                objectToJsonObjectConverter.convert(courtApplicationPleaUpdated)));
+
+        final ArgumentCaptor<CourtApplication> courtApplicationArgumentCaptor = ArgumentCaptor.forClass(CourtApplication.class);
+        verify(hearingJPAMapper).addOrUpdateCourtApplication(any(), courtApplicationArgumentCaptor.capture());
+        final CourtApplication updatedCourtApplication = courtApplicationArgumentCaptor.getValue();
+        assertThat(updatedCourtApplication, is(courtApplication));
+
+        final ArgumentCaptor<Hearing> hearingArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+        verify(hearingRepository).save(hearingArgumentCaptor.capture());
+        final Hearing savedHearing = hearingArgumentCaptor.getValue();
+        assertThat(savedHearing.getCourtApplicationsJson(), is("[{\"id\":\"" + applicationId.toString() + "\",\"plea\":"+objectToJsonObjectConverter.convert(applicationPleaForChecking)+"}]"));
+    }
+
+    @Test
+    public void pleaUpdated_shouldUpdateThePleaToOffenceInCourtApplication() {
+
+        final UUID applicationId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
+                .setHearingId(hearingId)
+                .setPleaModel(PleaModel.pleaModel().withPlea(Plea.plea()
+                        .withPleaValue("GUILTY")
+                        .withOffenceId(offenceId)
+                        .withPleaDate(LocalDate.now())
+                        .build()).build());
+
+        final Hearing hearing = new Hearing();
+        hearing.setCourtApplicationsJson("abc");
+
+
+        when(this.hearingRepository.findBy(pleaUpsert.getHearingId())).thenReturn(hearing);
+        when(hearingJPAMapper.updatePleaOnOffencesInCourtApplication(eq(hearing.getCourtApplicationsJson()), any(Plea.class))).thenReturn("def");
+
+        pleaUpdateEventListener.offencePleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-plea-updated"),
+                objectToJsonObjectConverter.convert(pleaUpsert)));
+
+        verify(this.hearingRepository).save(hearing);
+        assertThat(hearing.getCourtApplicationsJson(), is("def"));
+
     }
 }

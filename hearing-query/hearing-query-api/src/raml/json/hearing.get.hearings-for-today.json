@@ -97,9 +97,9 @@
             }
           ],
           "type": {
-            "applicationType": "applicationType",
-            "applicationTypeWelsh": "applicationTypeWelsh",
-            "applicationLegislation": "applicationLegislation"
+            "type": "applicationType",
+            "typeWelsh": "applicationTypeWelsh",
+            "legislation": "applicationLegislation"
           }
         }
       ],

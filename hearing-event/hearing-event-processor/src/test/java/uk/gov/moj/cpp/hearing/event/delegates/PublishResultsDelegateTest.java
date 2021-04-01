@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static java.lang.System.lineSeparator;
-import static java.util.Arrays.asList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -25,11 +24,12 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_OPTIONAL_PROMPT_REF_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE_FOR_COURTORDER;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTORDER;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
@@ -40,27 +40,21 @@ import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.OffenceFacts;
-import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Source;
-import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilder;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 
@@ -108,6 +102,9 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Spy
     private RestructuringHelper restructringHelper = new RestructuringHelper(resultTreeBuilder);
 
+    @Mock
+    private OffenceHelper offenceHelper;
+
     private PublishResultsDelegate target;
 
     @Before
@@ -120,7 +117,8 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
                 relistReferenceDataService,
                 custodyTimeLimitCalculator,
                 bailStatusHelper,
-                restructringHelper);
+                restructringHelper,
+                offenceHelper);
     }
 
     @Test
@@ -143,91 +141,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
         assertThat(defendant.isPresent(), is(true));
-    }
-
-    @Test
-    public void shareResultsWithEnrichedVerdictType() throws IOException {
-        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON, ResultsShared.class);
-        final JsonEnvelope envelope = getEnvelope(resultsShared);
-        List<VerdictType> allVerdictTypes = new ArrayList<>();
-        allVerdictTypes.add(VerdictType.verdictType()
-                .withVerdictCode("VC01")
-                .withCategory("Guilty")
-                .withCategoryType("GUILTY_BY_JURY_CONVICTED")
-                .withDescription("Guilty")
-                .withId(UUID.fromString("c4ca4238-a0b9-3382-8dcc-509a6f75849b"))
-                .withSequence(1)
-                .build());
-        allVerdictTypes.add(
-                VerdictType.verdictType()
-                        .withVerdictCode("VC13")
-                        .withCategory("Not Guilty")
-                        .withCategoryType("NOT_GUILTY")
-                        .withDescription("Not guilty by reason of insanity")
-                        .withId(UUID.fromString("c51ce410-c124-310e-8db5-e4b97fc2af39"))
-                        .withSequence(13)
-                        .build());
-        when(verdictTypesReferenceDataLoader.getAllVerdictTypes(envelope)).thenReturn(allVerdictTypes);
-
-        target.shareResults(envelope, sender, resultsShared);
-
-        verify(sender).send(envelopeArgumentCaptor.capture());
-
-        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
-
-        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
-        verify(custodyTimeLimitCalculator, times(1)).calculate(custodyLimitCalculatorHearingIn.capture());
-
-        final Hearing calculatorHearingIn = custodyLimitCalculatorHearingIn.getValue();
-
-        assertEquals(resultsShared.getHearing(), calculatorHearingIn);
-
-        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
-        assertThat(defendant.isPresent(), is(true));
-
-        final VerdictType verdictType = defendant.get().getOffences().get(0).getVerdict().getVerdictType();
-        assertThat(verdictType.getCategory(), is("Not Guilty"));
-        assertThat(verdictType.getCategoryType(), is("NOT_GUILTY"));
-        assertThat(verdictType.getDescription(), is("Not guilty by reason of insanity"));
-        assertThat(verdictType.getId().toString(), is("c51ce410-c124-310e-8db5-e4b97fc2af39"));
-        assertThat(verdictType.getVerdictCode(), is("VC13"));
-        assertThat(verdictType.getSequence(), is(13));
-    }
-
-    @Test
-    public void shareResultsWithEnrichedAlcoholMethodLevels() throws IOException {
-        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON, ResultsShared.class);
-        final JsonEnvelope envelope = getEnvelope(resultsShared);
-
-        when(alcoholLevelMethodsReferenceDataLoader.getAllAlcoholLevelMethods(envelope)).thenReturn(asList(
-                new AlcoholLevelMethod(randomUUID(), 1, "A", "Blood"),
-                new AlcoholLevelMethod(randomUUID(), 2, "B", "Breath")));
-
-        target.shareResults(envelope, sender, resultsShared);
-
-        verify(sender).send(envelopeArgumentCaptor.capture());
-
-        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
-
-        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
-        verify(custodyTimeLimitCalculator, times(1)).calculate(custodyLimitCalculatorHearingIn.capture());
-
-        final Hearing calculatorHearingIn = custodyLimitCalculatorHearingIn.getValue();
-
-        assertEquals(resultsShared.getHearing(), calculatorHearingIn);
-
-        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
-        assertThat(defendant.isPresent(), is(true));
-
-        final OffenceFacts offenceFacts = defendant.get().getOffences().get(0).getOffenceFacts();
-        assertThat(offenceFacts.getAlcoholReadingAmount(), is(99));
-        assertThat(offenceFacts.getAlcoholReadingMethodCode(), is("B"));
-        assertThat(offenceFacts.getAlcoholReadingMethodDescription(), is("Breath"));
-        assertThat(offenceFacts.getVehicleMake(), is("Ford"));
-        assertThat(offenceFacts.getVehicleCode().name(), is("PASSENGER_CARRYING_VEHICLE"));
-        assertThat(offenceFacts.getVehicleRegistration(), is("A123 LIU"));
     }
 
     @Test
@@ -313,7 +226,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         verify(sender).send(envelopeArgumentCaptor.capture());
         verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
     }
-
 
     @Test
     public void whenAnyJudicialResultsHaveResultsPrompts_Then_BailConditions_Should_BeSetBasedOnRank() throws IOException {
@@ -419,7 +331,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         assertFalse(isDisposed);
     }
 
-
     @Test
     public void whenJudicialResultCagtegory_Is_NotFinal_Then_Offence_IsDisposed_isFalse() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
@@ -435,7 +346,6 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
         assertFalse(getIsDisposedValueForOffence(publicHearingResulted.getHearing()));
     }
-
 
     @Test
     public void shouldShareResultsWhenResultDefinitionHavingCADate() throws IOException {
@@ -475,6 +385,28 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     }
 
     @Test
+    public void shouldShareResultsWithAcquittalDateForOffenceLevelJudicialResultsWhenCourtAplicationCasesExist() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES, ResultsShared.class);
+
+        target.shareResults(dummyEnvelope, sender, resultsShared);
+
+        verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
+        assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
+//        assertThat(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getOffence().getAquittalDate().toString(), is("2020-08-19"));
+    }
+
+    @Test
+    public void shouldShareResultsWithAcquittalDateForOffenceLevelJudicialResultsWhenCourtOrderExist() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_TO_SET_ACQUITTAL_DATE_FOR_COURTORDER, ResultsShared.class);
+
+        target.shareResults(dummyEnvelope, sender, resultsShared);
+
+        verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
+        assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
+//        assertThat(resultsShared.getHearing().getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getAquittalDate().toString(), is("2020-08-19"));
+    }
+
+    @Test
     public void shouldShareResultsWithoutUpdatingAcquittalDateForOffenceLevelJudicialResults() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE, ResultsShared.class);
 
@@ -486,37 +418,26 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     }
 
     @Test
-    public void shouldSetIndicatedPleaOnShareResults() throws IOException {
-        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON, ResultsShared.class);
-        final JsonEnvelope envelope = getEnvelope(resultsShared);
+    public void shouldShareResultsWithoutUpdatingAcquittalDateForOffenceLevelJudicialResultsWhenCourtApplicationCasesExist() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES, ResultsShared.class);
 
-        target.shareResults(envelope, sender, resultsShared);
+        target.shareResults(dummyEnvelope, sender, resultsShared);
 
-        verify(sender).send(envelopeArgumentCaptor.capture());
-
-        final Envelope<JsonObject> sharedResultsMessage = envelopeArgumentCaptor.getValue();
-
-        assertThat(sharedResultsMessage.metadata().name(), is("public.hearing.resulted"));
-
-        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
-        assertThat(defendant.isPresent(), is(true));
-
-        final Plea plea = defendant.get().getOffences().get(0).getPlea();
-        assertThat(defendant.get().getOffences().get(0).getModeOfTrial(), is("Either Way"));
-        assertThat(plea.getPleaDate().toString(), is("2018-06-24"));
-        assertThat(plea.getPleaValue(), is("INDICATED_GUILTY"));
-        assertThat(plea.getOffenceId().toString(), is("47ecee20-0215-11ea-9bbd-b1f5a4493d17"));
-        assertThat(plea.getOriginatingHearingId().toString(), is("31048c0d-e937-49fb-bfc5-02abc56d3f6a"));
-
-        final IndicatedPlea indicatedPlea = defendant.get().getOffences().get(0).getIndicatedPlea();
-        assertThat(indicatedPlea.getIndicatedPleaDate().toString(), is("2018-06-24"));
-        assertThat(indicatedPlea.getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
-        assertThat(indicatedPlea.getOffenceId().toString(), is("47ecee20-0215-11ea-9bbd-b1f5a4493d17"));
-        assertThat(indicatedPlea.getOriginatingHearingId().toString(), is("31048c0d-e937-49fb-bfc5-02abc56d3f6a"));
-        assertThat(indicatedPlea.getSource(), is(Source.IN_COURT));
+        verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
+        assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
+        assertThat(resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getAquittalDate().toString(), is("2020-08-18"));
     }
 
+    @Test
+    public void shouldShareResultsWithoutUpdatingAcquittalDateForOffenceLevelJudicialResultsWhenCourtOrderExists() throws IOException {
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTORDER, ResultsShared.class);
+
+        target.shareResults(dummyEnvelope, sender, resultsShared);
+
+        verify(sender, times(1)).send(envelopeArgumentCaptor.capture());
+        assertThat(resultsShared.getTargets().get(0).getResultLines().get(0).getOrderedDate().toString(), is("2020-08-19"));
+        assertThat(resultsShared.getHearing().getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getAquittalDate().toString(), is("2020-08-18"));
+    }
     @Test
     public void shouldOnlyPopulateDefendantLevelResultsWhenResultLinesPresentForDefendantLevel() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON, ResultsShared.class);

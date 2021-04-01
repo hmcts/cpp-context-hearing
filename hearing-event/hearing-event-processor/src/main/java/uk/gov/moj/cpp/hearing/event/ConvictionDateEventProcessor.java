@@ -14,6 +14,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 
 import javax.inject.Inject;
+import javax.json.JsonObjectBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,8 @@ public class ConvictionDateEventProcessor {
     private static final String CASE_ID = "caseId";
     private static final String OFFENCE_ID = "offenceId";
     private static final String CONVICTION_DATE = "convictionDate";
+    private static final String COURT_APPLICATION_ID = "courtApplicationId";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ConvictionDateEventProcessor.class);
     private Enveloper enveloper;
     private Sender sender;
@@ -46,11 +49,21 @@ public class ConvictionDateEventProcessor {
 
         ConvictionDateAdded convictionDateAdded = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(),
                 ConvictionDateAdded.class);
-
-        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.offence-conviction-date-changed")
-                .apply(createObjectBuilder().add(CASE_ID, convictionDateAdded.getCaseId().toString())
-                        .add(OFFENCE_ID, convictionDateAdded.getOffenceId().toString())
-                        .add(CONVICTION_DATE, convictionDateAdded.getConvictionDate().toString()).build()));
+        final JsonObjectBuilder builder = createObjectBuilder();
+        if(convictionDateAdded.getCourtApplicationId() == null){
+            builder.add(CASE_ID, convictionDateAdded.getCaseId().toString())
+                    .add(OFFENCE_ID, convictionDateAdded.getOffenceId().toString())
+                    .add(CONVICTION_DATE, convictionDateAdded.getConvictionDate().toString());
+        }else{
+            builder.add(COURT_APPLICATION_ID, convictionDateAdded.getCourtApplicationId().toString())
+                    .add(CONVICTION_DATE, convictionDateAdded.getConvictionDate().toString());
+            if(convictionDateAdded.getOffenceId() != null){
+               builder.add(OFFENCE_ID, convictionDateAdded.getOffenceId().toString());
+            }
+        }
+        this.sender.send(Enveloper.envelop(builder.build())
+                .withName("public.hearing.offence-conviction-date-changed")
+                .withMetadataFrom(event));
     }
 
     @Handles("hearing.conviction-date-removed")
@@ -62,8 +75,18 @@ public class ConvictionDateEventProcessor {
         ConvictionDateRemoved convictionDateRemoved = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), ConvictionDateRemoved.class);
 
-        this.sender.send(this.enveloper.withMetadataFrom(event, "public.hearing.offence-conviction-date-removed")
-                .apply(createObjectBuilder().add(CASE_ID, convictionDateRemoved.getCaseId().toString())
-                        .add(OFFENCE_ID, convictionDateRemoved.getOffenceId().toString()).build()));
+        final JsonObjectBuilder builder = createObjectBuilder();
+        if(convictionDateRemoved.getCourtApplicationId() == null){
+            builder.add(CASE_ID, convictionDateRemoved.getCaseId().toString())
+                    .add(OFFENCE_ID, convictionDateRemoved.getOffenceId().toString());
+        }else{
+            builder.add(COURT_APPLICATION_ID, convictionDateRemoved.getCourtApplicationId().toString());
+            if(convictionDateRemoved.getOffenceId() != null) {
+                builder.add(OFFENCE_ID, convictionDateRemoved.getOffenceId().toString());
+            }
+        }
+        this.sender.send(Enveloper.envelop(builder.build())
+                .withName("public.hearing.offence-conviction-date-removed")
+                .withMetadataFrom(event));
     }
 }

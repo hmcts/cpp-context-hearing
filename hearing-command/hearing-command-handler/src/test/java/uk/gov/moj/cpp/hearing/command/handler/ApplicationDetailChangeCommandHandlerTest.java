@@ -32,7 +32,6 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -133,8 +132,6 @@ public class ApplicationDetailChangeCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
-        //Update Application any field
-        courtApplication.setBreachedOrder("DUMMY_TEXT");
 
         JsonObject payload = Json.createObjectBuilder()
                 .add("courtApplication", objectToJsonObjectConverter.convert(courtApplication))
@@ -148,9 +145,7 @@ public class ApplicationDetailChangeCommandHandlerTest {
                         payloadIsJson(
                                 allOf(
                                         withJsonPath("$.hearingId", is(arbitraryHearingId.toString())),
-                                        withJsonPath("$.courtApplication.id", is(courtApplication.getId().toString())),
-                                        withJsonPath("$.courtApplication.breachedOrder", is(courtApplication.getBreachedOrder())
-                                        )
+                                        withJsonPath("$.courtApplication.id", is(courtApplication.getId().toString()))
                                 ))
                 )));
     }

@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+@SuppressWarnings({"squid:S2384"})
 public class Permissions {
     private final List<Group> groups;
     private final List<UserRole> switchableRoles;

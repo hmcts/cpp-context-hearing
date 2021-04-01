@@ -27,7 +27,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffec
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -142,17 +141,6 @@ public class HearingQueryView {
                 .withName("hearing.get-draft-result")
                 .withMetadataFrom(envelope);
     }
-
-
-    public Envelope<ApplicationTargetListResponse> getApplicationDraftResult(final JsonEnvelope envelope) {
-        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
-        final ApplicationTargetListResponse applicationTargetListResponse = hearingService.getApplicationTargets(hearingId);
-
-        return envelop(applicationTargetListResponse)
-                .withName("hearing.get-application-draft-result")
-                .withMetadataFrom(envelope);
-    }
-
 
     public JsonEnvelope searchByMaterialId(final JsonEnvelope envelope) {
         return enveloper.withMetadataFrom(envelope, "hearing.query.search-by-material-id")

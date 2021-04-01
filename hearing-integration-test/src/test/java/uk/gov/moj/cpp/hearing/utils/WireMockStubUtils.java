@@ -40,7 +40,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response.Status;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
-import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,18 +87,6 @@ public class WireMockStubUtils {
 
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCases() {
         final String response = getPayload("stub-data/usersgroups.permissions.json");
-
-        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
-                .willReturn(aResponse().withStatus(SC_OK)
-                        .withHeader(HeaderConstants.ID, randomUUID().toString())
-                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
-                        .withBody(response)));
-        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
-
-    }
-
-    public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ() {
-        final String response = getPayload("stub-data/usersgroups.permissions-for-DDJ.json");
 
         stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
                 .willReturn(aResponse().withStatus(SC_OK)
@@ -166,6 +153,19 @@ public class WireMockStubUtils {
                 .willReturn(responseDefBuilder));
 
         waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
+    }
+
+
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ() {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-DDJ.json");
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
     }
 
     public static void setupAsAuthorisedUser(final UUID userId) {

@@ -1,12 +1,16 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaVerdictUtil.isGuiltyVerdict;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded.convictionDateAdded;
 import static uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved.convictionDateRemoved;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -16,11 +20,15 @@ import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+@SuppressWarnings("squid:S00112")
 public class PleaDelegate implements Serializable {
 
     private final HearingAggregateMomento momento;
@@ -45,6 +53,28 @@ public class PleaDelegate implements Serializable {
         if (nonNull(pleaUpsert.getPleaModel().getAllocationDecision())) {
             this.momento.getAllocationDecision().put(offenceId, pleaUpsert.getPleaModel().getAllocationDecision());
         }
+
+        ofNullable(this.momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .flatMap(ps -> ps.getDefendants().stream())
+                .flatMap(d -> d.getOffences().stream())
+                .filter(o -> o.getId().equals(offenceId))
+                .forEach(this::setOffence);
+
+
+        ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .flatMap(ca -> ofNullable(ca.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty))
+                .flatMap(c -> ofNullable(c.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                .filter(o -> o.getId().equals(offenceId))
+                .forEach(this::setOffence);
+
+
+        ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .map(CourtApplication::getCourtOrder)
+                .filter(Objects::nonNull)
+                .flatMap(o -> o.getCourtOrderOffences().stream())
+                .map(CourtOrderOffence::getOffence)
+                .filter(o -> o.getId().equals(offenceId))
+                .forEach(this::setOffence);
     }
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
@@ -56,13 +86,24 @@ public class PleaDelegate implements Serializable {
     public Stream<Object> updatePlea(final UUID hearingId, final PleaModel pleaModel, final Set<String> guiltyPleaTypes) {
 
         final UUID offenceId = pleaModel.getOffenceId();
-        final ProsecutionCase prosecutionCase = this.momento.getHearing().getProsecutionCases().stream()
-                .filter(pc -> pc.getDefendants().stream()
-                        .flatMap(de -> de.getOffences().stream())
-                        .anyMatch(o -> o.getId().equals(offenceId)))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Offence id is not present"));
+        final UUID prosecutionCaseId;
+        final UUID courtApplicationId;
+        if (pleaModel.getApplicationId() == null) {
+            prosecutionCaseId = ofNullable(this.momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .filter(pc -> pc.getDefendants().stream()
+                            .flatMap(de -> de.getOffences().stream())
+                            .anyMatch(o -> o.getId().equals(offenceId)))
+                    .findFirst()
+                    .map(ProsecutionCase::getId)
+                    .orElse(null);
 
+            courtApplicationId = findCourtApplicationByOffence(offenceId);
+
+            throwIfOffenceAbsent(prosecutionCaseId, courtApplicationId);
+        } else {
+            courtApplicationId = pleaModel.getApplicationId();
+            prosecutionCaseId = null;
+        }
         setOriginatingHearingId(hearingId, pleaModel);
 
         final List<Object> events = new ArrayList<>();
@@ -71,8 +112,8 @@ public class PleaDelegate implements Serializable {
                 .setHearingId(hearingId)
                 .setPleaModel(pleaModel));
 
-        final Verdict existingOffenceVerdict = momento.getVerdicts().get(offenceId);
-        final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(offenceId);
+        final Verdict existingOffenceVerdict = momento.getVerdicts().get(Optional.ofNullable(offenceId).orElse(courtApplicationId));
+        final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(Optional.ofNullable(offenceId).orElse(courtApplicationId));
         final boolean guiltyVerdictForOffenceAlreadySet = nonNull(existingOffenceVerdict) && isGuiltyVerdict(existingOffenceVerdict.getVerdictType());
 
         if (nonNull(plea)) {
@@ -81,18 +122,20 @@ public class PleaDelegate implements Serializable {
                 if (!convictionDateAlreadySetForOffence) {
                     events.add(
                             convictionDateAdded()
-                                    .setCaseId(prosecutionCase.getId())
+                                    .setCaseId(prosecutionCaseId)
                                     .setHearingId(hearingId)
                                     .setOffenceId(offenceId)
-                                    .setConvictionDate(plea.getPleaDate()));
+                                    .setConvictionDate(plea.getPleaDate())
+                                    .setCourtApplicationId(courtApplicationId));
                 }
             } else if (!guiltyVerdictForOffenceAlreadySet && convictionDateAlreadySetForOffence) {
                 // its 'not guilty' plea and verdict is not already set to guilty
                 events.add(
                         convictionDateRemoved()
-                                .setCaseId(prosecutionCase.getId())
+                                .setCaseId(prosecutionCaseId)
                                 .setHearingId(hearingId)
-                                .setOffenceId(offenceId));
+                                .setOffenceId(offenceId)
+                                .setCourtApplicationId(courtApplicationId));
             }
 
         } else if (nonNull(pleaModel.getIndicatedPlea())) {
@@ -101,18 +144,41 @@ public class PleaDelegate implements Serializable {
             final IndicatedPlea indicatedPlea = pleaModel.getIndicatedPlea();
             events.add(indicatedPlea.getIndicatedPleaValue() == INDICATED_GUILTY ?
                     convictionDateAdded()
-                            .setCaseId(prosecutionCase.getId())
+                            .setCaseId(prosecutionCaseId)
                             .setHearingId(hearingId)
                             .setOffenceId(offenceId)
-                            .setConvictionDate(indicatedPlea.getIndicatedPleaDate()) :
+                            .setConvictionDate(indicatedPlea.getIndicatedPleaDate())
+                            .setCourtApplicationId(courtApplicationId) :
                     convictionDateRemoved()
-                            .setCaseId(prosecutionCase.getId())
+                            .setCaseId(prosecutionCaseId)
                             .setHearingId(hearingId)
                             .setOffenceId(offenceId)
+                            .setCourtApplicationId(courtApplicationId)
             );
         }
 
         return events.stream();
+    }
+
+    private UUID findCourtApplicationByOffence(final UUID offenceId) {
+        final UUID courtApplicationId;
+        courtApplicationId = ofNullable(this.momento.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(ca -> ofNullable(ca.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty)
+                        .flatMap(cac -> ofNullable(cac.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                        .anyMatch(o -> o.getId().equals(offenceId)) ||
+                        (ca.getCourtOrder() != null &&
+                                ca.getCourtOrder().getCourtOrderOffences().stream().anyMatch(co -> co.getOffence().getId().equals(offenceId)))
+                )
+                .findFirst()
+                .map(CourtApplication::getId)
+                .orElse(null);
+        return courtApplicationId;
+    }
+
+    public void throwIfOffenceAbsent(final UUID prosecutionCaseId, final UUID courtApplicationId) {
+        if (prosecutionCaseId == null && courtApplicationId == null) {
+            throw new RuntimeException("Offence id is not present");
+        }
     }
 
     private void setOriginatingHearingId(final UUID hearingId, final PleaModel pleaModel) {
@@ -127,4 +193,9 @@ public class PleaDelegate implements Serializable {
         }
     }
 
+    private void setOffence(final Offence offence) {
+        offence.setPlea(this.momento.getPleas().get(offence.getId()));
+        offence.setIndicatedPlea(this.momento.getIndicatedPlea().get(offence.getId()));
+        offence.setAllocationDecision(this.momento.getAllocationDecision().get(offence.getId()));
+    }
 }

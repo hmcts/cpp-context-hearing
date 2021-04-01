@@ -12,16 +12,26 @@
     "offenceId": {
       "$ref": "#/definitions/uuid"
     },
+    "courtApplicationId": {
+      "$ref": "#/definitions/uuid"
+    },
     "convictionDate": {
       "type": "string"
     }
   },
+  "oneOf": [{
   "required": [
     "caseId",
     "hearingId",
     "offenceId",
     "convictionDate"
-  ],
+  ]},{
+    "required": [
+      "courtApplicationId",
+      "hearingId",
+      "convictionDate"
+    ]
+  }],
   "definitions": {
     "uuid": {
       "type": "string",

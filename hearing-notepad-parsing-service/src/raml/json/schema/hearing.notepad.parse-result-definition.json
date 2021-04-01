@@ -114,6 +114,12 @@
           },
           "hidden": {
             "type": "boolean"
+          },
+          "minLength": {
+            "type": "string"
+          },
+          "maxLength": {
+            "type": "string"
           }
         }
       }

@@ -49,7 +49,7 @@ public class EffectiveRole {
 
     private static List<UserRole> getSwitchableRoles(List<UserRole> userRoles) {
         final List<UserRole> switchableRoles =
-                userRoles.stream().filter(r -> r.isSelectable()).collect(toList());
+                userRoles.stream().filter(UserRole::isSelectable).collect(toList());
 
         return switchableRoles.size() > 1 ? switchableRoles : Collections.emptyList();
     }

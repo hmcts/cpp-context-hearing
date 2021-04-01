@@ -43,15 +43,26 @@
           }
         ],
         "type": {
-          "applicantSynonym": "Defendant",
-          "applicationCategory": "CO",
-          "applicationCode": "MC80527",
-          "applicationJurisdictionType": "EITHER",
-          "applicationLegislation": "In accordance with section 14 of the Magistrates' Courts Act 1980",
-          "applicationType": "Appearance to make statutory declaration",
+          "categoryCode": "CO",
+          "code": "MC80527",
+          "Jurisdiction": "EITHER",
+          "legislation": "In accordance with section 14 of the Magistrates' Courts Act 1980",
+          "type": "Appearance to make statutory declaration",
           "id": "a1d421a1-4f0f-4c9f-8a20-a960e25a0894",
-          "linkType": "EITHER",
-          "respondentSynonym": "Prosecutor"
+          "linkType": "LINKED"
+        },
+        "subject": {
+          "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
+          "organisation": {
+            "name": "Testing Organisation Name"
+          },
+          "personDetails": {
+            "firstName": "Bryce",
+            "gender": "MALE",
+            "lastName": "Hammes",
+            "middleName": "Test"
+          },
+          "synonym": "Attendees"
         }
       }
     ],

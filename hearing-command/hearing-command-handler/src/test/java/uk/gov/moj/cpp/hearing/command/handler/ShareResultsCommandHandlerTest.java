@@ -13,20 +13,12 @@ import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelp
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
-import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.applicationDraftResultWithOutcomeCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import org.junit.Ignore;
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
-import uk.gov.justice.core.courts.CourtApplicationResponse;
-import uk.gov.justice.core.courts.CourtApplicationResponseType;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -51,7 +43,6 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
-import uk.gov.moj.cpp.hearing.command.result.ApplicationDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
@@ -64,11 +55,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
-import uk.gov.moj.cpp.hearing.domain.event.application.ApplicationResponseSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
@@ -95,9 +83,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class ShareResultsCommandHandlerTest {
 
     public static final String HEARING_RESULTS_SHARED_EVENT_NAME = "hearing.results-shared";
-    final static String DRAFT_RESULT_SAVED_EVENT_NAME = "hearing.draft-result-saved";
-    final static String SAVE_DRAFT_RESULT_FAILED_EVENT_NAME = "hearing.save-draft-result-failed";
-    final static String APPLICATION_DRAFT_RESULT_EVENT_NAME = "hearing.application-draft-resulted";
 
     private static InitiateHearingCommand initiateHearingCommand;
     private static ProsecutionCounselAdded prosecutionCounselAdded;
@@ -107,8 +92,7 @@ public class ShareResultsCommandHandlerTest {
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
     private DefendantDetailsUpdated defendantDetailsUpdated;
-    @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class, ApplicationDraftResulted.class, SaveDraftResultFailed.class);
+
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
     @Mock
@@ -125,6 +109,9 @@ public class ShareResultsCommandHandlerTest {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class);
 
     @BeforeClass
     public static void init() {
@@ -165,7 +152,7 @@ public class ShareResultsCommandHandlerTest {
                         .setValue(VariantValue.variantValue())
                 ));
 
-        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), CourtApplication.courtApplication().withId(randomUUID()).build(), null, null);
+        hearingExtended = new HearingExtended(initiateHearingCommand.getHearing().getId(), null, null, null, CourtApplication.courtApplication().withId(randomUUID()).build(), null, null);
 
     }
 
@@ -200,172 +187,6 @@ public class ShareResultsCommandHandlerTest {
     }
 
     @Test
-    public void shouldRaiseDraftResultSaved() throws Exception {
-
-        final HearingAggregate aggregate = new HearingAggregate() {{
-            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-            apply(Stream.of(prosecutionCounselAdded));
-            apply(Stream.of(defenceCounselUpsert));
-            apply(getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0)));
-        }};
-
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
-
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
-        final Target targetIn = saveDraftResultCommand.getTarget();
-
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(targetIn));
-
-        final ResultLine resultLineIn = targetIn.getResultLines().get(0);
-        final DelegatedPowers delegatedPowers = resultLineIn.getDelegatedPowers();
-        final Prompt promptIn = resultLineIn.getPrompts().get(0);
-        this.shareResultsCommandHandler.saveDraftResult(envelope);
-
-        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> DRAFT_RESULT_SAVED_EVENT_NAME.equals(e.metadata().name())).findFirst();
-        assertThat("expected:" + DRAFT_RESULT_SAVED_EVENT_NAME, efound.get(), IsNull.notNullValue());
-
-        assertThat(asPojo(efound.get(), DraftResultSaved.class), isBean(DraftResultSaved.class)
-                .with(DraftResultSaved::getTarget, isBean(Target.class)
-                        .with(Target::getTargetId, is(targetIn.getTargetId()))
-                        .with(Target::getDefendantId, is(targetIn.getDefendantId()))
-                        .with(Target::getDraftResult, is(targetIn.getDraftResult()))
-                        .with(Target::getHearingId, is(targetIn.getHearingId()))
-                        .with(Target::getOffenceId, is(targetIn.getOffenceId()))
-                )
-        );
-
-    }
-
-    @Test
-    public void shouldRaiseSaveDraftResultFailedEventWhenDifferentTargetIdIsUsedForKnownOffenceDefendantCombination() throws Exception {
-
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
-        final Target targetForOffence = saveDraftResultCommand.getTarget();
-
-        final HearingAggregate aggregate = new HearingAggregate() {{
-            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-            apply(Stream.of(new DraftResultSaved(targetForOffence, HearingState.INITIALISED, randomUUID())));
-        }};
-
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
-
-        final Target newTargetForSameOffence = getNewTarget(targetForOffence);
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(newTargetForSameOffence));
-
-        this.shareResultsCommandHandler.saveDraftResult(envelope);
-
-        final Optional<JsonEnvelope> found = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> SAVE_DRAFT_RESULT_FAILED_EVENT_NAME.equals(e.metadata().name())).findFirst();
-        assertThat("expected:" + SAVE_DRAFT_RESULT_FAILED_EVENT_NAME, found.get(), IsNull.notNullValue());
-
-        assertThat(asPojo(found.get(), SaveDraftResultFailed.class), isBean(SaveDraftResultFailed.class)
-                .with(SaveDraftResultFailed::getTarget, isBean(Target.class)
-                        .with(Target::getTargetId, is(newTargetForSameOffence.getTargetId()))
-                        .with(Target::getDefendantId, is(newTargetForSameOffence.getDefendantId()))
-                        .with(Target::getDraftResult, is(newTargetForSameOffence.getDraftResult()))
-                        .with(Target::getHearingId, is(newTargetForSameOffence.getHearingId()))
-                        .with(Target::getOffenceId, is(newTargetForSameOffence.getOffenceId()))
-                )
-        );
-
-    }
-
-    @Test
-    public void shouldRaiseSaveDraftResultFailedEventWhenKnownTargetIdUsedAnotherOffenceDefendantCombination() throws Exception {
-
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
-        final Target targetForOffence = saveDraftResultCommand.getTarget();
-
-        final HearingAggregate aggregate = new HearingAggregate() {{
-            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-            apply(Stream.of(new DraftResultSaved(targetForOffence, HearingState.INITIALISED, randomUUID())));
-        }};
-
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
-
-        final Target targetWithKnownTargetIdAndDifferentOffenceId = getNewTarget(targetForOffence);
-        targetWithKnownTargetIdAndDifferentOffenceId.setTargetId(targetForOffence.getTargetId());
-        targetWithKnownTargetIdAndDifferentOffenceId.setOffenceId(randomUUID());
-
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.save-draft-result").withUserId(UUID.randomUUID().toString()), objectToJsonObjectConverter.convert(targetWithKnownTargetIdAndDifferentOffenceId));
-
-        this.shareResultsCommandHandler.saveDraftResult(envelope);
-
-        final Optional<JsonEnvelope> found = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> SAVE_DRAFT_RESULT_FAILED_EVENT_NAME.equals(e.metadata().name())).findFirst();
-        assertThat("expected:" + SAVE_DRAFT_RESULT_FAILED_EVENT_NAME, found.get(), IsNull.notNullValue());
-
-        assertThat(asPojo(found.get(), SaveDraftResultFailed.class), isBean(SaveDraftResultFailed.class)
-                .with(SaveDraftResultFailed::getTarget, isBean(Target.class)
-                        .with(Target::getTargetId, is(targetWithKnownTargetIdAndDifferentOffenceId.getTargetId()))
-                        .with(Target::getDefendantId, is(targetWithKnownTargetIdAndDifferentOffenceId.getDefendantId()))
-                        .with(Target::getDraftResult, is(targetWithKnownTargetIdAndDifferentOffenceId.getDraftResult()))
-                        .with(Target::getHearingId, is(targetWithKnownTargetIdAndDifferentOffenceId.getHearingId()))
-                        .with(Target::getOffenceId, is(targetWithKnownTargetIdAndDifferentOffenceId.getOffenceId()))
-                )
-        );
-
-    }
-
-
-    @Test
-    public void shouldRaiseApplicationDraftResulted() throws Exception {
-
-        final HearingAggregate aggregate = new HearingAggregate() {{
-            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-        }};
-
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
-
-        final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultCommandTemplate(initiateHearingCommand.getHearing().getId());
-
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.application-draft-result"), objectToJsonObjectConverter.convert(applicationDraftResultCommand));
-
-        this.shareResultsCommandHandler.applicationDraftResult(envelope);
-
-        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> APPLICATION_DRAFT_RESULT_EVENT_NAME.equals(e.metadata().name())).findFirst();
-        assertThat("expected:" + APPLICATION_DRAFT_RESULT_EVENT_NAME, efound.get(), IsNull.notNullValue());
-
-        assertThat(asPojo(efound.get(), ApplicationDraftResulted.class), isBean(ApplicationDraftResulted.class)
-                .with(ApplicationDraftResulted::getTargetId, is(applicationDraftResultCommand.getTargetId()))
-                .with(ApplicationDraftResulted::getApplicationId, is(applicationDraftResultCommand.getApplicationId()))
-                .with(ApplicationDraftResulted::getDraftResult, is(applicationDraftResultCommand.getDraftResult()))
-                .with(ApplicationDraftResulted::getHearingId, is(applicationDraftResultCommand.getHearingId()))
-        );
-
-    }
-
-    @Test
-    public void shouldRaiseApplicationDraftResultedWithOutCome() throws Exception {
-
-        final HearingAggregate aggregate = new HearingAggregate() {{
-            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
-        }};
-
-        final UUID applicationId = randomUUID();
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
-
-        final CourtApplicationOutcomeType courtApplicationOutcomeType = CourtApplicationOutcomeType.courtApplicationOutcomeType().withDescription("Admitted")
-                .withId(randomUUID())
-                .withSequence(1).build();
-
-        final ApplicationDraftResultCommand applicationDraftResultCommand = applicationDraftResultWithOutcomeCommandTemplate(initiateHearingCommand.getHearing().getId(), applicationId, courtApplicationOutcomeType);
-
-        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.application-draft-result"), objectToJsonObjectConverter.convert(applicationDraftResultCommand));
-
-        this.shareResultsCommandHandler.applicationDraftResult(envelope);
-
-        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> APPLICATION_DRAFT_RESULT_EVENT_NAME.equals(e.metadata().name())).findFirst();
-        assertThat("expected:" + APPLICATION_DRAFT_RESULT_EVENT_NAME, efound.get(), IsNull.notNullValue());
-
-        assertThat(asPojo(efound.get(), ApplicationDraftResulted.class), isBean(ApplicationDraftResulted.class)
-                .with(ApplicationDraftResulted::getTargetId, is(applicationDraftResultCommand.getTargetId()))
-                .with(ApplicationDraftResulted::getApplicationId, is(applicationDraftResultCommand.getApplicationId()))
-                .with(ApplicationDraftResulted::getDraftResult, is(applicationDraftResultCommand.getDraftResult()))
-                .with(ApplicationDraftResulted::getHearingId, is(applicationDraftResultCommand.getHearingId()))
-                .with(ApplicationDraftResulted::getApplicationOutcomeType, is(courtApplicationOutcomeType))
-        );
-    }
-
-    @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
 
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
@@ -375,7 +196,6 @@ public class ShareResultsCommandHandlerTest {
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
         final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
         final int initialCourtApplicationCount = initiateHearingCommand.getHearing().getCourtApplications().size();
-        final ApplicationResponseSaved applicationResponseSaved = getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0));
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
@@ -384,7 +204,6 @@ public class ShareResultsCommandHandlerTest {
             apply(Stream.of(nowsVariantsSavedEvent));
             apply(draftResultSavedEvent);
             apply(hearingExtended);
-            apply(applicationResponseSaved);
         }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
@@ -423,7 +242,6 @@ public class ShareResultsCommandHandlerTest {
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
-                        null,
                         childResultLineIds,
                         parentResultLineIds
                 )
@@ -433,7 +251,11 @@ public class ShareResultsCommandHandlerTest {
 
         this.shareResultsCommandHandler.shareResult(envelope);
 
-        final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name())).findFirst();
+        Stream<JsonEnvelope> argument = verifyAppendAndGetArgumentFrom(this.hearingEventStream);
+        final Optional<JsonEnvelope> efound = argument
+                .filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name()))
+                .findFirst();
+
         assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), IsNull.notNullValue());
 
         final ResultsShared resultsShared = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), ResultsShared.class);
@@ -473,7 +295,6 @@ public class ShareResultsCommandHandlerTest {
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
         final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
-        final ApplicationResponseSaved applicationResponseSaved = getApplicationResponseSaved(initiateHearingCommand.getHearing().getCourtApplications().get(0));
 
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
@@ -482,7 +303,6 @@ public class ShareResultsCommandHandlerTest {
             apply(Stream.of(nowsVariantsSavedEvent));
             apply(draftResultSavedEvent);
             apply(hearingExtended);
-            apply(applicationResponseSaved);
             apply(defendantDetailsUpdated);
         }};
 
@@ -522,7 +342,6 @@ public class ShareResultsCommandHandlerTest {
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
-                        null,
                         childResultLineIds,
                         parentResultLineIds
                 )
@@ -540,26 +359,12 @@ public class ShareResultsCommandHandlerTest {
         assertThat(resultsShared.getDefendantDetailsChanged().get(0), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
     }
 
-    private ApplicationResponseSaved getApplicationResponseSaved(final CourtApplication courtApplication) {
-        return ApplicationResponseSaved.applicationResponseSaved()
-                .setApplicationPartyId(courtApplication.getRespondents().get(0).getPartyDetails().getId())
-                .setCourtApplicationResponse(CourtApplicationResponse.courtApplicationResponse()
-                        .withApplicationResponseDate(LocalDate.now())
-                        .withOriginatingHearingId(randomUUID())
-                        .withApplicationId(courtApplication.getId())
-                        .withApplicationResponseType(CourtApplicationResponseType.courtApplicationResponseType()
-                                .withDescription("Admitted")
-                                .withId(randomUUID())
-                                .withSequence(1).build())
-                        .build());
-    }
 
     private Target getNewTarget(final Target targetToCopyFrom) {
         return Target.target()
                 .withHearingId(targetToCopyFrom.getHearingId())
                 .withDefendantId(targetToCopyFrom.getDefendantId())
                 .withDraftResult("")
-                //.withHearingStates(Arrays.asList(SHARED_AMEND_LOCKED_USER_ERROR.name()))
                 .withOffenceId(targetToCopyFrom.getOffenceId())
                 .withTargetId(randomUUID())
                 .build();

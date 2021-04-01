@@ -2,11 +2,9 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.Target.target;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Prompt;
@@ -18,17 +16,14 @@ import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
-import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
-import uk.gov.moj.cpp.hearing.domain.event.result.ApplicationDraftResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.io.Serializable;
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -133,19 +128,7 @@ public class ResultsSharedDelegate implements Serializable {
     public Stream<Object> hearingLockedByOtherUser(final UUID hearingId) {
         return Stream.of(HearingLockedByOtherUser.builder().withHearingId(hearingId).build());
     }
-    public Stream<Object> applicationDraftResult(final UUID targetId, final UUID applicationId, final UUID hearingId, final String draftResult, final CourtApplicationOutcomeType applicationOutcomeType, final LocalDate applicationOutcomeDate) {
-        return Stream.of(ApplicationDraftResulted.applicationDraftResulted()
-                .setApplicationId(applicationId)
-                .setTargetId(targetId)
-                .setHearingId(hearingId)
-                .setDraftResult(draftResult)
-                .setApplicationOutcomeType(applicationOutcomeType)
-                .setApplicationOutcomeDate(applicationOutcomeDate));
-    }
 
-    public void handleApplicationDraftResulted(final ApplicationDraftResulted applicationDraftResulted) {
-        //place holder method
-    }
 
     private ResultLine convert(final SharedResultsCommandResultLine resultLineIn) {
         return ResultLine.resultLine()
@@ -236,7 +219,7 @@ public class ResultsSharedDelegate implements Serializable {
         updateCounsels();
         updateCompanyRepresentatives();
         updateOffence();
-        return updateApplicationOutcomes(resultLines);
+        return Stream.empty();
     }
 
     private void setSharedResults(final List<SharedResultsCommandResultLine> resultLines) {
@@ -244,23 +227,9 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.getHearing().setHasSharedResults(true);
     }
 
-    private Stream<Object> updateApplicationOutcomes(final List<SharedResultsCommandResultLine> resultLines) {
-        Stream<Object> applicationChanged = Stream.empty();
-        if (this.momento.getHearing().getCourtApplications() != null) {
-            final List<CourtApplication> courtApplications = momento.getHearing().getCourtApplications();
-            final Map<UUID, CourtApplicationOutcome> courtApplicationOutcomeMap =
-                    resultLines.stream().map(SharedResultsCommandResultLine::getApplicationOutcome).filter(Objects::nonNull).collect(Collectors.toMap(CourtApplicationOutcome::getApplicationId, courtApplicationOutcome -> courtApplicationOutcome, (courtApplicationOutcome1, courtApplicationOutcome2) -> courtApplicationOutcome1));
-            for (final CourtApplication courtApplication : courtApplications) {
-                if (courtApplicationOutcomeMap.containsKey(courtApplication.getId()) && !courtApplicationOutcomeMap.get(courtApplication.getId()).equals(courtApplication.getApplicationOutcome())) {
-                    applicationChanged = Stream.concat(checkAndUpdateApplicationOutcomes(courtApplicationOutcomeMap, courtApplication), applicationChanged);
-                }
-            }
-        }
-        return applicationChanged;
-    }
 
     private void updateOffence() {
-        if (this.momento.getHearing().getProsecutionCases() != null && !this.momento.getHearing().getProsecutionCases().isEmpty()) {
+        if (isNotEmpty(this.momento.getHearing().getProsecutionCases())) {
             this.momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant -> defendant.getOffences().forEach(offence -> {
                 if (momento.getPleas() != null && momento.getPleas().containsKey(offence.getId())) {
                     offence.setPlea(momento.getPleas().get(offence.getId()));
@@ -300,13 +269,6 @@ public class ResultsSharedDelegate implements Serializable {
         if (!this.momento.getCompanyRepresentatives().isEmpty()) {
             this.momento.getHearing().setCompanyRepresentatives(new ArrayList<>(this.momento.getCompanyRepresentatives().values()));
         }
-    }
-
-    private Stream<Object> checkAndUpdateApplicationOutcomes(final Map<UUID, CourtApplicationOutcome> courtApplicationOutcomeMap, final CourtApplication courtApplication) {
-        final CourtApplicationOutcome courtApplicationOutcome = courtApplicationOutcomeMap.get(courtApplication.getId());
-        courtApplicationOutcome.setOriginatingHearingId(momento.getHearing().getId());
-        courtApplication.setApplicationOutcome(courtApplicationOutcome);
-        return Stream.of(new ApplicationDetailChanged(momento.getHearing().getId(), courtApplication));
     }
 
     public Stream<Object> updateResultLinesStatus(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime lastSharedDateTime, final List<SharedResultLineId> sharedResultLines) {

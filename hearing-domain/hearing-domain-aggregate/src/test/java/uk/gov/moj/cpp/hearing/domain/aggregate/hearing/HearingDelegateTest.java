@@ -68,6 +68,40 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void handleHearingInitiated_AdjournedOrSubsequentHearingWithCourtApplicationCases() {
+        final LocalDate convictionDateForFirstOffence = PAST_LOCAL_DATE.next();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        final Offence offence = hearing.getFirstOffenceForFirstFirstCaseForFirstApplication();
+        final UUID offenceId = offence.getId();
+        offence.setPlea(Plea.plea().withPleaValue(GUILTY).withOffenceId(offenceId).build());
+        offence.setVerdict(Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType("GUILTY").build()).withOffenceId(offenceId).build());
+        offence.setConvictionDate(convictionDateForFirstOffence);
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        assertThat(momento.getHearing(), is(notNullValue()));
+        assertThat(momento.getPleas(), hasKey(offenceId));
+        assertThat(momento.getVerdicts(), hasKey(offenceId));
+        assertThat(momento.getConvictionDates(), hasEntry(offenceId, convictionDateForFirstOffence));
+    }
+
+    @Test
+    public void handleHearingInitiated_AdjournedOrSubsequentHearingWithCourtApplicationCourtOrders() {
+        final LocalDate convictionDateForFirstOffence = PAST_LOCAL_DATE.next();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        final Offence offence = hearing.getFirstOffenceForFirstFirstCourtOrderForFirstApplication();
+        final UUID offenceId = offence.getId();
+        offence.setPlea(Plea.plea().withPleaValue(GUILTY).withOffenceId(offenceId).build());
+        offence.setVerdict(Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType("GUILTY").build()).withOffenceId(offenceId).build());
+        offence.setConvictionDate(convictionDateForFirstOffence);
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        assertThat(momento.getHearing(), is(notNullValue()));
+        assertThat(momento.getPleas(), hasKey(offenceId));
+        assertThat(momento.getVerdicts(), hasKey(offenceId));
+        assertThat(momento.getConvictionDates(), hasEntry(offenceId, convictionDateForFirstOffence));
+    }
+
+    @Test
     public void shouldAddMasterDefendantIdToDefendant(){
         final UUID prosecutionCaseId1 = UUID.randomUUID();
         final UUID prosecutionCaseId2 = UUID.randomUUID();
@@ -127,7 +161,7 @@ public class HearingDelegateTest {
                 .withProsecutionCases(currentCases)
                 .build());
 
-        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, extendedCases, null);
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, null, null,null, extendedCases, null);
 
         hearingDelegate.handleHearingExtended(hearingExtended);
 
@@ -160,7 +194,7 @@ public class HearingDelegateTest {
                 .withProsecutionCases(currentCases)
                 .build());
 
-        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, extendedCases, null);
+        final HearingExtended hearingExtended = new HearingExtended(hearingId,null, null, null, null, extendedCases, null);
 
         hearingDelegate.handleHearingExtended(hearingExtended);
 
@@ -200,7 +234,7 @@ public class HearingDelegateTest {
                 .withProsecutionCases(currentCases)
                 .build());
 
-        final HearingExtended hearingExtended = new HearingExtended(hearingId, null, extendedCases, null);
+        final HearingExtended hearingExtended = new HearingExtended(hearingId,null, null, null, null, extendedCases, null);
 
         hearingDelegate.handleHearingExtended(hearingExtended);
 

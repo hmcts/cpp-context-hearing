@@ -1,49 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
-import uk.gov.justice.core.courts.CourtApplicationOutcomeType;
-import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CourtApplicationType;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Target;
-import uk.gov.justice.hearing.courts.Applicant;
-import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.sender.Sender;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.messaging.Metadata;
-import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
-import uk.gov.moj.cpp.hearing.nces.NcesNotifyNotification;
-import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
-
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
-import static java.util.UUID.fromString;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -52,6 +10,41 @@ import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtApplicationType;
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 
 public class UpdateDefendantWithApplicationDetailsDelegateTest {
@@ -116,7 +109,6 @@ public class UpdateDefendantWithApplicationDetailsDelegateTest {
 
         Assert.assertThat(COMMAND_NAME, is(getCommandNameFromMetaDataWeSent()));
         Assert.assertThat(updateDefendantWithApplicationDetails.getApplicationTypeId(), is(applicationTypeId));
-        Assert.assertThat(updateDefendantWithApplicationDetails.getApplicationOutcomeTypeId(), is(applicationOutcomeTypeId));
         Assert.assertThat(updateDefendantWithApplicationDetails.getDefendantId(), is(defendantId));
     }
 
@@ -201,18 +193,14 @@ public class UpdateDefendantWithApplicationDetailsDelegateTest {
         CourtApplication.Builder courtApplicationBuilder = CourtApplication.courtApplication()
                                             .withId(applicationId)
                                             .withApplicant(CourtApplicationParty.courtApplicationParty()
-                                                    .withDefendant(Defendant.defendant()
-                                                                            .withId(defendantId)
+                                                    .withMasterDefendant(MasterDefendant.masterDefendant()
+                                                                            .withMasterDefendantId(defendantId)
                                                                             .build())
                                                     .build())
                                             .withType(CourtApplicationType.courtApplicationType()
                                                                             .withId(applicationTypeId).build());
 
-        courtApplicationBuilder.withApplicationOutcome(CourtApplicationOutcome.courtApplicationOutcome()
-                                                    .withApplicationOutcomeType(CourtApplicationOutcomeType
-                                                            .courtApplicationOutcomeType()
-                                                            .withId(applicationOutcomeTypeId).build())
-                                                    .build());
+
         return singletonList(courtApplicationBuilder.build());
     }
 

@@ -7,10 +7,19 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CourtOrder;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
@@ -32,11 +41,72 @@ public class NowsTemplates {
 
         InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
 
+        return buildrResultsSharedTemplate(hearingOne);
+    }
+
+    public static ResultsShared resultsSharedTemplateWithCourtApplicationCases() {
+
+        final List<CourtApplication> applications = singletonList(CourtApplication.courtApplication()
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .build())
+                        .build())
+                .withCourtApplicationCases(singletonList(CourtApplicationCase.courtApplicationCase()
+                        .withOffences(singletonList(Offence.offence().build()))
+                        .withCaseStatus("ACTIVE")
+                        .build()))
+                .build());
+        InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingWithApplicationTemplate(applications));
+
+        return buildrResultsSharedTemplate(hearingOne);
+    }
+
+    public static ResultsShared resultsSharedTemplateWithCourtApplicationCourtOrder() {
+
+        final List<CourtApplication> applications = singletonList(CourtApplication.courtApplication()
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant()
+                                .withMasterDefendantId(randomUUID())
+                                .build())
+                        .build())
+                .withCourtOrder(CourtOrder.courtOrder()
+                        .withCourtOrderOffences(singletonList(CourtOrderOffence.courtOrderOffence()
+                                .withOffence(Offence.offence().build()).build())).build())
+                .build());
+        InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingWithApplicationTemplate(applications));
+
+        return buildrResultsSharedTemplate(hearingOne);
+    }
+
+    private static ResultsShared buildrResultsSharedTemplate(InitiateHearingCommandHelper hearingOne) {
+
         UUID completedResultLineId = randomUUID();
 
-        final List<Target> targets = new ArrayList<>(asList(
-                CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
-        ));
+        final List<Target> targets;
+        final List<Variant> variantDirectory;
+        if(hearingOne.getHearing().getProsecutionCases() != null){
+            targets = new ArrayList<>(asList(
+                    CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
+            ));
+            variantDirectory = singletonList(
+                    standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId()));
+        }else if (hearingOne.getHearing().getCourtApplications() != null ){
+            if(hearingOne.getHearing().getCourtApplications().get(0).getCourtApplicationCases() != null) {
+                targets = new ArrayList<>(asList(
+                        CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getMasterDefandantIdofFirstSubject(), hearingOne.getFirstOffenceForFirstFirstCaseForFirstApplication().getId(), completedResultLineId).build()
+                ));
+            }else{
+                targets = new ArrayList<>(asList(
+                        CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getMasterDefandantIdofFirstSubject(), hearingOne.getFirstOffenceForFirstFirstCourtOrderForFirstApplication().getId(), completedResultLineId).build()
+                ));
+            }
+            variantDirectory = singletonList(
+                    standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getMasterDefandantIdofFirstSubject()));
+        }else{
+            targets = null;
+            variantDirectory = null;
+        }
 
         return ResultsShared.builder()
                 .withHearingId(hearingOne.getHearingId())
@@ -58,9 +128,7 @@ public class NowsTemplates {
                         .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                         .build()
                 ))
-                .withVariantDirectory(singletonList(
-                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
-                ))
+                .withVariantDirectory(variantDirectory)
                 .build();
     }
 

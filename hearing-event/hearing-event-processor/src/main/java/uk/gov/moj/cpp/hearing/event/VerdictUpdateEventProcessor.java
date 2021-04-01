@@ -35,9 +35,10 @@ public class VerdictUpdateEventProcessor {
             LOGGER.debug("hearing.hearing-offence-verdict-updated event received {}", envelop.toObfuscatedDebugString());
         }
 
-        this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.command.update-verdict-against-offence")
-                .apply(envelop.payloadAsJsonObject()));
-
+        if(isOffenceIdInPayload(envelop)) {
+            this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.command.update-verdict-against-offence")
+                    .apply(envelop.payloadAsJsonObject()));
+        }
         this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.verdict-updated")
                 .apply(createObjectBuilder()
                         .add("hearingId", envelop.payloadAsJsonObject().getJsonString("hearingId"))
@@ -53,5 +54,9 @@ public class VerdictUpdateEventProcessor {
         this.sender.send(
                 this.enveloper.withMetadataFrom(event, "hearing.command.enrich-update-verdict-with-associated-hearings")
                         .apply(event.payloadAsJsonObject()));
+    }
+
+    private boolean isOffenceIdInPayload(JsonEnvelope envelop){
+        return envelop.payloadAsJsonObject().getJsonObject("verdict").get("offenceId") != null;
     }
 }

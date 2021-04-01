@@ -5,9 +5,6 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertThat;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-import org.junit.Before;
-import org.junit.Test;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
@@ -39,14 +36,14 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingResultLineSharedDatesUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
-import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
+import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
@@ -55,7 +52,14 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.result.*;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
+import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFailed;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
+import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
 import uk.gov.moj.cpp.hearing.nows.events.EnforcementError;
 import uk.gov.moj.cpp.hearing.nows.events.NowsRequested;
@@ -68,6 +72,10 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import org.junit.Before;
+import org.junit.Test;
 
 public class HearingEventListenerYamlConfigTest {
 
@@ -131,7 +139,6 @@ public class HearingEventListenerYamlConfigTest {
             HearingLocked.class.getAnnotation(Event.class).value(),
             HearingLockedByOtherUser.class.getAnnotation(Event.class).value(),
             ApprovalRequestRejected.class.getAnnotation(Event.class).value()
-
     );
 
     private final Map<String, String> handlerNames = new HashMap<>();
@@ -154,7 +161,6 @@ public class HearingEventListenerYamlConfigTest {
                 SubscriptionsUploadEventListener.class,
                 DefendantAttendanceEventListener.class,
                 DefenceCounselEventListener.class,
-                ApplicationResponseSavedEventListener.class,
                 RespondentCounselEventListener.class,
                 ApplicantCounselEventListener.class,
                 AddDefendantEventListener.class,

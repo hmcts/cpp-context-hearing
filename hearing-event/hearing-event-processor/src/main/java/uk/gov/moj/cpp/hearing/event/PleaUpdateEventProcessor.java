@@ -9,6 +9,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -22,6 +23,7 @@ public class PleaUpdateEventProcessor {
     private final Enveloper enveloper;
     private final Sender sender;
     private static final String OFFENCE_ID = "offenceId";
+    private static final String APPLICATION_ID = "applicationId";
 
     @Inject
     public PleaUpdateEventProcessor(final Enveloper enveloper, final Sender sender) {
@@ -36,12 +38,16 @@ public class PleaUpdateEventProcessor {
             LOGGER.debug("hearing.hearing-offence-plea-updated event received {}", envelop.toObfuscatedDebugString());
         }
 
-        this.sender.send(this.enveloper.withMetadataFrom(envelop, "hearing.command.update-plea-against-offence").apply(envelop.payloadAsJsonObject()));
-
-        this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.plea-updated")
-                .apply(createObjectBuilder()
-                        .add(OFFENCE_ID, getOffenceIdFromPayload(envelop))
-                        .build()));
+        if(isOffenceIdInPayload(envelop)) {
+            this.sender.send(Enveloper.envelop(envelop.payloadAsJsonObject()).withName("hearing.command.update-plea-against-offence").withMetadataFrom(envelop));
+            this.sender.send(Enveloper.envelop(createObjectBuilder()
+                    .add(OFFENCE_ID, getOffenceIdFromPayload(envelop))
+                    .build()).withName("public.hearing.plea-updated").withMetadataFrom(envelop));
+        }else{
+            this.sender.send(Enveloper.envelop(createObjectBuilder()
+                    .add(APPLICATION_ID, getApplicationIdFromPayload(envelop))
+                    .build()).withName("public.hearing.plea-updated").withMetadataFrom(envelop));
+        }
     }
 
     @Handles("hearing.events.enrich-update-plea-with-associated-hearings")
@@ -50,11 +56,17 @@ public class PleaUpdateEventProcessor {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.events.enrich-update-plea-with-associated-hearings event received {}", event.toObfuscatedDebugString());
         }
-
-        this.sender.send(enveloper.withMetadataFrom(event, "hearing.command.enrich-update-plea-with-associated-hearings").apply(event.payloadAsJsonObject()));
+        this.sender.send(Enveloper.envelop(event.payloadAsJsonObject())
+                .withName("hearing.command.enrich-update-plea-with-associated-hearings").withMetadataFrom(event));
     }
 
+    private boolean isOffenceIdInPayload(JsonEnvelope envelop){
+        return envelop.payloadAsJsonObject().getJsonObject(PLEA_MODEL).get(OFFENCE_ID) != null;
+    }
     private String getOffenceIdFromPayload(JsonEnvelope envelop) {
         return envelop.payloadAsJsonObject().getJsonObject(PLEA_MODEL).getString(OFFENCE_ID);
+    }
+    private String getApplicationIdFromPayload(JsonEnvelope envelop) {
+        return envelop.payloadAsJsonObject().getJsonObject(PLEA_MODEL).getString(APPLICATION_ID);
     }
 }

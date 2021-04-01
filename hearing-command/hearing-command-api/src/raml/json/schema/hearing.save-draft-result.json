@@ -32,14 +32,29 @@
     },
     "shadowListed" : {
       "type": "boolean"
+    },
+    "applicationId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     }
   },
-  "required": [
-    "hearingId",
-    "targetId",
-    "defendantId",
-    "offenceId",
-    "draftResult"
+  "oneOf": [
+    {
+      "required": [
+        "hearingId",
+        "targetId",
+        "defendantId",
+        "offenceId",
+        "draftResult"
+      ]
+    },
+    {
+      "required": [
+        "hearingId",
+        "targetId",
+        "applicationId",
+        "draftResult"
+      ]
+    }
   ],
   "additionalProperties": true
 }

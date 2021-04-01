@@ -5,6 +5,8 @@
     "shortCode" : "UNF",
     "level" : "O",
     "rank" : 11100,
+    "canBeSubjectOfBreach" : true,
+    "canBeSubjectOfVariation" : true,
     "wordGroups" : [ {
       "wordGroup" : [ "unexpected", "circumstances" ]
     }, {

@@ -72,9 +72,6 @@ subscriptions_descriptor:
         - name: hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json
 
-        - name: hearing.application-draft-resulted
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-draft-resulted.json
-
         # Case Defendant Details Updated
         - name: hearing.defendant-details-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-details-updated.json
@@ -130,10 +127,6 @@ subscriptions_descriptor:
         # Share Results
         - name: hearing.results-shared
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/results-shared.json
-
-        # application response
-        - name: hearing.application-response-saved
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/application-response-saved.json
 
         # Respondent Counsel
         - name: hearing.respondent-counsel-added

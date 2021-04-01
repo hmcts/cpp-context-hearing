@@ -1,0 +1,186 @@
+{
+  "hearingId": "65e29d33-da14-4ab7-b12a-59e85d21c7c3",
+  "sharedTime": "2020-08-19T09:14:31.473Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2020-08-19T09:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "65e29d33-da14-4ab7-b12a-59e85d21c7c3",
+    "jurisdictionType": "MAGISTRATES",
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    },
+    "courtApplications": [
+      {
+        "courtOrder": {
+          "courtOrderOffences": [
+            {
+              "offence": {
+                "aquittalDate": "2020-08-18",
+                "arrestDate": "2006-05-04",
+                "chargeDate": "2006-05-30",
+                "count": 0,
+                "endDate": "2005-05-05",
+                "id": "ef51d8a3-4556-4817-a83b-7b6e93a77a8c",
+                "modeOfTrial": "Either Way",
+                "offenceCode": "SA00002",
+                "offenceDefinitionId": "d7a7384c-3905-40ec-a581-203a10ef505a",
+                "offenceFacts": {
+                  "alcoholReadingAmount": 500,
+                  "alcoholReadingMethodCode": "A",
+                  "vehicleRegistration": "TE4654"
+                },
+                "offenceLegislation": "Contrary to section 3(1) and (4) of the Sexual Offences (Amendment)    Act 2000.",
+                "offenceTitle": "Sex offences -    abuse position of trust - engage in sexual activity",
+                "orderIndex": 500,
+                "startDate": "1996-05-04",
+                "wording": "Sex offences -    abuse position of trust - engage in sexual activity",
+                "plea": {
+                  "offenceId": "ef51d8a3-4556-4817-a83b-7b6e93a77a8c",
+                  "originatingHearingId": "65e29d33-da14-4ab7-b12a-59e85d21c7c3",
+                  "pleaDate": "2019-06-05",
+                  "pleaValue": "NOT_GUILTY"
+                }
+              }
+            }
+          ]
+        },
+        "subject": {
+          "id": "4a0e892d-c0c5-3c51-95b8-704d8c781777",
+          "masterDefendant": {
+            "masterDefendantId": "4a0e892d-c0c5-3c51-95b8-704d8c781777"
+          }
+        }
+      }
+    ]
+  },
+  "variantDirectory": [
+  ],
+  "completedResultLinesStatus": {
+  },
+  "targets": [
+    {
+      "defendantId": "420f9018-13c0-49fc-b27f-a83d59341c49",
+      "hearingId": "65e29d33-da14-4ab7-b12a-59e85d21c7c3",
+      "offenceId": "ef51d8a3-4556-4817-a83b-7b6e93a77a8a",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-08-19",
+          "prompts": [
+          ],
+          "resultDefinitionId": "b9c6047b-fb84-4b12-97a1-2175e4b8bbac",
+          "resultLabel": "Absolute discharge",
+          "resultLineId": "00e6308c-ec10-4690-815d-959eefeec1b5",
+          "sharedDate": "2020-08-19"
+        }
+      ],
+      "targetId": "493575f0-e1fc-11ea-90b4-c178bb8c1bec"
+    },
+    {
+      "defendantId": "420f9018-13c0-49fc-b27f-a83d59341c49",
+      "hearingId": "65e29d33-da14-4ab7-b12a-59e85d21c7c3",
+      "offenceId": "ef51d8a3-4556-4817-a83b-7b6e93a77a8b",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-08-19",
+          "prompts": [
+          ],
+          "resultDefinitionId": "b9c6047b-fb84-4b12-97a1-2175e4b8bbac",
+          "resultLabel": "Absolute discharge",
+          "resultLineId": "00e6308c-ec10-4690-815d-959eefeec1b6",
+          "sharedDate": "2020-08-19"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-09-23",
+          "prompts": [
+          ],
+          "resultDefinitionId": "a9b6e6af-cd04-4003-8f3d-18ad58f7f5a1",
+          "resultLabel": "Order made under Section 49 of the Children and Young Persons Act 1933 dispensing with the restrictions on publicity",
+          "resultLineId": "6b8ea13d-e656-4704-be14-1e32f502fa39",
+          "sharedDate": "2020-09-22",
+          "childResultLineIds": [],
+          "parentResultLineIds": []
+        }
+      ],
+      "targetId": "493575f0-e1fc-11ea-90b4-c178bb8c1bec"
+    },
+    {
+      "defendantId": "420f9018-13c0-49fc-b27f-a83d59341c49",
+      "hearingId": "65e29d33-da14-4ab7-b12a-59e85d21c7c3",
+      "offenceId": "ef51d8a3-4556-4817-a83b-7b6e93a77a8c",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-08-19",
+          "prompts": [
+          ],
+          "resultDefinitionId": "b9c6047b-fb84-4b12-97a1-2175e4b8bbac",
+          "resultLabel": "Absolute discharge",
+          "resultLineId": "00e6308c-ec10-4690-815d-959eefeec1b7",
+          "sharedDate": "2020-08-19"
+        },
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2020-09-23",
+          "prompts": [
+          ],
+          "resultDefinitionId": "a9b6e6af-cd04-4003-8f3d-18ad58f7f5a1",
+          "resultLabel": "Order made under Section 49 of the Children and Young Persons Act 1933 dispensing with the restrictions on publicity",
+          "resultLineId": "6b8ea13d-e656-4704-be14-1e32f502fa40",
+          "sharedDate": "2020-09-22",
+          "childResultLineIds": [],
+          "parentResultLineIds": []
+        }
+      ],
+      "targetId": "493575f0-e1fc-11ea-90b4-c178bb8c1bec"
+    }
+  ],
+  "savedTargets": [
+  ],
+  "defendantDetailsChanged": [
+  ]
+}

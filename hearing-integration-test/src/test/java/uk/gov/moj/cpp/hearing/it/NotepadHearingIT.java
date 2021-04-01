@@ -154,6 +154,8 @@ public class NotepadHearingIT extends AbstractIT {
                 withJsonPath("$.promptChoices[2].durationSequence", is(0)),
                 withJsonPath("$.promptChoices[2].componentType", is("TXT")),
                 withJsonPath("$.promptChoices[2].hidden", is(false)),
+                withJsonPath("$.promptChoices[2].minLength", is("1")),
+                withJsonPath("$.promptChoices[2].maxLength", is("4000")),
                 withJsonPath("$.promptChoices[3].code", is("a20665cc-6877-40f4-b85e-d4c87e62987b")),
                 withJsonPath("$.promptChoices[3].label", is("Period of order")),
                 withJsonPath("$.promptChoices[3].type", is("DURATION")),
@@ -198,6 +200,8 @@ public class NotepadHearingIT extends AbstractIT {
                 withJsonPath("$.promptChoices[6].type", is("TXT")),
                 withJsonPath("$.promptChoices[6].required", is(false)),
                 withJsonPath("$.promptChoices[6].durationSequence", is(0)),
+                withJsonPath("$.promptChoices[6].minLength", is("1")),
+                withJsonPath("$.promptChoices[6].maxLength", is("1000")),
                 withJsonPath("$.promptChoices[6].componentType", is("TXT"))};
     }
 }

@@ -3,11 +3,11 @@ package uk.gov.moj.cpp.hearing.event.helper;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
+import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
 
 import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
@@ -29,23 +29,17 @@ import javax.json.JsonObject;
 
 import org.apache.commons.collections.CollectionUtils;
 
-public  class ResultsSharedHelper {
+public class ResultsSharedHelper {
 
     /**
-     *  If any of the JudicialResults have a Category of Final , then set the corresponding Offence's isDisposed Flag to true.
+     * If any of the JudicialResults have a Category of Final , then set the corresponding Offence's
+     * isDisposed Flag to true.
      *
      * @param resultsShared
      * @return void
-     *
      */
     public void setIsDisposedFlagOnOffence(final ResultsShared resultsShared) {
-        final List<Offence> offencesList = resultsShared.getHearing()
-                .getProsecutionCases()
-                .stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .flatMap(defendant -> defendant.getOffences().stream())
-                .collect(toList());
-
+        final List<Offence> offencesList = getOffencesFromHearing(resultsShared.getHearing());
 
         if (isNotEmpty(offencesList)) {
             for (final Offence offence : offencesList) {
@@ -80,7 +74,7 @@ public  class ResultsSharedHelper {
 
         if (hearingDayList.size() > 1 && nonNull(crackedIneffectiveTrial)) {
             for (final HearingDay hearingDay : hearingDayList) {
-                if(hearingDay.getSittingDay().isAfter(resultsShared.getSharedTime())) {
+                if (hearingDay.getSittingDay().isAfter(resultsShared.getSharedTime())) {
                     hearingDay.setIsCancelled(true);
                 }
             }

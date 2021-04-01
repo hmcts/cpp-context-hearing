@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -173,5 +174,55 @@ public class VerdictUpdateEventProcessorTest {
 
         assertThat(events.get(0).metadata().name(), is("hearing.command.enrich-update-verdict-with-associated-hearings"));
 
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void verdictUpdateToCourtApplication() {
+
+        final boolean unanimous = BOOLEAN.next();
+
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+
+        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
+                .setHearingId(randomUUID())
+                .setVerdict(uk.gov.justice.core.courts.Verdict.verdict()
+                        .withVerdictDate(PAST_LOCAL_DATE.next())
+                        .withApplicationId(randomUUID())
+                        .withOriginatingHearingId(randomUUID())
+                        .withJurors(
+                                uk.gov.justice.core.courts.Jurors.jurors()
+                                        .withNumberOfJurors(integer(9, 12).next())
+                                        .withNumberOfSplitJurors(numberOfSplitJurors)
+                                        .withUnanimous(unanimous)
+                                        .build())
+                        .withVerdictType(
+                                uk.gov.justice.core.courts.VerdictType.verdictType()
+                                        .withId(randomUUID())
+                                        .withCategoryType(STRING.next())
+                                        .withCategory(STRING.next())
+                                        .withDescription(STRING.next())
+                                        .withSequence(INTEGER.next())
+                                        .build())
+                        .withLesserOrAlternativeOffence(uk.gov.justice.core.courts.LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                                .withOffenceLegislationWelsh(STRING.next())
+                                .withOffenceLegislation(STRING.next())
+                                .withOffenceTitleWelsh(STRING.next())
+                                .withOffenceTitle(STRING.next())
+                                .withOffenceCode(STRING.next())
+                                .withOffenceDefinitionId(randomUUID())
+                                .build())
+                        .build());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.hearing-offence-verdict-updated"),
+                objectToJsonObjectConverter.convert(verdictUpsert));
+
+        this.verdictUpdateEventProcessor.verdictUpdate(event);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+
+        assertThat(events.get(0).metadata().name(), is("public.hearing.verdict-updated"));
     }
 }

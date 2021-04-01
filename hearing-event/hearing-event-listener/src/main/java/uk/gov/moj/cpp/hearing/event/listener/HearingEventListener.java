@@ -6,7 +6,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -20,7 +19,10 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
-import uk.gov.moj.cpp.hearing.domain.event.result.*;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancelled;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsRejected;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -37,8 +39,8 @@ import java.io.IOException;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
 
@@ -129,41 +131,6 @@ public class HearingEventListener {
 
     }
 
-    @Handles("hearing.application-draft-resulted")
-    public void applicationDraftResulted(final JsonEnvelope event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.application-draft-resulted event received {}", event.toObfuscatedDebugString());
-        }
-        final ApplicationDraftResulted applicationDraftResulted = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ApplicationDraftResulted.class);
-
-        final Hearing hearing = this.hearingRepository.findBy(applicationDraftResulted.getHearingId());
-        // if share result of application and hearing are same then need to set  hearing.setHasSharedResults(false);
-        hearing.getApplicationDraftResults().stream()
-                .filter(adr -> adr.getId().equals(applicationDraftResulted.getTargetId()))
-                .findFirst()
-                .ifPresent(previousADR -> hearing.getApplicationDraftResults().remove(previousADR));
-
-        hearing.getApplicationDraftResults().add(applicationDraftResultJPAMapper.toJPA(hearing,
-                applicationDraftResulted.getTargetId(),
-                applicationDraftResulted.getApplicationId(),
-                applicationDraftResulted.getDraftResult()));
-
-        if (applicationDraftResulted.getApplicationOutcomeType() != null) {
-            final String courtApplicationsJson = hearingJPAMapper.saveApplicationOutcome(hearing.getCourtApplicationsJson(), getApplicationOutcome(applicationDraftResulted));
-            hearing.setCourtApplicationsJson(courtApplicationsJson);
-        }
-
-        hearingRepository.save(hearing);
-    }
-
-    private CourtApplicationOutcome getApplicationOutcome(final ApplicationDraftResulted applicationDraftResulted) {
-        return CourtApplicationOutcome.courtApplicationOutcome()
-                .withApplicationId(applicationDraftResulted.getApplicationId())
-                .withOriginatingHearingId(applicationDraftResulted.getHearingId())
-                .withApplicationOutcomeType(applicationDraftResulted.getApplicationOutcomeType())
-                .withApplicationOutcomeDate(applicationDraftResulted.getApplicationOutcomeDate())
-                .build();
-    }
 
     @Handles("hearing.results-shared")
     public void resultsShared(final JsonEnvelope event) {
@@ -350,7 +317,7 @@ public class HearingEventListener {
         final String draftResult = targetIn.getDraftResult();
         if (isNotBlank(draftResult)) {
             final String updatedDraftResult = enrichDraftResult(draftResult, sharedDateTime);
-            if(isNotBlank(updatedDraftResult)) {
+            if (isNotBlank(updatedDraftResult)) {
                 targetIn.setDraftResult(updatedDraftResult);
                 hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
             }

@@ -50,6 +50,9 @@
         },
         "outcome": {
           "type": "string"
+        },
+        "isBoxHearing": {
+          "type": "boolean"
         }
       }
     }

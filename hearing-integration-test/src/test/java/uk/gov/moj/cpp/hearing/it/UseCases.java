@@ -29,13 +29,17 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
 import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationOutcome;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.DefendantCase;
+import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Marker;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -94,6 +98,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -130,17 +135,42 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, true);
+        return initiateHearing(requestSpec, initiateHearing, true, true, true, false);
     }
 
-    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplication) {
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject) {
 
         Hearing hearing = initiateHearing.getHearing();
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
 
-        if (!includeApplication) {
+        if (!includeApplicationCases && !includeApplicationOrder) {
             hearing.setCourtApplications(null);
+        }else if(!includeApplicationCases ){
+            hearing.getCourtApplications().forEach(app -> app.setCourtApplicationCases(null));
+        }else if(!includeApplicationOrder ){
+            hearing.getCourtApplications().forEach(app -> app.setCourtOrder(null));
+        }
+        if(includeMasterDefandantInSubject ) {
+            final UUID masterDefendantId = randomUUID();
+
+            hearing.getCourtApplications().get(0).getSubject().setMasterDefendant(MasterDefendant.masterDefendant()
+                    .withMasterDefendantId(masterDefendantId)
+                    .withDefendantCase(Arrays.asList(DefendantCase.defendantCase()
+                            .withDefendantId(masterDefendantId)
+                            .withCaseId(hearing.getProsecutionCases().get(0).getId())
+                            .withCaseReference(hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
+                            .build()))
+                    .withPersonDefendant(PersonDefendant.personDefendant()
+                            .withPersonDetails(Person.person()
+                                    .withLastName(STRING.next())
+                                    .withGender(Gender.MALE)
+                                    .build())
+                            .build())
+                    .build());
+        }
+        if(!includeProsecutionCase){
+            hearing.setProsecutionCases(null);
         }
 
         makeCommand(requestSpec, "hearing.initiate")
@@ -199,6 +229,29 @@ public class UseCases {
 
         final EventListener eventListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+
+        makeCommand(requestSpec, "hearing.update-hearing")
+                .withArgs(hearingId)
+                .ofType("application/vnd.hearing.update-plea+json")
+                .withPayload(hearingUpdatePleaCommand)
+                .executeSuccessfully();
+
+        eventListener.waitFor();
+
+        return hearingUpdatePleaCommand;
+    }
+
+    public static UpdatePleaCommand updatePlea(final RequestSpecification requestSpec, final UUID hearingId, final UUID offenceId,
+                                               final UpdatePleaCommand hearingUpdatePleaCommand, final UUID applicationId) {
+
+        final EventListener eventListener;
+        if(offenceId != null) {
+            eventListener =listenFor("public.hearing.plea-updated")
+                    .withFilter(isJson(withJsonPath("$.offenceId", is(offenceId.toString()))));
+        }else{
+            eventListener =listenFor("public.hearing.plea-updated")
+                    .withFilter(isJson(withJsonPath("$.applicationId", is(applicationId.toString()))));
+        }
 
         makeCommand(requestSpec, "hearing.update-hearing")
                 .withArgs(hearingId)
@@ -554,10 +607,6 @@ public class UseCases {
     }
 
     private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
-        return sharedResultsCommandResultLineStream(target, null);
-    }
-
-    private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target, final CourtApplicationOutcome courtApplicationOutcome) {
         return target.getResultLines().stream().map(resultLineIn ->
                 new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
@@ -580,20 +629,15 @@ public class UseCases {
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
-                        courtApplicationOutcome, null, null));
+                        null, null));
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
 
-        return shareResults(requestSpec, hearingId, shareResultsCommand, targets, null);
-    }
-
-    public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets, final CourtApplicationOutcome courtApplicationOutcome) {
-
         // TODO GPE-6699
         shareResultsCommand.setResultLines(
                 targets.stream()
-                        .flatMap(target -> sharedResultsCommandResultLineStream(target, courtApplicationOutcome))
+                        .flatMap(target -> sharedResultsCommandResultLineStream(target))
                         .collect(Collectors.toList()));
 
 

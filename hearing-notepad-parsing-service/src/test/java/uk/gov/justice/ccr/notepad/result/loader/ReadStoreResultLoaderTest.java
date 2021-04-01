@@ -107,6 +107,7 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultDefinition1.getPublishedAsAPrompt(), is(TRUE));
         assertThat(resultDefinition1.getPublishedForNows(), is(TRUE));
         assertThat(resultDefinition1.getRollUpPrompts(), is(TRUE));
+        assertThat(resultDefinition1.getRollUpPrompts(), is(TRUE));
     }
 
     @Test
@@ -228,6 +229,8 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultPrompts.get(23).getReference(), is("HTYPE"));
         assertThat(resultPrompts.get(23).getType(), is(ResultType.FIXL));
         assertThat(resultPrompts.get(23).getFixedList().size(), is(27));
+        assertThat(resultPrompts.get(23).getMinLength(), is("1"));
+        assertThat(resultPrompts.get(23).getMaxLength(), is("4000"));
         assertThat(resultPrompts.get(24).getType(), is(ResultType.FIXLO));
         assertThat(resultPrompts.get(25).getType(), is(ResultType.FIXLOM));
         assertThat(resultPrompts.get(15).getKeywords(), hasItems("years"));

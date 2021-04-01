@@ -69,16 +69,6 @@
         "middleName": "Mia"
       }
     },
-    "applicationOutcome": {
-      "applicationId": "f3a6e917-7cc8-3c66-83dd-d958abd6a6e4",
-      "applicationOutcomeDate": "2020-02-18",
-      "applicationOutcomeType": {
-        "description": "granted",
-        "id": "c322f934-6b70-3fdd-b196-8628d5ee68db",
-        "sequence": 1
-      },
-      "originatingHearingId": "2e157cc3-e9f6-495f-9051-4c50df3523de"
-    },
     "applicationReceivedDate": "2020-02-18",
     "applicationReference": "12AA3456716",
     "applicationStatus": "DRAFT",

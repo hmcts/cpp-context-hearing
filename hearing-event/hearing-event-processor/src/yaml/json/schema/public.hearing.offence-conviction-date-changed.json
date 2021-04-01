@@ -11,13 +11,25 @@
     },
     "convictionDate": {
       "$ref": "#/definitions/datePattern"
+    },
+    "courtApplicationId": {
+      "$ref": "#/definitions/uuid"
     }
   },
   "additionalProperties": false,
-  "required": [
-    "caseId",
-    "offenceId",
-    "convictionDate"
+  "oneOf": [
+    {
+      "required": [
+        "caseId",
+        "offenceId",
+        "convictionDate"
+      ]
+    },{
+      "required": [
+        "courtApplicationId",
+        "convictionDate"
+      ]
+    }
   ],
   "definitions": {
     "uuid": {

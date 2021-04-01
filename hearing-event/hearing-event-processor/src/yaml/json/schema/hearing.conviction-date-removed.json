@@ -11,13 +11,21 @@
     },
     "offenceId": {
       "$ref": "#/definitions/uuid"
+    },
+    "courtApplicationId": {
+      "$ref": "#/definitions/uuid"
     }
   },
-  "required": [
-    "caseId",
-    "hearingId",
-    "offenceId"
-  ],
+  "oneOf": [{
+    "required": [
+      "caseId",
+      "hearingId",
+      "offenceId"
+    ]},{
+    "required": [
+      "courtApplicationId"
+    ]
+  }],
   "definitions": {
     "uuid": {
       "type": "string",

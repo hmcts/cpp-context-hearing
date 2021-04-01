@@ -5,6 +5,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.Address.address;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 
@@ -12,11 +14,16 @@ import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationCase;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
@@ -38,12 +45,16 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -88,10 +99,13 @@ public class PublishResultsEventProcessor {
             LOGGER.debug("hearing.results-shared event received {}", event.toObfuscatedDebugString());
         }
 
-        final ResultsShared resultsShared = this.jsonObjectToObjectConverter
-                .convert(event.payloadAsJsonObject(), ResultsShared.class);
+        final ResultsShared resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class);
         final Hearing hearing = resultsShared.getHearing();
-        final List<CourtApplication> courtApplications = hearing.getCourtApplications();
+
+        final List<CourtApplication> courtApplications = ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty).collect(toList());
+        final List<ProsecutionCase> prosecutionCaseList = ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty).collect(toList());
+
+        setProsecutorInformation(event, courtApplications, prosecutionCaseList);
 
         setCourtCentreOrganisationalUnitInfo(event, resultsShared.getHearing().getCourtCentre());
 
@@ -100,22 +114,16 @@ public class PublishResultsEventProcessor {
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
                         prosecutionCases
-                                .forEach(prosecutionCase -> {
-                                            populateProsecutorInformation(event, prosecutionCase.getProsecutionCaseIdentifier());
-                                            prosecutionCase.getDefendants().forEach(defendant ->
-                                                    {
-                                                        final UUID caseId = prosecutionCase.getId();
-                                                        final UUID defendantId = defendant.getId();
-                                                        final List<UUID> offenceIds = defendant.getOffences().stream().map(Offence::getId).collect(toList());
-                                                        final Map<UUID, OffenceResult> offenceResultMap = mapOffenceWithOffenceResult(event, defendant.getOffences(), resultsShared);
-                                                        updateTheDefendantsCase(event, resultsShared.getHearing().getId(), caseId, defendantId, offenceIds, offenceResultMap);
-                                                    }
-                                            );
-                                        }
-                                ));
+                                .forEach(prosecutionCase -> prosecutionCase.getDefendants().forEach(defendant ->
+                                {
+                                    final UUID caseId = prosecutionCase.getId();
+                                    final UUID defendantId = defendant.getId();
+                                    final List<UUID> offenceIds = defendant.getOffences().stream().map(Offence::getId).collect(toList());
+                                    final Map<UUID, OffenceResult> offenceResultMap = mapOffenceWithOffenceResult(event, defendant.getOffences(), resultsShared);
+                                    updateTheDefendantsCase(event, resultsShared.getHearing().getId(), caseId, defendantId, offenceIds, offenceResultMap);
+                                })));
 
-
-        if (courtApplications != null && !courtApplications.isEmpty()) {
+        if (isNotEmpty(courtApplications)) {
             // invoke command (resultsShared)
             updateDefendantWithApplicationDetailsDelegate.execute(sender, event, resultsShared);
         }
@@ -137,7 +145,7 @@ public class PublishResultsEventProcessor {
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())
                 .add("offenceIds", convertToJsonArray(offenceIds))
-                .add("resultedOffences", convertOffentResultMapToJsonArray(offenceResultMap))
+                .add("resultedOffences", convertOffenceResultMapToJsonArray(offenceResultMap))
                 .build();
 
         sender.send(envelop(payload)
@@ -151,12 +159,12 @@ public class PublishResultsEventProcessor {
         return arrayBuilder;
     }
 
-    private JsonArrayBuilder convertOffentResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
+    private JsonArrayBuilder convertOffenceResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
         final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
-        offenceResultMap.entrySet().stream().forEach(offenceResult -> {
+        offenceResultMap.forEach((key, value) -> {
             final JsonObject offenceResultObject = Json.createObjectBuilder()
-                    .add("offenceId", offenceResult.getKey().toString())
-                    .add("offenceResult", offenceResult.getValue().name())
+                    .add("offenceId", key.toString())
+                    .add("offenceResult", value.name())
                     .build();
             arrayBuilder.add(offenceResultObject);
         });
@@ -167,7 +175,7 @@ public class PublishResultsEventProcessor {
 
         final Map<UUID, OffenceResult> offenceResultMap = new HashMap<>();
 
-        offences.stream().forEach(offence -> {
+        offences.forEach(offence -> {
             final List<ResultLine> completedResultLinesForThisOffence = resultsShared.getTargets().stream()
                     .filter(target -> offence.getId().equals(target.getOffenceId()))
                     .flatMap(target -> target.getResultLines().stream())
@@ -233,21 +241,23 @@ public class PublishResultsEventProcessor {
     }
 
     private void populateProsecutorInformation(final JsonEnvelope context, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
-        final Prosecutor prosecutor = referenceDataService.getProsecutorById(context, prosecutionCaseIdentifier.getProsecutionAuthorityId());
-        prosecutionCaseIdentifier.setProsecutionAuthorityName(prosecutor.getFullName());
-        prosecutionCaseIdentifier.setProsecutionAuthorityOUCode(prosecutor.getOucode());
-        prosecutionCaseIdentifier.setMajorCreditorCode(prosecutor.getMajorCreditorCode());
-        if (nonNull(prosecutor.getAddress())) {
-            prosecutionCaseIdentifier.setAddress(getProsecutorAddress(prosecutor));
-        }
-        if (nonNull(prosecutor.getInformantEmailAddress())) {
-            prosecutionCaseIdentifier.setContact(getProsecutorContact(prosecutor));
-        }
+        final Optional<Prosecutor> optionalProsecutor = fetchProsecutorInformationById(context, prosecutionCaseIdentifier.getProsecutionAuthorityId());
+        optionalProsecutor.ifPresent(prosecutor -> {
+            prosecutionCaseIdentifier.setProsecutionAuthorityName(prosecutor.getFullName());
+            prosecutionCaseIdentifier.setProsecutionAuthorityOUCode(prosecutor.getOucode());
+            prosecutionCaseIdentifier.setMajorCreditorCode(prosecutor.getMajorCreditorCode());
+            if (nonNull(prosecutor.getAddress())) {
+                prosecutionCaseIdentifier.setAddress(getProsecutorAddress(prosecutor));
+            }
+            if (nonNull(prosecutor.getInformantEmailAddress())) {
+                prosecutionCaseIdentifier.setContact(getProsecutorContact(prosecutor));
+            }
+        });
     }
 
     private Address getProsecutorAddress(Prosecutor prosecutor) {
         final uk.gov.justice.hearing.courts.referencedata.Address prosecutorAddress = prosecutor.getAddress();
-        return Address.address()
+        return address()
                 .withAddress1(prosecutorAddress.getAddress1())
                 .withAddress2(prosecutorAddress.getAddress2())
                 .withAddress3(prosecutorAddress.getAddress3())
@@ -272,16 +282,84 @@ public class PublishResultsEventProcessor {
     private void setCourtCentreOrganisationalUnitInfo(final JsonEnvelope context, final CourtCentre courtCentre) {
         final OrganisationalUnit organisationalUnit = referenceDataService.getOrganisationUnitById(context, courtCentre.getId());
         courtCentre.setCode(organisationalUnit.getOucode());
-        if(nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh())  {
+        if (nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh()) {
             courtCentre.setWelshName(organisationalUnit.getOucodeL3WelshName());
             courtCentre.setWelshCourtCentre(organisationalUnit.getIsWelsh());
-            courtCentre.setWelshAddress(Address.address()
+            courtCentre.setWelshAddress(address()
                     .withAddress1(organisationalUnit.getWelshAddress1())
                     .withAddress2(organisationalUnit.getWelshAddress2())
                     .withAddress3(organisationalUnit.getWelshAddress3())
                     .withAddress4(organisationalUnit.getWelshAddress4())
                     .withAddress5(organisationalUnit.getWelshAddress5())
-                    .withPostcode(organisationalUnit.getPostcode()).build());
+                    .withPostcode(organisationalUnit.getPostcode())
+                    .build());
         }
+        if(isNull(courtCentre.getAddress())) {
+            courtCentre.setAddress(address()
+                    .withAddress1(organisationalUnit.getAddress1())
+                    .withAddress2(organisationalUnit.getAddress2())
+                    .withAddress3(organisationalUnit.getAddress3())
+                    .withAddress4(organisationalUnit.getAddress4())
+                    .withAddress5(organisationalUnit.getAddress5())
+                    .withPostcode(organisationalUnit.getPostcode())
+                    .build());
+        }
+    }
+
+    private void setProsecutorInformation(final JsonEnvelope context, final List<CourtApplication> courtApplications, final List<ProsecutionCase> prosecutionCases) {
+        courtApplications.stream()
+                .map(courtApplication -> ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty))
+                .flatMap(courtApplicationCaseStream -> courtApplicationCaseStream.map(CourtApplicationCase::getProsecutionCaseIdentifier))
+                .forEach(prosecutionCaseIdentifier -> populateProsecutorInformation(context, prosecutionCaseIdentifier));
+
+        courtApplications.stream()
+                .map(CourtApplication::getCourtOrder)
+                .filter(Objects::nonNull)
+                .map(courtOrder -> ofNullable(courtOrder.getCourtOrderOffences()).map(Collection::stream).orElseGet(Stream::empty))
+                .flatMap(courtOrderOffenceStream -> courtOrderOffenceStream.map(CourtOrderOffence::getProsecutionCaseIdentifier))
+                .forEach(prosecutionCaseIdentifier -> populateProsecutorInformation(context, prosecutionCaseIdentifier));
+
+        courtApplications.forEach(courtApplication -> populateProsecutingAuthorityInformation(context, courtApplication));
+
+        prosecutionCases.forEach(prosecutionCase -> populateProsecutorInformation(context, prosecutionCase.getProsecutionCaseIdentifier()));
+    }
+
+    private void populateProsecutingAuthorityInformation(final JsonEnvelope context, final CourtApplication courtApplication) {
+
+        ofNullable(courtApplication.getApplicant()).ifPresent(courtApplicationParty -> setProsecutingAuthorityInformation(context, courtApplicationParty));
+
+        ofNullable(courtApplication.getSubject()).ifPresent(courtApplicationParty -> setProsecutingAuthorityInformation(context, courtApplicationParty));
+
+        ofNullable(courtApplication.getRespondents())
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .forEach(courtApplicationParty -> setProsecutingAuthorityInformation(context, courtApplicationParty));
+
+        ofNullable(courtApplication.getThirdParties())
+                .map(Collection::stream)
+                .orElseGet(Stream::empty)
+                .forEach(courtApplicationParty -> setProsecutingAuthorityInformation(context, courtApplicationParty));
+    }
+
+    private void setProsecutingAuthorityInformation(final JsonEnvelope context, final CourtApplicationParty courtApplicationParty) {
+
+        if (nonNull(courtApplicationParty.getProsecutingAuthority())) {
+            final ProsecutingAuthority prosecutingAuthority = courtApplicationParty.getProsecutingAuthority();
+            final Optional<Prosecutor> optionalProsecutor = fetchProsecutorInformationById(context, prosecutingAuthority.getProsecutionAuthorityId());
+
+            optionalProsecutor.ifPresent(prosecutor -> {
+                prosecutingAuthority.setName(prosecutor.getFullName());
+                if (nonNull(prosecutor.getAddress())) {
+                    prosecutingAuthority.setAddress(getProsecutorAddress(prosecutor));
+                }
+                if (nonNull(prosecutor.getInformantEmailAddress())) {
+                    prosecutingAuthority.setContact(getProsecutorContact(prosecutor));
+                }
+            });
+        }
+    }
+
+    private Optional<Prosecutor> fetchProsecutorInformationById(final JsonEnvelope context, final UUID prosecutorId) {
+        return Optional.ofNullable(referenceDataService.getProsecutorById(context, prosecutorId));
     }
 }

@@ -1,39 +1,37 @@
 {
-  "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.save-draft-result.json",
-  "type": "object",
-  "properties": {
-    "hearingId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "resultLines": {
-      "type": "array",
-      "items": {
-        "$ref": "http://justice.gov.uk/core/courts/resultLine.json"
-      }
-    },
-    "defendantId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "targetId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "offenceId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "draftResult": {
-      "type": "string"
-    },
-    "shadowListed" : {
-      "type": "boolean"
+  "targets": [
+    {
+      "defendantId": "73c69a6e-63bb-4636-9e0f-c5d5048d13eb",
+      "draftResult": "draft results content",
+      "hearingId": "619813e1-4ff7-469f-ba42-59ce9f1b6d9d",
+      "offenceId": "ffa9c586-2594-4c66-9452-f35a624929ae",
+      "resultLines": [
+        {
+          "delegatedPowers": {
+            "firstName": "David",
+            "lastName": "Bowie",
+            "userId": "9fc282f7-95cb-4660-8570-a204c5cf74b3"
+          },
+          "isComplete": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2018-08-30",
+          "prompts": [
+            {
+              "fixedListCode": "fixedlistcode0",
+              "id": "10d81ccf-4561-4a4d-936c-2baf0eeee8df",
+              "label": "imprisonment term",
+              "value": "6 years",
+              "welshValue": "6 blynedd"
+            }
+          ],
+          "resultDefinitionId": "86303e9a-bd16-43f4-9437-d33e378970d1",
+          "resultLabel": "imprisonment",
+          "resultLineId": "23cf38fe-7c8c-450d-9572-5ac58d9d674a",
+          "sharedDate": "2018-08-30"
+        }
+      ],
+      "targetId": "180d2313-624d-4cb5-8967-44e2b28dea1e"
     }
-  },
-  "required": [
-    "hearingId",
-    "targetId",
-    "defendantId",
-    "offenceId",
-    "draftResult"
-  ],
-  "additionalProperties": true
+  ]
 }

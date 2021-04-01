@@ -25,7 +25,6 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     private static final String ACTION_NAME_GET_HEARINGS = "hearing.get.hearings";
     private static final String ACTION_NAME_GET_HEARINGS_FOR_TODAY = "hearing.get.hearings-for-today";
     private static final String ACTION_NAME_GET_DRAFT_RESULT = "hearing.get-draft-result";
-    private static final String ACTION_NAME_GET_APPLICATION_DRAFT_RESULT = "hearing.get-application-draft-result";
     private static final String ACTION_NAME_GET_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String ACTION_NAME_GET_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
@@ -84,16 +83,6 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnauthorisedGroupToGetDraftResult() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate");
-    }
-
-    @Test
-    public void shouldAllowUserInAuthorisedGroupToGetApplicationDraftResult() {
-        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_APPLICATION_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate");
-    }
-
-    @Test
-    public void shouldNotAllowUserInUnauthorisedGroupToGetApplicationDraftResult() {
-        assertFailureOutcomeOnActionForTheSuppliedGroups(ACTION_NAME_GET_APPLICATION_DRAFT_RESULT, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate");
     }
 
     @Test

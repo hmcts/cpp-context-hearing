@@ -26,6 +26,7 @@ public class TimelineHearingSummary {
     private final String outcome;
     private final List<String> defendants;
     private final List<String> applicants;
+    private final Boolean isBoxHearing;
 
     public TimelineHearingSummary(final TimelineHearingSummaryBuilder builder) {
         this.hearingId = builder.hearingId;
@@ -38,6 +39,7 @@ public class TimelineHearingSummary {
         this.defendants = builder.defendants;
         this.applicants = builder.applicants;
         this.outcome = builder.outcome;
+        this.isBoxHearing = builder.isBoxHearing;
     }
 
     public UUID getHearingId() {
@@ -84,6 +86,8 @@ public class TimelineHearingSummary {
         return outcome;
     }
 
+    public Boolean getIsBoxHearing(){ return isBoxHearing;}
+
     public static class TimelineHearingSummaryBuilder {
         private UUID hearingId;
         private LocalDate hearingDate;
@@ -95,6 +99,7 @@ public class TimelineHearingSummary {
         private List<String> defendants;
         private List<String> applicants;
         private String outcome;
+        private Boolean isBoxHearing;
 
         public TimelineHearingSummaryBuilder withHearingId(final UUID hearingId) {
             this.hearingId = hearingId;
@@ -142,6 +147,11 @@ public class TimelineHearingSummary {
 
         public TimelineHearingSummaryBuilder withOutcome(final String outcome) {
             this.outcome = outcome;
+            return this;
+        }
+
+        public TimelineHearingSummaryBuilder withIsBoxHearing(final Boolean isBoxHearing){
+            this.isBoxHearing = isBoxHearing;
             return this;
         }
 
