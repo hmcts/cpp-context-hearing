@@ -65,6 +65,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingJPAMapperTest {
@@ -104,11 +105,16 @@ public class HearingJPAMapperTest {
     @Mock
     private ApprovalRequestedJPAMapper approvalRequestedJPAMapper;
 
+    @Mock
+    private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
+
     @Captor
     private ArgumentCaptor<List<CourtApplication>> courtApplicationCaptor;
 
     @InjectMocks
     private HearingJPAMapper hearingJPAMapper;
+
+
 
     @Test
     public void testInsertCourtApplications() {

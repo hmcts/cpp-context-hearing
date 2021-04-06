@@ -30,6 +30,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Now;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
@@ -54,6 +55,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
@@ -99,6 +101,8 @@ public class HearingService {
     private HearingEventRepository hearingEventRepository;
     @Inject
     private HearingEventDefinitionRepository hearingEventDefinitionRepository;
+    @Inject
+    HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
     @Inject
     private NowRepository nowRepository;
     @Inject
@@ -565,10 +569,10 @@ public class HearingService {
 
     private List<TimelineHearingSummary> populateTimeLineHearingSummaries(final Hearing hearing, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
-
+        final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = this.hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId());
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms,hearingYouthCourtDefendants))
                 .collect(toList());
     }
 
@@ -577,9 +581,10 @@ public class HearingService {
                                                                                         final JsonObject allCourtRooms,
                                                                                         final UUID applicationId) {
         final CrackedIneffectiveTrial crackedIneffectiveTrial = fetchCrackedIneffectiveTrial(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
+        final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = this.hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId());
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants, applicationId))
                 .collect(toList());
     }
 

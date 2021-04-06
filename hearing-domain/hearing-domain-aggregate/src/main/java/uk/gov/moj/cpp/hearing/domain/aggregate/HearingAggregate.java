@@ -1,19 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.time.ZonedDateTime.now;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
-import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.APPROVAL_REQUESTED;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
-import static uk.gov.moj.cpp.hearing.domain.HearingState.VALIDATED;
-import static uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved.reusableInfoSaved;
-
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.AttendanceDay;
 import uk.gov.justice.core.courts.CompanyRepresentative;
@@ -38,6 +24,7 @@ import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.command.ReusableInfo;
 import uk.gov.moj.cpp.hearing.command.ReusableInfoResults;
@@ -85,6 +72,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
@@ -146,6 +134,20 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.time.ZonedDateTime.now;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
+import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.APPROVAL_REQUESTED;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.VALIDATED;
+import static uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved.reusableInfoSaved;
+
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
@@ -194,6 +196,7 @@ public class HearingAggregate implements Aggregate {
     private HearingState hearingState;
 
     private UUID amendingSharedHearingUserId;
+
 
     @Override
     public Object apply(final Object event) {
@@ -268,6 +271,8 @@ public class HearingAggregate implements Aggregate {
                                 masterDefendantIdAdded.getMasterDefendantId())),
                 when(HearingDaysWithoutCourtCentreCorrected.class).apply(hearingDelegate::handleHearingDaysWithoutCourtCentreCorrected),
                 when(HearingMarkedAsDuplicate.class).apply(duplicate -> hearingDelegate.handleHearingMarkedAsDuplicate()),
+                when(DefendantsInYouthCourtUpdated.class).apply(e -> this.momento.getHearing().setYouthCourtDefendantIds(e.getYouthCourtDefendantIds())),
+
                 when(ResultAmendmentsCancelled.class).apply(x -> {
                     this.hearingState = SHARED;
                     this.momento.getTransientTargets().clear();
@@ -394,7 +399,7 @@ public class HearingAggregate implements Aggregate {
         return apply(this.verdictDelegate.updateVerdict(hearingId, verdict, guiltyPleaTypes));
     }
 
-    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final HearingState newHearingState) {
+    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, HearingState newHearingState, final YouthCourt youthCourt) {
         if (
                 (Arrays.asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
                         || (INITIALISED == newHearingState && SHARED == this.hearingState)
@@ -405,7 +410,7 @@ public class HearingAggregate implements Aggregate {
                     .withAmendedByUserId(this.amendingSharedHearingUserId)
                     .withHearingState(this.hearingState).build());
         }
-        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged()));
+        return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt));
     }
 
 
@@ -476,10 +481,13 @@ public class HearingAggregate implements Aggregate {
 
         // Fix to ensure that no extra target IDs are created for the same combination of offence and defendant.
         // The aggregate ensures that any extra target ID for the same combination of offence / defendant is rejected and not processed
+
         if (isTargetValid(momento, target)) {
             return apply(resultsSharedDelegate.saveDraftResult(targetForEvent, newHearingState, userId));
         }
         return apply(resultsSharedDelegate.rejectSaveDraftResult(targetForEvent));
+
+
     }
 
     @SuppressWarnings("squid:S3358")
@@ -759,6 +767,13 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
+    public Stream<Object> receiveDefendantsPartOfYouthCourtHearing(final List<UUID> defendantsInYouthCourtList) {
+        return apply(Stream.of(new DefendantsInYouthCourtUpdated(defendantsInYouthCourtList, this.momento.getHearing().getId())));
+    }
+
+    public Hearing getHearing(){
+        return this.momento.getHearing();
+    }
     public HearingState getHearingState() {
         return hearingState;
     }

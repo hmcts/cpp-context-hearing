@@ -1,5 +1,33 @@
 package uk.gov.moj.cpp.hearing.query.view.helper;
 
+import org.apache.commons.lang3.StringUtils;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.YouthCourt;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+
+import javax.inject.Inject;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static java.util.Objects.nonNull;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
@@ -7,34 +35,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary.TimelineHearingSummaryBuilder;
-
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
-import uk.gov.justice.core.courts.MasterDefendant;
-import uk.gov.justice.core.courts.ProsecutingAuthority;
-import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.inject.Inject;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-
-import org.apache.commons.lang3.StringUtils;
 
 public class TimelineHearingSummaryHelper {
 
@@ -44,7 +44,7 @@ public class TimelineHearingSummaryHelper {
     @Inject
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
-    private TimelineHearingSummaryBuilder createTimelineHearingSummaryBuilder(final HearingDay hearingDay, final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final JsonObject allCourtRooms) {
+    private TimelineHearingSummaryBuilder createTimelineHearingSummaryBuilder(final HearingDay hearingDay, final Hearing hearing, final CrackedIneffectiveTrial crackedIneffectiveTrial, final JsonObject allCourtRooms, final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants) {
         final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = new TimelineHearingSummaryBuilder();
         timelineHearingSummaryBuilder.withHearingId(hearing.getId());
         timelineHearingSummaryBuilder.withHearingDate(hearingDay.getDate());
@@ -53,6 +53,21 @@ public class TimelineHearingSummaryHelper {
         timelineHearingSummaryBuilder.withCourtRoom(getCourtRoomName(hearingDay, hearing, allCourtRooms));
         timelineHearingSummaryBuilder.withHearingTime(hearingDay.getDateTime());
         timelineHearingSummaryBuilder.withEstimatedDuration(hearingDay.getListedDurationMinutes());
+        if (nonNull(hearingYouthCourtDefendants)){
+            timelineHearingSummaryBuilder.withYouthDefendantIds(hearingYouthCourtDefendants.stream().map(e-> e.getId().getDefendantId().toString()).collect(toList()));
+        }
+
+        if (nonNull(hearing.getYouthCourt())) {
+            final YouthCourt.Builder youthCourtBuilder = new YouthCourt.Builder();
+            youthCourtBuilder.withYouthCourtId(hearing.getYouthCourt().getId());
+            youthCourtBuilder.withName(hearing.getYouthCourt().getName());
+            youthCourtBuilder.withWelshName(hearing.getYouthCourt().getWelshName());
+            youthCourtBuilder.withCourtCode(hearing.getYouthCourt().getCourtCode());
+            timelineHearingSummaryBuilder.withYouthCourt(youthCourtBuilder.build());
+        }
+
+
+
         final List<String> defendantNames = getDefendantNames(hearing);
 
         if (!defendantNames.isEmpty()) {
@@ -80,8 +95,9 @@ public class TimelineHearingSummaryHelper {
     public TimelineHearingSummary createTimeLineHearingSummary(final HearingDay hearingDay,
                                                                final Hearing hearing,
                                                                final CrackedIneffectiveTrial crackedIneffectiveTrial,
-                                                               final JsonObject allCourtRooms) {
-        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+                                                               final JsonObject allCourtRooms,
+                                                               final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants) {
+        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants);
         return timelineHearingSummaryBuilder.build();
     }
 
@@ -89,8 +105,9 @@ public class TimelineHearingSummaryHelper {
                                                                final Hearing hearing,
                                                                final CrackedIneffectiveTrial crackedIneffectiveTrial,
                                                                final JsonObject allCourtRooms,
+                                                               final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants,
                                                                final UUID applicationId) {
-        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        final TimelineHearingSummaryBuilder timelineHearingSummaryBuilder = createTimelineHearingSummaryBuilder(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms,hearingYouthCourtDefendants);
         final List<String> applicantNames = getApplicantNames(hearing.getCourtApplicationsJson(), applicationId);
         if (!applicantNames.isEmpty()) {
             timelineHearingSummaryBuilder.withApplicants(applicantNames);
@@ -110,9 +127,9 @@ public class TimelineHearingSummaryHelper {
     }
 
     private String extractDisplayName(final CourtApplicationParty applicant) {
-        Optional<String> displayName;
-        displayName = ofNullable(applicant.getProsecutingAuthority()).map(ProsecutingAuthority::getProsecutionAuthorityCode);
-        if (nonNull(applicant.getPersonDetails())) {
+        Optional<String> displayName = Optional.empty();
+
+        if (Objects.nonNull(applicant.getPersonDetails())) {
             displayName = ofNullable(Stream.of(applicant.getPersonDetails().getFirstName(),
                     applicant.getPersonDetails().getLastName())
                     .filter(StringUtils::isNotBlank).collect(Collectors.joining(" ")));

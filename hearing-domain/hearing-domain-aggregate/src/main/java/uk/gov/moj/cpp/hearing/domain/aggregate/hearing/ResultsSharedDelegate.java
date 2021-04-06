@@ -1,15 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.core.courts.Target.target;
-
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -35,7 +32,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.Target.target;
 
 @SuppressWarnings("squid:S3776")
 public class ResultsSharedDelegate implements Serializable {
@@ -164,7 +164,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .build();
     }
 
-    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final List<UUID> defendantDetailsChanged) {
+    public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final List<UUID> defendantDetailsChanged, final YouthCourt youthCourt) {
         final Map<UUID, Target> finalTargets = new HashMap<>();
         final Map<UUID, Target> targets = new HashMap<>();
 
@@ -198,7 +198,7 @@ public class ResultsSharedDelegate implements Serializable {
                     finalTargets.put(target.getTargetId(), target);
                 }
         );
-
+        this.momento.getHearing().setYouthCourt(youthCourt);
         final ResultsShared.Builder builder = ResultsShared.builder()
                 .withHearingId(hearingId)
                 .withSharedTime(sharedTime)

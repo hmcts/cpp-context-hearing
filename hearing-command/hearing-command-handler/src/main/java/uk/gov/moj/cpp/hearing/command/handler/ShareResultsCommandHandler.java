@@ -1,9 +1,10 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.util.UUID.fromString;
-import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.services.common.util.Clock;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -11,17 +12,18 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.UUID.fromString;
+import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 @ServiceComponent(COMMAND_HANDLER)
 public class ShareResultsCommandHandler extends AbstractCommandHandler {
@@ -32,6 +34,10 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
     @Inject
     private Clock clock;
 
+    @Inject
+    private ReferenceDataService referenceDataService;
+
+
     @Handles("hearing.command.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
@@ -40,6 +46,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final Optional<String> userId = envelope.metadata().userId();
         final Target target = convertToObject(envelope, Target.class);
         if (target != null && userId.isPresent()) {
+
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
                     aggregate -> aggregate.saveDraftResults(fromString(userId.get()), target));
         }
@@ -65,7 +72,19 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareResultsCommand command = convertToObject(envelope, ShareResultsCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> aggregate.shareResults(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines(), command.getNewHearingState()));
+                aggregate -> shareResultsEnrichedWithYouthCourt(aggregate, command));
+    }
+
+    private Stream<Object> shareResultsEnrichedWithYouthCourt(final HearingAggregate hearingAggregate, final ShareResultsCommand command ) {
+        final Hearing hearing = hearingAggregate.getHearing();
+        final YouthCourt youthCourt;
+        if(hearing.getYouthCourtDefendantIds() != null && !hearing.getYouthCourtDefendantIds().isEmpty()) {
+             youthCourt = referenceDataService.getYouthCourtForMagistrateCourt(hearing.getCourtCentre().getId());
+        } else {
+            youthCourt = null;
+        }
+        return hearingAggregate.shareResults(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines(), command.getNewHearingState(), youthCourt);
+
     }
 
     @Handles("hearing.command.update-result-lines-status")

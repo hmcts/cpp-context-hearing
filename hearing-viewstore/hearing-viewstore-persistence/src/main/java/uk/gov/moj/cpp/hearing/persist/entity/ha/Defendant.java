@@ -362,4 +362,6 @@ public class Defendant {
     public void setCourtProceedingsInitiated(final ZonedDateTime courtProceedingsInitiated) {
         this.courtProceedingsInitiated = courtProceedingsInitiated;
     }
+
+
 }

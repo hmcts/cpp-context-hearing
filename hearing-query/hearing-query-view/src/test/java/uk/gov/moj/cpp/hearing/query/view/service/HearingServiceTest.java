@@ -33,6 +33,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
@@ -56,6 +57,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
 import javax.json.JsonObject;
@@ -136,6 +138,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingRepository hearingRepository;
+
+    @Mock
+    private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
 
     @Mock
     private HearingEventRepository hearingEventRepository;
@@ -803,7 +808,9 @@ public class HearingServiceTest {
         when(hearingRepository.findByCaseId(caseId)).thenReturn(hearings);
         when(entity.getHearingDays()).thenReturn(hearingDays);
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
-        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any())).thenReturn(hearingSummary);
+        List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = Arrays.asList(new HearingYouthCourtDefendants());
+
+        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any(List.class))).thenReturn(hearingSummary);
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());
 
@@ -833,9 +840,8 @@ public class HearingServiceTest {
         final UUID applicationId = randomUUID();
         when(hearingRepository.findAllHearingsByApplicationId(applicationId)).thenReturn(hearings);
         when(entity.getHearingDays()).thenReturn(hearingDays);
-
         final TimelineHearingSummary hearingSummary = mock(TimelineHearingSummary.class);
-        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any())).thenReturn(hearingSummary);
+        when(timelineHearingSummaryHelperMock.createTimeLineHearingSummary(any(), any(), any(), any(), any(List.class), any())).thenReturn(hearingSummary);
 
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypesMock = mock(CrackedIneffectiveVacatedTrialTypes.class);
         when(crackedIneffectiveVacatedTrialTypesMock.getCrackedIneffectiveVacatedTrialTypes()).thenReturn(emptyList());

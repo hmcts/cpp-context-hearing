@@ -7,6 +7,7 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.core.AllOf.allOf;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
@@ -24,6 +25,20 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.INEFFECTIVE_TRIAL_T
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Organisation;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Person;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
@@ -89,7 +104,8 @@ public class ApplicationTimelineIT extends AbstractIT {
                                 withJsonPath("$.hearingSummaries[0].hearingTime", is(hearingSummaryMap.get("hearingTime"))),
                                 withJsonPath("$.hearingSummaries[0].estimatedDuration", is(Integer.parseInt(hearingSummaryMap.get("listedDurationMinutes")))),
                                 withJsonPath("$.hearingSummaries[0].hearingDate", is(hearingSummaryMap.get("hearingDate"))),
-                                withJsonPath("$.hearingSummaries[0].applicants[0]", is(hearingSummaryMap.get("applicant")))
+                                withJsonPath("$.hearingSummaries[0].applicants[0]", is(hearingSummaryMap.get("applicant"))),
+                                withJsonPath("$.hearingSummaries[0].youthDefendantIds", is(empty()))
                         )));
 
     }

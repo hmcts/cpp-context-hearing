@@ -491,7 +491,7 @@ public class VerdictDelegateTest {
                 null,
                 null
         );
-        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED)
+        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null)
                 .collect(Collectors.toList()).get(0);
 
         assertEquals("GUILTY", resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict().getVerdictType().getCategoryType());
@@ -558,7 +558,7 @@ public class VerdictDelegateTest {
                 null,
                 null
         );
-        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED)
+        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null)
                 .collect(Collectors.toList()).get(0);
 
         assertEquals("GUILTY", resultsShared.getHearing().getCourtApplications().get(0).getVerdict().getVerdictType().getCategoryType());

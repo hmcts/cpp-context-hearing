@@ -73,6 +73,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
+
 import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
 import org.junit.Before;
 import org.junit.Test;
@@ -139,6 +144,7 @@ public class HearingEventListenerYamlConfigTest {
             HearingLocked.class.getAnnotation(Event.class).value(),
             HearingLockedByOtherUser.class.getAnnotation(Event.class).value(),
             ApprovalRequestRejected.class.getAnnotation(Event.class).value()
+
     );
 
     private final Map<String, String> handlerNames = new HashMap<>();
@@ -179,6 +185,7 @@ public class HearingEventListenerYamlConfigTest {
                 ApprovalRequestedEventListener.class,
                 ResultAmendmentsValidatedEventListener.class,
                 CpsProsecutorUpdatedEventListener.class,
+                YouthCourtDefendantsUpdatedEventListener.class,
                 ReusableInfoEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();

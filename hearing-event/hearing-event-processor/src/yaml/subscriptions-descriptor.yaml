@@ -242,6 +242,10 @@ subscriptions_descriptor:
         - name: hearing.events.marked-as-duplicate
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.marked-as-duplicate.json
 
+        # Defendants in youth court.
+        - name: hearing.event.defendants-in-youthcourt-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.defendants-in-youthcourt-updated.json
+
         - name: hearing.event.result-amendments-rejected
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected.json
 

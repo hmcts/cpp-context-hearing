@@ -1,5 +1,40 @@
 package uk.gov.moj.cpp.hearing.utils;
 
+import com.google.common.collect.Lists;
+import org.apache.http.HttpHeaders;
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.HearingLanguage;
+import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
+import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
+import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
+import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AllAlcoholLevelMethods;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.verdicttype.AllVerdictTypes;
+import uk.gov.moj.cpp.hearing.it.Utilities;
+
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.ws.rs.core.Response;
+import java.io.StringReader;
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -19,46 +54,8 @@ import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBa
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
-import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsDDCH;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeReady;
-
-import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.HearingLanguage;
-import uk.gov.justice.core.courts.VerdictType;
-import uk.gov.justice.hearing.courts.referencedata.EnforcementArea;
-import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
-import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
-import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
-import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
-import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AllAlcoholLevelMethods;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.verdicttype.AllVerdictTypes;
-import uk.gov.moj.cpp.hearing.it.Utilities;
-
-import java.io.StringReader;
-import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import javax.ws.rs.core.Response;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.Lists;
-import org.apache.http.HttpHeaders;
-import org.mockito.Spy;
 
 public class ReferenceDataStub {
 
@@ -100,6 +97,7 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/nows-metadata";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/organisation-units";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/enforcement-area";
+    private static final String REFERENCE_DATA_YOUTH_COURT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/youth-courts";
     private static final String REFERENCE_DATA_RESULT_BAIL_STATUSES_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/bail-statuses";
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cracked-ineffective-vacated-trial-types";
     private static final String REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/local-justice-areas";
@@ -130,6 +128,8 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit.v2+json";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE = "application/vnd.referencedata.query.enforcement-area+json";
+    private static final String REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE = "application/vnd.referencedata.query.youth-courts-by-mag-uuid+json";
+
     private static final String REFERENCE_DATA_RESULT_BAIL_STATUSES_MEDIA_TYPE = "application/vnd.referencedata.bail-statuses+json";
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-courtroom-mappings";
@@ -1050,6 +1050,20 @@ public class ReferenceDataStub {
                         .withBody(payload)));
 
         waitForStubToBeReady(REFERENCE_DATA_PLEA_TYPES_URL, REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE);
+    }
+
+    public static void stubForYouthCourtForMagUUID(final UUID  magsUUID) {
+        final JsonObjectBuilder builder = createObjectBuilder();
+        builder.add("courtCode", "5410");
+        builder.add("courtName", "courtName");
+        builder.add("courtNameWelsh", "courtNameWelsh");
+        builder.add("id", randomUUID().toString());
+
+        final JsonArrayBuilder youthCourtsBuilder = Json.createArrayBuilder();
+        youthCourtsBuilder.add(builder.build());
+        final JsonObject payload =
+                Json.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
+        stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
 
 }

@@ -8,6 +8,7 @@ import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -155,6 +156,16 @@ public class HearingEventListener {
                 targets.forEach(targetIn -> updateDraftResult(hearing, targetIn, resultsShared.getSharedTime()));
                 hearing.setHearingState(HearingState.SHARED);
                 hearingRepository.save(hearing);
+                if(resultsShared.getHearing().getYouthCourt() != null) {
+                    final YouthCourt youthCourt = resultsShared.getHearing().getYouthCourt();
+
+                    final uk.gov.moj.cpp.hearing.persist.entity.ha.YouthCourt  youthCourtEntity = hearing.getYouthCourt() == null ? new uk.gov.moj.cpp.hearing.persist.entity.ha.YouthCourt() : hearing.getYouthCourt();
+                    youthCourtEntity.setCourtCode(youthCourt.getCourtCode());
+                    youthCourtEntity.setId(youthCourt.getYouthCourtId());
+                    youthCourtEntity.setName(youthCourt.getName());
+                    youthCourtEntity.setWelshName(youthCourt.getWelshName());
+                    hearing.setYouthCourt(youthCourtEntity);
+                }
                 approvalRequestedRepository.removeAllRequestApprovals(hearing.getId());
             }
         }

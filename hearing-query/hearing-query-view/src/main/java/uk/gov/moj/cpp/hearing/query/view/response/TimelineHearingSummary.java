@@ -2,9 +2,12 @@ package uk.gov.moj.cpp.hearing.query.view.response;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
 
+import uk.gov.justice.core.courts.YouthCourt;
+
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +29,8 @@ public class TimelineHearingSummary {
     private final String outcome;
     private final List<String> defendants;
     private final List<String> applicants;
+    private List<String> youthDefendantIds;
+    private final YouthCourt youthCourt;
     private final Boolean isBoxHearing;
 
     public TimelineHearingSummary(final TimelineHearingSummaryBuilder builder) {
@@ -39,6 +44,8 @@ public class TimelineHearingSummary {
         this.defendants = builder.defendants;
         this.applicants = builder.applicants;
         this.outcome = builder.outcome;
+        this.youthDefendantIds = builder.youthDefendantIds;
+        this.youthCourt = builder.youthCourt;
         this.isBoxHearing = builder.isBoxHearing;
     }
 
@@ -58,6 +65,18 @@ public class TimelineHearingSummary {
 
     public String getHearingType() {
         return hearingType;
+    }
+
+    public List<String> getYouthDefendantIds() {
+        return new ArrayList<>(youthDefendantIds);
+    }
+
+    public void setYouthDefendantIds(final List<String> youthDefendantIds) {
+        this.youthDefendantIds = new ArrayList<>(youthDefendantIds);
+    }
+
+    public YouthCourt getYouthCourt() {
+        return youthCourt;
     }
 
     public String getCourtHouse() {
@@ -99,6 +118,21 @@ public class TimelineHearingSummary {
         private List<String> defendants;
         private List<String> applicants;
         private String outcome;
+        private List<String> youthDefendantIds;
+        private YouthCourt youthCourt;
+
+        public List<String> getYouthDefendantIds() {
+            return new ArrayList<>(youthDefendantIds);
+        }
+
+        public void setYouthDefendantIds(final List<String> youthDefendantIds) {
+            this.youthDefendantIds = new ArrayList<>(youthDefendantIds);
+        }
+
+        public YouthCourt getYouthCourt() {
+            return youthCourt;
+        }
+
         private Boolean isBoxHearing;
 
         public TimelineHearingSummaryBuilder withHearingId(final UUID hearingId) {
@@ -145,6 +179,15 @@ public class TimelineHearingSummary {
             return this;
         }
 
+        public TimelineHearingSummaryBuilder withYouthCourt(final YouthCourt youthCourt) {
+            this.youthCourt = youthCourt;
+            return this;
+        }
+
+        public TimelineHearingSummaryBuilder withYouthDefendantIds(final List<String> youthDefendantIds) {
+            this.youthDefendantIds = new ArrayList<>(youthDefendantIds);
+            return this;
+        }
         public TimelineHearingSummaryBuilder withOutcome(final String outcome) {
             this.outcome = outcome;
             return this;

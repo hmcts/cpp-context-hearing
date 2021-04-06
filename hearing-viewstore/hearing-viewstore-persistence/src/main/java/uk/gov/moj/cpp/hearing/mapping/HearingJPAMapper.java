@@ -1,12 +1,5 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
-import static java.util.Collections.emptyList;
-import static java.util.Optional.of;
-import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
-import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
-import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
-
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -17,13 +10,20 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import static java.util.Collections.emptyList;
+import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
+import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
+import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 
 
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:CommentedOutCodeLine", "squid:S1172"})
@@ -46,6 +46,7 @@ public class HearingJPAMapper {
     private HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper;
     private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
     private ApprovalRequestedJPAMapper approvalRequestedJPAMapper;
+    private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
 
     @Inject
     public HearingJPAMapper(final CourtCentreJPAMapper courtCentreJPAMapper,
@@ -63,7 +64,8 @@ public class HearingJPAMapper {
                             final HearingApplicantCounselJPAMapper hearingApplicantCounselJPAMapper,
                             final HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper,
                             final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper,
-                            final ApprovalRequestedJPAMapper approvalRequestedJPAMapper) {
+                            final ApprovalRequestedJPAMapper approvalRequestedJPAMapper,
+                            final HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository) {
         this.courtCentreJPAMapper = courtCentreJPAMapper;
         this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
         this.defendantAttendanceJPAMapper = defendantAttendanceJPAMapper;
@@ -80,6 +82,7 @@ public class HearingJPAMapper {
         this.hearingInterpreterIntermediaryJPAMapper = hearingInterpreterIntermediaryJPAMapper;
         this.hearingCompanyRepresentativeJPAMapper = hearingCompanyRepresentativeJPAMapper;
         this.approvalRequestedJPAMapper = approvalRequestedJPAMapper;
+        this.hearingYouthCourtDefendantsRepository = hearingYouthCourtDefendantsRepository;
     }
 
     //to keep cditester happy
@@ -157,9 +160,14 @@ public class HearingJPAMapper {
                 .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
                 .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
                 .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
+                .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
                 .build();
     }
 
+    @SuppressWarnings("squid:S1172")
+    private List<UUID> getDefendantsSelectedForYouthDefendant(final Hearing hearing){
+       return  hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId()).stream().map(h -> h.getId().getDefendantId()).collect(toList());
+    }
     public String addOrUpdateCourtApplication(final String courtApplicationsJson, final CourtApplication courtApplicationUpdate) {
         List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
         if (courtApplications == null) {

@@ -1,29 +1,14 @@
 package uk.gov.moj.cpp.hearing.query.view.helper;
 
-import static com.google.common.collect.ImmutableSet.of;
-import static java.lang.String.format;
-import static java.time.ZonedDateTime.now;
-import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.Arrays.asList;
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.isOneOf;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.core.courts.LegalEntityDefendant.legalEntityDefendant;
-import static uk.gov.justice.core.courts.Organisation.organisation;
-import static uk.gov.justice.core.courts.Person.person;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
-import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.services.test.utils.core.random.Generator;
 import uk.gov.justice.services.test.utils.core.random.StringGenerator;
@@ -34,28 +19,42 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourDefendantsKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
+import javax.json.JsonObject;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.JsonObject;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import static com.google.common.collect.ImmutableSet.of;
+import static java.lang.String.format;
+import static java.time.ZonedDateTime.now;
+import static java.time.format.DateTimeFormatter.ofPattern;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.LegalEntityDefendant.legalEntityDefendant;
+import static uk.gov.justice.core.courts.Organisation.organisation;
+import static uk.gov.justice.core.courts.Person.person;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TimelineHearingSummaryHelperTest {
@@ -78,7 +77,7 @@ public class TimelineHearingSummaryHelperTest {
     private Organisation organisation;
     private ProsecutionCase prosecutionCase;
     private UUID applicationId;
-
+    private List<HearingYouthCourtDefendants> hearingYouthCourtDefendantList;
     @Mock
     private CourtApplicationsSerializer courtApplicationsSerializer;
 
@@ -128,11 +127,14 @@ public class TimelineHearingSummaryHelperTest {
         crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
         applicationId = UUID.randomUUID();
         allCourtRooms = buildCourtRoomsJson();
+        HearingYouthCourDefendantsKey hearingYouthCourDefendantsKey = new HearingYouthCourDefendantsKey(UUID.randomUUID(),UUID.randomUUID());
+        HearingYouthCourtDefendants hearingYouthCourtDefendants = new HearingYouthCourtDefendants(hearingYouthCourDefendantsKey);
+        hearingYouthCourtDefendantList = Arrays.asList(hearingYouthCourtDefendants);
     }
 
     @Test
     public void shouldCreateTimelineHearingSummary() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
@@ -151,7 +153,7 @@ public class TimelineHearingSummaryHelperTest {
     @Test
     public void shouldCreateTimelineHearingSummaryWithIsBoxHearing() {
         hearing.setIsBoxHearing(true);
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
@@ -170,7 +172,7 @@ public class TimelineHearingSummaryHelperTest {
     @Test
     public void shouldCreateTimelineHearingSummaryWithoutIsBoxHearing() {
         hearing.setIsBoxHearing(false);
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
@@ -192,7 +194,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, applicationId);
 
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
@@ -212,7 +214,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsOrganisation(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId);
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
@@ -224,7 +226,7 @@ public class TimelineHearingSummaryHelperTest {
         when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsMasterDefendant(applicationId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
-                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, applicationId);
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId);
 
         assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
         assertThat(timeLineHearingSummary.getApplicants().get(0), is(organisation.getName()));
@@ -258,15 +260,16 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldHandleEmptyFields() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null),createObjectBuilder().build());
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null),createObjectBuilder().build(), hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
     @Test
     public void shouldHandleEmptyFields2() {
+
         prosecutionCase = new ProsecutionCase();
         hearing.setProsecutionCases(of(prosecutionCase));
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 
@@ -274,7 +277,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateEffectiveOutcomeInTimelineHearingSummary() {
         hearing.setIsEffectiveTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getOutcome(), is("Effective"));
     }
 
@@ -282,7 +285,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateVacatedOutcomeInTimelineHearingSummary() {
         hearing.setIsVacatedTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getOutcome(), is("Vacated"));
     }
 

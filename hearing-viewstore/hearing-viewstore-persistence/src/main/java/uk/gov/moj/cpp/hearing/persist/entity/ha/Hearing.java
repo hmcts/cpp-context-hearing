@@ -28,6 +28,9 @@ public class Hearing {
     @Embedded
     private CourtCentre courtCentre;
 
+    @Embedded
+    private YouthCourt youthCourt;
+
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
@@ -99,6 +102,9 @@ public class Hearing {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
     private Set<ApprovalRequested> approvalsRequested= new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
+    private Set<HearingYouthCourtDefendants> hearingYouthCourtDefendants= new HashSet<>();
 
     @Column(name = "trial_type_id")
     private UUID trialTypeId;
@@ -379,6 +385,14 @@ public class Hearing {
     @SuppressWarnings("squid:S2384")
     public void setApprovalsRequested(Set<ApprovalRequested> approvalsRequested) {
         this.approvalsRequested = approvalsRequested;
+    }
+
+    public YouthCourt getYouthCourt() {
+        return youthCourt;
+    }
+
+    public void setYouthCourt(YouthCourt youthCourt) {
+        this.youthCourt = youthCourt;
     }
 
     public HearingState getHearingState() {
