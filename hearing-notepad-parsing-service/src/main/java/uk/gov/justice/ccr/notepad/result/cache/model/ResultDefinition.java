@@ -24,6 +24,7 @@ public class ResultDefinition {
     private Boolean rollUpPrompts;
     private Boolean publishedForNows;
     private Boolean conditionalMandatory;
+    private String dvlaCode;
 
     public final String getId() {
         return id;
@@ -147,6 +148,14 @@ public class ResultDefinition {
         this.conditionalMandatory = conditonalMandatory;
     }
 
+    public String getDvlaCode() {
+        return dvlaCode;
+    }
+
+    public void setDvlaCode(final String dvlaCode) {
+        this.dvlaCode = dvlaCode;
+    }
+
     @Override
     public String toString() {
         return "ResultDefinition{" +
@@ -166,6 +175,7 @@ public class ResultDefinition {
                 ", isRollUpPrompts=" + rollUpPrompts +
                 ", isPublishedForNows=" + publishedForNows +
                 ", isConditionalMandatory=" + conditionalMandatory +
+                ", dvlaCode= " + dvlaCode +
                 '}';
     }
 
@@ -205,6 +215,7 @@ public class ResultDefinition {
         private Boolean isPublishedForNows;
         private Boolean isConditonalMandatory;
         private List<ChildResultDefinition> isChildResultDefinitions;
+        private String dvlaCode;
 
         public Builder withId(final String id) {
             this.id = id;
@@ -286,6 +297,11 @@ public class ResultDefinition {
             return this;
         }
 
+        public Builder withDvlaCode(final String dvlaCode) {
+            this.dvlaCode = dvlaCode;
+            return this;
+        }
+
         public ResultDefinition build() {
             final ResultDefinition resultDefinition = new ResultDefinition();
             resultDefinition.setId(this.id);
@@ -304,6 +320,7 @@ public class ResultDefinition {
             resultDefinition.setPublishedForNows(this.isPublishedForNows);
             resultDefinition.setConditonalMandatory(this.isConditonalMandatory);
             resultDefinition.setChildResultDefinitions(CollectionUtils.isNotEmpty(this.isChildResultDefinitions) ? new ArrayList<>(this.isChildResultDefinitions) : emptyList());
+            resultDefinition.setDvlaCode(this.dvlaCode);
             return resultDefinition;
         }
     }

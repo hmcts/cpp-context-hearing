@@ -127,6 +127,9 @@ public class ReadStoreResultLoader implements ResultLoader {
                                                     getBooleanOrNull(jsonObjectResultDefinition, "alwaysPublished")));
                                     resultDefinition.setPublishedForNows(getBooleanOrFalse(jsonObjectResultDefinition, "publishedForNows"));
                                     resultDefinition.setConditonalMandatory(getBooleanOrFalse(jsonObjectResultDefinition, "isBooleanResult"));
+                                    if(jsonObjectResultDefinition.containsKey("dvlaCode")) {
+                                        resultDefinition.setDvlaCode(jsonObjectResultDefinition.getString("dvlaCode"));
+                                    }
                                     resultDefinitions.add(resultDefinition);
                                 }
                         ));

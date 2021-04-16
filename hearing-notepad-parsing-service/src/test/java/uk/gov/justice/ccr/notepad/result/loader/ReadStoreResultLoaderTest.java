@@ -108,6 +108,8 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultDefinition1.getPublishedForNows(), is(TRUE));
         assertThat(resultDefinition1.getRollUpPrompts(), is(TRUE));
         assertThat(resultDefinition1.getRollUpPrompts(), is(TRUE));
+        assertThat(resultDefinition1.getDvlaCode(), is("C"));
+
     }
 
     @Test

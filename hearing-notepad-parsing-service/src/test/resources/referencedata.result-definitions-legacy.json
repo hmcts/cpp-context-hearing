@@ -15,6 +15,7 @@
       "d20": true,
       "publishedForNows": true,
       "rollUpPrompts": true,
+      "dvlaCode": "C",
       "wordGroups": [
         {
           "wordGroup": [

@@ -50,6 +50,7 @@ public class MatcherUtil {
                                 .with(Offence::getOrderIndex, is(offence.getOrderIndex()))
                                 .with(Offence::getCount, is(offence.getCount()))
                                 .with(Offence::getLaidDate, is(offence.getLaidDate()))
+                                .with(Offence::getEndorsableFlag, is(offence.getEndorsableFlag()))
                 ).toArray(BeanMatcher[]::new)));
     }
 

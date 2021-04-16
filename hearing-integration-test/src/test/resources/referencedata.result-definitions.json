@@ -45028,6 +45028,9 @@
       "convicted": "N",
       "d20": false,
       "cjsCode": "4592",
+      "drivingTestStipulation":1,
+      "pointsDisqualificationCode":"TT99",
+      "dvlaCode" : "C",
       "secondaryCJSCodes": [
         {
           "cjsCode":"1234",

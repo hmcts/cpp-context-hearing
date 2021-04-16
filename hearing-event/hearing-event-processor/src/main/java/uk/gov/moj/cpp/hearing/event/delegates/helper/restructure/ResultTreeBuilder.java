@@ -106,7 +106,7 @@ public class ResultTreeBuilder {
         return result;
     }
 
-    @SuppressWarnings("squid:S3776")
+    @SuppressWarnings({"squid:S3776","squid:MethodCyclomaticComplexity"})
     private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final ResultsShared resultsShared) {
         final Hearing hearing = resultsShared.getHearing();
         final DelegatedPowers courtClerk = resultsShared.getCourtClerk();
@@ -160,10 +160,19 @@ public class ResultTreeBuilder {
                 .withWelshResultWording(resultDefinition.getWelshResultWording())
                 .withCanBeSubjectOfBreach(resultDefinition.getCanBeSubjectOfBreach())
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
+                .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel());
 
         if (!isEmpty(resultDefinition.getSecondaryCJSCodes())) {
             builder.withSecondaryCJSCodes(getSecondaryCjsCodeList(resultDefinition.getSecondaryCJSCodes()));
+        }
+
+        if(!isNull(resultDefinition.getDrivingTestStipulation())){
+            builder.withDrivingTestStipulation(resultDefinition.getDrivingTestStipulation());
+        }
+
+        if(!isNull(resultDefinition.getPointsDisqualificationCode())){
+            builder.withPointsDisqualificationCode(resultDefinition.getPointsDisqualificationCode());
         }
         //Set Parent Judicial Result Id and Judicial Result Type Id
         if (!isEmpty(resultLine.getParentResultLineIds())) {

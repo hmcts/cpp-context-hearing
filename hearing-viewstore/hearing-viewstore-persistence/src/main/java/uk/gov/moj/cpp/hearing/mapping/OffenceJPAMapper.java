@@ -114,6 +114,9 @@ public class OffenceJPAMapper {
         if(Objects.nonNull(pojo.getReportingRestrictions())) {
             offence.setReportingRestrictions(reportingRestrictionJPAMapper.toJPA(hearing, pojo.getId(), pojo.getReportingRestrictions()));
         }
+        if(Objects.nonNull(pojo.getEndorsableFlag())) {
+            offence.setEndorsableFlag(pojo.getEndorsableFlag());
+        }
         return offence;
     }
 
@@ -156,6 +159,7 @@ public class OffenceJPAMapper {
                 .withIntroducedAfterInitialProceedings(entity.isIntroduceAfterInitialProceedings())
                 .withLaidDate(entity.getLaidDate())
                 .withReportingRestrictions(reportingRestrictionJPAMapper.fromJPA(entity.getReportingRestrictions()))
+                .withEndorsableFlag(entity.isEndorsableFlag())
                 .build();
     }
 

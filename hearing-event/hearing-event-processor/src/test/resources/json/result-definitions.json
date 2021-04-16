@@ -37,7 +37,10 @@
       "alwaysPublished":false,
       "jurisdiction":"B",
       "lCode":"DDCH",
-      "isAvailableForCourtExtract":true
+      "isAvailableForCourtExtract":true,
+      "drivingTestStipulation":1,
+      "pointsDisqualificationCode":"TT99",
+      "dvlaCode": "C"
     }
   ]
 }

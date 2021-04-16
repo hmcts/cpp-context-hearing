@@ -66,6 +66,9 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(secondaryCjsCodes.get(0).getText(), notNullValue());
         assertThat(secondaryCjsCodes.get(1).getCjsCode(), notNullValue());
         assertThat(secondaryCjsCodes.get(1).getText(), notNullValue());
+        assertThat(judicialResult.getDrivingTestStipulation(),notNullValue());
+        assertThat(judicialResult.getPointsDisqualificationCode(),notNullValue());
+        assertThat(judicialResult.getDvlaCode(), notNullValue());
     }
 
     @Test

@@ -13,6 +13,8 @@
       "alwaysPublished": false,
       "isBooleanResult": false,
       "lifeDuration": false,
+      "drivingTestStipulation":1,
+      "pointsDisqualificationCode":"TT99",
       "wordGroups": [
         {
           "wordGroup": [

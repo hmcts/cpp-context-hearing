@@ -87,6 +87,12 @@ public class ResultDefinition {
 
     private List<SecondaryCJSCode> secondaryCJSCodes = new ArrayList<>();
 
+    private Integer drivingTestStipulation;
+
+    private String pointsDisqualificationCode;
+
+    private String dvlaCode;
+
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
     }
@@ -421,6 +427,33 @@ public class ResultDefinition {
 
     public ResultDefinition setSecondaryCJSCodes(final List<SecondaryCJSCode> secondaryCJSCodes) {
         this.secondaryCJSCodes = secondaryCJSCodes;
+        return this;
+    }
+
+    public Integer getDrivingTestStipulation() {
+        return drivingTestStipulation;
+    }
+
+    public ResultDefinition setDrivingTestStipulation(final Integer drivingTestStipulation) {
+        this.drivingTestStipulation = drivingTestStipulation;
+        return this;
+    }
+
+    public String getPointsDisqualificationCode() {
+        return pointsDisqualificationCode;
+    }
+
+    public ResultDefinition setPointsDisqualificationCode(final String pointsDisqualificationCode) {
+        this.pointsDisqualificationCode = pointsDisqualificationCode;
+        return this;
+    }
+
+    public String getDvlaCode() {
+        return dvlaCode;
+    }
+
+    public ResultDefinition setDvlaCode(final String dvlaCode) {
+        this.dvlaCode = dvlaCode;
         return this;
     }
 }

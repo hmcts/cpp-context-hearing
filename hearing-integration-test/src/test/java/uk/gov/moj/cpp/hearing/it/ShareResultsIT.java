@@ -1493,6 +1493,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(result.getInt("hearing.prosecutionCases[0].defendants[0].offences[0].offenceDateCode"), is(offenceDateCodes[0]));
             assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].secondaryCJSCodes[0].cjsCode"), is("1234"));
             assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].secondaryCJSCodes[1].cjsCode"), is("5678"));
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].drivingTestStipulation"), is("1"));
+            assertThat(result.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].dvlaCode"), is("C"));
 
             if (offenceDateCodes.length > 1) {
                 assertThat(result.getInt("hearing.prosecutionCases[0].defendants[1].offences[0].offenceDateCode"), is(offenceDateCodes[1]));
@@ -2246,6 +2248,9 @@ public class ShareResultsIT extends AbstractIT {
                                                 )
                                                 .setSecondaryCJSCodes(getSecondaryCjsCodes())
                                                 .setLabel("resultLabel")
+                                                .setDrivingTestStipulation(1)
+                                                .setPointsDisqualificationCode("TT99")
+                                                .setDvlaCode("C")
                                                 .setWelshLabel(STRING.next())
                                                 .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
                                                 .setCanBeSubjectOfBreach(true)

@@ -126,6 +126,9 @@ public class Offence {
     @Column(name = "laid_date")
     private LocalDate laidDate;
 
+    @Column(name = "endorsable_flag")
+    private boolean endorsableFlag;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "offence", orphanRemoval = true)
     private Set<ReportingRestriction> reportingRestrictions = new HashSet<>();
 
@@ -383,6 +386,14 @@ public class Offence {
 
     public void setLaidDate(LocalDate laidDate) {
         this.laidDate = laidDate;
+    }
+
+    public boolean isEndorsableFlag() {
+        return endorsableFlag;
+    }
+
+    public void setEndorsableFlag(final boolean endorsableFlag) {
+        this.endorsableFlag = endorsableFlag;
     }
 
     @Override
