@@ -127,7 +127,7 @@ public class Offence {
     private LocalDate laidDate;
 
     @Column(name = "endorsable_flag")
-    private boolean endorsableFlag;
+    private Boolean endorsableFlag;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "offence", orphanRemoval = true)
     private Set<ReportingRestriction> reportingRestrictions = new HashSet<>();
@@ -388,11 +388,11 @@ public class Offence {
         this.laidDate = laidDate;
     }
 
-    public boolean isEndorsableFlag() {
+    public Boolean isEndorsableFlag() {
         return endorsableFlag;
     }
 
-    public void setEndorsableFlag(final boolean endorsableFlag) {
+    public void setEndorsableFlag(final Boolean endorsableFlag) {
         this.endorsableFlag = endorsableFlag;
     }
 
