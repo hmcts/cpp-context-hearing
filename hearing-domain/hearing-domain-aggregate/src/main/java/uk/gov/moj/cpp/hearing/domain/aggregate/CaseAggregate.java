@@ -11,7 +11,9 @@ import uk.gov.justice.progression.events.SendingSheetCompleted;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForCase;
+import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
@@ -37,6 +39,8 @@ public class CaseAggregate implements Aggregate {
                 when(RegisteredHearingAgainstCase.class).apply(e -> hearingIds.add(e.getHearingId())),
                 when(SendingSheetCompletedRecorded.class).apply(e -> sendingSheetCompleteProcessed = true),
                 when(HearingMarkedAsDuplicateForCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                when(HearingDeletedForProsecutionCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                when(HearingRemovedForProsecutionCase.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 otherwiseDoNothing());
     }
 
@@ -89,5 +93,13 @@ public class CaseAggregate implements Aggregate {
 
     public Stream<Object> markHearingAsDuplicate(final UUID prosecutionCaseId, final UUID hearingId) {
         return apply(Stream.of(new HearingMarkedAsDuplicateForCase(prosecutionCaseId, hearingId)));
+    }
+
+    public Stream<Object> deleteHearingForProsecutionCase(final UUID prosecutionCaseId, final UUID hearingId) {
+        return apply(Stream.of(new HearingDeletedForProsecutionCase(prosecutionCaseId, hearingId)));
+    }
+
+    public Stream<Object> removeHearingForProsecutionCase(final UUID prosecutionCaseId, final UUID hearingId) {
+        return apply(Stream.of(new HearingRemovedForProsecutionCase(prosecutionCaseId, hearingId)));
     }
 }

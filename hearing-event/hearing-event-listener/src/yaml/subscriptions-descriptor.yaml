@@ -128,6 +128,10 @@ subscriptions_descriptor:
         - name: hearing.results-shared
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/results-shared.json
 
+        # Share Results V2
+        - name: hearing.events.results-shared-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-shared-v2.json
+
         # Respondent Counsel
         - name: hearing.respondent-counsel-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/respondent-counsel-added.json
@@ -250,6 +254,26 @@ subscriptions_descriptor:
         - name: hearing.events.result-amendments-cancelled
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled.json
 
+        # Hearing Deleted
+        - name: hearing.events.hearing-deleted
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing-deleted.json
+
+        # Existing Hearing Updated
+        - name: hearing.events.existing-hearing-updated
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.existing-hearing-updated.json
+
+        # Hearing Unallocated
+        - name: hearing.events.hearing-unallocated
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing-unallocated.json
+
+        # Earliest Next Hearing Date Changed
+        - name: hearing.events.earliest-next-hearing-date-changed
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.earliest-next-hearing-date-changed.json
+
+        # Next Hearings Start Date Removed
+        - name: hearing.events.earliest-next-hearing-date-cleared
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.earliest-next-hearing-date-cleared.json
+
         # Reuse Of Information
         - name: hearing.event.reusable-info-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.reusable-info-saved.json
@@ -260,5 +284,9 @@ subscriptions_descriptor:
 
         - name: hearing.event.result-amendments-rejected
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected.json
+
+        # Offences Removed From Existing Hearing
+        - name: hearing.events.offences-removed-from-existing-hearing
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.offences-removed-from-existing-hearing.json
 
       event_source_name: hearing

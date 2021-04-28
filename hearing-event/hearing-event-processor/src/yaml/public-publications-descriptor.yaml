@@ -30,9 +30,13 @@ subscriptions_descriptor:
         - name: public.hearing.events-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-events-updated.json
 
-        # Resulting
+        # Share Results
         - name: public.hearing.resulted
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-resulted.json
+
+        # Share Results V2
+        - name: public.events.hearing.hearing-resulted
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.hearing-resulted.json
 
         - name: public.hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-draft-result-saved.json

@@ -29,6 +29,9 @@ public class Target {
     @Column(name = "defendant_id")
     private UUID defendantId;
 
+    @Column(name = "hearing_day")
+    private String hearingDay;
+
     @Column(name = "draft_result")
     private String draftResult;
 
@@ -76,6 +79,15 @@ public class Target {
 
     public Target setDefendantId(final UUID defendantId) {
         this.defendantId = defendantId;
+        return this;
+    }
+
+    public String getHearingDay() {
+        return hearingDay;
+    }
+
+    public Target setHearingDay(final String hearingDay) {
+        this.hearingDay = hearingDay;
         return this;
     }
 

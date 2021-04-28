@@ -15,7 +15,9 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.RemoveOffencesFromExistingHearing;
 
+import java.util.List;
 import java.util.UUID;
 
 @ServiceComponent(COMMAND_HANDLER)
@@ -90,5 +92,18 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
             aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate ->
                     hearingAggregate.deleteOffence(offenceWithHearingIds.getId(), hearingId));
         }
+    }
+
+
+    @Handles("hearing.command.remove-offences-from-existing-hearing")
+    public void removeOffencesFromExistingHearing(final JsonEnvelope envelope) throws EventStreamException {
+
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = convertToObject(envelope, RemoveOffencesFromExistingHearing.class);
+
+        final UUID hearingId = removeOffencesFromExistingHearing.getHearingId();
+        final List<UUID> offenceIds = removeOffencesFromExistingHearing.getOffenceIds();
+
+        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.removeOffencesFromExistingHearing(hearingId, offenceIds));
+
     }
 }

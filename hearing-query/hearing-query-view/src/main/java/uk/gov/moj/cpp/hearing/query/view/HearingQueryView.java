@@ -61,6 +61,7 @@ import org.slf4j.LoggerFactory;
 public class HearingQueryView {
 
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_HEARING_DAY = "hearingDay";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
@@ -142,6 +143,16 @@ public class HearingQueryView {
                 .withMetadataFrom(envelope);
     }
 
+    public Envelope<TargetListResponse> getResults(final JsonEnvelope envelope) {
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final String hearingDay = envelope.payloadAsJsonObject().getString(FIELD_HEARING_DAY);
+        final TargetListResponse targetListResponse = hearingService.getTargetsByDate(hearingId, hearingDay);
+
+        return envelop(targetListResponse)
+                .withName("hearing.results")
+                .withMetadataFrom(envelope);
+    }
+
     public JsonEnvelope searchByMaterialId(final JsonEnvelope envelope) {
         return enveloper.withMetadataFrom(envelope, "hearing.query.search-by-material-id")
                 .apply(hearingService.getNowsRepository(envelope.payloadAsJsonObject().getString(FIELD_QUERY)));
@@ -215,7 +226,7 @@ public class HearingQueryView {
 
         final JsonObjectBuilder builder = createObjectBuilder();
         if (publishCourtListStatus.isPresent()) {
-            builder.add("courtCentreId", publishCourtListStatus.get().getCourtCentreId().toString())
+            builder.add(FIELD_COURT_CENTRE_ID, publishCourtListStatus.get().getCourtCentreId().toString())
                     .add("lastUpdated", publishCourtListStatus.get().getLastUpdated().toString())
                     .add("publishStatus", publishCourtListStatus.get().getPublishStatus().toString())
                     .add("errorMessage", defaultIfEmpty(publishCourtListStatus.get().getFailureMessage(), ""));

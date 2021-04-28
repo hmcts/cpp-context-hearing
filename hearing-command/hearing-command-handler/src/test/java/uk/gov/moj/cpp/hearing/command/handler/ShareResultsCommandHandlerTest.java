@@ -6,6 +6,7 @@ import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.core.IsNull.notNullValue;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -188,8 +189,8 @@ public class ShareResultsCommandHandlerTest {
 
     @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
-
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final LocalDate hearingDay = LocalDate.now();
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), hearingDay);
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
@@ -289,8 +290,8 @@ public class ShareResultsCommandHandlerTest {
 
     @Test
     public void shouldRaiseResultsSharedEventAfterDDCH() throws Exception {
-
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final LocalDate hearingDay = LocalDate.now();
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), hearingDay);
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
@@ -352,7 +353,7 @@ public class ShareResultsCommandHandlerTest {
         this.shareResultsCommandHandler.shareResult(envelope);
 
         final Optional<JsonEnvelope> efound = verifyAppendAndGetArgumentFrom(this.hearingEventStream).filter(e -> HEARING_RESULTS_SHARED_EVENT_NAME.equals(e.metadata().name())).findFirst();
-        assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), IsNull.notNullValue());
+        assertThat("expected:" + HEARING_RESULTS_SHARED_EVENT_NAME, efound.get(), notNullValue());
 
         final ResultsShared resultsShared = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), ResultsShared.class);
         assertThat(resultsShared.getDefendantDetailsChanged().size(), is(1));
@@ -367,6 +368,7 @@ public class ShareResultsCommandHandlerTest {
                 .withDraftResult("")
                 .withOffenceId(targetToCopyFrom.getOffenceId())
                 .withTargetId(randomUUID())
+                .withHearingDay(targetToCopyFrom.getHearingDay())
                 .build();
     }
 }

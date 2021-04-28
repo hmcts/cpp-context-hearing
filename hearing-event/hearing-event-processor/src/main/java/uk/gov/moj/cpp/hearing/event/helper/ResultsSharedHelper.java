@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.helper;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
@@ -27,7 +28,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
-import org.apache.commons.collections.CollectionUtils;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 
 public class ResultsSharedHelper {
 
@@ -40,6 +41,22 @@ public class ResultsSharedHelper {
      */
     public void setIsDisposedFlagOnOffence(final ResultsShared resultsShared) {
         final List<Offence> offencesList = getOffencesFromHearing(resultsShared.getHearing());
+        setDisposed(offencesList);
+    }
+
+    /**
+     *  If any of the JudicialResults have a Category of Final , then set the corresponding Offence's isDisposed Flag to true.
+     *
+     * @param resultsShared
+     * @return void
+     *
+     */
+    public void setIsDisposedFlagOnOffence(final ResultsSharedV2 resultsShared) {
+        final List<Offence> offencesList = getOffencesFromHearing(resultsShared.getHearing());
+        setDisposed(offencesList);
+    }
+
+    private void setDisposed(final List<Offence> offencesList) {
 
         if (isNotEmpty(offencesList)) {
             for (final Offence offence : offencesList) {
@@ -53,11 +70,12 @@ public class ResultsSharedHelper {
                 }
             }
         }
+
     }
 
     private boolean isCategoryTypeFinalPresentInJudicialResult(final List<JudicialResult> judicialResultsList) {
 
-        if (CollectionUtils.isNotEmpty(judicialResultsList)) {
+        if (isNotEmpty(judicialResultsList)) {
             return judicialResultsList
                     .stream()
                     .filter(judicialResult -> nonNull(judicialResult.getCategory()))
@@ -75,6 +93,24 @@ public class ResultsSharedHelper {
         if (hearingDayList.size() > 1 && nonNull(crackedIneffectiveTrial)) {
             for (final HearingDay hearingDay : hearingDayList) {
                 if (hearingDay.getSittingDay().isAfter(resultsShared.getSharedTime())) {
+                    hearingDay.setIsCancelled(true);
+                }
+            }
+
+            if (hearingDayList.stream().anyMatch(hearingDay -> ofNullable(hearingDay.getIsCancelled()).orElse(false))) {
+                cancelHearingDays(context, sender, resultsShared.getHearingId(), hearingDayList, objectToJsonObjectConverter);
+            }
+        }
+    }
+
+    public void cancelFutureHearingDays(final JsonEnvelope context, final Sender sender, final ResultsSharedV2 resultsShared, final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
+        final Hearing sharedHearing = resultsShared.getHearing();
+        final List<HearingDay> hearingDayList = sharedHearing.getHearingDays();
+        final CrackedIneffectiveTrial crackedIneffectiveTrial = sharedHearing.getCrackedIneffectiveTrial();
+
+        if (hearingDayList.size() > 1 && nonNull(crackedIneffectiveTrial)) {
+            for (final HearingDay hearingDay : hearingDayList) {
+                if(hearingDay.getSittingDay().isAfter(resultsShared.getSharedTime())) {
                     hearingDay.setIsCancelled(true);
                 }
             }

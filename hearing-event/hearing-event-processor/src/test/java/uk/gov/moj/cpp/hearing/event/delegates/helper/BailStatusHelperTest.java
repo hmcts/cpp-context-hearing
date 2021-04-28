@@ -61,7 +61,7 @@ public class BailStatusHelperTest {
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("U", Lists.newArrayList("C", "U", "A"));
         when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
 
-        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate.getHearing());
 
         uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailStatus();
         assertNotNull(bailStatus);
@@ -78,7 +78,7 @@ public class BailStatusHelperTest {
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("U", Lists.newArrayList("W", "Z"));
         when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
 
-        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate.getHearing());
 
         uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailStatus();
         assertNotNull(bailStatus);
@@ -93,7 +93,7 @@ public class BailStatusHelperTest {
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplateWithoutPersonDefendant(Lists.newArrayList("C", "U", "A"));
         when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
 
-        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate);
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate.getHearing());
 
         PersonDefendant personDefendant = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant();
         assertNull(personDefendant);

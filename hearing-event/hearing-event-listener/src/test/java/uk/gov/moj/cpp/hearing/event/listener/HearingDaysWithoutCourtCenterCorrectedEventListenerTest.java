@@ -41,7 +41,7 @@ public class HearingDaysWithoutCourtCenterCorrectedEventListenerTest {
 
         final HearingDaysWithoutCourtCentreCorrected hearingDaysWithoutCourtCentreCorrected = new HearingDaysWithoutCourtCentreCorrected();
         final UUID streamId = UUID.randomUUID();
-        final HearingDay hd = new HearingDay(UUID.randomUUID(), UUID.randomUUID(),false,30, 1, ZonedDateTime.now());
+        final HearingDay hd = new HearingDay(UUID.randomUUID(), UUID.randomUUID(), false, false, 30, 1, ZonedDateTime.now());
         hearingDaysWithoutCourtCentreCorrected.setId(streamId);
         hearingDaysWithoutCourtCentreCorrected.setHearingDays(asList(hd));
 

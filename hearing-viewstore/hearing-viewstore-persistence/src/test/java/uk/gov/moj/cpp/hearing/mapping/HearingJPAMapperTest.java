@@ -114,8 +114,6 @@ public class HearingJPAMapperTest {
     @InjectMocks
     private HearingJPAMapper hearingJPAMapper;
 
-
-
     @Test
     public void testInsertCourtApplications() {
         final CourtApplication courtApplicationUpdate = CourtApplication.courtApplication().withId(randomUUID()).build();

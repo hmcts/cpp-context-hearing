@@ -58,7 +58,7 @@ public class HearingCommandApiTest {
 
     private static final String COMMAND_SHARE_RESULTS = "hearing.command.share-results";
 
-    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "logHearingEvent",
+    private static final List<String> NON_PASS_THROUGH_METHODS = newArrayList("shareResults", "shareResultsV2", "logHearingEvent",
             "correctEvent", "updatePlea", "updateVerdict", "addWitness", "generateNows", "updateNowsMaterialStatus", "addDefenceCounsel",
             "addProsecutionCounsel", "removeProsecutionCounsel", "updateProsecutionCounsel", "removeDefenceCounsel", "updateDefenceCounsel", "initiateHearing", "saveDraftResult", "applicationDraftResult", "saveHearingCaseNote",
             "updateHearingEvents", "generateNowsV2", "deleteAttendee", "uploadSubscriptions", "saveNowsVariants", "updateDefendantAttendance", "saveApplicationResponse",
@@ -66,12 +66,12 @@ public class HearingCommandApiTest {
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
-            "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants");
+            "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay");
 
-
-    public static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
-    public static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
-    public static final String JSON_EXPECTED_HEARING_INITIATE_DDCH = "json/expected-hearing-initiate-ddch.json";
+    private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
+    private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
+    private static final String JSON_EXPECTED_HEARING_INITIATE_DDCH = "json/expected-hearing-initiate-ddch.json";
     private static final String HEARING_INITIATE = "hearing.initiate";
 
     private static final String DUMMY_FIELD = "dummyField";
@@ -202,6 +202,24 @@ public class HearingCommandApiTest {
         hearingCommandApi.shareResults(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), COMMAND_SHARE_RESULTS);
+    }
+
+    @Test
+    public void shouldPassThroughShareResultV2CommandToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.share-results-v2");
+
+        hearingCommandApi.shareResultsV2(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.share-results-v2");
+    }
+
+    @Test
+    public void shouldPassThroughShareDaysResultCommandToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.share-days-results");
+
+        hearingCommandApi.shareResultsForHearingDay(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.share-days-results");
     }
 
     @Test
@@ -466,6 +484,24 @@ public class HearingCommandApiTest {
     }
 
     @Test
+    public void shouldPassThroughSaveDaysDraftResultRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-days-draft-result");
+
+        hearingCommandApi.saveDraftResultForHearingDay(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-days-draft-result");
+    }
+
+    @Test
+    public void shouldPassThroughSaveDaysDraftResultsRequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.save-days-draft-results");
+
+        hearingCommandApi.saveDraftResultsForHearingDay(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-days-draft-results");
+    }
+
+    @Test
     public void shouldPassThroughRequestApprovalCommandHandler() {
         final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.request-approval");
 
@@ -482,7 +518,6 @@ public class HearingCommandApiTest {
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.validate-result-amendments");
     }
-
 
     @Test
     public void shouldPassThroughRemoveDraftTargetRequestToCommandHandler() {
@@ -509,6 +544,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.markAsDuplicateHearing(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.mark-as-duplicate");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateRelatedHearingToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-related-hearing");
+
+        hearingCommandApi.updateRelatedHearing(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-related-hearing");
     }
 
     @Test

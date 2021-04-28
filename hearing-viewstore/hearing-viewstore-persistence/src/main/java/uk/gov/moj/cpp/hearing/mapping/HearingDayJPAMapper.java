@@ -25,6 +25,7 @@ public class HearingDayJPAMapper {
         }
         final HearingDay hearingDay = new HearingDay();
         hearingDay.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
+        hearingDay.setHasSharedResults(pojo.getHasSharedResults());
         hearingDay.setHearing(hearing);
         hearingDay.setDate(pojo.getSittingDay().toLocalDate());
         hearingDay.setDateTime(pojo.getSittingDay());
@@ -42,6 +43,7 @@ public class HearingDayJPAMapper {
             return null;
         }
         return uk.gov.justice.core.courts.HearingDay.hearingDay()
+                .withHasSharedResults(entity.getHasSharedResults())
                 .withListedDurationMinutes(entity.getListedDurationMinutes())
                 .withListingSequence(entity.getListingSequence())
                 .withSittingDay(entity.getSittingDay())

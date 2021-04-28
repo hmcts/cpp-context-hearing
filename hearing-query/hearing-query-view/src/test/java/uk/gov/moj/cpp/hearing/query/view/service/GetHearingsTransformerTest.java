@@ -67,6 +67,7 @@ public class GetHearingsTransformerTest {
                 .withValue(HearingSummaries::getId, hearing.getId())
                 .withValue(HearingSummaries::getHearingLanguage, hearing.getHearingLanguage().name())
                 .withValue(hs -> hs.getType().getId(), hearing.getType().getId())
+                .withValue(HearingSummaries::getHearingDays, hearing.getHearingDays())
                 .withValue(hs -> hs.getJurisdictionType().name(), hearing.getJurisdictionType().name())
                 .withValue(HearingSummaries::getHasSharedResults, hearing.getHasSharedResults())
                 .withValue(HearingSummaries::getReportingRestrictionReason, hearing.getReportingRestrictionReason())

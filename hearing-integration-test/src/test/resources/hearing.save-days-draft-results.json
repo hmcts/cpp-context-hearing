@@ -1,0 +1,72 @@
+{
+  "targets": [
+    {
+      "defendantId": "DEFENDANT_ID",
+      "draftResult": "draft results content",
+      "hearingId": "HEARING_ID",
+      "offenceId": "OFFENCE1_ID",
+      "resultLines": [
+        {
+          "delegatedPowers": {
+            "firstName": "David",
+            "lastName": "Bowie",
+            "userId": "9fc282f7-95cb-4660-8570-a204c5cf74b3"
+          },
+          "isComplete": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2018-08-30",
+          "prompts": [
+            {
+              "fixedListCode": "fixedlistcode0",
+              "id": "10d81ccf-4561-4a4d-936c-2baf0eeee8df",
+              "label": "imprisonment term",
+              "value": "6 years",
+              "welshValue": "6 blynedd"
+            }
+          ],
+          "resultDefinitionId": "86303e9a-bd16-43f4-9437-d33e378970d1",
+          "resultLabel": "imprisonment",
+          "resultLineId": "23cf38fe-7c8c-450d-9572-5ac58d9d674a",
+          "sharedDate": "2018-08-30"
+        }
+      ],
+      "targetId": "TARGET1_ID",
+      "hearingDay" : "HEARING_DAY"
+    },
+    {
+      "defendantId": "DEFENDANT_ID",
+      "draftResult": "draft results content",
+      "hearingId": "HEARING_ID",
+      "offenceId": "OFFENCE2_ID",
+      "resultLines": [
+        {
+          "delegatedPowers": {
+            "firstName": "David",
+            "lastName": "Bowie",
+            "userId": "9fc282f7-95cb-4660-8570-a204c5cf74b3"
+          },
+          "isComplete": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "orderedDate": "2018-08-30",
+          "prompts": [
+            {
+              "fixedListCode": "fixedlistcode0",
+              "id": "10d81ccf-4561-4a4d-936c-2baf0eeee8df",
+              "label": "imprisonment term",
+              "value": "6 years",
+              "welshValue": "6 blynedd"
+            }
+          ],
+          "resultDefinitionId": "86303e9a-bd16-43f4-9437-d33e378970d1",
+          "resultLabel": "imprisonment",
+          "resultLineId": "23cf38fe-7c8c-450d-9572-5ac58d9d674a",
+          "sharedDate": "2018-08-30"
+        }
+      ],
+      "targetId": "TARGET2_ID",
+      "hearingDay" : "HEARING_DAY"
+    }
+  ]
+}

@@ -1,8 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.codehaus.groovy.runtime.InvokerHelper.asList;
 import static org.hamcrest.CoreMatchers.is;
@@ -10,6 +12,7 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
@@ -29,6 +32,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommand
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import org.junit.Ignore;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -52,11 +56,13 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
@@ -69,6 +75,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -541,7 +548,7 @@ public class HearingAggregateTest {
 
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.apply(ResultsShared.builder().build());
+        hearingAggregate.apply(ResultsShared.builder().withHearing(Hearing.hearing().withId(randomUUID()).build()).build());
 
         final Stream<Object> stream = hearingAggregate.updateDefendantDetails(command.getHearingId(), command.getDefendant());
 
@@ -952,6 +959,10 @@ public class HearingAggregateTest {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
         final Target target = target().withTargetId(randomUUID())
                 .withDefendantId(randomUUID())
                 .withHearingId(hearingId)
@@ -976,8 +987,12 @@ public class HearingAggregateTest {
     @Test
     public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplication() {
 
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID targetId = randomUUID();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final UUID hearingId = randomUUID();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final Target target = target().withTargetId(randomUUID())
                 .withApplicationId(randomUUID())
                 .withHearingId(hearingId)
@@ -999,9 +1014,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldRaiseMultipleDraftResultsSavedWhenAllTargetsAreValidApplicationOffence() {
-
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID targetId = randomUUID();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final UUID hearingId = randomUUID();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final Target target = target().withTargetId(randomUUID())
                 .withApplicationId(randomUUID())
                 .withHearingId(hearingId)
@@ -1026,6 +1044,10 @@ public class HearingAggregateTest {
     @Test
     public void shouldNotRaiseMultipleDraftResultsSavedWhenAnyTargetIsNotValid() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -1051,9 +1073,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetDefendantOffence() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final UUID targetId = randomUUID();
-        final UUID hearingId = randomUUID();
         final Target target = target()
                 .withTargetId(targetId)
                 .withDefendantId(randomUUID())
@@ -1079,9 +1104,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplication() {
-        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
-        final UUID hearingId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final Target target = target()
                 .withTargetId(targetId)
                 .withHearingId(hearingId)
@@ -1104,9 +1132,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldNotRaiseMultipleDraftResultsSavedWhenNotMatchedWithAnExistingTargetApplicationOffence() {
-        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final UUID targetId = randomUUID();
-        final UUID hearingId = randomUUID();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final Target target = target()
                 .withTargetId(targetId)
                 .withHearingId(hearingId)
@@ -1132,7 +1163,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldNotRaiseMultipleDraftResultsSavedWhenNewTargetIsNotValid() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID targetId = randomUUID();
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final Target target = target()
                 .withTargetId(randomUUID())
                 .withDefendantId(randomUUID())
@@ -1152,6 +1188,9 @@ public class HearingAggregateTest {
     @Test
     public void shouldNotRaiseMultipleDraftResultsSavedWhenAllTargetsAreNotValid() {
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID hearingId = randomUUID();
@@ -1179,7 +1218,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldRaiseSaveDraftResultFailedWhenAnyTargetIsInvalid() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID targetId = randomUUID();
         final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final UUID applicationId = randomUUID();
@@ -1200,8 +1244,10 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldRaiseSaveDraftResultFailedWhenDefenceOffenceIsAlreadyUsedInAnotherTarget() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final UUID hearingId = randomUUID();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
 
@@ -1229,8 +1275,11 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldRaiseSaveDraftResultFailedWhenApplicationOffenceIsAlreadyUsedInAnotherTarget() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final UUID hearingId = randomUUID();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final UUID applicationId = randomUUID();
         final UUID offenceId = randomUUID();
 
@@ -1258,8 +1307,12 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldRaiseSaveDraftResultFailedWhenApplicationIsAlreadyUsedInAnotherTarget() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID targetId = randomUUID();
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final UUID hearingId = randomUUID();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
         final UUID applicationId = randomUUID();
 
         final Target target = target().withTargetId(randomUUID())
@@ -1305,7 +1358,7 @@ public class HearingAggregateTest {
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();
 
-        HearingDay hearingDay = new HearingDay(courtCentreId, courtRoomId, false, 0, 0, ZonedDateTime.now());
+        HearingDay hearingDay = new HearingDay(courtCentreId, courtRoomId, false, false, 0, 0, ZonedDateTime.now());
         event.setHearingDays(asList(hearingDay));
         hearingAggregate.apply(event);
 
@@ -1341,6 +1394,13 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldRaiseSaveDraftResultErrorWhenAllTargetsAreNotValid() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final LocalDate hearingDay = initiateHearingCommand.getHearing().getHearingDays().stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Hearing Day is not present"))
+                .getSittingDay()
+                .toLocalDate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
         Map<UUID, Target> existingTargets = new HashMap<>();
@@ -1355,7 +1415,8 @@ public class HearingAggregateTest {
         existingTargets.put(randomUUID(), previousTarget);
 
         HearingAggregateMomento hearingAggregateMomento = mock(HearingAggregateMomento.class);
-        when(hearingAggregateMomento.getTargets()).thenReturn(existingTargets);
+        when(hearingAggregateMomento.getMultiDayTargets().get(hearingDay)).thenReturn(existingTargets);
+        when(hearingAggregateMomento.getHearing()).thenReturn(hearing);
 
         setField(hearingAggregate, "momento", hearingAggregateMomento);
         final UUID defendantId = randomUUID();
@@ -1396,4 +1457,56 @@ public class HearingAggregateTest {
         assertThat(validationFailed, notNullValue());
         assertThat(validationFailed.getHearingId(), is(hearing.getId()));
     }
+
+    @Test
+    public void shouldRaiseEventHearingDeleted() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final UUID hearingId = hearing.getId();
+        final UUID offenceId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final UUID defendantId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getId();
+        final UUID caseId = hearing.getProsecutionCases().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
+
+        hearingAggregate.apply(new HearingDeleted(asList(caseId), asList(defendantId), asList(offenceId), asList(courtApplicationId), hearingId));
+
+        final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingDeleted hearingDeleted = (HearingDeleted) eventStream.get(0);
+        assertThat(hearingDeleted.getHearingId(), is(hearingId));
+        assertThat(hearingDeleted.getProsecutionCaseIds().size(), is(1));
+        assertThat(hearingDeleted.getDefendantIds().size(), is(1));
+        assertThat(hearingDeleted.getOffenceIds().size(), is(1));
+        assertThat(hearingDeleted.getCourtApplicationIds().size(), is(1));
+    }
+
+    @Test
+    public void shouldRaiseEventHearingUnallocated() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final UUID hearingId = hearing.getId();
+        final UUID offenceId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final UUID defendantId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getId();
+        final UUID caseId = hearing.getProsecutionCases().get(0).getId();
+        hearingAggregate.apply(new HearingDeleted(asList(caseId), asList(defendantId), asList(offenceId), emptyList(), hearingId));
+
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(offenceId)).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingUnallocated hearingUnallocated = (HearingUnallocated) eventStream.get(0);
+        assertThat(hearingUnallocated.getHearingId(), is(hearingId));
+        assertThat(hearingUnallocated.getProsecutionCaseIds().size(), is(1));
+        assertThat(hearingUnallocated.getDefendantIds().size(), is(1));
+        assertThat(hearingUnallocated.getOffenceIds().size(), is(1));
+    }
+
 }

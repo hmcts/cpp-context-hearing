@@ -5,6 +5,7 @@ import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
@@ -25,6 +26,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.SecondaryCJSCode;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
@@ -216,5 +218,31 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         final List<TreeNode<ResultLine>> topLevelResultLineParents = filterBy(resultLineTree, r -> r.getParents().size() == 0 && r.getChildren().size() > 0);
         assertThat(topLevelResultLineParents.size(), is(1));
         assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
+    }
+
+    @Test
+    public void shouldBuildSuccessfullyWithJudicialResultWhenResultLineIdExistsInNewAmendedResults() throws IOException {
+        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-with-newAmendedResults.json", ResultsSharedV2.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
+
+        assertThat(resultLineTree.size(), is(9));
+        final List<TreeNode<ResultLine>> topLevelResultLineParents = filterBy(resultLineTree, r -> r.getParents().size() == 0 && r.getChildren().size() > 0);
+        assertThat(topLevelResultLineParents.size(), is(1));
+        assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
+        assertThat(topLevelResultLineParents.get(0).getJudicialResult().getIsNewAmendment(),is(true));
+    }
+
+    @Test
+    public void shouldBuildSuccessfullyWithJudicialResultWhenResultLineIdNotExistsInNewAmendedResults() throws IOException {
+        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-without-newAmendedResults.json", ResultsSharedV2.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
+
+        assertThat(resultLineTree.size(), is(9));
+        final List<TreeNode<ResultLine>> topLevelResultLineParents = filterBy(resultLineTree, r -> r.getParents().size() == 0 && r.getChildren().size() > 0);
+        assertThat(topLevelResultLineParents.size(), is(1));
+        assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
+        assertThat(topLevelResultLineParents.get(0).getJudicialResult().getIsNewAmendment(), is(false));
     }
 }

@@ -6,6 +6,7 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.core.annotation.FeatureControl;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -74,6 +75,18 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.save-multiple-draft-results");
     }
 
+    @FeatureControl("amendReshare")
+    @Handles("hearing.save-days-draft-result")
+    public void saveDraftResultForHearingDay(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.save-days-draft-result");
+    }
+
+    @FeatureControl("amendReshare")
+    @Handles("hearing.save-days-draft-results")
+    public void saveDraftResultsForHearingDay(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.save-days-draft-results");
+    }
+
     @Handles("hearing.add-prosecution-counsel")
     public void addProsecutionCounsel(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.add-prosecution-counsel");
@@ -122,6 +135,18 @@ public class HearingCommandApi {
     @Handles("hearing.share-results")
     public void shareResults(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.share-results");
+    }
+
+    @Handles("hearing.share-results-v2")
+    @FeatureControl("amendReshare")
+    public void shareResultsV2(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.share-results-v2");
+    }
+
+    @Handles("hearing.share-days-results")
+    @FeatureControl("amendReshare")
+    public void shareResultsForHearingDay(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.share-days-results");
     }
 
     @Handles("hearing.update-defendant-attendance-on-hearing-day")
@@ -221,7 +246,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.change-hearing-detail")
     public void updateHearingDetails(final JsonEnvelope envelope) {
-        sendEnvelopeWithName(envelope,"hearing.change-hearing-detail");
+        sendEnvelopeWithName(envelope, "hearing.change-hearing-detail");
     }
 
     @Handles("hearing.remove-targets")
@@ -249,13 +274,18 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.validate-result-amendments");
     }
 
+    @Handles("hearing.update-related-hearing")
+    public void updateRelatedHearing(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.update-related-hearing");
+    }
+
     @Handles("hearing.correct-hearing-days-without-court-centre")
     public void correctHearingDaysWithoutCourtCentre(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.correct-hearing-days-without-court-centre");
     }
 
     @Handles("hearing.update-resultline-shared-dates")
-    public void updateResultLineSharedDates(final JsonEnvelope envelope){
+    public void updateResultLineSharedDates(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.update-resultline-shared-dates");
     }
 

@@ -16,10 +16,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public final class UpdateResultLinesStatusCommand implements Serializable {
 
-
     private static final long serialVersionUID = 1L;
 
     private final UUID hearingId;
+
     private final ZonedDateTime lastSharedDateTime;
 
     private final DelegatedPowers courtClerk;
@@ -35,7 +35,6 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
         this.lastSharedDateTime = lastSharedDateTime;
         this.courtClerk = courtClerk;
         this.sharedResultLines = unmodifiableList(ofNullable(sharedResultLines).orElseGet(ArrayList::new));
-        ;
     }
 
     public static Builder builder() {
@@ -61,6 +60,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
     public static final class Builder {
 
         private UUID hearingId;
+
         private ZonedDateTime lastSharedDateTime;
 
         private DelegatedPowers courtClerk;
@@ -82,7 +82,7 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
             return this;
         }
 
-        public Builder withCourtClerk(DelegatedPowers courtClerk) {
+        public Builder withCourtClerk(final DelegatedPowers courtClerk) {
             this.courtClerk = courtClerk;
             return this;
         }
@@ -90,5 +90,6 @@ public final class UpdateResultLinesStatusCommand implements Serializable {
         public UpdateResultLinesStatusCommand build() {
             return new UpdateResultLinesStatusCommand(this.hearingId, courtClerk, lastSharedDateTime, sharedResultLines);
         }
+
     }
 }

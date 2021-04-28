@@ -50,7 +50,7 @@ public class BailConditionsHelperTest {
         final String bailCondition = getBailCondition("Bail condition: Time of hearing", "Date of hearing : 777", "Courtroom : 555", "Courthouse name : 666", "Bail condition: Courtroom", "Bail condition: Courthouse name", "Time of hearing : 999", "Courthouse name : 666");
 
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate();
-        bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -84,8 +84,6 @@ public class BailConditionsHelperTest {
         assertThat(bailConditionsResult, is(bailCondition));
     }
 
-
-
     @Test
     public void testNotMapBailStatusReason() {
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate(null, "Bail Conditions", true, true, false, false, false);
@@ -118,6 +116,7 @@ public class BailConditionsHelperTest {
         setResultDefinitionGroupAsNull(resultsSharedTemplate);
 
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -154,6 +153,7 @@ public class BailConditionsHelperTest {
         setResultDefinitionGroupAsNull(resultsSharedTemplate);
 
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         assertNull(resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant());
@@ -189,6 +189,7 @@ public class BailConditionsHelperTest {
         setRankAsNull(resultsSharedTemplate);
 
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -237,6 +238,7 @@ public class BailConditionsHelperTest {
         setPromptSequenceAsNull(resultsSharedTemplate);
 
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -287,6 +289,7 @@ public class BailConditionsHelperTest {
         setJudicialResultPromptsAreNull(resultsSharedTemplate);
 
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -337,6 +340,7 @@ public class BailConditionsHelperTest {
         setRankAsEqualAndNull(resultsSharedTemplate);
 
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -390,6 +394,7 @@ public class BailConditionsHelperTest {
 
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate(bailStatus);
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
@@ -402,6 +407,7 @@ public class BailConditionsHelperTest {
 
         final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("L","Not a Bail Conditions", true, true, true, false, false);
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();

@@ -31,6 +31,7 @@ public class HearingDayJPAMapperTest {
     public static BeanMatcher<HearingDay> whenHearingDay(final BeanMatcher<HearingDay> m,
                                                          final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay entity) {
         return m.with(HearingDay::getListedDurationMinutes, is(entity.getListedDurationMinutes()))
+                .with(HearingDay::getHasSharedResults, is(entity.getHasSharedResults()))
                 .with(HearingDay::getListingSequence, is(entity.getListingSequence()))
                 .with(HearingDay::getSittingDay, is(entity.getSittingDay()));
     }
@@ -39,6 +40,7 @@ public class HearingDayJPAMapperTest {
             final BeanMatcher<uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay> m, final uk.gov.justice.core.courts.HearingDay pojo) {
 
         return m.with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getListedDurationMinutes, is(pojo.getListedDurationMinutes()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getHasSharedResults, is(pojo.getHasSharedResults()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getListingSequence, is(pojo.getListingSequence()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getSittingDay, is(pojo.getSittingDay()));
     }

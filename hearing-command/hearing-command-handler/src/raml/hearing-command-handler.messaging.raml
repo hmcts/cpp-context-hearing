@@ -14,6 +14,10 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.extend-hearing.json
             schema:  !include json/schema/hearing.command.extend-hearing.json
 
+        application/vnd.hearing.command.update-related-hearing+json:
+            example: !include json/hearing.command.update-related-hearing.json
+            schema:  !include json/schema/hearing.command.update-related-hearing.json
+
         application/vnd.hearing.command.register-hearing-against-offence+json:
             schema: !include json/schema/hearing.command.register-hearing-against-offence.json
             example: !include json/hearing.command.register-hearing-against-offence.json
@@ -94,9 +98,24 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.save-multiple-draft-results+json:
             example: !include json/hearing.command.save-multiple-draft-results.json
             schema: !include json/schema/hearing.command.save-multiple-draft-results.json
+        application/vnd.hearing.command.save-days-draft-result+json:
+            example: !include json/hearing.command.save-days-draft-result.json
+            schema:  !include json/schema/hearing.command.save-days-draft-result.json
+        application/vnd.hearing.command.save-days-draft-results+json:
+            example: !include json/hearing.command.save-days-draft-results.json
+            schema:  !include json/schema/hearing.command.save-days-draft-results.json
+
         application/vnd.hearing.command.share-results+json:
             example: !include json/hearing.command.share-results.json
             schema:  !include json/schema/hearing.command.share-results.json
+
+        application/vnd.hearing.command.share-results-v2+json:
+            example: !include json/hearing.command.share-results-v2.json
+            schema:  !include json/schema/hearing.command.share-results-v2.json
+
+        application/vnd.hearing.command.share-days-results+json:
+            example: !include json/hearing.command.share-days-results.json
+            schema:  !include json/schema/hearing.command.share-days-results.json
 
         application/vnd.hearing.command.remove-targets+json:
             example: !include json/hearing.command.remove-targets.json
@@ -109,6 +128,11 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.update-result-lines-status+json:
             example: !include json/hearing.command.update-result-lines-status.json
             schema:  !include json/schema/hearing.command.update-result-lines-status.json
+
+        application/vnd.hearing.command.update-days-result-lines-status+json:
+            example: !include json/hearing.command.update-days-result-lines-status.json
+            schema:  !include json/schema/hearing.command.update-days-result-lines-status.json
+
 
 #Update Plea
         application/vnd.hearing.hearing-offence-plea-update+json:
@@ -379,3 +403,51 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.youth-court-defendants+json:
             schema: !include json/schema/hearing.command.youth-court-defendants.json
             example: !include json/hearing.command.youth-court-defendants.json
+
+# Delete Hearing
+        application/vnd.hearing.command.delete-hearing+json:
+            schema: !include json/schema/hearing.command.delete-hearing.json
+            example: !include json/hearing.command.delete-hearing.json
+
+        application/vnd.hearing.command.delete-hearing-for-prosecution-cases+json:
+            schema: !include json/schema/hearing.command.delete-hearing-for-prosecution-cases.json
+            example: !include json/hearing.command.delete-hearing-for-prosecution-cases.json
+
+        application/vnd.hearing.command.delete-hearing-for-defendants+json:
+            schema: !include json/schema/hearing.command.delete-hearing-for-defendants.json
+            example: !include json/hearing.command.delete-hearing-for-defendants.json
+
+        application/vnd.hearing.command.delete-hearing-for-offences+json:
+            schema: !include json/schema/hearing.command.delete-hearing-for-offences.json
+            example: !include json/hearing.command.delete-hearing-for-offences.json
+
+        application/vnd.hearing.command.delete-hearing-for-court-applications+json:
+            schema: !include json/schema/hearing.command.delete-hearing-for-court-applications.json
+            example: !include json/hearing.command.delete-hearing-for-court-applications.json
+
+# Unallocate Hearing
+        application/vnd.hearing.command.unallocate-hearing+json:
+            schema: !include json/schema/hearing.command.unallocate-hearing.json
+            example: !include json/hearing.command.unallocate-hearing.json
+
+        application/vnd.hearing.command.remove-hearing-for-prosecution-cases+json:
+            schema: !include json/schema/hearing.command.remove-hearing-for-prosecution-cases.json
+            example: !include json/hearing.command.remove-hearing-for-prosecution-cases.json
+
+        application/vnd.hearing.command.remove-hearing-for-defendants+json:
+            schema: !include json/schema/hearing.command.remove-hearing-for-defendants.json
+            example: !include json/hearing.command.remove-hearing-for-defendants.json
+
+        application/vnd.hearing.command.remove-hearing-for-offences+json:
+            schema: !include json/schema/hearing.command.remove-hearing-for-offences.json
+            example: !include json/hearing.command.remove-hearing-for-offences.json
+
+# Record Next Hearing Day Updated
+        application/vnd.hearing.command.record-next-hearing-day-updated+json:
+            schema: !include json/schema/hearing.command.record-next-hearing-day-updated.json
+            example: !include json/hearing.command.record-next-hearing-day-updated.json
+
+# Remove Offences From Existing Hearing
+        application/vnd.hearing.command.remove-offences-from-existing-hearing+json:
+            schema: !include json/schema/hearing.command.remove-offences-from-existing-hearing.json
+            example: !include json/hearing.command.remove-offences-from-existing-hearing.json

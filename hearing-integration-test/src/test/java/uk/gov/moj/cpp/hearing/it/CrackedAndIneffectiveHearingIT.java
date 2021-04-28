@@ -123,7 +123,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         final HearingDay cancelledHearingDay = hearingDays.get(1);
         final TrialType trialType = TrialType.builder().withTrialTypeId(trialTypeId).build();
 
-        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -172,7 +172,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
         final TrialType trialType = TrialType.builder().withTrialTypeId(trialTypeId).build();
 
-        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
         shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
 
@@ -198,7 +198,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         final HearingDay secondHearingDay = hearingDays.get(1);
         final TrialType trialType = TrialType.builder().withTrialTypeId(trialTypeId).build();
 
-        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -242,7 +242,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         final HearingDay crackedHearingDay = hearingDays.get(0);
         final TrialType trialType = TrialType.builder().withTrialTypeId(trialTypeId).build();
 
-        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
 
         final EventListener publicEventResulted = listenFor("public.hearing.resulted")

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Comparator.comparing;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -20,36 +21,44 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("squid:S00107")
+@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871"})
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 5785404163781560623L;
+    private static final long serialVersionUID = 6948738797633524092L;
 
     private final HearingAggregateMomento momento;
 
@@ -180,7 +189,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public void handleTargetRemoved(final UUID targetId) {
-        this.momento.getTargets().remove(targetId);
+        this.momento.getMultiDayTargets().get(getHearingDay()).remove(targetId);
     }
 
     public void handleMasterDefendantIdAdded(final UUID prosecutionCaseId, final UUID defendantId, final UUID masterDefendantId) {
@@ -298,9 +307,13 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {
+
+        final LocalDate hearingDay = getHearingDay();
+        final Map<UUID, Target> targetMap = this.momento.getMultiDayTargets().containsKey(hearingDay) ? this.momento.getMultiDayTargets().get(hearingDay) : new HashMap<>();
+
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting action for removing draft target as hearing is null", hearingId));
-        } else if (!this.momento.getTargets().containsKey(targetId)) {
+        } else if (!targetMap.containsKey(targetId)) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting action for removing draft target as target ID not present", hearingId));
         }
         return Stream.of(TargetRemoved.targetRemoved().setHearingId(hearingId).setTargetId(targetId));
@@ -340,6 +353,41 @@ public class HearingDelegate implements Serializable {
                 hearingDay.setCourtRoomId(correctedHearingDay.getCourtRoomId());
             }
         });
+    }
+
+    public Stream<Object> deleteHearing(final UUID hearingId) {
+
+        final List<UUID> prosecutionCaseIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getProsecutionCaseIds(momento.getHearing()) : null;
+        final List<UUID> defendantIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getDefendantIds(momento.getHearing()) : null;
+        final List<UUID> offenceIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getOffenceIds(momento.getHearing()) : null;
+        final List<UUID> courtApplicationIds = isNotEmpty(momento.getHearing().getCourtApplications()) ? getCourtApplicationIds(momento.getHearing()) : null;
+
+        return Stream.of(new HearingDeleted(prosecutionCaseIds, defendantIds, offenceIds, courtApplicationIds, hearingId));
+    }
+
+    public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> offencesToBeRemoved) {
+
+        final List<UUID> defendantsToBeRemoved = momento.getHearing().getProsecutionCases()
+                .stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(defendant -> defendant
+                        .getOffences()
+                        .stream()
+                        .filter(offence -> !offencesToBeRemoved.contains(offence.getId()))
+                        .collect(Collectors.toList()).isEmpty())
+                .map(Defendant::getId)
+                .collect(toList());
+
+        final List<UUID> prosecutionCasesToBeRemoved = momento.getHearing().getProsecutionCases()
+                .stream()
+                .filter(prosecutionCase -> prosecutionCase
+                        .getDefendants()
+                        .stream().filter(defendant -> !defendantsToBeRemoved.contains(defendant.getId()))
+                        .collect(Collectors.toList()).isEmpty())
+                .map(ProsecutionCase::getId)
+                .collect(Collectors.toList());
+
+        return Stream.of(new HearingUnallocated(prosecutionCasesToBeRemoved, defendantsToBeRemoved, offencesToBeRemoved, hearingId));
     }
 
     private ProsecutionCase createProsecutionCase(final ProsecutionCase extendedPC, final ProsecutionCase current) {
@@ -423,4 +471,166 @@ public class HearingDelegate implements Serializable {
         });
         return currentOffences;
     }
+
+    public void handleHearingDeleted() {
+        this.momento.setDeleted(true);
+    }
+
+    public void handleHearingUnallocated(final HearingUnallocated hearingUnallocated) {
+        this.momento.setDeleted(true);
+
+        final List<UUID> offencesToBeRemoved = hearingUnallocated.getProsecutionCaseIds();
+        final List<UUID> defendantsToBeRemoved = hearingUnallocated.getProsecutionCaseIds();
+        final List<UUID> prosecutionCasesToBeRemoved = hearingUnallocated.getProsecutionCaseIds();
+
+        // Remove offences from all defendants
+        momento.getHearing().getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants().forEach(
+                        defendant -> defendant.getOffences()
+                                .removeIf(offence -> offencesToBeRemoved.contains(offence.getId()))
+                )
+        );
+
+        // Remove defendants with no offences from all prosecution cases
+        momento.getHearing().getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants()
+                        .removeIf(defendant -> defendantsToBeRemoved.contains(defendant.getId()))
+        );
+
+        // Remove prosecution cases with no defendants
+        momento.getHearing().getProsecutionCases()
+                .removeIf(prosecutionCase -> prosecutionCasesToBeRemoved.contains(prosecutionCase.getId()));
+    }
+
+    public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingStartDate) {
+
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
+        streamBuilder.add(new NextHearingStartDateRecorded(hearingId, seedingHearingId, nextHearingStartDate));
+
+        if (momento.getNextHearingStartDates().isEmpty()) {
+
+            streamBuilder.add(new EarliestNextHearingDateChanged(hearingId, seedingHearingId, nextHearingStartDate));
+
+        } else if (isNextHearingDateTheEarliestWhenNewNextHearing(hearingId, nextHearingStartDate)) {
+
+            streamBuilder.add(new EarliestNextHearingDateChanged(hearingId, seedingHearingId, nextHearingStartDate));
+
+        } else if (isNextHearingDateTheEarliestWhenExistingNextHearing(hearingId, nextHearingStartDate)) {
+
+            streamBuilder.add(new EarliestNextHearingDateChanged(hearingId, seedingHearingId, nextHearingStartDate));
+
+        } else if (isEarliestNextHearing(hearingId, nextHearingStartDate)) {
+
+            streamBuilder.add(new EarliestNextHearingDateChanged(hearingId, seedingHearingId, nextHearingStartDate));
+
+        }
+
+        return streamBuilder.build();
+    }
+
+    /**
+     * This method return true when the next hearing (hearingId) is not available in the map
+     * and the date 'nextHearingStartDate' for hearingId is the earliest in the map.
+     *
+     * @param hearingId
+     * @param nextHearingStartDate
+     * @return
+     */
+    private boolean isNextHearingDateTheEarliestWhenNewNextHearing(final UUID hearingId, final ZonedDateTime nextHearingStartDate) {
+
+        return isNull(momento.getNextHearingStartDates().get(hearingId))
+                && isEarliestNextHearingStartDate(hearingId, nextHearingStartDate, momento.getNextHearingStartDates());
+
+    }
+
+    /**
+     * This method return true when the next hearing (hearingId) is available in the map
+     * and is the only entry available in the map
+     * and the date 'nextHearingStartDate' is earlier than the existing date for hearingId in the map.
+     *
+     * @param hearingId
+     * @param nextHearingStartDate
+     * @return
+     */
+    private boolean isNextHearingDateTheEarliestWhenExistingNextHearing(final UUID hearingId, final ZonedDateTime nextHearingStartDate) {
+
+        return momento.getNextHearingStartDates().size() == 1
+                && nonNull(momento.getNextHearingStartDates().get(hearingId))
+                && nextHearingStartDate.isBefore(momento.getNextHearingStartDates().get(hearingId));
+
+    }
+
+    private boolean isEarliestNextHearing(final UUID hearingId, final ZonedDateTime nextHearingStartDate) {
+
+        return isEarliestNextHearingStartDate(hearingId, nextHearingStartDate, momento.getNextHearingStartDates());
+
+    }
+
+
+    private boolean isEarliestNextHearingStartDate(final UUID hearingId, final ZonedDateTime nextHearingStartDate, final Map<UUID, ZonedDateTime> nextHearingStartDates) {
+
+        final Optional<ZonedDateTime> earliestStartDate = nextHearingStartDates.entrySet().stream()
+                .filter(map -> !(map.getKey().equals(hearingId)))
+                .map(Map.Entry::getValue)
+                .min(comparing(ZonedDateTime::toLocalDate));
+
+        return earliestStartDate.isPresent() && nextHearingStartDate.isBefore(earliestStartDate.get());
+
+    }
+
+    public void handleNextHearingStartDateRecorded(final NextHearingStartDateRecorded nextHearingStartDateRecorded) {
+        momento.getNextHearingStartDates().put(nextHearingStartDateRecorded.getHearingId(), nextHearingStartDateRecorded.getNextHearingStartDate());
+    }
+
+    public void handleEarliestNextHearingDateCleared() {
+
+        momento.getNextHearingStartDates().clear();
+
+    }
+
+    private LocalDate getHearingDay() {
+        return this.momento.getHearing().getHearingDays().stream()
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Hearing Day is not present"))
+                .getSittingDay()
+                .toLocalDate();
+    }
+
+    private List<UUID> getProsecutionCaseIds(final Hearing hearing) {
+        return hearing
+                .getProsecutionCases()
+                .stream()
+                .map(ProsecutionCase::getId)
+                .collect(toList());
+    }
+
+    private List<UUID> getDefendantIds(final Hearing hearing) {
+        return hearing.getProsecutionCases()
+                .stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants()
+                        .stream()
+                        .map(Defendant::getId))
+                .collect(toList());
+
+    }
+
+    private List<UUID> getOffenceIds(final Hearing hearing) {
+        return hearing.getProsecutionCases()
+                .stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants()
+                        .stream()
+                        .flatMap(defendant -> defendant.getOffences()
+                                .stream()
+                                .map(Offence::getId)))
+                .collect(toList());
+    }
+
+    private List<UUID> getCourtApplicationIds(final Hearing hearing) {
+        return hearing
+                .getCourtApplications()
+                .stream()
+                .map(CourtApplication::getId)
+                .collect(toList());
+    }
+
 }

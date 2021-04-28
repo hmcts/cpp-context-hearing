@@ -463,7 +463,7 @@ public class VerdictDelegateTest {
                 .withFirstName("Andrew").withLastName("Eldritch")
                 .withUserId(randomUUID()).build();
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), LocalDate.now());
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), LocalDate.now(), LocalDate.now());
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);
@@ -530,7 +530,7 @@ public class VerdictDelegateTest {
                 .withFirstName("Andrew").withLastName("Eldritch")
                 .withUserId(randomUUID()).build();
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), LocalDate.now());
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), LocalDate.now(), LocalDate.now());
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
         targetDraft.setResultLines(null);

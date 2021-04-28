@@ -182,7 +182,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Test
     public void shareResultsIncludingDDCH() throws IOException {
 
-        doNothing().when(bailStatusHelper).mapBailStatuses(any(JsonEnvelope.class), any(ResultsShared.class));
+        doNothing().when(bailStatusHelper).mapBailStatuses(any(JsonEnvelope.class), any(Hearing.class));
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile("hearing.results-shared-ddch.json", ResultsShared.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
 

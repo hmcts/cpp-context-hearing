@@ -5,6 +5,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.contains;
@@ -12,10 +13,8 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.eq;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate.computeAllOffencesWithdrawnOrDismissed;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
@@ -24,17 +23,17 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESDecisionConstants;
-import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.NCESNotificationDecisionDelegate;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.nces.Defendant;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithFinancialOrderDetails;
 import uk.gov.moj.cpp.hearing.nces.DocumentContent;
 import uk.gov.moj.cpp.hearing.nces.FinancialOrderForDefendant;
-import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithFinancialOrderDetails;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,7 +51,6 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -494,6 +492,30 @@ public class DefendantAggregateTest {
 
         final List<Object> collect = defendantAggregate.lookupHearingsForNewOffenceOnDefendant(randomUUID(), randomUUID(), Offence.offence().build()).collect(toList());
         assertThat(collect.size(), is(1));
+    }
+
+    @Test
+    public void shouldRaiseEventHearingDeletedForDefendant() {
+        setField(defendantAggregate, "hearingIds", singletonList(randomUUID()));
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final List<Object> eventStream = defendantAggregate.deleteHearingForDefendant(defendantId, hearingId).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final HearingDeletedForDefendant hearingDeletedForDefendant = (HearingDeletedForDefendant) eventStream.get(0);
+        assertThat(hearingDeletedForDefendant.getHearingId(), is(hearingId));
+        assertThat(hearingDeletedForDefendant.getDefendantId(), is(defendantId));
+    }
+
+    @Test
+    public void shouldRaiseEventHearingAllocatedForDefendant() {
+        setField(defendantAggregate, "hearingIds", singletonList(randomUUID()));
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final List<Object> eventStream = defendantAggregate.removeHearingForDefendant(defendantId, hearingId).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final HearingRemovedForDefendant hearingRemovedForDefendant = (HearingRemovedForDefendant) eventStream.get(0);
+        assertThat(hearingRemovedForDefendant.getHearingId(), is(hearingId));
+        assertThat(hearingRemovedForDefendant.getDefendantId(), is(defendantId));
     }
 
     public void testMapWithdrawnDismissed(final Map map, final Matcher matcher) {

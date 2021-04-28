@@ -12,7 +12,9 @@ import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearing
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
@@ -41,6 +43,8 @@ public class OffenceAggregate implements Aggregate {
                 when(OffenceVerdictUpdated.class).apply(verdict -> this.offenceVerdictUpdated = verdict),
                 when(RegisteredHearingAgainstOffence.class).apply(offence -> hearingIds.add(offence.getHearingId())),
                 when(HearingMarkedAsDuplicateForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                when(HearingDeletedForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                when(HearingRemovedForOffence.class).apply(e -> hearingIds.remove(e.getHearingId())),
                 otherwiseDoNothing()
         );
     }
@@ -114,5 +118,13 @@ public class OffenceAggregate implements Aggregate {
 
     public Stream<Object> markHearingAsDuplicate(final UUID offenceId, final UUID hearingId) {
         return apply(Stream.of(new HearingMarkedAsDuplicateForOffence(offenceId, hearingId)));
+    }
+
+    public Stream<Object> deleteHearingForOffence(final UUID offenceId, final UUID hearingId) {
+        return apply(Stream.of(new HearingDeletedForOffence(offenceId, hearingId)));
+    }
+
+    public Stream<Object> removeHearingForOffence(final UUID offenceId, final UUID hearingId) {
+        return apply(Stream.of(new HearingRemovedForOffence(offenceId, hearingId)));
     }
 }

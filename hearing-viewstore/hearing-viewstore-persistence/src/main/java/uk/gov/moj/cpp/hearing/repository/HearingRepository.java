@@ -93,6 +93,23 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
             "WHERE target.hearing.id = :hearingId")
     public abstract List<Target> findTargetsByHearingId(@QueryParam("hearingId") final UUID hearingId);
 
+    /**
+     * <code>hearingDay</code> is introduced with DD-3426.
+     * For the results saved before DD-3426 feature, <code>hearingDay</code> field will be empty.
+     * To enable backward compatibility, null values also included in the filter
+     *
+     * @param hearingId The id of the hearing
+     * @param hearingDay The hearing day that the results are entered for
+     *
+     * @return A list of targets against the given hearing id and hearing day.
+     * If no result is found, returns empty list.
+     */
+    @Query(value = "SELECT target FROM Target target " +
+            "WHERE target.hearing.id = :hearingId " +
+            "AND (target.hearingDay = :hearingDay OR target.hearingDay IS NULL)")
+    public abstract List<Target> findTargetsByFilters(@QueryParam("hearingId") final UUID hearingId,
+                                                      @QueryParam("hearingDay") final String hearingDay);
+
     @Query(value = "SELECT hearing.applicationDraftResults FROM Hearing hearing " +
             "WHERE hearing.id = :hearingId")
     public abstract List<ApplicationDraftResult> findApplicationDraftResultsByHearingId(@QueryParam("hearingId") final UUID hearingId);

@@ -9,6 +9,7 @@ import static java.util.stream.Collectors.toList;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.MasterDefendant;
@@ -26,6 +27,20 @@ public class BailConditionsHelper {
 
     private static final String BAIL_CONDITIONS = "Bail Conditions";
     private static final String[] applicableBailStatusCodes = new String[]{"L", "P", "B"};
+
+    public void setBailConditions(final Hearing hearing) {
+        ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .forEach(this::setBailConditions);
+
+        ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(ca -> nonNull(ca.getSubject().getMasterDefendant()))
+                .filter(ca -> nonNull(ca.getSubject().getMasterDefendant().getPersonDefendant()))
+                .forEach(ca -> {
+                    final List<Offence> offences = getOffencesFromApplication(ca);
+                    setBailConditions(ca.getSubject().getMasterDefendant(), offences);
+                });
+    }
 
     public void setBailConditions(final ResultsShared resultsShared) {
         ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)

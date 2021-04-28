@@ -2,10 +2,13 @@ package uk.gov.moj.cpp.hearing.event;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
@@ -24,6 +27,7 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
@@ -33,6 +37,7 @@ import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -44,6 +49,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import javax.json.JsonObject;
+import javax.json.JsonString;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateOffencesForDefendantEventProcessorTest {
@@ -60,12 +67,14 @@ public class UpdateOffencesForDefendantEventProcessorTest {
     @Spy
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
-
     @Mock
     private Sender sender;
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<Envelope<JsonObject>> commandEnvelopeArgumentCaptor;
 
     @InjectMocks
     private UpdateOffencesForDefendantEventProcessor updateOffencesForDefendantEventProcessor;
@@ -216,5 +225,34 @@ public class UpdateOffencesForDefendantEventProcessorTest {
                         )
                 )
         );
+    }
+
+    @Test
+    public void shouldRaiseRemoveOffencesFromExistingAllocatedHearingCommand() {
+
+        final UUID hearingId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final JsonObject envelopePayload = createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("offenceIds", createArrayBuilder()
+                        .add(offenceId1.toString())
+                        .add(offenceId2.toString())
+                        .build())
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.events.listing.offences-removed-from-existing-allocated-hearing"), envelopePayload);
+
+        updateOffencesForDefendantEventProcessor.handleOffencesRemovedFromExistingAllocatedHearingPublicEvent(event);
+
+        verify(this.sender, times(1)).send(this.commandEnvelopeArgumentCaptor.capture());
+        final Envelope<JsonObject> command = this.commandEnvelopeArgumentCaptor.getAllValues().get(0);
+        assertThat(command.metadata().name(), is("hearing.command.remove-offences-from-existing-hearing"));
+        assertThat(command.payload().getString("hearingId"), is(hearingId.toString()));
+        final List<JsonString> offenceIds = command.payload().getJsonArray("offenceIds").getValuesAs(JsonString.class);
+        assertThat(offenceIds.get(0).getString(), is(offenceId1.toString()));
+        assertThat(offenceIds.get(1).getString(), is(offenceId2.toString()));
+
     }
 }

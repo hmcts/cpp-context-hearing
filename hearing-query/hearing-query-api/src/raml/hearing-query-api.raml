@@ -62,6 +62,30 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get-draft-result.json
                     schema:  !include  json/schema/hearing.get-draft-result.json
 
+/hearings/{hearingId}/{hearingDay}:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the draft result
+          type: string
+        hearingDay:
+          description: The day of the hearing (multi day) to get the draft results for, in format yy-mm-dd (e.g. 2021-03-25)
+          type: string
+  get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.results+json
+            name: hearing.get-results
+        ...
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.results+json:
+                    example:  !include json/hearing.get-results.json
+                    schema:  !include  json/schema/hearing.get-results.json
+
+
 /hearings/{hearingId}/event-log:
     uriParameters:
         hearingId:

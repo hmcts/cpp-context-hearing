@@ -37,6 +37,40 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
             202:
                 description: OK
 
+/hearings/{hearingId}/{hearingDay}:
+  post:
+    description: |
+      ...
+      (mapping):
+          requestType: application/vnd.hearing.shared-results+json
+          name: hearing.share-days-results
+      (mapping):
+          requestType: application/vnd.hearing.draft-result+json
+          name: hearing.save-days-draft-result
+      (mapping):
+          requestType: application/vnd.hearing.draft-results+json
+          name: hearing.save-days-draft-results
+      ...
+    body:
+      application/vnd.hearing.shared-results+json:
+          example:
+           !include json/hearing.share-days-results.json
+          schema:
+           !include json/schema/hearing.share-days-results.json
+      application/vnd.hearing.draft-result+json:
+          example:
+           !include json/hearing.save-days-draft-result.json
+          schema:
+           !include json/schema/hearing.save-days-draft-result.json
+      application/vnd.hearing.draft-results+json:
+          example:
+           !include json/hearing.save-days-draft-results.json
+          schema:
+           !include json/schema/hearing.save-days-draft-results.json
+    responses:
+          202:
+              description: Accepted
+
 /hearings/{hearingId}:
   displayName: Hearing
   post:
@@ -126,6 +160,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.change-hearing-detail+json
             name: hearing.change-hearing-detail
+        (mapping):
+            requestType: application/vnd.hearing.related-hearing+json
+            name: hearing.update-related-hearing
         (mapping):
             requestType: application/vnd.hearing.change-cancel-amendments+json
             name: hearing.change-cancel-amendments
@@ -244,6 +281,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.change-cancel-amendments+json:
             schema: !include json/schema/hearing.change-cancel-amendments.json
             example: !include json/hearing.change-cancel-amendments.json
+        application/vnd.hearing.related-hearing+json:
+            example: !include json/hearing.update-related-hearing.json
+            schema: !include json/schema/hearing.update-related-hearing.json
         application/vnd.hearing.update-resultline-shared-dates+json:
             example: !include json/hearing.update-resultline-shared-dates.json
             schema: !include json/schema/hearing.update-resultline-shared-dates.json
@@ -345,11 +385,17 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.share-results+json
             name: hearing.share-results
+        (mapping):
+            requestType: application/vnd.hearing.share-results-v2+json
+            name: hearing.share-results-v2
         ...
       body:
         application/vnd.hearing.share-results+json:
             example: !include json/hearing.share-results.json
             schema: !include json/schema/hearing.share-results.json
+        application/vnd.hearing.share-results-v2+json:
+            example: !include json/hearing.share-results-v2.json
+            schema: !include json/schema/hearing.share-results-v2.json
       responses:
             202:
                 description: OK

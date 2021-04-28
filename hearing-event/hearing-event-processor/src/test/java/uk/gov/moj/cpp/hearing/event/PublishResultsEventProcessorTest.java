@@ -138,7 +138,7 @@ public class PublishResultsEventProcessorTest {
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
 
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -178,7 +178,7 @@ public class PublishResultsEventProcessorTest {
                         .withPostcode("LL55 2DF")
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -221,7 +221,7 @@ public class PublishResultsEventProcessorTest {
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
 
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -260,7 +260,7 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "F"));
 
@@ -311,7 +311,7 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "F"));
 
@@ -364,7 +364,7 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "F"));
 
@@ -417,7 +417,7 @@ public class PublishResultsEventProcessorTest {
                 .filter(ResultLine::getIsComplete)
                 .collect(Collectors.toList()).get(0);
 
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         when(referenceDataService.getResultDefinitionById(any(), any(), any())).thenReturn(getResultDefinitionForOffenceResult(resultLine, "A"));
 
@@ -473,7 +473,7 @@ public class PublishResultsEventProcessorTest {
                         .withWelshAddress5("Welsh 5")
                         .withPostcode("LL55 2DF")
                         .build());
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -508,7 +508,7 @@ public class PublishResultsEventProcessorTest {
                         .withPostcode("LL55 2DF")
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 
@@ -564,7 +564,7 @@ public class PublishResultsEventProcessorTest {
                         .build());
 
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
-        when(resultsSharedFilter.filterTargets(any(), any())).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
 
         publishResultsEventProcessor.resultsShared(event);
 

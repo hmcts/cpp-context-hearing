@@ -9,6 +9,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.mapping.OffenceJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -20,6 +21,8 @@ import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.UUID;
 
 @ServiceComponent(EVENT_LISTENER)
 public class UpdateOffencesForDefendantEventListener {
@@ -76,6 +79,33 @@ public class UpdateOffencesForDefendantEventListener {
         offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
 
         defendantRepository.save(offence.getDefendant());
+    }
+
+    @Transactional
+    @Handles("hearing.events.offences-removed-from-existing-hearing")
+    public void removeOffencesFromExistingAllocatedHearing(final JsonEnvelope envelope) {
+
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffencesRemovedFromExistingHearing.class);
+
+        final UUID hearingId = offencesRemovedFromExistingHearing.getHearingId();
+        final List<UUID> prosecutionCaseIds = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
+        final List<UUID> defendantIds = offencesRemovedFromExistingHearing.getDefendantIds();
+        final List<UUID> offenceIds = offencesRemovedFromExistingHearing.getOffenceIds();
+
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+        hearing.getProsecutionCases().forEach(prosecutionCase ->
+            prosecutionCase.getDefendants().forEach(defendant ->
+                defendant.getOffences().removeIf(o -> offenceIds.contains(o.getId().getId()))
+        ));
+
+        hearing.getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants().removeIf(defendant -> defendantIds.contains(defendant.getId().getId()))
+        );
+
+        hearing.getProsecutionCases().removeIf(prosecutionCase -> prosecutionCaseIds.contains(prosecutionCase.getId().getId()));
+
+        hearingRepository.save(hearing);
+
     }
 
 }

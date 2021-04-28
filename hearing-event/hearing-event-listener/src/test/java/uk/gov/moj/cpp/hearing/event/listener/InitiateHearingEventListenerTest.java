@@ -31,6 +31,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.mapping.CourtCentreJPAMapper;
@@ -222,6 +223,69 @@ public class InitiateHearingEventListenerTest {
     }
 
     @Test
+    public void shouldUpdateProsecutionCasesInExistingHearing() {
+
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final ProsecutionCase prosecutionCaseInEvent = createProsecutionCase(prosecutionCaseId, defendantId, offenceId);
+        final List<ProsecutionCase> prosecutionCasesInEvent = new ArrayList<>();
+        prosecutionCasesInEvent.add(prosecutionCaseInEvent);
+
+        final ExistingHearingUpdated existingHearingUpdated = new ExistingHearingUpdated(hearingId, prosecutionCasesInEvent, null);
+
+        final Set<Offence> offencesEntities = new HashSet<>();
+        final Offence offenceEntity = new Offence();
+        offenceEntity.setId(new HearingSnapshotKey(offenceId, hearingId));
+        offencesEntities.add(offenceEntity);
+
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant> defendantsEntities = new HashSet<>();
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        defendantEntity.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendantEntity.setOffences(offencesEntities);
+        defendantsEntities.add(defendantEntity);
+
+        final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCasesEntities = new HashSet<>();
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCaseEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCaseEntity.setId(new HearingSnapshotKey(prosecutionCaseId, hearingId));
+        prosecutionCaseEntity.setDefendants(defendantsEntities);
+        prosecutionCasesEntities.add(prosecutionCaseEntity);
+
+        final ProsecutionCase prosecutionCaseInEntity = createProsecutionCase(prosecutionCaseId, defendantId, offenceId);
+        final List<ProsecutionCase> prosecutionCasesInEntity = new ArrayList<>();
+        prosecutionCasesInEntity.add(prosecutionCaseInEntity);
+
+        final Hearing hearing = new Hearing();
+        hearing.setProsecutionCases(prosecutionCasesEntities);
+
+        when(hearingRepository.findBy(existingHearingUpdated.getHearingId())).thenReturn(hearing);
+        when(prosecutionCaseJPAMapper.toJPA(any(hearing.getClass()), any(ProsecutionCase.class))).thenReturn(prosecutionCaseEntity);
+        when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCasesInEntity);
+        when(prosecutionCaseRepository.save(any())).thenReturn(prosecutionCaseEntity);
+
+        initiateHearingEventListener.handleExistingHearingUpdatedEvent(envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(existingHearingUpdated)));
+
+        final ArgumentCaptor<Hearing> hearingExArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+        final ArgumentCaptor<ProsecutionCase> prosecutionCaseArgumentCaptor = ArgumentCaptor.forClass(ProsecutionCase.class);
+
+        verify(prosecutionCaseJPAMapper, times(1)).toJPA(hearingExArgumentCaptor.capture(), prosecutionCaseArgumentCaptor.capture());
+        verify(prosecutionCaseRepository).save(any());
+
+        final ProsecutionCase prosecutionCase = prosecutionCaseArgumentCaptor.getValue();
+
+        assertThat(prosecutionCase.getDefendants().size(), is(1));
+        assertThat(prosecutionCase.getId(), is(prosecutionCaseId));
+        assertThat(prosecutionCase.getDefendants().size(), is(1));
+
+        assertThat(prosecutionCase.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(prosecutionCase.getDefendants().get(0).getOffences().size(), is(1));
+        assertThat(prosecutionCase.getDefendants().get(0).getOffences().get(0).getId(), is(offenceId));
+
+    }
+
+    @Test
     public void shouldAddDefendantToTheExistingProsecutionCaseWhenDefendantIsNotPresentInTheProsecutionCase() {
 
         final UUID hearingId = randomUUID();
@@ -295,10 +359,9 @@ public class InitiateHearingEventListenerTest {
         final UUID hearingId = randomUUID();
         final UUID prosecutionCaseId = randomUUID();
         final UUID defendantId = randomUUID();
-        final UUID offenceId1 = randomUUID();
-        final UUID offenceId2 = randomUUID();
+        final UUID offenceId = randomUUID();
 
-        final ProsecutionCase prosecutionCaseInEvent = createProsecutionCase(prosecutionCaseId, defendantId, offenceId1);
+        final ProsecutionCase prosecutionCaseInEvent = createProsecutionCase(prosecutionCaseId, defendantId, offenceId);
         final List<ProsecutionCase> prosecutionCasesInEvent = new ArrayList<>();
         prosecutionCasesInEvent.add(prosecutionCaseInEvent);
 
@@ -306,7 +369,7 @@ public class InitiateHearingEventListenerTest {
 
         final Set<Offence> offencesEntities = new HashSet<>();
         final Offence offenceEntity = new Offence();
-        offenceEntity.setId(new HearingSnapshotKey(offenceId2, hearingId));
+        offenceEntity.setId(new HearingSnapshotKey(offenceId, hearingId));
         offencesEntities.add(offenceEntity);
 
         final Set<uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant> defendantsEntities = new HashSet<>();
@@ -321,7 +384,7 @@ public class InitiateHearingEventListenerTest {
         prosecutionCaseEntity.setDefendants(defendantsEntities);
         prosecutionCasesEntities.add(prosecutionCaseEntity);
 
-        final ProsecutionCase prosecutionCaseInEntity = createProsecutionCase(prosecutionCaseId, defendantId, offenceId2);
+        final ProsecutionCase prosecutionCaseInEntity = createProsecutionCase(prosecutionCaseId, defendantId, offenceId);
         final List<ProsecutionCase> prosecutionCasesInEntity = new ArrayList<>();
         prosecutionCasesInEntity.add(prosecutionCaseInEntity);
 
@@ -343,12 +406,14 @@ public class InitiateHearingEventListenerTest {
 
         final ProsecutionCase prosecutionCase = prosecutionCaseArgumentCaptor.getValue();
         assertThat(prosecutionCase.getId(), is(prosecutionCaseId));
+        assertThat(prosecutionCase.getRemovalReason(), is("removal reason"));
         assertThat(prosecutionCase.getDefendants().size(), is(1));
         assertThat(prosecutionCase.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(prosecutionCase.getDefendants().get(0).getWitnessStatement(), is("witness statement"));
 
-        assertThat(prosecutionCase.getDefendants().get(0).getOffences().size(), is(2));
-        assertThat(prosecutionCase.getDefendants().get(0).getOffences().get(0).getId(), is(offenceId2));
-        assertThat(prosecutionCase.getDefendants().get(0).getOffences().get(1).getId(), is(offenceId1));
+        assertThat(prosecutionCase.getDefendants().get(0).getOffences().size(), is(1));
+        assertThat(prosecutionCase.getDefendants().get(0).getOffences().get(0).getId(), is(offenceId));
+        assertThat(prosecutionCase.getDefendants().get(0).getOffences().get(0).getOffenceLegislation(), is("offence legislation"));
 
     }
 
@@ -357,6 +422,7 @@ public class InitiateHearingEventListenerTest {
         defendants.add(createDefendant(defendantId, offenceId));
         return ProsecutionCase.prosecutionCase()
                 .withId(prosecutionCaseId)
+                .withRemovalReason("removal reason")
                 .withDefendants(defendants)
                 .build();
     }
@@ -366,6 +432,7 @@ public class InitiateHearingEventListenerTest {
         offences.add(createOffence(offenceId));
         return Defendant.defendant()
                 .withId(defendantId)
+                .withWitnessStatement("witness statement")
                 .withOffences(offences)
                 .build();
     }
@@ -373,6 +440,7 @@ public class InitiateHearingEventListenerTest {
     private uk.gov.justice.core.courts.Offence createOffence(final UUID offenceId) {
         return uk.gov.justice.core.courts.Offence.offence()
                 .withId(offenceId)
+                .withOffenceLegislation("offence legislation")
                 .build();
     }
 

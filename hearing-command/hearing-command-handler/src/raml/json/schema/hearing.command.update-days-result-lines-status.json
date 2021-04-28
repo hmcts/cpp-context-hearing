@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.update-days-result-lines-status.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "lastSharedDateTime": {
+      "type": "string"
+    },
+    "courtClerk": {
+      "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
+    },
+    "sharedResultLines": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sharedResultLineId": {
+            "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+          }
+        },
+        "required": [
+          "sharedResultLineId"
+        ]
+      }
+    },
+    "hearingDay": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
+    }
+  },
+  "required": [
+    "hearingId",
+    "sharedResultLines",
+    "hearingDay"
+  ]
+}

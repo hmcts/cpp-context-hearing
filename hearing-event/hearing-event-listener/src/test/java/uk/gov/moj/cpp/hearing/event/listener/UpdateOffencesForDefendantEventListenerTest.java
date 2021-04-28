@@ -4,6 +4,7 @@ import static java.time.LocalDate.now;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +12,8 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
+import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -21,6 +24,7 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CourtIndicatedSentenceJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.DelegatedPowersJPAMapper;
@@ -40,11 +44,15 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -256,4 +264,154 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
         assertThat(defendant.getId().getId(), is(defendantOut.getId().getId()));
     }
+
+    @Test
+    public void shouldRemoveOffenceFromExistingHearingWhenOffenceToBeRemoved() {
+
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final List<UUID> offenceIds = Collections.singletonList(offenceId1);
+
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, new ArrayList<>(), new ArrayList<>(), offenceIds);
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offencesRemovedFromExistingHearing));
+
+        final Offence offence1 = new Offence();
+        offence1.setId(new HearingSnapshotKey(offenceId1, hearingId));
+
+        final Offence offence2 = new Offence();
+        offence2.setId(new HearingSnapshotKey(offenceId2, hearingId));
+
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendant.getOffences().add(offence1);
+        defendant.getOffences().add(offence2);
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(prosecutionId, hearingId));
+        prosecutionCase.getDefendants().add(defendant);
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        hearing.getProsecutionCases().add(prosecutionCase);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
+
+        final ArgumentCaptor<Hearing> hearingArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository).save(hearingArgumentCaptor.capture());
+
+
+        final Hearing hearingOut = hearingArgumentCaptor.getValue();
+
+        assertThat(hearingOut, isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getProsecutionCases, hasSize(1))
+                .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                        .with(ProsecutionCase::getDefendants, hasSize(1))
+                        .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                .with(Defendant::getOffences, hasSize(1)))))));
+
+    }
+
+    @Test
+    public void shouldRemoveDefendantFromExistingHearingWhenDefendantIsToBeRemoved() {
+
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+
+        final List<UUID> defendantIds = Collections.singletonList(defendantId);
+        final List<UUID> offenceIds = Collections.singletonList(offenceId1);
+
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, new ArrayList<>(), defendantIds, offenceIds);
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offencesRemovedFromExistingHearing));
+
+        final Offence offence1 = new Offence();
+        offence1.setId(new HearingSnapshotKey(offenceId1, hearingId));
+
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendant.getOffences().add(offence1);
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(prosecutionId, hearingId));
+        prosecutionCase.getDefendants().add(defendant);
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        hearing.getProsecutionCases().add(prosecutionCase);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
+
+        final ArgumentCaptor<Hearing> hearingArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository).save(hearingArgumentCaptor.capture());
+
+
+        final Hearing hearingOut = hearingArgumentCaptor.getValue();
+
+        assertThat(hearingOut, isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getProsecutionCases, hasSize(1))
+                .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                        .with(ProsecutionCase::getDefendants, hasSize(0)))));
+
+    }
+
+    @Test
+    public void shouldRemoveProsecutionCaseFromExistingHearingWhenProsecutionCaseToBeRemoved() {
+
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+
+        final List<UUID> prosecutionCaseIds = Collections.singletonList(prosecutionId);
+        final List<UUID> defendantIds = Collections.singletonList(defendantId);
+        final List<UUID> offenceIds = Collections.singletonList(offenceId1);
+
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, prosecutionCaseIds, defendantIds, offenceIds);
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offencesRemovedFromExistingHearing));
+
+        final Offence offence1 = new Offence();
+        offence1.setId(new HearingSnapshotKey(offenceId1, hearingId));
+
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendant.getOffences().add(offence1);
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(prosecutionId, hearingId));
+        prosecutionCase.getDefendants().add(defendant);
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        hearing.getProsecutionCases().add(prosecutionCase);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+
+        updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
+
+        final ArgumentCaptor<Hearing> hearingArgumentCaptor = ArgumentCaptor.forClass(Hearing.class);
+
+        verify(hearingRepository).save(hearingArgumentCaptor.capture());
+
+
+        final Hearing hearingOut = hearingArgumentCaptor.getValue();
+
+        assertThat(hearingOut, isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getProsecutionCases, hasSize(0)));
+
+    }
+
 }

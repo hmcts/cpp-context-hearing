@@ -5,6 +5,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Objects.isNull;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -77,9 +78,12 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
@@ -617,7 +621,7 @@ public class UseCases {
                         target.getDefendantId(),
                         resultLineIn.getResultDefinitionId(),
                         resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(toList()),
                         resultLineIn.getResultLabel(),
                         resultLineIn.getLevel().name(),
                         resultLineIn.getIsModified(),
@@ -626,6 +630,33 @@ public class UseCases {
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
                         resultLineIn.getAmendmentDate(),
+                        resultLineIn.getFourEyesApproval(),
+                        resultLineIn.getApprovedDate(),
+                        resultLineIn.getIsDeleted(),
+                        null, null));
+    }
+
+    private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target) {
+        return target.getResultLines().stream().map(resultLineIn ->
+                new SharedResultsCommandResultLineV2(resultLineIn.getDelegatedPowers(),
+                        resultLineIn.getOrderedDate(),
+                        resultLineIn.getSharedDate(),
+                        resultLineIn.getResultLineId(),
+                        target.getTargetId(),
+                        target.getOffenceId(),
+                        target.getDefendantId(),
+                        resultLineIn.getResultDefinitionId(),
+                        resultLineIn.getPrompts().stream()
+                                .map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(), p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef()))
+                                .collect(toList()),
+                        resultLineIn.getResultLabel(),
+                        resultLineIn.getLevel().name(),
+                        resultLineIn.getIsModified(),
+                        resultLineIn.getIsComplete(),
+                        target.getApplicationId(),
+                        resultLineIn.getAmendmentReasonId(),
+                        resultLineIn.getAmendmentReason(),
+                        ZonedDateTime.now(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
@@ -648,6 +679,23 @@ public class UseCases {
                 .executeSuccessfully();
 
         return shareResultsCommand;
+    }
+
+    public static ShareDaysResultsCommand shareResultsPerDay(final RequestSpecification requestSpec, final UUID hearingId, final ShareDaysResultsCommand command, final List<Target> targets) {
+
+        command.setResultLines(
+                targets.stream()
+                        .flatMap(target -> sharedResultsResultLinePerDay(target))
+                        .collect(toList()));
+
+
+        makeCommand(requestSpec, "hearing.share-days-results")
+                .ofType("application/vnd.hearing.shared-results+json")
+                .withArgs(hearingId, command.getHearingDay())
+                .withPayload(command)
+                .executeSuccessfully();
+
+        return command;
     }
 
     public static JsonObject saveHearingCaseNote(final RequestSpecification requestSpec, final UUID hearingId, final JsonObject hearingCaseNote) {
@@ -1123,6 +1171,24 @@ public class UseCases {
                 .add("hearingId", hearingId.toString())
                 .add("caseMarkers", arrayBuilder)
                 .build();
+        sendMessage(
+                getPublicTopicInstance().createProducer(),
+                eventName,
+                payload,
+                metadataWithRandomUUID(eventName).withUserId(randomUUID().toString()).build());
+
+    }
+
+    public static void changeNextHearingDate(final UUID seedingHearingId, final UUID hearingId, final ZonedDateTime nextHearingStartDate) throws Exception {
+
+        final String eventName = "public.events.listing.next-hearing-day-changed";
+
+        final JsonObject payload = createObjectBuilder()
+                .add("seedingHearingId", seedingHearingId.toString())
+                .add("hearingId", hearingId.toString())
+                .add("hearingStartDate", nextHearingStartDate.format(DATE_TIME_FORMATTER))
+                .build();
+
         sendMessage(
                 getPublicTopicInstance().createProducer(),
                 eventName,

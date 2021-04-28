@@ -38,7 +38,6 @@ import org.junit.Test;
 
 public class BailStatusReasonHelperTest {
 
-
     @Test
     public void testMapBailStatusReason() {
         final ResultsShared resultsSharedTemplate = buildSharedTemplate(true, true, false, false);

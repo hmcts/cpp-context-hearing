@@ -26,6 +26,8 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_LOG_HEARING_EVENT = "hearing.log-hearing-event";
     private static final String ACTION_NAME_CORRECT_HEARING_EVENT = "hearing.correct-hearing-event";
     private static final String ACTION_NAME_SHARE_RESULTS_EVENT = "hearing.share-results";
+    private static final String ACTION_NAME_SHARE_RESULTS_V2_EVENT = "hearing.share-results-v2";
+    private static final String ACTION_NAME_SHARE_DAYS_RESULTS_EVENT = "hearing.share-days-results";
     private static final String ACTION_NAME_CREATE_HEARING_EVENT_DEFINITIONS_EVENT = "hearing.create-hearing-event-definitions";
     private static final String ACTION_NAME_GENERATE_NOWS = "hearing.generate-nows";
     private static final String ACTION_NAME_UPDATE_NOWS_MATERIAL_STATUS = "hearing.update-nows-material-status";
@@ -149,7 +151,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddDefenceCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_DEFENCE_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers","Defence Users","Advocates", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Defence Users", "Advocates", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -224,6 +226,42 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldNotAllowUnauthorisedUserToShareResult() {
         final Action action = createActionFor(ACTION_NAME_SHARE_RESULTS_EVENT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToShareResultV2() {
+        final Action action = createActionFor(ACTION_NAME_SHARE_RESULTS_V2_EVENT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToShareResultV2() {
+        final Action action = createActionFor(ACTION_NAME_SHARE_RESULTS_V2_EVENT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertFailureOutcome(results);
+    }
+
+    @Test
+    public void shouldAllowAuthorisedUserToShareDaysResult() {
+        final Action action = createActionFor(ACTION_NAME_SHARE_DAYS_RESULTS_EVENT);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate")).willReturn(true);
+
+        final ExecutionResults results = executeRulesWith(action);
+        assertSuccessfulOutcome(results);
+    }
+
+    @Test
+    public void shouldNotAllowUnauthorisedUserToShareDaysResult() {
+        final Action action = createActionFor(ACTION_NAME_SHARE_DAYS_RESULTS_EVENT);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Random group")).willReturn(false);
 
         final ExecutionResults results = executeRulesWith(action);

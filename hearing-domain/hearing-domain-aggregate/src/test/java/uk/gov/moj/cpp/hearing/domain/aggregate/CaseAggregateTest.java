@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.stream.Collectors.toList;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
 import uk.gov.justice.progression.events.SendingSheetCompleted;
@@ -10,6 +13,8 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Interpreter;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
@@ -116,5 +121,36 @@ public class CaseAggregateTest {
         return sendingSheetCompleted;
     }
 
+    @Test
+    public void shouldRaiseHearingDeletedForProsecutionCaseEvent() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId = UUID.randomUUID();
+
+        caseAggregate.apply(new HearingDeletedForProsecutionCase(prosecutionCaseId, hearingId));
+
+        final List<Object> eventStream = caseAggregate.deleteHearingForProsecutionCase(prosecutionCaseId, hearingId).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingDeletedForProsecutionCase hearingDeleted = (HearingDeletedForProsecutionCase) eventStream.get(0);
+        assertThat(hearingDeleted.getHearingId(), is(hearingId));
+        assertThat(hearingDeleted.getProsecutionCaseId(), is(prosecutionCaseId));
+    }
+
+    @Test
+    public void shouldRaiseHearingUnallocatedForProsecutionCaseEvent() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId = UUID.randomUUID();
+
+        caseAggregate.apply(new HearingRemovedForProsecutionCase(prosecutionCaseId, hearingId));
+
+        final List<Object> eventStream = caseAggregate.removeHearingForProsecutionCase(prosecutionCaseId, hearingId).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingRemovedForProsecutionCase hearingDeleted = (HearingRemovedForProsecutionCase) eventStream.get(0);
+        assertThat(hearingDeleted.getHearingId(), is(hearingId));
+        assertThat(hearingDeleted.getProsecutionCaseId(), is(prosecutionCaseId));
+    }
 
 }

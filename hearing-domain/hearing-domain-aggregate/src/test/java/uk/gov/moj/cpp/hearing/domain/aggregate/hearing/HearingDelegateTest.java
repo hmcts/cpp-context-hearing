@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -19,17 +20,23 @@ import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
+import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -259,6 +266,210 @@ public class HearingDelegateTest {
 
     }
 
+    @Test
+    public void shouldRemoveProsecutionCaseAndDefendantWhenAllOffencesAreRemoved() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID prosecutionCaseId3 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID offence1 = UUID.randomUUID();
+        final UUID offence2 = UUID.randomUUID();
+        final UUID offence3 = UUID.randomUUID();
+        final UUID offence4 = UUID.randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
+        final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
+        final ProsecutionCase prosecutionCase3 = createProsecutionCase(prosecutionCaseId3, defendantId3, offence3, offence4);
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3)))
+                .build());
+
+        final List<UUID> offencesToBeRemoved = asList(offence1, offence2);
+        final List<Object> eventStream = hearingDelegate.unAllocateHearing(hearingId, offencesToBeRemoved).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingUnallocated hearingUnallocated = (HearingUnallocated) eventStream.get(0);
+        assertThat(hearingUnallocated.getHearingId(), is(hearingId));
+        assertThat(hearingUnallocated.getProsecutionCaseIds().size(), is(1));
+        assertThat(hearingUnallocated.getDefendantIds().size(), is(1));
+        assertThat(hearingUnallocated.getOffenceIds().size(), is(2));
+        assertThat(momento.getHearing(), is(notNullValue()));
+    }
+
+    @Test
+    public void shouldNotRemoveProsecutionCaseAndDefendantWhenSingleOffenceIsRemoved() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutionCaseId1 = UUID.randomUUID();
+        final UUID prosecutionCaseId2 = UUID.randomUUID();
+        final UUID prosecutionCaseId3 = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID offence1 = UUID.randomUUID();
+        final UUID offence2 = UUID.randomUUID();
+        final UUID offence3 = UUID.randomUUID();
+        final UUID offence4 = UUID.randomUUID();
+
+        final ProsecutionCase prosecutionCase1 = createProsecutionCase(prosecutionCaseId1, defendantId1, offence1, offence2);
+        final ProsecutionCase prosecutionCase2 = createProsecutionCase(prosecutionCaseId2, defendantId2, offence3, offence4);
+        final ProsecutionCase prosecutionCase3 = createProsecutionCase(prosecutionCaseId3, defendantId3, offence3, offence4);
+
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withProsecutionCases(new ArrayList<>(asList(prosecutionCase1, prosecutionCase2, prosecutionCase3)))
+                .build());
+        final List<UUID> offencesToBeRemoved = asList(offence1);
+        final List<Object> eventStream = hearingDelegate.unAllocateHearing(hearingId, offencesToBeRemoved).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+        final HearingUnallocated hearingUnallocated = (HearingUnallocated) eventStream.get(0);
+        assertThat(hearingUnallocated.getHearingId(), is(hearingId));
+        assertThat(hearingUnallocated.getProsecutionCaseIds().size(), is(0));
+        assertThat(hearingUnallocated.getDefendantIds().size(), is(0));
+        assertThat(hearingUnallocated.getOffenceIds().size(), is(1));
+        assertThat(momento.getHearing(), is(notNullValue()));
+
+    }
+
+    @Test
+    public void shouldRaiseEarliestNextHearingDateChangedEventWhenThereAreNoNextHearingDatesForSeedingHearing() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
+
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(2));
+
+        final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
+        assertThat(nextHearingStartDateRecorded.getHearingId(), is(hearingId));
+        assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
+
+        final EarliestNextHearingDateChanged earliestNextHearingDateChanged = (EarliestNextHearingDateChanged) eventStream.get(1);
+        assertThat(earliestNextHearingDateChanged.getHearingId(), is(hearingId));
+        assertThat(earliestNextHearingDateChanged.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(earliestNextHearingDateChanged.getEarliestNextHearingDate(), is(nextHearingStartDate));
+
+    }
+
+    @Test
+    public void shouldRaiseEarliestNextHearingDateChangedEventWhenSameNextHearingDateIsEarlierThanPreviousOne() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
+
+        momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(2));
+
+        final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
+        assertThat(nextHearingStartDateRecorded.getHearingId(), is(hearingId));
+        assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
+
+        final EarliestNextHearingDateChanged earliestNextHearingDateChanged = (EarliestNextHearingDateChanged) eventStream.get(1);
+        assertThat(earliestNextHearingDateChanged.getHearingId(), is(hearingId));
+        assertThat(earliestNextHearingDateChanged.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(earliestNextHearingDateChanged.getEarliestNextHearingDate(), is(nextHearingStartDate));
+
+    }
+
+    @Test
+    public void shouldNotRaiseEarliestNextHearingDateChangedEventWhenSameNextHearingDateIsLaterThanPreviousOne() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
+
+        momento.getNextHearingStartDates().put(hearingId, ZonedDateTime.now().plusDays(3));
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+
+        final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
+        assertThat(nextHearingStartDateRecorded.getHearingId(), is(hearingId));
+        assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
+
+    }
+
+    @Test
+    public void shouldRaiseEarliestNextHearingDateChangedEventWhenNextHearingDateIsEarlierThanAllThePreviousOnes() {
+
+        final UUID hearingId1 = UUID.randomUUID();
+        final UUID hearingId2 = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(2);
+
+        momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(3));
+        momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(4));
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(2));
+
+        final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
+        assertThat(nextHearingStartDateRecorded.getHearingId(), is(hearingId1));
+        assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
+
+        final EarliestNextHearingDateChanged earliestNextHearingDateChanged = (EarliestNextHearingDateChanged) eventStream.get(1);
+        assertThat(earliestNextHearingDateChanged.getHearingId(), is(hearingId1));
+        assertThat(earliestNextHearingDateChanged.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(earliestNextHearingDateChanged.getEarliestNextHearingDate(), is(nextHearingStartDate));
+
+    }
+
+    @Test
+    public void shouldNotRaiseEarliestNextHearingDateChangedEventWhenNextHearingDateIsLaterThanOneOfThePreviousOnes() {
+
+        final UUID hearingId1 = UUID.randomUUID();
+        final UUID hearingId2 = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
+
+        momento.getNextHearingStartDates().put(hearingId1, ZonedDateTime.now().plusDays(2));
+        momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(4));
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+
+        final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
+        assertThat(nextHearingStartDateRecorded.getHearingId(), is(hearingId1));
+        assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
+
+    }
+
+    @Test
+    public void shouldNotRaiseEarliestNextHearingDateChangedEventWhenNextHearingDateIsLaterThanPreviousOnes() {
+
+        final UUID hearingId1 = UUID.randomUUID();
+        final UUID hearingId2 = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
+
+        momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(3));
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+
+        final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
+        assertThat(nextHearingStartDateRecorded.getHearingId(), is(hearingId1));
+        assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
+        assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
+
+
+    }
+
     private List<ProsecutionCase> caseList(ProsecutionCase... cases){
         return new ArrayList(Arrays.asList(cases));
     }
@@ -280,6 +491,28 @@ public class HearingDelegateTest {
         final List<Offence> offences = new ArrayList<>();
         offences.add(Offence.offence()
                 .withId(offenceId)
+                .build());
+
+        final List<Defendant> defendants = new ArrayList<>();
+        defendants.add(Defendant.defendant()
+                .withId(newDefendantID)
+                .withOffences(offences)
+                .build());
+
+        return ProsecutionCase.prosecutionCase()
+                .withId(caseId)
+                .withDefendants(defendants)
+                .build();
+    }
+
+    private ProsecutionCase createProsecutionCase(final UUID caseId, final UUID newDefendantID, final UUID offenceId1, final UUID offenceId2) {
+        final List<Offence> offences = new ArrayList<>();
+        offences.add(Offence.offence()
+                .withId(offenceId1)
+                .build());
+
+        offences.add(Offence.offence()
+                .withId(offenceId2)
                 .build());
 
         final List<Defendant> defendants = new ArrayList<>();

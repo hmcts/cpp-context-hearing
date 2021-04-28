@@ -12,6 +12,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyList;
@@ -33,6 +34,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -64,6 +66,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -93,6 +96,7 @@ public class HearingQueryViewTest {
 
     public static final UUID COURT_CENTRE_ID = randomUUID();
     private static final UUID HEARING_ID = randomUUID();
+    private static final String HEARING_DAY = "2021-03-01";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_COURTCENTRE_ID = "courtCentreId";
     private static final String FIELD_COURTROOM_IDS = "courtRoomIds";
@@ -101,6 +105,7 @@ public class HearingQueryViewTest {
     private static final String COURT_CENTRE_IDS_QUERY_PARAMETER = "courtCentreIds";
     private static final String LAST_MODIFIED_TIME = "dateOfHearing";
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_HEARING_DAY = "hearingDay";
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Spy
@@ -351,7 +356,7 @@ public class HearingQueryViewTest {
         final JsonEnvelope result = target.getDefendantInfoFromCourtHouseId(query);
         verify(hearingService).getHearingsByCourtRoomList(hearingDate, courtHouseId, asList(roomId1, roomId2));
         assertThat(result.metadata().name(), is("hearing.defendant.info"));
-        assertTrue(result.payloadAsJsonObject().getJsonArray("courtRooms").size() == 1);
+        assertEquals(1, result.payloadAsJsonObject().getJsonArray("courtRooms").size());
         assertTrue(result.payloadAsJsonObject().getJsonArray("courtRooms").getJsonObject(0).getString("courtRoomName").equalsIgnoreCase("Room-1"));
 
     }
@@ -388,6 +393,42 @@ public class HearingQueryViewTest {
         verify(hearingService).getTargets(HEARING_ID);
         assertThat(draftResult.payload().getTargets(), Matchers.empty());
         assertThat(draftResult.metadata().name(), is("hearing.get-draft-result"));
+    }
+
+    @Test
+    public void shouldNotGetDraftResultByNonExistingHearingDay() {
+        when(hearingService.getTargetsByDate(HEARING_ID, HEARING_DAY)).thenReturn(new TargetListResponse());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.results"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .build());
+
+        final Envelope<TargetListResponse> draftResult = target.getResults(query);
+
+        verify(hearingService).getTargetsByDate(HEARING_ID, HEARING_DAY);
+        assertThat(draftResult.payload().getTargets(), Matchers.empty());
+        assertThat(draftResult.metadata().name(), is("hearing.results"));
+    }
+
+    @Test
+    public void shouldGetDraftResultByHearingIdAndHearingDay() {
+        when(hearingService.getTargetsByDate(HEARING_ID, HEARING_DAY)).thenReturn(buildTargetListResponse());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.results"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .build());
+
+        final Envelope<TargetListResponse> draftResult = target.getResults(query);
+
+        verify(hearingService).getTargetsByDate(HEARING_ID, HEARING_DAY);
+        assertThat(draftResult.payload().getTargets(), Matchers.hasSize(1));
+        assertThat(draftResult.metadata().name(), is("hearing.results"));
     }
 
     @Test
@@ -500,5 +541,15 @@ public class HearingQueryViewTest {
         final UUID courtCentreId = randomUUID();
         final CourtListPublishStatusResult publishCourtListStatus = new CourtListPublishStatusResult(courtCentreId, now(), EXPORT_SUCCESSFUL);
         return of(publishCourtListStatus);
+    }
+
+    private TargetListResponse buildTargetListResponse() {
+
+        return TargetListResponse.builder().
+                withTargets(Arrays.asList(Target.target()
+                        .withHearingId(HEARING_ID)
+                        .withHearingDay(LocalDate.parse(HEARING_DAY))
+                        .withTargetId(randomUUID())
+                        .build())).build();
     }
 }

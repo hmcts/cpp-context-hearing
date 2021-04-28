@@ -260,11 +260,12 @@ public class HearingService {
         for (final Hearing hearing : hearings) {
             for (final ProsecutionCase pc : hearing.getProsecutionCases()) {
                 final UUID roomUUID = hearing.getCourtCentre().getRoomId();
-                if (!courtRooms.containsKey(roomUUID)) { //court room needs to be created
 
-                    courtRooms.put(roomUUID, CourtRoom.courtRoom().withCourtRoomName(hearing.getCourtCentre().getRoomName()).withDefendantDetails(new ArrayList<>()).build());
-                }
-                addDefendantDetailsToQueryResult(courtRooms, pc, roomUUID);
+                courtRooms.computeIfAbsent(roomUUID, room ->
+                        courtRooms.put(roomUUID, CourtRoom.courtRoom()
+                                .withCourtRoomName(hearing.getCourtCentre().getRoomName())
+                                .withDefendantDetails(new ArrayList<>()).build()));
+                addDefendantDetailsToQueryResult(courtRooms, pc, roomUUID); //court room needs to be created
 
             }
         }
@@ -528,6 +529,13 @@ public class HearingService {
 
     public TargetListResponse getTargets(final UUID hearingId) {
         final List<Target> listOfTargets = hearingRepository.findTargetsByHearingId(hearingId);
+        final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
+        return TargetListResponse.builder()
+                .withTargets(targetJPAMapper.fromJPA(Sets.newHashSet(listOfTargets), Sets.newHashSet(listOfProsecutionCases))).build();
+    }
+
+    public TargetListResponse getTargetsByDate(final UUID hearingId, final String hearingDay) {
+        final List<Target> listOfTargets = hearingRepository.findTargetsByFilters(hearingId, hearingDay);
         final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
         return TargetListResponse.builder()
                 .withTargets(targetJPAMapper.fromJPA(Sets.newHashSet(listOfTargets), Sets.newHashSet(listOfProsecutionCases))).build();

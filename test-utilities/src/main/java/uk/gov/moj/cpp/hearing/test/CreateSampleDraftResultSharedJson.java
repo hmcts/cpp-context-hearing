@@ -27,7 +27,7 @@ public class CreateSampleDraftResultSharedJson {
     public static void main(String[] args) throws IOException {
         final ObjectMapper objectMapper = createObjectMapper();
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
-        final SaveDraftResultCommand command = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now());
+        final SaveDraftResultCommand command = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
         command.setHearingId(command.getHearingId());
 
         final List<String> destinations = Arrays.asList(

@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -14,6 +16,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated.builder;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -23,6 +26,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
@@ -38,6 +42,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
+import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -184,5 +189,17 @@ public class OffenceAggregateTest {
         ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
         Stream<Object> objectStream = offenceAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Offence.offence().build());
         assertTrue(objectStream.findAny().isPresent());
+    }
+
+    @Test
+    public void shouldRaiseEventHearingDeletedForOffence() {
+        setField(offenceAggregate, "hearingIds", singletonList(randomUUID()));
+        final UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final List<Object> eventStream = offenceAggregate.deleteHearingForOffence(offenceId, hearingId).collect(toList());
+        assertThat(eventStream.size(), CoreMatchers.is(1));
+        final HearingDeletedForOffence hearingDeleted = (HearingDeletedForOffence) eventStream.get(0);
+        assertThat(hearingDeleted.getHearingId(), CoreMatchers.is(hearingId));
+        assertThat(hearingDeleted.getOffenceId(), CoreMatchers.is(offenceId));
     }
 }

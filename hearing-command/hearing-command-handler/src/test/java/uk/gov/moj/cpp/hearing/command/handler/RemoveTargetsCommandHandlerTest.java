@@ -22,7 +22,6 @@ import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
-import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -43,8 +42,6 @@ import javax.json.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -71,9 +68,6 @@ public class RemoveTargetsCommandHandlerTest {
     @Mock
     private AggregateService aggregateService;
 
-    @Mock
-    private Requester requester;
-
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
@@ -83,16 +77,11 @@ public class RemoveTargetsCommandHandlerTest {
     @InjectMocks
     private RemoveTargetsCommandHandler handler;
 
-    @Captor
-    private ArgumentCaptor<JsonEnvelope> requesterArgumentCaptor;
-
     @Before
     public void setup() {
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
-
-
 
     @Test
     public void eventActionIgnoredShouldBeRaisedForInvalidTargetId() throws Exception {

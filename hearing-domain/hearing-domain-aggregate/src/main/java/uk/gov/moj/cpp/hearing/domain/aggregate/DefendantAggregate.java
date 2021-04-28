@@ -16,7 +16,9 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForDefendant;
+import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.nces.ApplicationDetailsForDefendant;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithApplicationDetails;
@@ -66,6 +68,8 @@ public class DefendantAggregate implements Aggregate {
                         when(DefendantLegalAidStatusUpdated.class).apply(e -> {
                         }),
                         when(HearingMarkedAsDuplicateForDefendant.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                        when(HearingDeletedForDefendant.class).apply(e -> hearingIds.remove(e.getHearingId())),
+                        when(HearingRemovedForDefendant.class).apply(e -> hearingIds.remove(e.getHearingId())),
                         otherwiseDoNothing()
                 );
     }
@@ -184,5 +188,13 @@ public class DefendantAggregate implements Aggregate {
             return false;
         }
         return offenceResults.entrySet().stream().noneMatch(entry -> entry.getValue().equals(OffenceResult.ADJOURNED) || entry.getValue().equals(OffenceResult.GUILTY));
+    }
+
+    public Stream<Object> deleteHearingForDefendant(final UUID defendantId, final UUID hearingId) {
+        return apply(Stream.of(new HearingDeletedForDefendant(defendantId, hearingId)));
+    }
+
+    public Stream<Object> removeHearingForDefendant(final UUID defendantId, final UUID hearingId) {
+        return apply(Stream.of(new HearingRemovedForDefendant(defendantId, hearingId)));
     }
 }

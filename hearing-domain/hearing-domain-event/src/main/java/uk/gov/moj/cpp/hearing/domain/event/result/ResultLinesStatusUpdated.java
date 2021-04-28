@@ -16,15 +16,19 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.result-lines-status-updated")
-public final class ResultLinesStatusUpdated implements Serializable {
+public class ResultLinesStatusUpdated implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1553542790402775808L;
 
-    private final UUID hearingId;
-    private final List<SharedResultLineId> sharedResultLines;
+    private UUID hearingId;
+
+    private List<SharedResultLineId> sharedResultLines;
+
     private ZonedDateTime lastSharedDateTime;
+
     private DelegatedPowers courtClerk;
 
+    public ResultLinesStatusUpdated() {}
 
     @JsonCreator
     private ResultLinesStatusUpdated(@JsonProperty("hearingId") final UUID hearingId,
@@ -95,7 +99,6 @@ public final class ResultLinesStatusUpdated implements Serializable {
             return this;
         }
 
-
         public ResultLinesStatusUpdated build() {
             return new ResultLinesStatusUpdated(
                     hearingId,
@@ -103,5 +106,6 @@ public final class ResultLinesStatusUpdated implements Serializable {
                     courtClerk,
                     sharedResultLines);
         }
+
     }
 }

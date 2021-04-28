@@ -5,6 +5,7 @@ import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -127,6 +128,10 @@ public class Hearing {
 
     @Column(name = "amended_by_user_id")
     private UUID amendedByUserId;
+
+    @Column(name = "earliest_next_hearing_date")
+    private ZonedDateTime earliestNextHearingDate;
+
 
     public Hearing() {
         //For JPA
@@ -409,6 +414,15 @@ public class Hearing {
 
     public void setAmendedByUserId(UUID amendedByUserId) {
         this.amendedByUserId = amendedByUserId;
+    }
+
+    public ZonedDateTime getEarliestNextHearingDate() {
+        return earliestNextHearingDate;
+    }
+
+    public Hearing setEarliestNextHearingDate(final ZonedDateTime earliestNextHearingDate) {
+        this.earliestNextHearingDate = earliestNextHearingDate;
+        return this;
     }
 
     @Override

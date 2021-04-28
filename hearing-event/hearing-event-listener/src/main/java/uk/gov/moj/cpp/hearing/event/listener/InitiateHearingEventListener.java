@@ -17,6 +17,7 @@ import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
@@ -135,25 +136,7 @@ public class InitiateHearingEventListener {
             }
             hearingRepository.save(hearingEntity);
         }
-        if (isNotEmpty(hearingExtended.getProsecutionCases())) {
-            final List<uk.gov.justice.core.courts.ProsecutionCase> prosecutionCasesFromEntities = prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases());
-            hearingExtended.getProsecutionCases().forEach(
-                    prosecutionCaseRequest -> {
-                        final uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseEntity = prosecutionCasesFromEntities.stream()
-                                .filter(prosecutionCase -> prosecutionCase.getId().equals(prosecutionCaseRequest.getId()))
-                                .findFirst().orElse(null);
-                        uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseToBePersisted = null;
-                        if (nonNull(prosecutionCaseEntity)) {
-                            prosecutionCaseToBePersisted = createProsecutionCase(prosecutionCaseRequest, prosecutionCaseEntity);
-                        } else {
-                            prosecutionCaseToBePersisted = prosecutionCaseRequest;
-                        }
-                        final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity, prosecutionCaseToBePersisted);
-                        getOffencesForProsecutionCase(prosecutionCase).forEach(offence -> updateOffenceForShadowListedStatus(hearingExtended.getShadowListedOffences(), offence));
-                        prosecutionCaseRepository.save(prosecutionCase);
-                    }
-            );
-        }
+        updateHearing(hearingEntity, hearingExtended.getProsecutionCases(), hearingExtended.getShadowListedOffences());
     }
 
     @Transactional
@@ -239,6 +222,49 @@ public class InitiateHearingEventListener {
                 offence.setVerdict(verdictJPAMapper.toJPA(event.getVerdict()));
                 offenceRepository.save(offence);
             }
+        }
+    }
+
+    @Handles("hearing.events.existing-hearing-updated")
+    public void handleExistingHearingUpdatedEvent(final JsonEnvelope event) {
+
+        final JsonObject payload = event.payloadAsJsonObject();
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.existing-hearing-updated event received {}", payload);
+        }
+
+        final ExistingHearingUpdated existingHearingUpdated = jsonObjectToObjectConverter.convert(payload, ExistingHearingUpdated.class);
+
+        final Hearing hearingEntity = hearingRepository.findBy(existingHearingUpdated.getHearingId());
+
+        updateHearing(hearingEntity, existingHearingUpdated.getProsecutionCases(), existingHearingUpdated.getShadowListedOffences());
+    }
+
+    private void updateHearing(final Hearing hearingEntity, final List<uk.gov.justice.core.courts.ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+
+        if (isNotEmpty(prosecutionCases)) {
+
+            final List<uk.gov.justice.core.courts.ProsecutionCase> prosecutionCasesFromEntities = prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases());
+
+            prosecutionCases.forEach(
+                    prosecutionCaseRequest -> {
+                        final uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseEntity = prosecutionCasesFromEntities.stream()
+                                .filter(prosecutionCase -> prosecutionCase.getId().equals(prosecutionCaseRequest.getId()))
+                                .findFirst().orElse(null);
+
+                        uk.gov.justice.core.courts.ProsecutionCase prosecutionCaseToBePersisted = null;
+                        if (nonNull(prosecutionCaseEntity)) {
+                            prosecutionCaseToBePersisted = createProsecutionCase(prosecutionCaseRequest, prosecutionCaseEntity);
+                        } else {
+                            prosecutionCaseToBePersisted = prosecutionCaseRequest;
+                        }
+
+                        final ProsecutionCase prosecutionCase = prosecutionCaseJPAMapper.toJPA(hearingEntity, prosecutionCaseToBePersisted);
+                        getOffencesForProsecutionCase(prosecutionCase).forEach(offence -> updateOffenceForShadowListedStatus(shadowListedOffences, offence));
+                        prosecutionCaseRepository.save(prosecutionCase);
+                    }
+            );
         }
     }
 

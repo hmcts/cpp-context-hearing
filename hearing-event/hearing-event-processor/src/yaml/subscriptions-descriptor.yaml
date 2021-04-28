@@ -75,6 +75,10 @@ subscriptions_descriptor:
         - name: hearing.results-shared
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/results-shared.json
 
+        # Share Results V2
+        - name: hearing.events.results-shared-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-shared-v2.json
+
         # Save Draft Results
         - name: hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json
@@ -274,6 +278,14 @@ subscriptions_descriptor:
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-requested.json
 
 
+        # Hearing Deleted
+        - name: hearing.events.hearing-deleted
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing-deleted.json
+
+        # Hearing unallocated
+        - name: hearing.events.hearing-unallocated
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing-unallocated.json
+
       event_source_name: hearing
 
     - name: public event subscription
@@ -334,5 +346,25 @@ subscriptions_descriptor:
         # Hearing CPS Prosecutor Updated
         - name: public.progression.events.cps-prosecutor-updated
           schema_uri: http://moj.gov.uk/cpp/progression/events/public.progression.event.case-cps-prosecutor-updated.json
+
+        # Listing Hearing Deleted
+        - name: public.events.listing.allocated-hearing-deleted
+          schema_uri: http://justice.gov.uk/hearing/courts/public.events.listing.allocated-hearing-deleted.json
+
+        # Listing Hearing Unallocated
+        - name: public.events.listing.hearing-unallocated
+          schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.hearing-unallocated.json
+
+        # Case Defendants added
+        - name: public.progression.defendants-added-to-court-proceedings
+          schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-defendants-added-to-court-proceedings.json
+
+        # Next Hearing Date Changed
+        - name: public.events.listing.next-hearing-day-changed
+          schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.next-hearing-day-changed.json
+
+        # Remove Offences from allocated hearing
+        - name: public.events.listing.offences-removed-from-existing-allocated-hearing
+          schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.offences-removed-from-existing-allocated-hearing.json
 
       event_source_name: public.event.source

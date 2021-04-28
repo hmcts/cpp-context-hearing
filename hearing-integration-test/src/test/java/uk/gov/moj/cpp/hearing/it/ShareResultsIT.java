@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.Boolean.TRUE;
+import static java.time.LocalDate.now;
 import static java.time.format.DateTimeFormatter.ofPattern;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -30,6 +31,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.moj.cpp.hearing.it.Queries.getDraftResultsPollForMatch;
 import static uk.gov.moj.cpp.hearing.it.UseCases.setTrialType;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResults;
+import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updatePlea;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
@@ -58,6 +60,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardInitiateHearingTemplateWithDefendantJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefendantAttendanceCommandTemplates.updateDefendantAttendanceTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates;
@@ -79,6 +82,8 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MIL
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
+import com.google.common.collect.ImmutableMap;
+import org.junit.Before;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
@@ -115,9 +120,11 @@ import uk.gov.justice.progression.events.CaseDefendantDetails;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.PublicHearingSaveDraftResultFailed;
@@ -162,6 +169,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Test;
+import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 
 @SuppressWarnings({"squid:S2699"})
@@ -175,6 +183,13 @@ public class ShareResultsIT extends AbstractIT {
     private static final UUID WITHDRAWN_RESULT_DEF_ID = fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final String GUILTY = "GUILTY";
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
+
+    @Before
+    public void setup() {
+        setupNowsReferenceData(now());
+        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
+        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
+    }
 
     @Test
     public void testEmptyDraftResultWhenNoDraftResultSaved() {
@@ -202,7 +217,7 @@ public class ShareResultsIT extends AbstractIT {
         final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
                 now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate, LocalDate.now());
         setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
 
         final List<Target> targets = new ArrayList<>();
@@ -253,6 +268,40 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
+    public void shouldShareResultsForHearingWithMultipleCasesWithApplicationFeatureEnabled() {
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final LocalDate hearingDay = LocalDate.now();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate, hearingDay);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+        assertHearingResultsAreShared(hearing);
+
+    }
+
+    @Test
     public void shouldUodateOffencesAndSubjectWhenApplicationCasesExist(){
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
@@ -291,6 +340,60 @@ public class ShareResultsIT extends AbstractIT {
         try (final EventListener publicEventResultedListener = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtApplicationCases[0].offences[0].aquittalDate"), is(orderedDate.format(ofPattern("yyyy-MM-dd"))));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtApplicationCases[0].offences[0].isDisposed"), is("true"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+        }
+    }
+
+    @Test
+    public void shouldUpdateOffencesAndSubjectWhenApplicationCasesExistFeatureEnabled(){
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final LocalDate hearingDay = LocalDate.now();
+
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForApplicationCases(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        final UUID hearingId = hearing.getId();
+        final UUID offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
+        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
+                null, null, null, "NOT-GUILTY", false, null);
+        updatePlea(getRequestSpec(), hearingId, offenceId,
+                hearingUpdatePleaCommand, courtApplicationId
+        );
+
+        stubCourtRoomForApplication(hearing);
+
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate, hearingDay);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(hearing.getId())))))) {
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtApplicationCases[0].offences[0].aquittalDate"), is(orderedDate.format(ofPattern("yyyy-MM-dd"))));
@@ -357,8 +460,97 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
         }
     }
+
+    @Test
+    public void shouldUpdateOffencesAndSubjectWhenApplicationCourtOrderExistsFeatureEnabled(){
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final LocalDate hearingDay = LocalDate.now();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForApplicationCourtOrder(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        final UUID hearingId = hearing.getId();
+        final UUID offenceId = hearing.getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getId();
+        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
+                null, null, null, "NOT-GUILTY", false, null);
+        updatePlea(getRequestSpec(), hearingId, offenceId,
+                hearingUpdatePleaCommand, courtApplicationId
+        );
+
+        stubCourtRoomForApplication(hearing);
+
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate, hearingDay);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtOrder.courtOrderOffences[0].offence.aquittalDate"), is(orderedDate.format(ofPattern("yyyy-MM-dd"))));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtOrder.courtOrderOffences[0].offence.isDisposed"), is("true"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.defendantCase.defendantId"), is(notNullValue()));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.defendantCase.caseID"), is(notNullValue()));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+        }
+    }
+
     @Test
     public void shouldShareResultsForHearingWithMultipleCasesWithApplicationAndOffence() {
+
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplicationAndOffence(hearingCommand.it(), orderedDate);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        testSaveDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareResultWithCourtClerk(hearing, targets);
+
+        assertHearingResultsAreShared(hearing);
+
+    }
+
+    @Test
+    public void shouldShareResultsForHearingWithMultipleCasesWithApplicationAndOffenceFeatureEnabled() {
 
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
@@ -401,7 +593,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final CommandHelpers.UpdateVerdictCommandHelper updateVerdictCommandHelper = updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
 
-        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
 
         final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
 
@@ -434,6 +626,50 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
+    public void shouldShareResultsPerDay() {
+
+        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
+        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
+
+        LocalDate orderDate = PAST_LOCAL_DATE.next();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+
+        final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdictCommandHelper = updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
+
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
+
+        final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(hearing.getCourtCentre(), prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        hearing.getCourtApplications().get(0).getCourtApplicationCases().forEach(prosecutionCase -> stubLjaDetails(hearing.getCourtCentre(), prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        hearing.getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().forEach(offence -> stubLjaDetails(hearing.getCourtCentre(), offence.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+
+        stubCourtRoom(hearing);
+
+        final LocalDate convictionDateBasedOnVerdict = updateVerdictCommandHelper.getFirstVerdict().getVerdictDate();
+
+        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaWithoutChangingConvictionDate(initiateHearingCommandHelper), convictionDateBasedOnVerdict);
+
+        try (final EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
+                                .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                                .with(Hearing::getDefendantAttendance, first(isBean(DefendantAttendance.class)
+                                        .with(DefendantAttendance::getAttendanceDays, first(isBean(AttendanceDay.class)
+                                                .with(AttendanceDay::getAttendanceType, is(AttendanceType.IN_PERSON))))))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
+
+            completeSetupAndShareResultsPerDay(allNows, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
+            assertPublicHearingResultedHasVerdictTypeInformationV2(publicEventResulted, expectedTrialType, hearing);
+        }
+    }
+
+    @Test
     public void shouldShareResultsWithIndicatedPleaInformationPopulatedFromIndicatedGuiltyPlea() {
 
         LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -441,7 +677,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplateForIndicatedPlea(null, false)));
 
-        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
 
         final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
 
@@ -562,7 +798,7 @@ public class ShareResultsIT extends AbstractIT {
 
             final AllResultDefinitionsReferenceDataHelper refDataHelper = setupResultDefinitionsReferenceData(orderDate, singletonList(DISMISSED_RESULT_DEF_ID));
 
-            final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+            final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
             setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, DISMISSED_RESULT_DEF_ID), DISMISSED_RESULT_DEF_ID, orderDate);
             targets.add(saveDraftResultCommand.getTarget());
 
@@ -576,7 +812,6 @@ public class ShareResultsIT extends AbstractIT {
             publicEventForDefendantCaseWithdrawnOrDismissed.waitFor();
         }
     }
-
 
     /**
      * DDCH -Defendant details changed, if there are any changes to the defendant in name (Include
@@ -600,7 +835,6 @@ public class ShareResultsIT extends AbstractIT {
         shareResultsShouldNotHaveDDCH(targets, hearingOne);
 
     }
-
 
     @Test
     public void shareResultShouldPublishDDCHResultsWhenDefendantDetailsChanged() throws Exception {
@@ -634,7 +868,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelper(initiateHearing, targets);
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), PAST_LOCAL_DATE.next());
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), PAST_LOCAL_DATE.next(), LocalDate.now());
 
 
         saveDraftResultWithInvalidTargetIdAndCheckForFailedEvent(saveDraftResultCommand);
@@ -666,7 +900,7 @@ public class ShareResultsIT extends AbstractIT {
         //And
         shareAndVerifyDDCH(targets, hearingOne);
 
-        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate, orderDate);
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
                 getAmendedResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
@@ -734,7 +968,6 @@ public class ShareResultsIT extends AbstractIT {
         shareAndVerifyOffenceDateCode(targets, hearingOne, offenceDateCode, newOffenceDateCode);
 
     }
-
 
     @Test
     public void shareResultShouldPublishOffenceDateCodeAfterNewOffenceAdded() throws Exception {
@@ -815,7 +1048,7 @@ public class ShareResultsIT extends AbstractIT {
         //When
         updateDefendantDetails(initiateHearing, hearingOne, "Test2", "Test");
 
-        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate, orderDate);
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
                 getAmendedResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
@@ -852,7 +1085,6 @@ public class ShareResultsIT extends AbstractIT {
 
     }
 
-
     @Test
     public void shareResultShouldNotPublishDefenceAssociationWhenDefenceAssociationAddedLaterCleared() throws Exception {
 
@@ -887,7 +1119,7 @@ public class ShareResultsIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderDate, orderDate);
 
         saveDraftResultCommand.getTarget().setResultLines(
                 asList(standardResultLineTemplate(randomUUID(), randomUUID(), orderDate).build(),
@@ -926,7 +1158,7 @@ public class ShareResultsIT extends AbstractIT {
 
         stubCourtCentre(hearingCommandHelper.getHearing());
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderDate);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderDate, orderDate);
 
         setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, GUILTY_RESULT_DEF_ID), GUILTY_RESULT_DEF_ID, orderDate);
 
@@ -963,6 +1195,7 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
+    @SuppressWarnings("squid:S1607")
     @Test
     public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownApplicationOffenceCombination() throws Exception {
 
@@ -980,6 +1213,25 @@ public class ShareResultsIT extends AbstractIT {
 
     }
 
+    @SuppressWarnings("squid:S1607")
+    @Test
+    public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownApplicationOffenceCombinationFeatureEnabled() {
+
+        final LocalDate hearingDay = LocalDate.now();
+
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelperWithApplicationAndOffence(initiateHearing, targets, hearingDay);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplicationAndOffence(hearingOne.it(), PAST_LOCAL_DATE.next(), hearingDay);
+
+        saveDaysDraftResultWithInvalidTargetIdAndCheckForFailedEvent(saveDraftResultCommand);
+
+    }
+
+    @SuppressWarnings("squid:S1607")
     @Test
     public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownApplication() throws Exception {
 
@@ -994,6 +1246,24 @@ public class ShareResultsIT extends AbstractIT {
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingOne.it(), PAST_LOCAL_DATE.next());
 
         saveDraftResultWithInvalidTargetIdAndCheckForFailedEvent(saveDraftResultCommand);
+
+    }
+
+    @SuppressWarnings("squid:S1607")
+    @Test
+    public void saveDraftResultFailedWhenUnknownTargetIdUsedForKnownApplicationFeatureEnabled() {
+
+        final LocalDate hearingDay = LocalDate.now();
+
+        InitiateHearingCommand initiateHearing = standardInitiateHearingTemplate();
+
+        final List<Target> targets = new ArrayList<>();
+
+        final InitiateHearingCommandHelper hearingOne = createInitiateHearingCommandHelperWithApplication(initiateHearing, targets, hearingDay);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingOne.it(), PAST_LOCAL_DATE.next(), hearingDay);
+
+        saveDaysDraftResultWithInvalidTargetIdAndCheckForFailedEvent(saveDraftResultCommand);
 
     }
 
@@ -1036,6 +1306,52 @@ public class ShareResultsIT extends AbstractIT {
         targets.add(saveDraftResultCommand.getTarget());
 
         testSaveDraftResult(saveDraftResultCommand);
+
+        getDraftResultsPollForMatch(hearingOne.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("draft results content")))));
+    }
+
+    @Test
+    public void shouldSaveDraftResultsForApplicationFeatureEnabled() {
+
+        final LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final LocalDate hearingDay = LocalDate.now();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+
+        final AllResultDefinitionsReferenceDataHelper refDataHelper = setupResultDefinitionsReferenceData(orderDate, singletonList(allNows.getFirstPrimaryResultDefinitionId()));
+
+        final List<CourtApplication> courtApplications = Collections.singletonList(new HearingFactory().courtApplication().build());
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingWithApplicationTemplate(courtApplications)));
+
+        stubCourtCentre(hearingOne.getHearing());
+
+        ProsecutionCounselIT.createFirstProsecutionCounsel(hearingOne);
+
+        final CommandHelpers.UpdatePleaCommandHelper pleaOne = changeConvictionDate(hearingOne);
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
+                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue())))
+                                                .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))))))))));
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingOne.it(), orderDate, hearingDay);
+
+        setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, allNows.getFirstPrimaryResultDefinitionId()), allNows.getFirstPrimaryResultDefinitionId(), orderDate);
+
+        final List<Target> targets = new ArrayList<>();
+
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
 
         getDraftResultsPollForMatch(hearingOne.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
                 .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("draft results content")))));
@@ -1086,6 +1402,52 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
+    public void shouldSaveDraftResultsForApplicationOffenceFeatureEnabled() {
+
+        final LocalDate orderDate = PAST_LOCAL_DATE.next();
+        final LocalDate hearingDay = LocalDate.now();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+
+        final AllResultDefinitionsReferenceDataHelper refDataHelper = setupResultDefinitionsReferenceData(orderDate, singletonList(allNows.getFirstPrimaryResultDefinitionId()));
+
+        final List<CourtApplication> courtApplications = Collections.singletonList(new HearingFactory().courtApplication().build());
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingWithApplicationTemplate(courtApplications)));
+
+        stubCourtCentre(hearingOne.getHearing());
+
+        ProsecutionCounselIT.createFirstProsecutionCounsel(hearingOne);
+
+        final CommandHelpers.UpdatePleaCommandHelper pleaOne = changeConvictionDate(hearingOne);
+
+        Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
+                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue())))
+                                                .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))))))))));
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplicationAndOffence(hearingOne.it(), orderDate, hearingDay);
+
+        setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, allNows.getFirstPrimaryResultDefinitionId()), allNows.getFirstPrimaryResultDefinitionId(), orderDate);
+
+        final List<Target> targets = new ArrayList<>();
+
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        getDraftResultsPollForMatch(hearingOne.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("draft results content")))));
+    }
+
+    @Test
     public void shareResults_shouldPublishResults_andAmendAndReShareResultsAgain() {
 
         LocalDate orderDate = PAST_LOCAL_DATE.next();
@@ -1113,7 +1475,7 @@ public class ShareResultsIT extends AbstractIT {
                                                         .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue())))
                                                 .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))))))))));
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderDate, orderDate);
 
         setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, allNows.getFirstPrimaryResultDefinitionId()), allNows.getFirstPrimaryResultDefinitionId(), orderDate);
 
@@ -1159,7 +1521,7 @@ public class ShareResultsIT extends AbstractIT {
             //need to get out prompt label here or put in to create draft label
             final AllResultDefinitionsReferenceDataHelper resultDefHelper = setupResultDefinitionsReferenceData(orderDate, asList(firstNowNonMandatoryResultDefinitionId, secondNowPrimaryResultDefinitionId));
 
-            final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate);
+            final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderDate, orderDate);
 
             saveDraftResultCommand2.getTarget().setResultLines(asList(
                     getAmendedResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
@@ -1287,6 +1649,61 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
+    @Test
+    public void shouldUpdateOffencesWithPleaAndVerdictWhenApplicationCasesExistFeatureEnabled() {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final LocalDate hearingDay = LocalDate.now();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommandForApplicationCases(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        final UUID hearingId = hearing.getId();
+        final UUID offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
+        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
+                null, null, null, "NOT-GUILTY", false, null);
+        updatePlea(getRequestSpec(), hearingId, offenceId,
+                hearingUpdatePleaCommand, courtApplicationId
+        );
+
+        changeVerdictForApplication(hearingCommand, fromString(VERDICT_TYPE_GUILTY_ID), VERDICT_TYPE_GUILTY_CODE);
+
+        stubCourtRoomForApplication(hearing);
+
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplateWithApplication(hearingCommand.it(), orderedDate, hearingDay);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        saveDaysDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+        try (final EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtApplicationCases[0].offences[0].isDisposed"), is("true"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].courtApplicationCases[0].offences[0].verdict.verdictType.category"), is("Guilty"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.code"), is("B"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+        }
+    }
+
     private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
         updateDefendantAttendance(initiateHearingCommandHelper);
 
@@ -1320,6 +1737,31 @@ public class ShareResultsIT extends AbstractIT {
         return targets;
     }
 
+    private List<Target> completeSetupAndShareResultsPerDay(AllNowsReferenceDataHelper allNows, InitiateHearingCommandHelper initiateHearingCommandHelper, SaveDraftResultCommand saveDraftResultCommand, LocalDate orderDate) {
+        setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0),
+                findPrompt(setupResultDefinitionsReferenceData(orderDate, singletonList(allNows.getFirstPrimaryResultDefinitionId())),
+                        allNows.getFirstPrimaryResultDefinitionId()), allNows.getFirstPrimaryResultDefinitionId(), orderDate);
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+        testSaveDraftResult(saveDraftResultCommand);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
+        shareDaysResultsCommand.setHearingDay(LocalDate.now());
+        shareResultsPerDay(getRequestSpec(), initiateHearingCommandHelper.getHearingId(), with(
+                shareDaysResultsCommand,
+                command -> command.setCourtClerk(getCourtClerk())
+        ), singletonList(saveDraftResultCommand.getTarget()));
+
+        orderDate = PAST_LOCAL_DATE.next();
+        //setup reference data for second ordered date
+        setupNowsReferenceData(orderDate, allNows.it());
+        return targets;
+    }
+
     private void assertPublicHearingResultedHasVerdictTypeInformation(final EventListener publicEventResultedListener, final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
         final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.id"), is(VERDICT_TYPE_GUILTY_ID));
@@ -1334,6 +1776,22 @@ public class ShareResultsIT extends AbstractIT {
         assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].canBeSubjectOfVariation"), is("true"));
 
         assertHearingHasSharedResults(expectedTrialType, hearing);
+    }
+
+    private void assertPublicHearingResultedHasVerdictTypeInformationV2(final EventListener publicEventResultedListener, final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
+        final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+        assertThat(publicHearingResulted.getBoolean("isReshare"), is(false));
+
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.id"), is(VERDICT_TYPE_GUILTY_ID));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.verdictCode"), is(VERDICT_TYPE_GUILTY_CODE));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.category"), is("Guilty"));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.categoryType"), is("GUILTY_BY_JURY_CONVICTED"));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.sequence"), is("1"));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.description"), is("Guilty"));
+        assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].verdict.verdictType.cjsVerdictCode"), is("G"));
+
+        assertHearingHasSharedResultsV2(expectedTrialType, hearing);
     }
 
     private void assertPublicHearingResultedHasIndicatedPleaInformation(final EventListener publicEventResultedListener, final Hearing hearing, final Plea updatedPlea) {
@@ -1356,6 +1814,18 @@ public class ShareResultsIT extends AbstractIT {
 
         shareResults(getRequestSpec(), hearing.getId(), with(
                 basicShareResultsCommandTemplate(),
+                command -> command.setCourtClerk(courtClerk1)
+        ), targets);
+    }
+
+    private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+        ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
+        shareDaysResultsCommand.setHearingDay(hearingDay);
+        shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
+                shareDaysResultsCommand,
                 command -> command.setCourtClerk(courtClerk1)
         ), targets);
     }
@@ -1558,8 +2028,7 @@ public class ShareResultsIT extends AbstractIT {
 
     }
 
-
-    public void addOffence(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final Integer offenceDateCode) throws Exception {
+    private void addOffence(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final Integer offenceDateCode) throws Exception {
 
         final CommandHelpers.UpdateOffencesForDefendantCommandHelper offenceAdded = h(UseCases.updateOffences(
                 addOffencesForDefendantTemplate(
@@ -1795,7 +2264,7 @@ public class ShareResultsIT extends AbstractIT {
 
         setCrackedIneffectiveTrial(hearingOne, pleaOne);
 
-        saveDraftResult(orderedDate, allNows, now1MandatoryResultDefinitionPrompt, hearingOne, targets, saveDraftResultCommandTemplate(hearingOne.it(), orderedDate));
+        saveDraftResult(orderedDate, allNows, now1MandatoryResultDefinitionPrompt, hearingOne, targets, saveDraftResultCommandTemplate(hearingOne.it(), orderedDate, LocalDate.now()));
         return hearingOne;
     }
 
@@ -1833,6 +2302,40 @@ public class ShareResultsIT extends AbstractIT {
         return hearingOne;
     }
 
+    private InitiateHearingCommandHelper createInitiateHearingCommandHelperWithApplication(final InitiateHearingCommand initiateHearing, final List<Target> targets, final LocalDate hearingDay) {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+
+        final AllResultDefinitionsReferenceDataHelper refDataHelper1 = setupResultDefinitionsReferenceData(orderedDate, singletonList(allNows.getFirstPrimaryResultDefinitionId()));
+
+        final ResultDefinition now1MandatoryResultDefinition =
+                nowsResultDefinition(refDataHelper1, allNows.getFirstPrimaryResultDefinitionId());
+
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt now1MandatoryResultDefinitionPrompt = now1MandatoryResultDefinition.getPrompts().get(0);
+
+        initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0)
+                .getPersonDefendant().setCustodialEstablishment(
+                CustodialEstablishment.custodialEstablishment()
+                        .withCustody("POLICE")
+                        .withName("East Croydon Police Station")
+                        .withId(randomUUID())
+                        .build());
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearing));
+
+
+        updateDefendantAttendance(hearingOne);
+
+
+        final CommandHelpers.UpdatePleaCommandHelper pleaOne = createProsecutionCounsel(hearingOne);
+
+        setCrackedIneffectiveTrial(hearingOne, pleaOne);
+
+        saveDaysDraftResult(orderedDate, allNows, now1MandatoryResultDefinitionPrompt, hearingOne, targets, saveDraftResultCommandTemplateWithApplication(hearingOne.it(), orderedDate, hearingDay), hearingDay);
+        return hearingOne;
+    }
+
     private InitiateHearingCommandHelper createInitiateHearingCommandHelperWithApplicationAndOffence(final InitiateHearingCommand initiateHearing, final List<Target> targets) {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
 
@@ -1867,6 +2370,38 @@ public class ShareResultsIT extends AbstractIT {
         return hearingOne;
     }
 
+    private InitiateHearingCommandHelper createInitiateHearingCommandHelperWithApplicationAndOffence(final InitiateHearingCommand initiateHearing, final List<Target> targets, final LocalDate hearingDay) {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+
+        final AllResultDefinitionsReferenceDataHelper refDataHelper1 = setupResultDefinitionsReferenceData(orderedDate, singletonList(allNows.getFirstPrimaryResultDefinitionId()));
+
+        final ResultDefinition now1MandatoryResultDefinition =
+                nowsResultDefinition(refDataHelper1, allNows.getFirstPrimaryResultDefinitionId());
+
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt now1MandatoryResultDefinitionPrompt = now1MandatoryResultDefinition.getPrompts().get(0);
+
+        initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0)
+                .getPersonDefendant().setCustodialEstablishment(
+                CustodialEstablishment.custodialEstablishment()
+                        .withCustody("POLICE")
+                        .withName("East Croydon Police Station")
+                        .withId(randomUUID())
+                        .build());
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearing));
+
+        updateDefendantAttendance(hearingOne);
+
+        final CommandHelpers.UpdatePleaCommandHelper pleaOne = createProsecutionCounsel(hearingOne);
+
+        setCrackedIneffectiveTrial(hearingOne, pleaOne);
+
+        saveDaysDraftResult(orderedDate, allNows, now1MandatoryResultDefinitionPrompt, hearingOne, targets, saveDraftResultCommandTemplateWithApplicationAndOffence(hearingOne.it(), orderedDate, hearingDay), hearingDay);
+        return hearingOne;
+    }
+
     private InitiateHearingCommandHelper createInitiateHearingCommandHelperForNextHearing(final InitiateHearingCommand initiateHearing, final LocalDate orderDate) {
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
         setupNowsReferenceData(LocalDate.now(), allNows.it());
@@ -1885,7 +2420,7 @@ public class ShareResultsIT extends AbstractIT {
     private void amendResultsToShare(final InitiateHearingCommandHelper hearingOne, final List<Target> targets, final Hearing hearing) {
 
         final LocalDate orderedDate2 = PAST_LOCAL_DATE.next();
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate2);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate2, LocalDate.now());
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate2);
 
         //setup reference data for second ordered date
@@ -1911,7 +2446,7 @@ public class ShareResultsIT extends AbstractIT {
                 .filter(rd -> secondNowPrimaryResultDefinitionId.equals(rd.getId())).findFirst().orElse(null)
                 .getPrompts().get(0);
 
-        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate2);
+        final SaveDraftResultCommand saveDraftResultCommand2 = saveDraftResultCommandTemplate(hearingOne.it(), orderedDate2, LocalDate.now());
 
         saveDraftResultCommand2.getTarget().setResultLines(asList(
                 standardResultLineTemplate(randomUUID(), firstNowNonMandatoryResultDefinitionId, orderedDate2).withPrompts(
@@ -2010,7 +2545,6 @@ public class ShareResultsIT extends AbstractIT {
         return defendant;
     }
 
-
     private uk.gov.moj.cpp.hearing.command.defendant.Defendant convertWithDefenceAssociate(final Defendant currentDefendant, final AssociatedDefenceOrganisation associatedDefenceOrganisation) {
 
         uk.gov.moj.cpp.hearing.command.defendant.Defendant defendant = new uk.gov.moj.cpp.hearing.command.defendant.Defendant();
@@ -2058,7 +2592,7 @@ public class ShareResultsIT extends AbstractIT {
         if (checkIfResultDeleted) {
             saveDraftResultCommand = saveDraftResultCommandTemplateForDeletedResult(initiateHearingCommandHelper.it(), orderDate);
         } else {
-            saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+            saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         }
 
         setResultLine(saveDraftResultCommand.getTarget().getResultLines().get(0), findPrompt(refDataHelper, allNows.getFirstPrimaryResultDefinitionId()), allNows.getFirstPrimaryResultDefinitionId(), orderDate);
@@ -2087,7 +2621,7 @@ public class ShareResultsIT extends AbstractIT {
         //need to get out prompt label here or put in to create draft label
         final AllResultDefinitionsReferenceDataHelper resultDefHelper = setupResultDefinitionsReferenceData(orderDate, asList(firstNowNonMandatoryResultDefinitionId, secondNowPrimaryResultDefinitionId));
 
-        saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate);
+        saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
 
         saveDraftResultCommand.getTarget().setResultLines(asList(
                 getResultLine(firstNowNonMandatoryResultDefinitionId, findPrompt(resultDefHelper, firstNowNonMandatoryResultDefinitionId), orderDate),
@@ -2161,6 +2695,36 @@ public class ShareResultsIT extends AbstractIT {
                     .ofType("application/vnd.hearing.save-draft-result+json")
                     .withArgs(saveDraftResultCommand.getTarget().getHearingId())
                     .withPayload(saveDraftResultCommand.getTarget())
+                    .executeSuccessfully();
+
+            publicEventResulted.waitFor();
+        }
+        target.setResultLines(resultLines);
+    }
+
+    private void saveDaysDraftResult(final SaveDraftResultCommand saveDraftResultCommand) {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final Target target = saveDraftResultCommand.getTarget();
+        final List<ResultLine> resultLines = target.getResultLines();
+        // currently not sending result lines in draft
+        target.setResultLines(null);
+        final BeanMatcher<PublicHearingDraftResultSaved> beanMatcher = isBean(PublicHearingDraftResultSaved.class)
+                .with(PublicHearingDraftResultSaved::getTargetId, is(target.getTargetId()))
+                .with(PublicHearingDraftResultSaved::getHearingId, is(target.getHearingId()))
+                .with(PublicHearingDraftResultSaved::getDefendantId, is(target.getDefendantId()))
+                .with(PublicHearingDraftResultSaved::getOffenceId, is(target.getOffenceId()));
+
+
+        final String expectedMetaDataContextUser = getLoggedInUser().toString();
+        final String expectedMetaDataName = PUBLIC_HEARING_DRAFT_RESULT_SAVED;
+        try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
+                .withFilter(beanMatcher, expectedMetaDataName, expectedMetaDataContextUser)) {
+
+            makeCommand(getRequestSpec(), "hearing.save-days-draft-result")
+                    .ofType("application/vnd.hearing.draft-result+json")
+                    .withArgs(target.getHearingId(), target.getHearingDay())
+                    .withPayload(target)
                     .executeSuccessfully();
 
             publicEventResulted.waitFor();
@@ -2522,6 +3086,29 @@ public class ShareResultsIT extends AbstractIT {
         return hearing;
     }
 
+    private Hearing saveDaysDraftResult(final LocalDate orderedDate, final AllNowsReferenceDataHelper allNows, final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt now1MandatoryResultDefinitionPrompt, final InitiateHearingCommandHelper hearingOne, final List<Target> targets, final SaveDraftResultCommand saveDraftResultCommand, final LocalDate hearingDay) {
+        saveDraftResultCommand.getTarget().getResultLines().get(0).setPrompts(
+                singletonList(Prompt.prompt()
+                        .withLabel(now1MandatoryResultDefinitionPrompt.getLabel())
+                        .withFixedListCode("fixedListCode")
+                        .withValue("value1")
+                        .withWelshValue("wvalue1")
+                        .withId(now1MandatoryResultDefinitionPrompt.getId())
+                        .build()));
+
+        targets.add(saveDraftResultCommand.getTarget());
+
+        final ResultLine resultLine1 = saveDraftResultCommand.getTarget().getResultLines().get(0);
+        resultLine1.setResultLineId(randomUUID());
+        resultLine1.setResultDefinitionId(allNows.getFirstPrimaryResultDefinitionId());
+        resultLine1.setOrderedDate(orderedDate);
+
+        final Hearing hearing = hearingOne.getHearing();
+
+        saveDaysDraftResult(saveDraftResultCommand);
+        return hearing;
+    }
+
     private void updateDefendantDetails(final InitiateHearingCommand initiateHearing, final InitiateHearingCommandHelper hearingOne, final String firstName, String firstNameToVerify) throws Exception {
         CaseDefendantDetails caseDefendantDetails = new CaseDefendantDetails();
         caseDefendantDetails.setDefendants(singletonList(convert(initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0), firstName)));
@@ -2676,7 +3263,7 @@ public class ShareResultsIT extends AbstractIT {
 
         hearing.getHearing().getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(hearing.getHearing().getCourtCentre(), prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
 
-        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), orderedDate);
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearing.it(), orderedDate, LocalDate.now());
 
         saveDraftResultCommand.getTarget().setResultLines(singletonList(
                 standardResultLineTemplate(randomUUID(), resultDefinitionID, orderedDate)
@@ -2842,6 +3429,14 @@ public class ShareResultsIT extends AbstractIT {
                         .with(Hearing::getHasSharedResults, is(true))));
     }
 
+    private void assertHearingHasSharedResultsV2(final CrackedIneffectiveTrial expectedTrialType, final Hearing hearing) {
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .with(Hearing::getCrackedIneffectiveTrial, is(expectedTrialType))
+                        .with(Hearing::getHasSharedResults, is(true))));
+    }
+
     private void assertHearingResultsAreShared(final Hearing hearing) {
         Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -2873,8 +3468,28 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
+    private void saveDaysDraftResultWithInvalidTargetIdAndCheckForFailedEvent(final SaveDraftResultCommand saveDraftResultCommand) {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
+        final Target target = saveDraftResultCommand.getTarget();
 
+        try (final EventListener publicEventFailed = listenFor("public.hearing.save-draft-result-failed")
+                .withFilter(convertStringTo(PublicHearingSaveDraftResultFailed.class, isBean(PublicHearingSaveDraftResultFailed.class)
+                        .with(PublicHearingSaveDraftResultFailed::getTargetId, is(target.getTargetId()))
+                        .with(PublicHearingSaveDraftResultFailed::getHearingId, is(target.getHearingId()))
+                        .with(PublicHearingSaveDraftResultFailed::getDefendantId, is(target.getDefendantId()))
+                        .with(PublicHearingSaveDraftResultFailed::getOffenceId, is(target.getOffenceId())
+                        )))) {
+
+            makeCommand(getRequestSpec(), "hearing.save-days-draft-result")
+                    .ofType("application/vnd.hearing.draft-result+json")
+                    .withArgs(target.getHearingId(), target.getHearingDay())
+                    .withPayload(saveDraftResultCommand.getTarget())
+                    .executeSuccessfully();
+
+            publicEventFailed.waitFor();
+        }
+    }
 
     private void removeDraftTarget(final UUID hearingId, final UUID targetId) {
 

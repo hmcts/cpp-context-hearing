@@ -20,6 +20,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RollUpPr
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
@@ -37,6 +38,35 @@ public class RestructuringHelper {
     }
 
     public List<TreeNode<ResultLine>> restructure(final JsonEnvelope context, final ResultsShared resultsShared) {
+        final List<TreeNode<ResultLine>> treeNodes = resultTreeBuilder.build(context, resultsShared);
+
+        final List<TreeNode<ResultLine>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
+
+        updateResultText(
+                removeNonPublishableResults(
+                        restructureNextHearing(
+                                processAlwaysPublishResults(
+                                        deDupNextHearing(
+                                                filterNodesWithRollUpPrompts(
+                                                        processPublishAsPrompt(
+                                                                removeExcludedResults(treeNodes))
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
+        setDurationElements(treeNodes, resultsShared.getHearing());
+        treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
+        final List<TreeNode<ResultLine>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
+                .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))
+                .collect(toList());
+        removeNextHearingObject(publishedForNowsNodesNotInRollup);
+        treeNodes.addAll(publishedForNowsNodesNotInRollup);
+        return treeNodes;
+    }
+
+    public List<TreeNode<ResultLine>> restructure(final JsonEnvelope context, final ResultsSharedV2 resultsShared) {
         final List<TreeNode<ResultLine>> treeNodes = resultTreeBuilder.build(context, resultsShared);
 
         final List<TreeNode<ResultLine>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);

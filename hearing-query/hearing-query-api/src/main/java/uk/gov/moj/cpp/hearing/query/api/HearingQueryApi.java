@@ -157,6 +157,13 @@ public class HearingQueryApi {
         return getJsonEnvelope(envelope);
     }
 
+    @FeatureControl("amendReshare")
+    @Handles("hearing.get-results")
+    public JsonEnvelope getResults(final JsonEnvelope query) {
+        final Envelope<TargetListResponse> envelope = this.hearingQueryView.getResults(query);
+        return getJsonEnvelope(envelope);
+    }
+
     @Handles("hearing.query.search-by-material-id")
     public JsonEnvelope searchByMaterialId(final JsonEnvelope query) {
         return this.hearingQueryView.searchByMaterialId(query);
@@ -283,9 +290,9 @@ public class HearingQueryApi {
         return jsonEnvelopeRepacker.repack(jsonValueEnvelope);
     }
 
-    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJ, final Permissions permissions){
+    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJ, final Permissions permissions) {
         List<UUID> accessibleCases = new ArrayList<>();
-        if (isDDJ){
+        if (isDDJ) {
             accessibleCases = accessibleCasesO.findCases(permissions, userId);
         }
         return accessibleCases;

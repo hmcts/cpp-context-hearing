@@ -9,6 +9,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.hearing.details.UpdateRelatedHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
@@ -50,6 +51,14 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
         }
     }
 
+    /**
+     * This command is called from HearingExtendedEventProcessor to update the existing hearing.
+     * This method call creates an event HearingExtend.
+     * For better command name and event name refer {@link InitiateHearingCommandHandler#updateRelatedHearing(JsonEnvelope)}
+     *
+     * @param envelope
+     * @throws EventStreamException
+     */
     @Handles("hearing.command.extend-hearing")
     public void extendHearing(final JsonEnvelope envelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
@@ -66,6 +75,27 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
             final UUID applicationId = command.getCourtApplication().getId();
             aggregate(ApplicationAggregate.class, applicationId, envelope, a -> a.registerHearingId(applicationId, hearingId));
         }
+
+    }
+
+    /**
+     * This is the new command handler which updates the existing hearing like {@link InitiateHearingCommandHandler#extendHearing(JsonEnvelope)}
+     * and does the same functionality.
+     *
+     * But this command is created to have a meaningful command name and event name(ExistingHearingUpdated).
+     *
+     * @param envelope
+     * @throws EventStreamException
+     */
+    @Handles("hearing.command.update-related-hearing")
+    public void updateRelatedHearing(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-related-hearing received {}", envelope.toObfuscatedDebugString());
+        }
+
+        final UpdateRelatedHearingCommand command = convertToObject(envelope, UpdateRelatedHearingCommand.class);
+        final UUID hearingId = command.getHearingId();
+        aggregate(HearingAggregate.class, hearingId, envelope, a -> a.updateExistingHearing(hearingId, command.getProsecutionCases(), command.getShadowListedOffences()));
 
     }
 

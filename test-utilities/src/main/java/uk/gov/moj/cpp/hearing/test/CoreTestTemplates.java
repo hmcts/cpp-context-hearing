@@ -121,6 +121,7 @@ public class CoreTestTemplates {
 
     public static HearingDay.Builder hearingDay(CourtCentre courtCentre) {
         return HearingDay.hearingDay()
+                .withHasSharedResults(true)
                 .withSittingDay(RandomGenerator.PAST_UTC_DATE_TIME.next())
                 .withListingSequence(INTEGER.next())
                 .withListedDurationMinutes(INTEGER.next())
@@ -717,6 +718,7 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
+    @SuppressWarnings("squid:S107")
     public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args,
                                                    final UUID courtId,
                                                    final UUID courtRoomId,
@@ -876,6 +878,17 @@ public class CoreTestTemplates {
         return Target.target()
                 .withTargetId(randomUUID())
                 .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult(JSON_STRING)
+                .withResultLines(new ArrayList<>(asList(resultLine(resultLineId))));
+    }
+
+    public static Target.Builder target(final UUID hearingId, final LocalDate hearingDay, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
+        return Target.target()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withHearingDay(hearingDay)
                 .withDefendantId(defendantId)
                 .withOffenceId(offenceId)
                 .withDraftResult(JSON_STRING)

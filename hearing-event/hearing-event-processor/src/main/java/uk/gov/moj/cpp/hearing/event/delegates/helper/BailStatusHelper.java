@@ -3,12 +3,14 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
+import static java.util.stream.Collectors.toList;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
@@ -31,10 +33,28 @@ public class BailStatusHelper {
 
     private final ReferenceDataService referenceDataService;
 
-
     @Inject
     public BailStatusHelper(final ReferenceDataService referenceDataService) {
         this.referenceDataService = referenceDataService;
+    }
+
+    public void mapBailStatuses(final JsonEnvelope context, final Hearing hearing) {
+
+        final List<BailStatus> bailStatusesFromRefData = referenceDataService.getBailStatuses(context);
+
+        ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(d -> nonNull(d.getPersonDefendant()))
+                .forEach(defendant -> updateDefendantWithBailStatus(defendant, bailStatusesFromRefData));
+
+        ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(ca -> nonNull(ca.getSubject().getMasterDefendant()))
+                .filter(ca -> nonNull(ca.getSubject().getMasterDefendant().getPersonDefendant()))
+                .forEach(ca -> {
+                    final List<Offence> offences = getOffencesFromApplication(ca);
+                    updateDefendantWithBailStatus(ca.getSubject().getMasterDefendant(), bailStatusesFromRefData, offences);
+                });
+
     }
 
     public void mapBailStatuses(final JsonEnvelope context, final ResultsShared resultsShared) {
@@ -43,19 +63,19 @@ public class BailStatusHelper {
         ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .filter(d -> nonNull(d.getPersonDefendant()))
-                .forEach(defendant -> updateDefandantWithBailStatus(defendant, bailStatusesFromRefData));
+                .forEach(defendant -> updateDefendantWithBailStatus(defendant, bailStatusesFromRefData));
 
         ofNullable(resultsShared.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
                 .filter(ca -> nonNull(ca.getSubject().getMasterDefendant()))
                 .filter(ca -> nonNull(ca.getSubject().getMasterDefendant().getPersonDefendant()))
                 .forEach(ca -> {
                     final List<Offence> offences = getOffencesFromApplication(ca);
-                    updateDefandantWithBailStatus(ca.getSubject().getMasterDefendant(), bailStatusesFromRefData, offences);
+                    updateDefendantWithBailStatus(ca.getSubject().getMasterDefendant(), bailStatusesFromRefData, offences);
                 });
     }
 
 
-    private void updateDefandantWithBailStatus(Defendant defendant, final List<BailStatus> bailStatusesFromRefData) {
+    private void updateDefendantWithBailStatus(Defendant defendant, final List<BailStatus> bailStatusesFromRefData) {
         final Optional<BailStatus> bailStatusOptional = getPostHearingCustodyStatusBasedOnRank(defendant, bailStatusesFromRefData);
         bailStatusOptional.ifPresent(bailStatusResult ->
                 defendant.getPersonDefendant().setBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus()
@@ -66,7 +86,7 @@ public class BailStatusHelper {
         );
     }
 
-    private void updateDefandantWithBailStatus(final MasterDefendant defendant, final List<BailStatus> bailStatusesFromRefData, final List<Offence> offences) {
+    private void updateDefendantWithBailStatus(final MasterDefendant defendant, final List<BailStatus> bailStatusesFromRefData, final List<Offence> offences) {
         final Optional<BailStatus> bailStatusOptional = getPostHearingCustodyStatusBasedOnRank(bailStatusesFromRefData, offences);
         bailStatusOptional.ifPresent(bailStatusResult ->
                 defendant.getPersonDefendant().setBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus()
@@ -92,7 +112,7 @@ public class BailStatusHelper {
                 .map(Offence::getJudicialResults)
                 .filter(Objects::nonNull)
                 .flatMap(List::stream)
-                .collect(Collectors.toList());
+                .collect(toList());
 
         return getBailStatusByJudicialResults(judicialResults, bailStatusesFromRefData);
     }

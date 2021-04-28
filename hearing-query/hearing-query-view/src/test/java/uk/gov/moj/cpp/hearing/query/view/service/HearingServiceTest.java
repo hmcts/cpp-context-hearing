@@ -627,6 +627,90 @@ public class HearingServiceTest {
     }
 
     @Test
+    public void shouldReturnResponseWhenTargetIsAddedWithHearingDay() {
+
+        final Hearing hearing = new Hearing();
+        hearing.setProsecutionCases(createProsecutionCases());
+        hearing.setId(randomUUID());
+        hearing.setTargets(asSet(new Target()));
+        final String HEARING_DAY = "2021-03-01";
+
+        final List<uk.gov.justice.core.courts.Target> targets = asList(
+                targetTemplate(),
+                targetTemplate());
+
+        when(hearingRepository.findTargetsByFilters(hearing.getId(), HEARING_DAY))
+                .thenReturn(Lists.newArrayList(hearing.getTargets()));
+        when(hearingRepository.findProsecutionCasesByHearingId(hearing.getId()))
+                .thenReturn(Lists.newArrayList(hearing.getProsecutionCases()));
+        when(targetJPAMapper.fromJPA(anySet(), anySet())).thenReturn(targets);
+
+
+        final TargetListResponse targetListResponse = hearingService.getTargetsByDate(hearing.getId(), HEARING_DAY);
+
+        final uk.gov.justice.core.courts.Target targetIn = targets.get(0);
+
+        final ResultLine resultLine = targetIn.getResultLines().get(0);
+
+        final Prompt prompt = resultLine.getPrompts().get(0);
+
+        verify(hearingRepository)
+                .findTargetsByFilters(hearing.getId(), HEARING_DAY);
+        verify(hearingRepository)
+                .findProsecutionCasesByHearingId(hearing.getId());
+
+        assertThat(targetListResponse, isBean(TargetListResponse.class)
+                .with(t -> t.getTargets().isEmpty(), is(false))
+                .with(TargetListResponse::getTargets, first(isBean(uk.gov.justice.core.courts.Target.class)
+                        .with(uk.gov.justice.core.courts.Target::getTargetId, is(targetIn.getTargetId()))
+                        .with(uk.gov.justice.core.courts.Target::getDefendantId, is(targetIn.getDefendantId()))
+                        .with(uk.gov.justice.core.courts.Target::getMasterDefendantId, is(targetIn.getMasterDefendantId()))
+                        .with(uk.gov.justice.core.courts.Target::getDraftResult, is(targetIn.getDraftResult()))
+                        .with(uk.gov.justice.core.courts.Target::getHearingId, is(targetIn.getHearingId()))
+                        .with(uk.gov.justice.core.courts.Target::getHearingDay, is(targetIn.getHearingDay()))
+                        .with(uk.gov.justice.core.courts.Target::getOffenceId, is(targetIn.getOffenceId()))
+                        .with(t -> t.getResultLines().size(), is(targetIn.getResultLines().size()))
+                        .with(uk.gov.justice.core.courts.Target::getResultLines, first(isBean(ResultLine.class)
+                                .with(ResultLine::getIsModified, is(resultLine.getIsModified()))
+                                .with(ResultLine::getIsComplete, is(resultLine.getIsComplete()))
+                                .with(ResultLine::getLevel, is(resultLine.getLevel()))
+                                .with(ResultLine::getResultLineId, is(resultLine.getResultLineId()))
+                                .with(ResultLine::getResultLabel, is(resultLine.getResultLabel()))
+                                .with(ResultLine::getSharedDate, is(resultLine.getSharedDate()))
+                                .with(ResultLine::getOrderedDate, is(resultLine.getOrderedDate()))
+                                .with(ResultLine::getDelegatedPowers, isBean(DelegatedPowers.class)
+                                        .with(DelegatedPowers::getUserId, is(resultLine.getDelegatedPowers().getUserId()))
+                                        .with(DelegatedPowers::getFirstName, is(resultLine.getDelegatedPowers().getFirstName()))
+                                        .with(DelegatedPowers::getLastName, is(resultLine.getDelegatedPowers().getLastName())))
+                                .with(r -> r.getPrompts().size(), is(resultLine.getPrompts().size()))
+                                .with(ResultLine::getPrompts, first(isBean(Prompt.class)
+                                        .with(Prompt::getId, is(prompt.getId()))
+                                        .with(Prompt::getLabel, is(prompt.getLabel()))
+                                        .with(Prompt::getFixedListCode, is(prompt.getFixedListCode()))
+                                        .with(Prompt::getValue, is(prompt.getValue()))
+                                        .with(Prompt::getWelshValue, is(prompt.getWelshValue()))
+                                )))))));
+
+    }
+
+    @Test
+    public void shouldReturnEmptyResponseWhenTargetsByDateNotFound() {
+
+        final Hearing hearing = new Hearing();
+
+        hearing.setId(randomUUID());
+        hearing.setProsecutionCases(createProsecutionCases());
+
+        when(hearingRepository.findBy(any())).thenReturn(hearing);
+
+        when(targetJPAMapper.fromJPA(anySet(), anySet())).thenReturn(new ArrayList());
+
+        final TargetListResponse targetListResponse = hearingService.getTargetsByDate(hearing.getId(), "2021-03-01");
+
+        assertThat(targetListResponse.getTargets().isEmpty(), is(true));
+    }
+
+    @Test
     public void shouldReturnResponseWhenApplicationTargetIsAdded() {
         final ApplicationDraftResult applicationDraftResult = ApplicationDraftResult.applicationDraftResult()
                 .setApplicationId(randomUUID()).setDraftResult("result").setId(randomUUID());

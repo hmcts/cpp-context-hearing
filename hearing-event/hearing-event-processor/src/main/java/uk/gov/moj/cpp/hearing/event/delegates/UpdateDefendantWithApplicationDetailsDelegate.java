@@ -13,6 +13,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
 
 import java.util.Objects;
@@ -35,9 +36,22 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
     }
 
-    public void execute(Sender sender, JsonEnvelope event, ResultsShared resultsShared) {
+    public void execute(final Sender sender, final JsonEnvelope event, final ResultsShared resultsShared) {
         Optional.of(resultsShared)
                 .map(ResultsShared::getHearing)
+                .map(Hearing::getCourtApplications)
+                .ifPresent(courtApplications ->
+                        courtApplications.stream()
+                                .filter(courtApplication -> hasAtLeastOneResultAndCase(resultsShared, courtApplication.getId()))
+                                .map(this::getUpdateDefendantWithApplicationDetails)
+                                .filter(Objects::nonNull)
+                                .forEach(notification -> sendNotify(sender, event, notification))
+                );
+    }
+
+    public void execute(final Sender sender, final JsonEnvelope event, final ResultsSharedV2 resultsShared) {
+        Optional.of(resultsShared)
+                .map(ResultsSharedV2::getHearing)
                 .map(Hearing::getCourtApplications)
                 .ifPresent(courtApplications ->
                         courtApplications.stream()
@@ -62,7 +76,7 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
         return null;
     }
 
-    private boolean hasAtLeastOneResultAndCase(ResultsShared resultsShared, UUID applicationId) {
+    private boolean hasAtLeastOneResultAndCase(final ResultsShared resultsShared, final UUID applicationId) {
         return resultsShared.getHearing().getProsecutionCases() != null &&
                 !resultsShared.getHearing().getProsecutionCases().isEmpty() &&
                 resultsShared.getTargets()
@@ -74,14 +88,26 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
                         .anyMatch(Objects::nonNull);
     }
 
-    private Optional<UUID> getDefendantId(CourtApplication courtApplication) {
+    private boolean hasAtLeastOneResultAndCase(final ResultsSharedV2 resultsShared, final UUID applicationId) {
+        return resultsShared.getHearing().getProsecutionCases() != null &&
+                !resultsShared.getHearing().getProsecutionCases().isEmpty() &&
+                resultsShared.getTargets()
+                        .stream()
+                        .filter(target -> applicationId.equals(target.getApplicationId()))
+                        .filter(target -> !target.getResultLines().isEmpty())
+                        .flatMap(target -> target.getResultLines().stream())
+                        .map(ResultLine::getResultDefinitionId)
+                        .anyMatch(Objects::nonNull);
+    }
+
+    private Optional<UUID> getDefendantId(final CourtApplication courtApplication) {
         return Optional.of(courtApplication)
                 .map(CourtApplication::getApplicant)
                 .map(CourtApplicationParty::getMasterDefendant)
                 .map(MasterDefendant::getMasterDefendantId);
     }
 
-    private Optional<UUID> getApplicationTypeId(CourtApplication courtApplication) {
+    private Optional<UUID> getApplicationTypeId(final CourtApplication courtApplication) {
         return of(courtApplication)
                 .map(CourtApplication::getType)
                 .map(CourtApplicationType::getId);
@@ -89,7 +115,7 @@ public class UpdateDefendantWithApplicationDetailsDelegate {
 
 
 
-    private void sendNotify(Sender sender, JsonEnvelope event, UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails) {
+    private void sendNotify(final Sender sender, final JsonEnvelope event, final UpdateDefendantWithApplicationDetails updateDefendantWithApplicationDetails) {
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(updateDefendantWithApplicationDetails);
         final Function<Object, JsonEnvelope> objectJsonEnvelopeFunction = this.enveloper.withMetadataFrom(event, "hearing.command.update-defendant-with-application-details");
         sender.sendAsAdmin(objectJsonEnvelopeFunction.apply(jsonObject));

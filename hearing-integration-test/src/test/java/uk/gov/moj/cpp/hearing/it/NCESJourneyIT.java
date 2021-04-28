@@ -136,7 +136,7 @@ public class NCESJourneyIT extends AbstractIT {
     @Test
     public void shouldSendToGOBButNotSendEmailWhenResultsSharedWithFinancialImpositionWithoutDeemedServedResults() {
         InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
+        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
 
         // extend hearing by creating an application against a defendant
         final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);
@@ -153,7 +153,7 @@ public class NCESJourneyIT extends AbstractIT {
     @Test
     public void shouldSendToGOBAndEmailWhenResultsSharedWithFinancialImpositionAndDeemedServedResults() {
         InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
+        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
 
         // extend hearing by creating an application against a defendant
         final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);
@@ -172,7 +172,7 @@ public class NCESJourneyIT extends AbstractIT {
     @Test
     public void shouldSendToGOBAndNotEmailWhenResultsResharedWithFinancialImpositionAndWithDeemedServedResults() {
         InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
+        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
 
         // extend hearing by creating an application against a defendant
         final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);
@@ -199,7 +199,7 @@ public class NCESJourneyIT extends AbstractIT {
     @Test
     public void shouldSendToGOBAndEmailWhenResultsAreResharedButWithoutDeemedServedResults() {
         InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
+        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
 
         // extend hearing by creating an application against a defendant
         final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);
@@ -227,7 +227,7 @@ public class NCESJourneyIT extends AbstractIT {
     @Test
     public void shouldSendEmailWhenResultsSharedWithFinancialImpositionAndDeemedServedResultsAndApplicationWithdrawn() throws JsonProcessingException {
         InitiateHearingCommandHelper hearingCommandHelper = getInitiateHearingCommandHelper();
-        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate);
+        SaveDraftResultCommand draftResultCommand = saveDraftResultCommandTemplate(hearingCommandHelper.it(), orderedDate, LocalDate.now());
 
         // extend hearing by creating an application against a defendant
         final Defendant firstDefendant = hearingCommandHelper.getFirstCase().getDefendants().get(0);

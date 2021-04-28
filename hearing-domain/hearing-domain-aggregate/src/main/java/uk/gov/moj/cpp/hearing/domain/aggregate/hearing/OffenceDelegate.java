@@ -1,15 +1,22 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.empty;
 
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OffenceDelegate implements Serializable {
@@ -48,6 +55,71 @@ public class OffenceDelegate implements Serializable {
                 .forEach(defendant -> defendant.getOffences().removeIf(offence -> offence.getId().equals(offenceId)));
     }
 
+    @SuppressWarnings("squid:S1612")
+    public void handleExistingHearingUpdated(ExistingHearingUpdated existingHearingUpdated) {
+        existingHearingUpdated.getProsecutionCases().forEach(prosecutionCase ->
+                addProsecutionCaseToMomentoHearing(prosecutionCase));
+    }
+
+    private void addProsecutionCaseToMomentoHearing(final ProsecutionCase prosecutionCase) {
+        final Optional<ProsecutionCase> prosecutionCaseInAggregate = this.momento.getHearing().getProsecutionCases().stream()
+                .filter(pc -> pc.getId().equals(prosecutionCase.getId()))
+                .findFirst();
+
+        if (prosecutionCaseInAggregate.isPresent()) {
+            prosecutionCase.getDefendants().forEach(defendant ->
+                    addDefendantToMomentoHearing(prosecutionCaseInAggregate.get(), defendant));
+        } else {
+            momento.getHearing().getProsecutionCases().add(prosecutionCase);
+        }
+    }
+
+    private void addDefendantToMomentoHearing(final ProsecutionCase prosecutionCaseInAggregate, final Defendant defendant) {
+        final Optional<Defendant> defendantInAggregate = prosecutionCaseInAggregate.getDefendants().stream()
+                .filter(d -> d.getId().equals(defendant.getId()))
+                .findFirst();
+        if (defendantInAggregate.isPresent()) {
+            defendant.getOffences().forEach(offence -> addOffenceToMomentoHearing(defendantInAggregate.get(), offence));
+        } else {
+            prosecutionCaseInAggregate.getDefendants().add(defendant);
+        }
+    }
+
+    private void addOffenceToMomentoHearing(final Defendant defendantInAggregate, final Offence offence) {
+        final Optional<Offence> offenceInAggregate = defendantInAggregate.getOffences().stream()
+                .filter(o -> o.getId().equals(offence.getId()))
+                .findFirst();
+        if (!offenceInAggregate.isPresent()) {
+            defendantInAggregate.getOffences().add(offence);
+        }
+    }
+
+    public void handleOffencesRemovedFromExistingHearing(final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing) {
+
+        final List<UUID> offencesToBeRemoved = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
+        final List<UUID> defendantsToBeRemoved = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
+        final List<UUID> prosecutionCasesToBeRemoved = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
+
+        // Remove offences from all defendants
+        momento.getHearing().getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants().forEach(
+                        defendant -> defendant.getOffences()
+                                .removeIf(offence -> offencesToBeRemoved.contains(offence.getId()))
+                )
+        );
+
+        // Remove defendants with no offences from all prosecution cases
+        momento.getHearing().getProsecutionCases().forEach(
+                prosecutionCase -> prosecutionCase.getDefendants()
+                        .removeIf(defendant -> defendantsToBeRemoved.contains(defendant.getId()))
+        );
+
+        // Remove prosecution cases with no defendants
+        momento.getHearing().getProsecutionCases()
+                .removeIf(prosecutionCase -> prosecutionCasesToBeRemoved.contains(prosecutionCase.getId()));
+
+    }
+
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId,
                                      final Offence offence) {
         if (this.momento.isPublished()) {
@@ -81,5 +153,35 @@ public class OffenceDelegate implements Serializable {
                 .withId(offenceId)
                 .withHearingId(hearingId)
                 .build());
+    }
+
+    public Stream<Object> removeOffencesFromAllocatedHearing(final UUID hearingId, final List<UUID> offenceIds) {
+
+        if (this.momento.isPublished()) {
+            return empty();
+        }
+
+        final List<UUID> defendantsToBeRemoved = momento.getHearing().getProsecutionCases()
+                .stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .filter(defendant -> defendant
+                        .getOffences()
+                        .stream()
+                        .filter(offence -> !offenceIds.contains(offence.getId()))
+                        .collect(toList()).isEmpty())
+                .map(Defendant::getId)
+                .collect(toList());
+
+        final List<UUID> prosecutionCasesToBeRemoved = momento.getHearing().getProsecutionCases()
+                .stream()
+                .filter(prosecutionCase -> prosecutionCase
+                        .getDefendants()
+                        .stream().filter(defendant -> !defendantsToBeRemoved.contains(defendant.getId()))
+                        .collect(toList()).isEmpty())
+                .map(ProsecutionCase::getId)
+                .collect(Collectors.toList());
+
+        return Stream.of(new OffencesRemovedFromExistingHearing(hearingId, prosecutionCasesToBeRemoved, defendantsToBeRemoved, offenceIds));
+
     }
 }

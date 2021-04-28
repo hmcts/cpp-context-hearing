@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/hearing/courts/recordNextHearingDayUpdated.json",
+  "type": "object",
+  "properties": {
+    "seedingHearingId": {
+      "description": "Seed hearing id",
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "hearingId": {
+      "description": "Next hearing id",
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "hearingStartDate": {
+      "description": "Next hearing start date",
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "seedingHearingId",
+    "hearingId",
+    "hearingStartDate"
+  ],
+  "additionalProperties": false
+}

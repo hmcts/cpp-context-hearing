@@ -25,9 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = -561416825201569227L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -37,7 +38,6 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, IndicatedPlea> indicatedPleas = new HashMap<>();
     private final Map<UUID, AllocationDecision> allocationDecisions = new HashMap<>();
     private final Map<UUID, Verdict> verdicts = new HashMap<>();
-    private final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = new HashMap<>();
     private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
     private final Map<UUID, CompanyRepresentative> companyRepresentatives = new HashMap<>();
     private final Map<UUID, InterpreterIntermediary> interpreterIntermediary = new HashMap<>();
@@ -46,13 +46,17 @@ public class HearingAggregateMomento implements Serializable {
 
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
-    private List<UUID> adjournedHearingIds = new ArrayList<>();
-    private Map<UUID, Target> targets = new HashMap<>();
     private Map<UUID, LocalDate> convictionDates = new HashMap<>();
-    private Map<UUID, Target> savedTargets = new HashMap<>();
     private boolean published = false;
     private boolean duplicate = false;
     private ZonedDateTime lastSharedTime;
+    private boolean deleted = false;
+    private Map<UUID, ZonedDateTime> nextHearingStartDates = new HashMap<>();
+    private Map<UUID, ZonedDateTime> resultsAmendmentDateMap = new HashMap<>();
+    private Map<LocalDate, Map<UUID, Target>> multiDayTargets = new HashMap<>();
+    private Map<LocalDate, Map<UUID, Target>> multiDaySavedTargets = new HashMap<>();
+    private Map<LocalDate, Map<UUID, CompletedResultLineStatus>> multiDayCompletedResultLinesStatus = new HashMap<>();
+    private Map<LocalDate, Boolean> isHearingDayPreviouslyShared = new HashMap<>();
 
     public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
         return hearingEvents;
@@ -102,10 +106,6 @@ public class HearingAggregateMomento implements Serializable {
         this.variantDirectory = new ArrayList<>(variantDirectory);
     }
 
-    public Map<UUID, CompletedResultLineStatus> getCompletedResultLinesStatus() {
-        return completedResultLinesStatus;
-    }
-
     public boolean isPublished() {
         return published;
     }
@@ -114,28 +114,8 @@ public class HearingAggregateMomento implements Serializable {
         this.published = published;
     }
 
-    public List<UUID> getAdjournedHearingIds() {
-        return adjournedHearingIds;
-    }
-
-    public void setAdjournedHearingIds(final List<UUID> adjournedHearingIds) {
-        this.adjournedHearingIds = adjournedHearingIds;
-    }
-
-    public Map<UUID, Target> getTargets() {
-        return targets;
-    }
-
-    public void setTargets(Map<UUID, Target> targets) {
-        this.targets = targets;
-    }
-
     public Map<UUID, LocalDate> getConvictionDates() {
         return convictionDates;
-    }
-
-    public void setConvictionDates(final Map<UUID, LocalDate> convictionDates) {
-        this.convictionDates = convictionDates;
     }
 
     public Map<UUID, RespondentCounsel> getRespondentCounsels() {
@@ -144,14 +124,6 @@ public class HearingAggregateMomento implements Serializable {
 
     public Map<UUID, ApplicantCounsel> getApplicantCounsels() {
         return applicantCounsels;
-    }
-
-    public Map<UUID, Target> getSavedTargets() {
-        return savedTargets;
-    }
-
-    public void setSavedTargets(final Map<UUID, Target> savedTargets) {
-        this.savedTargets.putAll(savedTargets);
     }
 
     public Map<UUID, CompanyRepresentative> getCompanyRepresentatives() {
@@ -189,4 +161,37 @@ public class HearingAggregateMomento implements Serializable {
     public void setLastSharedTime(ZonedDateTime lastSharedTime) {
         this.lastSharedTime = lastSharedTime;
     }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(final boolean deleted) {
+        this.deleted = deleted;
+    }
+
+    public Map<UUID, ZonedDateTime> getNextHearingStartDates() {
+        return nextHearingStartDates;
+    }
+
+    public Map<UUID, ZonedDateTime> getResultsAmendmentDateMap() {
+        return resultsAmendmentDateMap;
+    }
+
+    public Map<LocalDate, Map<UUID, Target>> getMultiDaySavedTargets() {
+        return multiDaySavedTargets;
+    }
+
+    public Map<LocalDate, Map<UUID, CompletedResultLineStatus>> getMultiDayCompletedResultLinesStatus() {
+        return multiDayCompletedResultLinesStatus;
+    }
+
+    public Map<LocalDate, Boolean> getIsHearingDayPreviouslyShared() {
+        return isHearingDayPreviouslyShared;
+    }
+
+    public Map<LocalDate, Map<UUID, Target>> getMultiDayTargets() {
+        return multiDayTargets;
+    }
+
 }

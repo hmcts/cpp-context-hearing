@@ -13,6 +13,8 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
@@ -24,6 +26,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsRejected;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -37,6 +40,7 @@ import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
@@ -171,6 +175,34 @@ public class HearingEventListener {
         }
     }
 
+    @Handles("hearing.events.results-shared-v2")
+    public void resultsSharedV2(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.results-shared-v2 event received {}", event.toObfuscatedDebugString());
+        }
+
+        final ResultsSharedV2 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV2.class);
+
+        final Hearing hearing = hearingRepository.findBy(resultsShared.getHearing().getId());
+        if (hearing == null) {
+            LOGGER.error("Hearing not found");
+        } else {
+            final LocalDate hearingDay = resultsShared.getHearingDay();
+            if (resultsShared.getHearing().getHasSharedResults()) {
+                final List<uk.gov.moj.cpp.hearing.persist.entity.ha.Target> listOfTargets = hearingRepository.findTargetsByHearingId(hearing.getId());
+                final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearing.getId());
+                final List<Target> targets = targetJPAMapper.fromJPA(Sets.newHashSet(listOfTargets), Sets.newHashSet(listOfProsecutionCases));
+                hearing.setHasSharedResults(true);
+                hearing.getHearingDays().stream().filter(hd -> hearingDay.equals(hd.getDate())).forEach(hd -> hd.setHasSharedResults(true));
+                hearing.getTargets().clear();
+                targets.forEach(targetIn -> updateDraftResult(hearing, targetIn, resultsShared.getSharedTime(), hearingDay));
+                hearing.setHearingState(HearingState.SHARED);
+                hearingRepository.save(hearing);
+                approvalRequestedRepository.removeAllRequestApprovals(hearing.getId());
+            }
+        }
+    }
+
     @Handles("hearing.hearing-trial-type-set")
     public void setHearingTrialType(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
@@ -267,6 +299,36 @@ public class HearingEventListener {
         }
     }
 
+    @Handles("hearing.events.earliest-next-hearing-date-changed")
+    public void changeEarliestNextHearingDate(final JsonEnvelope event) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.earliest-next-hearing-date-changed {}", event.toObfuscatedDebugString());
+        }
+
+        final EarliestNextHearingDateChanged earliestNextHearingDateChanged = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), EarliestNextHearingDateChanged.class);
+
+        final Hearing hearing = hearingRepository.findBy(earliestNextHearingDateChanged.getSeedingHearingId());
+        hearing.setEarliestNextHearingDate(earliestNextHearingDateChanged.getEarliestNextHearingDate());
+        hearingRepository.save(hearing);
+
+    }
+
+    @Handles("hearing.events.earliest-next-hearing-date-cleared")
+    public void removeNextHearingsStartDate(final JsonEnvelope event) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.earliest-next-hearing-date-cleared {}", event.toObfuscatedDebugString());
+        }
+
+        final EarliestNextHearingDateCleared earliestNextHearingDateCleared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), EarliestNextHearingDateCleared.class);
+
+        final Hearing hearing = hearingRepository.findBy(earliestNextHearingDateCleared.getHearingId());
+        hearing.setEarliestNextHearingDate(null);
+        hearingRepository.save(hearing);
+
+    }
+
     public String enrichDraftResult(final String draftResult, final ZonedDateTime sharedTime) {
         final BiConsumer<JsonNode, ZonedDateTime> consumer = (node, sharedDateTime) -> {
             final ObjectNode child = (ObjectNode) node;
@@ -323,6 +385,33 @@ public class HearingEventListener {
             }
         }
     }
+
+    /**
+     * Updates the draft results with shared time etc. Only updates draft results for the given
+     * hearingDay.
+     *
+     * @param hearing        - the hearing to update
+     * @param targetIn       - the target to add
+     * @param sharedDateTime - the share time
+     * @param hearingDay     - the day of the hearing being shared, if target's hearingDay doesn't
+     *                       match it won't be updated.
+     */
+    private void updateDraftResult(Hearing hearing, Target targetIn, ZonedDateTime sharedDateTime, final LocalDate hearingDay) {
+        final String draftResult = targetIn.getDraftResult();
+        if (isNotBlank(draftResult)) {
+
+            if (hearingDay != null && hearingDay.equals(targetIn.getHearingDay())) {
+                final String updatedDraftResult = enrichDraftResult(draftResult, sharedDateTime);
+                if (isNotBlank(updatedDraftResult)) {
+                    targetIn.setDraftResult(updatedDraftResult);
+                    hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
+                }
+            } else {
+                hearing.getTargets().add(targetJPAMapper.toJPA(hearing, targetIn));
+            }
+        }
+    }
+
 
     private void updateDraftResult(Hearing hearing, Target targetIn, ZonedDateTime sharedDateTime) {
         final String draftResult = targetIn.getDraftResult();

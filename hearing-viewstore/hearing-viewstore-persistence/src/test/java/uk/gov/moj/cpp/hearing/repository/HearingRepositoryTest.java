@@ -48,6 +48,7 @@ import org.junit.runner.RunWith;
 public class HearingRepositoryTest {
 
     private static final List<uk.gov.justice.core.courts.Hearing> hearings = new ArrayList<>();
+    private static final List<uk.gov.justice.core.courts.Hearing> hearingsWithHearingDay = new ArrayList<>();
     private static final uk.gov.justice.core.courts.Hearing simpleHearing = minimumInitiateHearingTemplate().getHearing();
 
     @Inject
@@ -71,7 +72,9 @@ public class HearingRepositoryTest {
     @BeforeClass
     public static void create() {
         final InitiateHearingCommand initiateHearingCommand = minimumInitiateHearingTemplate();
+        final InitiateHearingCommand initiateHearingCommandWithHearingDay = minimumInitiateHearingTemplate();
         hearings.add(initiateHearingCommand.getHearing());
+        hearingsWithHearingDay.add(initiateHearingCommandWithHearingDay.getHearing());
     }
 
     @Before
@@ -85,11 +88,22 @@ public class HearingRepositoryTest {
             hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
             hearingRepository.save(hearingEntity);
         });
+
+        hearingsWithHearingDay.forEach(hearing -> {
+            final Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
+            // because h2 incorrectly maps column type TEXT to VARCHAR(255)
+            hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
+            hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
+            hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(randomUUID()).setHearing(hearingEntity).setHearingDay("2021-03-01")));
+            hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
+            hearingRepository.save(hearingEntity);
+        });
     }
 
     @After
     public void teardown() {
         hearings.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
+        hearingsWithHearingDay.forEach(hearing -> hearingRepository.attachAndRemove(hearingRepository.findBy(hearing.getId())));
     }
 
     @Test
@@ -144,6 +158,7 @@ public class HearingRepositoryTest {
         final uk.gov.justice.core.courts.Hearing hearing = hearings.get(0);
         List<Hearing> hearingList = hearingRepository.findHearings(hearing.getHearingDays().get(0).getSittingDay().toLocalDate(), hearing.getCourtCentre().getId());
         assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearing.getId()))));
+        assertThat(hearingList.get(0).getHearingDays(), hasItem(isBean(HearingDay.class).with(HearingDay::getHasSharedResults, is(true))));
     }
 
     @Test
@@ -171,7 +186,7 @@ public class HearingRepositoryTest {
 
     @Test
     public void shouldFindAll() {
-        assertEquals(hearings.size(), hearingRepository.findAll().size());
+        assertEquals(hearings.size()+hearingsWithHearingDay.size(), hearingRepository.findAll().size());
     }
 
     @Test
@@ -199,6 +214,27 @@ public class HearingRepositoryTest {
         final UUID hearingId = hearings.get(0).getId();
         final List<Target> targets = hearingRepository.findTargetsByHearingId(hearingId);
         assertThat(targets.size(), is(1));
+    }
+
+    @Test
+    public void shouldFindTargetsByFilter() {
+        final UUID hearingId = hearings.get(0).getId(); //hearing day null
+        final String hearingDay = "2021-03-01";
+        final List<Target> targets = hearingRepository.findTargetsByFilters(hearingId, hearingDay);
+        assertThat(targets.size(), is(1));
+
+        final UUID hearingId2 = hearingsWithHearingDay.get(0).getId(); //hearing day not null
+        final String hearingDay2 = "2021-03-01";
+        final List<Target> targetsWithHearingDay = hearingRepository.findTargetsByFilters(hearingId2, hearingDay2);
+        assertThat(targetsWithHearingDay.size(), is(1));
+    }
+
+    @Test
+    public void shouldNotFindTargetsByFilter() {
+        final UUID hearingId = hearingsWithHearingDay.get(0).getId();
+        final String hearingDay = "2021-03-02"; //hearing day exists but do not match
+        final List<Target> targets = hearingRepository.findTargetsByFilters(hearingId, hearingDay);
+        assertThat(targets.size(), is(0));
     }
 
     @Test
@@ -351,6 +387,7 @@ public class HearingRepositoryTest {
         for (final ZonedDateTime sittingDay : sittingDays) {
             initiateHearingCommand.getHearing().getHearingDays().add(hearingDay()
                     .withListedDurationMinutes(15)
+                    .withHasSharedResults(true)
                     .withSittingDay(sittingDay)
                     .withListingSequence(2)
                     .build());

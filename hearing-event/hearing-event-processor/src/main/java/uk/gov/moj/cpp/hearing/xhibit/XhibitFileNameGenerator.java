@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.lang.String.format;
 import static java.time.format.DateTimeFormatter.ofPattern;
-import static java.util.UUID.fromString;
 
 import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 
@@ -22,6 +21,9 @@ public class XhibitFileNameGenerator {
     @Inject
     private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
 
+    @Inject
+    private XhibitHelper xhibitHelper;
+
     public String generateWebPageFileName(final ZonedDateTime requestedDate, final String courtCentreId) {
         return generateFileName(WEB_PAGE_PREFIX, requestedDate, courtCentreId);
     }
@@ -32,7 +34,7 @@ public class XhibitFileNameGenerator {
 
     private String generateFileName(final String prefix, final ZonedDateTime requestedDate, final String courtCentreId) {
 
-        final String xhibitCourtCentreCode = getCourtCode(courtCentreId);
+        final String xhibitCourtCentreCode = xhibitHelper.getCrestCourtId(courtCentreId);
 
         return format("%s_%s_%s.xml", prefix, xhibitCourtCentreCode, getSendDate(requestedDate));
     }
@@ -40,9 +42,5 @@ public class XhibitFileNameGenerator {
     private String getSendDate(final ZonedDateTime createdDate) {
         final DateTimeFormatter formatter = ofPattern("uuuuMMddHHmmss");
         return createdDate.format(formatter);
-    }
-
-    private String getCourtCode(final String courtCentreId) {
-        return commonXhibitReferenceDataService.getCourtDetails(fromString(courtCentreId)).getCrestCourtId();
     }
 }

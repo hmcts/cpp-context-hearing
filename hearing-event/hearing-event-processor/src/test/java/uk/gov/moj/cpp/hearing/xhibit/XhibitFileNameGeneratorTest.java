@@ -1,14 +1,13 @@
 package uk.gov.moj.cpp.hearing.xhibit;
 
 import static java.time.ZonedDateTime.now;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
-import uk.gov.moj.cpp.listing.domain.xhibit.CourtLocation;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,33 +22,23 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class XhibitFileNameGeneratorTest {
 
+    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuuMMddHHmmss");
     @Mock
     private CommonXhibitReferenceDataService commonXhibitReferenceDataService;
-
     @InjectMocks
     private XhibitFileNameGenerator xhibitFileNameGenerator;
-
-    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("uuuuMMddHHmmss");
-
-    ZonedDateTime requestedTime;
-    String courtCentreId;
-    CourtLocation courtLocation;
+    @Mock
+    private XhibitHelper xhibitHelper;
+    private ZonedDateTime requestedTime;
+    private String courtCentreId;
 
     @Before
     public void setup() {
         requestedTime = now();
         courtCentreId = randomUUID().toString();
+        when(xhibitHelper.getCrestCourtId(any())).thenReturn("123");
 
-        courtLocation = new CourtLocation("ouCode",
-                "123",
-                "CrestCourtSiteId",
-                "CourtName",
-                "CourtShortName",
-                "CourtSiteName",
-                "CourtSiteCode",
-                "CourtType");
 
-        when(commonXhibitReferenceDataService.getCourtDetails(fromString(courtCentreId))).thenReturn(courtLocation);
     }
 
     @Test

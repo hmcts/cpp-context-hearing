@@ -49,6 +49,9 @@ public class HearingDay {
     @Column(name = "court_room_id")
     private UUID courtRoomId;
 
+    @Column(name = "has_shared_results")
+    private Boolean hasSharedResults;
+
     public HearingDay() {
         //For JPA
     }
@@ -131,6 +134,14 @@ public class HearingDay {
 
     public void setCourtRoomId(final UUID courtRoomId) {
         this.courtRoomId = courtRoomId;
+    }
+
+    public Boolean getHasSharedResults() {
+        return hasSharedResults;
+    }
+
+    public void setHasSharedResults(final Boolean hasSharedResults) {
+        this.hasSharedResults = hasSharedResults;
     }
 
     @Override

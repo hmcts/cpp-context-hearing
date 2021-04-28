@@ -47,6 +47,7 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.hearing.details.UpdateRelatedHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.ExtendHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
@@ -55,6 +56,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
@@ -98,7 +100,8 @@ public class InitiateHearingCommandHandlerTest {
             RegisteredHearingAgainstCase.class,
             InheritedVerdictAdded.class,
             RegisteredHearingAgainstApplication.class,
-            HearingExtended.class
+            HearingExtended.class,
+            ExistingHearingUpdated.class
     );
     @Mock
     private EventStream hearingEventStream, applicationEventStream;
@@ -125,18 +128,40 @@ public class InitiateHearingCommandHandlerTest {
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
 
+    /**
+     * The test will be refactored part of DD-9620
+     * @throws Throwable
+     */
     @Test
     public void extendHearing() throws Throwable {
         extendHearing((h) -> {
         });
     }
 
+    /**
+     * The test will be refactored part of DD-9620
+     * @throws Throwable
+     */
     @Test
     public void extendHearingProsecutionCases() throws Throwable {
         extendHearingWithProsecutionCases((h) -> {
         });
     }
 
+    /**
+     * The test will be refactored part of DD-9620
+     * @throws Throwable
+     */
+    @Test
+    public void updateExistingHearingProsecutionCases() throws Throwable {
+        updateExistingHearingWithProsecutionCases((h) -> {
+        });
+    }
+
+    /**
+     * The test will be refactored part of DD-9620
+     * @throws Throwable
+     */
     @Test
     public void extendHearingNullInitialApplications() throws Throwable {
 
@@ -213,6 +238,38 @@ public class InitiateHearingCommandHandlerTest {
 
         assertThat(hearingExtended.getProsecutionCases().get(0).getId(), is(command.getProsecutionCases().get(0).getId()));
         assertThat(hearingExtended.getHearingId(), is(command.getHearingId()));
+    }
+
+    private void updateExistingHearingWithProsecutionCases(final Consumer<Hearing> hearingModification) throws EventStreamException {
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        hearingModification.accept(hearingOne.getHearing());
+
+        final JsonEnvelope initCommand = envelopeFrom(metadataWithRandomUUID("hearing.initiate"), objectToJsonObjectConverter.convert(hearingOne.it()));
+
+        setupMockedEventStream(hearingOne.getHearingId(), this.hearingEventStream, new HearingAggregate());
+        if (hearingOne.getHearing().getCourtApplications() != null) {
+            setupMockedEventStream(hearingOne.getHearing().getCourtApplications().get(0).getId(), this.applicationEventStream, new ApplicationAggregate());
+        }
+
+        this.hearingCommandHandler.initiate(initCommand);
+
+        final UpdateRelatedHearingCommand command = new UpdateRelatedHearingCommand();
+        command.setProsecutionCases(Arrays.asList(ProsecutionCase.prosecutionCase().withId(UUID.randomUUID()).build()));
+        command.setHearingId(hearingOne.getHearingId());
+
+        final JsonEnvelope commandJson = envelopeFrom(metadataWithRandomUUID("hearing.command.update-related-hearing"), objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateRelatedHearing(commandJson);
+
+        ArgumentCaptor<Stream> argumentCaptor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(this.hearingEventStream, times(2))).append((Stream) argumentCaptor.capture());
+
+        final JsonEnvelope jsonEnvelope = (JsonEnvelope) argumentCaptor.getAllValues().get(1).findFirst().orElse(null);
+
+        ExistingHearingUpdated existingHearingUpdated = asPojo(jsonEnvelope, ExistingHearingUpdated.class);
+
+        assertThat(existingHearingUpdated.getProsecutionCases().get(0).getId(), is(command.getProsecutionCases().get(0).getId()));
+        assertThat(existingHearingUpdated.getHearingId(), is(command.getHearingId()));
     }
 
     @Test

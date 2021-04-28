@@ -38,11 +38,17 @@
       "hasSharedResults": true,
       "hearingDays": [
         {
+          "courtCentreId": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+          "courtRoomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+          "isCancelled": false,
           "listedDurationMinutes": 40,
           "listingSequence": 1,
           "sittingDay": "2019-07-25T07:19:59.780Z"
         },
         {
+          "courtCentreId": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+          "courtRoomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+          "isCancelled": false,
           "listedDurationMinutes": 40,
           "listingSequence": 1,
           "sittingDay": "2019-07-26T07:19:59.780Z"
@@ -120,11 +126,17 @@
       "hasSharedResults": true,
       "hearingDays": [
         {
+          "courtCentreId": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+          "courtRoomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+          "isCancelled": false,
           "listedDurationMinutes": 40,
           "listingSequence": 1,
           "sittingDay": "2019-07-24T10:06:44.893Z"
         },
         {
+          "courtCentreId": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+          "courtRoomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+          "isCancelled": false,
           "listedDurationMinutes": 40,
           "listingSequence": 1,
           "sittingDay": "2019-07-25T10:06:44.892Z"

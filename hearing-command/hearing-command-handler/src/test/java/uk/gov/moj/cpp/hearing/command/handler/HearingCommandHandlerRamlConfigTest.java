@@ -75,6 +75,9 @@ public class HearingCommandHandlerRamlConfigTest {
                 CorrectHearingDaysWithoutCourtCentreCommandHandler.class,
                 DuplicateHearingCommandHandler.class,
                 ProsecutionCaseCommandHandler.class,
+                DeleteHearingCommandHandler.class,
+                UnallocateHearingCommandHandler.class,
+                RecordNextHearingDayUpdatedCommandHandler.class,
                 UpdateResultLineSharedDatesCommandHandler.class,
                 ReusableInfoCommandHandler.class,
                 YouthCourtDefendantsCommandHandler.class

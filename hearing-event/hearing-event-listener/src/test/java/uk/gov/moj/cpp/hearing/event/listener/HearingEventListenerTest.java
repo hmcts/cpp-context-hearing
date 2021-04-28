@@ -9,6 +9,7 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
@@ -42,6 +43,9 @@ import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
@@ -51,6 +55,7 @@ import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -66,6 +71,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -135,9 +141,10 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldPersist_with_hasSharedResults_false() {
 
         final UUID hearingId = randomUUID();
-        final Target targetOut = new Target();
+        final LocalDate hearingDay = LocalDate.now();
+        final Target targetOut = new Target().setHearingDay(hearingDay.toString());
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
-                CoreTestTemplates.target(hearingId, randomUUID(), randomUUID(), randomUUID()).build(),
+                CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(true)
@@ -232,6 +239,66 @@ public class HearingEventListenerTest {
                 .with(Hearing::getHasSharedResults, is(true))
                 .with(Hearing::getTargets, hasSize(1))
                 .with(Hearing::getId, is(resultsShared.getHearingId()))
+        );
+    }
+
+    @Test
+    public void resultsSharedV2_shouldPersist_with_hasSharedResults_true() {
+        final LocalDate today = LocalDate.now();
+        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+
+        final ResultsSharedV2 resultsShared = resultsSharedV2Template(today);
+
+        final uk.gov.justice.core.courts.Target resultForToday = targetTemplate(today);
+        final uk.gov.justice.core.courts.Target resultForTomorrow = targetTemplate(tomorrow);
+        final List<uk.gov.justice.core.courts.Target> targets = asList(resultForToday, resultForTomorrow);
+        final Target target = new Target()
+                .setId(randomUUID())
+                .setHearingDay(today.toString());
+        final Target target2 = new Target()
+                .setId(randomUUID())
+                .setHearingDay(tomorrow.toString());
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        final Defendant defendant = new Defendant();
+        final Set<Defendant> defendants = asSet(defendant);
+        prosecutionCase.setDefendants(defendants);
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay hearingDay = new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay();
+        hearingDay.setDate(today);
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(false)
+                .setHearingDays(asSet(hearingDay))
+                .setTargets(asSet(target, target2))
+                .setProsecutionCases(asSet(prosecutionCase))
+                .setId(resultsShared.getHearingId()
+                );
+
+        when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
+        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
+        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
+                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
+        when(targetJPAMapper.fromJPA(asSet(target, target2), asSet(prosecutionCase))).thenReturn(targets);
+        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
+        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
+
+        hearingEventListener.resultsSharedV2(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v2"),
+                objectToJsonObjectConverter.convert(resultsShared)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        verify(this.approvalRequestedRepository).removeAllRequestApprovals(resultsShared.getHearingId());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(true))
+                .with(Hearing::getId, is(resultsShared.getHearingId()))
+                .with(Hearing::getTargets, hasSize(2))
+                .with(Hearing::getHearingDays, first(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)
+                                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getHasSharedResults, is(true)
+                                )
+                        )
+                )
         );
     }
 
@@ -337,6 +404,41 @@ public class HearingEventListenerTest {
                 .withVariantDirectory(singletonList(
                         standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
                 ))
+                .build();
+    }
+
+    private ResultsSharedV2 resultsSharedV2Template(final LocalDate hearingDay) {
+
+        CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        UUID completedResultLineId = randomUUID();
+        hearingOne.it().getHearing().setHasSharedResults(true);
+
+        return ResultsSharedV2.builder()
+                .withHearingId(hearingOne.getHearingId())
+                .withTargets(new ArrayList<>(singletonList(
+                        CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
+                )))
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                .withHearing(hearingOne.getHearing())
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
+                        .withCourtClerk(DelegatedPowers.delegatedPowers()
+                                .withUserId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .withId(completedResultLineId)
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                        .build()
+                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                ))
+                .withHearingDay(hearingDay)
                 .build();
     }
 
@@ -543,6 +645,57 @@ public class HearingEventListenerTest {
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getString(LAST_SHARED_DATE), is(sharedTime.toLocalDate().toString()));
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
+    }
+
+    @Test
+    public void shouldUpdateEarliestNextHearingDate() {
+
+        final UUID hearingId = randomUUID();
+        final UUID seedingHearingId = randomUUID();
+        final ZonedDateTime earliestNextHearingDate = ZonedDateTime.now(ZoneId.of("UTC"));
+
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+
+        final EarliestNextHearingDateChanged earliestNextHearingDateChanged = new EarliestNextHearingDateChanged(hearingId, seedingHearingId, earliestNextHearingDate);
+
+        when(hearingRepository.findBy(seedingHearingId)).thenReturn(hearingEntity);
+
+        hearingEventListener.changeEarliestNextHearingDate(envelopeFrom(metadataWithRandomUUID("hearing.events.earliest-next-hearing-date-changed"),
+                objectToJsonObjectConverter.convert(earliestNextHearingDateChanged)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getEarliestNextHearingDate, is(earliestNextHearingDate))
+        );
+    }
+
+    @Test
+    public void shouldRemoveNextHearingsStartDate() {
+
+        final UUID hearingId = randomUUID();
+
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId)
+                .setEarliestNextHearingDate(ZonedDateTime.now());
+
+        final EarliestNextHearingDateCleared earliestNextHearingDateCleared = new EarliestNextHearingDateCleared(hearingId);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+
+        hearingEventListener.removeNextHearingsStartDate(envelopeFrom(metadataWithRandomUUID("hearing.events.next-hearings-start-date-removed"),
+                objectToJsonObjectConverter.convert(earliestNextHearingDateCleared)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getEarliestNextHearingDate, nullValue())
+        );
     }
 
     private String getDraftResultFromResource(final String path) throws IOException {

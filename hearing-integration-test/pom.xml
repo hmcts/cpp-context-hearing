@@ -81,6 +81,21 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>framework-management</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>jmx-command-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-jmx</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>uk.gov.moj.cpp.common.library.utils</groupId>
             <artifactId>cpp-platform-test-utils</artifactId>
             <scope>test</scope>

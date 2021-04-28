@@ -8,9 +8,11 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -45,6 +47,9 @@ public class TargetJPAMapper {
         target.setApplicationId(pojo.getApplicationId());
         target.setResultLines(resultLineJPAMapper.toJPA(target, pojo.getResultLines()));
         target.setShadowListed(pojo.getShadowListed());
+        if (Objects.nonNull(pojo.getHearingDay())){
+            target.setHearingDay(pojo.getHearingDay().toString());
+        }
         return target;
     }
 
@@ -52,7 +57,7 @@ public class TargetJPAMapper {
         if (null == entity) {
             return null;
         }
-        return uk.gov.justice.core.courts.Target.target()
+        final uk.gov.justice.core.courts.Target.Builder builder = uk.gov.justice.core.courts.Target.target()
                 .withDefendantId(entity.getDefendantId())
                 .withMasterDefendantId(masterDefendantId)
                 .withDraftResult(entity.getDraftResult())
@@ -61,7 +66,11 @@ public class TargetJPAMapper {
                 .withApplicationId(entity.getApplicationId())
                 .withTargetId(entity.getId())
                 .withResultLines(resultLineJPAMapper.fromJPA(entity.getResultLines()))
-                .withShadowListed(entity.getShadowListed())
+                .withShadowListed(entity.getShadowListed());
+        if (Objects.nonNull(entity.getHearingDay())) {
+            builder.withHearingDay(LocalDate.parse(entity.getHearingDay()));
+        }
+        return builder
                 .build();
     }
 
