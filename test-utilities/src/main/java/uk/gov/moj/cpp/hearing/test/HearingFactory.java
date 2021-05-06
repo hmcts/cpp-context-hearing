@@ -98,7 +98,7 @@ public class HearingFactory {
     public MasterDefendant masterDefendant(UUID masterDefendantId, UUID caseId) {
         return MasterDefendant.masterDefendant()
                 .withMasterDefendantId(masterDefendantId)
-                .withPersonDefendant(PersonDefendant.personDefendant().build())
+                .withPersonDefendant(PersonDefendant.personDefendant().withPersonDetails(person().build()).build())
                 .build();
     }
 

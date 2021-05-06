@@ -141,6 +141,9 @@ subscriptions_descriptor:
         - name: public.hearing.hearing-days-cancelled
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-days-cancelled.json
 
+        - name: public.hearing.nces-email-notification-for-application
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.nces-email-notification-for-application.json
+
         # Duplicate Hearing
         - name: public.events.hearing.marked-as-duplicate
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.marked-as-duplicate.json

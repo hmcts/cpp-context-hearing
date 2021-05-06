@@ -1840,4 +1840,40 @@ public class TestTemplates {
                 .build());
         return courtApplications;
     }
+
+    public static List<CourtApplicationCase> createCourtApplicationCases(){
+        return Arrays.asList(CourtApplicationCase.courtApplicationCase()
+                .withProsecutionCaseId(randomUUID())
+                .withIsSJP(false)
+                .withCaseStatus("ACTIVE")
+                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                        .withCaseURN("caseURN1")
+                        .withProsecutionAuthorityId(randomUUID())
+                        .withProsecutionAuthorityCode("ABC")
+                        .build())
+                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withOffenceDefinitionId(randomUUID())
+                        .withOffenceCode("ABC")
+                        .withOffenceTitle("ABC")
+                        .withWording("ABC")
+                        .withStartDate(LocalDate.now())
+                        .withId(randomUUID()).build()))
+                .build(), CourtApplicationCase.courtApplicationCase()
+                .withProsecutionCaseId(randomUUID())
+                .withIsSJP(false)
+                .withCaseStatus("ACTIVE")
+                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                        .withCaseURN("caseURN2")
+                        .withProsecutionAuthorityId(randomUUID())
+                        .withProsecutionAuthorityCode("ABC")
+                        .build())
+                .withOffences(Collections.singletonList(uk.gov.justice.core.courts.Offence.offence()
+                        .withOffenceDefinitionId(randomUUID())
+                        .withOffenceCode("ABC")
+                        .withOffenceTitle("ABC")
+                        .withWording("ABC")
+                        .withStartDate(LocalDate.now())
+                        .withId(randomUUID()).build()))
+                .build());
+    }
 }

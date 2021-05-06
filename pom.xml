@@ -28,10 +28,10 @@
         <coredomain.version>1.0.152</coredomain.version>
         <referencedata.version>7.0.44</referencedata.version>
         <material.version>7.0.0</material.version>
-        <results.version>7.0.51</results.version>
+        <results.version>7.0.53</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
-        <stagingenforcement.version>7.0.8</stagingenforcement.version>
-        <progression.version>7.0.123-amendreshare</progression.version>
+        <stagingenforcement.version>7.0.17</stagingenforcement.version>
+        <progression.version>7.0.124</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
