@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="33" author="hearing" logicalFilePath="103_create_index_to_ha_hearing_day.xml">
+
+        <sql>
+            CREATE INDEX IF NOT EXISTS ha_hearing_day_hearing_id_idx ON ha_hearing_day USING btree (hearing_id);
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>
