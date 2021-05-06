@@ -17,6 +17,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -55,13 +56,12 @@ public class ProsecutionCaseIT extends AbstractIT {
         Queries.getHearingPollForMatch(hearingOne.getHearingId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
                         .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
-                                .with(ProsecutionCase::getProsecutionCaseIdentifier, isBean(ProsecutionCaseIdentifier.class)
-                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityId, is(cpsProsecutorUpdated.getProsecutionAuthorityId()))
-                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityCode, is(cpsProsecutorUpdated.getProsecutionAuthorityCode()))
-                                        .with(ProsecutionCaseIdentifier::getProsecutionAuthorityReference, is(cpsProsecutorUpdated.getProsecutionAuthorityReference()))
-                                        .with(ProsecutionCaseIdentifier::getCaseURN, is(cpsProsecutorUpdated.getCaseURN()))
+                                .with(ProsecutionCase::getProsecutor, isBean(Prosecutor.class)
+                                        .with(Prosecutor::getProsecutorId, is(cpsProsecutorUpdated.getProsecutionAuthorityId()))
+                                        .with(Prosecutor::getProsecutorCode, is(cpsProsecutorUpdated.getProsecutionAuthorityCode()))
                                 )
-                        ))));
+                        ))
+                ));
     }
 
     @Test

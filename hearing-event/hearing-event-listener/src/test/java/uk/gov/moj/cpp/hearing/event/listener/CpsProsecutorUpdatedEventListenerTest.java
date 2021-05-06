@@ -16,9 +16,9 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.repository.ProsecutionCaseRepository;
 
 import org.junit.Before;
@@ -53,9 +53,9 @@ public class CpsProsecutorUpdatedEventListenerTest {
     @Test
     public void shouldUpdateProsecutionCase() {
         //given
-        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = new ProsecutionCaseIdentifier();
+        final CpsProsecutor cpsProsecutor = new CpsProsecutor();
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
-        prosecutionCase.setProsecutionCaseIdentifier(prosecutionCaseIdentifier);
+        prosecutionCase.setCpsProsecutor(cpsProsecutor);
 
         //when
         when(prosecutionCaseRepository.findBy(any(HearingSnapshotKey.class))).thenReturn(prosecutionCase);
@@ -68,11 +68,9 @@ public class CpsProsecutorUpdatedEventListenerTest {
 
         verify(prosecutionCaseRepository, times(1)).save(prosecutionCaseArgumentCaptor.capture());
 
-        final ProsecutionCaseIdentifier capturedProsecutionCaseIdentifier = prosecutionCaseArgumentCaptor.getAllValues().get(0).getProsecutionCaseIdentifier();
-        assertThat(capturedProsecutionCaseIdentifier.getProsecutionAuthorityId(), is(cpsProsecutorUpdated.getProsecutionAuthorityId()));
-        assertThat(capturedProsecutionCaseIdentifier.getProsecutionAuthorityReference(), is(cpsProsecutorUpdated.getProsecutionAuthorityReference()));
-        assertThat(capturedProsecutionCaseIdentifier.getProsecutionAuthorityCode(), is(cpsProsecutorUpdated.getProsecutionAuthorityCode()));
-        assertThat(capturedProsecutionCaseIdentifier.getCaseURN(), is(cpsProsecutorUpdated.getCaseURN()));
+        final CpsProsecutor capturedCpsProsecutor = prosecutionCaseArgumentCaptor.getAllValues().get(0).getCpsProsecutor();
+        assertThat(capturedCpsProsecutor.getCpsProsecutorCode(), is(cpsProsecutorUpdated.getProsecutionAuthorityCode()));
+        assertThat(capturedCpsProsecutor.getCpsProsecutorId(), is(cpsProsecutorUpdated.getProsecutionAuthorityId()));
 
     }
 

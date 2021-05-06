@@ -34,6 +34,9 @@ public class ProsecutionCase {
     @Embedded
     private ProsecutionCaseIdentifier prosecutionCaseIdentifier;
 
+    @Embedded
+    private CpsProsecutor cpsProsecutor;
+
     @Column(name = "initiation_code")
     @Enumerated(EnumType.STRING)
     private InitiationCode initiationCode;
@@ -135,6 +138,15 @@ public class ProsecutionCase {
 
     public void setMarkers(Set<CaseMarker> markers) {
         this.markers = markers;
+    }
+
+
+    public CpsProsecutor getCpsProsecutor() {
+        return cpsProsecutor;
+    }
+
+    public void setCpsProsecutor(final CpsProsecutor cpsProsecutor) {
+        this.cpsProsecutor = cpsProsecutor;
     }
 
     @Override

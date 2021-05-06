@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
@@ -95,12 +96,6 @@ public class ProsecutionCaseDelegate implements Serializable {
     }
 
     private void setProsecutor(final ProsecutionCase prosecutionCase, final CpsProsecutorUpdated cpsProsecutorUpdated) {
-        final ProsecutionCaseIdentifier prosecutionCaseIdentifier =  prosecutionCase.getProsecutionCaseIdentifier();
-        prosecutionCaseIdentifier.setProsecutionAuthorityId(cpsProsecutorUpdated.getProsecutionAuthorityId());
-        prosecutionCaseIdentifier.setProsecutionAuthorityCode(cpsProsecutorUpdated.getProsecutionAuthorityCode());
-        prosecutionCaseIdentifier.setProsecutionAuthorityReference(cpsProsecutorUpdated.getProsecutionAuthorityReference());
-        prosecutionCaseIdentifier.setProsecutionAuthorityName(cpsProsecutorUpdated.getProsecutionAuthorityName());
-        prosecutionCaseIdentifier.setCaseURN(cpsProsecutorUpdated.getCaseURN());
-        prosecutionCaseIdentifier.setAddress(cpsProsecutorUpdated.getAddress());
+        prosecutionCase.setProsecutor(Prosecutor.prosecutor().withProsecutorCode(cpsProsecutorUpdated.getProsecutionAuthorityCode()).withProsecutorId(cpsProsecutorUpdated.getProsecutionCaseId()).withProsecutorName(cpsProsecutorUpdated.getProsecutionAuthorityName()).withAddress(cpsProsecutorUpdated.getAddress()).build());
     }
 }
