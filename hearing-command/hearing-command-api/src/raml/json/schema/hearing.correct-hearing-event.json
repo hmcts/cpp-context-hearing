@@ -16,6 +16,10 @@
       "type": "string",
       "format": "date-time"
     },
+    "note": {
+      "type": "string",
+      "maxLength": 3000
+    },
     "lastModifiedTime": {
       "type": "string",
       "format": "date-time"

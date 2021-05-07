@@ -7,5 +7,6 @@
   "eventTime": "2016-11-12T09:25:00Z",
   "alterable": false,
   "defenceCounselId": "d06f6539-2a7c-4bc8-bca3-A1e5a225471a",
-  "override": false
+  "override": false,
+  "note": "note for hearing event"
 }

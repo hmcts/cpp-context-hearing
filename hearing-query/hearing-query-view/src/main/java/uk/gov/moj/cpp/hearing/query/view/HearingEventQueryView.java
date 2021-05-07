@@ -43,6 +43,7 @@ public class HearingEventQueryView {
             LoggerFactory.getLogger(HearingEventQueryView.class.getName());
 
     private static final String FIELD_DEFENCE_COUNSEL_ID = "defenceCounselId";
+    private static final String NOTE = "note";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITIONS = "hearing.get-hearing-event-definitions";
     private static final String RESPONSE_NAME_HEARING_EVENT_DEFINITION = "hearing.get-hearing-event-definition";
     private static final String RESPONSE_NAME_HEARING_EVENT_LOG = "hearing.get-hearing-event-log";
@@ -128,6 +129,10 @@ public class HearingEventQueryView {
                             if (nonNull(hearingEvent.getDefenceCounselId())) {
                                 jsonObjectBuilder.add(FIELD_DEFENCE_COUNSEL_ID,
                                         hearingEvent.getDefenceCounselId().toString());
+                            }
+                            if (nonNull(hearingEvent.getNote())) {
+                                jsonObjectBuilder.add(NOTE,
+                                        hearingEvent.getNote());
                             }
 
                             eventLogJsonArrayBuilder.add(jsonObjectBuilder);

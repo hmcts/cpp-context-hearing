@@ -86,7 +86,7 @@ public class LogEventHearingEventProcessorTest {
         final HearingEventLogged hearingEventLogged = new HearingEventLogged(randomUUID(), null, randomUUID(), randomUUID(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(),
                 new uk.gov.moj.cpp.hearing.domain.CourtCentre(randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), STRING.next()),
-                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN);
+                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next());
 
         this.logEventHearingEventProcessor.publishHearingEventLoggedPublicEvent(
                 createEnvelope("hearing.hearing-event-logged", this.objectToJsonObjectConverter.convert(hearingEventLogged)));
@@ -120,7 +120,7 @@ public class LogEventHearingEventProcessorTest {
         final HearingEventLogged hearingEventLogged = new HearingEventLogged(randomUUID(), randomUUID(), randomUUID(), randomUUID(),
                 null, STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(),
                 new uk.gov.moj.cpp.hearing.domain.CourtCentre(randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), STRING.next()),
-                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN);
+                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next());
 
         this.logEventHearingEventProcessor.publishHearingEventLoggedPublicEvent(
                 createEnvelope("hearing.hearing-event-logged", this.objectToJsonObjectConverter.convert(hearingEventLogged)));
@@ -152,7 +152,7 @@ public class LogEventHearingEventProcessorTest {
     public void publishHearingVerdictUpdatedPublicEvent() throws IOException {
 
         final HearingEventIgnored hearingEventIgnored =
-                new HearingEventIgnored(randomUUID(), randomUUID(), randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), STRING.next(), BOOLEAN.next());
+                new HearingEventIgnored(randomUUID(), randomUUID(), randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), STRING.next(), BOOLEAN.next(), STRING.next());
 
         this.logEventHearingEventProcessor.publishHearingEventIgnoredPublicEvent(createEnvelope("hearing.hearing-event-ignored",
                 this.objectToJsonObjectConverter.convert(hearingEventIgnored)));
@@ -168,7 +168,7 @@ public class LogEventHearingEventProcessorTest {
     public void publishHearingEventsUpdated() throws IOException {
 
         final HearingEventsUpdated hearingEventsUpdated =
-                new HearingEventsUpdated(randomUUID(), Arrays.asList(new HearingEvent(randomUUID(), "RL")));
+                new HearingEventsUpdated(randomUUID(), Arrays.asList(new HearingEvent(randomUUID(), "RL", STRING.next())));
 
         this.logEventHearingEventProcessor.publishHearingEventsUpdatedEvent(createEnvelope("hearing.hearing-events-updated",
                 this.objectToJsonObjectConverter.convert(hearingEventsUpdated)));

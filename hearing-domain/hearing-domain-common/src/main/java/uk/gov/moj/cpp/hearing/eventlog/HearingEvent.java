@@ -11,6 +11,7 @@ public class HearingEvent {
     private UUID hearingEventId;
     private UUID lastHearingEventId;
     private String recordedLabel;
+    private String note;
     private ZonedDateTime eventTime;
     private ZonedDateTime lastModifiedTime;
 
@@ -18,6 +19,7 @@ public class HearingEvent {
     public HearingEvent(@JsonProperty("hearingEventId") final UUID hearingEventId,
                         @JsonProperty("lastHearingEventId") final UUID lastHearingEventId,
                         @JsonProperty("recordedLabel") final String recordedLabel,
+                        @JsonProperty("note") final String note,
                         @JsonProperty("eventTime") final ZonedDateTime eventTime,
                         @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime) {
         this.hearingEventId = hearingEventId;
@@ -25,6 +27,7 @@ public class HearingEvent {
         this.recordedLabel = recordedLabel;
         this.eventTime = eventTime;
         this.lastModifiedTime = lastModifiedTime;
+        this.note = note;
     }
 
     public static Builder builder() {
@@ -44,6 +47,10 @@ public class HearingEvent {
         return recordedLabel;
     }
 
+    public String getNote() {
+        return note;
+    }
+
     public ZonedDateTime getEventTime() {
         return eventTime;
     }
@@ -56,6 +63,7 @@ public class HearingEvent {
         private UUID hearingEventId;
         private UUID lastHearingEventId;
         private String recordedLabel;
+        private String note;
         private ZonedDateTime eventTime;
         private ZonedDateTime lastModifiedTime;
 
@@ -74,6 +82,11 @@ public class HearingEvent {
             return this;
         }
 
+        public Builder withNote(String note) {
+            this.note = note;
+            return this;
+        }
+
         public Builder withEventTime(ZonedDateTime eventTime) {
             this.eventTime = eventTime;
             return this;
@@ -85,7 +98,7 @@ public class HearingEvent {
         }
 
         public HearingEvent build() {
-            return new HearingEvent(this.hearingEventId, this.lastHearingEventId, this.recordedLabel, this.eventTime, this.lastModifiedTime);
+            return new HearingEvent(this.hearingEventId, this.lastHearingEventId, this.recordedLabel, this.note,  this.eventTime, this.lastModifiedTime);
         }
     }
 }

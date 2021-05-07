@@ -44,6 +44,9 @@ public class HearingEvent {
     @Column(name = "event_date")
     private LocalDate eventDate;
 
+    @Column(name = "note")
+    private String note;
+
     public HearingEvent() {
         // for JPA
     }
@@ -139,6 +142,15 @@ public class HearingEvent {
 
     public HearingEvent setEventDate(LocalDate eventDate) {
         this.eventDate = eventDate;
+        return this;
+    }
+
+    public String getNote() {
+        return note;
+    }
+
+    public HearingEvent setNote(String note) {
+        this.note = note;
         return this;
     }
 

@@ -75,7 +75,7 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, "testNote");
 
         poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
                 "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -91,7 +91,8 @@ public class HearingEventsIT extends AbstractIT {
                                 withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
                                 withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
                                 withJsonPath("$.events[0].defenceCounselId", is(logEventCommand.getDefenceCounselId().toString())),
-                                withJsonPath("$.events[0].alterable", is(false))
+                                withJsonPath("$.events[0].alterable", is(false)),
+                                withJsonPath("$.events[0].note", is("testNote"))
                         ))
                 );
 
@@ -111,7 +112,7 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
         poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
                 "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -146,7 +147,7 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(),
-                hearingOne.it(), hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                hearingOne.it(), hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 hearingOne.getHearingId(), EVENT_TIME.toLocalDate()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -195,7 +196,7 @@ public class HearingEventsIT extends AbstractIT {
 
         assertThat(hearingEventDefinition.isAlterable(), is(true));
 
-        final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(), hearingEventDefinition.getId(), true, DEFENCE_COUNSEL_ID, EVENT_TIME);
+        final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(), hearingEventDefinition.getId(), true, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 hearingOne.getHearingId(), EVENT_TIME.toLocalDate()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -229,7 +230,7 @@ public class HearingEventsIT extends AbstractIT {
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
         final LogEventCommand logEventCommand =
                 logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                        hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                        hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
         final CorrectLogEventCommand correctLogEventCommand = correctLogEvent(getRequestSpec(), logEventCommand.getHearingEventId(),
                 asDefault(), hearingOne.it(), hearingEventDefinition.getId(), false, EVENT_TIME);
@@ -269,7 +270,7 @@ public class HearingEventsIT extends AbstractIT {
 
         final LogEventCommand startHearingLogEventCommand = logEvent(getRequestSpec(),
                 e -> e.withEventTime(zonedDateTime),
-                hearingOne.it(), startHearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, zonedDateTime);
+                hearingOne.it(), startHearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, zonedDateTime, null);
 
         final CorrectLogEventCommand correctLogEventCommand = correctLogEvent(getRequestSpec(), startHearingLogEventCommand.getHearingEventId(),
                 e -> e.withEventTime(zonedDateTime.plusMinutes(40)),
@@ -279,7 +280,7 @@ public class HearingEventsIT extends AbstractIT {
         final LogEventCommand identifyDefendantLogEventCommand = logEvent(getRequestSpec(),
                 e -> e.withEventTime(zonedDateTime.plusMinutes(20)),
                 hearingOne.it(), identifyDefendantEventDefinition.getId(), true,
-                DEFENCE_COUNSEL_ID, zonedDateTime);
+                DEFENCE_COUNSEL_ID, zonedDateTime, null);
 
         poll(requestParams(getBaseUri() + "/" + MessageFormat.format(ENDPOINT_PROPERTIES.getProperty("hearing.get-hearing-event-log"),
                 hearingOne.getHearingId(), zonedDateTime.toLocalDate()), "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -311,9 +312,9 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
-        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), "RL1");
+        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), "RL1" ,"note");
 
         final String commandAPIEndPoint = MessageFormat.format(
                 ENDPOINT_PROPERTIES.getProperty("hearing.update-hearing-events"),
@@ -354,7 +355,7 @@ public class HearingEventsIT extends AbstractIT {
         assertThat(hearingEventDefinition.isAlterable(), is(false));
 
         final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
         poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
                 "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
@@ -451,7 +452,7 @@ public class HearingEventsIT extends AbstractIT {
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
         final LogEventCommand logEventCommand =
                 logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
-                        hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME);
+                        hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
         final CorrectLogEventCommand correctLogEventCommand = correctLogEvent(getRequestSpec(), logEventCommand.getHearingEventId(),
                 asDefault(), hearingOne.it(), hearingEventDefinition.getId(), false, EVENT_TIME);

@@ -31,6 +31,7 @@ public class HearingEventLogged implements Serializable {
     private final HearingType hearingType;
     private final String caseURN;
     private final JurisdictionType jurisdictionType;
+    private final String note;
 
     @JsonCreator
     public HearingEventLogged(
@@ -46,7 +47,8 @@ public class HearingEventLogged implements Serializable {
             @JsonProperty("courtCentre") final CourtCentre courtCentre,
             @JsonProperty("hearingType") final HearingType hearingType,
             @JsonProperty("caseURN") final String caseURN,
-            @JsonProperty("jurisdictionType") final JurisdictionType jurisdictionType) {
+            @JsonProperty("jurisdictionType") final JurisdictionType jurisdictionType,
+            @JsonProperty("note") final String note) {
         this.hearingEventId = hearingEventId;
         this.lastHearingEventId = lastHearingEventId;
         this.hearingId = hearingId;
@@ -60,6 +62,7 @@ public class HearingEventLogged implements Serializable {
         this.caseURN = caseURN;
         this.defenceCounselId = defenceCounselId;
         this.jurisdictionType = jurisdictionType;
+        this.note = note;
     }
 
     public UUID getHearingEventId() {
@@ -111,5 +114,9 @@ public class HearingEventLogged implements Serializable {
     }
 
     public JurisdictionType getJurisdictionType() { return jurisdictionType; }
+
+    public String getNote() {
+        return note;
+    }
 
 }

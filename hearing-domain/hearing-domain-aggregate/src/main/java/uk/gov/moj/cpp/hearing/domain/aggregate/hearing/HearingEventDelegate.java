@@ -47,14 +47,14 @@ public class HearingEventDelegate implements Serializable {
 
         Optional<String> ignoreReason = validateHearingEvent(hearingEvent.getHearingEventId());
         if (ignoreReason.isPresent()) {
-            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
+            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable, hearingEvent.getNote()));
         }
 
         final String reference = getReference();
 
         if (isNull(reference)) {
             ignoreReason = Optional.of(REASON_CASEURN_NOT_FOUND);
-            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
+            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable, hearingEvent.getNote()));
         }
 
         final CourtCentre courtCentre = CourtCentre.courtCentre()
@@ -84,7 +84,8 @@ public class HearingEventDelegate implements Serializable {
                 courtCentre,
                 hearingType,
                 reference,
-                momento.getHearing().getJurisdictionType()));
+                momento.getHearing().getJurisdictionType(),
+                hearingEvent.getNote()));
     }
 
 
@@ -105,7 +106,7 @@ public class HearingEventDelegate implements Serializable {
 
         final Optional<String> ignoreReason = validateHearingEventBeforeApplyCorrection(hearingEvent.getHearingEventId());
         if (ignoreReason.isPresent()) {
-            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable));
+            return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable, hearingEvent.getNote()));
         }
 
         return Stream.of(
@@ -133,7 +134,8 @@ public class HearingEventDelegate implements Serializable {
                                 .withDescription(momento.getHearing().getType().getDescription())
                                 .build(),
                         getReference(),
-                        momento.getHearing().getJurisdictionType()
+                        momento.getHearing().getJurisdictionType(),
+                        hearingEvent.getNote()
                 ));
     }
 

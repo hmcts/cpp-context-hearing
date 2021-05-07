@@ -22,6 +22,10 @@
         },
         "recordedLabel": {
           "type": "string"
+        },
+        "note": {
+          "type": "string",
+          "maxLength": 3000
         }
       },
       "required": [

@@ -17,6 +17,7 @@ public class CorrectLogEventCommand {
     private final ZonedDateTime eventTime;
     private final ZonedDateTime lastModifiedTime;
     private final boolean alterable;
+    private final String note;
     private final UUID defenceCounselId;
 
     @JsonCreator
@@ -25,6 +26,7 @@ public class CorrectLogEventCommand {
                                   @JsonProperty("hearingId") final UUID hearingId,
                                   @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
                                   @JsonProperty("recordedLabel") final String recordedLabel,
+                                  @JsonProperty("note") final String note,
                                   @JsonProperty("eventTime") final ZonedDateTime eventTime,
                                   @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
                                   @JsonProperty("alterable") final boolean alterable,
@@ -38,6 +40,7 @@ public class CorrectLogEventCommand {
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
         this.defenceCounselId = defenceCounselId;
+        this.note = note;
     }
 
     public static Builder builder() {
@@ -78,6 +81,10 @@ public class CorrectLogEventCommand {
         return defenceCounselId;
     }
 
+    public String getNote() {
+        return note;
+    }
+
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public boolean getAlterable() {
         return alterable;
@@ -94,6 +101,7 @@ public class CorrectLogEventCommand {
         private ZonedDateTime lastModifiedTime;
         private boolean alterable;
         private UUID defenceCounselId;
+        private String note;
 
         public Builder withHearingEventId(final UUID hearingEventId) {
             this.hearingEventId = hearingEventId;
@@ -134,7 +142,10 @@ public class CorrectLogEventCommand {
             this.alterable = alterable;
             return this;
         }
-
+        public Builder withNote(final String note) {
+            this.note = note;
+            return this;
+        }
         public Builder withDefenceCounselId(final UUID counselId) {
             this.defenceCounselId = counselId;
             return this;
@@ -142,7 +153,7 @@ public class CorrectLogEventCommand {
 
         public CorrectLogEventCommand build() {
             return new CorrectLogEventCommand(this.hearingEventId, this.latestHearingEventId, this.hearingId,
-                    this.hearingEventDefinitionId, this.recordedLabel, this.eventTime, this.lastModifiedTime,
+                    this.hearingEventDefinitionId, this.recordedLabel, this.note, this.eventTime, this.lastModifiedTime,
                     this.alterable, this.defenceCounselId);
         }
     }

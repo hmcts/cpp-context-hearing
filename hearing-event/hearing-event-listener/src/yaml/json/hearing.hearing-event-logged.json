@@ -7,6 +7,7 @@
   "eventTime": "2016-02-23T14:31:10.354Z",
   "lastModifiedTime": "2014-04-10T00:33:12.197Z",
   "alterable": false,
+  "note" : "note for hearing event",
   "courtCentre": {
     "id": "4551bd67-724e-4b48-82f6-3939b336e9c2",
     "name": "ZRxYiGmQbu",

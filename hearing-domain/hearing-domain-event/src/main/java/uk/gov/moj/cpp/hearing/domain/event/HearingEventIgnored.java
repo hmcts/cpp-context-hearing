@@ -21,6 +21,7 @@ public class HearingEventIgnored implements Serializable {
     private ZonedDateTime eventTime;
     private String reason;
     private boolean alterable;
+    private String note;
 
     @JsonCreator
     public HearingEventIgnored(@JsonProperty("hearingEventId") final UUID hearingEventId,
@@ -29,7 +30,8 @@ public class HearingEventIgnored implements Serializable {
                                @JsonProperty("recordedLabel") final String recordedLabel,
                                @JsonProperty("eventTime") final ZonedDateTime eventTime,
                                @JsonProperty("reason") final String reason,
-                               @JsonProperty("alterable") final boolean alterable) {
+                               @JsonProperty("alterable") final boolean alterable,
+                               @JsonProperty("note") final String note) {
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
@@ -37,6 +39,7 @@ public class HearingEventIgnored implements Serializable {
         this.eventTime = eventTime;
         this.reason = reason;
         this.alterable = alterable;
+        this.note = note;
     }
 
     public HearingEventIgnored(final UUID hearingId, final String reason) {
@@ -70,5 +73,9 @@ public class HearingEventIgnored implements Serializable {
 
     public UUID getHearingEventDefinitionId() {
         return hearingEventDefinitionId;
+    }
+
+    public String getNote() {
+        return note;
     }
 }

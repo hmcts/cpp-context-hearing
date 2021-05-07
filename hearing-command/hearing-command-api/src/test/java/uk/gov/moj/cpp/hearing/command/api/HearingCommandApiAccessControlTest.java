@@ -122,7 +122,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddProsecutionCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_PROSECUTION_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "CPS", "Advocates", "Non CPS Prosecutors"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "CPS", "Advocates", "Non CPS Prosecutors"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -141,7 +141,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToRemoveProsecutionCounsel() {
         final Action action = createActionFor(ACTION_NAME_REMOVE_PROSECUTION_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -151,7 +151,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddDefenceCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_DEFENCE_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Defence Users", "Advocates", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers","Defence Users","Advocates", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -180,7 +180,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToUpdateProsecutionCounsel() {
         final Action action = createActionFor(ACTION_NAME_UPDATE_PROSECUTION_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -271,7 +271,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToLogHearingEvent() {
         final Action action = createActionFor(ACTION_NAME_LOG_HEARING_EVENT);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge")).willReturn(true);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge")).willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);
@@ -420,7 +420,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddApplicantCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_APPLICANT_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -439,7 +439,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToRemoveApplicantCounsel() {
         final Action action = createActionFor(ACTION_NAME_REMOVE_APPLICANT_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -458,7 +458,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToUpdateApplicantCounsel() {
         final Action action = createActionFor(ACTION_NAME_UPDATE_APPLICANT_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -485,7 +485,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddRespondentCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_RESPONDENT_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -504,7 +504,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToRemoveRespondentCounsel() {
         final Action action = createActionFor(ACTION_NAME_REMOVE_RESPONDENT_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -523,7 +523,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToUpdateRespondentCounsel() {
         final Action action = createActionFor(ACTION_NAME_UPDATE_RESPONDENT_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -662,7 +662,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToSetTrialType() {
         final Action action = createActionFor(ACTION_NAME_SET_TRIAL_TYPE);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"))
                 .willReturn(true);
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);

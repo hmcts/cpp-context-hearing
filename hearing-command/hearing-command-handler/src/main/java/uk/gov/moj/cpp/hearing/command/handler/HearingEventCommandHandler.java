@@ -59,7 +59,8 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
                 .withHearingEventId(logEventCommand.getHearingEventId())
                 .withEventTime(logEventCommand.getEventTime())
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
-                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+                .withRecordedLabel(logEventCommand.getRecordedLabel())
+                .withNote(logEventCommand.getNote()).build();
 
         final UUID hearingId = logEventCommand.getHearingId();
         final UUID hearingEventDefinitionId = logEventCommand.getHearingEventDefinitionId();
@@ -82,7 +83,9 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
                         .withHearingEventId(UUID.randomUUID())
                         .withEventTime(logEventCommand.getEventTime())
                         .withLastModifiedTime(logEventCommand.getLastModifiedTime())
-                        .withRecordedLabel(PAUSE_HEARING_EVENT_RECORDED_LABEL).build();
+                        .withRecordedLabel(PAUSE_HEARING_EVENT_RECORDED_LABEL)
+                        .withNote(logEventCommand.getNote())
+                        .build();
 
                 final UUID activeHearingId = UUID.fromString(activeHearings.getString(index));
 
@@ -115,7 +118,8 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
                 .withHearingEventId(correctLogEventCommand.getHearingEventId())
                 .withEventTime(correctLogEventCommand.getEventTime())
                 .withLastModifiedTime(correctLogEventCommand.getLastModifiedTime())
-                .withRecordedLabel(correctLogEventCommand.getRecordedLabel()).build();
+                .withRecordedLabel(correctLogEventCommand.getRecordedLabel())
+                .withNote(correctLogEventCommand.getNote()).build();
         aggregate(HearingAggregate.class, correctLogEventCommand.getHearingId(), jsonEnvelope, a -> a.correctHearingEvent(correctLogEventCommand.getLatestHearingEventId(),
                 correctLogEventCommand.getHearingId(),
                 correctLogEventCommand.getHearingEventDefinitionId(),

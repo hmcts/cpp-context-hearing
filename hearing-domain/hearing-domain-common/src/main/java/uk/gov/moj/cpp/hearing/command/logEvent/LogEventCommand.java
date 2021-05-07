@@ -12,6 +12,7 @@ public class LogEventCommand {
     private final UUID hearingEventId;
     private final UUID hearingId;
     private final UUID hearingEventDefinitionId;
+    private final String note;
     private final String recordedLabel;
     private final ZonedDateTime eventTime;
     private final ZonedDateTime lastModifiedTime;
@@ -23,6 +24,7 @@ public class LogEventCommand {
                            @JsonProperty("hearingId") final UUID hearingId,
                            @JsonProperty("hearingEventDefinitionId") final UUID hearingEventDefinitionId,
                            @JsonProperty("recordedLabel") final String recordedLabel,
+                           @JsonProperty("note") final String note,
                            @JsonProperty("eventTime") final ZonedDateTime eventTime,
                            @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
                            @JsonProperty("alterable") final Boolean alterable,
@@ -31,6 +33,7 @@ public class LogEventCommand {
         this.hearingId = hearingId;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
         this.recordedLabel = recordedLabel;
+        this.note = note;
         this.eventTime = eventTime;
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
@@ -57,6 +60,10 @@ public class LogEventCommand {
         return recordedLabel;
     }
 
+    public String getNote() {
+        return note;
+    }
+
     public ZonedDateTime getEventTime() {
         return eventTime;
     }
@@ -79,6 +86,7 @@ public class LogEventCommand {
         private UUID hearingId;
         private UUID hearingEventDefinitionId;
         private String recordedLabel;
+        private String note;
         private ZonedDateTime eventTime;
         private ZonedDateTime lastModifiedTime;
         private Boolean alterable;
@@ -104,6 +112,11 @@ public class LogEventCommand {
             return this;
         }
 
+        public Builder withNote(final String note) {
+            this.note = note;
+            return this;
+        }
+
         public Builder withEventTime(final ZonedDateTime eventTime) {
             this.eventTime = eventTime;
             return this;
@@ -126,7 +139,7 @@ public class LogEventCommand {
 
         public LogEventCommand build() {
             return new LogEventCommand(hearingEventId, hearingId, hearingEventDefinitionId,
-                    recordedLabel, eventTime, lastModifiedTime, alterable, defenceCounselId);
+                    recordedLabel, note, eventTime, lastModifiedTime, alterable, defenceCounselId);
         }
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -89,6 +90,7 @@ public class HearingLogEventListener {
                 .setLastModifiedTime(modifiedTimeUTC)
                 .setAlterable(hearingEventLogged.isAlterable())
                 .setDefenceCounselId(hearingEventLogged.getDefenceCounselId())
+                .setNote(hearingEventLogged.getNote())
         );
     }
 
@@ -120,6 +122,7 @@ public class HearingLogEventListener {
 
             if (repositoryEvent != null) {
                 repositoryEvent.setRecordedLabel(hearingEvent.getRecordedLabel());
+                repositoryEvent.setNote(nonNull(hearingEvent.getNote()) ? hearingEvent.getNote() : repositoryEvent.getNote());
                 hearingEventRepository.save(repositoryEvent);
             }
         });

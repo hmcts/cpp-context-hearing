@@ -15,8 +15,13 @@
     "defenceCounselId": {
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
     },
+
     "recordedLabel": {
       "type": "string"
+    },
+    "note": {
+      "type": "string",
+      "maxLength": 3000
     },
     "eventTime": {
       "type": "string",

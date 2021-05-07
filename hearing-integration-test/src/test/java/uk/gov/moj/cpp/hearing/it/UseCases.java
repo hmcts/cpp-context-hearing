@@ -293,7 +293,7 @@ public class UseCases {
                                            final boolean alterable,
                                            final UUID defenceCounselId,
                                            final ZonedDateTime eventTime,
-                                           final String recordedLabel) {
+                                           final String recordedLabel, String note) {
         final LogEventCommand logEvent = with(
                 LogEventCommand.builder()
                         .withHearingEventId(hearingEventId)
@@ -304,6 +304,7 @@ public class UseCases {
                         .withRecordedLabel(recordedLabel)
                         .withDefenceCounselId(defenceCounselId)
                         .withAlterable(alterable)
+                        .withNote(note)
                 , consumer).build();
 
         final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
@@ -357,8 +358,8 @@ public class UseCases {
                                            final UUID hearingEventDefinitionId,
                                            final boolean alterable,
                                            final UUID defenceCounselId,
-                                           final ZonedDateTime eventTime) {
-        return logEvent(hearingEventId, requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, STRING.next());
+                                           final ZonedDateTime eventTime, String note) {
+        return logEvent(hearingEventId, requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, STRING.next(), note);
     }
 
     public static LogEventCommand logEvent(final RequestSpecification requestSpec,
@@ -367,8 +368,8 @@ public class UseCases {
                                            final UUID hearingEventDefinitionId,
                                            final boolean alterable,
                                            final UUID defenceCounselId,
-                                           final ZonedDateTime eventTime) {
-        return logEvent(randomUUID(), requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, STRING.next());
+                                           final ZonedDateTime eventTime, String note) {
+        return logEvent(randomUUID(), requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, STRING.next(), note);
     }
 
 

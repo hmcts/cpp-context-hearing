@@ -382,7 +382,7 @@ public class DefenceCounselIT extends AbstractIT {
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 
         final LogEventCommand logEventCommand = logEvent(randomUUID(), getRequestSpec(), asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING);
+                hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING, null);
 
         //Add Defence Counsel
         final Utilities.EventListener publicDefenceCounselAdded = listenFor("public.hearing.defence-counsel-change-ignored")
@@ -415,7 +415,7 @@ public class DefenceCounselIT extends AbstractIT {
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel(RECORDED_LABEL_END_HEARING);
 
         final LogEventCommand logEventCommand = logEvent(randomUUID(), requestSpec, asDefault(), hearingOne.it(),
-                hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING);
+                hearingEventDefinition.getId(), false, randomUUID(), EVENT_TIME, RECORDED_LABEL_END_HEARING, null);
 
         //Add Defence Counsel
         final Utilities.EventListener publicDefenceCounselAdded = listenFor("public.hearing.defence-counsel-change-ignored")

@@ -62,11 +62,11 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() throws NoSuchAlgorithmException {
         createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
-                false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()));
+                false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()), null);
 
         createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
-                false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()));
+                false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()), null);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, eventTime.toLocalDate());
 
@@ -118,7 +118,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
         final HearingEventDefinition hearingEventDefinition = getHearingEventDefinition(actionLabel);
 
-        logEvent(getRequestSpec(), asDefault(), hearing.it(), hearingEventDefinition.getId(), false, fromString(defenceCounselId), eventTime);
+        logEvent(getRequestSpec(), asDefault(), hearing.it(), hearingEventDefinition.getId(), false, fromString(defenceCounselId), eventTime, null);
         return hearing;
     }
 

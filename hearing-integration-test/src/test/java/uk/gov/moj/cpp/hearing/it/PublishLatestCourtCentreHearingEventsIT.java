@@ -170,10 +170,10 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
         final UUID expectedHearingEventId = randomUUID();
         final UUID hearingEventId = randomUUID();
-        logEvent(expectedHearingEventId, requestSpec, asDefault(), hearing.it(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, false, fromString(defenceCounselId), eventTime.plusMinutes(10));
+        logEvent(expectedHearingEventId, requestSpec, asDefault(), hearing.it(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, false, fromString(defenceCounselId), eventTime.plusMinutes(10), null);
         pollHearingEventLog(hearing.getHearingId(), 2, eventTime.plusMinutes(10));
         ZonedDateTime updatedEventTime = eventTime.plusMinutes(15);
-        logEvent(hearingEventId, requestSpec, asDefault(), hearing.it(), RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER, false, fromString(defenceCounselId), updatedEventTime);
+        logEvent(hearingEventId, requestSpec, asDefault(), hearing.it(), RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER, false, fromString(defenceCounselId), updatedEventTime, null);
         pollHearingEventLog(hearing.getHearingId(), 3, updatedEventTime);
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -223,7 +223,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     private CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final UUID hearingEventId, final String courtRoomId, final String defenceCounselId, final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, String courtCenter) throws NoSuchAlgorithmException {
         final CommandHelpers.InitiateHearingCommandHelper hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCenter), fromString(courtRoomId), "CourtRoom 1", localDate, fromString(defenceCounselId), caseId, hearingTypeId)));
         givenAUserHasLoggedInAsACourtClerk(randomUUID());
-        logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime);
+        logEvent(hearingEventId, getRequestSpec(), asDefault(), hearing.it(), eventDefinitionId, false, fromString(defenceCounselId), eventTime, null);
 
         poll(requestParams(getURL("hearing.get-hearing-event-log", hearing.it().getHearing().getId(), eventTime.toLocalDate()),
                 "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
