@@ -1,10 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
-import static java.util.Collections.emptyMap;
-import static java.util.stream.Collectors.toList;
 import static java.time.ZonedDateTime.now;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.match;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.otherwiseDoNothing;
 import static uk.gov.justice.domain.aggregate.matcher.EventSwitcher.when;
@@ -89,9 +89,9 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
@@ -236,6 +236,7 @@ public class HearingAggregate implements Aggregate {
                         }
                 ),
                 when(ResultsSharedV2.class).apply(e -> {
+                            this.hearingState = SHARED;
                             resultsSharedDelegate.handleResultsSharedV2(e);
                             defendantDelegate.clearDefendantDetailsChanged();
                         }
@@ -827,7 +828,7 @@ public class HearingAggregate implements Aggregate {
         return apply(Stream.of(new DefendantsInYouthCourtUpdated(defendantsInYouthCourtList, this.momento.getHearing().getId())));
     }
 
-    public Hearing getHearing(){
+    public Hearing getHearing() {
         return this.momento.getHearing();
     }
 
