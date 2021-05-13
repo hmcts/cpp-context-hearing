@@ -77,6 +77,7 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.getMultiDaySavedTargets().put(resultsShared.getHearingDay(), resultsShared.getTargets().stream()
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(Target::getTargetId, target -> target, (target1, target2) -> target1)));
+        recordTargetsSharedAndResetTransientTargets();
         this.momento.getIsHearingDayPreviouslyShared().put(resultsShared.getHearingDay(), true);
         resultsShared.getNewAmendmentResults()
                 .forEach(newAmendmentResult -> this.momento.getResultsAmendmentDateMap().put(newAmendmentResult.getId(), newAmendmentResult.getAmendmentDateTime()));
