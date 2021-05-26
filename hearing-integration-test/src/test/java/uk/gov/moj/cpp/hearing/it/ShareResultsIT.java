@@ -2547,7 +2547,7 @@ public class ShareResultsIT extends AbstractIT {
         final PersonDefendant newPersonDefendant = new PersonDefendant(curPd.getArrestSummonsNumber(), curPd.getBailConditions(),
                 curPd.getBailReasons(), curPd.getBailStatus(), curPd.getCustodialEstablishment(), curPd.getCustodyTimeLimit(), curPd.getDriverLicenceCode(), curPd.getDriverLicenseIssue(),
                 curPd.getDriverNumber(), curPd.getEmployerOrganisation(), curPd.getEmployerPayrollReference(),
-                curPd.getPerceivedBirthYear(), person, curPd.getVehicleOperatorLicenceNumber());
+                curPd.getPerceivedBirthYear(), person, curPd.getPoliceBailConditions(), curPd.getPoliceBailStatus(), curPd.getVehicleOperatorLicenceNumber());
 
 
         defendant.setPersonDefendant(newPersonDefendant);
@@ -2570,7 +2570,7 @@ public class ShareResultsIT extends AbstractIT {
         final PersonDefendant newPersonDefendant = new PersonDefendant(curPd.getArrestSummonsNumber(), curPd.getBailConditions(),
                 curPd.getBailReasons(), curPd.getBailStatus(), curPd.getCustodialEstablishment(), curPd.getCustodyTimeLimit(), curPd.getDriverLicenceCode(), curPd.getDriverLicenseIssue(),
                 curPd.getDriverNumber(), curPd.getEmployerOrganisation(), curPd.getEmployerPayrollReference(),
-                curPd.getPerceivedBirthYear(), person, curPd.getVehicleOperatorLicenceNumber());
+                curPd.getPerceivedBirthYear(), person, curPd.getPoliceBailConditions(), curPd.getPoliceBailStatus(), curPd.getVehicleOperatorLicenceNumber());
 
 
         defendant.setPersonDefendant(newPersonDefendant);
