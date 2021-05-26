@@ -8,6 +8,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.jayway.awaitility.Awaitility.waitAtMost;
 import static com.jayway.awaitility.Duration.TEN_SECONDS;
 import static java.text.MessageFormat.format;
@@ -55,7 +56,6 @@ public class WireMockStubUtils {
             "/material-service/command/api/rest/material/material";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
     private static final String CONTENT_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
-    private static final String CONTENT_TYPE_QUERY_PROGRESSION_CASE_DETAILS = "application/vnd.progression.query.caseprogressiondetail+json";
     private static final String BASE_URI = "http://" + HOST + ":8080";
 
     private final static String QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions";
@@ -274,6 +274,15 @@ public class WireMockStubUtils {
                 .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.request-outstanding-fine+json"))
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)));
 
+    }
+
+    public static void stubAzure(){
+        stubFor(get(urlPathMatching("/azure/featuremanager/*"))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withBody("{\"items\" : [{ \"content_type\" : \"temp\" , \"key\" : \"reuseOfInformation\", \"value\" : \"{\\\"enabled\\\": true}\"}]}")
+                ));
+
+        waitForStubToBeReady("/azure/featuremanager/reuseOfInformation", "");
     }
 
     public static final void mockMaterialUpload() {

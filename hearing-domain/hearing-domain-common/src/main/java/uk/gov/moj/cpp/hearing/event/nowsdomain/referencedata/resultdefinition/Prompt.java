@@ -50,6 +50,8 @@ public class Prompt {
 
     private Integer cacheable;
 
+    private String partName;
+
     public static Prompt prompt() {
         return new Prompt();
     }
@@ -222,6 +224,16 @@ public class Prompt {
 
     public Prompt setCacheable(final Integer cacheable) {
         this.cacheable = cacheable;
+        return this;
+    }
+
+
+    public String getPartName() {
+        return partName;
+    }
+
+    public Prompt setPartName(final String partName) {
+        this.partName = partName;
         return this;
     }
 }

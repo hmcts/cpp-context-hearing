@@ -52,7 +52,7 @@ public class ResultPromptViewBuilder {
         return resultPromptView;
     }
 
-    private void createResultPromptsMapForGrouping(List<Children> childrenList, Map<String, List<Integer>> durationPrompt, Map<String, List<Integer>> childDurationPrompt, Map<String, List<Integer>> nameAddressPrompt, Map<String, List<Integer>>  childNameAddressPrompt, AtomicInteger index, PromptChoice promptChoice) {
+    private void createResultPromptsMapForGrouping(List<Children> childrenList, Map<String, List<Integer>> durationPrompt, Map<String, List<Integer>> childDurationPrompt, Map<String, List<Integer>> nameAddressPrompt, Map<String, List<Integer>> childNameAddressPrompt, AtomicInteger index, PromptChoice promptChoice) {
         final String label = promptChoice.getLabel();
         final String code = promptChoice.getCode();
         final String promptRef = promptChoice.getPromptRef();
@@ -67,16 +67,16 @@ public class ResultPromptViewBuilder {
                 childDurationPrompt.putIfAbsent(label, Lists.newArrayList());
                 childDurationPrompt.get(label).add(currentIndex);
                 promptChoice.setVisible(false);
-            } else if(promptChoice.getType() == ResultType.NAMEADDRESS){
+            } else if (promptChoice.getType() == ResultType.NAMEADDRESS) {
                 childNameAddressPrompt.putIfAbsent(code, Lists.newArrayList());
                 childNameAddressPrompt.get(code).add(currentIndex);
                 promptChoice.setVisible(false);
             } else {
-                childrenList.add(new Children(promptChoice.getLabel(), promptChoice.getCode(),promptRef, promptChoice.getType(), promptChoice.getFixedList(), promptChoice.getChildren()));
+                childrenList.add(new Children(promptChoice.getLabel(), promptChoice.getCode(), promptRef, promptChoice.getType(), promptChoice.getFixedList(), promptChoice.getChildren()));
                 promptChoice.setVisible(false);
             }
         }
-        if(ADDRESS.equals(promptChoice.getComponentType()) || NAMEADDRESS.equals(promptChoice.getComponentType())){
+        if (ADDRESS.equals(promptChoice.getComponentType()) || NAMEADDRESS.equals(promptChoice.getComponentType())) {
             nameAddressPrompt.putIfAbsent(code, Lists.newArrayList());
             nameAddressPrompt.get(code).add(currentIndex);
             promptChoice.setVisible(false);
@@ -95,7 +95,7 @@ public class ResultPromptViewBuilder {
     }
 
     private void groupAddressAndNameAddressPrompt(final Map<String, List<Integer>> addressPrompt, final List<PromptChoice> promptChoices) {
-        addressPrompt.forEach((s,integers) -> {
+        addressPrompt.forEach((s, integers) -> {
             final PromptChoice promptChoice = promptChoices.stream()
                     .filter(v -> v.getCode().equals(s))
                     .findFirst().get();
@@ -110,11 +110,11 @@ public class ResultPromptViewBuilder {
         if(!containsIgnoreCase(pc.getLabel(), TITLE)) {
             promptChoice.addChildren(new Children(pc.getLabel(), pc.getPromptRef(), TXT, pc.getPromptOrder(), pc.getPartName()));
             promptChoice.setVisible(true);
-            if(CollectionUtils.isNotEmpty(pc.getNameAddressList())) {
+            if (CollectionUtils.isNotEmpty(pc.getNameAddressList())) {
                 promptChoice.setNameAddressList(pc.getNameAddressList());
                 pc.setNameAddressList(null);
             }
-            if(pc.getNameEmail() !=null) {
+            if (pc.getNameEmail() != null) {
                 promptChoice.setNameEmail(pc.getNameEmail());
                 pc.setNameEmail(null);
             }
@@ -139,42 +139,45 @@ public class ResultPromptViewBuilder {
     }
 
     private void groupNameAddressPromptWithInOneOff(List<PromptChoice> promptChoices, Map<String, List<Integer>> childNameAddressPrompt, PromptChoice promptChoice) {
-        if(childNameAddressPrompt !=null && !childNameAddressPrompt.isEmpty()) {
-            childNameAddressPrompt.forEach((s, integers)-> {
+        if (childNameAddressPrompt != null && !childNameAddressPrompt.isEmpty()) {
+            childNameAddressPrompt.forEach((s, integers) -> {
+                final Children nameAddressChildren = new Children(s, "", promptChoice.getPromptRef(), ResultType.NAMEADDRESS, promptChoice.getPartName());
+                promptChoice.addChildren(nameAddressChildren);
+                integers.forEach(integer -> {
+                    final PromptChoice pc = promptChoices.get(integer);
+                    if (!containsIgnoreCase(pc.getLabel(), TITLE)) {
+                        nameAddressChildren.addChildrenList(new Children(pc.getLabel(), pc.getPromptRef(), TXT, pc.getPartName()));
+                        setAttributesFromChildren(nameAddressChildren, pc);
+                    }
+                });
 
-              final Children nameAddressChildren = new Children(s , "", promptChoice.getPromptRef(), ResultType.NAMEADDRESS, promptChoice.getPartName());
-              promptChoice.addChildren(nameAddressChildren);
-              integers.forEach(integer -> {
-                  final PromptChoice pc = promptChoices.get(integer);
-                  if(!containsIgnoreCase(pc.getLabel(), TITLE)) {
-                      nameAddressChildren.addChildrenList(new Children(pc.getLabel(), pc.getPromptRef(), TXT, pc.getPartName()));
-                      setAttributesFromChildren(nameAddressChildren, pc);
-                  }
+                sortChildrenBySequence(nameAddressChildren.getChildrenList());
+                promptChoice.setType(null);
+                promptChoice.setNameAddressList(null);
 
-              });
-
-              sortChildrenBySequence(nameAddressChildren.getChildrenList());
-              promptChoice.setType(null);
-              promptChoice.setNameAddressList(null);
-          });
+                final List<Children> childrenList = nameAddressChildren.getChildrenList();
+                childrenList.stream().limit(1).forEach(children -> nameAddressChildren.setPromptRef(Optional.ofNullable(children.getPartName())
+                        .map(partName -> children.getPromptRef().replace(partName, ""))
+                        .orElse(nameAddressChildren.getPromptRef())));
+            });
         }
     }
 
     private void setAttributesFromChildren(final Children nameAddressChildren, PromptChoice pc) {
-        if(isBlank(nameAddressChildren.getLabel())) {
+        if (isBlank(nameAddressChildren.getLabel())) {
             nameAddressChildren.setLabel(pc.getComponentLabel());
         }
-        if(isBlank(nameAddressChildren.getListLabel())) {
+        if (isBlank(nameAddressChildren.getListLabel())) {
             nameAddressChildren.setListLabel(pc.getListLabel());
         }
-        if(isBlank(nameAddressChildren.getAddressType())) {
+        if (isBlank(nameAddressChildren.getAddressType())) {
             nameAddressChildren.setAddressType(pc.getAddressType());
         }
-        if(CollectionUtils.isNotEmpty(pc.getNameAddressList())) {
+        if (CollectionUtils.isNotEmpty(pc.getNameAddressList())) {
             nameAddressChildren.setNameAddressList(pc.getNameAddressList());
             pc.setNameAddressList(null);
         }
-        if(pc.getNameEmail() != null) {
+        if (pc.getNameEmail() != null) {
             nameAddressChildren.setNameEmail(pc.getNameEmail());
         }
     }

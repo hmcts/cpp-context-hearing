@@ -3,19 +3,32 @@ package uk.gov.moj.cpp.hearing.common;
 import java.util.UUID;
 
 public class ReusableInformation<T> {
-
+    public enum IdType{
+        DEFENDANT,
+        CASE
+    }
     private T value;
     private String promptRef;
     private UUID masterDefendantId;
+    private UUID caseId;
     private Integer cacheable;
     private String cacheDataPath;
 
-    public ReusableInformation(final T value, final String promptRef, final UUID masterDefendantId, final Integer cacheable, final String cacheDataPath) {
+    public ReusableInformation(final T value, final String promptRef, final IdType idType, final UUID id, final Integer cacheable, final String cacheDataPath) {
         this.value = value;
         this.promptRef = promptRef;
-        this.masterDefendantId = masterDefendantId;
         this.cacheable = cacheable;
         this.cacheDataPath = cacheDataPath;
+        switch (idType) {
+            case DEFENDANT:
+                this.masterDefendantId = id;
+                break;
+            case CASE:
+                this.caseId = id;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + idType);
+        }
     }
 
     public T getValue() {
@@ -30,6 +43,10 @@ public class ReusableInformation<T> {
         return masterDefendantId;
     }
 
+    public UUID getCaseId() {
+        return caseId;
+    }
+
     public Integer getCacheable() {
         return cacheable;
     }
@@ -41,9 +58,10 @@ public class ReusableInformation<T> {
     public static class Builder<T> {
         private T value;
         private String promptRef;
-        private UUID masterDefendantId;
+        private UUID id;
         private Integer cacheable;
         private String cacheDataPath;
+        private IdType idType;
 
         public Builder withValue(final T value) {
             this.value = value;
@@ -55,8 +73,13 @@ public class ReusableInformation<T> {
             return this;
         }
 
-        public Builder withMasterDefendantId(final UUID masterDefendantId) {
-            this.masterDefendantId = masterDefendantId;
+        public Builder withId(final UUID id) {
+            this.id = id;
+            return this;
+        }
+
+        public Builder withIdType(final IdType idType) {
+            this.idType = idType;
             return this;
         }
 
@@ -71,7 +94,7 @@ public class ReusableInformation<T> {
         }
 
         public ReusableInformation build() {
-            return new ReusableInformation(value, promptRef, masterDefendantId, cacheable, cacheDataPath);
+            return new ReusableInformation(value, promptRef, idType, id, cacheable, cacheDataPath);
         }
     }
 

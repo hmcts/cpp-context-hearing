@@ -371,8 +371,7 @@ public class DefendantDelegateTest {
                 .withDateOfBirth(dateOfBirth)
                 .withAddress(address)
                 .build();
-        PersonDefendant personDefendant = new PersonDefendant(null, null, null, null, null, null,
-                null, null, null, null, null, null, person, null);
+        PersonDefendant personDefendant = PersonDefendant.personDefendant().withPersonDetails(person).build();
         defendant.setId(defendantId);
         defendant.setPersonDefendant(personDefendant);
         defendant.setProsecutionCaseId(prosecutionCaseId);
@@ -393,8 +392,7 @@ public class DefendantDelegateTest {
                 .withDateOfBirth(dateOfBirth)
                 .withAddress(address)
                 .build();
-        PersonDefendant personDefendant = new PersonDefendant(null, null, null, null, null, null,
-                null, null, null, null, null, null, person, null);
+        PersonDefendant personDefendant = PersonDefendant.personDefendant().withPersonDetails(person).build();
         defendant.setId(defendantId);
         defendant.setPersonDefendant(personDefendant);
         defendant.setProsecutionCaseId(prosecutionCaseId);

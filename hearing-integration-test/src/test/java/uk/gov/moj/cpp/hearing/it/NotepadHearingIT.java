@@ -132,6 +132,38 @@ public class NotepadHearingIT extends AbstractIT {
 
     }
 
+    @Test
+    public void shouldParseDataForGrouping(){
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "FCOMP", LocalDate.now());
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+
+        poll(requestParams(url, mediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.promptChoices", hasSize(2)),
+                                withJsonPath("$.promptChoices[1].promptRef", is("CREDNAME")),
+                                withJsonPath("$.promptChoices[1].children", hasSize(2)),
+                                withJsonPath("$.promptChoices[1].children[0].promptRef", is("CREDNAME")),
+                                withJsonPath("$.promptChoices[1].children[0].type", is("FIXL")),
+                                withJsonPath("$.promptChoices[1].children[1].promptRef", is("minorcreditornameandaddress")),
+                                withJsonPath("$.promptChoices[1].children[1].type", is("NAMEADDRESS")),
+                                withJsonPath("$.promptChoices[1].children[1].children", hasSize(9)),
+                                withJsonPath("$.promptChoices[1].children[1].children[0].promptRef", is("minorcreditornameandaddressOrganisationName")),
+                                withJsonPath("$.promptChoices[1].children[1].children[1].promptRef", is("minorcreditornameandaddressAddress1")),
+                                withJsonPath("$.promptChoices[1].children[1].children[2].promptRef", is("minorcreditornameandaddressAddress2")),
+                                withJsonPath("$.promptChoices[1].children[1].children[3].promptRef", is("minorcreditornameandaddressAddress3")),
+                                withJsonPath("$.promptChoices[1].children[1].children[4].promptRef", is("minorcreditornameandaddressAddress4")),
+                                withJsonPath("$.promptChoices[1].children[1].children[5].promptRef", is("minorcreditornameandaddressAddress5")),
+                                withJsonPath("$.promptChoices[1].children[1].children[6].promptRef", is("minorcreditornameandaddressPostCode")),
+                                withJsonPath("$.promptChoices[1].children[1].children[7].promptRef", is("minorcreditornameandaddressEmailAddress1")),
+                                withJsonPath("$.promptChoices[1].children[1].children[8].promptRef", is("minorcreditornameandaddressCategoryCode"))
+                        )));
+    }
+
     private Matcher[] getMatchersForPromptChoices() {
         return new Matcher[]{withJsonPath("$.promptChoices[0].code", is("3054909b-15b6-499f-b44f-67b2b1215c76")),
                 withJsonPath("$.promptChoices[0].label", is("Protected person's address")),

@@ -4,11 +4,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.mapping.CpsProsecutorJPAMapperTest.whenProsecutor;
 import static uk.gov.moj.cpp.hearing.mapping.DefendantJPAMapperTest.whenFirstDefendant;
+import static uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapperTest.whenProsecutionCaseIdentifier;
+import static uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapperTest.whenProsecutionCaseIdentifierWithNsp;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.HearingJPADataTemplate.aNewHearingJPADataTemplate;
 
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -43,6 +46,8 @@ public class ProsecutionCaseJPAMapperTest {
                 .with(ProsecutionCase::getStatementOfFacts, is(entity.getStatementOfFacts()))
                 .with(ProsecutionCase::getStatementOfFactsWelsh, is(entity.getStatementOfFactsWelsh()))
 
+                .with(ProsecutionCase::getProsecutionCaseIdentifier, whenProsecutionCaseIdentifierWithNsp(
+                        isBean(ProsecutionCaseIdentifier.class), entity.getProsecutionCaseIdentifier()))
                 .with(ProsecutionCase::getProsecutor, CpsProsecutorJPAMapperTest.whenProsecutor(
                         isBean(Prosecutor.class), entity.getCpsProsecutor()));
     }
@@ -63,6 +68,8 @@ public class ProsecutionCaseJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getStatementOfFacts, is(pojo.getStatementOfFacts()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getStatementOfFactsWelsh, is(pojo.getStatementOfFactsWelsh()))
 
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getProsecutionCaseIdentifier, whenProsecutionCaseIdentifier(
+                        isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier.class), pojo.getProsecutionCaseIdentifier()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getCpsProsecutor, whenProsecutor(
                         isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor.class), pojo.getProsecutor()));
     }

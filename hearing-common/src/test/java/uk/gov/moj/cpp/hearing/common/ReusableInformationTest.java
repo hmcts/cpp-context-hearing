@@ -5,20 +5,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformation.IdType.DEFENDANT;
 
 import java.util.UUID;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReusableInformationTest {
-
-    @InjectMocks
-    private ReusableInformation reusableInformation;
 
 
     @Test
@@ -29,7 +26,8 @@ public class ReusableInformationTest {
 
         final ReusableInformation<String> reusableInformation = new ReusableInformation.Builder<String>()
                 .withValue(value)
-                .withMasterDefendantId(defendantId)
+                .withIdType(DEFENDANT)
+                .withId(defendantId)
                 .withPromptRef(promptRef)
                 .build();
 
@@ -46,7 +44,8 @@ public class ReusableInformationTest {
 
         final ReusableInformation<Integer> reusableInformation = new ReusableInformation.Builder<Integer>()
                 .withValue(value)
-                .withMasterDefendantId(defendantId)
+                .withIdType(DEFENDANT)
+                .withId(defendantId)
                 .withPromptRef(promptRef)
                 .build();
 
@@ -56,7 +55,7 @@ public class ReusableInformationTest {
     }
 
     @Test
-    public void shouldHaveCachableInformationIfObjectType() {
+    public void shouldHaveCacheableInformationIfObjectType() {
         final AddressReusableInfo addressReusableInfo = new AddressReusableInfo();
         addressReusableInfo.setParentguardiansaddressAddress1("address1");
         addressReusableInfo.setParentguardiansaddressEmailAddress1("email@example.com");
@@ -68,7 +67,8 @@ public class ReusableInformationTest {
 
         final ReusableInformation<AddressReusableInfo> reusableInformation = new ReusableInformation.Builder<AddressReusableInfo>()
                 .withValue(addressReusableInfo)
-                .withMasterDefendantId(defendantId)
+                .withIdType(DEFENDANT)
+                .withId(defendantId)
                 .withPromptRef(promptRef)
                 .build();
 

@@ -1,5 +1,6 @@
 package uk.gov.justice.ccr.notepad.view;
 
+import static java.lang.Boolean.FALSE;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -29,6 +30,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Sets;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -288,6 +290,70 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         final Children gcc6= oneOfNameAddressChildrenList.get(1);
         assertThat(Arrays.asList(gcc5.getType(), gcc5.getLabel(), gcc5.getPartName()), containsInAnyOrder(Arrays.asList(TXT, "Minor creditor name and address first name", "FirstName").toArray()));
         assertThat(Arrays.asList(gcc6.getType(),  gcc6.getLabel(), gcc6.getPartName()), containsInAnyOrder(Arrays.asList(TXT,"Minor creditor name and address last name", "LastName").toArray()));
+    }
+
+    @Test
+    public void shouldBuildFromKnowledgeWithGroup()  {
+        final List<Part> parts = new PartsResolver().getParts("ATRNR");
+        final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
+        final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(),true, false , "", mockPromptChoices);
+
+        final Knowledge knowledgeWithNAMEADDRESSWithInOneOf = processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now());
+
+
+        final List<PromptChoice> promptChoices = getPromptChoices();
+        knowledgeWithNAMEADDRESSWithInOneOf.setPromptChoices(promptChoices);
+
+        final ResultPromptView result = target.buildFromKnowledge(knowledgeWithNAMEADDRESSWithInOneOf);
+
+        final PromptChoice promptChoice = result.getPromptChoices().get(0);
+        assertThat(promptChoice.getPromptRef(), is("CREDNAME"));
+        assertThat(promptChoice.getChildren().get(0).getPromptRef(), is("CREDNAME"));
+        assertThat(promptChoice.getChildren().get(1).getPromptRef(), is("minorcreditornameandaddress"));
+        assertThat(promptChoice.getChildren().get(1).getChildrenList().get(0).getPromptRef(), is("minorcreditornameandaddressOrganisationName"));
+        assertThat(promptChoice.getChildren().get(1).getChildrenList().get(1).getPromptRef(), is("minorcreditornameandaddressAddress1"));
+    }
+
+    private List<PromptChoice> getPromptChoices() {
+        List<PromptChoice> pcs = new ArrayList<>();
+        PromptChoice promptChoice= new PromptChoice();
+        promptChoice.setCode("af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe");
+        promptChoice.setLabel("Major creditor name");
+        promptChoice.setComponentType("ONEOF");
+        promptChoice.setType( ResultType.FIXL);
+        promptChoice.setPromptRef("CREDNAME");
+        promptChoice.setRequired( FALSE );
+        promptChoice.setComponentLabel("FIXL");
+        promptChoice.setFixedList(Sets.newHashSet("ITEM 1", "ITEM 2"));
+        promptChoice.setHidden(false);
+        pcs.add(promptChoice);
+
+        promptChoice= new PromptChoice();
+        promptChoice.setCode("5707f766-b5b5-4747-9b15-542e7d170301");
+        promptChoice.setLabel("Minor creditor organisation name");
+        promptChoice.setType(NAMEADDRESS);
+        promptChoice.setPromptRef("minorcreditornameandaddressOrganisationName");
+        promptChoice.setRequired(true);
+        promptChoice.setComponentType("ONEOF");
+        promptChoice.setComponentLabel("Minor creditor");
+        promptChoice.setPartName("OrganisationName");
+        promptChoice.setHidden(false);
+        promptChoice.setNameEmail(false);
+        pcs.add(promptChoice);
+
+        promptChoice= new PromptChoice();
+        promptChoice.setCode("5707f766-b5b5-4747-9b15-542e7d170301");
+        promptChoice.setLabel("Minor creditor address line 1");
+        promptChoice.setType(NAMEADDRESS);
+        promptChoice.setPromptRef("minorcreditornameandaddressAddress1");
+        promptChoice.setRequired(true);
+        promptChoice.setComponentType("ONEOF");
+        promptChoice.setComponentLabel("Minor creditor");
+        promptChoice.setPartName("Address1");
+        promptChoice.setHidden(false);
+        promptChoice.setNameEmail(false);
+        pcs.add(promptChoice);
+        return pcs;
     }
 
 }

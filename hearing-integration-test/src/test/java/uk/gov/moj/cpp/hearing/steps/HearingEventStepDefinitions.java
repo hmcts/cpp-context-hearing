@@ -250,8 +250,8 @@ public class HearingEventStepDefinitions {
                 .until(status().is(NOT_FOUND));
     }
 
-    private static String getQueryReusableInfoUrl(){
+    public static String getQueryReusableInfoUrl(final UUID hearingId){
         final String queryReusableInfoEndPoint = ENDPOINT_PROPERTIES.getProperty("hearing.query.reusable-info");
-        return format("%s/%s",getBaseUri(),queryReusableInfoEndPoint);
+        return format("%s/%s/%s",getBaseUri(),queryReusableInfoEndPoint, hearingId.toString());
     }
 }

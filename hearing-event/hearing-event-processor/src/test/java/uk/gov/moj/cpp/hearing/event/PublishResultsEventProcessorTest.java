@@ -519,6 +519,72 @@ public class PublishResultsEventProcessorTest {
         verifyProsecutionCaseIdentifier(this.publishResultDelegateCaptor.getValue());
     }
 
+    @Test
+    public void shouldNotPopulateProsecutorInformationOrganisationProsecutor() {
+
+        final ResultsShared resultsShared = resultsSharedTemplate();
+        resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().setProsecutionAuthorityName("ExistingAuthorityName");
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+                .thenReturn(OrganisationalUnit.organisationalUnit()
+                        .withOucode("123ABCD")
+                        .withIsWelsh(true)
+                        .withOucodeL3WelshName("Welsh Court Centre")
+                        .withWelshAddress1("Welsh 1")
+                        .withWelshAddress2("Welsh 2")
+                        .withWelshAddress3("Welsh 3")
+                        .withWelshAddress4("Welsh 4")
+                        .withWelshAddress5("Welsh 5")
+                        .withPostcode("LL55 2DF")
+                        .build());
+
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
+        verify(this.publishResultsDelegate).shareResults(eventArgumentCaptor.capture(), senderArgumentCaptor.capture(), this.publishResultDelegateCaptor.capture());
+        verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
+        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        assertThat(this.publishResultDelegateCaptor.getValue().getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityName(), equalTo("ExistingAuthorityName"));
+    }
+
+    @Test
+    public void shouldNotPopulateProsecutorInformationOrganisationProsecutorForApplication() {
+
+        final ResultsShared resultsShared = resultsSharedTemplate();
+        resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().setProsecutionAuthorityName("ExistingAuthorityName");
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
+                objectToJsonObjectConverter.convert(resultsShared));
+
+        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+                .thenReturn(OrganisationalUnit.organisationalUnit()
+                        .withOucode("123ABCD")
+                        .withIsWelsh(true)
+                        .withOucodeL3WelshName("Welsh Court Centre")
+                        .withWelshAddress1("Welsh 1")
+                        .withWelshAddress2("Welsh 2")
+                        .withWelshAddress3("Welsh 3")
+                        .withWelshAddress4("Welsh 4")
+                        .withWelshAddress5("Welsh 5")
+                        .withPostcode("LL55 2DF")
+                        .build());
+
+        when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsShared.class)).thenReturn(resultsShared);
+        when(resultsSharedFilter.filterTargets(any(ResultsShared.class), any())).thenReturn(resultsShared);
+
+        publishResultsEventProcessor.resultsShared(event);
+
+        verify(updateDefendantWithApplicationDetailsDelegate, times(1)).execute(sender, event, resultsShared);
+        verify(this.publishResultsDelegate).shareResults(eventArgumentCaptor.capture(), senderArgumentCaptor.capture(), this.publishResultDelegateCaptor.capture());
+        verify(updateResultLineStatusDelegate).updateResultLineStatus(sender, event, resultsShared);
+        verify(this.sender).send(this.eventArgumentCaptor.capture());
+        assertThat(this.publishResultDelegateCaptor.getValue().getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityName(), equalTo("ExistingAuthorityName"));
+    }
+
     private Prosecutor prosecutorTemplate() {
         return Prosecutor.prosecutor()
                 .withId(UUID.randomUUID().toString())

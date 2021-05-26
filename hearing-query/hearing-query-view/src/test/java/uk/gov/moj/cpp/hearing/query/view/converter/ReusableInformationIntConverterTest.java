@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformation.IdType.DEFENDANT;
 
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationIntConverter;
@@ -33,7 +34,8 @@ public class ReusableInformationIntConverterTest {
 
         final ReusableInformation reusableInformation = new ReusableInformation.Builder<String>()
                 .withValue(value)
-                .withMasterDefendantId(defendantId)
+                .withIdType(DEFENDANT)
+                .withId(defendantId)
                 .withPromptRef(promptRef)
                 .withCacheable(cacheable)
                 .withCacheDataPath(cacheDataPath)

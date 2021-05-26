@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <changeSet id="102" author="hearing" logicalFilePath="102-add-columns-minor-creditor-to-case.xml">
+        <addColumn tableName="ha_case">
+            <column name="prosecutor_authority_name" type="TEXT"/>
+
+            <column name="prosecutor_authority_address_1" type="TEXT"/>
+
+            <column name="prosecutor_authority_address_2" type="TEXT"/>
+
+            <column name="prosecutor_authority_address_3" type="TEXT"/>
+
+            <column name="prosecutor_authority_address_4" type="TEXT"/>
+
+            <column name="prosecutor_authority_address_5" type="TEXT"/>
+
+            <column name="prosecutor_authority_post_code" type="TEXT"/>
+
+            <column name="prosecutor_authority_email_address" type="TEXT"/>
+
+            <column name="prosecutor_category" type="TEXT"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.view.converter;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -9,6 +11,7 @@ import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.ADD
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXL;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLM;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INT;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.NAMEADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT;
 
 import uk.gov.justice.core.courts.Address;
@@ -17,6 +20,8 @@ import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
@@ -31,6 +36,7 @@ import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationTxtConvert
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -78,7 +84,7 @@ public class ReusableInformationMainConverterTest {
     }
 
     @Test
-    public void shouldConvert() {
+    public void shouldConvertForDefendant() {
         final List<Defendant> defendants = Collections.unmodifiableList(Arrays.asList(prepareDefendant()));
         final List<Prompt> prompts = new ArrayList<>();
         prompts.addAll(prepareTxtPromptsWithCommaSeperated());
@@ -88,7 +94,7 @@ public class ReusableInformationMainConverterTest {
         prompts.addAll(prepareIntPrompts());
         prompts.addAll(prepareFixlPrompts());
 
-        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convert(defendants, prompts, Collections.emptyMap());
+        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(defendants, prompts, Collections.emptyMap());
 
         assertNotNull(defendantListMap);
 
@@ -109,6 +115,35 @@ public class ReusableInformationMainConverterTest {
         assertAddressType(defendants.get(0), promptJsonObjects, associatedPerson);
         assertFixlType(defendants.get(0), promptJsonObjects);
         assertFixlmType(defendants.get(0), promptJsonObjects, person);
+    }
+
+    @Test
+    public void shouldConvertForCase() {
+        final List<ProsecutionCase> cases = singletonList(prepareCase());
+        final List<Prompt> prompts = new ArrayList<>();
+        prompts.addAll(prepareCasePrompts());
+        prompts.addAll(prepareTxtPromptsWithCommaSeperated());
+        prompts.addAll(prepareTxtPrompts());
+
+        final Map<ProsecutionCase, List<JsonObject>> caseListMap = reusableInformationMainConverter.convertCase(cases, prompts, Collections.emptyMap());
+
+        assertNotNull(caseListMap);
+
+        assertThat(caseListMap.size(), is(cases.size()));
+
+        final List<JsonObject> promptJsonObjects = caseListMap.get(cases.get(0));
+
+        assertThat(promptJsonObjects.get(0).getString("promptRef"), is("minorcreditornameandaddress"));
+        assertThat(promptJsonObjects.get(0).getString("type"), is("NAMEADDRESS"));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("minorcreditornameandaddressOrganisationName"), is("AuthorityName"));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").getString("minorcreditornameandaddressAddress1"), is("line 1"));
+        assertThat(promptJsonObjects.get(0).getJsonObject("value").get("minorcreditornameandaddressAddress2"), nullValue());
+
+        assertThat(promptJsonObjects.get(1).getString("promptRef"), is("parentguardiansname"));
+        assertThat(promptJsonObjects.get(1).getString("value"), is(""));
+
+        assertThat(promptJsonObjects.get(2).getString("promptRef"), is("defendantDrivingLicenceNumber"));
+        assertThat(promptJsonObjects.get(2).getString("value"), is(""));
     }
 
     private void assertFixlType(final Defendant defendant, final List<JsonObject> promptJsonObjects) {
@@ -304,6 +339,35 @@ public class ReusableInformationMainConverterTest {
                 promptForParentGuardiansAddressEmailAddress2);
     }
 
+    private Collection<? extends Prompt> prepareCasePrompts() {
+        final UUID id = UUID.randomUUID();
+        final Prompt name = new Prompt()
+                .setId(id)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("prosecutionCaseIdentifier.prosecutionAuthorityName")
+                .setReference("minorcreditornameandaddressOrganisationName")
+                .setPartName("OrganisationName");
+
+        final Prompt addresLine1 = new Prompt()
+                .setId(id)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("prosecutionCaseIdentifier.address.address1")
+                .setReference("minorcreditornameandaddressAddress1")
+                .setPartName("Address1");
+
+        final Prompt addresLine2 = new Prompt()
+                .setId(id)
+                .setType(NAMEADDRESS.name())
+                .setCacheable(2)
+                .setCacheDataPath("prosecutionCaseIdentifier.address.address2")
+                .setReference("minorcreditornameandaddressAddress2")
+                .setPartName("Address2");
+
+        return Arrays.asList(name, addresLine1, addresLine2);
+    }
+
     public Defendant prepareDefendant() {
         final Defendant defendant = Defendant.defendant()
                 .withMasterDefendantId(UUID.randomUUID())
@@ -348,5 +412,16 @@ public class ReusableInformationMainConverterTest {
         defendant.setPersonDefendant(personDefendant);
 
         return defendant;
+    }
+
+    public ProsecutionCase prepareCase(){
+        return ProsecutionCase.prosecutionCase()
+                .withDefendants(singletonList(prepareDefendant()))
+                .withProsecutionCaseIdentifier(ProsecutionCaseIdentifier.prosecutionCaseIdentifier()
+                        .withContact(ContactNumber.contactNumber().withPrimaryEmail("contact@cpp.co.uk").build())
+                        .withProsecutionAuthorityName("AuthorityName")
+                        .withAddress(Address.address().withAddress1("line 1").withPostcode("E14 4XA").build())
+                        .build())
+                .build();
     }
 }

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.convertor;
 
+import static java.util.Optional.ofNullable;
 import static javax.json.Json.createObjectBuilder;
 
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
@@ -17,16 +18,16 @@ public abstract class ReusableInformationBaseConverter<T> {
 
     private static final String PROMPT_REF = "promptRef";
     private static final String MASTER_DEFENDANT_ID = "masterDefendantId";
-
+    private static final String CASE_ID = "caseId";
 
     protected JsonObjectBuilder convert(final ReusableInformation<T> reusableInformation) {
-
-        return createObjectBuilder()
+        final JsonObjectBuilder builder = createObjectBuilder()
                 .add(PROMPT_REF, reusableInformation.getPromptRef())
-                .add(MASTER_DEFENDANT_ID, reusableInformation.getMasterDefendantId().toString())
                 .add(TYPE_LABEL, type.name())
                 .add(CACHE_DATA_PATH, reusableInformation.getCacheDataPath())
                 .add(CACHEABLE, reusableInformation.getCacheable());
-
+        ofNullable(reusableInformation.getMasterDefendantId()).ifPresent(id -> builder.add(MASTER_DEFENDANT_ID, id.toString()));
+        ofNullable(reusableInformation.getCaseId()).ifPresent(id -> builder.add(CASE_ID, id.toString()));
+        return builder;
     }
 }

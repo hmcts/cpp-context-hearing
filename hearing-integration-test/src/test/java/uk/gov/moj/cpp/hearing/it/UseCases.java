@@ -29,6 +29,8 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
+import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantCase;
@@ -139,10 +141,15 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, true, true, true, false);
+        return initiateHearing(requestSpec, initiateHearing, true, true, true, false, false);
     }
 
-    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject) {
+    public static InitiateHearingCommand initiateHearingWithNsp(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
+
+        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true);
+    }
+
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp) {
 
         Hearing hearing = initiateHearing.getHearing();
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
@@ -175,6 +182,15 @@ public class UseCases {
         }
         if(!includeProsecutionCase){
             hearing.setProsecutionCases(null);
+        }
+
+        if(isNsp){
+            hearing.getProsecutionCases().stream().forEach(prosecutionCase -> prosecutionCase.getProsecutionCaseIdentifier().setAddress(Address.address()
+                    .withPostcode("E14 4EX").withAddress1("line 1").withAddress2("line 2").withAddress3("line 3").withAddress4("line 4").withAddress5("line 5").build())
+                    .setProsecutionAuthorityName("ProsecutionAuthorityName")
+                    .setContact(ContactNumber.contactNumber().withPrimaryEmail("contact@cpp.co.uk").build())
+                    .setProsecutorCategory("Charity")
+                    .setMajorCreditorCode(null));
         }
 
         makeCommand(requestSpec, "hearing.initiate")

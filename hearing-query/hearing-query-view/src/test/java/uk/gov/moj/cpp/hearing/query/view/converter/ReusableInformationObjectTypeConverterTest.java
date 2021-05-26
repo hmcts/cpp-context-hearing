@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformation.IdType.DEFENDANT;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -69,7 +70,8 @@ public class ReusableInformationObjectTypeConverterTest {
 
         final ReusableInformation reusableInformation = new ReusableInformation.Builder<NameAddressReusableInformation>()
                 .withValue(nameAddressReusableInformation)
-                .withMasterDefendantId(defendantId)
+                .withIdType(DEFENDANT)
+                .withId(defendantId)
                 .withPromptRef(promptRef)
                 .withCacheable(cacheable)
                 .withCacheDataPath(cacheDataPath)
@@ -122,7 +124,8 @@ public class ReusableInformationObjectTypeConverterTest {
 
         final ReusableInformation reusableInformation = new ReusableInformation.Builder<AddressReusableInformation>()
                 .withValue(addressReusableInformation)
-                .withMasterDefendantId(defendantId)
+                .withIdType(DEFENDANT)
+                .withId(defendantId)
                 .withPromptRef(promptRef)
                 .withCacheable(cacheable)
                 .withCacheDataPath(cacheDataPath)

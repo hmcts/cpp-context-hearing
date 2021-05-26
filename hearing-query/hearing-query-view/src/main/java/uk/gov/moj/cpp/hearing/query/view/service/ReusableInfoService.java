@@ -2,11 +2,13 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConverter;
@@ -45,15 +47,27 @@ public class ReusableInfoService {
     @Inject
     private ReusableInformationMainConverter reusableInformationMainConverter;
 
-    public List<JsonObject> getCaseDetailReusableInformation(final Collection<Defendant> defendants, final List<Prompt> resultPrompts, final Map<String, String> countryCodesMap) {
+    public List<JsonObject> getCaseDetailReusableInformation(final Collection<ProsecutionCase> cases, final List<Prompt> resultPrompts, final Map<String, String> countryCodesMap) {
         final Map<String, Map<String, String>> customPromptValues = new HashMap<>();
         customPromptValues.put(NATIONALITY, countryCodesMap);
 
-        final Map<Defendant, List<JsonObject>> reusableInfoMap = reusableInformationMainConverter
-                .convert(defendants, resultPrompts.stream()
+        final Map<UUID, Defendant> defendants = cases.stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .collect(toMap(Defendant::getMasterDefendantId, defendant -> defendant, (defendant1, defendant2) -> defendant1));
+
+        final Map<Defendant, List<JsonObject>> reusableInfoMapForDefendant = reusableInformationMainConverter
+                .convertDefendant(defendants.values(), resultPrompts.stream()
                         .filter(prompt -> isNotBlank(prompt.getCacheDataPath())).collect(toList()), customPromptValues);
 
-        return reusableInfoMap.values().stream().flatMap(List::stream).collect(toList());
+        final Map<ProsecutionCase, List<JsonObject>> reusableInfoMapForCase = reusableInformationMainConverter
+                .convertCase(cases, resultPrompts.stream()
+                        .filter(prompt -> isNotBlank(prompt.getCacheDataPath())).collect(toList()), customPromptValues);
+
+        final List<JsonObject> defendantList = reusableInfoMapForDefendant.values().stream().flatMap(List::stream).collect(toList());
+        final List<JsonObject> caseList = reusableInfoMapForCase.values().stream().flatMap(List::stream).collect(toList());
+        defendantList.addAll(caseList);
+
+        return defendantList;
     }
 
     public JsonObject getViewStoreReusableInformation(final Collection<Defendant> defendants, final List<JsonObject> reusableCaseDetailPrompts) {
