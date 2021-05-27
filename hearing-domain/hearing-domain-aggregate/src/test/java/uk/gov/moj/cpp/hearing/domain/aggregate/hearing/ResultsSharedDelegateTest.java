@@ -6,22 +6,28 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.moj.cpp.hearing.command.result.NewAmendmentResult;
-import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -388,5 +394,31 @@ public class ResultsSharedDelegateTest {
         assertThat(resultsSharedV2.getSavedTargets().size(), is(2));
         assertThat(resultsSharedV2.getCompletedResultLinesStatus().size(), is(1));
 
+    }
+
+    @Test
+    public void shouldAddMultipleDraftResultSavedThenMomentoShouldHaveMultipleTargets() {
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.parse("2019-12-18");
+        final Target target = target().withTargetId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withHearingDay(hearingDay)
+                .build();
+        final Target target2 = target().withTargetId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
+                .withHearingDay(hearingDay)
+                .withResultLines(new ArrayList<>())
+                .build();
+
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(target, HearingState.SHARED, randomUUID());
+        final DraftResultSaved draftResultSaved1 = new DraftResultSaved(target2, HearingState.SHARED, randomUUID());
+        resultsSharedDelegate.handleDraftResultSaved(draftResultSaved);
+        resultsSharedDelegate.handleDraftResultSaved(draftResultSaved1);
+        assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).size(), is(2));
+        assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).get(target.getTargetId()), notNullValue());
+        assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).get(target2.getTargetId()), notNullValue());
     }
 }

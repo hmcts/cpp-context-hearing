@@ -49,7 +49,7 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 
-@SuppressWarnings("squid:S3776")
+@SuppressWarnings({"squid:S3776", "PMD.BeanMembersShouldSerialize"})
 public class ResultsSharedDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -175,9 +175,13 @@ public class ResultsSharedDelegate implements Serializable {
             this.momento.getMultiDayTargets().get(hearingDay).get(targetId).setShadowListed(target.getShadowListed());
         } else {
             draftResultSaved.getTarget().setResultLines(emptyList());
-            final Map<UUID, Target> newTarget = new HashMap<>();
-            newTarget.put(targetId, draftResultSaved.getTarget());
-            this.momento.getMultiDayTargets().put(hearingDay, newTarget);
+            if (this.momento.getMultiDayTargets().containsKey(hearingDay)) {
+                this.momento.getMultiDayTargets().get(hearingDay).put(targetId, draftResultSaved.getTarget());
+            } else {
+                final Map<UUID, Target> newTarget = new HashMap<>();
+                newTarget.put(targetId, draftResultSaved.getTarget());
+                this.momento.getMultiDayTargets().put(hearingDay, newTarget);
+            }
         }
 
     }
