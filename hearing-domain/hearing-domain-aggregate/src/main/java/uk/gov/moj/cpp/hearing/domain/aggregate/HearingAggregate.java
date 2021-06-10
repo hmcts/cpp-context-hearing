@@ -577,7 +577,7 @@ public class HearingAggregate implements Aggregate {
                 .findFirst();
 
         if (saveDraftResultFailed.isPresent()) {
-            return Stream.of(saveDraftResultFailed);
+            return Stream.of(saveDraftResultFailed.get());
         } else {
             appliedTargetEvent.add(new MultipleDraftResultsSaved(targets.size()));
             return appliedTargetEvent.stream();

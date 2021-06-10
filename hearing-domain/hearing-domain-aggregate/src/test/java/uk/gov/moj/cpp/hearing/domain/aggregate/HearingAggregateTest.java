@@ -12,7 +12,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
@@ -32,7 +31,6 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommand
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import org.junit.Ignore;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -117,6 +115,31 @@ public class HearingAggregateTest {
         final HearingInitiated result = (HearingInitiated) new HearingAggregate().initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
 
         assertThat(result.getHearing().getId(), is(initiateHearingCommand.getHearing().getId()));
+    }
+
+    @Test
+    public void shouldRaiseSaveDraftResultsFailedEventWhenTargetIsInvalid() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithAllLevelJudicialResults();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final HearingInitiated result = (HearingInitiated) hearingAggregate.initiate(initiateHearingCommand.getHearing()).collect(Collectors.toList()).get(0);
+
+        final LocalDate hearingDay = result.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate();
+        final UUID hearingId = result.getHearing().getId();
+
+        final List<Target> invalidTargets = Arrays.asList(Target.target()
+                .withHearingId(hearingId)
+                .withDefendantId(null)
+                .withDraftResult(null)
+                .withOffenceId(null)
+                .withTargetId(UUID.randomUUID())
+                .withShadowListed(null)
+                .withHearingDay(hearingDay)
+                .build());
+
+        final SaveDraftResultFailed saveDraftResultFailed = (SaveDraftResultFailed) hearingAggregate.saveMultipleDraftResultsForHearingDay(invalidTargets, hearingDay, randomUUID()).collect(Collectors.toList()).get(0);
+
+        assertThat(saveDraftResultFailed.getTarget().getHearingId(), is(hearingId));
     }
 
     @Test
