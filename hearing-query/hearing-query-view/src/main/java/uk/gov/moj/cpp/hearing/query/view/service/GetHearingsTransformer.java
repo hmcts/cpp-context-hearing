@@ -6,7 +6,6 @@ import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -14,7 +13,6 @@ import uk.gov.justice.core.courts.CourtApplicationType;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -69,7 +67,7 @@ public class GetHearingsTransformer {
                 .withCourtCentre(hearing.getCourtCentre())
                 .withReportingRestrictionReason(hearing.getReportingRestrictionReason())
                 .withHearingLanguage(hearing.getHearingLanguage().name())
-                .withJurisdictionType(jurisdictionType(hearing.getJurisdictionType()))
+                .withJurisdictionType(hearing.getJurisdictionType())
                 .withHasSharedResults(hearing.getHasSharedResults())
                 .withCourtApplicationSummaries(
                         hearing.getCourtApplications() == null ? emptyList() :
@@ -164,13 +162,6 @@ public class GetHearingsTransformer {
         return result;
     }
 
-    private uk.gov.justice.hearing.courts.JurisdictionType jurisdictionType(final JurisdictionType jurisdictionType) {
-        if (CROWN.equals(jurisdictionType)) {
-            return uk.gov.justice.hearing.courts.JurisdictionType.CROWN;
-        } else {
-            return uk.gov.justice.hearing.courts.JurisdictionType.MAGISTRATES;
-        }
-    }
 
     private ProsecutionCaseSummaries.Builder summary(final ProsecutionCase prosecutionCase) {
         return ProsecutionCaseSummaries.prosecutionCaseSummaries()

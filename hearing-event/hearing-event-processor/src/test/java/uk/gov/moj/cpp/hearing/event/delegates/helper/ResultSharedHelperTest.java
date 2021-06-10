@@ -11,11 +11,12 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.NowDefinitionTemplates.standardNowDefinition;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import uk.gov.justice.core.courts.Category;
+
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAttendance;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.helper.ResultsSharedHelper;
@@ -45,7 +46,7 @@ public class ResultSharedHelperTest {
         final CommandHelpers.ResultsSharedEventHelper resultsShared = getResultsShared();
 
         final ResultsShared expected = resultsShared.it();
-        setJudicialResultsWithCategoryOf(expected,Category.FINAL);
+        setJudicialResultsWithCategoryOf(expected, JudicialResultCategory.FINAL);
 
         resultsSharedHelper.setIsDisposedFlagOnOffence(expected);
 
@@ -59,7 +60,7 @@ public class ResultSharedHelperTest {
         final CommandHelpers.ResultsSharedEventHelper resultsShared = getResultsSharedWithCourtApplicationCases();
 
         final ResultsShared expected = resultsShared.it();
-        setJudicialResultsWithCategoryOfSetCourtApplicationCase(expected,Category.FINAL);
+        setJudicialResultsWithCategoryOfSetCourtApplicationCase(expected,JudicialResultCategory.FINAL);
 
         resultsSharedHelper.setIsDisposedFlagOnOffence(expected);
 
@@ -73,7 +74,7 @@ public class ResultSharedHelperTest {
         final CommandHelpers.ResultsSharedEventHelper resultsShared = getResultsSharedWithCourtApplicationCourtOrder();
 
         final ResultsShared expected = resultsShared.it();
-        setJudicialResultsWithCategoryOfSetCourtApplicationCourtOrder(expected,Category.FINAL);
+        setJudicialResultsWithCategoryOfSetCourtApplicationCourtOrder(expected,JudicialResultCategory.FINAL);
 
         resultsSharedHelper.setIsDisposedFlagOnOffence(expected);
 
@@ -101,7 +102,7 @@ public class ResultSharedHelperTest {
         }));
 
         final ResultsShared expected = resultsShared.it();
-        setJudicialResultsWithCategoryOf(expected,Category.INTERMEDIARY);
+        setJudicialResultsWithCategoryOf(expected,JudicialResultCategory.INTERMEDIARY);
 
         resultsSharedHelper.setIsDisposedFlagOnOffence(expected);
 
@@ -128,7 +129,7 @@ public class ResultSharedHelperTest {
         }));
 
         final ResultsShared expected = resultsShared.it();
-        setJudicialResultsWithCategoryOfSetCourtApplicationCase(expected,Category.INTERMEDIARY);
+        setJudicialResultsWithCategoryOfSetCourtApplicationCase(expected,JudicialResultCategory.INTERMEDIARY);
 
         resultsSharedHelper.setIsDisposedFlagOnOffence(expected);
 
@@ -155,7 +156,7 @@ public class ResultSharedHelperTest {
         }));
 
         final ResultsShared expected = resultsShared.it();
-        setJudicialResultsWithCategoryOfSetCourtApplicationCourtOrder(expected,Category.INTERMEDIARY);
+        setJudicialResultsWithCategoryOfSetCourtApplicationCourtOrder(expected,JudicialResultCategory.INTERMEDIARY);
 
         resultsSharedHelper.setIsDisposedFlagOnOffence(expected);
 
@@ -172,23 +173,23 @@ public class ResultSharedHelperTest {
                     .build();
     }
 
-    private void setJudicialResultsWithCategoryOf(final ResultsShared expected , Category category) {
+    private void setJudicialResultsWithCategoryOf(final ResultsShared expected , JudicialResultCategory category) {
         final List<JudicialResult> judicialResultList   = new ArrayList<>();
-        judicialResultList.add(JudicialResult.judicialResult().withCategory(Category.INTERMEDIARY).withCjsCode("cjsCode1").build());
+        judicialResultList.add(JudicialResult.judicialResult().withCategory(JudicialResultCategory.INTERMEDIARY).withCjsCode("cjsCode1").build());
         judicialResultList.add(JudicialResult.judicialResult().withCategory(category).withCjsCode("cjsCode2").build());
         expected.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setJudicialResults(judicialResultList);
     }
 
-    private void setJudicialResultsWithCategoryOfSetCourtApplicationCase(final ResultsShared expected , Category category) {
+    private void setJudicialResultsWithCategoryOfSetCourtApplicationCase(final ResultsShared expected , JudicialResultCategory category) {
         final List<JudicialResult> judicialResultList   = new ArrayList<>();
-        judicialResultList.add(JudicialResult.judicialResult().withCategory(Category.INTERMEDIARY).withCjsCode("cjsCode1").build());
+        judicialResultList.add(JudicialResult.judicialResult().withCategory(JudicialResultCategory.INTERMEDIARY).withCjsCode("cjsCode1").build());
         judicialResultList.add(JudicialResult.judicialResult().withCategory(category).withCjsCode("cjsCode2").build());
         expected.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).setJudicialResults(judicialResultList);
     }
 
-    private void setJudicialResultsWithCategoryOfSetCourtApplicationCourtOrder(final ResultsShared expected , Category category) {
+    private void setJudicialResultsWithCategoryOfSetCourtApplicationCourtOrder(final ResultsShared expected , JudicialResultCategory category) {
         final List<JudicialResult> judicialResultList   = new ArrayList<>();
-        judicialResultList.add(JudicialResult.judicialResult().withCategory(Category.INTERMEDIARY).withCjsCode("cjsCode1").build());
+        judicialResultList.add(JudicialResult.judicialResult().withCategory(JudicialResultCategory.INTERMEDIARY).withCjsCode("cjsCode1").build());
         judicialResultList.add(JudicialResult.judicialResult().withCategory(category).withCjsCode("cjsCode2").build());
         expected.getHearing().getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().setJudicialResults(judicialResultList);
     }

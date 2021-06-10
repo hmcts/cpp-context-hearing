@@ -33,7 +33,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
-import uk.gov.justice.core.courts.Category;
+
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
@@ -41,6 +41,7 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -219,7 +220,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Test
     public void whenAnyJudicialResultCategorytIsFinal_Then_IsDiposed_Should_BeSetToTrue() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
-        setJudicialResultsWithCategoryOf(resultsShared, Category.FINAL);
+        setJudicialResultsWithCategoryOf(resultsShared, JudicialResultCategory.FINAL);
 
         target.shareResults(dummyEnvelope, sender, resultsShared);
 
@@ -316,7 +317,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Test
     public void shouldShareResultsWhenJudicialResultCategoryIsNotFinalThenOffenceIsDisposedFalse() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
-        setJudicialResultsWithCategoryOf(resultsShared, Category.ANCILLARY);
+        setJudicialResultsWithCategoryOf(resultsShared, JudicialResultCategory.ANCILLARY);
         target.shareResults(dummyEnvelope, sender, resultsShared);
 
         verify(sender).send(envelopeArgumentCaptor.capture());
@@ -334,7 +335,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Test
     public void whenJudicialResultCagtegory_Is_NotFinal_Then_Offence_IsDisposed_isFalse() throws IOException {
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_JSON, ResultsShared.class);
-        setJudicialResultsWithCategoryOf(resultsShared, Category.ANCILLARY);
+        setJudicialResultsWithCategoryOf(resultsShared, JudicialResultCategory.ANCILLARY);
 
         target.shareResults(dummyEnvelope, sender, resultsShared);
 
@@ -507,9 +508,9 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         assertThat(resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getJudicialResults(), hasSize(2));
     }
 
-    private void setJudicialResultsWithCategoryOf(final ResultsShared expected, final Category category) {
+    private void setJudicialResultsWithCategoryOf(final ResultsShared expected, final JudicialResultCategory category) {
         final List<JudicialResult> judicialResultList = new ArrayList<>();
-        judicialResultList.add(judicialResult().withCategory(Category.INTERMEDIARY).withCjsCode("cjsCode1").build());
+        judicialResultList.add(judicialResult().withCategory(JudicialResultCategory.INTERMEDIARY).withCjsCode("cjsCode1").build());
         judicialResultList.add(judicialResult().withCategory(category).withCjsCode("cjsCode2").build());
         expected.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).setJudicialResults(judicialResultList);
     }

@@ -18,21 +18,15 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
 
-import uk.gov.justice.core.courts.ApplicationStatus;
-import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
-import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
@@ -657,13 +651,13 @@ public class PublishResultsDelegate {
 
     private Optional<LocalDate> getMaxOrderDate(final List<JudicialResult> judicialResults) {
         return judicialResults.stream()
-                .filter(judicialResult -> judicialResult.getCategory() == Category.FINAL)
+                .filter(judicialResult -> judicialResult.getCategory() == JudicialResultCategory.FINAL)
                 .map(JudicialResult::getOrderedDate)
                 .max(Comparator.naturalOrder());
     }
 
     private boolean hasFinalResult(final List<JudicialResult> judicialResults) {
-        return judicialResults != null && judicialResults.stream().filter(Objects::nonNull).anyMatch(result -> Category.FINAL == result.getCategory());
+        return judicialResults != null && judicialResults.stream().filter(Objects::nonNull).anyMatch(result -> JudicialResultCategory.FINAL == result.getCategory());
     }
 
 }

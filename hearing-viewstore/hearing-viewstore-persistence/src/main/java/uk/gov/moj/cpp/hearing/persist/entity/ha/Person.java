@@ -1,7 +1,8 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
-import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
+
 import uk.gov.justice.core.courts.Gender;
+import uk.gov.justice.core.courts.HearingLanguage;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -37,7 +38,7 @@ public class Person {
 
     @Column(name = "documentation_language_needs")
     @Enumerated(EnumType.STRING)
-    private DocumentationLanguageNeeds documentationLanguageNeeds;
+    private HearingLanguage documentationLanguageNeeds;
 
     @Column(name = "first_name")
     private String firstName;
@@ -135,11 +136,11 @@ public class Person {
         this.disabilityStatus = disabilityStatus;
     }
 
-    public DocumentationLanguageNeeds getDocumentationLanguageNeeds() {
+    public HearingLanguage getDocumentationLanguageNeeds() {
         return documentationLanguageNeeds;
     }
 
-    public void setDocumentationLanguageNeeds(DocumentationLanguageNeeds documentationLanguageNeeds) {
+    public void setDocumentationLanguageNeeds(HearingLanguage documentationLanguageNeeds) {
         this.documentationLanguageNeeds = documentationLanguageNeeds;
     }
 

@@ -5,12 +5,12 @@ import static uk.gov.moj.cpp.hearing.CreateJsonSampleUtil.createObjectMapper;
 
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.hearing.courts.Applicant;
 import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.justice.hearing.courts.JurisdictionType;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.justice.hearing.courts.Respondents;
 

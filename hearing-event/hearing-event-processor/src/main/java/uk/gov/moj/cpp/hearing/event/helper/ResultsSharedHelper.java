@@ -3,23 +3,23 @@ package uk.gov.moj.cpp.hearing.event.helper;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
 
-import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 
 import java.util.List;
 import java.util.UUID;
@@ -27,8 +27,6 @@ import java.util.UUID;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-
-import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 
 public class ResultsSharedHelper {
 
@@ -79,7 +77,7 @@ public class ResultsSharedHelper {
             return judicialResultsList
                     .stream()
                     .filter(judicialResult -> nonNull(judicialResult.getCategory()))
-                    .anyMatch(judicialResult -> judicialResult.getCategory().equals(Category.FINAL));
+                    .anyMatch(judicialResult -> judicialResult.getCategory().equals(JudicialResultCategory.FINAL));
         }
         return false;
 

@@ -1,7 +1,26 @@
 package uk.gov.moj.cpp.hearing.utils;
 
-import com.google.common.collect.Lists;
-import org.apache.http.HttpHeaders;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import static java.lang.String.format;
+import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
+import static javax.json.Json.createReader;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.http.HttpStatus.SC_OK;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeReady;
+
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.VerdictType;
@@ -20,12 +39,6 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Al
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.verdicttype.AllVerdictTypes;
 import uk.gov.moj.cpp.hearing.it.Utilities;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-import javax.ws.rs.core.Response;
 import java.io.StringReader;
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -35,27 +48,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static java.lang.String.format;
-import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
-import static javax.json.Json.createArrayBuilder;
-import static javax.json.Json.createObjectBuilder;
-import static javax.json.Json.createReader;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static org.apache.http.HttpStatus.SC_OK;
-import static uk.gov.justice.json.schemas.staging.HearingLanguage.WELSH;
-import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
-import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
-import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
-import static uk.gov.moj.cpp.hearing.utils.FileUtil.getPayload;
-import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.waitForStubToBeReady;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
+import javax.ws.rs.core.Response;
+
+import com.google.common.collect.Lists;
+import org.apache.http.HttpHeaders;
 
 public class ReferenceDataStub {
 
@@ -863,7 +864,7 @@ public class ReferenceDataStub {
         UUID welshCourtId = fromString(courtIdForWelsh);
         UUID englishCourtId = fromString(courtIdForEnglish);
 
-        if (WELSH.equals(hearingLanguage)) {
+        if (HearingLanguage.WELSH.equals(hearingLanguage)) {
             welshCourtId = courtCentre.getId();
         } else {
             englishCourtId = courtCentre.getId();

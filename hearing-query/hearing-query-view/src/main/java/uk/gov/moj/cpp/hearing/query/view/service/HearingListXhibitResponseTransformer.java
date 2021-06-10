@@ -5,7 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static uk.gov.justice.hearing.courts.JurisdictionType.CROWN;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail.caseDetail;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Cases.cases;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court.court;

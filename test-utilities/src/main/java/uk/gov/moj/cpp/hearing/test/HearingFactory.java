@@ -13,7 +13,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.BreachType;
-import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtApplicationType;
@@ -26,6 +25,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResult;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.Jurisdiction;
 import uk.gov.justice.core.courts.LinkType;
@@ -246,7 +246,7 @@ public class HearingFactory {
                 .withIsConvictedResult(false)
                 .withIsAvailableForCourtExtract(false)
                 .withOrderedDate(now())
-                .withCategory(Category.FINAL)
+                .withCategory(JudicialResultCategory.FINAL)
                 .withResultText("resultText")
                 .withTerminatesOffenceProceedings(false)
                 .withLifeDuration(false)

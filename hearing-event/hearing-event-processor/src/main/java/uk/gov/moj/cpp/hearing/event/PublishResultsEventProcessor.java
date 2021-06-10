@@ -12,7 +12,6 @@ import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 
 import uk.gov.justice.core.courts.Address;
-import uk.gov.justice.core.courts.Category;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -20,6 +19,7 @@ import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Offence;
@@ -192,11 +192,11 @@ public class PublishResultsEventProcessor {
                             "resultDefinition not found for resultLineId: %s, resultDefinitionId: %s, hearingId: %s orderedDate: %s",
                             resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearing().getId(), resultLine.getOrderedDate()));
                 }
-                final Category resultCategory = getCategory(resultDefinition);
-                if (Category.FINAL.equals(resultCategory)) {
+                final JudicialResultCategory resultCategory = getCategory(resultDefinition);
+                if (JudicialResultCategory.FINAL.equals(resultCategory)) {
                     offenceResultMap.put(offence.getId(), mapOffenceResult(resultDefinition));
-                } else if (Category.ANCILLARY.equals(resultCategory)
-                        || Category.INTERMEDIARY.equals(resultCategory)) {
+                } else if (JudicialResultCategory.ANCILLARY.equals(resultCategory)
+                        || JudicialResultCategory.INTERMEDIARY.equals(resultCategory)) {
                     offenceResultMap.put(offence.getId(), OffenceResult.ADJOURNED);
                 } else {
                     throw new ResultDefinitionNotFoundException(format(
@@ -218,20 +218,20 @@ public class PublishResultsEventProcessor {
         }
     }
 
-    private Category getCategory(final ResultDefinition resultDefinition) {
-        Category category = null;
+    private JudicialResultCategory getCategory(final ResultDefinition resultDefinition) {
+        JudicialResultCategory category = null;
 
         if (nonNull(resultDefinition) && nonNull(resultDefinition.getCategory())) {
 
             switch (resultDefinition.getCategory()) {
                 case "A":
-                    category = Category.ANCILLARY;
+                    category = JudicialResultCategory.ANCILLARY;
                     break;
                 case "F":
-                    category = Category.FINAL;
+                    category = JudicialResultCategory.FINAL;
                     break;
                 case "I":
-                    category = Category.INTERMEDIARY;
+                    category = JudicialResultCategory.INTERMEDIARY;
                     break;
                 default:
                     throw new IllegalArgumentException(format("No valid category found for result defnition %s", resultDefinition.getId().toString()));

@@ -41,7 +41,6 @@ import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.DelegatedPowers;
-import uk.gov.justice.core.courts.DocumentationLanguageNeeds;
 import uk.gov.justice.core.courts.Ethnicity;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
@@ -398,7 +397,7 @@ public class CoreTestTemplates {
                 .withAdditionalNationalityId(randomUUID())
                 .withDateOfBirth(PAST_LOCAL_DATE.next())
                 .withDisabilityStatus(STRING.next())
-                .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? DocumentationLanguageNeeds.WELSH : DocumentationLanguageNeeds.ENGLISH)
+                .withDocumentationLanguageNeeds(args.hearingLanguage == WELSH ? HearingLanguage.WELSH : HearingLanguage.ENGLISH)
                 .withEthnicity(Ethnicity.ethnicity().withObservedEthnicityCode(STRING.next()).build())
                 .withAddress(address().build())
                 .withFirstName(STRING.next())
