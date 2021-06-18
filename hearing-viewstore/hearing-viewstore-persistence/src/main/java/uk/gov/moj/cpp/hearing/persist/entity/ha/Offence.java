@@ -86,6 +86,9 @@ public class Offence {
     @Column(name = "ctl_time_limit")
     private LocalDate ctlTimeLimit;
 
+    @Column(name = "is_ctl_extended")
+    private Boolean isCtlExtended;
+
     @Column(name = "proceedings_concluded")
     private boolean proceedingsConcluded;
 
@@ -128,6 +131,24 @@ public class Offence {
 
     @Column(name = "endorsable_flag")
     private Boolean endorsableFlag;
+
+    @Column(name = "ctl_clock_stopped")
+    private Boolean ctlClockStopped;
+
+    @Column(name = "bail_status_id")
+    private UUID bailStatusId;
+
+    @Column(name = "bail_status_code")
+    private String bailStatusCode;
+
+    @Column(name = "bail_status_description")
+    private String bailStatusDescription;
+
+    @Column(name = "previous_days_held_in_custody")
+    private Integer previousDaysHeldInCustody;
+
+    @Column(name = "date_held_in_custody_since")
+    private LocalDate dateHeldInCustodySince;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "offence", orphanRemoval = true)
     private Set<ReportingRestriction> reportingRestrictions = new HashSet<>();
@@ -396,6 +417,30 @@ public class Offence {
         this.endorsableFlag = endorsableFlag;
     }
 
+    public Boolean isCtlClockStopped() {
+        return ctlClockStopped;
+    }
+
+    public void setCtlClockStopped(final Boolean ctlClockStopped) {
+        this.ctlClockStopped = ctlClockStopped;
+    }
+
+    public Integer getPreviousDaysHeldInCustody() {
+        return previousDaysHeldInCustody;
+    }
+
+    public void setPreviousDaysHeldInCustody(final Integer previousDaysHeldInCustody) {
+        this.previousDaysHeldInCustody = previousDaysHeldInCustody;
+    }
+
+    public LocalDate getDateHeldInCustodySince() {
+        return dateHeldInCustodySince;
+    }
+
+    public void setDateHeldInCustodySince(final LocalDate dateHeldInCustodySince) {
+        this.dateHeldInCustodySince = dateHeldInCustodySince;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(this.id);
@@ -426,5 +471,37 @@ public class Offence {
 
     public void setReportingRestrictions(final Set<ReportingRestriction> reportingRestrictions) {
         this.reportingRestrictions = reportingRestrictions;
+    }
+
+    public UUID getBailStatusId() {
+        return bailStatusId;
+    }
+
+    public void setBailStatusId(UUID bailStatusId) {
+        this.bailStatusId = bailStatusId;
+    }
+
+    public String getBailStatusCode() {
+        return bailStatusCode;
+    }
+
+    public void setBailStatusCode(String bailStatusCode) {
+        this.bailStatusCode = bailStatusCode;
+    }
+
+    public String getBailStatusDescription() {
+        return bailStatusDescription;
+    }
+
+    public void setBailStatusDescription(String bailStatusDescription) {
+        this.bailStatusDescription = bailStatusDescription;
+    }
+
+    public Boolean isCtlExtended() {
+        return isCtlExtended;
+    }
+
+    public void setCtlExtended(Boolean ctlExtended) {
+        isCtlExtended = ctlExtended;
     }
 }

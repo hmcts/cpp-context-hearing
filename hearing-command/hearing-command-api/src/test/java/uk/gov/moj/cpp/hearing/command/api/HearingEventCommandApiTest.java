@@ -5,6 +5,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
@@ -33,6 +34,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -49,6 +51,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 
 @SuppressWarnings({"unused", "unchecked"})
 @RunWith(DataProviderRunner.class)
@@ -63,8 +66,10 @@ public class HearingEventCommandApiTest {
     private static final String FIELD_ALTERABLE = "alterable";
     private static final String FIELD_ACTIVE_HEARINGS = "activeHearings";
     private static final String FIELD_OVERRIDE = "override";
+    private static final String FIELD_HEARING_TYPE_IDS = "hearingTypeIds";
 
     private static final UUID HEARING_ID = randomUUID();
+    private static final UUID HEARING_TYPE_ID = randomUUID();
 
     private static final UUID HEARING_EVENT_ID = randomUUID();
     private static final UUID HEARING_EVENT_DEFINITION_ID = randomUUID();
@@ -80,6 +85,9 @@ public class HearingEventCommandApiTest {
 
     @Mock
     private Requester requester;
+
+    @Mock
+    private ReferenceDataService referenceDataService;
 
     @Spy
     private Enveloper enveloper = createEnveloper();
@@ -135,9 +143,12 @@ public class HearingEventCommandApiTest {
     @UseDataProvider("provideCorrectAlterableFlags")
     @Test
     public void shouldLogEventWithCorrectAlterableFlagAnd_OverrideCourtRoomRequested(final boolean alterable, final boolean expectation) {
+
         final JsonEnvelope command = prepareLogHearingEventCommandWithOverrideFlag();
         when(requester.request(argThat(activeHearingsQuery(command)))).thenReturn(prepareActiveHearingsResponse());
         when(requester.request(argThat(hearingDefinitionQuery(command)))).thenReturn(prepareHearingEventDefinitionResponse(alterable));
+        when(referenceDataService.getTrialHearingTypes(command)).thenReturn(Arrays.asList(HEARING_TYPE_ID));
+
         hearingEventCommandApi.logHearingEvent(command);
 
         verify(sender).send(senderArgumentCaptor.capture());
@@ -215,7 +226,9 @@ public class HearingEventCommandApiTest {
                         withJsonPath(format("$.%s", FIELD_OVERRIDE), equalTo(TRUE)),
                         withJsonPath(format("$.%s", FIELD_ALTERABLE), equalTo(expectation)),
                         withJsonPath(format("$.%s", FIELD_ACTIVE_HEARINGS), hasSize(1)),
-                        withJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID.toString()))
+                        withJsonPath(format("$.%s[0]", FIELD_ACTIVE_HEARINGS), equalTo(HEARING_ID.toString())),
+                        withJsonPath(format("$.%s", FIELD_HEARING_TYPE_IDS), hasSize(1)),
+                        withJsonPath(format("$.%s[0]", FIELD_HEARING_TYPE_IDS), equalTo(HEARING_TYPE_ID.toString()))
                 )))
         ));
     }

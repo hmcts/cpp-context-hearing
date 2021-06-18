@@ -81,7 +81,6 @@ import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.offence.UpdateOffencesForDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
-import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
@@ -629,28 +628,33 @@ public class UseCases {
 
     private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
         return target.getResultLines().stream().map(resultLineIn ->
-                new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
-                        resultLineIn.getOrderedDate(),
-                        resultLineIn.getSharedDate(),
-                        resultLineIn.getResultLineId(),
-                        target.getTargetId(),
-                        target.getOffenceId(),
-                        target.getDefendantId(),
-                        resultLineIn.getResultDefinitionId(),
-                        resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(toList()),
-                        resultLineIn.getResultLabel(),
-                        resultLineIn.getLevel().name(),
-                        resultLineIn.getIsModified(),
-                        resultLineIn.getIsComplete(),
-                        target.getApplicationId(),
-                        resultLineIn.getAmendmentReasonId(),
-                        resultLineIn.getAmendmentReason(),
-                        resultLineIn.getAmendmentDate(),
-                        resultLineIn.getFourEyesApproval(),
-                        resultLineIn.getApprovedDate(),
-                        resultLineIn.getIsDeleted(),
-                        null, null));
+                getSharedResultsCommandResultLine(target, resultLineIn));
+    }
+
+    private static SharedResultsCommandResultLine getSharedResultsCommandResultLine(final Target target,
+                                                                                    final uk.gov.justice.core.courts.ResultLine resultLineIn) {
+        return new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                resultLineIn.getOrderedDate(),
+                resultLineIn.getSharedDate(),
+                resultLineIn.getResultLineId(),
+                target.getTargetId(),
+                target.getOffenceId(),
+                target.getDefendantId(),
+                resultLineIn.getResultDefinitionId(),
+                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(toList()),
+                resultLineIn.getResultLabel(),
+                resultLineIn.getLevel().name(),
+                resultLineIn.getIsModified(),
+                resultLineIn.getIsComplete(),
+                target.getApplicationId(),
+                resultLineIn.getAmendmentReasonId(),
+                resultLineIn.getAmendmentReason(),
+                resultLineIn.getAmendmentDate(),
+                resultLineIn.getFourEyesApproval(),
+                resultLineIn.getApprovedDate(),
+                resultLineIn.getIsDeleted(),
+                null, null);
     }
 
     private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target) {
@@ -1061,7 +1065,7 @@ public class UseCases {
 
     public static void addDefendant(final Defendant defendant) throws Exception {
 
-        final String eventName = "public.progression.defendants-added-to-court-proceedings";
+        final String eventName = "public.progression.defendants-added-to-hearing";
 
         final ObjectMapper mapper = new ObjectMapperProducer().objectMapper();
         final String payloadAsString = mapper.writeValueAsString(defendant);

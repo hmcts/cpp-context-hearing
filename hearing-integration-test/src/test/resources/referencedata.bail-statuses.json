@@ -17,6 +17,12 @@
       "statusRanking": 3,
       "id": "b81ac80b-81a9-48b6-87b0-cc34610eec99",
       "statusCode":"A"
+    },
+    {
+      "statusDescription": "Remanded into Custody",
+      "statusRanking": 4,
+      "id": "5aaecac5-222b-402d-9047-84803679edac",
+      "statusCode": "C"
     }
   ]
 }

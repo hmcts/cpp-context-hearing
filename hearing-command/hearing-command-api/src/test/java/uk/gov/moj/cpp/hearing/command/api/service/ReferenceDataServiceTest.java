@@ -1,17 +1,20 @@
 package uk.gov.moj.cpp.hearing.command.api.service;
 
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
+import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.command.api.CommandAPITestBase;
@@ -20,20 +23,24 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import javax.json.Json;
 import javax.json.JsonObject;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import java.util.List;
+import java.util.UUID;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferenceDataServiceTest {
 
     private static final String RESULT_QUERY = "referencedata.query-result-definitions";
-    public static final String JSON_RESULT_DEFINITION_JSON = "json/resultDefinitions.json";
+    private static final String REF_DATA_HEARING_TYPES_QUERY = "referencedata.query.hearing-types";
+
+    private static final String JSON_RESULT_DEFINITION_JSON = "json/resultDefinitions.json";
+    private static final String REF_DATA_HEARING_TYPES_JSON = "json/hearing-types.json";
 
 
     @InjectMocks
@@ -70,6 +77,19 @@ public class ReferenceDataServiceTest {
         when(requester.requestAsAdmin(any(), any())).thenReturn(envelope);
         final ResultDefinition results = referenceDataService.getResults(envelope, "DDCH");
         assertThat(results.getId(), nullValue());
+    }
+
+    @Test
+    public void shouldReturnTrialTypeIds() {
+        final JsonObject jsonObjectPayload = CommandAPITestBase.readJson(REF_DATA_HEARING_TYPES_JSON, JsonObject.class);
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(REF_DATA_HEARING_TYPES_QUERY), jsonObjectPayload);
+
+        when(requester.request(any())).thenReturn(jsonEnvelope);
+        final List<UUID> results = referenceDataService.getTrialHearingTypes(jsonEnvelope);
+
+        assertThat(results.size(), is(2));
+        assertThat(results.get(0), is(fromString("06b0c2bf-3f98-46ed-ab7e-56efaf9ecced")));
+        assertThat(results.get(1), is(fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed")));
     }
 
 

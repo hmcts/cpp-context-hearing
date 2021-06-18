@@ -1,11 +1,16 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.empty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitExtended;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
@@ -184,4 +189,43 @@ public class OffenceDelegate implements Serializable {
         return Stream.of(new OffencesRemovedFromExistingHearing(hearingId, prosecutionCasesToBeRemoved, defendantsToBeRemoved, offenceIds));
 
     }
+
+    public void handleCustodyTimeLimitClockStopped(final CustodyTimeLimitClockStopped event) {
+        final List<UUID> offenceIds = event.getOffenceIds();
+        this.momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .forEach(offence -> {
+                    if (offenceIds.contains(offence.getId())) {
+                        offence.setCustodyTimeLimit(null);
+                        offence.setCtlClockStopped(true);
+                    }
+                });
+    }
+
+    public void handleCustodyTimeLimitExtended(final CustodyTimeLimitExtended event) {
+
+        final UUID offenceId = event.getOffenceId();
+
+        if (momento.getHearing() != null && isNotEmpty(momento.getHearing().getProsecutionCases())) {
+            this.momento.getHearing().getProsecutionCases().stream()
+                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                    .flatMap(defendant -> defendant.getOffences().stream())
+                    .forEach(offence -> {
+                        if (offenceId.equals(offence.getId())) {
+                            if (nonNull(offence.getCustodyTimeLimit())) {
+                                offence.getCustodyTimeLimit().setTimeLimit(event.getExtendedTimeLimit());
+                                offence.getCustodyTimeLimit().setIsCtlExtended(true);
+                            } else {
+                                offence.setCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
+                                        .withTimeLimit(event.getExtendedTimeLimit())
+                                        .withIsCtlExtended(true)
+                                        .build());
+                            }
+
+                        }
+                    });
+        }
+    }
+
 }

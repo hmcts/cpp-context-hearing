@@ -29,6 +29,7 @@ import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
 import uk.gov.justice.core.courts.AssociatedPerson;
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -96,7 +97,7 @@ import java.util.stream.Collectors;
 public class CoreTestTemplates {
 
     private static final UUID BAIL_STATUS_ID = randomUUID();
-    private static final String JSON_STRING = "json string";
+    private static final String JSON_STRING = "{\"results\":[{\"isDeleted\":false,\"isModified\":false,\"resultCode\":\"d0a369c9-5a28-40ec-99cb-da7943550b13\",\"orderedDate\":\"2021-05-27\"}]}";
     private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
     private static final String REPORTING_RESTRICTION_LABEL_SECOND = "Second";
 
@@ -320,6 +321,7 @@ public class CoreTestTemplates {
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
+                        .withIsCtlExtended(false)
                         .build())
                 .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
                         .withId(randomUUID())
@@ -717,6 +719,26 @@ public class CoreTestTemplates {
         return hearingBuilder;
     }
 
+    public static BailStatus getBailStatus(final String code, final String description) {
+        return bailStatus()
+                .withId(UUID.randomUUID())
+                .withCustodyTimeLimit(null)
+                .withCode(code)
+                .withDescription(description)
+                .build();
+    }
+
+    public static AllocationDecision.Builder allocationDecision(final UUID offenceId, final String reason) {
+        return AllocationDecision.allocationDecision()
+                .withOriginatingHearingId(randomUUID())
+                .withOffenceId(offenceId)
+                .withMotReasonId(randomUUID())
+                .withMotReasonDescription(reason)
+                .withMotReasonCode(STRING.next())
+                .withSequenceNumber(INTEGER.next())
+                .withAllocationDecisionDate(now())
+                .withCourtIndicatedSentence(courtIndicatedSentence().build());
+    }
     @SuppressWarnings("squid:S107")
     public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args,
                                                    final UUID courtId,
@@ -911,6 +933,26 @@ public class CoreTestTemplates {
                 .withIsComplete(true)
                 .withIsModified(false)
                 .withIsDeleted(false)
+                .build();
+    }
+
+    public static ResultLine resultLine(final UUID resultDefinitionId, final UUID resultLineId, final boolean isDeleted) {
+        return ResultLine.resultLine()
+                .withResultDefinitionId(resultDefinitionId)
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.CASE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .withValue("2017-05-20")
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
+                .withIsDeleted(isDeleted)
                 .build();
     }
 

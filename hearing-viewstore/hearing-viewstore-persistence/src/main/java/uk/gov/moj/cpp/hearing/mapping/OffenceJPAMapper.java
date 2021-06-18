@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Objects.nonNull;
+
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -10,12 +13,12 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@SuppressWarnings({"squid:MethodCyclomaticComplexity"})
 public class OffenceJPAMapper {
 
     private NotifiedPleaJPAMapper notifiedPleaJPAMapper;
@@ -57,6 +60,7 @@ public class OffenceJPAMapper {
     public OffenceJPAMapper() {
     }
 
+    @SuppressWarnings("squid:S3776")
     public Offence toJPA(final Hearing hearing, final UUID defendantId, final uk.gov.justice.core.courts.Offence pojo) {
         if (null == pojo) {
             return null;
@@ -92,9 +96,12 @@ public class OffenceJPAMapper {
         offence.setPlea(pleaJPAMapper.toJPA(pojo.getPlea()));
         offence.setVerdict(verdictJPAMapper.toJPA(pojo.getVerdict()));
         offence.setAllocationDecision(allocationDecisionJPAMapper.toJPA(pojo.getAllocationDecision()));
-        if (pojo.getCustodyTimeLimit()!=null && (pojo.getCustodyTimeLimit().getDaysSpent()!=null || pojo.getCustodyTimeLimit().getTimeLimit()!=null )) {
+        if (pojo.getCustodyTimeLimit() != null && (pojo.getCustodyTimeLimit().getDaysSpent() != null
+                || pojo.getCustodyTimeLimit().getTimeLimit() != null
+                || pojo.getCustodyTimeLimit().getIsCtlExtended() != null)) {
             offence.setCtlDaysSpent(pojo.getCustodyTimeLimit().getDaysSpent());
             offence.setCtlTimeLimit(pojo.getCustodyTimeLimit().getTimeLimit());
+            offence.setCtlExtended(pojo.getCustodyTimeLimit().getIsCtlExtended());
         } else {
             offence.setCtlTimeLimit(null);
             offence.setCtlDaysSpent(null);
@@ -102,21 +109,37 @@ public class OffenceJPAMapper {
         offence.setLaidDate(pojo.getLaidDate());
 
         offence.setLaaApplnReference(laaApplnReferenceJPAMapper.toJpa(pojo.getLaaApplnReference()));
-        if(Objects.nonNull(pojo.getIsDiscontinued())) {
+        if(nonNull(pojo.getIsDiscontinued())) {
             offence.setDiscontinued(pojo.getIsDiscontinued());
         }
-        if(Objects.nonNull(pojo.getIntroducedAfterInitialProceedings())) {
+        if(nonNull(pojo.getIntroducedAfterInitialProceedings())) {
             offence.setIntroduceAfterInitialProceedings(pojo.getIntroducedAfterInitialProceedings());
         }
-        if(Objects.nonNull(pojo.getProceedingsConcluded())) {
+        if(nonNull(pojo.getProceedingsConcluded())) {
             offence.setProceedingsConcluded(pojo.getProceedingsConcluded());
         }
-        if(Objects.nonNull(pojo.getReportingRestrictions())) {
+        if(nonNull(pojo.getReportingRestrictions())) {
             offence.setReportingRestrictions(reportingRestrictionJPAMapper.toJPA(hearing, pojo.getId(), pojo.getReportingRestrictions()));
         }
-        if(Objects.nonNull(pojo.getEndorsableFlag())) {
+        if(nonNull(pojo.getEndorsableFlag())) {
             offence.setEndorsableFlag(pojo.getEndorsableFlag());
         }
+        if (nonNull(pojo.getCtlClockStopped())) {
+            offence.setCtlClockStopped(pojo.getCtlClockStopped());
+        }
+        if (nonNull(pojo.getBailStatus())) {
+            if (nonNull(pojo.getBailStatus().getId())) {
+                offence.setBailStatusId(pojo.getBailStatus().getId());
+            }
+            if (nonNull(pojo.getBailStatus().getCode())) {
+                offence.setBailStatusCode(pojo.getBailStatus().getCode());
+            }
+            if (nonNull(pojo.getBailStatus().getDescription())) {
+                offence.setBailStatusDescription(pojo.getBailStatus().getDescription());
+            }
+        }
+        offence.setPreviousDaysHeldInCustody(pojo.getPreviousDaysHeldInCustody());
+        offence.setDateHeldInCustodySince(pojo.getDateHeldInCustodySince());
         return offence;
     }
 
@@ -160,15 +183,11 @@ public class OffenceJPAMapper {
                 .withLaidDate(entity.getLaidDate())
                 .withReportingRestrictions(reportingRestrictionJPAMapper.fromJPA(entity.getReportingRestrictions()))
                 .withEndorsableFlag(entity.isEndorsableFlag())
+                .withCtlClockStopped(entity.isCtlClockStopped())
+                .withBailStatus(extractBailStatus(entity))
+                .withDateHeldInCustodySince(entity.getDateHeldInCustodySince())
+                .withPreviousDaysHeldInCustody(entity.getPreviousDaysHeldInCustody())
                 .build();
-    }
-
-    private CustodyTimeLimit extractCustodyTimeLimit(final Offence offence) {
-        if (offence.getCtlDaysSpent()!=null || offence.getCtlTimeLimit()!=null) {
-            return new CustodyTimeLimit(offence.getCtlDaysSpent(), offence.getCtlTimeLimit());
-        } else {
-            return null;
-        }
     }
 
     public Set<Offence> toJPA(final Hearing hearing, final UUID defendantId, final List<uk.gov.justice.core.courts.Offence> pojos) {
@@ -184,4 +203,27 @@ public class OffenceJPAMapper {
         }
         return entities.stream().map(this::fromJPA).collect(Collectors.toList());
     }
+
+    private CustodyTimeLimit extractCustodyTimeLimit(final Offence offence) {
+        if (nonNull(offence.getCtlDaysSpent())
+                || nonNull(offence.getCtlTimeLimit())
+                || nonNull(offence.isCtlExtended())) {
+            return new CustodyTimeLimit(offence.getCtlDaysSpent(), offence.isCtlExtended(), offence.getCtlTimeLimit());
+        } else {
+            return null;
+        }
+    }
+
+    private BailStatus extractBailStatus(final Offence offence) {
+        if (nonNull(offence.getBailStatusId()) || nonNull(offence.getBailStatusCode()) || nonNull(offence.getBailStatusDescription())) {
+            return BailStatus.bailStatus()
+                    .withId(offence.getBailStatusId())
+                    .withCode(offence.getBailStatusCode())
+                    .withDescription(offence.getBailStatusDescription())
+                    .build();
+        } else {
+            return null;
+        }
+    }
+
 }

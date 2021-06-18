@@ -132,7 +132,7 @@ public class TestTemplates {
     private static final String HEARING_DAY = "2021-03-01";
     private static final String WELSH_LABEL_SPACE = "welshLabel ";
     private static final String IMPRISONMENT = "imprisonment";
-    private static final String DRAFT_RESULTS_CONTENT = "draft results content";
+    private static final String DRAFT_RESULTS_CONTENT = "{}";
     public static final String FIXEDLISTCODE_0 = "fixedlistcode0";
     public static final String IMPRISONMENT_TERM = "imprisonment term";
     public static final String SIX_YEARS = "6 years";
@@ -790,6 +790,40 @@ public class TestTemplates {
         }
 
         public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
+            return ResultLine.resultLine()
+                    .withResultLineId(resultLineId)
+                    .withDelegatedPowers(
+                            DelegatedPowers.delegatedPowers()
+                                    .withUserId(UUID.randomUUID())
+                                    .withLastName(BOWIE)
+                                    .withFirstName(DAVID)
+                                    .build()
+                    )
+                    .withIsComplete(true)
+                    .withIsModified(true)
+                    .withIsDeleted(false)
+                    .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
+                    .withOrderedDate(orderedDate)
+                    .withResultLineId(UUID.randomUUID())
+                    .withResultLabel(IMPRISONMENT)
+                    .withSharedDate(now())
+                    .withResultDefinitionId(resultDefinitionId)
+                    .withPrompts(
+                            asList(
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withFixedListCode(FIXEDLISTCODE_0)
+                                            .withId(UUID.randomUUID())
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue(SIX_YEARS)
+                                            .withWelshLabel(WELSH_LABEL_SPACE + IMPRISONMENT_TERM)
+                                            .withWelshValue(WELSH_VALUE)
+                                            .withPromptRef(IMPRISONMENT)
+                                            .build()
+                            )
+                    );
+
+        }
+        public static ResultLine.Builder ctlResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
                     .withDelegatedPowers(

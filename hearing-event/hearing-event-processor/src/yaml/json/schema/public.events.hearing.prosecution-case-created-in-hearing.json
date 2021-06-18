@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.prosecution-case-created-in-hearing.json",
+  "type": "object",
+  "properties": {
+    "prosecutionCaseId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    }
+  },
+  "required": [
+    "prosecutionCaseId"
+  ]
+}

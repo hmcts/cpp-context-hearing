@@ -1,27 +1,30 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitExtended;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -62,37 +65,37 @@ public class OffenceDelegateTest {
 
         hearingAggregate.apply(new HearingInitiated(Hearing.hearing()
                 .withId(hearingId)
-                .withProsecutionCases(new ArrayList<>(Arrays.asList(ProsecutionCase.prosecutionCase()
+                .withProsecutionCases(new ArrayList<>(asList(ProsecutionCase.prosecutionCase()
                         .withId(case1Id)
-                        .withDefendants(new ArrayList<>(Arrays.asList(Defendant.defendant()
+                        .withDefendants(new ArrayList<>(asList(Defendant.defendant()
                                 .withId(case1Defendant1Id)
-                                .withOffences(new ArrayList<>(Arrays.asList(Offence.offence()
+                                .withOffences(new ArrayList<>(asList(Offence.offence()
                                         .withId(case1Defendant1Offence1Id)
                                         .build())))
                                 .build())))
                         .build())))
                 .build()));
 
-        final List<ProsecutionCase> prosecutionCases = Arrays.asList(ProsecutionCase.prosecutionCase()
+        final List<ProsecutionCase> prosecutionCases = asList(ProsecutionCase.prosecutionCase()
                         .withId(case1Id)
-                        .withDefendants(Arrays.asList(Defendant.defendant()
+                        .withDefendants(asList(Defendant.defendant()
                                         .withId(case1Defendant1Id)
-                                        .withOffences(Arrays.asList(Offence.offence()
+                                        .withOffences(asList(Offence.offence()
                                                 .withId(case1Defendant1Offence2Id)
                                                 .build()))
                                         .build(),
                                 Defendant.defendant()
                                         .withId(case1Defendant2Id)
-                                        .withOffences(Arrays.asList(Offence.offence()
+                                        .withOffences(asList(Offence.offence()
                                                 .withId(case1Defendant2OffenceId)
                                                 .build()))
                                         .build()))
                         .build(),
                 ProsecutionCase.prosecutionCase()
                         .withId(case2Id)
-                        .withDefendants(Arrays.asList(Defendant.defendant()
+                        .withDefendants(asList(Defendant.defendant()
                                 .withId(case2Defendant1Id)
-                                .withOffences(Arrays.asList(Offence.offence()
+                                .withOffences(asList(Offence.offence()
                                         .withId(case2Defendant1OffenceId)
                                         .build()))
                                 .build()))
@@ -123,6 +126,103 @@ public class OffenceDelegateTest {
         assertThat(defendant3.getId(), is(case2Defendant1Id));
         assertThat(defendant3.getOffences().size(), is(1));
         assertThat(defendant3.getOffences().get(0).getId(), is(case2Defendant1OffenceId));
+
+    }
+
+    @Test
+    public void shouldHandleCTLClockStopped() {
+        final UUID hearingId = randomUUID();
+        final UUID offence1Id = randomUUID();
+        final UUID offence2Id = randomUUID();
+
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(Defendant.defendant()
+                                .withOffences(asList(Offence.offence()
+                                                .withId(offence1Id)
+                                                .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit().build())
+                                                .build(),
+                                        Offence.offence()
+                                                .withId(offence2Id)
+                                                .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit().build())
+                                                .build()))
+                                .build()))
+                        .build()))
+                .build());
+
+        hearingAggregate.apply(new CustodyTimeLimitClockStopped(hearingId, asList(offence1Id)));
+
+        final List<Offence> offences = hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+        assertThat(offences.get(0).getCustodyTimeLimit(), nullValue());
+        assertThat(offences.get(0).getCtlClockStopped(), is(true));
+
+        assertThat(offences.get(1).getCustodyTimeLimit(), notNullValue());
+        assertThat(offences.get(1).getCtlClockStopped(), nullValue());
+    }
+
+    @Test
+    public void shouldUpdateCustodyTimeLimitWhenCTLExistsAlready() {
+
+        final UUID hearingId = randomUUID();
+        final UUID offence1Id = randomUUID();
+        final UUID offence2Id = randomUUID();
+        final LocalDate initialCTLDate = LocalDate.now().minusDays(50);
+        final LocalDate extendedCTLDate = LocalDate.now().plusDays(50);
+
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(Defendant.defendant()
+                                .withOffences(asList(Offence.offence()
+                                                .withId(offence1Id)
+                                                .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
+                                                        .withTimeLimit(initialCTLDate)
+                                                        .withIsCtlExtended(false)
+                                                        .build())
+                                                .build(),
+                                        Offence.offence()
+                                                .withId(offence2Id)
+                                                .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit().build())
+                                                .build()))
+                                .build()))
+                        .build()))
+                .build());
+
+        hearingAggregate.apply(new CustodyTimeLimitExtended(hearingId, offence1Id, extendedCTLDate));
+
+        final List<Offence> offences = hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+        assertThat(offences.get(0).getCustodyTimeLimit(), notNullValue());
+        assertThat(offences.get(0).getCustodyTimeLimit().getTimeLimit(), is(extendedCTLDate));
+        assertThat(offences.get(0).getCustodyTimeLimit().getIsCtlExtended(), is(true));
+
+    }
+
+    @Test
+    public void shouldUpdateCustodyTimeLimitWhenCTLDoesNotExistAlready() {
+
+        final UUID hearingId = randomUUID();
+        final UUID offence1Id = randomUUID();
+        final UUID offence2Id = randomUUID();
+        final LocalDate extendedCTLDate = LocalDate.now().plusDays(50);
+
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(Defendant.defendant()
+                                .withOffences(asList(Offence.offence()
+                                                .withId(offence1Id)
+                                                .build(),
+                                        Offence.offence()
+                                                .withId(offence2Id)
+                                                .build()))
+                                .build()))
+                        .build()))
+                .build());
+
+        hearingAggregate.apply(new CustodyTimeLimitExtended(hearingId, offence1Id, extendedCTLDate));
+
+        final List<Offence> offences = hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+        assertThat(offences.get(0).getCustodyTimeLimit(), notNullValue());
+        assertThat(offences.get(0).getCustodyTimeLimit().getTimeLimit(), is(extendedCTLDate));
+        assertThat(offences.get(0).getCustodyTimeLimit().getIsCtlExtended(), is(true));
 
     }
 

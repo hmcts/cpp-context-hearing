@@ -267,6 +267,11 @@ public class HearingQueryApi {
         return this.hearingQueryView.getReusableInformation(query, prompts, countryCodesMap);
     }
 
+    @Handles("hearing.custody-time-limit")
+    public JsonEnvelope retrieveCustodyTimeLimit(final JsonEnvelope query) {
+        return this.hearingQueryView.retrieveCustodyTimeLimit(query);
+    }
+
     @SuppressWarnings("squid:S2629")
     private JsonEnvelope requestStagingEnforcementToGetOutstandingFines(final JsonEnvelope query, final JsonObject viewResponseEnvelopePayload) {
         final JsonEnvelope enforcementResultEnvelope;

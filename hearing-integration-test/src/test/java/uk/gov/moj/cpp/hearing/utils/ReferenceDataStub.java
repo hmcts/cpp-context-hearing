@@ -170,6 +170,9 @@ public class ReferenceDataStub {
     public static final CrackedIneffectiveVacatedTrialType CRACKED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(CRACKED_TRIAL_TYPE_ID, "code", "Cracked", "fullDescription", null);
     private static final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList<>();
 
+    private static final String REFERENCE_DATA_PUBLIC_HOLIDAYS_MEDIA_TYPE = "application/vnd.referencedata.query.public-holidays+json";
+    private static final String REFERENCE_DATA_PUBLIC_HOLIDAYS_URL = "/referencedata-service/query/api/rest/referencedata/public-holidays";
+
     private static List<JsonValue> createCourtRoomFixture() {
         String body = getPayload("referencedata.dyna.fixedlists.court.centre.json");
         JsonObject jsonObject = createReader(new StringReader(body)).readObject();
@@ -1051,6 +1054,20 @@ public class ReferenceDataStub {
                         .withBody(payload)));
 
         waitForStubToBeReady(REFERENCE_DATA_PLEA_TYPES_URL, REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE);
+    }
+
+    public static void stubPublicHolidays(){
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+        String payload = getPayload("stub-data/referencedata.query.public-holidays.json");
+
+        stubFor(get(urlPathMatching(REFERENCE_DATA_PUBLIC_HOLIDAYS_URL))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_PUBLIC_HOLIDAYS_MEDIA_TYPE)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(REFERENCE_DATA_PUBLIC_HOLIDAYS_URL, REFERENCE_DATA_PUBLIC_HOLIDAYS_MEDIA_TYPE);
     }
 
     public static void stubForYouthCourtForMagUUID(final UUID  magsUUID) {

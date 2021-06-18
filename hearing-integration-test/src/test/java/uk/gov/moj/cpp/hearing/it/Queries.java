@@ -15,7 +15,6 @@ import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.justice.services.test.utils.core.http.RequestParams;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
@@ -158,6 +157,27 @@ public class Queries {
         if (!expectedConditions.matches(responseData)) {
             assertThat(responseData, expectedConditions);
         }
+
+    }
+
+    public static ResponseData getCalculatedCustodyTimeLimitExpiryDate(final UUID hearingId, final String hearingDay, final UUID offenceId, final long timeout) {
+
+        final RequestParams requestParams = requestParams(getURL("hearing.custody-time-limit", hearingId.toString(), hearingDay, offenceId.toString()), "application/vnd.hearing.custody-time-limit+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
+                .build();
+
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK));
+
+        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
+
+        ResponseData responseData = makeRequest(requestParams);
+
+        while (!expectedConditions.matches(responseData) && ZonedDateTime.now().isBefore(expiryTime)) {
+            sleep();
+            responseData = makeRequest(requestParams);
+        }
+
+        return responseData;
 
     }
 

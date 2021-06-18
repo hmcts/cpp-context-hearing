@@ -23,6 +23,7 @@ import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
@@ -322,7 +323,9 @@ public class ResultsSharedDelegate implements Serializable {
         if (!defendantDetailsChanged.isEmpty()) {
             builder.withDefendantDetailsChanged(defendantDetailsChanged);
         }
-        return Stream.concat(enrichHearing(resultLines), Stream.of(builder.build()));
+
+        final Stream<Object> streams = Stream.concat(enrichHearing(resultLines), Stream.of(builder.build()));
+        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiry(this.momento, resultLines));
     }
 
     public Stream<Object> shareResultsV2(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged) {
@@ -372,7 +375,8 @@ public class ResultsSharedDelegate implements Serializable {
             streamBuilder.add(new EarliestNextHearingDateCleared(hearingId));
         }
 
-        return Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
+        final Stream<Object> streams = Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
+        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines));
     }
 
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged, final YouthCourt youthCourt, final LocalDate hearingDay) {
@@ -426,7 +430,8 @@ public class ResultsSharedDelegate implements Serializable {
             streamBuilder.add(new EarliestNextHearingDateCleared(hearingId));
         }
 
-        return Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
+        final Stream<Object> streams = Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
+        return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines));
     }
 
     private void setDraftResultAndPutFinalTargetsMap(final Map<UUID, Target> finalTargets, final Target target, final Map<UUID, Target> targetsInAggregate) {

@@ -289,4 +289,10 @@ subscriptions_descriptor:
         - name: hearing.events.offences-removed-from-existing-hearing
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.offences-removed-from-existing-hearing.json
 
+        - name: hearing.event.custody-time-limit-clock-stopped
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.event.custody-time-limit-clock-stopped.json
+
+        - name: hearing.event.custody-time-limit-extended
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.event.custody-time-limit-extended.json
+
       event_source_name: hearing

@@ -1,15 +1,19 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.lang.Boolean.FALSE;
 import static java.time.Instant.now;
 import static java.util.Objects.nonNull;
+import static java.util.UUID.fromString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
 
+import uk.gov.justice.core.courts.BailStatus;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -34,20 +38,26 @@ import uk.gov.moj.cpp.hearing.mapping.exception.UnmatchedSittingDayException;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
@@ -70,10 +80,19 @@ public class HearingEventListener {
     private static final String CHILD_RESULT_LINES = "childResultLines";
 
     @Inject
+    private BailStatusProducer bailStatusProducer;
+
+    @Inject
+    private OffenceRepository offenceRepository;
+
+    @Inject
     private ApprovalRequestedRepository approvalRequestedRepository;
 
     @Inject
     private HearingRepository hearingRepository;
+
+    @Inject
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
 
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -112,7 +131,77 @@ public class HearingEventListener {
         hearing.setHearingState(draftResultSaved.getHearingState());
         hearing.setAmendedByUserId(draftResultSaved.getAmendedByUserId());
 
+        saveBailStatusForCTLRemandStatus(targetIn);
+
         hearingRepository.save(hearing);
+    }
+
+    private void saveBailStatusForCTLRemandStatus(final Target targetIn) {
+
+        final String draftResultTarget = targetIn.getDraftResult();
+        if (nonNull(draftResultTarget)) {
+            final JsonObject parsedTarget = stringToJsonObjectConverter.convert(draftResultTarget);
+            if (parsedTarget.containsKey(RESULTS)) {
+
+                final JsonArray results = parsedTarget.getJsonArray(RESULTS);
+                if (isAllDeleted(results)) {
+                    unsetBailStatus(getOffence(targetIn));
+                    return;
+                }
+
+                for (int i = 0; i < results.size(); i++) {
+                    extractBailStatus(targetIn, results.getJsonObject(i));
+                }
+            }
+        }
+    }
+
+    private boolean isAllDeleted(final JsonArray results) {
+        boolean deleted = true;
+        for (int i = 0; i < results.size(); i++) {
+            deleted = results.getJsonObject(i).getBoolean("isDeleted",false);
+            if (!deleted) {
+                break;
+            }
+        }
+        return deleted;
+    }
+
+    private void extractBailStatus(final Target targetIn, final JsonObject result) {
+
+        if (nonNull(result) && !result.getBoolean("isDeleted", false)) {
+
+            final String resultCode = result.getString("resultCode", null);
+            if (nonNull(resultCode)) {
+                final Optional<BailStatus> bailStatusOpt = bailStatusProducer.getBailStatus(fromString(resultCode));
+
+                saveOffenceBailStatus(targetIn, bailStatusOpt);
+            }
+        }
+    }
+
+    private void saveOffenceBailStatus(final Target targetIn, final Optional<BailStatus> bailStatusOpt) {
+        if (bailStatusOpt.isPresent()) {
+
+            final Offence offence = getOffence(targetIn);
+            final BailStatus bailStatus = bailStatusOpt.get();
+            offence.setBailStatusId(bailStatus.getId());
+            offence.setBailStatusCode(bailStatus.getCode());
+            offence.setBailStatusDescription(bailStatus.getDescription());
+            offenceRepository.save(offence);
+        }
+    }
+
+    private Offence getOffence(final Target targetIn) {
+        final HearingSnapshotKey hearingSnapshotKey = new HearingSnapshotKey(targetIn.getOffenceId(), targetIn.getHearingId());
+        return offenceRepository.findBy(hearingSnapshotKey);
+    }
+
+    private void unsetBailStatus(final Offence offence) {
+        offence.setBailStatusId(null);
+        offence.setBailStatusCode(null);
+        offence.setBailStatusDescription(null);
+        offenceRepository.save(offence);
     }
 
     @Handles("hearing.target-removed")
@@ -132,8 +221,6 @@ public class HearingEventListener {
                             hearingRepository.save(hearing);
                         }
                 );
-
-
     }
 
 
@@ -337,7 +424,7 @@ public class HearingEventListener {
             }
 
             ((ObjectNode) node).put(LAST_SHARED_DATE, sharedDateTime.toLocalDate().toString());
-            ((ObjectNode) node).put(DIRTY, Boolean.FALSE);
+            ((ObjectNode) node).put(DIRTY, FALSE);
         };
 
         try {
@@ -355,7 +442,7 @@ public class HearingEventListener {
                 objectnode.remove(LAST_UPDATED_AT);
             }
 
-            objectnode.put(REQUEST_APPROVAL, Boolean.FALSE);
+            objectnode.put(REQUEST_APPROVAL, FALSE);
             objectnode.put(LAST_UPDATED_AT, now().toEpochMilli());
 
             final JsonNode arrNode = actualObj.get(RESULTS);
@@ -478,7 +565,7 @@ public class HearingEventListener {
             LOGGER.debug("hearing.events.marked-as-duplicate event received {}", event.toObfuscatedDebugString());
         }
 
-        final UUID hearingId = UUID.fromString(event.payloadAsJsonObject().getString("hearingId"));
+        final UUID hearingId = fromString(event.payloadAsJsonObject().getString("hearingId"));
         final Hearing hearing = hearingRepository.findBy(hearingId);
 
         if (hearing != null) {

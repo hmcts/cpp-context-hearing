@@ -29408,7 +29408,7 @@
       "convicted": "N",
       "d20": false,
       "resultDefinitionGroup": "Press",
-      "postHearingCustodyStatus": "A",
+      "postHearingCustodyStatus": "B",
       "jurisdiction": "B",
       "lCode": "REPC",
       "terminatesOffenceProceedings": false,
@@ -29430,6 +29430,23 @@
           "courtExtract": "N",
           "financial": "N",
           "jurisdiction": "B"
+        },
+        {
+          "id": "21541638-82dd-4a9f-a05c-67589dc8dce9",
+          "label": "Court or police station which previously granted bail",
+          "resultPromptRule": "mandatory",
+          "type": "TXT",
+          "nameEmail": false,
+          "hidden": false,
+          "associateToReferenceData": false,
+          "sequence": 200,
+          "userGroups": [],
+          "courtExtract": "Y",
+          "financial": "N",
+          "jurisdiction": "B",
+          "min": "1",
+          "max": "100",
+          "reference": "courtOrPoliceStationWhichPreviouslyGrantedBail"
         }
       ],
       "startDate": "2019-10-25"
@@ -53218,7 +53235,7 @@
       "urgent": false,
       "convicted": "N",
       "d20": false,
-      "postHearingCustodyStatus": "A",
+      "postHearingCustodyStatus": "C",
       "jurisdiction": "B",
       "terminatesOffenceProceedings": false,
       "prompts": [

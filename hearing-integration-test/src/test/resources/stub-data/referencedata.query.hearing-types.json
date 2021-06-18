@@ -6,7 +6,8 @@
       "hearingCode": "PTP",
       "hearingDescription": "Plea & Trial Preparation",
       "welshHearingDescription": "Paratoi ar gyfer Pledio a Threial",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": true
     },
     {
       "id": "cb428693-e886-4809-868e-e5f874d459d5",
@@ -14,7 +15,8 @@
       "hearingCode": "PLY",
       "hearingDescription": "Preliminary Hearing",
       "welshHearingDescription": "Gwrandawiad Rhagarweiniol",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": true
     },
     {
       "id": "511fe0a3-1391-4954-8158-6b10eed0dad9",
@@ -22,7 +24,8 @@
       "hearingCode": "PLE",
       "hearingDescription": "Plea",
       "welshHearingDescription": "Ple",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": true
     },
     {
       "id": "1466e2a6-3760-41de-9d23-17deac22d0a2",
@@ -30,7 +33,8 @@
       "hearingCode": "CSE",
       "hearingDescription": "Committal for Sentence",
       "welshHearingDescription": "Traddodi ar gyfer Dedfryd",
-      "defaultDurationMin": 30
+      "defaultDurationMin": 30,
+      "trialTypeFlag": true
     },
     {
       "id": "5ae4c090-0f70-4694-b4fc-707633d2b430",
@@ -38,7 +42,8 @@
       "hearingCode": "SEN",
       "hearingDescription": "Sentence",
       "welshHearingDescription": "Dedfryd",
-      "defaultDurationMin": 30
+      "defaultDurationMin": 30,
+      "trialTypeFlag": false
     },
     {
       "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4",
@@ -46,7 +51,8 @@
       "hearingCode": "TRL",
       "hearingDescription": "Trial",
       "welshHearingDescription": "Treial",
-      "defaultDurationMin": 0
+      "defaultDurationMin": 0,
+      "trialTypeFlag": false
     },
     {
       "id": "fb90d7d1-a591-4deb-92a0-4e3d0d469bce",
@@ -54,7 +60,8 @@
       "hearingCode": "TNW",
       "hearingDescription": "Trial - no witnesses",
       "welshHearingDescription": "Treial - dim tystion",
-      "defaultDurationMin": 0
+      "defaultDurationMin": 0,
+      "trialTypeFlag": false
     },
     {
       "id": "017f0533-1f4d-47e5-844c-6f29c8bb429e",
@@ -62,7 +69,8 @@
       "hearingCode": "TIS",
       "hearingDescription": "Trial of Issue",
       "welshHearingDescription": "Treial Pwnc Dadl",
-      "defaultDurationMin": 30
+      "defaultDurationMin": 30,
+      "trialTypeFlag": true
     },
     {
       "id": "3449743b-95d6-4836-8941-57f588b52068",
@@ -70,7 +78,8 @@
       "hearingCode": "APN",
       "hearingDescription": "Application",
       "welshHearingDescription": "Cais",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "633224da-6db3-4df5-8097-62cee52f7a61",
@@ -78,7 +87,8 @@
       "hearingCode": "BLA",
       "hearingDescription": "Bail Application",
       "welshHearingDescription": "Cais am fechnïaeth",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "3b5fdf13-7033-4ce0-857d-b7ea463da91d",
@@ -86,7 +96,8 @@
       "hearingCode": "BVA",
       "hearingDescription": "Bail Variation Application",
       "welshHearingDescription": "Cais i Amrywio Mechnïaeth",
-      "defaultDurationMin": 10
+      "defaultDurationMin": 10,
+      "trialTypeFlag": false
     },
     {
       "id": "3d8f6751-c2d6-401f-a1b5-dbd49bbf7c4f",
@@ -94,7 +105,8 @@
       "hearingCode": "BRG",
       "hearingDescription": "Application to Rescind Grant of Bail",
       "welshHearingDescription": "Cais i Ddiddymu Caniatâd Mechnïaeth",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "96e0da75-c841-4683-acce-f0a592785711",
@@ -102,7 +114,8 @@
       "hearingCode": "EBW",
       "hearingDescription": "Execution of Bench Warrant",
       "welshHearingDescription": "Gweithredu Gwarant o'r Fainc",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "906afefb-d2f5-4fde-8481-9560070463d9",
@@ -110,7 +123,8 @@
       "hearingCode": "CTA",
       "hearingDescription": "Custody Time Limit Application",
       "welshHearingDescription": "Cais am Derfyn Amser yn y Ddalfa",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "7dfff260-6f83-496b-a68e-f32f5e8aef10",
@@ -118,7 +132,8 @@
       "hearingCode": "BFA",
       "hearingDescription": "Application to Break Fixture",
       "welshHearingDescription": "Cais i Dorri Trefniant",
-      "defaultDurationMin": 10
+      "defaultDurationMin": 10,
+      "trialTypeFlag": false
     },
     {
       "id": "f730b853-f9bb-4d46-8c1e-cc3af5a13fe8",
@@ -126,7 +141,8 @@
       "hearingCode": "MEN",
       "hearingDescription": "Mention",
       "welshHearingDescription": "Crybwyll",
-      "defaultDurationMin": 10
+      "defaultDurationMin": 10,
+      "trialTypeFlag": false
     },
     {
       "id": "c79769ac-35d8-4ccf-96a5-1d7a2aa844d2",
@@ -134,7 +150,8 @@
       "hearingCode": "MDA",
       "hearingDescription": "Mention - Defendant to Attend",
       "welshHearingDescription": "Crybwyll - Y Diffynnydd i Fynychu",
-      "defaultDurationMin": 10
+      "defaultDurationMin": 10,
+      "trialTypeFlag": false
     },
     {
       "id": "edb25956-282c-4cee-9934-5686d901a029",
@@ -142,7 +159,8 @@
       "hearingCode": "JGT",
       "hearingDescription": "Judgment",
       "welshHearingDescription": "Dyfarniad",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "162ca142-112e-4030-99c7-9e4a12ff28ab",
@@ -150,7 +168,8 @@
       "hearingCode": "DSE",
       "hearingDescription": "Deferred Sentence",
       "welshHearingDescription": "Dedfryd Oededig",
-      "defaultDurationMin": 30
+      "defaultDurationMin": 30,
+      "trialTypeFlag": false
     },
     {
       "id": "394a29f3-7795-40b2-97a9-2d7d9120093c",
@@ -158,7 +177,8 @@
       "hearingCode": "DPR",
       "hearingDescription": "Deferred Sentence - Prosecution Released",
       "welshHearingDescription": "Dedfryd Oededig - Yr Erlyniad",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "c6d76309-c912-436b-a21b-a4c4450bc052",
@@ -166,7 +186,8 @@
       "hearingCode": "PTR",
       "hearingDescription": "Pre-Trial Review",
       "welshHearingDescription": "Adolygiad Cyn-treial",
-      "defaultDurationMin": 30
+      "defaultDurationMin": 30,
+      "trialTypeFlag": false
     },
     {
       "id": "c0df00c0-7293-4385-b99d-62b4266299ae",
@@ -174,7 +195,8 @@
       "hearingCode": "MEF",
       "hearingDescription": "Mention & Fix",
       "welshHearingDescription": "Crybwyll a Phennu",
-      "defaultDurationMin": 10
+      "defaultDurationMin": 10,
+      "trialTypeFlag": false
     },
     {
       "id": "c4801ef6-75a5-4ad9-9b27-a34ca1593658",
@@ -182,7 +204,8 @@
       "hearingCode": "MAP",
       "hearingDescription": "Mention - All Parties to Attend",
       "welshHearingDescription": "Crybwyll - Pob Parti i Fynychu",
-      "defaultDurationMin": 10
+      "defaultDurationMin": 10,
+      "trialTypeFlag": false
     },
     {
       "id": "bd4dab38-ea91-434b-8e73-e0d50ef0cbdf",
@@ -190,7 +213,8 @@
       "hearingCode": "REV",
       "hearingDescription": "Review",
       "welshHearingDescription": "Adolygiad",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "2685abcb-824d-4485-b2f6-0d793a252565",
@@ -198,7 +222,8 @@
       "hearingCode": "STE",
       "hearingDescription": "Section 28 Hearing",
       "welshHearingDescription": "Gwrandawiad Adran 28",
-      "defaultDurationMin": 30
+      "defaultDurationMin": 30,
+      "trialTypeFlag": false
     },
     {
       "id": "70e377a6-8352-4e75-b65c-46ce4a14f4c5",
@@ -206,7 +231,8 @@
       "hearingCode": "GRH",
       "hearingDescription": "Ground Rules Hearing",
       "welshHearingDescription": "Gwrandawiad Rheolau Sylfaenol",
-      "defaultDurationMin": 20
+      "defaultDurationMin": 20,
+      "trialTypeFlag": false
     },
     {
       "id": "8dd41e45-b594-4ba6-906e-1a4626b08fed",
@@ -218,7 +244,8 @@
       "validFrom": null,
       "validTo": null,
       "exhibitHearingCode": "CCT",
-      "exhibitHearingDescription": "Plea and Trial Preparation"
+      "exhibitHearingDescription": "Plea and Trial Preparation",
+      "trialTypeFlag": false
     },
     {
       "id": "9cc41e45-b594-4ba6-906e-1a4626b08fed",
@@ -230,7 +257,8 @@
       "validFrom": null,
       "validTo": null,
       "exhibitHearingCode": "CCT",
-      "exhibitHearingDescription": "Plea and Trial Preparation"
+      "exhibitHearingDescription": "Plea and Trial Preparation",
+      "trialTypeFlag": false
     }
   ]
 }

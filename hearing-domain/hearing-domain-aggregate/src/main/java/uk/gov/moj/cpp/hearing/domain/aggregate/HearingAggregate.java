@@ -69,6 +69,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.RespondentCounselDelegate
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ResultsSharedDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VariantDirectoryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VerdictDelegate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
@@ -82,6 +83,8 @@ import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitExtended;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselUpdated;
@@ -307,6 +310,8 @@ public class HearingAggregate implements Aggregate {
                 when(EarliestNextHearingDateCleared.class).apply(cleared -> hearingDelegate.handleEarliestNextHearingDateCleared()),
                 when(OffencesRemovedFromExistingHearing.class).apply(offenceDelegate::handleOffencesRemovedFromExistingHearing),
                 when(ExistingHearingUpdated.class).apply(offenceDelegate::handleExistingHearingUpdated),
+                when(CustodyTimeLimitClockStopped.class).apply(offenceDelegate::handleCustodyTimeLimitClockStopped),
+                when(CustodyTimeLimitExtended.class).apply(offenceDelegate::handleCustodyTimeLimitExtended),
                 otherwiseDoNothing()
         );
 
@@ -390,8 +395,9 @@ public class HearingAggregate implements Aggregate {
         return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
     }
 
-    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent) {
-        return apply(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
+    public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final List<UUID> hearingTypeIds) {
+        return apply(Stream.concat(this.hearingEventDelegate.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent),
+                CustodyTimeLimitUtil.stopCTLExpiryForTrialHearingUser(this.momento, hearingEvent, hearingTypeIds)));
     }
 
     public Stream<Object> updateHearingEvents(final UUID hearingId, final List<uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent> hearingEvents) {
@@ -826,6 +832,14 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> receiveDefendantsPartOfYouthCourtHearing(final List<UUID> defendantsInYouthCourtList) {
         return apply(Stream.of(new DefendantsInYouthCourtUpdated(defendantsInYouthCourtList, this.momento.getHearing().getId())));
+    }
+
+    public Stream<Object> extendCustodyTimeLimit(final UUID hearingId, final UUID offenceId, final LocalDate extendedTimeLimit) {
+        return apply(Stream.of(CustodyTimeLimitExtended.custodyTimeLimitExtended()
+                .withHearingId(hearingId)
+                .withOffenceId(offenceId)
+                .withExtendedTimeLimit(extendedTimeLimit)
+                .build()));
     }
 
     public Hearing getHearing() {

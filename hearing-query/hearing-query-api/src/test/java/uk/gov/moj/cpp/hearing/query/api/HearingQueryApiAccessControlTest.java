@@ -39,6 +39,8 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
 
     private static final String HEARING_QUERY_SESSION_TIME = "hearing.query.session-time";
 
+    private static final String HEARING_CUSTODY_TIME_LIMIT = "hearing.custody-time-limit";
+
 
     @Mock
     private UserAndGroupProvider userAndGroupProvider;
@@ -191,6 +193,16 @@ public class HearingQueryApiAccessControlTest extends BaseDroolsAccessControlTes
     @Test
     public void shouldNotAllowUserInUnAuthorisedGroupToQuerySessionTime() {
         assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_QUERY_SESSION_TIME, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin");
+    }
+
+    @Test
+    public void shouldAllowUserInAuthorisedGroupToCustodyTimeLimit() {
+        assertSuccessfulOutcomeOnActionForTheSuppliedGroups(HEARING_CUSTODY_TIME_LIMIT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate");
+    }
+
+    @Test
+    public void shouldNotAllowUserInUnAuthorisedGroupToCustodyTimeLimit() {
+        assertFailureOutcomeOnActionForTheSuppliedGroups(HEARING_CUSTODY_TIME_LIMIT, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate");
     }
 
     @Override

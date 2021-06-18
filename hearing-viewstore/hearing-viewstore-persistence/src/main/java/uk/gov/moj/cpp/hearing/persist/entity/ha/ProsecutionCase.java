@@ -50,6 +50,9 @@ public class ProsecutionCase {
     @Column(name = "statement_of_facts_welsh")
     private String statementOfFactsWelsh;
 
+    @Column(name = "trial_receipt_type")
+    private String trialReceiptType;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
     private Set<Defendant> defendants = new HashSet<>();
 
@@ -147,6 +150,14 @@ public class ProsecutionCase {
 
     public void setCpsProsecutor(final CpsProsecutor cpsProsecutor) {
         this.cpsProsecutor = cpsProsecutor;
+    }
+
+    public String getTrialReceiptType() {
+        return trialReceiptType;
+    }
+
+    public void setTrialReceiptType(final String trialReceiptType) {
+        this.trialReceiptType = trialReceiptType;
     }
 
     @Override

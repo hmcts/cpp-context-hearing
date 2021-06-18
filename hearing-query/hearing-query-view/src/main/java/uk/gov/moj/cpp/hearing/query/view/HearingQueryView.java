@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
 import static java.time.LocalDate.now;
+import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
@@ -33,6 +34,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResp
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
 import uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService;
+import uk.gov.moj.cpp.hearing.query.view.service.ctl.CTLExpiryDateCalculatorService;
 import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
@@ -74,6 +76,8 @@ public class HearingQueryView {
     private static final String FIELD_END_TIME = "endTime";
     private static final String FIELD_QUERY = "q";
     private static final String FIELD_ID = "id";
+    private static final String FIELD_OFFENCE_ID = "offenceId";
+    private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
 
@@ -92,6 +96,9 @@ public class HearingQueryView {
     private ObjectMapper mapper;
     @Inject
     private ReusableInfoService reusableInfoService;
+
+    @Inject
+    private CTLExpiryDateCalculatorService ctlExpiryDateCalculatorService;
 
     @Inject
     private CourtListRepository courtListRepository;
@@ -321,4 +328,48 @@ public class HearingQueryView {
         final JsonObject reusableViewStorePrompts = reusableInfoService.getViewStoreReusableInformation(defendants.values(), reusableCaseDetailPrompts);
         return envelopeFrom(envelope.metadata(), reusableViewStorePrompts);
     }
+
+    public JsonEnvelope retrieveCustodyTimeLimit(final JsonEnvelope envelope) {
+
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final UUID hearingId = UUID.fromString(payload.getString(FIELD_HEARING_ID));
+        final UUID offenceId = UUID.fromString(payload.getString(FIELD_OFFENCE_ID));
+        final LocalDate hearingDay = LocalDate.parse(envelope.payloadAsJsonObject().getString(FIELD_HEARING_DAY));
+
+
+        final Hearing hearing = hearingService.getHearingById(hearingId)
+                .orElseThrow(() -> new RuntimeException("Hearing not found for hearing id: " + hearingId));
+
+        final LocalDate expiryDate = getCTLExpiryDate(hearing, offenceId, hearingDay);
+
+        if (nonNull(expiryDate)) {
+
+            final JsonObject ctlExpiryDate = createObjectBuilder()
+                    .add(FIELD_CUSTODY_TIME_LIMIT, expiryDate.toString())
+                    .build();
+
+            return envelopeFrom(envelope.metadata(), ctlExpiryDate);
+
+        } else {
+            return envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
+        }
+
+    }
+
+    private LocalDate getCTLExpiryDate(final Hearing hearing, final UUID offenceId, final LocalDate hearingDay) {
+
+        if (ctlExpiryDateCalculatorService.avoidCalculation(hearing, offenceId)) {
+            return null;
+        }
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Offence offence = hearing.getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .filter(off -> off.getId().getId().equals(offenceId))
+                .findFirst().orElseThrow(() -> new RuntimeException("Offence not found for offence id: " + offenceId));
+
+        return ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, hearingDay).orElse(null);
+
+    }
+
 }

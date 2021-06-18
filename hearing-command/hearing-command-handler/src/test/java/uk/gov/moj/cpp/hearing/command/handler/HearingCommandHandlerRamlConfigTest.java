@@ -80,7 +80,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 RecordNextHearingDayUpdatedCommandHandler.class,
                 UpdateResultLineSharedDatesCommandHandler.class,
                 ReusableInfoCommandHandler.class,
-                YouthCourtDefendantsCommandHandler.class
+                YouthCourtDefendantsCommandHandler.class,
+                ExtendCustodyTimeLimitCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));

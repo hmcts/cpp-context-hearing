@@ -72,7 +72,7 @@ public class CaseDefendantAddEventProcessorTest {
 
         final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.defendants-added-to-court-proceedings"),
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.defendants-added-to-hearing"),
                 createObjectBuilder()
                         .add(DEFENDANTS,
                                 createArrayBuilder().add(uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())

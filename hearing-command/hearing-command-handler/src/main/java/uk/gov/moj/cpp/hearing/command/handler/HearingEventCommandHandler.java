@@ -14,6 +14,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingEventDefinitionAggregate;
 import uk.gov.moj.cpp.hearing.eventlog.HearingEvent;
 
+import java.util.List;
 import java.util.UUID;
 
 import javax.json.JsonArray;
@@ -66,6 +67,7 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
         final UUID hearingEventDefinitionId = logEventCommand.getHearingEventDefinitionId();
         final Boolean alterable = logEventCommand.getAlterable();
         final UUID defenceCounselId = logEventCommand.getDefenceCounselId();
+        final List<UUID> hearingTypeIds = logEventCommand.getHearingTypeIds();
 
         final JsonObject hearingEventPayload = jsonEnvelope.payloadAsJsonObject();
 
@@ -89,11 +91,11 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
                 final UUID activeHearingId = UUID.fromString(activeHearings.getString(index));
 
-                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent));
+                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent, hearingTypeIds));
             }
         }
 
-        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent));
+        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, hearingTypeIds));
     }
 
     @Handles("hearing.command.update-hearing-events")

@@ -1316,7 +1316,7 @@ public class ShareResultsIT extends AbstractIT {
         testSaveDraftResult(saveDraftResultCommand);
 
         getDraftResultsPollForMatch(hearingOne.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
-                .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("draft results content")))));
+                .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("{}")))));
     }
 
     @Test
@@ -1407,7 +1407,7 @@ public class ShareResultsIT extends AbstractIT {
         testSaveDraftResult(saveDraftResultCommand);
 
         getDraftResultsPollForMatch(hearingOne.getHearing().getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
-                .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("draft results content")))));
+                .with(TargetListResponse::getTargets, first(isBean(Target.class).with(Target::getDraftResult, is("{}")))));
     }
 
     @Test

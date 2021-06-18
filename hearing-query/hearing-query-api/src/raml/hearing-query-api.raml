@@ -517,3 +517,28 @@ protocols: [ HTTP, HTTPS ]
                       example:  !include json/hearing.query.reusable-info.json
                       schema:  !include  json/schema/hearing.query.reusable-info.json
 
+/hearings/{hearingId}/{hearingDay}/offences/{offenceId}:
+    uriParameters:
+        hearingId:
+            description: ID of the current hearing
+            type: string
+        hearingDay:
+            description: The day of the hearing (multi day) to get the draft results for, in format yy-mm-dd (e.g. 2021-03-25)
+            type: string
+        offenceId:
+            description: ID of the current offence
+            type: string
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.custody-time-limit+json
+                name: hearing.custody-time-limit
+            ...
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.custody-time-limit+json:
+                        example: !include json/hearing.custody-time-limit.json
+                        schema: !include json/schema/hearing.custody-time-limit.json

@@ -4,6 +4,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
 import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDocumentCreate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubRelistReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.StagingEnforcementStub.stubEnforceFinancialImposition;
 import static uk.gov.moj.cpp.hearing.utils.SystemIdMapperStub.stubAddMapping;
@@ -46,7 +47,7 @@ public class StubPerExecution {
         setupAsWildcardUserBelongingToAllGroups();
         stubAddMapping();
         stubEnforceFinancialImposition();
-
+        stubOrganisationUnit();
     }
 
     public static void main(String[] args) {

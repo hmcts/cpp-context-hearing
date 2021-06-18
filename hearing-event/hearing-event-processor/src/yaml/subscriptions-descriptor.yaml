@@ -286,6 +286,13 @@ subscriptions_descriptor:
         - name: hearing.events.hearing-unallocated
           schema_uri: http://justice.gov.uk/hearing/courts/hearing-unallocated.json
 
+        - name: hearing.event.custody-time-limit-clock-stopped
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.event.custody-time-limit-clock-stopped.json
+
+        # Prosecution Case registered in Hearing
+        - name: hearing.events.registered-hearing-against-case
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.registered-hearing-against-case.json
+
       event_source_name: hearing
 
     - name: public event subscription
@@ -303,9 +310,9 @@ subscriptions_descriptor:
         - name: public.progression.court-application-updated
           schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-court-application-updated.json
 
-        # Case Defendants added
-        - name: public.progression.defendants-added-to-court-proceedings
-          schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-defendants-added-to-court-proceedings.json
+        # Add Defendants to Prosecution Case and Hearings
+        - name: public.progression.defendants-added-to-hearing
+          schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public.progression.defendants-added-to-hearing.json
 
         # Offences For Defendant Updated
         - name: public.progression.defendant-offences-changed
@@ -355,10 +362,6 @@ subscriptions_descriptor:
         - name: public.events.listing.hearing-unallocated
           schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.hearing-unallocated.json
 
-        # Case Defendants added
-        - name: public.progression.defendants-added-to-court-proceedings
-          schema_uri: http://cpp.moj.gov.uk/progression/json/schema/event/public-defendants-added-to-court-proceedings.json
-
         # Next Hearing Date Changed
         - name: public.events.listing.next-hearing-day-changed
           schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.next-hearing-day-changed.json
@@ -366,5 +369,9 @@ subscriptions_descriptor:
         # Remove Offences from allocated hearing
         - name: public.events.listing.offences-removed-from-existing-allocated-hearing
           schema_uri: http://justice.gov.uk/listing/courts/public.events.listing.offences-removed-from-existing-allocated-hearing.json
+
+        # Progression Custody Time Limit Extended (by Application)
+        - name: public.events.progression.custody-time-limit-extended
+          schema_uri: http://justice.gov.uk/core/courts/public.events.progression.custody-time-limit-extended.json
 
       event_source_name: public.event.source

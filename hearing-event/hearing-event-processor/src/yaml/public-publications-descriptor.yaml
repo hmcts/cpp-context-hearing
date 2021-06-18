@@ -176,4 +176,11 @@ subscriptions_descriptor:
         - name: public.hearing.result-amendments-validation-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validation-failed.json
 
+        - name: public.events.hearing.custody-time-limit-clock-stopped
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.custody-time-limit-clock-stopped.json
+
+        # Prosecution Case created in Hearing
+        - name: public.events.hearing.prosecution-case-created-in-hearing
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.prosecution-case-created-in-hearing.json
+
       event_source_name: public.event.source

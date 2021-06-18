@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.command.logEvent;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -18,6 +19,7 @@ public class LogEventCommand {
     private final ZonedDateTime lastModifiedTime;
     private final Boolean alterable;
     private final UUID defenceCounselId;
+    private final List<UUID> hearingTypeIds;
 
     @JsonCreator
     public LogEventCommand(@JsonProperty("hearingEventId") final UUID hearingEventId,
@@ -28,7 +30,8 @@ public class LogEventCommand {
                            @JsonProperty("eventTime") final ZonedDateTime eventTime,
                            @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
                            @JsonProperty("alterable") final Boolean alterable,
-                           @JsonProperty("defenceCounselId") final UUID defenceCounselId) {
+                           @JsonProperty("defenceCounselId") final UUID defenceCounselId,
+                           @JsonProperty("hearingTypeIds") final List<UUID> hearingTypeIds) {
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
@@ -38,6 +41,7 @@ public class LogEventCommand {
         this.lastModifiedTime = lastModifiedTime;
         this.alterable = alterable;
         this.defenceCounselId = defenceCounselId;
+        this.hearingTypeIds = hearingTypeIds;
     }
 
     public static Builder builder() {
@@ -81,6 +85,10 @@ public class LogEventCommand {
         return defenceCounselId;
     }
 
+    public List<UUID> getHearingTypeIds() {
+        return hearingTypeIds;
+    }
+
     public static class Builder {
         private UUID hearingEventId;
         private UUID hearingId;
@@ -91,6 +99,7 @@ public class LogEventCommand {
         private ZonedDateTime lastModifiedTime;
         private Boolean alterable;
         private UUID defenceCounselId;
+        private List<UUID> hearingTypeIds;
 
         public Builder withHearingEventId(final UUID hearingEventId) {
             this.hearingEventId = hearingEventId;
@@ -137,9 +146,14 @@ public class LogEventCommand {
             return this;
         }
 
+        public Builder withHearingTypeIds(final List<UUID> hearingTypeIds) {
+            this.hearingTypeIds = hearingTypeIds;
+            return this;
+        }
+
         public LogEventCommand build() {
             return new LogEventCommand(hearingEventId, hearingId, hearingEventDefinitionId,
-                    recordedLabel, note, eventTime, lastModifiedTime, alterable, defenceCounselId);
+                    recordedLabel, note, eventTime, lastModifiedTime, alterable, defenceCounselId, hearingTypeIds);
         }
     }
 }

@@ -46,6 +46,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -122,7 +123,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId, randomUUID(), STRING.next(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID());
+                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID(), Arrays.asList(randomUUID()));
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -167,7 +168,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null);
+                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()));
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -222,7 +223,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null);
+                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()));
 
         final CorrectLogEventCommand correctLogEvenCommand = new CorrectLogEventCommand(logEventCommand.getHearingEventId(), randomUUID(), hearingId,
                 randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID() );

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.api;
 
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.messaging.JsonObjects.createObjectBuilder;
@@ -11,10 +12,14 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.api.service.ReferenceDataService;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -31,6 +36,7 @@ public class HearingEventCommandApi {
     private static final String FIELD_ACTIVE_HEARINGS = "activeHearings";
     private static final String FIELD_OVERRIDE = "override";
     private static final String FIELD_EVENT_TIME = "eventTime";
+    private static final String FIELD_HEARING_TYPE_IDS = "hearingTypeIds";
 
     @Inject
     private Sender sender;
@@ -41,6 +47,9 @@ public class HearingEventCommandApi {
     @Inject
     private Enveloper enveloper;
 
+    @Inject
+    private ReferenceDataService referenceDataService;
+
     @Handles("hearing.create-hearing-event-definitions")
     public void createHearingEventDefinitions(final JsonEnvelope envelope) {
         sender.send(envelope);
@@ -50,15 +59,16 @@ public class HearingEventCommandApi {
     public void logHearingEvent(final JsonEnvelope command) {
         final JsonObject responsePayload = getEventDefinition(command);
         final boolean overrideCourtRoom = command.payloadAsJsonObject().getBoolean(FIELD_OVERRIDE, false);
+        final List<UUID> hearingTypeIds = referenceDataService.getTrialHearingTypes(command);
 
         if (overrideCourtRoom) {
             final JsonObject activeHearingsDetails = getActiveHearingsForCourtRoom(command);
             final JsonObject payloadWithActiveHearings = createObjectBuilder(command.payloadAsJsonObject())
                     .add(FIELD_ACTIVE_HEARINGS, activeHearingsDetails.getJsonArray(FIELD_ACTIVE_HEARINGS))
                     .build();
-            enrichAndSendCommand(command, responsePayload, "hearing.command.log-hearing-event", payloadWithActiveHearings);
+            enrichAndSendCommandWithHearingTypeIds(command, responsePayload, "hearing.command.log-hearing-event", payloadWithActiveHearings, hearingTypeIds);
         } else {
-            enrichAndSendCommand(command, responsePayload, "hearing.command.log-hearing-event");
+            enrichAndSendCommandWithHearingTypeIds(command, responsePayload, "hearing.command.log-hearing-event", hearingTypeIds);
         }
     }
 
@@ -112,8 +122,27 @@ public class HearingEventCommandApi {
         return builder.build();
     }
 
-    private void enrichAndSendCommand(final JsonEnvelope command, final JsonObject eventDefinitionDetails, final String eventName, final JsonObject payloadWithActiveHearings) {
-        final JsonObject enrichedPayload = enrichIncomingPayload(payloadWithActiveHearings, eventDefinitionDetails.getBoolean(FIELD_ALTERABLE));
+    private void enrichAndSendCommandWithHearingTypeIds(final JsonEnvelope command, final JsonObject eventDefinitionDetails, final String eventName, final List<UUID> hearingTypeIds) {
+        final JsonObject enrichedPayload = enrichIncomingPayloadWithHearingTypeIds(command.payloadAsJsonObject(), eventDefinitionDetails.getBoolean(FIELD_ALTERABLE), hearingTypeIds);
         sender.send(enveloper.withMetadataFrom(command, eventName).apply(enrichedPayload));
+    }
+
+
+    private void enrichAndSendCommandWithHearingTypeIds(final JsonEnvelope command, final JsonObject eventDefinitionDetails, final String eventName, final JsonObject payloadWithActiveHearings, final List<UUID> hearingTypeIds) {
+        final JsonObject enrichedPayload = enrichIncomingPayloadWithHearingTypeIds(payloadWithActiveHearings, eventDefinitionDetails.getBoolean(FIELD_ALTERABLE), hearingTypeIds);
+        sender.send(enveloper.withMetadataFrom(command, eventName).apply(enrichedPayload));
+    }
+
+    private JsonObject enrichIncomingPayloadWithHearingTypeIds(final JsonObject source, final boolean alterable, final List<UUID> hearingTypeIds) {
+
+        final JsonArrayBuilder hearingTypesArray = createArrayBuilder();
+        hearingTypeIds.stream().map(UUID::toString).forEach(hearingTypesArray::add);
+
+        final JsonObjectBuilder builder = createObjectBuilder();
+        builder.add(FIELD_ALTERABLE, alterable);
+        builder.add(FIELD_HEARING_TYPE_IDS, hearingTypesArray.build());
+        source.forEach(builder::add);
+
+        return builder.build();
     }
 }

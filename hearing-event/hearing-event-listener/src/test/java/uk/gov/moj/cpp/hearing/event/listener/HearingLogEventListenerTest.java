@@ -86,7 +86,7 @@ public class HearingLogEventListenerTest {
     public void shouldPersistAHearingEventLog() {
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(), randomUUID());
+                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(), randomUUID(), Arrays.asList(randomUUID()));
 
         final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
 
@@ -136,7 +136,7 @@ public class HearingLogEventListenerTest {
     public void shouldDeleteAnExistingHearingEvent() {
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), randomUUID(), randomUUID(), STRING.next(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(), randomUUID());
+                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(), randomUUID(), Arrays.asList(randomUUID()));
 
         when(hearingEventRepository.findOptionalById(logEventCommand.getHearingId())).thenReturn(
                 of(HearingEvent.hearingEvent()

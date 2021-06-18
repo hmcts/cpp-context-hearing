@@ -204,7 +204,8 @@ public class HearingEventListenerYamlConfigTest {
                 YouthCourtDefendantsUpdatedEventListener.class,
                 HearingDeletedEventListener.class,
                 HearingUnallocatedEventListener.class,
-                ReusableInfoEventListener.class));
+                ReusableInfoEventListener.class,
+                CustodyTimeLimitEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

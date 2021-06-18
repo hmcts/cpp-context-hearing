@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="104" author="jive" logicalFilePath="104-add-bail-status-to-offence">
+
+        <addColumn tableName="ha_offence">
+            <column name="bail_status_id" type="UUID"/>
+            <column name="bail_status_code" type="TEXT"/>
+            <column name="bail_status_description" type="TEXT"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_offence">
+                <column name="bail_status_id"/>
+                <column name="bail_status_code"/>
+                <column name="bail_status_description"/>
+            </dropColumn>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

@@ -215,3 +215,12 @@ rule "Query - API - hearing.defendant.outstanding-fine-requests"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.custody-time-limit"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.custody-time-limit");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end

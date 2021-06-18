@@ -25,7 +25,7 @@ public class CaseDefendantAddEventProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseDefendantAddEventProcessor.class);
 
-    private static final String PUBLIC_EVENT_PROGRESSION_DEFENDANTS_ADDED_TO_COURT_PROCEEDINGS = "public.progression.defendants-added-to-court-proceedings";
+    private static final String PUBLIC_EVENT_PROGRESSION_DEFENDANTS_ADDED_TO_HEARING = "public.progression.defendants-added-to-hearing";
 
     private static final String HEARING_DEFENDANT_ADDED = "hearing.defendant-added";
 
@@ -43,10 +43,10 @@ public class CaseDefendantAddEventProcessor {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
 
-    @Handles(PUBLIC_EVENT_PROGRESSION_DEFENDANTS_ADDED_TO_COURT_PROCEEDINGS)
+    @Handles(PUBLIC_EVENT_PROGRESSION_DEFENDANTS_ADDED_TO_HEARING)
     public void processPublicCaseDefendantAdded(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(EVENT_RECEIVED_LOG_TEMPLATE, PUBLIC_EVENT_PROGRESSION_DEFENDANTS_ADDED_TO_COURT_PROCEEDINGS, event.toObfuscatedDebugString());
+            LOGGER.debug(EVENT_RECEIVED_LOG_TEMPLATE, PUBLIC_EVENT_PROGRESSION_DEFENDANTS_ADDED_TO_HEARING, event.toObfuscatedDebugString());
         }
         sender.send(enveloper.withMetadataFrom(event, "hearing.add-defendants").apply(event.payloadAsJsonObject()));
     }

@@ -2,7 +2,7 @@
   "targets": [
     {
       "defendantId": "DEFENDANT_ID",
-      "draftResult": "draft results content",
+      "draftResult": "{}",
       "hearingId": "HEARING_ID",
       "offenceId": "OFFENCE1_ID",
       "resultLines": [
@@ -36,7 +36,7 @@
     },
     {
       "defendantId": "DEFENDANT_ID",
-      "draftResult": "draft results content",
+      "draftResult": "{}",
       "hearingId": "HEARING_ID",
       "offenceId": "OFFENCE2_ID",
       "resultLines": [

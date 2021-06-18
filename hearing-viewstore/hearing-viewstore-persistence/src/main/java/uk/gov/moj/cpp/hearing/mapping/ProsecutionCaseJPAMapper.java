@@ -57,6 +57,7 @@ public class ProsecutionCaseJPAMapper {
         prosecutionCase.setStatementOfFacts(pojo.getStatementOfFacts());
         prosecutionCase.setStatementOfFactsWelsh(pojo.getStatementOfFactsWelsh());
         prosecutionCase.setDefendants(defendantJPAMapper.toJPA(hearing, prosecutionCase, pojo.getDefendants()));
+        prosecutionCase.setTrialReceiptType(pojo.getTrialReceiptType());
         return prosecutionCase;
     }
 
@@ -73,7 +74,9 @@ public class ProsecutionCaseJPAMapper {
                 .withStatementOfFacts(entity.getStatementOfFacts())
                 .withStatementOfFactsWelsh(entity.getStatementOfFactsWelsh())
                 .withDefendants(defendantJPAMapper.fromJPA(entity.getDefendants()))
+                .withTrialReceiptType(entity.getTrialReceiptType())
                 .withCaseMarkers(caseMarkerJPAMapper.fromJPA(entity.getMarkers()));
+
         if (Objects.nonNull(entity.getCpsProsecutor())) {
             prosecutionCase.withProsecutor(cpsProsecutorJPAMapper.fromJPA(entity.getCpsProsecutor()));
         }

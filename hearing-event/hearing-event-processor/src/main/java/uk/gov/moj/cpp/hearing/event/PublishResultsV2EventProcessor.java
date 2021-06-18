@@ -248,16 +248,18 @@ public class PublishResultsV2EventProcessor {
     }
 
     private void populateProsecutorInformation(final JsonEnvelope context, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
-        final Prosecutor prosecutor = referenceDataService.getProsecutorById(context, prosecutionCaseIdentifier.getProsecutionAuthorityId());
-        prosecutionCaseIdentifier.setProsecutionAuthorityName(prosecutor.getFullName());
-        prosecutionCaseIdentifier.setProsecutionAuthorityOUCode(prosecutor.getOucode());
-        prosecutionCaseIdentifier.setMajorCreditorCode(prosecutor.getMajorCreditorCode());
-        if (nonNull(prosecutor.getAddress())) {
-            prosecutionCaseIdentifier.setAddress(getProsecutorAddress(prosecutor));
-        }
-        if (nonNull(prosecutor.getInformantEmailAddress())) {
-            prosecutionCaseIdentifier.setContact(getProsecutorContact(prosecutor));
-        }
+        final Optional<Prosecutor> optionalProsecutor = fetchProsecutorInformationById(context, prosecutionCaseIdentifier.getProsecutionAuthorityId());
+        optionalProsecutor.ifPresent(prosecutor -> {
+            prosecutionCaseIdentifier.setProsecutionAuthorityName(prosecutor.getFullName());
+            prosecutionCaseIdentifier.setProsecutionAuthorityOUCode(prosecutor.getOucode());
+            prosecutionCaseIdentifier.setMajorCreditorCode(prosecutor.getMajorCreditorCode());
+            if (nonNull(prosecutor.getAddress())) {
+                prosecutionCaseIdentifier.setAddress(getProsecutorAddress(prosecutor));
+            }
+            if (nonNull(prosecutor.getInformantEmailAddress())) {
+                prosecutionCaseIdentifier.setContact(getProsecutorContact(prosecutor));
+            }
+        });
     }
 
     private Address getProsecutorAddress(Prosecutor prosecutor) {

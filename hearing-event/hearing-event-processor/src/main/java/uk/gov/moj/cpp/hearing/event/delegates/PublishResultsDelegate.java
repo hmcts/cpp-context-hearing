@@ -14,6 +14,7 @@ import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
 import static uk.gov.justice.core.courts.Level.CASE;
 import static uk.gov.justice.core.courts.Level.DEFENDANT;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
+import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
@@ -45,6 +46,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelper;
 import uk.gov.moj.cpp.hearing.event.helper.ResultsSharedHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.model.ExtendedCustodyTimeLimit;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
@@ -129,6 +131,8 @@ public class PublishResultsDelegate {
 
         this.custodyTimeLimitCalculator.calculate(resultsShared.getHearing());
 
+        this.custodyTimeLimitCalculator.calculateDateHeldInCustody(resultsShared.getHearing());
+
         new ResultsSharedHelper().setIsDisposedFlagOnOffence(resultsShared);
 
         new BailStatusReasonHelper().setReason(resultsShared);
@@ -174,6 +178,8 @@ public class PublishResultsDelegate {
         bailStatusHelper.mapBailStatuses(context, resultsShared.getHearing());
 
         this.custodyTimeLimitCalculator.calculate(resultsShared.getHearing());
+        this.custodyTimeLimitCalculator.calculateDateHeldInCustody(resultsShared.getHearing(), resultsShared.getHearingDay());
+        this.custodyTimeLimitCalculator.updateExtendedCustodyTimeLimit(resultsShared);
 
         new ResultsSharedHelper().setIsDisposedFlagOnOffence(resultsShared);
         new BailStatusReasonHelper().setReason(resultsShared.getHearing());
@@ -197,6 +203,16 @@ public class PublishResultsDelegate {
             LOGGER.info("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope);
         }
         sender.send(jsonEnvelope);
+    }
+
+    private void sendCommandToExtendCustodyTimeLimit(final JsonEnvelope context, final Sender sender, final ExtendedCustodyTimeLimit extendedCustodyTimeLimit) {
+
+        final JsonObject payload = this.objectToJsonObjectConverter.convert(extendedCustodyTimeLimit);
+
+         sender.send(envelop(payload)
+                .withName("hearing.command.extend-custody-time-limit")
+                .withMetadataFrom(context));
+
     }
 
     /**
