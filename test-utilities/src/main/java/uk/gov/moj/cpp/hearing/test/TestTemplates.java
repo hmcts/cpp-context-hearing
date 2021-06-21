@@ -757,6 +757,10 @@ public class TestTemplates {
             return saveMultipleDaysDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE, hearingDay);
         }
 
+        public static SaveMultipleDaysResultsCommand saveMultipleDraftResultsCommandTemplateWithInvalidTarget(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final LocalDate hearingDay) {
+            return saveMultipleDaysDraftResultCommandTemplateInvalidTarget(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE, hearingDay);
+        }
+
         public static List<SaveDraftResultCommand> saveDraftResultCommandForMultipleOffences(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final UUID resultDefId) {
             final Hearing hearing = initiateHearingCommand.getHearing();
             final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
@@ -1065,6 +1069,26 @@ public class TestTemplates {
             return new SaveDraftResultCommand(target, null);
         }
 
+        public static SaveMultipleDaysResultsCommand saveMultipleDaysDraftResultCommandTemplateInvalidTarget(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
+                                                                                                             final UUID resultLineId, final UUID resultDefinitionId, final Boolean shadowListed, final LocalDate hearingDay) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+            final Offence offence1 = defendant0.getOffences().get(0);
+            final Target target1 = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withOffenceId(offence1.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .withShadowListed(shadowListed)
+                    .withHearingDay(hearingDay)
+                    .build();
+
+            return new SaveMultipleDaysResultsCommand(hearing.getId(), Arrays.asList(target1), hearingDay);
+
+        }
+
         public static SaveMultipleDaysResultsCommand saveMultipleDaysDraftResultCommandTemplate(
                 final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
                 final UUID resultLineId, final UUID resultDefinitionId, final Boolean shadowListed, final LocalDate hearingDay) {
@@ -1096,6 +1120,7 @@ public class TestTemplates {
             return new SaveMultipleDaysResultsCommand(hearing.getId(), Arrays.asList(target1, target2), hearingDay);
         }
     }
+
 
     public static class ShareResultsCommandTemplates {
         private ShareResultsCommandTemplates() {

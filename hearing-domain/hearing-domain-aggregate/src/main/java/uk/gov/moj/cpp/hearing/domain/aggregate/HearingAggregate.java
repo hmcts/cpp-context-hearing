@@ -164,7 +164,7 @@ import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "pmd:BeanMembersShouldSerialize"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = 5432374024089063139L;

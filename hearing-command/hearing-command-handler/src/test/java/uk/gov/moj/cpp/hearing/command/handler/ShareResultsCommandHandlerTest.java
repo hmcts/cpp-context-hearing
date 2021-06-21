@@ -14,8 +14,11 @@ import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelp
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveMultipleDraftResultsCommandTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveMultipleDraftResultsCommandTemplateWithInvalidTarget;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
@@ -45,6 +48,7 @@ import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
+import uk.gov.moj.cpp.hearing.command.result.SaveMultipleDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
@@ -58,6 +62,8 @@ import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
@@ -112,7 +118,7 @@ public class ShareResultsCommandHandlerTest {
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
     @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class);
+    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class, SaveDraftResultFailed.class);
 
     @BeforeClass
     public static void init() {
@@ -186,6 +192,45 @@ public class ShareResultsCommandHandlerTest {
         when(this.clock.now()).thenReturn(sharedTime);
         defendantDetailsUpdated = new DefendantDetailsUpdated(initiateHearingCommand.getHearing().getId(), convert(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0), "Test"));
     }
+
+
+    @Test
+    public void shouldRaiseFailedExceptionWhenSaveDaysDraftResults() throws Exception {
+        final LocalDate hearingDay = LocalDate.now();
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), hearingDay);
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        targetDraft.setResultLines(null);
+        final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+            apply(Stream.of(prosecutionCounselAdded));
+            apply(Stream.of(defenceCounselUpsert));
+            apply(Stream.of(nowsVariantsSavedEvent));
+            apply(draftResultSavedEvent);
+        }};
+
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+
+        final SaveMultipleDaysResultsCommand saveMultipleDaysResultsCommand = saveMultipleDraftResultsCommandTemplateWithInvalidTarget(initiateHearingCommand, LocalDate.now(), hearingDay);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.save-days-draft-results").withUserId(randomUUID().toString()), objectToJsonObjectConverter.convert(saveMultipleDaysResultsCommand));
+
+        this.shareResultsCommandHandler.saveMultipleDraftResultsForHearingDay(envelope);
+
+        Stream<JsonEnvelope> argument = verifyAppendAndGetArgumentFrom(this.hearingEventStream);
+        final Optional<JsonEnvelope> efound = argument
+                .filter(e -> "hearing.save-draft-result-failed".equals(e.metadata().name()))
+                .findFirst();
+
+        assertThat("expected:" + "hearing.save-draft-result-failed", efound.get(), IsNull.notNullValue());
+
+        final SaveDraftResultFailed saveDraftResultFailed = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), SaveDraftResultFailed.class);
+
+      assertThat(saveDraftResultFailed.getTarget().getTargetId(), is(saveMultipleDaysResultsCommand.getTargets().get(0).getTargetId()));
+    }
+
 
     @Test
     public void shouldRaiseResultsSharedEvent() throws Exception {
