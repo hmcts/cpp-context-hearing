@@ -28,7 +28,7 @@
         <coredomain.version>1.0.158</coredomain.version>
         <referencedata.version>7.0.53</referencedata.version>
         <material.version>7.0.0</material.version>
-        <results.version>7.0.60</results.version>
+        <results.version>7.0.53</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
         <stagingenforcement.version>7.0.17</stagingenforcement.version>
         <progression.version>7.0.138-custodytimelimit</progression.version>
@@ -39,7 +39,7 @@
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
         <usersgroups.version>7.0.27</usersgroups.version>
-        <listing.version>7.0.72</listing.version>
+        <listing.version>7.0.65</listing.version>
     </properties>
 
     <modules>
