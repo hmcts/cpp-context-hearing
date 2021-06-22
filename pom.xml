@@ -31,7 +31,7 @@
         <results.version>7.0.53</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
         <stagingenforcement.version>7.0.17</stagingenforcement.version>
-        <progression.version>7.0.138-custodytimelimit</progression.version>
+        <progression.version>7.0.133</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
