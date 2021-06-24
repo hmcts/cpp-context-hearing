@@ -202,7 +202,7 @@ public class HearingEventListenerTest {
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
         draftResultSaved.getTarget().getResultLines().remove(0);
-        draftResultSaved.getTarget().getResultLines().add(CoreTestTemplates.resultLine(RI_C_RESULT_DEFINITON_ID, UUID.randomUUID(),false));
+        draftResultSaved.getTarget().getResultLines().add(CoreTestTemplates.resultLine(RI_C_RESULT_DEFINITON_ID, UUID.randomUUID(), false));
 
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(true)
@@ -250,7 +250,7 @@ public class HearingEventListenerTest {
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
         draftResultSaved.getTarget().getResultLines().remove(0);
-        draftResultSaved.getTarget().getResultLines().add(CoreTestTemplates.resultLine(RI_C_RESULT_DEFINITON_ID, UUID.randomUUID(),false));
+        draftResultSaved.getTarget().getResultLines().add(CoreTestTemplates.resultLine(RI_C_RESULT_DEFINITON_ID, UUID.randomUUID(), false));
 
         final Hearing dbHearing = new Hearing()
                 .setHasSharedResults(true)
@@ -582,6 +582,48 @@ public class HearingEventListenerTest {
                 .with(Offence::getBailStatusCode, is(nullValue()))
                 .with(Offence::getBailStatusId, is(nullValue()))
                 .with(Offence::getBailStatusDescription, is(nullValue())));
+    }
+
+    @Test
+    public void draftResultSaved_shouldNotClearBailStatusIfNoResults() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+        final Target targetOut = new Target().setHearingDay(hearingDay.toString());
+
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(
+                CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
+                HearingState.INITIALISED, randomUUID());
+
+        final JsonArray emptyResults = Json.createArrayBuilder().build();
+        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", emptyResults).build().toString());
+
+        when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(null);
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(true)
+                .setId(hearingId)
+                .setTargets(asSet(new Target()
+                        .setId(draftResultSaved.getTarget().getTargetId())
+                ));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+        when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
+
+        hearingEventListener.draftResultSaved(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved"),
+                objectToJsonObjectConverter.convert(draftResultSaved)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(false))
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getTargets, hasSize(1))
+                .with(Hearing::getTargets, first(is(targetOut)))
+        );
+
+        verify(this.offenceRepository, never()).save(Mockito.any());
     }
 
     @Test

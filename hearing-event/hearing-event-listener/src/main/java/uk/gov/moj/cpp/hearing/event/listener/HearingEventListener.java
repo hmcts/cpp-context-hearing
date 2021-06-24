@@ -68,7 +68,7 @@ import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:CommentedOutCodeLine", "squid:S1166"})
+@SuppressWarnings({"squid:CommentedOutCodeLine", "squid:S1166", "squid:S134"})
 @ServiceComponent(EVENT_LISTENER)
 public class HearingEventListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventListener.class.getName());
@@ -145,7 +145,10 @@ public class HearingEventListener {
 
                 final JsonArray results = parsedTarget.getJsonArray(RESULTS);
                 if (isAllDeleted(results)) {
-                    unsetBailStatus(getOffence(targetIn));
+                    final Offence existingOffence = getOffence(targetIn);
+                    if (existingOffence != null) {
+                        unsetBailStatus(existingOffence);
+                    }
                     return;
                 }
 
@@ -157,7 +160,7 @@ public class HearingEventListener {
     }
 
     private boolean isAllDeleted(final JsonArray results) {
-        boolean deleted = true;
+        boolean deleted = !results.isEmpty();
         for (int i = 0; i < results.size(); i++) {
             deleted = results.getJsonObject(i).getBoolean("isDeleted",false);
             if (!deleted) {
