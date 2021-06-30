@@ -84,6 +84,14 @@
       ]
     },
     {
+      "eventName": "hearing.events.results-shared-v2",
+      "fieldsToBeIgnored": [
+        "$.variantDirectory[*].value.status",
+        "$.targets[*].resultLines[*].level",
+        "$.savedTargets[*].resultLines[*].level"
+      ]
+    },
+    {
       "eventName": "hearing.interpreter-intermediary-added",
       "fieldsToBeIgnored": [
         "$.interpreterIntermediary.role",
@@ -99,6 +107,7 @@
     {
       "eventName": "hearing.events.hearing-extended",
       "fieldsToBeIgnored": [
+        "$.jurisdictionType"
       ]
     },
     {
@@ -116,6 +125,32 @@
     {
       "eventName": "hearing.defendant-attendance-updated",
       "fieldsToBeIgnored": [
+      ]
+    },
+    {
+      "eventName": "hearing.draft-result-saved",
+      "fieldsToBeIgnored": [
+        "$.hearingState"
+      ]
+    },
+    {
+      "eventName": "hearing.trial-vacated",
+      "fieldsToBeIgnored": [
+        "$.code",
+        "$.vacatedTrialReasonId"
+      ]
+    },
+    {
+      "eventName": "hearing.trial-type-set",
+      "fieldsToBeIgnored": [
+        "$.code",
+        "$.trialTypeId"
+      ]
+    },
+    {
+      "eventName": "hearing.event.update-vacated-trial-details",
+      "fieldsToBeIgnored": [
+        "$.vacatedTrialReasonId"
       ]
     }
   ]
