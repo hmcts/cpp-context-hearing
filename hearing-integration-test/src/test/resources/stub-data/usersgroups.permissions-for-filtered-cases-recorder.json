@@ -13,6 +13,11 @@
   ],
   "permissions": [
     {
+      "permissionId": "a2b393ff-820f-4f4d-bed5-33930c0c320e",
+      "object": "RECORDER-ROLE",
+      "action": "GrantAccess"
+    },
+    {
       "action": "Access",
       "object": "Case",
       "source": "%USER_ID%",

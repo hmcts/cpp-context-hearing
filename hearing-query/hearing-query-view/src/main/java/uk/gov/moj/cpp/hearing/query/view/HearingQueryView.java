@@ -105,7 +105,7 @@ public class HearingQueryView {
 
     public Envelope<GetHearings> findHearings(final JsonEnvelope envelope,
                                               final List<UUID> accessibleCasesId,
-                                              final boolean isDDJ) {
+                                              final boolean isDDJorRecorder) {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
         final UUID courtCentreId = UUID.fromString(payload.getString(FIELD_COURT_CENTRE_ID));
@@ -113,7 +113,7 @@ public class HearingQueryView {
         final String startTime = payload.containsKey(FIELD_START_TIME) ? payload.getString(FIELD_START_TIME) : "00:00";
         final String endTime = payload.containsKey(FIELD_END_TIME) ? payload.getString(FIELD_END_TIME) : "23:59";
 
-        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesId, isDDJ);
+        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesId, isDDJorRecorder);
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
                 .withMetadataFrom(envelope);

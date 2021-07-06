@@ -15,6 +15,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.RecorderChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
@@ -25,6 +26,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
+import static org.mockito.Matchers.refEq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -51,6 +53,9 @@ public class FindHearingsQueryApiTest {
 
     @Mock
     private DDJChecker ddjChecker;
+
+    @Mock
+    private RecorderChecker recorderChecker;
 
     @Mock
     private JsonEnvelope jsonInputEnvelope;
@@ -90,6 +95,25 @@ public class FindHearingsQueryApiTest {
         when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
         when(ddjChecker.isDDJ(permissions)).thenReturn(true);
+        when(recorderChecker.isRecorder(permissions)).thenReturn(false);
+        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
+        when(hearingQueryView.findHearings(jsonInputEnvelope, accessibleCaseList, false))
+                .thenReturn(jsonOutputEnvelope);
+
+        hearingQueryApi.findHearings(jsonInputEnvelope);
+        verify(ddjChecker, times(1)).isDDJ(permissions);
+        verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
+        verify(usersAndGroupsService, times(1)).permissions(userId.toString());
+    }
+
+    @Test
+    public void should_return_hearings_for_recorder() {
+        final UUID userId = UUID.randomUUID();
+        when(jsonInputEnvelope.metadata()).thenReturn(metadata);
+        when(metadata.userId()).thenReturn(Optional.of(userId.toString()));
+        when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
+        when(ddjChecker.isDDJ(permissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(permissions)).thenReturn(true);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
         when(hearingQueryView.findHearings(jsonInputEnvelope, accessibleCaseList, false))
                 .thenReturn(jsonOutputEnvelope);
@@ -108,6 +132,7 @@ public class FindHearingsQueryApiTest {
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
         when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
         when(ddjChecker.isDDJ(permissions)).thenReturn(false);
+        when(recorderChecker.isRecorder(permissions)).thenReturn(false);
         when(hearingQueryView.findHearings(jsonInputEnvelope, accessibleCaseList, false))
                 .thenReturn(jsonOutputEnvelope);
 

@@ -113,8 +113,38 @@ public class WireMockStubUtils {
 
     }
 
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder(final UUID case1, final UUID case2, final UUID case3, final UUID userId) {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-cases-recorder.json")
+                .replaceAll("%CASE_1%", case1.toString())
+                .replaceAll("%CASE_2%", case2.toString())
+                .replaceAll("%CASE_3%", case3.toString())
+                .replaceAll("%USER_ID%", userId.toString());
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(final UUID case1,final UUID userId) {
-        final String response = getPayload("stub-data/usersgroups.permissions-for-filtered-cases.json")
+        final String response = getPayload("stub-data/usersgroups.permissions-for-filtered-cases-ddj.json")
+                .replaceAll("%CASE_1%", case1.toString())
+                .replaceAll("%USER_ID%", userId.toString());
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder(final UUID case1,final UUID userId) {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-filtered-cases-recorder.json")
                 .replaceAll("%CASE_1%", case1.toString())
                 .replaceAll("%USER_ID%", userId.toString());
 
@@ -156,8 +186,35 @@ public class WireMockStubUtils {
     }
 
 
+    public static void stubUsersAndGroupsUserRolesForRecorder(final UUID userId) {
+        final String response = getPayload("stub-data/usergroups.get-roles-for-user-recorder.json");
+        final String url = format(QUERY_ROLES_FOR_USER, userId.toString());
+
+        final ResponseDefinitionBuilder responseDefBuilder = aResponse().withStatus(SC_OK)
+                .withHeader(ID, randomUUID().toString())
+                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                .withBody(response);
+        stubFor(get(urlPathEqualTo(url))
+                .willReturn(responseDefBuilder));
+
+        waitForStubToBeReady(url, CONTENT_TYPE_QUERY_ROLES_FOR_USER);
+    }
+
+
     public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ() {
         final String response = getPayload("stub-data/usersgroups.permissions-for-DDJ.json");
+
+        stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader(HeaderConstants.ID, randomUUID().toString())
+                        .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(response)));
+        waitForStubToBeReady(QUERY_GET_LOGGED_IN_USER_PERMISSIONS, CONTENT_TYPE_QUERY_GET_LOGGED_IN_USER_PERMISSIONS);
+
+    }
+
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForRecorder() {
+        final String response = getPayload("stub-data/usersgroups.permissions-for-recorder.json");
 
         stubFor(get(urlPathEqualTo(QUERY_GET_LOGGED_IN_USER_PERMISSIONS))
                 .willReturn(aResponse().withStatus(SC_OK)

@@ -172,7 +172,7 @@ public class HearingService {
     public GetHearings getHearings(final LocalDate date, final String startTime,
                                    final String endTime, final UUID courtCentreId,
                                    final UUID roomId, final List<UUID> accessibleCasesId,
-                                   final boolean isDDJ) {
+                                   final boolean isDDJorRecorder) {
 
         if (null == date || null == courtCentreId) {
             return new GetHearings(null);
@@ -185,7 +185,7 @@ public class HearingService {
             source = hearingRepository.findByFilters(date, courtCentreId, roomId);
         }
 
-        if (isDDJ) {
+        if (isDDJorRecorder) {
             source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesId);
         }
 

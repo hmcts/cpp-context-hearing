@@ -88,6 +88,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
@@ -116,12 +117,18 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     private static final UUID WITHDRAWN_RESULT_ID = UUID.fromString("eb2e4c4f-b738-4a4d-9cce-0572cecb7cb8");
     private static final UUID REMAND_STATUS_PROMPT_ID = UUID.fromString("9403f0d7-90b5-4377-84b4-f06a77811362");
     private static final UUID CROWN_COURT_RESULT_DEFINITION_ID = UUID.fromString("fbed768b-ee95-4434-87c8-e81cbc8d24c8");
+    private final String WITHDRAWN_PROMPT_ID = "1d20aad5-9dc2-42a2-9498-5687f3e5ce33";
 
     private final UtcClock utcClock = new UtcClock();
 
     @Before
     public void setup() {
         stubPublicHolidays();
+    }
+
+
+    @BeforeClass
+    public static void setupBeforeClass() {
         final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
         FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
     }
@@ -147,6 +154,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, CTLE_RESULT_DEFINITON_ID);
 
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
@@ -233,6 +241,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
 
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
@@ -303,6 +312,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
 
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
@@ -370,6 +380,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
 
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
+                .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getTargetId(), targets.get(0).getTargetId())
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getDraftResult(), targets.get(0).getDraftResult())
@@ -459,6 +470,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
         saveSingleDayDraftResultCommand.getTarget().getResultLines().get(0).setResultDefinitionId(WITHDRAWN_RESULT_ID);
+        setPromptForWithDrawnResultCommandForCTL(saveSingleDayDraftResultCommand, orderDate.toString());
 
         final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, WITHDRAWN_RESULT_ID.toString());
 
@@ -478,7 +490,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     }
 
     @Test
-    public void shouldSetDateHeldInCustodyWhenFirstHearingInCustody()  {
+    public void shouldSetDateHeldInCustodyWhenFirstHearingInCustody() {
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
         final LocalDate orderDate = LocalDate.now();
         final UUID offenceId = UUID.randomUUID();
@@ -507,8 +519,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                                                         .with(Offence::getPreviousDaysHeldInCustody, nullValue())
                                                         .with(Offence::getDateHeldInCustodySince, is(hearingDay))))))))
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))))))
-        {
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
             shareDaysResultsCommand.setHearingDay(hearingDay);
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
@@ -559,8 +570,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                                                         .with(Offence::getPreviousDaysHeldInCustody, is(previousDaysHeldInCustody))
                                                         .with(Offence::getDateHeldInCustodySince, is(dateHeldInCustodySince))))))))
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))))))
-        {
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
             shareDaysResultsCommand.setHearingDay(LocalDate.now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
@@ -574,7 +584,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     }
 
     @Test
-    public void shouldClearDateHeldInCustodySinceAndCalculateDaysSpentWhenResultIsOnBail()  {
+    public void shouldClearDateHeldInCustodySinceAndCalculateDaysSpentWhenResultIsOnBail() {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
         final LocalDate orderDate = LocalDate.now();
@@ -619,7 +629,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 ).build()
         ));
 
-        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand,  "bb90e801-0066-4bdf-85e6-8d64bc683f0c");
+        final List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, "bb90e801-0066-4bdf-85e6-8d64bc683f0c");
 
 
         final DelegatedPowers courtClerk = getDelegatedPowers();
@@ -635,8 +645,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                                                         .with(Offence::getPreviousDaysHeldInCustody, is(newPreviousDaysHeldInCustody))
                                                         .with(Offence::getDateHeldInCustodySince, nullValue())))))))
                                 .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
-                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId())))))))
-        {
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
             ShareDaysResultsCommand shareDaysResultsCommand = basicShareResultsCommandV2Template();
             shareDaysResultsCommand.setHearingDay(LocalDate.now());
             shareResultsPerDay(getRequestSpec(), hearing.getId(), with(
@@ -689,6 +698,23 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         return saveDraftResultCommand;
     }
 
+    private SaveDraftResultCommand setPromptForWithDrawnResultCommandForCTL(final SaveDraftResultCommand saveDraftResultCommand, final String ctlExpiryDate) {
+        final List<ResultLine> resultLineList = new ArrayList<>();
+        final ResultLine resultLine = ResultLine.resultLine()
+                .withOrderedDate(LocalDate.now())
+                .withResultLineId(WITHDRAWN_RESULT_ID)
+                .withIsModified(false)
+                .withIsComplete(false)
+                .withIsDeleted(false)
+                .withPrompts(getWithDrawnPrompts(ctlExpiryDate))
+                .withLevel(Level.OFFENCE)
+                .withResultDefinitionId(WITHDRAWN_RESULT_ID)
+                .build();
+        resultLineList.add(resultLine);
+        saveDraftResultCommand.getTarget().setResultLines(resultLineList);
+        return saveDraftResultCommand;
+    }
+
     private List<Prompt> getOnBailRemandStatusPrompts() {
         return Arrays.asList(Prompt.prompt()
                 .withId(REMAND_STATUS_PROMPT_ID)
@@ -719,6 +745,18 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         ctlPromptList.add(custodyTimeLimitExpires);
         ctlPromptList.add(timeSpendInCustody);
         return ctlPromptList;
+    }
+
+    private List<Prompt> getWithDrawnPrompts(final String localDate) {
+        final List<Prompt> withDrawnPromptList = new ArrayList();
+        final Prompt withDrawnPrompt = Prompt.prompt()
+                .withId(fromString(WITHDRAWN_PROMPT_ID))
+                .withLabel("Reasons")
+                .withValue(localDate)
+                .withWelshValue(localDate)
+                .build();
+        withDrawnPromptList.add(withDrawnPrompt);
+        return withDrawnPromptList;
     }
 
     private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForSingleCaseStructure(final UUID offenceId) {

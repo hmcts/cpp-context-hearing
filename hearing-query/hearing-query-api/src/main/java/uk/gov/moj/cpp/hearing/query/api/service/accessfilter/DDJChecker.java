@@ -9,7 +9,7 @@ public class DDJChecker {
 
     public boolean isDDJ( final Permissions permissions) {
         return permissions.getPermissionList().stream().
-                map(Permission::getObject).anyMatch(object->object.equalsIgnoreCase(DDJ_PERMISSION_OBJECT));
+                map(Permission::getObject).anyMatch(object -> DDJ_PERMISSION_OBJECT.equalsIgnoreCase(object));
 
     }
 }

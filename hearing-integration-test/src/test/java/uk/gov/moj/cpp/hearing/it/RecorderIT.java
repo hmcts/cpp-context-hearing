@@ -17,11 +17,11 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithCases;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForRecorder;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRolesForDDJ;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRolesForRecorder;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
@@ -52,16 +52,16 @@ import java.util.UUID;
 import org.hamcrest.Matcher;
 import org.junit.Test;
 
-public class DDJIT extends AbstractIT {
+public class RecorderIT extends AbstractIT {
 
     @Test
-    public void initiateHearingWithMultipleCasesForDDJ() {
+    public void initiateHearingWithMultipleCasesForRecorder() {
         final UUID case1 = randomUUID();
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3,getLoggedInUser());
-        stubUsersAndGroupsUserRolesForDDJ(getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder(case1, case2, case3, getLoggedInUser());
+        stubUsersAndGroupsUserRolesForRecorder(getLoggedInUser());
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
         final Map<UUID, List<UUID>> value = new HashMap<>();
@@ -109,6 +109,7 @@ public class DDJIT extends AbstractIT {
                                 .withValue(CourtApplication::getId, courtApplication.getId())
                                 .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
                         ))
+                        .with(Hearing::getProsecutionCases, hasSize(3))
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
@@ -129,9 +130,10 @@ public class DDJIT extends AbstractIT {
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
+                                .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(3))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
-                                       .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
-                               ))
+                                        .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
+                                ))
                         ))
         );
 
@@ -139,13 +141,13 @@ public class DDJIT extends AbstractIT {
     }
 
     @Test
-    public void initiateHearingWithFilteredCasesForDDJ() {
+    public void initiateHearingWithFilteredCasesForRecorder() {
         final UUID case1 = randomUUID();
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3,getLoggedInUser());
-        stubUsersAndGroupsUserRolesForDDJ(getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder(case1, case2, case3, getLoggedInUser());
+        stubUsersAndGroupsUserRolesForRecorder(getLoggedInUser());
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
         final Map<UUID, List<UUID>> value = new HashMap<>();
@@ -168,8 +170,8 @@ public class DDJIT extends AbstractIT {
         final Hearing hearing = hearingOne.getHearing();
         final List<ProsecutionCase> prosecutionCases = new ArrayList<>();
         final List<ProsecutionCase> prosecutionCasesIdentified = hearingOne.getHearing().getProsecutionCases();
-        for (ProsecutionCase prosecutionCase:prosecutionCasesIdentified){
-            if (prosecutionCase.getId().equals(case1)){
+        for (ProsecutionCase prosecutionCase : prosecutionCasesIdentified) {
+            if (prosecutionCase.getId().equals(case1)) {
                 prosecutionCases.add(prosecutionCase);
             }
         }
@@ -207,7 +209,7 @@ public class DDJIT extends AbstractIT {
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingTwo.getProsecutionCases()))
                 )
         );
-        stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(case1, getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder(case1, getLoggedInUser());
 
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
@@ -234,14 +236,15 @@ public class DDJIT extends AbstractIT {
         );
 
     }
+
     @Test
-    public void initiateHearingWithNoHearingCasesForDDJ() {
+    public void initiateHearingWithNoHearingCasesForRecorder() {
 
         final UUID case1 = randomUUID();
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1, case2, case3,getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder(case1, case2, case3, getLoggedInUser());
 
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
@@ -290,11 +293,12 @@ public class DDJIT extends AbstractIT {
                                 .withValue(CourtApplication::getId, courtApplication.getId())
                                 .withValue(CourtApplication::getApplicationReference, courtApplication.getApplicationReference())
                         ))
+                        .with(Hearing::getProsecutionCases, hasSize(3))
                         .with(Hearing::getProsecutionCases, MatcherUtil.getProsecutionCasesMatchers(hearingOne.getHearing().getProsecutionCases()))
                 )
         );
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForDDJ();
+        stubUsersAndGroupsGetLoggedInPermissionsWithoutCasesForRecorder();
 
         Queries.getHearingsByDatePollForMatch(
                 hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), hearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
@@ -303,12 +307,12 @@ public class DDJIT extends AbstractIT {
     }
 
     @Test
-    public void initiateHearingWithMultipleCasesForNonDDJ() {
+    public void initiateHearingWithMultipleCasesForNonRecorder() {
         final UUID case1 = randomUUID();
         final UUID case2 = randomUUID();
         final UUID case3 = randomUUID();
 
-        stubUsersAndGroupsGetLoggedInPermissionsWithCases(case1,case2,case3,getLoggedInUser());
+        stubUsersAndGroupsGetLoggedInPermissionsWithCasesForRecorder(case1, case2, case3, getLoggedInUser());
         stubUsersAndGroupsUserRoles(getLoggedInUser());
 
         final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
@@ -371,11 +375,12 @@ public class DDJIT extends AbstractIT {
                                 .with(HearingSummaries::getType, isBean(HearingType.class)
                                         .withValue(HearingType::getId, hearing.getType().getId())
                                         .withValue(HearingType::getDescription, hearing.getType().getDescription()))
-                                 .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
+                                .with(HearingSummaries::getHearingDays, first(isBean(HearingDay.class)
                                         .withValue(HearingDay::getSittingDay, hearingDay.getSittingDay().withZoneSameLocal(ZoneId.of("UTC")))
                                         .withValue(HearingDay::getListedDurationMinutes, hearingDay.getListedDurationMinutes())
                                         .withValue(HearingDay::getListingSequence, hearingDay.getListingSequence())))
                                 .with(HearingSummaries::getProsecutionCaseSummaries, hasProsecutionSummaries(hearing.getProsecutionCases()))
+                                .with(HearingSummaries::getProsecutionCaseSummaries, hasSize(3))
                                 .with(HearingSummaries::getCourtApplicationSummaries, first(isBean(CourtApplicationSummaries.class)
                                         .withValue(CourtApplicationSummaries::getId, courtApplication.getId())
                                 ))
@@ -384,6 +389,7 @@ public class DDJIT extends AbstractIT {
 
 
     }
+
     public Matcher<Iterable<ProsecutionCaseSummaries>> hasProsecutionSummaries(final List<ProsecutionCase> prosecutionCases) {
         return hasItems(
                 prosecutionCases.stream().map(

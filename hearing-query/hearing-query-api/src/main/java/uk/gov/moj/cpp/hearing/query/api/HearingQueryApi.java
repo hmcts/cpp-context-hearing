@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffec
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.RecorderChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
@@ -97,6 +98,9 @@ public class HearingQueryApi {
     @Inject
     private DDJChecker ddjChecker;
 
+    @Inject
+    private RecorderChecker recorderChecker;
+
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
 
@@ -106,9 +110,9 @@ public class HearingQueryApi {
         }
         final String userId = optionalUserId.get();
         final Permissions permissions = usersAndGroupsService.permissions(userId);
-        final boolean isDDJ = ddjChecker.isDDJ(permissions);
-        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ, permissions);
-        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearings(query, accessibleCases, isDDJ);
+        final boolean isDDJorRecorder = isDDJorRecorder(permissions);
+        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJorRecorder, permissions);
+        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearings(query, accessibleCases, isDDJorRecorder);
         return getJsonEnvelope(envelope);
     }
 
@@ -127,9 +131,12 @@ public class HearingQueryApi {
         final String userId = optionalUserId.get();
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         final Permissions permissions = usersAndGroupsService.permissions(userId);
-        final boolean isDDJ = ddjChecker.isDDJ(permissions);
-        final List<UUID> accessibleCases = getAccessibleCases(userId, isDDJ, permissions);
-        final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCases, isDDJ);
+
+        final boolean ddJorRecorder = isDDJorRecorder(permissions);
+
+        final List<UUID> accessibleCases = getAccessibleCases(userId, ddJorRecorder, permissions);
+
+        final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCases, ddJorRecorder);
         return getJsonEnvelope(envelope);
     }
 
@@ -295,11 +302,18 @@ public class HearingQueryApi {
         return jsonEnvelopeRepacker.repack(jsonValueEnvelope);
     }
 
-    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJ, final Permissions permissions) {
+    private List<UUID> getAccessibleCases(final String userId, final boolean isDDJorRecorder, final Permissions permissions) {
         List<UUID> accessibleCases = new ArrayList<>();
-        if (isDDJ) {
+        if (isDDJorRecorder) {
             accessibleCases = accessibleCasesO.findCases(permissions, userId);
         }
         return accessibleCases;
     }
+
+    private boolean isDDJorRecorder(final Permissions permissions) {
+        final boolean isDDJ = ddjChecker.isDDJ(permissions);
+        final boolean isRecorder = recorderChecker.isRecorder(permissions);
+        return isDDJ || isRecorder;
+    }
+
 }

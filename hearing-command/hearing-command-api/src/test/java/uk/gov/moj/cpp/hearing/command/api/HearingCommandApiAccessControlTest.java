@@ -271,7 +271,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToLogHearingEvent() {
         final Action action = createActionFor(ACTION_NAME_LOG_HEARING_EVENT);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge")).willReturn(true);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders")).willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);
@@ -289,7 +289,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToCorrectHearingEvent() {
         final Action action = createActionFor(ACTION_NAME_CORRECT_HEARING_EVENT);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge")).willReturn(true);
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders")).willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);
@@ -382,7 +382,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToSaveHearingCaseNote() {
         final Action action = createActionFor(ACTION_NAME_SAVE_HEARING_CASE_NOTE);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -662,7 +662,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToSetTrialType() {
         final Action action = createActionFor(ACTION_NAME_SET_TRIAL_TYPE);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders"))
                 .willReturn(true);
         final ExecutionResults results = executeRulesWith(action);
         assertSuccessfulOutcome(results);

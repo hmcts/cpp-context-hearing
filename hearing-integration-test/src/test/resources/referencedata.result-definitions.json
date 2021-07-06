@@ -25911,6 +25911,7 @@
            "sequence": 700,
           "hidden": false,
           "fixedListId": "c82897b8-7e25-4b5d-9cd3-dbf3e1cb7c0c",
+          "reference": "remandStatus",
           "userGroups": [
             "Court Clerks",
             "Legal Advisers",
@@ -26215,6 +26216,27 @@
       "lCode": "RI",
       "terminatesOffenceProceedings": false,
       "prompts": [
+        {
+          "id": "9403f0d7-90b5-4377-84b4-f06a77811362",
+          "label": "Remand Status",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 700,
+          "hidden": false,
+          "fixedListId": "c82897b8-7e25-4b5d-9cd3-dbf3e1cb7c0c",
+          "reference": "remandStatus",
+          "userGroups": [
+            "Court Clerks",
+            "Legal Advisers",
+            "Probation Admin",
+            "Police Admin",
+            "Victim & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ],
+          "courtExtract": "N",
+          "financial": "N",
+          "jurisdiction": "B"
+        },
         {
           "id": "21ecdc07-7397-4eac-9c26-e66dfeb32d01",
           "label": "TV link at next hearing",

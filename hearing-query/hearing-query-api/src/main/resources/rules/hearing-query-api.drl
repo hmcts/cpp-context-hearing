@@ -10,7 +10,7 @@ rule "Query - API - hearing.get.hearings"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearings");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders"));
   then
     $outcome.setSuccess(true);
 end
@@ -29,7 +29,7 @@ rule "Query - API - hearing.get.hearing"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearing");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders"));
   then
     $outcome.setSuccess(true);
 end
@@ -38,7 +38,7 @@ rule "Query - API - hearing.get-hearing-event-definitions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definitions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate", "Recorders"));
   then
     $outcome.setSuccess(true);
 end
@@ -65,7 +65,7 @@ rule "Query - API - hearing.get-hearing-event-log"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-log");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users", "Recorders"));
   then
     $outcome.setSuccess(true);
 end
@@ -138,7 +138,7 @@ rule "Query - API - hearing.case.timeline"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.case.timeline");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","Recorders","DJMC","Deputies", "Victims & Witness Care Admin"))
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","DJMC","Deputies", "Victims & Witness Care Admin", "Recorders"))
   then
     $outcome.setSuccess(true);
 end
@@ -147,7 +147,7 @@ rule "Query - API - hearing.application.timeline"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.application.timeline");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","Recorders","DJMC","Deputies", "Victims & Witness Care Admin"))
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","DJMC","Deputies", "Victims & Witness Care Admin", "Recorders"))
   then
     $outcome.setSuccess(true);
 end
