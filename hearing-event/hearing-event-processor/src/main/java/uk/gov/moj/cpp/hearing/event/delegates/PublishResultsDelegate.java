@@ -142,7 +142,8 @@ public class PublishResultsDelegate {
         new ResultsSharedHelper().cancelFutureHearingDays(context, sender, resultsShared, objectToJsonObjectConverter);
 
         if (isNotEmpty(resultsShared.getDefendantDetailsChanged())) {
-            mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH));
+            final Optional<LocalDate> orderedDate = getMaxOrderedDate(resultsShared.getTargets());
+            mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH), orderedDate);
         }
 
         final PublicHearingResulted hearingResulted = PublicHearingResulted.publicHearingResulted()
@@ -186,7 +187,8 @@ public class PublishResultsDelegate {
         new BailConditionsHelper().setBailConditions(resultsShared.getHearing());
         new ResultsSharedHelper().cancelFutureHearingDays(context, sender, resultsShared, objectToJsonObjectConverter);
         if (!isEmpty(resultsShared.getDefendantDetailsChanged())) {
-            mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH));
+            final Optional<LocalDate> orderedDate = getMaxOrderedDate(resultsShared.getTargets());
+            mapDefendantLevelDDCHJudicialResults(resultsShared, relistReferenceDataService.getResults(context, DDCH), orderedDate);
         }
 
         final PublicHearingResultedV2 hearingResulted = PublicHearingResultedV2.publicHearingResultedV2()
@@ -285,13 +287,13 @@ public class PublishResultsDelegate {
         return emptyList();
     }
 
-    private void mapDefendantLevelDDCHJudicialResults(final ResultsShared resultsShared, final ResultDefinition resultDefinition) {
+    private void mapDefendantLevelDDCHJudicialResults(final ResultsShared resultsShared, final ResultDefinition resultDefinition, Optional<LocalDate> orderedDate) {
         final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
         prosecutionCaseStream
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .forEach(defendant -> {
                     if (resultsShared.getDefendantDetailsChanged().contains(defendant.getId())) {
-                        final JudicialResult judicialResult = createDDCHJudicialResult(resultsShared.getHearing().getId(), resultDefinition);
+                        final JudicialResult judicialResult = createDDCHJudicialResult(resultsShared.getHearing().getId(), resultDefinition, orderedDate);
                         judicialResult.setJudicialResultPrompts(null);
                         judicialResult.setNextHearing(null);
                         final List<JudicialResult> judicialResults = defendant.getDefendantCaseJudicialResults();
@@ -305,12 +307,12 @@ public class PublishResultsDelegate {
                 });
     }
 
-    private void mapDefendantLevelDDCHJudicialResults(final ResultsSharedV2 resultsShared, final ResultDefinition resultDefinition) {
+    private void mapDefendantLevelDDCHJudicialResults(final ResultsSharedV2 resultsShared, final ResultDefinition resultDefinition, Optional<LocalDate> orderedDate) {
         resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .forEach(defendant -> {
                     if (resultsShared.getDefendantDetailsChanged().contains(defendant.getId())) {
-                        final JudicialResult judicialResult = createDDCHJudicialResult(resultsShared.getHearing().getId(), resultDefinition);
+                        final JudicialResult judicialResult = createDDCHJudicialResult(resultsShared.getHearing().getId(), resultDefinition, orderedDate);
                         judicialResult.setJudicialResultPrompts(null);
                         judicialResult.setNextHearing(null);
                         final List<JudicialResult> judicialResults = defendant.getDefendantCaseJudicialResults();
@@ -324,7 +326,7 @@ public class PublishResultsDelegate {
                 });
     }
 
-    private JudicialResult createDDCHJudicialResult(final UUID hearingId, final ResultDefinition resultDefinition) {
+    private JudicialResult createDDCHJudicialResult(final UUID hearingId, final ResultDefinition resultDefinition, Optional<LocalDate> orderedDate) {
         return JudicialResult.judicialResult()
                 .withJudicialResultId(randomUUID())
                 .withJudicialResultTypeId(resultDefinition.getId())
@@ -337,7 +339,7 @@ public class PublishResultsDelegate {
                 .withIsUnscheduled(resultDefinition.getUnscheduled())
                 .withLabel(resultDefinition.getLabel())
                 .withLastSharedDateTime(LocalDate.now().toString())
-                .withOrderedDate(LocalDate.now())
+                .withOrderedDate(orderedDate.orElse(LocalDate.now()))
                 .withOrderedHearingId(hearingId)
                 .withRank(isNull(resultDefinition.getRank()) ? BigDecimal.ZERO : new BigDecimal(resultDefinition.getRank()))
                 .withUsergroups(resultDefinition.getUserGroups())
@@ -674,6 +676,18 @@ public class PublishResultsDelegate {
 
     private boolean hasFinalResult(final List<JudicialResult> judicialResults) {
         return judicialResults != null && judicialResults.stream().filter(Objects::nonNull).anyMatch(result -> JudicialResultCategory.FINAL == result.getCategory());
+    }
+
+    private Optional<LocalDate> getMaxOrderedDate(final List<Target> targets) {
+        if(nonNull(targets)) {
+            return targets.stream().filter(target -> nonNull(target.getResultLines()))
+                    .flatMap(target -> target.getResultLines().stream())
+                    .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
+                    .map(ResultLine::getOrderedDate)
+                    .max(Comparator.naturalOrder());
+        }else{
+            return Optional.empty();
+        }
     }
 
 }

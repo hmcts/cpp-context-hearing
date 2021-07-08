@@ -210,6 +210,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
         verify(custodyTimeLimitCalculator, times(1)).calculate(custodyLimitCalculatorHearingIn.capture());
         final Hearing calHearingIn = custodyLimitCalculatorHearingIn.getValue();
         assertEquals(resultsShared.getHearing(), calHearingIn);
+        assertThat(publicHearingResulted.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getDefendantCaseJudicialResults().get(0).getOrderedDate().toString(), is("2021-07-02"));
 
 
         final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
