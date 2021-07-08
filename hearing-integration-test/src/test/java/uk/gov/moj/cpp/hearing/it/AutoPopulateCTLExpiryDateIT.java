@@ -152,7 +152,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForCTLE(saveSingleDayDraftResultCommand, ctlExtendedDate);
 
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, CTLE_RESULT_DEFINITON_ID);
-
+        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
                 .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
@@ -240,6 +240,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
 
+        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
                 .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())
@@ -378,7 +379,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         saveSingleDayDraftResultCommand = setPromptForSaveDraftResultCommandForRemandStatus(saveSingleDayDraftResultCommand);
 
         List<Target> targets = saveDraftResults(saveSingleDayDraftResultCommand, REMAND_STATUS_RESULT_DEFINITION_ID);
-
+        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         getDraftResultsForHearingDayPollForMatch(hearing.getId(), orderDate.toString(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(TargetListResponse.class)
                 .withValue(targetListResponse -> targetListResponse.getTargets().isEmpty(), false)
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getHearingDay(), targets.get(0).getHearingDay())

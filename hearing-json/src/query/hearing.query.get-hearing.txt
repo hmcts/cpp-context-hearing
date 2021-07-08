@@ -134,13 +134,13 @@
           "$ref": "http://justice.gov.uk/json/schemas/core/hearingType.json"
         },
         "jurisdictionType": {
-          "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/jurisdictionType"
+          "$ref": "http://justice.gov.uk/core/courts/jurisdictionType.json"
         },
 		"reportingRestrictionReason": {
 			"type": "string"
 		},
        "hearingLanguage": {
-			 "$ref": "http://justice.gov.uk/json/schemas/core/courtsDefinitions.json#/definitions/hearingLanguage"
+			 "$ref": "http://justice.gov.uk/core/courts/hearingLanguage.json"
 		},
         "hearingDays": {
           "type": "array",

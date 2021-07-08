@@ -15,7 +15,7 @@
     },
     "documentationLanguage": {
       "description": "Indicates the language of the document.  When bi-lingual set to the main language of the document",
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/hearingLanguage"
+      "$ref": "http://justice.gov.uk/core/courts/hearingLanguage.json"
     },
     "requestedMaterials": {
       "type": "array",

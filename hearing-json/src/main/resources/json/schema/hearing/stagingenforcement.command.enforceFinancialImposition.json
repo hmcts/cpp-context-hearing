@@ -126,10 +126,10 @@
           "type": "string"
         },
         "documentLanguage": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/hearingLanguage"
+          "$ref": "http://justice.gov.uk/core/courts/hearingLanguage.json"
         },
         "hearingLanguage": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/hearingLanguage"
+          "$ref": "http://justice.gov.uk/core/courts/hearingLanguage.json"
         },
         "aliases": {
           "type": "array",
