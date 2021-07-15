@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Comparator.comparing;
 import static java.util.Collections.emptyList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -45,8 +45,8 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,7 +70,7 @@ public class HearingDelegate implements Serializable {
         final Hearing hearing = hearingInitiated.getHearing();
         this.momento.setHearing(hearing);
 
-        if(isNull(hearing)){
+        if (isNull(hearing)) {
             return;
         }
         if (nonNull(hearing.getProsecutionCases())) {
@@ -115,7 +115,7 @@ public class HearingDelegate implements Serializable {
 
         updateHearingDays(hearingExtended);
 
-        if(nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getJurisdictionType())) {
+        if (nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getJurisdictionType())) {
             this.momento.getHearing().setJurisdictionType(hearingExtended.getJurisdictionType());
         }
 
@@ -140,13 +140,13 @@ public class HearingDelegate implements Serializable {
     }
 
     private void updateHearingDays(HearingExtended hearingExtended) {
-        if(nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getHearingDays())) {
+        if (nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getHearingDays())) {
             this.momento.getHearing().setHearingDays(hearingExtended.getHearingDays());
         }
     }
 
     private void updateCourtCentre(HearingExtended hearingExtended) {
-        if(nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getCourtCentre())) {
+        if (nonNull(this.momento.getHearing()) && nonNull(hearingExtended.getCourtCentre())) {
             this.momento.getHearing().setCourtCentre(hearingExtended.getCourtCentre());
         }
     }
@@ -515,7 +515,7 @@ public class HearingDelegate implements Serializable {
 
             streamBuilder.add(new EarliestNextHearingDateChanged(hearingId, seedingHearingId, nextHearingStartDate));
 
-        } else if (isNextHearingDateTheEarliestWhenExistingNextHearing(hearingId, nextHearingStartDate)) {
+        } else if (isUpdatedNextHearingTheOnlyNextHearing(hearingId)) {
 
             streamBuilder.add(new EarliestNextHearingDateChanged(hearingId, seedingHearingId, nextHearingStartDate));
 
@@ -529,8 +529,8 @@ public class HearingDelegate implements Serializable {
     }
 
     /**
-     * This method return true when the next hearing (hearingId) is not available in the map
-     * and the date 'nextHearingStartDate' for hearingId is the earliest in the map.
+     * This method return true when the next hearing (hearingId) is not available in the map and the
+     * date 'nextHearingStartDate' for hearingId is the earliest in the map.
      *
      * @param hearingId
      * @param nextHearingStartDate
@@ -544,26 +544,21 @@ public class HearingDelegate implements Serializable {
     }
 
     /**
-     * This method return true when the next hearing (hearingId) is available in the map
-     * and is the only entry available in the map
-     * and the date 'nextHearingStartDate' is earlier than the existing date for hearingId in the map.
+     * This method return true when the next hearing (hearingId) is available in the map and is the
+     * only entry available in the map. It doesn't matter if the new date is earlier or later than
+     * the previous entry in the map for the same hearing, the date has moved so the previous date
+     * is no longer valid, so we use the new date always.
      *
      * @param hearingId
-     * @param nextHearingStartDate
      * @return
      */
-    private boolean isNextHearingDateTheEarliestWhenExistingNextHearing(final UUID hearingId, final ZonedDateTime nextHearingStartDate) {
-
+    private boolean isUpdatedNextHearingTheOnlyNextHearing(final UUID hearingId) {
         return momento.getNextHearingStartDates().size() == 1
-                && nonNull(momento.getNextHearingStartDates().get(hearingId))
-                && nextHearingStartDate.isBefore(momento.getNextHearingStartDates().get(hearingId));
-
+                && nonNull(momento.getNextHearingStartDates().get(hearingId));
     }
 
     private boolean isEarliestNextHearing(final UUID hearingId, final ZonedDateTime nextHearingStartDate) {
-
         return isEarliestNextHearingStartDate(hearingId, nextHearingStartDate, momento.getNextHearingStartDates());
-
     }
 
 
@@ -583,9 +578,7 @@ public class HearingDelegate implements Serializable {
     }
 
     public void handleEarliestNextHearingDateCleared() {
-
         momento.getNextHearingStartDates().clear();
-
     }
 
     private LocalDate getHearingDay() {
