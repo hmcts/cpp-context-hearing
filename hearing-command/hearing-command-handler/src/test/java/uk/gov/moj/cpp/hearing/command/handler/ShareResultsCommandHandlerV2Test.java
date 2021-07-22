@@ -105,9 +105,9 @@ public class ShareResultsCommandHandlerV2Test {
     private static NowsVariantsSavedEvent nowsVariantsSavedEvent;
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
-    private DefendantDetailsUpdated defendantDetailsUpdated;
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(DraftResultSaved.class, ResultsShared.class, SaveDraftResultFailed.class, ResultsSharedV2.class, ResultLinesStatusUpdated.class, DaysResultLinesStatusUpdated.class);
+    private DefendantDetailsUpdated defendantDetailsUpdated;
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
     @Mock
@@ -173,7 +173,7 @@ public class ShareResultsCommandHandlerV2Test {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 

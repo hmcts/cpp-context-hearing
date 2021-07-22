@@ -84,6 +84,7 @@ import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForRe
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
+
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
@@ -168,8 +169,10 @@ import com.jayway.restassured.path.json.JsonPath;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 
@@ -188,6 +191,10 @@ public class ShareResultsIT extends AbstractIT {
     @Before
     public void setup() {
         setupNowsReferenceData(now());
+    }
+
+    @BeforeClass
+    public static void setupBeforeClass() {
         final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
         FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
     }
@@ -304,7 +311,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    public void shouldUodateOffencesAndSubjectWhenApplicationCasesExist(){
+    public void shouldUodateOffencesAndSubjectWhenApplicationCasesExist() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
 
@@ -313,7 +320,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
-        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
         final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
                 null, null, null, "NOT-GUILTY", false, null);
         updatePlea(getRequestSpec(), hearingId, offenceId,
@@ -357,7 +364,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
-    public void shouldUpdateOffencesAndSubjectWhenApplicationCasesExistFeatureEnabled(){
+    public void shouldUpdateOffencesAndSubjectWhenApplicationCasesExistFeatureEnabled() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final LocalDate hearingDay = LocalDate.now();
 
@@ -368,7 +375,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
-        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
         final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
                 null, null, null, "NOT-GUILTY", false, null);
         updatePlea(getRequestSpec(), hearingId, offenceId,
@@ -411,7 +418,7 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     @Test
-    public void shouldUpdateOffencesAndSubjectWhenApplicationCourtOrderExists(){
+    public void shouldUpdateOffencesAndSubjectWhenApplicationCourtOrderExists() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
 
@@ -420,7 +427,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getId();
-        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
         final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
                 null, null, null, "NOT-GUILTY", false, null);
         updatePlea(getRequestSpec(), hearingId, offenceId,
@@ -466,7 +473,7 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
-    public void shouldUpdateOffencesAndSubjectWhenApplicationCourtOrderExistsFeatureEnabled(){
+    public void shouldUpdateOffencesAndSubjectWhenApplicationCourtOrderExistsFeatureEnabled() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final LocalDate hearingDay = LocalDate.now();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
@@ -476,7 +483,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence().getId();
-        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
         final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
                 null, null, null, "NOT-GUILTY", false, null);
         updatePlea(getRequestSpec(), hearingId, offenceId,
@@ -1606,7 +1613,7 @@ public class ShareResultsIT extends AbstractIT {
 
 
     @Test
-    public void shouldUpdateOffencesWithPleaAndVerdictWhenApplicationCasesExist(){
+    public void shouldUpdateOffencesWithPleaAndVerdictWhenApplicationCasesExist() {
         final LocalDate orderedDate = PAST_LOCAL_DATE.next();
         final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
 
@@ -1615,7 +1622,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
-        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
         final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
                 null, null, null, "NOT-GUILTY", false, null);
         updatePlea(getRequestSpec(), hearingId, offenceId,
@@ -1671,7 +1678,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final UUID hearingId = hearing.getId();
         final UUID offenceId = hearing.getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getId();
-        final UUID courtApplicationId =hearing.getCourtApplications().get(0).getId();
+        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
         final UpdatePleaCommand hearingUpdatePleaCommand = updatePleaTemplate(hearing.getId(), offenceId,
                 null, null, null, "NOT-GUILTY", false, null);
         updatePlea(getRequestSpec(), hearingId, offenceId,
@@ -1912,7 +1919,6 @@ public class ShareResultsIT extends AbstractIT {
     }
 
 
-
     private void shareResultsShouldNotHaveDDCH(final List<Target> targets, final InitiateHearingCommandHelper hearingOne) {
         final DelegatedPowers courtClerk2 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Siouxsie").withLastName("Sioux")
@@ -1941,8 +1947,6 @@ public class ShareResultsIT extends AbstractIT {
         }
 
     }
-
-
 
 
     private void shareAndVerifyOffenceDateCode(final List<Target> targets, final InitiateHearingCommandHelper hearingOne, final Integer... offenceDateCodes) {
@@ -2540,7 +2544,7 @@ public class ShareResultsIT extends AbstractIT {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -2563,7 +2567,7 @@ public class ShareResultsIT extends AbstractIT {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), cpd.getFirstName(), cpd.getGender(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), cpd.getFirstName(), cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 

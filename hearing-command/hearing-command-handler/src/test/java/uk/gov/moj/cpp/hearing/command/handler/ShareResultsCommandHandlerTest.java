@@ -98,8 +98,9 @@ public class ShareResultsCommandHandlerTest {
     private static uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent nowsVariantsSavedEvent;
     private static UUID metadataId;
     private static ZonedDateTime sharedTime;
+    @Spy
+    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class, SaveDraftResultFailed.class);
     private DefendantDetailsUpdated defendantDetailsUpdated;
-
     @InjectMocks
     private ShareResultsCommandHandler shareResultsCommandHandler;
     @Mock
@@ -116,9 +117,6 @@ public class ShareResultsCommandHandlerTest {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
-
-    @Spy
-    private final Enveloper enveloper = createEnveloperWithEvents(ResultsShared.class, SaveDraftResultFailed.class);
 
     @BeforeClass
     public static void init() {
@@ -169,7 +167,7 @@ public class ShareResultsCommandHandlerTest {
         final PersonDefendant curPd = currentDefendant.getPersonDefendant();
         final Person cpd = curPd.getPersonDetails();
         Person person = new Person(cpd.getAdditionalNationalityCode(), cpd.getAdditionalNationalityDescription(), cpd.getAdditionalNationalityId(), cpd.getAddress(), cpd.getContact(), cpd.getDateOfBirth(),
-                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getInterpreterLanguageNeeds(),
+                cpd.getDisabilityStatus(), cpd.getDocumentationLanguageNeeds(), cpd.getEthnicity(), firstName, cpd.getGender(), cpd.getHearingLanguageNeeds(), cpd.getInterpreterLanguageNeeds(),
                 cpd.getLastName(), cpd.getMiddleName(), cpd.getNationalInsuranceNumber(), cpd.getNationalityCode(), cpd.getNationalityDescription(), cpd.getNationalityId(),
                 cpd.getOccupation(), cpd.getOccupationCode(), cpd.getPersonMarkers(), cpd.getSpecificRequirements(), cpd.getTitle());
 
@@ -228,7 +226,7 @@ public class ShareResultsCommandHandlerTest {
 
         final SaveDraftResultFailed saveDraftResultFailed = jsonObjectToObjectConverter.convert(efound.get().payloadAsJsonObject(), SaveDraftResultFailed.class);
 
-      assertThat(saveDraftResultFailed.getTarget().getTargetId(), is(saveMultipleDaysResultsCommand.getTargets().get(0).getTargetId()));
+        assertThat(saveDraftResultFailed.getTarget().getTargetId(), is(saveMultipleDaysResultsCommand.getTargets().get(0).getTargetId()));
     }
 
 

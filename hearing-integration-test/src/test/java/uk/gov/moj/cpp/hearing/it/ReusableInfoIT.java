@@ -25,6 +25,7 @@ import javax.json.JsonObjectBuilder;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ReusableInfoIT extends AbstractIT{
@@ -38,8 +39,8 @@ public class ReusableInfoIT extends AbstractIT{
     final UUID defendantId1 = fromString("3d27da1d-3878-4499-8cdc-0ff3d4e3f2d8");
     final UUID offenceId1 = randomUUID();
 
-    @Before
-    public void init() {
+    @BeforeClass
+    public static void setupBeforeClass() {
         final ImmutableMap<String, Boolean> features = ImmutableMap.of("reuseOfInformation", true);
         FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
     }
