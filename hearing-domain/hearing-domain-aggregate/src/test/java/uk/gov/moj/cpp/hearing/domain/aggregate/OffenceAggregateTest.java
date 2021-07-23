@@ -4,10 +4,11 @@ import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.core.courts.Plea.plea;
 import static uk.gov.justice.core.courts.PleaModel.pleaModel;
@@ -26,6 +27,7 @@ import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
@@ -111,9 +113,9 @@ public class OffenceAggregateTest {
                 ));
 
         final List<Object> events = offenceAggregate.lookupOffenceForHearing(
-                        registeredHearingAgainstOffence.getHearingId(),
-                        registeredHearingAgainstOffence.getOffenceId())
-                        .collect(Collectors.toList());
+                registeredHearingAgainstOffence.getHearingId(),
+                registeredHearingAgainstOffence.getOffenceId())
+                .collect(Collectors.toList());
 
         assertThat(events.get(0), not(offenceAggregate.getVerdict()));
     }
@@ -154,10 +156,14 @@ public class OffenceAggregateTest {
                         .build()).build())
                 .build();
 
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+
         final List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPleaModel()).collect(Collectors.toList());
 
         assertThat(events.get(0), is(offenceAggregate.getPlea()));
-
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+        assertThat(events.get(1), is(instanceOf(EnrichUpdatePleaWithAssociatedHearings.class)));
         assertThat(offenceAggregate.getPlea().getHearingId(), is(hearingId));
         assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getOffenceId(), is(offenceId));
         assertThat(offenceAggregate.getPlea().getPleaModel().getPlea().getPleaDate(), is(pleaDate));
@@ -202,4 +208,68 @@ public class OffenceAggregateTest {
         assertThat(hearingDeleted.getHearingId(), CoreMatchers.is(hearingId));
         assertThat(hearingDeleted.getOffenceId(), CoreMatchers.is(offenceId));
     }
+
+    @Test
+    public void updatePlea_shouldNotEnrichPleaWithAssociatedHearings() {
+
+        final UUID hearingId = randomUUID();
+
+        final OffencePleaUpdated offencePleaUpdated = builder()
+                .withHearingId(hearingId)
+                .withPleaModel(pleaModel().build())
+                .build();
+
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+
+        final List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPleaModel()).collect(Collectors.toList());
+
+        assertNotNull(events.get(0));
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+    }
+
+
+    @Test
+    public void updatePlea_shouldEnrichPleaWithAssociatedHearings_WhenPleaValueIsPresent() {
+
+        final UUID hearingId = randomUUID();
+
+        final OffencePleaUpdated offencePleaUpdated = builder()
+                .withHearingId(hearingId)
+                .withPleaModel(pleaModel().withPlea(plea()
+                        .withPleaValue(GUILTY)
+                        .build()).build())
+                .build();
+
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+
+        final List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPleaModel()).collect(Collectors.toList());
+
+        assertNotNull(events.get(0));
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+        assertThat(events.get(1), is(instanceOf(EnrichUpdatePleaWithAssociatedHearings.class)));
+
+    }
+
+    @Test
+    public void updatePlea_shouldNotEnrichPleaWithAssociatedHearings_WhenPleaValueIsNull() {
+
+        final UUID hearingId = randomUUID();
+
+        final OffencePleaUpdated offencePleaUpdated = builder()
+                .withHearingId(hearingId)
+                .withPleaModel(pleaModel().withPlea(plea()
+                        .build()).build())
+                .build();
+
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+
+        final List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPleaModel()).collect(Collectors.toList());
+
+        assertNotNull(events.get(0));
+        assertThat(events.size(), is(1));
+        assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+    }
+
 }

@@ -25,6 +25,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class OffenceAggregate implements Aggregate {
 
     private static final long serialVersionUID = 2L;
@@ -71,7 +73,7 @@ public class OffenceAggregate implements Aggregate {
                 .filter(id -> !id.equals(hearingId))
                 .collect(Collectors.toList());
 
-        if (!connectedHearingIds.isEmpty()) {
+        if (!connectedHearingIds.isEmpty() && pleaModel.getPlea() != null && StringUtils.isNotEmpty(pleaModel.getPlea().getPleaValue())) {
             streamBuilder.add(new EnrichUpdatePleaWithAssociatedHearings(connectedHearingIds, pleaModel.getPlea()));
         }
 
