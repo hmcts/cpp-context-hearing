@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -108,14 +109,17 @@ public class HearingDetailChangeCommandHandlerTest {
             apply(new HearingInitiated(hearing.getHearing()));
         }};
 
-        when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingEventStream);
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE), objectToJsonObjectConverter.convert(hearingDetailsUpdateCommand));
 
         handler.changeHearingDetail(jsonEnvelope);
 
-        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+        verify(eventSource).getStreamById(hearing.getHearingId());
+        verify(aggregateService).get(hearingEventStream, HearingAggregate.class);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList());
 
         assertThat(asPojo(events.get(0), HearingDetailChanged.class), isBean(HearingDetailChanged.class)
                 .with(HearingDetailChanged::getId, Matchers.is(hearingId))
@@ -166,17 +170,56 @@ public class HearingDetailChangeCommandHandlerTest {
             apply(new HearingInitiated(null));
         }};
 
-        when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingEventStream);
-        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE), objectToJsonObjectConverter.convert(hearingDetailsUpdateCommand));
 
         handler.changeHearingDetail(jsonEnvelope);
 
-        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+        verify(eventSource).getStreamById(hearing.getHearingId());
+        verify(aggregateService).get(hearingEventStream, HearingAggregate.class);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList());
 
         assertThat(asPojo(events.get(0), HearingChangeIgnored.class), isBean(HearingChangeIgnored.class)
                 .with(HearingChangeIgnored::getHearingId, Matchers.is(hearingId)));
+    }
+
+    @Test
+    public void eventHearingDetailChangedShouldBeRaisedWhenNoProsecutionCases() throws Exception {
+
+        CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearing.getHearingId();
+
+        CourtCentre courtCentre = createCourtCentre();
+        HearingType hearingType = createHearingType();
+        List<JudicialRole> judicialRoles = createJudicialRoles();
+        List<HearingDay> hearingDays = createHearingDays();
+
+        uk.gov.moj.cpp.hearing.command.hearing.details.Hearing hearingDetail = createHearing(hearingId, courtCentre, hearingType, judicialRoles, hearingDays);
+
+        HearingDetailsUpdateCommand hearingDetailsUpdateCommand = HearingDetailsUpdateCommand.hearingDetailsUpdateCommand()
+                .setHearing(hearingDetail);
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing.getHearing().setProsecutionCases(null)));
+        }};
+
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(PRIVATE_HEARING_COMMAND_HEARING_DETAIL_CHANGE), objectToJsonObjectConverter.convert(hearingDetailsUpdateCommand));
+
+        handler.changeHearingDetail(jsonEnvelope);
+
+        verify(eventSource).getStreamById(hearing.getHearingId());
+        verify(aggregateService).get(hearingEventStream, HearingAggregate.class);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList());
+
+        assertThat(asPojo(events.get(0), HearingDetailChanged.class), isBean(HearingDetailChanged.class)
+                .with(HearingDetailChanged::getId, Matchers.is(hearingId)));
     }
 
     private List<HearingDay> createHearingDays() {

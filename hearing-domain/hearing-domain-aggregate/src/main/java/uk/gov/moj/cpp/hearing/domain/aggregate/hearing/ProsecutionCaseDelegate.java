@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Optional.ofNullable;
+
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
@@ -10,6 +12,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -25,18 +28,21 @@ public class ProsecutionCaseDelegate implements Serializable {
     }
 
     public void handleCaseMarkersUpdated(final CaseMarkersUpdated caseMarkersUpdated) {
-        this.momento.getHearing().getProsecutionCases().stream()
-                .filter(prosecutionCase -> prosecutionCase.getId().equals(caseMarkersUpdated.getProsecutionCaseId()))
-                .findFirst()
-                .ifPresent(prosecutionCase -> setCaseMarkers(prosecutionCase, caseMarkersUpdated.getCaseMarkers()));
-
+        if (momento.getHearing() != null) {
+            ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .filter(prosecutionCase -> prosecutionCase.getId().equals(caseMarkersUpdated.getProsecutionCaseId()))
+                    .findFirst()
+                    .ifPresent(prosecutionCase -> setCaseMarkers(prosecutionCase, caseMarkersUpdated.getCaseMarkers()));
+        }
     }
 
     public void handleProsecutorUpdated(final CpsProsecutorUpdated cpsProsecutorUpdated) {
-        this.momento.getHearing().getProsecutionCases().stream()
-                .filter(prosecutionCase -> prosecutionCase.getId().equals(cpsProsecutorUpdated.getProsecutionCaseId()))
-                .findFirst()
-                .ifPresent(prosecutionCase -> setProsecutor(prosecutionCase, cpsProsecutorUpdated));
+        if (momento.getHearing() != null) {
+            ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .filter(prosecutionCase -> prosecutionCase.getId().equals(cpsProsecutorUpdated.getProsecutionCaseId()))
+                    .findFirst()
+                    .ifPresent(prosecutionCase -> setProsecutor(prosecutionCase, cpsProsecutorUpdated));
+        }
     }
 
     public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, List<Marker> markers) {
@@ -51,7 +57,7 @@ public class ProsecutionCaseDelegate implements Serializable {
     }
 
     public Stream<Object> updateProsecutor(final UUID hearingId, final UUID prosecutionCaseId, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
-        if (!this.momento.isPublished()) {
+        if (momento.getHearing() != null && !this.momento.isPublished()) {
             return Stream.of(CpsProsecutorUpdated.cpsProsecutorUpdated()
                     .setHearingId(hearingId)
                     .setProsecutionCaseId(prosecutionCaseId)
@@ -66,27 +72,29 @@ public class ProsecutionCaseDelegate implements Serializable {
     }
 
     public void onDefendantLegalaidStatusTobeUpdatedForHearing(final DefendantLegalAidStatusUpdatedForHearing defendantLegalAidStatusUpdatedForHearing) {
-        this.momento.getHearing().getProsecutionCases().stream()
-                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .filter(defendant ->defendant.getId().equals(defendantLegalAidStatusUpdatedForHearing.getDefendantId()))
-                .findFirst().ifPresent(defendant ->
-                defendant.setLegalAidStatus(defendantLegalAidStatusUpdatedForHearing.getLegalAidStatus()));
+        if (momento.getHearing() != null) {
+            ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                    .filter(defendant -> defendant.getId().equals(defendantLegalAidStatusUpdatedForHearing.getDefendantId()))
+                    .findFirst().ifPresent(defendant ->
+                    defendant.setLegalAidStatus(defendantLegalAidStatusUpdatedForHearing.getLegalAidStatus()));
+        }
     }
 
     public void onCaseDefendantUpdatedForHearing(final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing) {
-        final ProsecutionCase updatedProsecutionCase  = caseDefendantsUpdatedForHearing.getProsecutionCase();
-        this.momento.getHearing().getProsecutionCases().stream()
+        final ProsecutionCase updatedProsecutionCase = caseDefendantsUpdatedForHearing.getProsecutionCase();
+        ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .filter(prosecutionCase -> prosecutionCase.getId().equals(updatedProsecutionCase.getId()))
-                .map(prosecutionCase-> {
+                .map(prosecutionCase -> {
                     prosecutionCase.setCaseStatus(updatedProsecutionCase.getCaseStatus());
                     return prosecutionCase;
                 })
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .forEach(defendant ->
                         updatedProsecutionCase.getDefendants().stream()
-                                .filter(updatedDefendant ->defendant.getId().equals(updatedDefendant.getId()))
-                                .findFirst().ifPresent(updatedDefendant->
-                            defendant.setProceedingsConcluded(updatedDefendant.getProceedingsConcluded())
+                                .filter(updatedDefendant -> defendant.getId().equals(updatedDefendant.getId()))
+                                .findFirst().ifPresent(updatedDefendant ->
+                                defendant.setProceedingsConcluded(updatedDefendant.getProceedingsConcluded())
                         ));
 
     }

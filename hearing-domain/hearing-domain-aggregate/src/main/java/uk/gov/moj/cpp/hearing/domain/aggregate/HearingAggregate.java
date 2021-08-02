@@ -696,11 +696,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateCaseMarkers(final UUID hearingId, final UUID prosecutionCaseId, final List<Marker> markers) {
-        return prosecutionCaseDelegate.updateCaseMarkers(hearingId, prosecutionCaseId, markers);
+        return apply(prosecutionCaseDelegate.updateCaseMarkers(hearingId, prosecutionCaseId, markers));
     }
 
     public Stream<Object> updateProsecutor(final UUID hearingId, final UUID prosecutionCaseId, final ProsecutionCaseIdentifier prosecutionCaseIdentifier) {
-        return prosecutionCaseDelegate.updateProsecutor(hearingId, prosecutionCaseId, prosecutionCaseIdentifier);
+        return apply(prosecutionCaseDelegate.updateProsecutor(hearingId, prosecutionCaseId, prosecutionCaseIdentifier));
     }
 
     private boolean hasHearingEnded() {
