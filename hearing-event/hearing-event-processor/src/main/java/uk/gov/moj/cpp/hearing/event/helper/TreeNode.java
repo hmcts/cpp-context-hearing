@@ -106,6 +106,10 @@ public class TreeNode<T> {
         return this.children.isEmpty() && !this.parents.isEmpty();
     }
 
+    public boolean isIntermediateLeaf() {
+        return !this.children.isEmpty() && !this.parents.isEmpty();
+    }
+
     public boolean isStandalone() {
         return this.parents.isEmpty() && this.children.isEmpty();
     }

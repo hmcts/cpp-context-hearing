@@ -95,18 +95,19 @@ public class RemoveNonPublishableLinesHelperTest {
         treeNode3.addParent(treeNode2);
 
         final List<TreeNode<ResultLine>> restructuredTree = RemoveNonPublishableLinesHelper.removeNonPublishableResults(tree);
-        final List<TreeNode<ResultLine>> standaloneNodes = restructuredTree.stream().filter(node -> node.getChildren().size() == 0 && node.getParents().size() == 0).collect(Collectors.toList());
-        assertThat(standaloneNodes.size(), is(0));
+        final List<TreeNode<ResultLine>> parentNodes = restructuredTree.stream().filter(node -> node.getChildren().isEmpty() && node.getParents().isEmpty()).collect(Collectors.toList());
+        assertThat(parentNodes.size(), is(1));
 
         final List<TreeNode<ResultLine>> leafNodes = restructuredTree.stream().filter(TreeNode::isLeaf).collect(Collectors.toList());
-        assertThat(leafNodes.size(), is(1));
+        assertThat(leafNodes.size(), is(0));
 
-        final List<JudicialResultPrompt> judicialResultPrompts = leafNodes.get(0).getJudicialResult().getJudicialResultPrompts();
-        assertThat(judicialResultPrompts.size(), is(2));
-        assertThat(judicialResultPrompts.get(0).getLabel(), is("3"));
-        assertThat(judicialResultPrompts.get(1).getLabel(), is("4"));
+        final List<JudicialResultPrompt> judicialResultPrompts = parentNodes.get(0).getJudicialResult().getJudicialResultPrompts();
+        assertThat(judicialResultPrompts.size(), is(3));
+        assertThat(judicialResultPrompts.get(0).getLabel(), is("1"));
+        assertThat(judicialResultPrompts.get(1).getLabel(), is("3"));
+        assertThat(judicialResultPrompts.get(2).getLabel(), is("4"));
 
-        final JudicialResult judicialResult = leafNodes.get(0).getJudicialResult();
+        final JudicialResult judicialResult = parentNodes.get(0).getJudicialResult();
         assertThat(judicialResult.getNextHearing(), is(nullValue()));
     }
 

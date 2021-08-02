@@ -76,12 +76,12 @@ public class RestructuringHelperTest extends AbstractRestructuringTest {
         final JsonEnvelope envelope = getEnvelope(resultsShared);
         final List<TreeNode<ResultLine>> restructuredTree = target.restructure(envelope, resultsShared);
 
-        assertThat(restructuredTree.size(), is(3));
+        assertThat(restructuredTree.size(), is(2));
 
-        final List<TreeNode<ResultLine>> topLevelResultLineRestructuredParents = filterBy(restructuredTree, r -> r.getParents().size() == 0 && r.getChildren().size() > 0);
+        final List<TreeNode<ResultLine>> topLevelResultLineRestructuredParents = filterBy(restructuredTree, r -> r.getParents().isEmpty() && r.getChildren().size() > 0);
 
-        assertThat(restructuredTree.stream().filter(TreeNode::isStandalone).collect(toList()).size(), is(1));
-        assertThat(topLevelResultLineRestructuredParents.size(), is(1));
+        assertThat((int) restructuredTree.stream().filter(TreeNode::isStandalone).count(), is(2));
+        assertThat(topLevelResultLineRestructuredParents.size(), is(0));
 
         restructuredTree.forEach(rl -> {
             List<JudicialResultPrompt> judicialResultPrompts = rl.getJudicialResult().getJudicialResultPrompts();

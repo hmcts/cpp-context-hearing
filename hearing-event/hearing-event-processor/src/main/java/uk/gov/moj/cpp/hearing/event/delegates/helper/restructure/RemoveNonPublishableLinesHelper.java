@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Stream.concat;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
@@ -28,8 +29,15 @@ public class RemoveNonPublishableLinesHelper {
                 .sorted(comparing(node -> node.getResultDefinition().getData().getRank()))
                 .collect(Collectors.toList());
 
+        final List<TreeNode<ResultLine>> intermediateLeafTreeNodes = treeNodeList.stream()
+                                .filter(node -> node.isIntermediateLeaf() && !node.isStandalone())
+                                .sorted(comparing(node -> node.getResultDefinition().getData().getRank()))
+                                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultLine>> treeNodes = concat(leafTreeNodes.stream(), intermediateLeafTreeNodes.stream()).collect(Collectors.toList());
+
         final List<TreeNode<ResultLine>> candidateNodeForRemoval = new ArrayList<>();
-        leafTreeNodes.forEach(treeNode -> {
+        treeNodes.forEach(treeNode -> {
                     final List<Pair<Integer, List<JudicialResultPrompt>>> judicialResultPrompts = new ArrayList<>();
                     populatePrompts(treeNode, judicialResultPrompts);
                     final Optional<TreeNode<ResultLine>> parent = processParent(treeNode, judicialResultPrompts, candidateNodeForRemoval);
