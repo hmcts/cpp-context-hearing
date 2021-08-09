@@ -3,10 +3,12 @@ package uk.gov.moj.cpp.hearing.event.listener;
 import static com.google.common.io.Resources.getResource;
 import static java.lang.Boolean.TRUE;
 import static java.nio.charset.Charset.defaultCharset;
+import static java.time.LocalDate.now;
 import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
@@ -85,7 +87,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
@@ -189,15 +190,15 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusNull() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
-        final JsonObject result = Json.createObjectBuilder().add("resultCode", RI_UNKNOWN_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder()
+        final JsonObject result = createObjectBuilder().add("resultCode", RI_UNKNOWN_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder()
                 .add(result)
                 .build();
-        target.withDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        target.withDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
@@ -237,15 +238,15 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusC() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
-        final JsonObject result = Json.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder()
+        final JsonObject result = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder()
                 .add(result)
                 .build();
-        target.withDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        target.withDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
 
@@ -289,17 +290,17 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusS() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = Json.createObjectBuilder().add("resultCode", CCIIYDA_S_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder().add(result1).build();
+        final JsonObject result1 = createObjectBuilder().add("resultCode", CCIIYDA_S_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -338,17 +339,17 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusL() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = Json.createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder().add(result1).build();
+        final JsonObject result1 = createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -387,17 +388,17 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusP() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = Json.createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder().add(result1).build();
+        final JsonObject result1 = createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -436,17 +437,17 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusU() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = Json.createObjectBuilder().add("resultCode", CCIU_U_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder().add(result1).build();
+        final JsonObject result1 = createObjectBuilder().add("resultCode", CCIU_U_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -485,17 +486,17 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldStoreForCustodyStatusB() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = Json.createObjectBuilder().add("resultCode", REMCBY_B_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
-        final JsonArray results = Json.createArrayBuilder().add(result1).build();
+        final JsonObject result1 = createObjectBuilder().add("resultCode", REMCBY_B_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder().add(result1).build();
 
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -534,22 +535,22 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldNotStoreBailStatusIfAllResultLinesDeleted() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonObject result1 = Json.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result2 = Json.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result3 = Json.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result4 = Json.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonObject result5 = Json.createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
-        final JsonArray results = Json.createArrayBuilder()
+        final JsonObject result1 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result2 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result3 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result4 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonObject result5 = createObjectBuilder().add("resultCode", RI_C_RESULT_DEFINITON_ID.toString()).add("isDeleted", true).build();
+        final JsonArray results = createArrayBuilder()
                 .add(result1).add(result2).add(result3).add(result4).add(result5)
                 .build();
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
 
         final Offence offence = new Offence();
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
@@ -588,15 +589,15 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldNotClearBailStatusIfNoResults() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
                 CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
                 HearingState.INITIALISED, randomUUID());
 
-        final JsonArray emptyResults = Json.createArrayBuilder().build();
-        draftResultSaved.getTarget().setDraftResult(Json.createObjectBuilder().add("results", emptyResults).build().toString());
+        final JsonArray emptyResults = createArrayBuilder().build();
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", emptyResults).build().toString());
 
         when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(null);
 
@@ -630,7 +631,7 @@ public class HearingEventListenerTest {
     public void draftResultSaved_shouldPersist_with_hasSharedResults_false() {
 
         final UUID hearingId = randomUUID();
-        final LocalDate hearingDay = LocalDate.now();
+        final LocalDate hearingDay = now();
         final Target targetOut = new Target().setHearingDay(hearingDay.toString());
 
         final DraftResultSaved draftResultSaved = new DraftResultSaved(
@@ -740,8 +741,8 @@ public class HearingEventListenerTest {
 
     @Test
     public void resultsSharedV2_shouldPersist_with_hasSharedResults_true() {
-        final LocalDate today = LocalDate.now();
-        final LocalDate tomorrow = LocalDate.now().plusDays(1);
+        final LocalDate today = now();
+        final LocalDate tomorrow = now().plusDays(1);
 
         final ResultsSharedV2 resultsShared = resultsSharedV2Template(today);
 
@@ -1199,6 +1200,48 @@ public class HearingEventListenerTest {
                 .with(Hearing::getId, is(hearingId))
                 .with(Hearing::getEarliestNextHearingDate, nullValue())
         );
+    }
+
+    @Test
+    public void draftResultSaved_withBailStatus() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = now();
+        final Target targetOut = new Target().setHearingDay(hearingDay.toString());
+
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(
+                CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID()).build(),
+                HearingState.INITIALISED, randomUUID());
+
+        final JsonObject result1 = createObjectBuilder().add("resultCode", RIB_P_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = createArrayBuilder().add(result1).build();
+
+        draftResultSaved.getTarget().setDraftResult(createObjectBuilder().add("results", results).build().toString());
+
+        final Offence offence = new Offence();
+        when(offenceRepository.findBy(new HearingSnapshotKey(draftResultSaved.getTarget().getOffenceId(), hearingId))).thenReturn(offence);
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(true)
+                .setId(hearingId)
+                .setTargets(asSet(new Target()
+                        .setId(draftResultSaved.getTarget().getTargetId())
+                ));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+        when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
+
+        hearingEventListener.draftResultSaved(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved"),
+                objectToJsonObjectConverter.convert(draftResultSaved)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        verify(this.offenceRepository).save(offenceArgumentCaptor.capture());
+
+        assertThat(offenceArgumentCaptor.getValue(), isBean(Offence.class)
+                .with(Offence::getBailStatusCode, is(BAIL_STATUS_P_REF_DATA_CODE))
+                .with(Offence::getBailStatusId, is(BAIL_STATUS_P_REF_DATA_ID))
+                .with(Offence::getBailStatusDescription, is(BAIL_STATUS_P_REF_DATA_DESC)));
     }
 
     private String getDraftResultFromResource(final String path) throws IOException {
