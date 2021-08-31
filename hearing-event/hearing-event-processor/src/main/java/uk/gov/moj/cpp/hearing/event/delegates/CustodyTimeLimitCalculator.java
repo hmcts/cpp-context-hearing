@@ -108,8 +108,12 @@ public class CustodyTimeLimitCalculator {
         Optional.ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .forEach(defendant -> {
-                    if (nonNull(defendant.getPersonDefendant())) {
+                    if (nonNull(defendant.getPersonDefendant())
+                            && nonNull(defendant.getPersonDefendant().getBailStatus())
+                            && nonNull(defendant.getPersonDefendant().getBailStatus().getCode())) {
+
                         final String bailStatusCode = defendant.getPersonDefendant().getBailStatus().getCode();
+
                         for (final Offence offence : defendant.getOffences()) {
                             if (Arrays.stream(onBailStatusCodes).anyMatch(bailStatusCode::equals)) {
                                 calculateDateHeldInCustodyForBailCodes(offence, hearingDay);

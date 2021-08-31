@@ -352,6 +352,28 @@ public class CustodyTimeLimitCalculatorTest {
     }
 
     @Test
+    public void shouldNotCalculateHeldInCustodyWhenBailStatusIsNull() {
+        final LocalDate hearingDay = LocalDate.now();
+        final Hearing hearing = Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(Defendant.defendant()
+                                .withPersonDefendant(PersonDefendant.personDefendant()
+                                        .build())
+                                .withOffences(asList(Offence.offence()
+                                        .build()))
+                                .build()))
+                        .build()))
+                .build();
+
+        target.calculateDateHeldInCustody(hearing, hearingDay);
+
+        final Offence offence = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        assertThat(offence.getPreviousDaysHeldInCustody(), nullValue());
+        assertThat(offence.getDateHeldInCustodySince(), nullValue());
+
+    }
+
+    @Test
     public void shouldNotCalculateForUnknownRemandStatuses() {
 
         final int daysSpentIn = 34;
