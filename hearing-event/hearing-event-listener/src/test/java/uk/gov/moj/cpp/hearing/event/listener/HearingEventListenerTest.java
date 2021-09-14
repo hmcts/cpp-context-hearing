@@ -194,6 +194,9 @@ public class HearingEventListenerTest {
     @Captor
     private ArgumentCaptor<Offence> offenceArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<HearingSnapshotKey> hearingSnapshotKeyArgumentCaptor;
+
     private static final String LAST_SHARED_DATE = "lastSharedDate";
     private static final String DIRTY = "dirty";
     private static final String RESULTS = "results";
@@ -248,6 +251,57 @@ public class HearingEventListenerTest {
                 .with(Hearing::getTargets, first(is(targetOut)))
         );
 
+        verifyNoMoreInteractions(offenceRepository);
+
+    }
+
+    @Test
+    public void draftResultSaved_shouldNotSaveHearingOffenceBailStatusForApplicationsAsOffenceNotFound() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+        final Target targetOut = new Target().setHearingDay(hearingDay.toString());
+
+        final uk.gov.justice.core.courts.Target.Builder target = CoreTestTemplates.target(hearingId, hearingDay, randomUUID(), randomUUID(), randomUUID());
+        final JsonObject result = Json.createObjectBuilder().add("resultCode", RILA_L_RESULT_DEFINITON_ID.toString()).add("isDeleted", false).build();
+        final JsonArray results = Json.createArrayBuilder()
+                .add(result)
+                .build();
+        target.withDraftResult(Json.createObjectBuilder().add("results", results).build().toString());
+
+        final DraftResultSaved draftResultSaved = new DraftResultSaved(target.build(), HearingState.INITIALISED, randomUUID());
+
+        draftResultSaved.getTarget().getResultLines().remove(0);
+        draftResultSaved.getTarget().getResultLines().add(CoreTestTemplates.resultLine(RI_C_RESULT_DEFINITON_ID, UUID.randomUUID(), false));
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(true)
+                .setId(hearingId)
+                .setTargets(asSet(new Target()
+                        .setId(draftResultSaved.getTarget().getTargetId())
+                ));
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
+        when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
+        final UUID offenceId = draftResultSaved.getTarget().getOffenceId();
+        when(offenceRepository.findBy(new HearingSnapshotKey(offenceId, hearingId))).thenReturn(null);
+
+        hearingEventListener.draftResultSaved(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved"),
+                objectToJsonObjectConverter.convert(draftResultSaved)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(false))
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getTargets, hasSize(1))
+                .with(Hearing::getTargets, first(is(targetOut)))
+        );
+
+        verify(offenceRepository).findBy(hearingSnapshotKeyArgumentCaptor.capture());
+        assertThat(hearingSnapshotKeyArgumentCaptor.getValue().getId(),is(offenceId));
+        assertThat(hearingSnapshotKeyArgumentCaptor.getValue().getHearingId(),is(hearingId));
         verifyNoMoreInteractions(this.offenceRepository);
     }
 

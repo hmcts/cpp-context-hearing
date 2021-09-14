@@ -207,12 +207,14 @@ public class HearingEventListener {
         if (bailStatusOpt.isPresent()) {
 
             final Offence offence = getOffence(targetIn);
-            final BailStatus bailStatus = bailStatusOpt.get();
-            if(nonNull(bailStatus)) {
-                offence.setBailStatusId(bailStatus.getId());
-                offence.setBailStatusCode(bailStatus.getCode());
-                offence.setBailStatusDescription(bailStatus.getDescription());
-                offenceRepository.save(offence);
+            if (nonNull(offence)) {
+                final BailStatus bailStatus = bailStatusOpt.get();
+                if(nonNull(bailStatus)) {
+                    offence.setBailStatusId(bailStatus.getId());
+                    offence.setBailStatusCode(bailStatus.getCode());
+                    offence.setBailStatusDescription(bailStatus.getDescription());
+                    offenceRepository.save(offence);
+                }
             }
         }
     }
