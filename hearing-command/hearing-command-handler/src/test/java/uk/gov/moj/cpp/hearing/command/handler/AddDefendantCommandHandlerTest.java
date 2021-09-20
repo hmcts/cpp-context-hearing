@@ -1,9 +1,9 @@
-package uk.gov.moj.cpp.hearing.command.handler;//package uk.gov.moj.cpp.hearing.command.handler;
+package uk.gov.moj.cpp.hearing.command.handler;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -73,7 +73,7 @@ public class AddDefendantCommandHandlerTest {
     private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
 
     @Spy
-    private ObjectToJsonObjectConverter objectToJsonObjectConverter= new JsonObjectConvertersFactory().objectToJsonObjectConverter();
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter = new JsonObjectConvertersFactory().objectToJsonObjectConverter();
 
     @InjectMocks
     private AddDefendantCommandHandler addDefendantCommandHandler;
@@ -165,6 +165,41 @@ public class AddDefendantCommandHandlerTest {
         when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
+        addDefendantCommandHandler.addDefendant(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.hearingEventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.defendant-added"),
+                        payloadIsJson(allOf(withJsonPath("$.hearingId", is(arbitraryHearingObject.getHearingId().toString())),
+                                withJsonPath("$.defendant.id", is(arbitraryDefendant.getId().toString())))))
+        ));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void testCaseDefendantShouldNotBeAddedWhenDuplicate() throws EventStreamException {
+        //Given
+        final uk.gov.moj.cpp.hearing.command.defendant.Defendant arbitraryDefendant = defendantTemplate();
+        CommandHelpers.InitiateHearingCommandHelper arbitraryHearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            Hearing hearing = arbitraryHearingObject.getHearing();
+            HearingDay hearingDay = hearing.getHearingDays().get(0);
+            hearingDay.setSittingDay(ZonedDateTime.now());
+            apply(new HearingInitiated(hearing));
+        }};
+        final CaseAggregate caseAggregate = new CaseAggregate() {{
+            apply(RegisteredHearingAgainstCase.builder().withCaseId(arbitraryDefendant.getProsecutionCaseId()).withHearingId(arbitraryHearingObject.getHearingId()).build());
+        }};
+        setupMockedEventStream(arbitraryHearingObject.getHearingId(), this.hearingEventStream, hearingAggregate);
+        setupMockedEventStream(arbitraryDefendant.getProsecutionCaseId(), this.caseEventStream, caseAggregate);
+        when(this.eventSource.getStreamById(arbitraryDefendant.getProsecutionCaseId())).thenReturn(this.caseEventStream);
+        when(this.aggregateService.get(this.caseEventStream, CaseAggregate.class)).thenReturn(caseAggregate);
+
+        JsonObject payload = Json.createObjectBuilder()
+                .add("defendants", Json.createArrayBuilder().add(objectToJsonObjectConverter.convert(arbitraryDefendant)).build())
+                .build();
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.add-defendant"), payload);
+        when(this.eventSource.getStreamById(arbitraryHearingObject.getHearingId())).thenReturn(this.hearingEventStream);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         addDefendantCommandHandler.addDefendant(envelope);
 
@@ -173,6 +208,13 @@ public class AddDefendantCommandHandlerTest {
                         payloadIsJson(allOf(withJsonPath("$.hearingId", is(arbitraryHearingObject.getHearingId().toString())),
                                 withJsonPath("$.defendant.id", is(arbitraryDefendant.getId().toString())))))
         ));
+
+        assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().size(), is(2));
+
+        // Add the same defendant again, it should be ignored
+        addDefendantCommandHandler.addDefendant(envelope);
+
+        assertThat(hearingAggregate.getHearing().getProsecutionCases().get(0).getDefendants().size(), is(2));
     }
 
     @SuppressWarnings("unchecked")

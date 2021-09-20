@@ -167,7 +167,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = 5432374024089063139L;
+    private static final long serialVersionUID = 5432374024089063140L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -652,7 +652,7 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addDefendant(final UUID hearingId, final uk.gov.justice.core.courts.Defendant defendant) {
-        return hearingDelegate.addDefendant(hearingId, defendant);
+        return apply(hearingDelegate.addDefendant(hearingId, defendant));
     }
 
     public Stream<Object> updateCourtApplication(final UUID hearingId, final uk.gov.justice.core.courts.CourtApplication courtApplication) {

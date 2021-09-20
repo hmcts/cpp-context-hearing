@@ -58,7 +58,7 @@ import java.util.stream.Stream;
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871"})
 public class HearingDelegate implements Serializable {
 
-    private static final long serialVersionUID = 6948738797633524092L;
+    private static final long serialVersionUID = 6948738797633524093L;
 
     private final HearingAggregateMomento momento;
 
@@ -281,10 +281,21 @@ public class HearingDelegate implements Serializable {
         }
         return Stream.of(new ApplicationDetailChanged(hearingId, courtApplication));
     }
-
+    
+    /**
+     * Adds defendants, as long as they don't already exist on the case.
+     *
+     * @param defendantAdded
+     */
     public void handleDefendantAdded(final DefendantAdded defendantAdded) {
         if (momento.getHearing() != null) {
-            momento.getHearing().getProsecutionCases().forEach(prosecutionCase -> prosecutionCase.getDefendants().add(defendantAdded.getDefendant()));
+            final List<ProsecutionCase> prosecutionCases = momento.getHearing().getProsecutionCases();
+
+            for (final ProsecutionCase prosecutionCase : prosecutionCases) {
+                if (prosecutionCase.getDefendants().stream().map(Defendant::getId).noneMatch(id -> id.equals(defendantAdded.getDefendant().getId()))) {
+                    prosecutionCase.getDefendants().add(defendantAdded.getDefendant());
+                }
+            }
         }
     }
 
