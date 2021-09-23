@@ -65,7 +65,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToInitiateHearing() {
         final Action action = createActionFor(ACTION_NAME_INITIATE_HEARING);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users", "Court Associate"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
