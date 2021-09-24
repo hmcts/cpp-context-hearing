@@ -56,7 +56,7 @@ public class Hearing {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingDay> hearingDays = new HashSet<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "hearing", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
     private Set<ProsecutionCase> prosecutionCases = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
@@ -102,10 +102,10 @@ public class Hearing {
     private Set<HearingApplication> hearingApplications = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
-    private Set<ApprovalRequested> approvalsRequested= new HashSet<>();
+    private Set<ApprovalRequested> approvalsRequested = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
-    private Set<HearingYouthCourtDefendants> hearingYouthCourtDefendants= new HashSet<>();
+    private Set<HearingYouthCourtDefendants> hearingYouthCourtDefendants = new HashSet<>();
 
     @Column(name = "trial_type_id")
     private UUID trialTypeId;

@@ -1,6 +1,11 @@
 package uk.gov.moj.cpp.hearing.persist.entity.ha;
 
 import uk.gov.justice.core.courts.InitiationCode;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -13,9 +18,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Table(name = "ha_case")
@@ -53,7 +55,7 @@ public class ProsecutionCase {
     @Column(name = "trial_receipt_type")
     private String trialReceiptType;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "prosecutionCase", orphanRemoval = true)
     private Set<Defendant> defendants = new HashSet<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
