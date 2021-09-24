@@ -34,13 +34,13 @@
         "resultLineId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
-        "targetId": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-        },
         "offenceId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
         "defendantId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "masterDefendantId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
         "resultDefinitionId": {
@@ -99,7 +99,16 @@
         "isComplete": {
           "type": "boolean"
         },
+        "shadowListed" : {
+          "type": "boolean"
+        },
+        "draftResult": {
+          "type": "string"
+        },
         "applicationId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "caseId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
         "amendmentDate": {

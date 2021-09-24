@@ -72,6 +72,16 @@ subscriptions_descriptor:
         - name: hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json
 
+        - name: hearing.draft-result-saved-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved-v2.json
+
+        - name: hearing.draft-result-deleted-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-deleted-v2.json
+
+        # hearing amended
+        - name: hearing.event.amended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-event-amended.json
+
         # Case Defendant Details Updated
         - name: hearing.defendant-details-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/defendant-details-updated.json

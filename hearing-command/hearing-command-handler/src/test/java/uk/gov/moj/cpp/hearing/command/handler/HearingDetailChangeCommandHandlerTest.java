@@ -30,7 +30,10 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAmendCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
@@ -220,6 +223,30 @@ public class HearingDetailChangeCommandHandlerTest {
 
         assertThat(asPojo(events.get(0), HearingDetailChanged.class), isBean(HearingDetailChanged.class)
                 .with(HearingDetailChanged::getId, Matchers.is(hearingId)));
+    }
+    @Test
+    public void eventHearingAmendedShouldBeRaised() throws Exception {
+
+        CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
+
+        HearingAmendCommand hearingAmendCommand = (new HearingAmendCommand(hearing.getHearingId(), HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingAmendCommand(hearing.getHearing().getId(), HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR));
+        }};
+
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+
+        final MetadataBuilder metadataBuilder = metadataWithRandomUUID("hearing.command.amend").withUserId(UUID.randomUUID().toString());
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataBuilder, objectToJsonObjectConverter.convert(hearingAmendCommand));
+
+        handler.amendHearing(jsonEnvelope);
+
+        verify(eventSource).getStreamById(hearing.getHearingId());
+        verify(aggregateService).get(hearingEventStream, HearingAggregate.class);
+
     }
 
     private List<HearingDay> createHearingDays() {

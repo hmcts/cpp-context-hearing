@@ -6,7 +6,6 @@
   },
   "resultLines": [{
     "resultLineId": "e5e381e2-8083-4674-8533-dee96881197a",
-    "targetId": "TARGET_ID",
     "sharedDate": "SHARED_DATE",
     "resultDefinitionId": "70c98fa6-804d-11e8-adc0-fa7ae01bbebc",
     "level": "OFFENCE",
@@ -49,13 +48,13 @@
     }],
     "isModified": false,
     "isComplete": true,
+    "shadowListed": true,
     "defendantId": "DEFENDANT_ID",
     "offenceId": "OFFENCE_ID",
     "orderedDate": "SHARED_DATE",
     "parentResultLineIds": ["b2a59cf4-42a2-408a-b1a0-b48e7cddd5d9"]
   }, {
     "resultLineId": "b2a59cf4-42a2-408a-b1a0-b48e7cddd5d9",
-    "targetId": "TARGET_ID",
     "sharedDate": "SHARED_DATE",
     "resultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
     "level": "OFFENCE",

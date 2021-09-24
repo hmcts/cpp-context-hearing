@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="109" author="hearing"
+               logicalFilePath="116-add-column-to-ha-result-line.xml">
+
+        <addColumn tableName="ha_result_line">
+            <column name="application_id" type="uuid"/>
+            <column name="offence_id" type="uuid"/>
+            <column name="defendant_id" type="uuid"/>
+            <column name="master_defendant_id" type="uuid"/>
+            <column name="shadow_listed" type="BOOLEAN"/>
+            <column name="case_id" type="UUID"/>
+
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_result_line">
+                <column name="application_id" />
+                <column name="offence_id"/>
+                <column name="defendant_id" />
+                <column name="master_defendant_id"/>
+                <column name="shadow_listed" />
+                <column name="case_id" />
+            </dropColumn>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

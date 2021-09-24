@@ -260,6 +260,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>uk.gov.justice.services</groupId>
+            <artifactId>test-utils-enveloper-provider</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>uk.org.lidalia</groupId>
             <artifactId>slf4j-test</artifactId>
             <scope>test</scope>

@@ -55,9 +55,6 @@
         "resultLineId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
-        "targetId": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-        },
         "offenceId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
@@ -123,6 +120,12 @@
         },
         "isComplete": {
           "type": "boolean"
+        },
+        "shadowListed" : {
+          "type": "boolean"
+        },
+        "draftResult": {
+          "type": "string"
         },
         "childResultLineIds": {
           "type": "array",

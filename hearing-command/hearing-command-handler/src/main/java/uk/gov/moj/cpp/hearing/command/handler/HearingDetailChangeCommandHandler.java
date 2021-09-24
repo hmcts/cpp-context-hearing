@@ -1,13 +1,17 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAmendCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +41,20 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
                 hearingDetailsUpdateCommand.getHearing().getJudiciary()
 
         ));
+    }
+
+    @Handles("hearing.command.amend")
+    public void amendHearing(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.amend event received {}", envelope.toObfuscatedDebugString());
+        }
+
+        final Optional<String> userId = envelope.metadata().userId();
+        final HearingAmendCommand hearingAmendCommand = convertToObject(envelope, HearingAmendCommand.class);
+        aggregate(HearingAggregate.class, hearingAmendCommand.getHearingId(), envelope,
+                    aggregate -> aggregate.amendHearing(hearingAmendCommand.getHearingId(), fromString(userId.get()), hearingAmendCommand.getNewHearingState()));
+
+
     }
 }
 

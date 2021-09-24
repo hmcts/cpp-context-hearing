@@ -5,9 +5,9 @@ import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.isEmptyString;
 import static org.junit.Assert.assertTrue;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
@@ -33,6 +33,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Re
 import java.io.IOException;
 import java.util.List;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -220,6 +221,15 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
     }
 
+    @Test
+    public void shouldBuildSuccessfullyWithJudicialResultWhenTargetIsOffence() throws IOException {
+        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-with-target-resultline-based-on application-or-offence.json", ResultsSharedV2.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
+
+        assertThat(resultLineTree.size(), is(1));
+        assertThat(resultLineTree.get(0).getOffenceId().toString(), Matchers.not(isEmptyString()));
+    }
     @Test
     public void shouldBuildSuccessfullyWithJudicialResultWhenResultLineIdExistsInNewAmendedResults() throws IOException {
         final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-with-newAmendedResults.json", ResultsSharedV2.class);

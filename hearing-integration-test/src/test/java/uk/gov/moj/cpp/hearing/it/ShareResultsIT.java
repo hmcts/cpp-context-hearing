@@ -11,6 +11,7 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -25,6 +26,9 @@ import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
+import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
+import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -80,6 +84,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
 import com.google.common.collect.ImmutableMap;
@@ -118,6 +123,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.progression.events.CaseDefendantDetails;
+import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
@@ -161,6 +167,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
@@ -1722,6 +1729,43 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
+    @Test
+    public void shouldSaveDraftResultV2() throws IOException {
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final UUID hearingId = randomUUID();
+        final UUID resultLineId = randomUUID();
+        final String hearingDay = "2021-03-01";
+
+        final String eventPayloadString = getStringFromResource("hearing.save-draft-result-v2.json")
+                .replaceAll("RESULT_LINE_ID", resultLineId.toString())
+                .replaceAll("HEARING_ID", hearingId.toString())
+                .replaceAll("CASE_ID", randomUUID().toString())
+                .replaceAll("OFFENCE_ID", randomUUID().toString());
+
+        try (final EventListener publicEventResulted = listenFor(PUBLIC_HEARING_DRAFT_RESULT_SAVED)
+                .withFilter(convertStringTo(PublicHearingDraftResultSaved.class, isBean(PublicHearingDraftResultSaved.class)
+                        .with(PublicHearingDraftResultSaved::getHearingId, is(hearingId))))) {
+            makeCommand(getRequestSpec(), "hearing.save-draft-result-v2")
+                    .ofType("application/vnd.hearing.save-draft-result-v2+json")
+                    .withArgs(hearingId, hearingDay)
+                    .withPayload(eventPayloadString)
+                    .executeSuccessfully();
+
+            publicEventResulted.waitFor();
+        }
+
+        poll(requestParams(getURL("hearing.get-draft-result-v2", hearingId, hearingDay), "application/vnd.hearing.get-draft-result-v2+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingId.toString())),
+                                withJsonPath("$.hearingDay", is(hearingDay))
+                        )));
+    }
+
     private CommandHelpers.UpdateVerdictCommandHelper updateDefendantAndChangeVerdict(InitiateHearingCommandHelper initiateHearingCommandHelper) {
         updateDefendantAttendance(initiateHearingCommandHelper);
 
@@ -2227,7 +2271,6 @@ public class ShareResultsIT extends AbstractIT {
         final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
         final String eventPayloadString = getStringFromResource("hearing.share-results.json")
-                .replaceAll("TARGET_ID", targetId.toString())
                 .replaceAll("DEFENDANT_ID", hearing.getFirstDefendantForFirstCase().getId().toString())
                 .replaceAll("OFFENCE_ID", hearing.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())
                 .replaceAll("SHARED_DATE", LocalDate.now().format(dateFormatter));

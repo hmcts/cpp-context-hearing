@@ -53,6 +53,7 @@ import org.apache.commons.lang3.StringUtils;
 @Named("readStoreResultLoader")
 public class ReadStoreResultLoader implements ResultLoader {
 
+
     //Label
     private static final String FIELD_WORD_GROUP = "wordGroup";
     private static final String ORG_TYPE = "organisationTypes";
@@ -96,6 +97,7 @@ public class ReadStoreResultLoader implements ResultLoader {
 
     private JsonEnvelope jsonEnvelope;
 
+
     public void setJsonEnvelope(final JsonEnvelope jsonEnvelope) {
         this.jsonEnvelope = jsonEnvelope;
     }
@@ -127,7 +129,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                                                     getBooleanOrNull(jsonObjectResultDefinition, "alwaysPublished")));
                                     resultDefinition.setPublishedForNows(getBooleanOrFalse(jsonObjectResultDefinition, "publishedForNows"));
                                     resultDefinition.setConditonalMandatory(getBooleanOrFalse(jsonObjectResultDefinition, "isBooleanResult"));
-                                    if(jsonObjectResultDefinition.containsKey("dvlaCode")) {
+                                    if (jsonObjectResultDefinition.containsKey("dvlaCode")) {
                                         resultDefinition.setDvlaCode(jsonObjectResultDefinition.getString("dvlaCode"));
                                     }
                                     resultDefinitions.add(resultDefinition);
@@ -225,6 +227,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                     final String fixedListId = promptJson.getString("fixedListId", null);
                     setFixedList(resultPromptFixedListMap, promptJson, resultPrompt, promptReference, fixedListId);
                     final String referenceDataKey = promptJson.getString("referenceDataKey", null);
+                    resultPrompt.setReferenceDataKey(referenceDataKey);
                     if (referenceDataKey != null && ResultType.NAMEADDRESS.equals(resultPrompt.getType())) {
                         resultPrompt.setNameAddressList(resultPromptDynamicListNameAddress.get(referenceDataKey.trim().toLowerCase()));
                     }
@@ -238,6 +241,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                 }));
         return resultPrompts;
     }
+
 
     private void setNameAddressFields(JsonObject promptJson, ResultPrompt resultPrompt) {
         final String componentLabel = promptJson.getString("componentLabel", null);

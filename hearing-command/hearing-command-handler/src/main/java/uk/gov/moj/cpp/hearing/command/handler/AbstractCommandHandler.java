@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static javax.json.JsonValue.NULL;
 import static uk.gov.justice.services.core.enveloper.Enveloper.toEnvelopeWithMetadataFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -11,9 +13,6 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static javax.json.JsonValue.NULL;
-
 
 import java.util.ArrayList;
 import java.util.List;

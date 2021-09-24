@@ -29,6 +29,9 @@ public class Target {
     @Column(name = "defendant_id")
     private UUID defendantId;
 
+    @Column(name = "master_defendant_id")
+    private UUID masterDefendantId;
+
     @Column(name = "hearing_day")
     private String hearingDay;
 
@@ -40,6 +43,9 @@ public class Target {
 
     @Column(name = "application_id")
     private UUID applicationId;
+
+    @Column(name = "case_id")
+    private UUID caseId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "target", orphanRemoval = true)
     private Set<ResultLine> resultLines = new HashSet<>();
@@ -136,6 +142,22 @@ public class Target {
 
     public void setShadowListed(final Boolean shadowListed) {
         this.shadowListed = shadowListed;
+    }
+
+    public UUID getMasterDefendantId() {
+        return masterDefendantId;
+    }
+
+    public void setMasterDefendantId(final UUID masterDefendantId) {
+        this.masterDefendantId = masterDefendantId;
+    }
+
+    public UUID getCaseId() {
+        return caseId;
+    }
+
+    public void setCaseId(final UUID caseId) {
+        this.caseId = caseId;
     }
 
     @Override

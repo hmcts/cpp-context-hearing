@@ -1,16 +1,23 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Objects.nonNull;
+
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
 
 @ApplicationScoped
 public class ResultLineJPAMapper {
@@ -34,6 +41,19 @@ public class ResultLineJPAMapper {
             return null;
         }
         final ResultLine resultLine = ResultLine.resultLine()
+                .setApplicationId(pojo.getApplicationId())
+                .setOffenceId(pojo.getOffenceId())
+                .setCaseId(pojo.getCaseId())
+                .setDefendantId(pojo.getDefendantId())
+                .setMasterDefendantId(pojo.getMasterDefendantId())
+                .setShadowListed(pojo.getShadowListed())
+                .setCaseId(pojo.getCaseId())
+                .setAmendmentDate(pojo.getAmendmentDate())
+                .setAmendmentReason(pojo.getAmendmentReason())
+                .setAmendmentReasonId(pojo.getAmendmentReasonId())
+                .setChildResultLineIds(StringUtils.join(pojo.getChildResultLineIds(), ','))
+                .setParentResultLineIds(StringUtils.join(pojo.getParentResultLineIds(), ','))
+                .setShortCode(pojo.getShortCode())
                 .setId(pojo.getResultLineId())
                 .setResultDefinitionId(pojo.getResultDefinitionId())
                 .setResultLabel(pojo.getResultLabel())
@@ -41,6 +61,7 @@ public class ResultLineJPAMapper {
                 .setTarget(target)
                 .setOrderedDate(pojo.getOrderedDate())
                 .setComplete(pojo.getIsComplete())
+                .setDeleted(pojo.getIsDeleted())
                 .setLevel(pojo.getLevel())
                 .setModified(pojo.getIsModified())
                 .setDelegatedPowers(delegatedPowersJPAMapper.toJPA(pojo.getDelegatedPowers()));
@@ -62,16 +83,29 @@ public class ResultLineJPAMapper {
             return null;
         }
         return uk.gov.justice.core.courts.ResultLine.resultLine()
+                .withAmendmentDate(entity.getAmendmentDate())
+                .withApplicationId(entity.getApplicationId())
+                .withOffenceId(entity.getOffenceId())
+                .withDefendantId(entity.getDefendantId())
+                .withMasterDefendantId(entity.getMasterDefendantId())
+                .withShadowListed(entity.getShadowListed())
+                .withCaseId(entity.getCaseId())
+                .withAmendmentReason(entity.getAmendmentReason())
+                .withAmendmentReasonId(entity.getAmendmentReasonId())
+                .withChildResultLineIds(toList(entity.getChildResultLineIds()))
+                .withParentResultLineIds(toList(entity.getParentResultLineIds()))
                 .withResultLineId(entity.getId())
                 .withDelegatedPowers(delegatedPowersJPAMapper.fromJPA(entity.getDelegatedPowers()))
                 .withIsComplete(entity.getComplete())
                 .withIsModified(entity.getModified())
+                .withIsDeleted(entity.getDeleted())
                 .withLevel(entity.getLevel())
                 .withOrderedDate(entity.getOrderedDate())
                 .withPrompts(promptJPAMapper.fromJPA(entity.getPrompts()))
                 .withResultDefinitionId(entity.getResultDefinitionId())
                 .withResultLabel(entity.getResultLabel())
                 .withSharedDate(entity.getSharedDate())
+                .withShortCode(entity.getShortCode())
                 .build();
     }
 
@@ -80,5 +114,9 @@ public class ResultLineJPAMapper {
             return new ArrayList<>();
         }
         return entities.stream().map(this::fromJPA).collect(Collectors.toList());
+    }
+
+    private static List<UUID> toList(String ids) {
+        return nonNull(ids) && !ids.isEmpty()? Arrays.asList(ids.split(",")).stream().map(UUID::fromString).collect(Collectors.toList()): Collections.emptyList();
     }
 }

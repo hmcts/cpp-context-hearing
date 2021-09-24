@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.persist.entity.ha;
 import uk.gov.justice.core.courts.Level;
 
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -22,6 +23,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "ha_result_line")
+
 public class ResultLine {
 
     @Id
@@ -31,6 +33,42 @@ public class ResultLine {
     @JoinColumn(name = "target_id")
     private Target target;
 
+    @Column(name = "short_code")
+    private String shortCode;
+
+    @Column(name = "amendment_date")
+    private ZonedDateTime amendmentDate;
+
+    @Column(name = "amendment_reason_id")
+    private UUID amendmentReasonId;
+
+    @Column(name = "amendment_reason")
+    private String amendmentReason;
+
+    @Column(name = "child_result_line_ids")
+    private String childResultLineIds;
+
+    @Column(name = "parent_result_line_ids")
+    private String parentResultLineIds;
+
+    @Column(name = "offence_id")
+    private UUID offenceId;
+
+    @Column(name = "application_id")
+    private UUID applicationId;
+
+    @Column(name = "case_id")
+    private UUID caseId;
+
+    @Column(name = "defendant_id")
+    private UUID defendantId;
+
+    @Column(name = "master_defendant_id")
+    private UUID masterDefendantId;
+
+    @Column(name = "shadow_listed")
+    private Boolean shadowListed;
+
     @Embedded
     private DelegatedPowers delegatedPowers;
 
@@ -39,6 +77,10 @@ public class ResultLine {
 
     @Column(name = "is_modified")
     private Boolean isModified;
+
+
+    @Column(name = "is_deleted")
+    private Boolean isDeleted;
 
     @Column(name = "level")
     @Enumerated(EnumType.STRING)
@@ -85,6 +127,15 @@ public class ResultLine {
         return this;
     }
 
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public ResultLine setShortCode(final String shortCode) {
+        this.shortCode = shortCode;
+        return this;
+    }
+
     public DelegatedPowers getDelegatedPowers() {
         return delegatedPowers;
     }
@@ -109,6 +160,15 @@ public class ResultLine {
 
     public ResultLine setModified(final Boolean modified) {
         isModified = modified;
+        return this;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public ResultLine setDeleted(final Boolean deleted) {
+        isDeleted = deleted;
         return this;
     }
 
@@ -163,6 +223,107 @@ public class ResultLine {
 
     public ResultLine setSharedDate(final LocalDate sharedDate) {
         this.sharedDate = sharedDate;
+        return this;
+    }
+
+    public ZonedDateTime getAmendmentDate() {
+        return amendmentDate;
+    }
+
+    public UUID getAmendmentReasonId() {
+        return amendmentReasonId;
+    }
+
+    public String getAmendmentReason() {
+        return amendmentReason;
+    }
+
+
+    public String getChildResultLineIds() {
+        return childResultLineIds;
+    }
+
+    public String getParentResultLineIds() {
+        return parentResultLineIds;
+    }
+
+    public ResultLine setAmendmentDate(final ZonedDateTime amendmentDate) {
+        this.amendmentDate = amendmentDate;
+        return this;
+    }
+
+    public ResultLine setAmendmentReasonId(final UUID amendmentReasonId) {
+        this.amendmentReasonId = amendmentReasonId;
+        return this;
+    }
+
+    public ResultLine setAmendmentReason(final String amendmentReason) {
+        this.amendmentReason = amendmentReason;
+        return this;
+    }
+
+
+    public ResultLine setChildResultLineIds(final String childResultLineIds) {
+        this.childResultLineIds = childResultLineIds;
+        return this;
+    }
+
+    public ResultLine setParentResultLineIds(final String parentResultLineIds) {
+        this.parentResultLineIds = parentResultLineIds;
+        return this;
+    }
+
+    public UUID getOffenceId() {
+        return offenceId;
+    }
+
+    public ResultLine setOffenceId(final UUID offenceId) {
+        this.offenceId = offenceId;
+        return this;
+    }
+
+    public UUID getApplicationId() {
+        return applicationId;
+    }
+
+    public ResultLine setApplicationId(final UUID applicationId) {
+        this.applicationId = applicationId;
+        return this;
+    }
+
+    public UUID getCaseId() {
+        return caseId;
+    }
+
+    public ResultLine setCaseId(final UUID caseId) {
+        this.caseId = caseId;
+        return this;
+    }
+
+    public UUID getDefendantId() {
+        return defendantId;
+    }
+
+    public ResultLine setDefendantId(final UUID defendantId) {
+        this.defendantId = defendantId;
+        return this;
+    }
+
+    public UUID getMasterDefendantId() {
+        return masterDefendantId;
+    }
+
+    public ResultLine setMasterDefendantId(final UUID masterDefendantId) {
+        this.masterDefendantId = masterDefendantId;
+        return this;
+    }
+
+    public Boolean getShadowListed() {
+        return shadowListed;
+    }
+
+    public ResultLine setShadowListed(final Boolean shadowListed) {
+        this.shadowListed = shadowListed;
         return this;
     }
 

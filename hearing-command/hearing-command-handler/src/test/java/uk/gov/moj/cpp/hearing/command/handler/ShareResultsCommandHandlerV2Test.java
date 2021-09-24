@@ -4,9 +4,14 @@ import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.any;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -44,6 +49,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantKey;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.VariantValue;
+import uk.gov.moj.cpp.hearing.command.result.DeleteDraftResultV2Command;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
@@ -55,11 +61,13 @@ import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -199,11 +207,35 @@ public class ShareResultsCommandHandlerV2Test {
     }
 
     @Test
+    public void shouldRaiseDeleteDraftResultsV2Event() throws Exception {
+
+        final UUID userId = UUID.randomUUID();
+        HearingAmended hearingAmended = new HearingAmended(initiateHearingCommand.getHearing().getId(),userId,HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR);
+        DraftResultDeletedV2 draftResultDeletedV2 = new DraftResultDeletedV2(initiateHearingCommand.getHearing().getId(),LocalDate.now(),userId);
+        final DeleteDraftResultV2Command deleteDraftResultV2Command = DeleteDraftResultV2Command.deleteDraftResultCommand()
+                .setHearingId(initiateHearingCommand.getHearing().getId())
+                .setHearingDay(LocalDate.now());
+
+
+        final JsonEnvelope envelope = envelopeFrom(metadataOf(metadataId, "hearing.command.delete.draft-result-v2").withUserId(userId.toString()), objectToJsonObjectConverter.convert(deleteDraftResultV2Command));
+
+        final HearingAggregate aggregate = new HearingAggregate() {{
+            apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
+            apply(Stream.of(hearingAmended));
+       }};
+
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
+
+        this.shareResultsCommandHandler.deleteDraftResultV2(envelope);
+
+    }
+        @Test
     public void shouldRaiseResultsSharedV2Event() throws Exception {
         final LocalDate hearingDay = LocalDate.now();
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), hearingDay);
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        resultLineIn.setShortCode("NCOS");
         targetDraft.setResultLines(null);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
         final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
@@ -233,13 +265,15 @@ public class ShareResultsCommandHandlerV2Test {
         final List<UUID> parentResultLineIds = of(randomUUID());
 
         shareDaysResultsCommand.setResultLines(Arrays.asList(
-                new SharedResultsCommandResultLineV2(resultLineIn.getDelegatedPowers(),
+                new SharedResultsCommandResultLineV2(
+                        resultLineIn.getShortCode(),
+                        resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
                         resultLineIn.getSharedDate(),
                         resultLineIn.getResultLineId(),
-                        targetDraft.getTargetId(),
                         targetDraft.getOffenceId(),
                         targetDraft.getDefendantId(),
+                        targetDraft.getMasterDefendantId(),
                         resultLineIn.getResultDefinitionId(),
                         resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
                                 p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
@@ -248,14 +282,17 @@ public class ShareResultsCommandHandlerV2Test {
                         resultLineIn.getIsModified(),
                         resultLineIn.getIsComplete(),
                         targetDraft.getApplicationId(),
+                        targetDraft.getCaseId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        Objects.nonNull(resultLineIn.getAmendmentDate()) ? resultLineIn.getAmendmentDate().atStartOfDay(ZoneId.systemDefault()) : null,
+                        Objects.nonNull(resultLineIn.getAmendmentDate()) ? resultLineIn.getAmendmentDate(): null,
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
                         childResultLineIds,
-                        parentResultLineIds
+                        parentResultLineIds,
+                        targetDraft.getShadowListed(),
+                        targetDraft.getDraftResult()
                 )
         ));
 
@@ -272,10 +309,10 @@ public class ShareResultsCommandHandlerV2Test {
                 .with(resultsSharedV2 -> resultsSharedV2.getIsReshare(), is(false))
                 .with(h -> h.getTargets().size(), is(1))
                 .with(ResultsSharedV2::getTargets, first(isBean(Target.class)
-                        .with(Target::getTargetId, is(targetDraft.getTargetId()))
                         .with(t -> t.getResultLines().size(), is(shareDaysResultsCommand.getResultLines().size()))
                         .with(Target::getResultLines, first(isBean(ResultLine.class)
                                         .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
+                                        .with(ResultLine::getShortCode, is(resultLineIn.getShortCode()))
                                         .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
                                         .with(ResultLine::getPrompts, first(isBean(Prompt.class)
                                                 .with(Prompt::getId, is(promptIn.getId()))))

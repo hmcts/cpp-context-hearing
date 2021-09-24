@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 
@@ -72,13 +73,11 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
@@ -98,14 +97,12 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(shared2Time)
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
@@ -132,13 +129,11 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
@@ -158,13 +153,11 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
@@ -191,13 +184,11 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
@@ -217,13 +208,11 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
@@ -239,14 +228,12 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
         final SharedResultsCommandResultLineV2 secondResharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(shared3Time)
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> secondResharedResultLines = Arrays.asList(secondResharedResultLine1, secondResharedResultLine2);
 
@@ -261,6 +248,19 @@ public class ResultsSharedDelegateTest {
     }
 
     @Test
+    public void shouldDeleteDraftResult() {
+        UUID userId = UUID.randomUUID();
+        UUID hearingId = UUID.randomUUID();
+        LocalDate hearingDay = LocalDate.now();
+
+        Stream stream = resultsSharedDelegate.deleteDraftResultV2(hearingId,hearingDay,userId);
+        assertThat(stream.findFirst().get().getClass().getCanonicalName(), is(DraftResultDeletedV2.class.getCanonicalName()));
+
+    }
+
+
+
+        @Test
     public void shouldAddNewResultsForTheGivenDay() {
 
         final UUID hearingId = randomUUID();
@@ -280,7 +280,6 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
@@ -288,7 +287,6 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
 
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
@@ -305,9 +303,8 @@ public class ResultsSharedDelegateTest {
 
         final ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
         assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
-        assertThat(resultsSharedV2.getTargets().size(), is(2));
+        assertThat(resultsSharedV2.getTargets().size(), is(1));
         assertThat(resultsSharedV2.getTargets().get(0).getHearingDay(), is(hearingDay));
-        assertThat(resultsSharedV2.getTargets().get(1).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV2.getIsReshare(), is(false));
 
     }
@@ -332,7 +329,6 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
-                .withTargetId(target1Id)
                 .build();
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
@@ -340,7 +336,6 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
-                .withTargetId(target2Id)
                 .build();
 
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
@@ -359,9 +354,9 @@ public class ResultsSharedDelegateTest {
         ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
         assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
 
-        assertThat(resultsSharedV2.getTargets().size(), is(2));
+        assertThat(resultsSharedV2.getTargets().size(), is(1));
         assertThat(resultsSharedV2.getTargets().get(0).getHearingDay(), is(hearingDay));
-        assertThat(resultsSharedV2.getTargets().get(1).getHearingDay(), is(hearingDay));
+
 
         // Not previously shared hence no saved targets and result line status
         assertThat(resultsSharedV2.getIsReshare(), is(false));
@@ -385,13 +380,13 @@ public class ResultsSharedDelegateTest {
         resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
         assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
 
-        assertThat(resultsSharedV2.getTargets().size(), is(2));
+        assertThat(resultsSharedV2.getTargets().size(), is(1));
         assertThat(resultsSharedV2.getTargets().get(0).getHearingDay(), is(hearingDay));
-        assertThat(resultsSharedV2.getTargets().get(1).getHearingDay(), is(hearingDay));
+
 
         // Previously shared hence saved targets and result line status
         assertThat(resultsSharedV2.getIsReshare(), is(true));
-        assertThat(resultsSharedV2.getSavedTargets().size(), is(2));
+        assertThat(resultsSharedV2.getSavedTargets().size(), is(1));
         assertThat(resultsSharedV2.getCompletedResultLinesStatus().size(), is(1));
 
     }

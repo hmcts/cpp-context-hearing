@@ -251,7 +251,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
         );
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC);
+        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
 
         final String ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload()).getString(FIELD_CUSTODY_TIME_LIMIT);
 
@@ -322,7 +322,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
         );
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC);
+        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
 
         final String ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload()).getString(FIELD_CUSTODY_TIME_LIMIT);
 
@@ -390,7 +390,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 .withValue(targetListResponse -> targetListResponse.getTargets().get(0).getOffenceId(), targets.get(0).getOffenceId())
         );
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC);
+        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
 
         final String ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload()).getString(FIELD_CUSTODY_TIME_LIMIT);
 
@@ -450,7 +450,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         assertCTLClockStopped(hearing);
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC);
+        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
 
         final JsonObject ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload());
         assertThat(ctlExpiryDate.isEmpty(), is(true));
@@ -483,7 +483,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         assertCTLClockStopped(hearing);
 
-        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC);
+        final ResponseData responseData = Queries.getCalculatedCustodyTimeLimitExpiryDate(initiateHearing.getHearing().getId(), orderDate.toString(), offenceId, DEFAULT_POLL_TIMEOUT_IN_SEC, "C");
 
         final JsonObject ctlExpiryDate = new StringToJsonObjectConverter().convert(responseData.getPayload());
         assertThat(ctlExpiryDate.isEmpty(), is(true));
@@ -614,6 +614,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 standardResultLineTemplate(randomUUID(), CROWN_COURT_RESULT_DEFINITION_ID, orderDate)
                         .withPrompts(singletonList(Prompt.prompt()
                                 .withId(UUID.fromString("5f507153-6dc9-4ec0-94db-c821eff333f1"))
+                                .withPromptRef("HCROOM")
                                 .withLabel(STRING.next())
                                 .withValue(randomUUID().toString())
                                 .withWelshValue(STRING.next())
@@ -623,6 +624,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
                 standardResultLineTemplate(randomUUID(), UUID.fromString("bb90e801-0066-4bdf-85e6-8d64bc683f0c"), orderDate).withPrompts(
                         singletonList(Prompt.prompt()
                                 .withId(UUID.fromString("21541638-82dd-4a9f-a05c-67589dc8dce9"))
+                                .withPromptRef("courtOrPoliceStationWhichPreviouslyGrantedBail")
                                 .withLabel(STRING.next())
                                 .withValue("on Bail")
                                 .withWelshValue(STRING.next())
@@ -730,6 +732,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final List<Prompt> ctlPromptList = new ArrayList();
         final Prompt custodyTimeLimitExpires = Prompt.prompt()
                 .withId(fromString(CTL_EXPIRES_PROMPT_ID))
+                .withPromptRef("CTLDATE")
                 .withLabel("Custody time limit expires")
                 .withValue(localDate)
                 .withWelshValue(localDate)
@@ -737,6 +740,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt timeSpendInCustody = Prompt.prompt()
                 .withId(fromString(TIME_SPEND_IN_CUSTODY_PROMPT_ID))
+                .withPromptRef("CTLTIME")
                 .withLabel("Time spent in custody (in days)")
                 .withValue("0")
                 .withWelshValue("0")
@@ -878,6 +882,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt tvLinkAtNextHearing = Prompt.prompt()
                 .withId(fromString(TV_LINK_AT_NEXT_HEARING_PROMPT_ID))
+                .withPromptRef("PromptRef1")
                 .withLabel("TV link at next hearing")
                 .withFixedListCode("fixedListCode")
                 .withValue("value1")
@@ -886,6 +891,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt tvLinkPreHearing = Prompt.prompt()
                 .withId(fromString(TV_LINK_PRE_HEARING_PROMPT_ID))
+                .withPromptRef("PromptRef2")
                 .withLabel("TV link pre-hearing conference time")
                 .withValue("value1")
                 .withWelshValue(STRING.next())
@@ -894,6 +900,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt remandBasis = Prompt.prompt()
                 .withId(fromString(REMAND_BASIS))
+                .withPromptRef("PromptRef3")
                 .withLabel("Remand basis")
                 .withValue("value1")
                 .withWelshValue(STRING.next())
@@ -901,6 +908,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt prison = Prompt.prompt()
                 .withId(fromString(PRISON_PROMPT_ID))
+                .withPromptRef("PromptRef4")
                 .withLabel("Prison")
                 .withValue("value1")
                 .withWelshValue(STRING.next())
@@ -908,6 +916,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt riskOrVulnerabilityFactors = Prompt.prompt()
                 .withId(fromString(RISK_OR_VULNERABILITY_FACTORS_PROMPT_ID))
+                .withPromptRef("PromptRef5")
                 .withLabel("Risk or vulnerability factors")
                 .withValue("value1")
                 .withWelshValue(STRING.next())
@@ -915,6 +924,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt bailException = Prompt.prompt()
                 .withId(fromString(BAIL_EXCEPTION_PROMPT_ID))
+                .withPromptRef("bailException")
                 .withLabel("Bail exception")
                 .withValue("value1")
                 .withWelshValue(STRING.next())
@@ -923,6 +933,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt bailExceptionReason = Prompt.prompt()
                 .withId(fromString(BAIL_EXCEPTION_REASON_PROMPT_ID))
+                .withPromptRef("bailExceptionReason")
                 .withLabel("Bail exception reason")
                 .withValue("value1")
                 .withWelshValue(STRING.next())
@@ -930,6 +941,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Prompt additionalReasons = Prompt.prompt()
                 .withId(fromString(ADDITIONAL_REASONS_PROMPT_ID))
+                .withPromptRef("PromptRef8")
                 .withLabel("Additional reasons")
                 .withValue("value1")
                 .withWelshValue(STRING.next())

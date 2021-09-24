@@ -23,6 +23,9 @@
       "id": "http://justice.gov.uk/hearing/courts/hearing.share-results-v2.json",
       "type": "object",
       "properties": {
+        "shortCode": {
+          "type": "string"
+        },
         "delegatedPowers": {
           "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
         },
@@ -33,9 +36,6 @@
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
         },
         "resultLineId": {
-          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-        },
-        "targetId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
         "offenceId": {
@@ -100,6 +100,12 @@
         "isComplete": {
           "type": "boolean"
         },
+        "shadowListed" : {
+          "type": "boolean"
+        },
+        "draftResult": {
+          "type": "string"
+        },
         "applicationId": {
           "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
         },
@@ -150,7 +156,8 @@
         "orderedDate",
         "resultLineId",
         "isModified",
-        "isComplete"
+        "isComplete",
+        "shortCode"
       ]
     }
   }

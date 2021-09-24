@@ -75,6 +75,16 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.save-multiple-draft-results");
     }
 
+    @Handles("hearing.save-draft-result-v2")
+    public void saveDraftResultV2(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.save-draft-result-v2");
+    }
+
+    @Handles("hearing.delete-draft-result-v2")
+    public void deleteDraftResultV2(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.delete-draft-result-v2");
+    }
+
     @FeatureControl("amendReshare")
     @Handles("hearing.save-days-draft-result")
     public void saveDraftResultForHearingDay(final JsonEnvelope envelope) {
@@ -147,6 +157,11 @@ public class HearingCommandApi {
     @FeatureControl("amendReshare")
     public void shareResultsForHearingDay(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.share-days-results");
+    }
+
+    @Handles("hearing.amend")
+    public void amendHearing(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.amend");
     }
 
     @Handles("hearing.update-defendant-attendance-on-hearing-day")

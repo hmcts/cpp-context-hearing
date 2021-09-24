@@ -63,12 +63,11 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         final LocalDate ctlExpiryDate = LocalDate.now().plusDays(182);
 
         when(offence.getModeOfTrial()).thenReturn(ModeOfTrial.INDICTABLE.type());
-        when(offence.getBailStatusCode()).thenReturn(REMANDED_IN_CUSTODY_PENDING_CONDITIONS.getCode());
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.of(ctlExpiryDate));
         when(publicHolidaysWeekendsService.getCalenderBasedCTLExpiryDate(ctlExpiryDate)).thenReturn(ctlExpiryDate);
 
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
-                .calculateCTLExpiryDate(offence, LocalDate.now());
+                .calculateCTLExpiryDate(offence, LocalDate.now(), "P");
 
         assertThat(expiryDate.get(), is(ctlExpiryDate));
     }
@@ -88,7 +87,7 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         final LocalDate adjustedDaysForWeekend = ctlExpiryOnSunday.minusDays(2);
         when(publicHolidaysWeekendsService.getCalenderBasedCTLExpiryDate(ctlExpiryOnSunday)).thenReturn(adjustedDaysForWeekend);
 
-        final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, LocalDate.now());
+        final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, LocalDate.now(), "P");
 
         assertThat(expiryDate.get(), is(adjustedDaysForWeekend));
     }
@@ -105,12 +104,11 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
 
         when(referenceData.getPublicHolidays(division, LocalDate.now(), ctlExpiryOnMonday)).thenReturn(publicHolidays);
         when(offence.getModeOfTrial()).thenReturn(ModeOfTrial.INDICTABLE.type());
-        when(offence.getBailStatusCode()).thenReturn(REMANDED_IN_CUSTODY_PENDING_CONDITIONS.getCode());
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.of(ctlExpiryOnMonday));
         final LocalDate adjustedDaysForPublicHolidays = ctlExpiryOnMonday.minusDays(4);
         when(publicHolidaysWeekendsService.getCalenderBasedCTLExpiryDate(ctlExpiryOnMonday)).thenReturn(adjustedDaysForPublicHolidays);
 
-        final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, LocalDate.now());
+        final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, LocalDate.now(), "P");
 
         assertThat(expiryDate.get(), is(adjustedDaysForPublicHolidays));
     }
@@ -121,7 +119,7 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, null, now())).thenReturn(Optional.empty());
 
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
-                .calculateCTLExpiryDate(offence, LocalDate.now());
+                .calculateCTLExpiryDate(offence, LocalDate.now(), "C");
 
         assertThat(expiryDate, is(empty()));
     }
@@ -131,7 +129,7 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(null, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.empty());
 
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
-                .calculateCTLExpiryDate(offence, LocalDate.now());
+                .calculateCTLExpiryDate(offence, LocalDate.now(), "C");
 
         assertThat(expiryDate, is(empty()));
     }
@@ -349,14 +347,13 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         final int timeSpent = 2;
 
         when(offence.getModeOfTrial()).thenReturn(ModeOfTrial.INDICTABLE.type());
-        when(offence.getBailStatusCode()).thenReturn(REMANDED_IN_CUSTODY_PENDING_CONDITIONS.getCode());
         when(ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, REMANDED_IN_CUSTODY_PENDING_CONDITIONS, now())).thenReturn(Optional.of(ctlExpiryDate));
         when(publicHolidaysWeekendsService.getCalenderBasedCTLExpiryDate(ctlExpiryDate.minusDays(timeSpent))).thenReturn(ctlExpiryDate.minusDays(timeSpent));
 
         when(timeSpentCalculator.timeSpent(offence, now())).thenReturn(timeSpent);
 
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
-                .calculateCTLExpiryDate(offence, LocalDate.now());
+                .calculateCTLExpiryDate(offence, LocalDate.now(), "P");
 
         assertThat(expiryDate.get(), is(ctlExpiryDate.minusDays(timeSpent)));
     }
@@ -369,7 +366,7 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
         when(offence.getCtlTimeLimit()).thenReturn(ctlExpiryDate);
 
         final Optional<LocalDate> expiryDate = ctlExpiryDateCalculatorService
-                .calculateCTLExpiryDate(offence, LocalDate.now());
+                .calculateCTLExpiryDate(offence, LocalDate.now(), null);
 
         assertThat(expiryDate.get(), is(ctlExpiryDate));
     }

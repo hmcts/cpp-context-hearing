@@ -48,21 +48,67 @@ protocols: [ HTTP, HTTPS ]
           description: ID of hearing to get the draft result
           type: string
   get:
-      description: |
+    description: |
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.get-draft-result+json
+          name: hearing.get-draft-result
+       ...
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.get-draft-result+json:
+                  example:  !include json/hearing.get-draft-result.json
+                  schema:  !include  json/schema/hearing.get-draft-result.json
+
+/hearings/{hearingId}/{hearingDay}/draft-result:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the draft result
+          type: string
+        hearingDay:
+          description: The day of the hearing (multi day) to get the draft results for, in format yy-mm-dd (e.g. 2021-03-25)
+          type: string
+  get:
+    description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.get-draft-result+json
-            name: hearing.get-draft-result
+            responseType: application/vnd.hearing.get-draft-result-v2+json
+            name: hearing.get-draft-result-v2
         ...
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.get-draft-result+json:
-                    example:  !include json/hearing.get-draft-result.json
-                    schema:  !include  json/schema/hearing.get-draft-result.json
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.get-draft-result-v2+json:
+                  example:  !include json/hearing.get-draft-result-v2.json
+                  schema:  !include  json/schema/hearing.get-draft-result-v2.json
 
 /hearings/{hearingId}/{hearingDay}:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the draft result
+          type: string
+        hearingDay:
+          description: The day of the hearing (multi day) to get the draft results for, in format yy-mm-dd (e.g. 2021-03-25)
+          type: string
+  get:
+    description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.results+json
+            name: hearing.get-results
+        ...
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.results+json:
+                  example:  !include json/hearing.get-results.json
+                  schema:  !include  json/schema/hearing.get-results.json
+
+/hearings/{hearingId}/{hearingDay}/share-results:
   uriParameters:
         hearingId:
           description: ID of hearing to get the draft result
@@ -74,17 +120,16 @@ protocols: [ HTTP, HTTPS ]
       description: |
         ...
         (mapping):
-            responseType: application/vnd.hearing.results+json
-            name: hearing.get-results
+            responseType: application/vnd.hearing.get-share-result-v2+json
+            name: hearing.get-share-result-v2
         ...
       responses:
             200:
                 description: OK
                 body:
-                  application/vnd.hearing.results+json:
-                    example:  !include json/hearing.get-results.json
-                    schema:  !include  json/schema/hearing.get-results.json
-
+                  application/vnd.hearing.get-share-result-v2+json:
+                    example:  !include json/hearing.get-share-result-v2.json
+                    schema:  !include  json/schema/hearing.get-share-result-v2.json
 
 /hearings/{hearingId}/event-log:
     uriParameters:
@@ -535,6 +580,13 @@ protocols: [ HTTP, HTTPS ]
                 responseType: application/vnd.hearing.custody-time-limit+json
                 name: hearing.custody-time-limit
             ...
+        queryParameters:
+            bailStatusCode:
+                description: bail status code
+                type: string
+                required: true
+                pattern: ^[CLPS]$
+
         responses:
             200:
                 description: OK

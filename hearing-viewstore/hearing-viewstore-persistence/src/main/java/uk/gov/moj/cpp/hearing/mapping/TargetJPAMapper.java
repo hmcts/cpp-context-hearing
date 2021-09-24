@@ -20,6 +20,8 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import org.json.JSONObject;
+
 @ApplicationScoped
 public class TargetJPAMapper {
 
@@ -42,15 +44,38 @@ public class TargetJPAMapper {
         target.setId(pojo.getTargetId());
         target.setHearing(hearing);
         target.setDefendantId(pojo.getDefendantId());
+        target.setMasterDefendantId(pojo.getMasterDefendantId());
         target.setDraftResult(pojo.getDraftResult());
         target.setOffenceId(pojo.getOffenceId());
         target.setApplicationId(pojo.getApplicationId());
+        target.setCaseId(pojo.getCaseId());
         target.setResultLines(resultLineJPAMapper.toJPA(target, pojo.getResultLines()));
         target.setShadowListed(pojo.getShadowListed());
         if (Objects.nonNull(pojo.getHearingDay())){
             target.setHearingDay(pojo.getHearingDay().toString());
         }
         return target;
+    }
+
+    public uk.gov.justice.core.courts.Target addMasterDefandantId(final uk.gov.justice.core.courts.Target entity, final UUID masterDefendantId) {
+        if (null == entity) {
+            return null;
+        }
+        final uk.gov.justice.core.courts.Target.Builder builder = uk.gov.justice.core.courts.Target.target()
+                .withDefendantId(entity.getDefendantId())
+                .withMasterDefendantId(masterDefendantId)
+                .withDraftResult(new JSONObject().toString())
+                .withHearingId(entity.getHearingId())
+                .withOffenceId(entity.getOffenceId())
+                .withApplicationId(entity.getApplicationId())
+                .withTargetId(entity.getTargetId())
+                .withResultLines(entity.getResultLines())
+                .withShadowListed(entity.getShadowListed());
+        if (Objects.nonNull(entity.getHearingDay())) {
+            builder.withHearingDay(entity.getHearingDay());
+        }
+        return builder
+                .build();
     }
 
     public uk.gov.justice.core.courts.Target fromJPA(final Target entity, final UUID masterDefendantId) {
@@ -88,6 +113,17 @@ public class TargetJPAMapper {
         return entities
                 .stream()
                 .map(target -> fromJPA(target, getMasterDefendantId(target.getDefendantId(), prosecutionCases)))
+                .collect(Collectors.toList());
+    }
+
+
+    public List<uk.gov.justice.core.courts.Target> setMasterDefandantId(Set<uk.gov.justice.core.courts.Target> entities, final Set<ProsecutionCase> prosecutionCases) {
+        if (isNull(entities)) {
+            return new ArrayList<>();
+        }
+        return entities
+                .stream()
+                .map(target -> addMasterDefandantId(target, getMasterDefendantId(target.getDefendantId(), prosecutionCases)))
                 .collect(Collectors.toList());
     }
 

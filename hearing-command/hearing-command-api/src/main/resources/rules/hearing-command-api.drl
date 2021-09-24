@@ -52,6 +52,24 @@ rule "Command - API - Action - hearing.save-draft-result"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.save-draft-result-v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.save-draft-result-v2");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.delete-draft-result-v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.delete-draft-result-v2");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.save-multiple-draft-results"
   when
     $outcome: Outcome();
@@ -119,6 +137,15 @@ rule "Command - API - Action - hearing.share-results-v2"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.share-results-v2");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.amend"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.amend");
    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
   then
     $outcome.setSuccess(true);

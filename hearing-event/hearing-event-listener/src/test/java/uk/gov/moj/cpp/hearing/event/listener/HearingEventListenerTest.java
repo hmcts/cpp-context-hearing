@@ -16,6 +16,7 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -30,6 +31,7 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.integer;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_USER_ERROR;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
@@ -49,6 +51,7 @@ import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
@@ -56,13 +59,16 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -70,6 +76,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
+import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
@@ -90,6 +97,7 @@ import java.util.UUID;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -145,6 +153,8 @@ public class HearingEventListenerTest {
     @Captor
     ArgumentCaptor<Hearing> saveHearingCaptor;
     @Captor
+    ArgumentCaptor<DraftResult> draftResultCaptor;
+    @Captor
     ArgumentCaptor<HearingApplication> saveHearingApplicationCaptor;
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter;
@@ -157,6 +167,8 @@ public class HearingEventListenerTest {
     private HearingEventListener hearingEventListener;
     @Mock
     private HearingRepository hearingRepository;
+    @Mock
+    private DraftResultRepository draftResultRepository;
     @Mock
     private TargetJPAMapper targetJPAMapper;
     @Mock
@@ -700,6 +712,31 @@ public class HearingEventListenerTest {
     }
 
     @Test
+    public void shouldCreateNewDraftResultSavedV2WhenDoesntExists() {
+
+        final UUID hearingId = randomUUID();
+        final UUID amendedByUser = randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+        final JsonObject someJsonObject = new StringToJsonObjectConverter().convert("{}");
+        final DraftResultSavedV2 draftResultSavedV2 = new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, amendedByUser);
+
+        when(draftResultRepository.findBy(hearingId.toString()+hearingDay.toString())).thenReturn(null);
+
+        hearingEventListener.draftResultSavedV2(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved-v2"),
+                objectToJsonObjectConverter.convert(draftResultSavedV2)
+        ));
+
+        verify(this.draftResultRepository).save(draftResultCaptor.capture());
+
+        assertThat(draftResultCaptor.getValue(), isBean(DraftResult.class)
+                .with(DraftResult::getHearingId, is(hearingId))
+                .with(DraftResult::getHearingDay, is(hearingDay.toString()))
+                .with(DraftResult::getAmendedByUserId, is(amendedByUser))
+                .with(DraftResult::getDraftResultPayload, is(objectMapper.convertValue(someJsonObject, JsonNode.class)))
+        );
+    }
+
+    @Test
     public void resultsShared_shouldPersist_with_hasSharedResults_true() {
         final ResultsShared resultsShared = resultsSharedTemplate();
         final List<uk.gov.justice.core.courts.Target> targets = asList(targetTemplate());
@@ -722,7 +759,6 @@ public class HearingEventListenerTest {
         when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
                 .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
         when(targetJPAMapper.fromJPA(asSet(target), asSet(prosecutionCase))).thenReturn(targets);
-
         hearingEventListener.resultsShared(envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared)
         ));
@@ -776,7 +812,8 @@ public class HearingEventListenerTest {
         when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
         when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
                 .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
-        when(targetJPAMapper.fromJPA(asSet(target, target2), asSet(prosecutionCase))).thenReturn(targets);
+
+        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
         when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
         when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
 
@@ -790,7 +827,7 @@ public class HearingEventListenerTest {
         assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
                 .with(Hearing::getHasSharedResults, is(true))
                 .with(Hearing::getId, is(resultsShared.getHearingId()))
-                .with(Hearing::getTargets, hasSize(2))
+                .with(Hearing::getTargets, hasSize(3))
                 .with(Hearing::getHearingDays, first(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)
                                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getHasSharedResults, is(true)
                                 )
@@ -1149,6 +1186,52 @@ public class HearingEventListenerTest {
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getString(LAST_SHARED_DATE), is(sharedTime.toLocalDate().toString()));
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
+    }
+
+
+
+    @Test
+    public void shouldAmendHearing() {
+
+        final UUID hearingId = randomUUID();
+        final UUID userId = randomUUID();
+        final Hearing hearingEntity = new Hearing()
+                .setId(hearingId);
+
+        final HearingAmended hearingAmended = new HearingAmended(hearingId, userId, SHARED_AMEND_LOCKED_USER_ERROR);
+
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
+
+        hearingEventListener.amendHearing(envelopeFrom(metadataWithRandomUUID("hearing.event.amended"),
+                objectToJsonObjectConverter.convert(hearingAmended)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingId))
+                .with(Hearing::getHearingState, is(hearingAmended.getNewHearingState()))
+                .with(Hearing::getAmendedByUserId, is(hearingAmended.getUserId()))
+        );
+    }
+
+    @Test
+    public void shouldDeleteDraftResultV2() {
+
+        final UUID hearingId = randomUUID();
+        final UUID userId = randomUUID();
+        final DraftResult draftResultEntity = new DraftResult();
+
+
+        final DraftResultDeletedV2 draftResultDeletedV2 = new DraftResultDeletedV2(hearingId, now(), userId);
+
+        when(draftResultRepository.findBy(any())).thenReturn(draftResultEntity);
+
+        hearingEventListener.draftResultDeletedV2(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-deleted-v2"),
+                objectToJsonObjectConverter.convert(draftResultDeletedV2)
+        ));
+
+        verify(this.draftResultRepository).removeAndFlush(draftResultCaptor.capture());
     }
 
     @Test

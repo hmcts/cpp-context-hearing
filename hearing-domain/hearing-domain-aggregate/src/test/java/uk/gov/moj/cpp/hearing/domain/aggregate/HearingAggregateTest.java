@@ -24,6 +24,8 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
@@ -41,6 +43,7 @@ import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAmendCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -53,6 +56,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -60,11 +64,13 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventLogged;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -260,6 +266,19 @@ public class HearingAggregateTest {
         assertThat(hearingEventIgnored.getHearingEventId(), is(logEventCommand.getHearingEventId()));
         assertThat(hearingEventIgnored.isAlterable(), is(false));
 
+    }
+
+    @Test
+    public void shouldAmendHearing() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAmendCommand hearingAmendCommand = new HearingAmendCommand(UUID.randomUUID(),SHARED_AMEND_LOCKED_ADMIN_ERROR);
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final HearingAmended hearingAmended = (HearingAmended) hearingAggregate
+                .amendHearing(hearingAmendCommand.getHearingId(), hearingAmendCommand.getHearingId(), hearingAmendCommand.getNewHearingState()).collect(Collectors.toList()).get(0);
+        assertThat(hearingAmended.getHearingId(), is(hearingAmendCommand.getHearingId()));
+        assertThat(hearingAmended.getNewHearingState(), is(hearingAmendCommand.getNewHearingState()));
     }
 
     @Test
@@ -757,6 +776,8 @@ public class HearingAggregateTest {
         assertThat(hearingEventLogged.getHearingType().getId(), is(initiateHearingCommand.getHearing().getType().getId()));
         assertThat(hearingEventLogged.getHearingType().getDescription(), is(initiateHearingCommand.getHearing().getType().getDescription()));
     }
+
+
 
     @Test
     public void shouldAddDefenceCounselBeforeHearingEnded() {
@@ -1389,7 +1410,34 @@ public class HearingAggregateTest {
         assertThat("SaveDraftResultFailed is present", saveDraftResultFailed.isPresent());
     }
 
+    @Test
+    public void shouldNotDeleteDraftResultWhenHearingIsNotLocked() {
 
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+        final UUID userId = UUID.randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+        hearingAggregate.amendHearing(hearingId,userId, INITIALISED);
+        final Stream stream = hearingAggregate.deleteDraftResultV2(userId, hearingId,hearingDay);
+        assertThat(stream.findFirst().get().getClass().getCanonicalName(), Matchers.is(HearingLockedByOtherUser.class.getCanonicalName()));
+
+    }
+
+    @Test
+    public void shouldDeleteDraftResultWhenHearingIsLocked() {
+        final UUID userId = UUID.randomUUID();
+        final UUID hearingId = UUID.randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.amendHearing(hearingId,userId, SHARED_AMEND_LOCKED_ADMIN_ERROR);
+
+        final Stream stream = hearingAggregate.deleteDraftResultV2(userId, hearingId,hearingDay);
+        assertThat(stream.findFirst().get().getClass().getCanonicalName(), Matchers.is(DraftResultDeletedV2.class.getCanonicalName()));
+
+    }
     @Test
     public void shouldCorrectHearingDaysWithoutCourtCentreIfNotAlreadySet() {
 

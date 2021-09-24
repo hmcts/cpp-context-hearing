@@ -1,6 +1,7 @@
 package uk.gov.justice.ccr.notepad.view;
 
 import static java.lang.Boolean.FALSE;
+import static java.util.Collections.EMPTY_SET;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -53,12 +54,13 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
     private List<PromptChoice> mockPromptChoices;
 
     @Test
-    public void buildFromKnowledge() throws Exception {
+    public void buildFromKnowledge() {
+
         final List<Part> parts = new PartsResolver().getParts("parp");
         final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
         final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(), true,  false , "", mockPromptChoices);
 
-        final Knowledge knowledgeResultPrompt = processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now());
+        final Knowledge knowledgeResultPrompt = processor.processResultPrompt(resultDefinitionView.getResultDefinitionId(), LocalDate.now());
         final String code = randomUUID().toString();
         final Set<NameAddress> nameAddressList = new HashSet<>();
         NameAddress nameAddress1 = NameAddress.nameAddress()
@@ -93,9 +95,20 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         pc2.setPartName("LastName");
         pc1.setAddressType("Organisation");
         pc1.setLabel("Minor creditor name and address first name");
+        final PromptChoice pc3 = new PromptChoice();
+        pc3.setComponentType("NAMEADDRESS");
+        pc3.setCode(code);
+        pc3.setType(ResultType.NAMEADDRESS);
+        pc3.setReferenceDataKey("hCHOUSE");
+        pc3.setPromptRef("pr2");
+        pc3.setComponentLabel("Minor creditor name and address first name");
+        pc3.setPartName("LastName");
+        pc3.setAddressType("Organisation");
+        pc3.setLabel("Minor creditor name and address last name");
         final List<PromptChoice> promptChoices = knowledgeResultPrompt.getPromptChoices();
         promptChoices.add(pc1);
         promptChoices.add(pc2);
+        promptChoices.add(pc3);
 
         final ResultPromptView result = target.buildFromKnowledge(knowledgeResultPrompt);
         assertThat(result.getPromptChoices().size(), is(4));
@@ -107,10 +120,10 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
                 , containsInAnyOrder(Arrays.asList(36, "Prohibited activities", TXT, Boolean.TRUE).toArray()));
         assertThat(Arrays.asList(p2.getCode().length(), p2.getLabel(), p2.getType(), p2.getRequired())
                 , containsInAnyOrder(Arrays.asList(36, "Period of prohibition", DURATION, Boolean.TRUE).toArray()));
-        assertThat(Arrays.asList(p3.getCode().length(), p3.getLabel(), p3.getType(), p3.getRequired())
-                , containsInAnyOrder(Arrays.asList(36, "Address Line 1", ADDRESS, Boolean.TRUE).toArray()));
-        assertThat(Arrays.asList(p4.getCode().length(), p4.getLabel(), p4.getType(), p4.getNameEmail())
-                , containsInAnyOrder(Arrays.asList(36, "Minor creditor name and address first name", null, Boolean.TRUE).toArray()));
+        assertThat(Arrays.asList(p3.getCode(), p3.getLabel(), p3.getType(), p3.getRequired())
+                , containsInAnyOrder(Arrays.asList("44a5fa6c-da56-401a-b10d-cb01138caa21", "Address Line 1", ADDRESS, Boolean.TRUE).toArray()));
+        assertThat(Arrays.asList(p4.getCode(), p4.getLabel(), p4.getType().name(), p4.getNameEmail())
+                , containsInAnyOrder(Arrays.asList(code, "Minor creditor name", "NAMEADDRESS", true).toArray()));
         final List<Children> childrenList = p2.getChildren();
         final Children c1 = childrenList.get(0);
         final Children c2 = childrenList.get(1);
@@ -134,15 +147,30 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         assertThat(Arrays.asList(addressLineC2.getType(), addressLineC2.getLabel())
                 , containsInAnyOrder(Arrays.asList(TXT, "Address Line 2").toArray()));
 
+        assertThat(p4.getPromptRef(), is("hCHOUSE"));
         assertThat(p4.getComponentType(), is(ONEOF));
-        assertThat(p4.getChildren().size(), is(1));
+        assertThat(p4.getChildren().size(), is(2));
         final Children oneOfNameAddress = p4.getChildren().get(0);
         assertThat(oneOfNameAddress.getType(), is(NAMEADDRESS));
         final List<Children> nameAddressChildrenList = oneOfNameAddress.getChildrenList();
         final Children nameAddressC1 = nameAddressChildrenList.get(0);
-        final Children nameAddressC2 = nameAddressChildrenList.get(1);
-        assertThat(nameAddressC1.getPartName(), is("FirstName"));
-        assertThat(nameAddressC2.getPartName(), is("LastName"));
+        //final Children nameAddressC2 = nameAddressChildrenList.get(1);
+        assertThat(nameAddressC1.getPartName(), is("LastName"));
+        //assertThat(nameAddressC2.getPartName(), is("LastName"));
+    }
+
+    @Test
+    public void buildFromKnowledgeForNameEmail() {
+        final Knowledge knowledge = new Knowledge();
+
+        knowledge.setPromptChoices(setUpPromptChoicesForNameEmail());
+
+        final ResultPromptView result = target.buildFromKnowledge(knowledge);
+        assertThat(result.getPromptChoices().size(), is(1));
+        assertThat(result.getPromptChoices().get(0).getChildren().size(), is(3));
+        assertThat(result.getPromptChoices().get(0).getChildren().get(0).getPromptRef(), is("pr1"));
+        assertThat(result.getPromptChoices().get(0).getChildren().get(1).getPromptRef(), is("pr2"));
+        assertThat(result.getPromptChoices().get(0).getChildren().get(2).getPromptRef(), is("pr3"));
     }
 
     @Test
@@ -210,10 +238,9 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         pc2.setComponentLabel("Minor creditor name");
         pc2.setLabel("Minor creditor name and address last name");
         pc2.setPartName("LastName");
-        pc1.setAddressType("Organisation");
-        pc1.setLabel("Minor creditor name and address first name");
 
-        final Knowledge knowledgeWithNAMEADDRESSWithInOneOf = processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now());
+
+        final Knowledge knowledgeWithNAMEADDRESSWithInOneOf = processor.processResultPrompt(resultDefinitionView.getResultDefinitionId(), LocalDate.now());
         final List<PromptChoice> promptChoices = knowledgeWithNAMEADDRESSWithInOneOf.getPromptChoices();
         promptChoices.add(pc1);
         promptChoices.add(pc2);
@@ -234,20 +261,20 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         final PromptChoice p4 = result.getPromptChoices().get(3);
         final PromptChoice p5 = result.getPromptChoices().get(4);
 
-        assertThat(Arrays.asList(p1.getCode().length(), p1.getLabel(), p1.getType(), p1.getRequired(), p1.getHidden())
-                , containsInAnyOrder(Arrays.asList(36, "Treatment institution / place", TXT, Boolean.TRUE, Boolean.FALSE).toArray()));
+        assertThat(Arrays.asList(p1.getCode().length(), p1.getLabel(), p1.getType(), p1.getRequired(), p1.getNameAddressList())
+                , containsInAnyOrder(Arrays.asList(36, "Treatment institution / place", TXT, Boolean.TRUE, EMPTY_SET).toArray()));
 
-        assertThat(Arrays.asList(p2.getCode().length(), p2.getLabel(), p2.getType(), p2.getRequired(), p2.getHidden())
-                , containsInAnyOrder(Arrays.asList(36, "Under direction of", TXT, Boolean.TRUE, Boolean.FALSE).toArray()));
+        assertThat(Arrays.asList(p2.getCode().length(), p2.getLabel(), p2.getType(), p2.getRequired(), p2.getNameAddressList())
+                , containsInAnyOrder(Arrays.asList(36, "Under direction of", TXT, Boolean.TRUE, EMPTY_SET).toArray()));
 
-        assertThat(Arrays.asList(p3.getCode().length(), p3.getLabel(), p3.getType(), p3.getRequired(), p3.getHidden())
-                , containsInAnyOrder(Arrays.asList(36, "Period of treatment", DURATION, Boolean.TRUE, Boolean.FALSE).toArray()));
+        assertThat(Arrays.asList(p3.getCode().length(), p3.getLabel(), p3.getType(), p3.getRequired(), p3.getNameAddressList())
+                , containsInAnyOrder(Arrays.asList(36, "Period of treatment", DURATION, Boolean.TRUE, EMPTY_SET).toArray()));
 
-        assertThat(Arrays.asList(p4.getCode().length(), p4.getLabel(), p4.getComponentType(), p4.getRequired(), p4.getHidden())
-                , containsInAnyOrder(Arrays.asList(36, "Period of treatment-oneOf", "ONEOF", Boolean.TRUE, Boolean.FALSE).toArray()));
+        assertThat(Arrays.asList(p4.getCode().length(), p4.getLabel(), p4.getComponentType(), p4.getRequired(), p4.getNameAddressList())
+                , containsInAnyOrder(Arrays.asList(36, "Period of treatment-oneOf", "ONEOF", Boolean.TRUE, EMPTY_SET).toArray()));
 
-        assertThat(Arrays.asList(p5.getCode().length(), p5.getLabel(), p5.getType(), p5.getRequired(), p5.getHidden())
-                , containsInAnyOrder(Arrays.asList(36, "Treatment intervals", TXT, Boolean.FALSE, Boolean.FALSE).toArray()));
+        assertThat(Arrays.asList(p5.getCode().length(), p5.getLabel(), p5.getType(), p5.getRequired(), p5.getNameAddressList())
+                , containsInAnyOrder(Arrays.asList(36, "Treatment intervals", TXT, Boolean.FALSE, EMPTY_SET).toArray()));
 
         final List<Children> childrenList = p3.getChildren();
         final Children c1 = childrenList.get(0);
@@ -269,7 +296,7 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         assertThat(Arrays.asList(gc1.getType(), gc1.getCode(), gc1.getLabel()), containsInAnyOrder(Arrays.asList(TXT, "b9f6aed0-382a-49a9-803d-d19cfade22b1" ,"Additional information").toArray()));
         assertThat(Arrays.asList(gc2.getType(), gc2.getCode(), gc2.getLabel()), containsInAnyOrder(Arrays.asList(FIXL, "47337f1c-e343-4093-884f-035ba96c4db0","Conviction / acquittal").toArray()));
         assertThat(Arrays.asList(gc3.getType(), gc3.getCode(), gc3.getLabel()), containsInAnyOrder(Arrays.asList(DURATION, "8c0775df-5ef0-4f46-83a3-da50e6d9395f","Period of treatment-oneOf").toArray()));
-        assertThat(Arrays.asList(gc4.getType(), gc4.getCode(), gc4.getLabel(),gc4.getListLabel(), gc4.getAddressType()), containsInAnyOrder(Arrays.asList(NAMEADDRESS, code,"Minor creditor name", "Select Minor Creditor", "Organisation").toArray()));
+        assertThat(Arrays.asList(gc4.getType(), gc4.getCode(), gc4.getLabel(),gc4.getListLabel()), containsInAnyOrder(Arrays.asList(NAMEADDRESS, null,"Minor creditor name", "Select Minor Creditor").toArray()));
 
         final Set<NameAddress> gc4NameAddressList = gc4.getNameAddressList();
         assertThat(gc4NameAddressList.size(), is(1));
@@ -287,9 +314,9 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
 
         final List<Children> oneOfNameAddressChildrenList  = gc4.getChildrenList();
         final Children gcc5 = oneOfNameAddressChildrenList.get(0);
-        final Children gcc6= oneOfNameAddressChildrenList.get(1);
-        assertThat(Arrays.asList(gcc5.getType(), gcc5.getLabel(), gcc5.getPartName()), containsInAnyOrder(Arrays.asList(TXT, "Minor creditor name and address first name", "FirstName").toArray()));
-        assertThat(Arrays.asList(gcc6.getType(),  gcc6.getLabel(), gcc6.getPartName()), containsInAnyOrder(Arrays.asList(TXT,"Minor creditor name and address last name", "LastName").toArray()));
+        //final Children gcc6= oneOfNameAddressChildrenList.get(1);
+        assertThat(Arrays.asList(gcc5.getType(), gcc5.getLabel(), gcc5.getPartName()), containsInAnyOrder(Arrays.asList(TXT, "Minor creditor name and address last name", "LastName").toArray()));
+        //assertThat(Arrays.asList(gcc6.getType(),  gcc6.getLabel(), gcc6.getPartName()), containsInAnyOrder(Arrays.asList(TXT,"Minor creditor name and address last name", "LastName").toArray()));
     }
 
     @Test
@@ -298,7 +325,7 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         final Knowledge knowledge = processor.processParts(parts.stream().map(Part::getValueAsString).collect(Collectors.toList()), LocalDate.now());
         final ResultDefinitionView resultDefinitionView = new ResultDefinitionViewBuilder().buildFromKnowledge(parts, knowledge, new ArrayList<>(),true, false , "", mockPromptChoices);
 
-        final Knowledge knowledgeWithNAMEADDRESSWithInOneOf = processor.processResultPrompt(resultDefinitionView.getResultCode(), LocalDate.now());
+        final Knowledge knowledgeWithNAMEADDRESSWithInOneOf = processor.processResultPrompt(resultDefinitionView.getShortCode(), LocalDate.now());
 
 
         final List<PromptChoice> promptChoices = getPromptChoices();
@@ -308,10 +335,62 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
 
         final PromptChoice promptChoice = result.getPromptChoices().get(0);
         assertThat(promptChoice.getPromptRef(), is("CREDNAME"));
+        assertThat(promptChoice.getLabel(), is("Major creditor name"));
         assertThat(promptChoice.getChildren().get(0).getPromptRef(), is("CREDNAME"));
         assertThat(promptChoice.getChildren().get(1).getPromptRef(), is("minorcreditornameandaddress"));
         assertThat(promptChoice.getChildren().get(1).getChildrenList().get(0).getPromptRef(), is("minorcreditornameandaddressOrganisationName"));
         assertThat(promptChoice.getChildren().get(1).getChildrenList().get(1).getPromptRef(), is("minorcreditornameandaddressAddress1"));
+    }
+
+    private List<PromptChoice> setUpPromptChoicesForNameEmail() {
+        final String code = randomUUID().toString();
+
+        final PromptChoice pc1 = new PromptChoice();
+        pc1.setComponentType("NAMEADDRESS");
+        pc1.setCode(code);
+        pc1.setType(ResultType.NAMEADDRESS);
+        pc1.setPromptRef("pr1");
+        pc1.setComponentLabel("Minor creditor organisation");
+        pc1.setListLabel("Select Minor Creditor");
+        pc1.setAddressType("Organisation");
+        pc1.setLabel("Minor creditor organisation name");
+        pc1.setNameEmail(true);
+        pc1.setPartName("OrganisationName");
+        final PromptChoice pc2 = new PromptChoice();
+        pc2.setComponentType("NAMEADDRESS");
+        pc2.setCode(code);
+        pc2.setType(ResultType.NAMEADDRESS);
+        pc2.setPromptRef("pr2");
+        pc2.setComponentLabel("Minor creditor email address");
+        pc2.setLabel("Minor creditor email address");
+        pc2.setPartName("EmailAddress1");
+        pc2.setAddressType("Organisation");
+        pc2.setNameEmail(true);
+        pc2.setLabel("Minor creditor email address");
+        final PromptChoice pc3 = new PromptChoice();
+        pc3.setComponentType("NAMEADDRESS");
+        pc3.setCode(code);
+        pc3.setType(ResultType.NAMEADDRESS);
+        pc3.setReferenceDataKey("hCHOUSE");
+        pc3.setPromptRef("pr3");
+        pc3.setComponentLabel("Minor creditor email addresse");
+        pc3.setPartName("EmailAddress2");
+        pc3.setAddressType("Organisation");
+        pc3.setNameEmail(true);
+        pc3.setLabel("Minor creditor email address");
+        final PromptChoice pc4 = new PromptChoice();
+        pc4.setComponentType("NAMEADDRESS");
+        pc4.setCode(code);
+        pc4.setType(ResultType.NAMEADDRESS);
+        pc4.setReferenceDataKey("hCHOUSE");
+        pc4.setPromptRef("pr4");
+        pc4.setComponentLabel("Minor creditor address line");
+        pc4.setPartName("AddressLine1");
+        pc4.setAddressType("Organisation");
+        pc4.setNameEmail(true);
+        pc4.setLabel("Minor creditor address line");
+
+        return Arrays.asList(pc1, pc2, pc3, pc4);
     }
 
     private List<PromptChoice> getPromptChoices() {
@@ -325,7 +404,6 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         promptChoice.setRequired( FALSE );
         promptChoice.setComponentLabel("FIXL");
         promptChoice.setFixedList(Sets.newHashSet("ITEM 1", "ITEM 2"));
-        promptChoice.setHidden(false);
         pcs.add(promptChoice);
 
         promptChoice= new PromptChoice();
@@ -337,7 +415,6 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         promptChoice.setComponentType("ONEOF");
         promptChoice.setComponentLabel("Minor creditor");
         promptChoice.setPartName("OrganisationName");
-        promptChoice.setHidden(false);
         promptChoice.setNameEmail(false);
         pcs.add(promptChoice);
 
@@ -350,7 +427,6 @@ public class ResultPromptViewBuilderTest extends AbstractTest {
         promptChoice.setComponentType("ONEOF");
         promptChoice.setComponentLabel("Minor creditor");
         promptChoice.setPartName("Address1");
-        promptChoice.setHidden(false);
         promptChoice.setNameEmail(false);
         pcs.add(promptChoice);
         return pcs;

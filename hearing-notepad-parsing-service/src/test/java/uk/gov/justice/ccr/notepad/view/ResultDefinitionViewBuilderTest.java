@@ -59,7 +59,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part part4 = result.getParts().get(3);
 
         assertThat(result.getChildResultDefinitions().size(), is(2));
-        assertThat(result.getResultCode().length()
+        assertThat(result.getResultDefinitionId().length()
                 , is(36)
         );
         assertThat(result.getResultLevel()
@@ -114,7 +114,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part part3 = result.getParts().get(2);
 
         assertThat(result.getChildResultDefinitions().size(), is(2));
-        assertThat(result.getResultCode().length()
+        assertThat(result.getResultDefinitionId().length()
                 , is(36)
         );
         assertThat(result.getResultLevel()
@@ -145,7 +145,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part part4 = result.getParts().get(2);
 
         assertThat(result.getChildResultDefinitions().size(), is(2));
-        assertThat(result.getResultCode().length()
+        assertThat(result.getResultDefinitionId().length()
                 , is(36)
         );
         assertThat(result.getResultLevel()
@@ -190,7 +190,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part p8 = result.getParts().get(7);
 
         assertThat(result.getChildResultDefinitions().size(), is(2));
-        assertThat(result.getResultCode().length()
+        assertThat(result.getResultDefinitionId().length()
                 , is(36)
         );
         assertThat(result.getResultLevel()
@@ -237,7 +237,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part p5 = result.getParts().get(4);
         Part p6 = result.getParts().get(5);
 
-        assertThat(result.getResultCode(), nullValue());
+        assertThat(result.getResultDefinitionId(), nullValue());
         assertThat(result.getResultLevel(), nullValue());
 
         assertThat(Arrays.asList(p3.getValue(), p3.getState(), p3.getType())
@@ -267,7 +267,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
 
         Part p1 = result.getParts().get(0);
 
-        assertThat(result.getResultCode() == null
+        assertThat(result.getResultDefinitionId() == null
                 , is(true)
         );
         assertThat(result.getResultLevel() == null
@@ -295,7 +295,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part p2 = result.getParts().get(1);
         Part p3 = result.getParts().get(2);
         Part p4 = result.getParts().get(3);
-        assertThat(result.getResultCode() == null
+        assertThat(result.getResultDefinitionId() == null
                 , is(true)
         );
         assertThat(result.getResultLevel() == null
@@ -329,7 +329,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part p2 = result.getParts().get(1);
         Part p3 = result.getParts().get(2);
         Part p4 = result.getParts().get(3);
-        assertThat(result.getResultCode().length()
+        assertThat(result.getResultDefinitionId().length()
                 , is(36)
         );
         assertThat(result.getResultLevel()
@@ -367,7 +367,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part part4 = result.getParts().get(3);
         Part part5 = result.getParts().get(4);
         Part part6 = result.getParts().get(5);
-        assertThat(result.getResultCode().length()
+        assertThat(result.getResultDefinitionId().length()
                 , is(36)
         );
         assertThat(result.getResultLevel()
@@ -418,7 +418,7 @@ public class ResultDefinitionViewBuilderTest extends AbstractTest {
         Part p2 = result.getParts().get(1);
         Part p3 = result.getParts().get(2);
         Part p4 = result.getParts().get(3);
-        assertThat(result.getResultCode() == null
+        assertThat(result.getResultDefinitionId() == null
                 , is(true)
         );
         assertThat(result.getResultLevel() == null

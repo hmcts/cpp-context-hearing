@@ -8,6 +8,7 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
 import javax.json.JsonObject;
@@ -34,6 +35,8 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
+import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
@@ -475,5 +478,34 @@ public class HearingEventsIT extends AbstractIT {
                                 withJsonPath("$.events[0].alterable", is(false))
                         ))
                 );
+    }
+
+    @Test
+    public void amendEvent_givenStartOfHearing() {
+
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        amendHearing(getRequestSpec(), hearingOne.getHearingId(), SHARED_AMEND_LOCKED_ADMIN_ERROR);
+
+        poll(requestParams(getURL("hearing.get-hearing", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
+                "application/vnd.hearing.get.hearing+json").withHeader(USER_ID, getLoggedInUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingState", is(SHARED_AMEND_LOCKED_ADMIN_ERROR.toString())
+
+                        )))
+                );
+
     }
 }

@@ -38,14 +38,14 @@ public class CTLExpiryDateCalculatorService {
      * Uses the PublicHolidaysWeekendsService to find out if the date falls on weekend or bank holiday
      * If CTL is extended, it will return existed CTL expiry time
      */
-    public Optional<LocalDate> calculateCTLExpiryDate(final Offence offence, final LocalDate hearingDay) {
+    public Optional<LocalDate> calculateCTLExpiryDate(final Offence offence, final LocalDate hearingDay, final String bailStatusCode) {
 
         if(TRUE.equals(offence.isCtlExtended())){
             return Optional.of(offence.getCtlTimeLimit());
         }
 
         Optional<LocalDate> ctlExpiryDate = Optional.empty();
-        final CTLRemandStatus remandStatus = CTLRemandStatus.getCTLRemandStatusFrom(offence.getBailStatusCode());
+        final CTLRemandStatus remandStatus = CTLRemandStatus.getCTLRemandStatusFrom(bailStatusCode);
 
         if (ctlExpiryDateValidityChecker.valid(offence, remandStatus)) {
             ctlExpiryDate = ctlExpiryDateCalculator.calculateCTLExpiryDate(offence, remandStatus, hearingDay);

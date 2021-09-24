@@ -26,7 +26,9 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUT
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2;
 import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_DRAFT_RESULT_SAVED;
+import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_EVENT_AMENDED;
 
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
@@ -43,6 +45,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.result.RequestApprovalCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
@@ -98,6 +101,8 @@ public class HearingEventProcessorTest {
     private static final String FIELD_CASE = "case";
     private static final String FIELD_CASE_ID = "caseId";
     private static final String FIELD_HEARING_ID = "hearingId";
+    private static final String FIELD_HEARING_DAY = "hearingDay";
+    private static final String NEW_HEARING_STATE = "newHearingState";
     private static final String FIELD_SHARED_TIME = "sharedTime";
     private static final String FIELD_HEARING_DEFINITION = "hearingEventDefinition";
     private static final String FIELD_HEARING_DEFINITION_ID = "hearingEventDefinitionId";
@@ -233,6 +238,61 @@ public class HearingEventProcessorTest {
                 .convert(envelopeOut.payloadAsJsonObject(), RequestApprovalCommand.class);
 
         assertThat(requestApprovalCommand.getHearingId(), is(HEARING_ID));
+
+    }
+
+    @Test
+    public void shouldHearingAmendedPublicEvent() {
+
+        UUID userId = UUID.randomUUID();
+        HearingState newHearingState = HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
+        HearingAmended hearingAmended = new HearingAmended(HEARING_ID,userId,newHearingState);
+
+        final JsonObjectBuilder result = createObjectBuilder()
+                .add(NEW_HEARING_STATE, newHearingState.toString())
+                .add(FIELD_HEARING_ID, HEARING_ID.toString());
+        final JsonEnvelope eventIn =  envelopeFrom(metadataWithRandomUUID("hearing.event.amended"), result.build());
+
+        final InOrder inOrder = inOrder(sender);
+        this.hearingEventProcessor.publicHearingAmended(eventIn);
+
+        inOrder.verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(PUBLIC_HEARING_EVENT_AMENDED));
+
+        final PublicHearingAmended publicHearingAmended = jsonObjectToObjectConverter
+                .convert(envelopeOut.payloadAsJsonObject(), PublicHearingAmended.class);
+
+        assertThat(publicHearingAmended.getHearingId(), is(HEARING_ID));
+
+    }
+
+    @Test
+    public void shouldPublishDraftResultDeletedV2PublicEvent() {
+
+        UUID userId = UUID.randomUUID();
+        HearingState newHearingState = HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
+        HearingAmended hearingAmended = new HearingAmended(HEARING_ID,userId,newHearingState);
+
+        final JsonObjectBuilder result = createObjectBuilder()
+                .add(FIELD_AMENDED_BY_USER_ID, userId.toString())
+                .add(FIELD_HEARING_DAY, "2021-01-03")
+                .add(FIELD_HEARING_ID, HEARING_ID.toString());
+        final JsonEnvelope eventIn =  envelopeFrom(metadataWithRandomUUID("hearing.draft-result-deleted-v2"), result.build());
+
+        final InOrder inOrder = inOrder(sender);
+        this.hearingEventProcessor.publicDraftResultDeletedV2PublicEvent(eventIn);
+
+        inOrder.verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2));
+
+        final PublicHearingDraftResultDeleted publicHearingDraftResultDeleted = jsonObjectToObjectConverter
+                .convert(envelopeOut.payloadAsJsonObject(), PublicHearingDraftResultDeleted.class);
+
+        assertThat(publicHearingDraftResultDeleted.getHearingId(), is(HEARING_ID));
 
     }
 

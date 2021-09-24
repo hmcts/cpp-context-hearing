@@ -4,6 +4,7 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.restassured.RestAssured.given;
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
@@ -87,6 +88,7 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 import uk.gov.moj.cpp.hearing.command.verdict.HearingUpdateVerdictCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
@@ -126,6 +128,7 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
+import org.json.JSONObject;
 
 public class UseCases {
 
@@ -620,6 +623,22 @@ public class UseCases {
         return saveDraftResultCommand;
     }
 
+    public static boolean amendHearing(final RequestSpecification requestSpec, final UUID hearingId, final HearingState newHearingState) {
+
+        JSONObject json = new JSONObject();
+
+        json.put("hearingId", hearingId);
+        json.put("newHearingState", newHearingState.toString());
+
+        makeCommand(requestSpec, "hearing.amend")
+                .ofType("application/vnd.hearing.amend+json")
+                .withArgs(hearingId)
+                .withPayload(json.toString())
+                .executeSuccessfully();
+
+        return true;
+    }
+
     public static SaveDraftResultCommand saveDraftResultsApplication(final RequestSpecification requestSpec, final SaveDraftResultCommand saveDraftResultCommand) {
         //dummy save draft to use existing pattern
 
@@ -628,44 +647,43 @@ public class UseCases {
 
     private static Stream<SharedResultsCommandResultLine> sharedResultsCommandResultLineStream(final Target target) {
         return target.getResultLines().stream().map(resultLineIn ->
-                getSharedResultsCommandResultLine(target, resultLineIn));
-    }
-
-    private static SharedResultsCommandResultLine getSharedResultsCommandResultLine(final Target target,
-                                                                                    final uk.gov.justice.core.courts.ResultLine resultLineIn) {
-        return new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
-                resultLineIn.getOrderedDate(),
-                resultLineIn.getSharedDate(),
-                resultLineIn.getResultLineId(),
-                target.getTargetId(),
-                target.getOffenceId(),
-                target.getDefendantId(),
-                resultLineIn.getResultDefinitionId(),
-                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
-                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(toList()),
-                resultLineIn.getResultLabel(),
-                resultLineIn.getLevel().name(),
-                resultLineIn.getIsModified(),
-                resultLineIn.getIsComplete(),
-                target.getApplicationId(),
-                resultLineIn.getAmendmentReasonId(),
-                resultLineIn.getAmendmentReason(),
-                resultLineIn.getAmendmentDate(),
-                resultLineIn.getFourEyesApproval(),
-                resultLineIn.getApprovedDate(),
-                resultLineIn.getIsDeleted(),
-                null, null);
+                new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                        resultLineIn.getOrderedDate(),
+                        resultLineIn.getSharedDate(),
+                        resultLineIn.getResultLineId(),
+                        target.getOffenceId(),
+                        target.getDefendantId(),
+                        resultLineIn.getResultDefinitionId(),
+                        resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                                p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(toList()),
+                        resultLineIn.getResultLabel(),
+                        resultLineIn.getLevel().name(),
+                        resultLineIn.getIsModified(),
+                        resultLineIn.getIsComplete(),
+                        target.getApplicationId(),
+                        resultLineIn.getAmendmentReasonId(),
+                        resultLineIn.getAmendmentReason(),
+                        nonNull(resultLineIn.getAmendmentDate())?resultLineIn.getAmendmentDate().toLocalDate():null,
+                        resultLineIn.getFourEyesApproval(),
+                        resultLineIn.getApprovedDate(),
+                        resultLineIn.getIsDeleted(),
+                        null,
+                        null,
+                        target.getShadowListed(),
+                        target.getDraftResult()));
     }
 
     private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target) {
         return target.getResultLines().stream().map(resultLineIn ->
-                new SharedResultsCommandResultLineV2(resultLineIn.getDelegatedPowers(),
+                new SharedResultsCommandResultLineV2(
+                        resultLineIn.getShortCode(),
+                        resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
                         resultLineIn.getSharedDate(),
                         resultLineIn.getResultLineId(),
-                        target.getTargetId(),
                         target.getOffenceId(),
                         target.getDefendantId(),
+                        target.getMasterDefendantId(),
                         resultLineIn.getResultDefinitionId(),
                         resultLineIn.getPrompts().stream()
                                 .map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(), p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef()))
@@ -675,13 +693,17 @@ public class UseCases {
                         resultLineIn.getIsModified(),
                         resultLineIn.getIsComplete(),
                         target.getApplicationId(),
+                        target.getCaseId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
                         ZonedDateTime.now(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
-                        null, null));
+                        resultLineIn.getChildResultLineIds(),
+                        resultLineIn.getParentResultLineIds(),
+                        target.getShadowListed(),
+                        target.getDraftResult()));
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
@@ -700,6 +722,24 @@ public class UseCases {
                 .executeSuccessfully();
 
         return shareResultsCommand;
+    }
+
+    public static ShareDaysResultsCommand sharedResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareDaysResultsCommand command, final List<Target> targets) {
+
+        // TODO GPE-6699
+        command.setResultLines(
+                targets.stream()
+                        .flatMap(target -> sharedResultsResultLinePerDay(target))
+                        .collect(Collectors.toList()));
+
+
+        makeCommand(requestSpec, "hearing.shared-results")
+                .ofType("application/vnd.hearing.shared-results+json")
+                .withArgs(hearingId, command.getHearingDay())
+                .withPayload(command)
+                .executeSuccessfully();
+
+        return command;
     }
 
     public static ShareDaysResultsCommand shareResultsPerDay(final RequestSpecification requestSpec, final UUID hearingId, final ShareDaysResultsCommand command, final List<Target> targets) {

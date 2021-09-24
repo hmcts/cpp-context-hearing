@@ -15,7 +15,6 @@ public class SharedResultsCommandResultLine implements Serializable {
     private LocalDate orderedDate;
     private LocalDate sharedDate;
     private UUID resultLineId;
-    private UUID targetId;
     private UUID offenceId;
     private UUID defendantId;
     private UUID resultDefinitionId;
@@ -34,6 +33,8 @@ public class SharedResultsCommandResultLine implements Serializable {
     private boolean isDeleted;
     private List<UUID> childResultLineIds;
     private List<UUID> parentResultLineIds;
+    private boolean shadowListed;
+    private String draftResult;
 
     @SuppressWarnings({"squid:S2384"})
     @JsonCreator
@@ -42,7 +43,6 @@ public class SharedResultsCommandResultLine implements Serializable {
             @JsonProperty("orderedDate") final LocalDate orderedDate,
             @JsonProperty("sharedDate") final LocalDate sharedDate,
             @JsonProperty("resultLineId") final UUID resultLineId,
-            @JsonProperty("targetId") final UUID targetId,
             @JsonProperty("offenceId") final UUID offenceId,
             @JsonProperty("defendantId") final UUID defendantId,
             @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
@@ -59,13 +59,14 @@ public class SharedResultsCommandResultLine implements Serializable {
             @JsonProperty("approvedDate") final LocalDate approvedDate,
             @JsonProperty("isDeleted") final boolean isDeleted,
             @JsonProperty("childResultLineIds") final List<UUID> childResultLineIds,
-            @JsonProperty("parentResultLineIds") final List<UUID>  parentResultLineIds
+            @JsonProperty("parentResultLineIds") final List<UUID>  parentResultLineIds,
+            @JsonProperty("shadowListed") final boolean shadowListed,
+            @JsonProperty("draftResult") final String draftResult
     ) {
         this.delegatedPowers = delegatedPowers;
         this.orderedDate = orderedDate;
         this.sharedDate = sharedDate;
         this.resultLineId = resultLineId;
-        this.targetId = targetId;
         this.offenceId = offenceId;
         this.defendantId = defendantId;
         this.resultDefinitionId = resultDefinitionId;
@@ -83,6 +84,8 @@ public class SharedResultsCommandResultLine implements Serializable {
         this.isDeleted = isDeleted;
         this.childResultLineIds = childResultLineIds;
         this.parentResultLineIds = parentResultLineIds;
+        this.shadowListed = shadowListed;
+        this.draftResult = draftResult;
     }
 
     public DelegatedPowers getDelegatedPowers() {
@@ -115,14 +118,6 @@ public class SharedResultsCommandResultLine implements Serializable {
 
     public void setResultLineId(UUID resultLineId) {
         this.resultLineId = resultLineId;
-    }
-
-    public UUID getTargetId() {
-        return targetId;
-    }
-
-    public void setTargetId(UUID targetId) {
-        this.targetId = targetId;
     }
 
     public UUID getOffenceId() {
@@ -261,5 +256,21 @@ public class SharedResultsCommandResultLine implements Serializable {
 
     public void setParentResultLineIds(final List<UUID> parentResultLineIds) {
         this.parentResultLineIds = parentResultLineIds;
+    }
+
+    public boolean isShadowListed() {
+        return shadowListed;
+    }
+
+    public void setShadowListed(final boolean shadowListed) {
+        this.shadowListed = shadowListed;
+    }
+
+    public String getDraftResult() {
+        return draftResult;
+    }
+
+    public void setDraftResult(final String draftResult) {
+        this.draftResult = draftResult;
     }
 }

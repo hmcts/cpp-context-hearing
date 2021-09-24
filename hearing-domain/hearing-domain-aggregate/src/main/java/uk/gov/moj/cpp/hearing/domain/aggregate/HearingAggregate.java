@@ -95,6 +95,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHear
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
@@ -136,6 +137,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancelled;
@@ -163,6 +165,8 @@ import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregate implements Aggregate {
@@ -261,6 +265,8 @@ public class HearingAggregate implements Aggregate {
                             resultsSharedDelegate.handleDraftResultSaved(draftResultSaved);
                         }
                 ),
+                when(DraftResultSavedV2.class).apply(draftResultSaved -> {}
+                ),
                 when(DefendantAttendanceUpdated.class).apply(defendantDelegate::handleDefendantAttendanceUpdated),
                 when(RespondentCounselAdded.class).apply(respondentCounselDelegate::handleRespondentCounselAdded),
                 when(RespondentCounselRemoved.class).apply(respondentCounselDelegate::handleRespondentCounselRemoved),
@@ -294,16 +300,24 @@ public class HearingAggregate implements Aggregate {
                 when(HearingDaysWithoutCourtCentreCorrected.class).apply(hearingDelegate::handleHearingDaysWithoutCourtCentreCorrected),
                 when(HearingMarkedAsDuplicate.class).apply(duplicate -> hearingDelegate.handleHearingMarkedAsDuplicate()),
                 when(DefendantsInYouthCourtUpdated.class).apply(e -> this.momento.getHearing().setYouthCourtDefendantIds(e.getYouthCourtDefendantIds())),
+                when(HearingAmended.class).apply(x->{
+                    this.amendingSharedHearingUserId = x.getUserId();
+                    this.hearingState = x.getNewHearingState();
+                }),
                 when(ResultAmendmentsCancelled.class).apply(x -> {
                     this.hearingState = SHARED;
                     this.momento.getTransientTargets().clear();
                 }),
-                when(ResultAmendmentsValidated.class).apply(x -> this.hearingState = VALIDATED),
+                when(ResultAmendmentsValidated.class).apply(x -> {
+                    this.hearingState = VALIDATED;
+                }),
                 when(ResultAmendmentsRejected.class).apply(x -> {
                     this.hearingState = SHARED;
                     this.momento.getTransientTargets().clear();
                 }),
-                when(ApprovalRequestedV2.class).apply(e -> this.hearingState = APPROVAL_REQUESTED),
+                when(ApprovalRequestedV2.class).apply(e -> {
+                    this.hearingState = APPROVAL_REQUESTED;
+                }),
                 when(HearingDeleted.class).apply(deleted -> hearingDelegate.handleHearingDeleted()),
                 when(HearingUnallocated.class).apply(hearingDelegate::handleHearingUnallocated),
                 when(NextHearingStartDateRecorded.class).apply(hearingDelegate::handleNextHearingStartDateRecorded),
@@ -545,7 +559,38 @@ public class HearingAggregate implements Aggregate {
         return apply(resultsSharedDelegate.rejectSaveDraftResult(targetForEvent));
     }
 
-    @SuppressWarnings("squid:S3358")
+    public Stream<Object> saveDraftResultV2(final UUID userId, final JsonObject draftResult, final UUID hearingId, LocalDate hearingDay) {
+        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
+            return apply(resultsSharedDelegate.hearingLocked(hearingId));
+        }
+
+        if (isSharedHearingBeingAmended() && !isSameUserWhoIsAmendingSharedHearing(userId)) {
+            return apply(resultsSharedDelegate.hearingLockedByOtherUser(hearingId));
+        }
+
+        return apply(resultsSharedDelegate.saveDraftResultV2(hearingId, hearingDay, draftResult, userId));
+    }
+
+    public Stream<Object> deleteDraftResultV2(final UUID userId,final UUID hearingId, LocalDate hearingDay) {
+
+        if (!INITIALISED.equals(this.hearingState)) {
+            return apply(resultsSharedDelegate.deleteDraftResultV2(hearingId, hearingDay, userId));
+        } else {
+            return apply(resultsSharedDelegate.hearingLockedByOtherUser(hearingId));
+        }
+    }
+
+    public Stream<Object> amendHearing(final UUID hearingId, final UUID userId, final HearingState newHearingState) {
+
+        if (SHARED_AMEND_LOCKED_ADMIN_ERROR.equals(newHearingState) || SHARED_AMEND_LOCKED_USER_ERROR.equals(newHearingState)) {
+            return apply(resultsSharedDelegate.amendHearing(hearingId, userId, newHearingState));
+
+        }
+        return null;
+    }
+
+
+        @SuppressWarnings("squid:S3358")
     private HearingState getHearingState(final List<String> hearingStates) {
         if (this.hearingState != INITIALISED) {
             return hearingStates != null && (!hearingStates.isEmpty()) ? hearingStates.contains("ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0") ? SHARED_AMEND_LOCKED_ADMIN_ERROR : SHARED_AMEND_LOCKED_USER_ERROR : this.hearingState;

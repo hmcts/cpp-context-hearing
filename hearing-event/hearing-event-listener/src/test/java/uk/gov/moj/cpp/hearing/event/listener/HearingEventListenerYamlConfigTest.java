@@ -27,6 +27,7 @@ import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
@@ -159,7 +160,6 @@ public class HearingEventListenerYamlConfigTest {
             NextHearingStartDateRecorded.class.getAnnotation(Event.class).value(),
             HearingResultLineSharedDatesUpdated.class.getAnnotation(Event.class).value(),
             DaysResultLinesStatusUpdated.class.getAnnotation(Event.class).value()
-
 
     );
 

@@ -16,9 +16,12 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
@@ -54,6 +57,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Pr
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConverter;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -78,6 +82,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.json.JsonArray;
@@ -113,6 +118,7 @@ public class HearingQueryViewTest {
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_DAY = "hearingDay";
     private static final String FIELD_OFFENCE_ID = "offenceId";
+    private static final String FIELD_BAIL_STATUS_CODE = "bailStatusCode";
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
 
     @Rule
@@ -142,6 +148,12 @@ public class HearingQueryViewTest {
 
     @Mock
     private CTLExpiryDateCalculatorService ctlExpiryDateCalculatorService;
+
+    @Mock
+    private JsonObject draftResult;
+
+    @Mock
+    private Function<Object, JsonEnvelope> enveloperFunction;
 
     @InjectMocks
     private HearingQueryView target;
@@ -447,6 +459,24 @@ public class HearingQueryViewTest {
     }
 
     @Test
+    public void shouldGetDraftResultV2ByHearingIdAndHearingDay() throws IOException {
+        final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
+        when(hearingService.getDraftResult(HEARING_ID, HEARING_DAY)).thenReturn(buildDraftResultResponse(false));
+        when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString())).thenReturn(enveloperFunction);
+        when(enveloperFunction.apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-draft-result-v2"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .build());
+
+        final JsonEnvelope draftResultV2 = target.getDraftResultV2(query);
+
+        verify(hearingService).getDraftResult(HEARING_ID, HEARING_DAY);
+    }
+
+    @Test
     public void shouldGetViewStoreReusableInfoOnly() {
         final UUID masterDefendantId = UUID.fromString("2e576a1b-2c62-476d-a556-4c24d6bbc1a2");
         final List<Prompt> resultPrompts = new ArrayList<>();
@@ -521,6 +551,7 @@ public class HearingQueryViewTest {
 
         final UUID hearingId = randomUUID();
         final UUID offenceId = randomUUID();
+        final String bailStatusCode = "C";
 
         when(hearingService.getHearingById(hearingId)).thenThrow(new RuntimeException("Hearing not found for hearing id: " + hearingId));
 
@@ -529,6 +560,7 @@ public class HearingQueryViewTest {
                         .add(FIELD_HEARING_ID, hearingId.toString())
                         .add(FIELD_OFFENCE_ID, offenceId.toString())
                         .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .add(FIELD_BAIL_STATUS_CODE, bailStatusCode)
                         .build());
 
         exception.expect(RuntimeException.class);
@@ -545,6 +577,7 @@ public class HearingQueryViewTest {
         final UUID prosecutionCaseId = randomUUID();
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
+        final String bailStatusCode = "C";
 
         final Offence offence = new Offence();
         offence.setId(new HearingSnapshotKey(randomUUID(), hearingId));
@@ -569,6 +602,7 @@ public class HearingQueryViewTest {
                         .add(FIELD_HEARING_ID, hearingId.toString())
                         .add(FIELD_OFFENCE_ID, offenceId.toString())
                         .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .add(FIELD_BAIL_STATUS_CODE, bailStatusCode)
                         .build());
 
         exception.expect(RuntimeException.class);
@@ -585,6 +619,7 @@ public class HearingQueryViewTest {
         final UUID prosecutionCaseId = randomUUID();
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
+        final String bailStatusCode = "C";
 
         final Offence offence = new Offence();
         offence.setId(new HearingSnapshotKey(randomUUID(), hearingId));
@@ -609,6 +644,7 @@ public class HearingQueryViewTest {
                         .add(FIELD_HEARING_ID, hearingId.toString())
                         .add(FIELD_OFFENCE_ID, offenceId.toString())
                         .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .add(FIELD_BAIL_STATUS_CODE, bailStatusCode)
                         .build());
 
         final JsonEnvelope response = target.retrieveCustodyTimeLimit(query);
@@ -628,6 +664,7 @@ public class HearingQueryViewTest {
         final UUID prosecutionCaseId = randomUUID();
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
+        final String bailStatusCode = "C";
 
         final Offence offence = new Offence();
         offence.setId(new HearingSnapshotKey(offenceId, hearingId));
@@ -646,20 +683,21 @@ public class HearingQueryViewTest {
 
         when(hearingService.getHearingById(hearingId)).thenReturn(Optional.of(hearing));
         when(ctlExpiryDateCalculatorService.avoidCalculation(hearing, offenceId)).thenReturn(false);
-        when(ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE)).thenReturn(Optional.empty());
+        when(ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE, bailStatusCode)).thenReturn(Optional.empty());
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUID("hearing.custody-time-limit"),
                 createObjectBuilder()
                         .add(FIELD_HEARING_ID, hearingId.toString())
                         .add(FIELD_OFFENCE_ID, offenceId.toString())
                         .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .add(FIELD_BAIL_STATUS_CODE, bailStatusCode)
                         .build());
 
         final JsonEnvelope response = target.retrieveCustodyTimeLimit(query);
 
         verify(hearingService).getHearingById(hearingId);
         verify(ctlExpiryDateCalculatorService).avoidCalculation(hearing, offenceId);
-        verify(ctlExpiryDateCalculatorService).calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE);
+        verify(ctlExpiryDateCalculatorService).calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE, bailStatusCode);
 
         assertThat(response.metadata().name(), is("hearing.custody-time-limit"));
         assertThat(response.payloadAsJsonObject().isEmpty(), is(true));
@@ -674,6 +712,7 @@ public class HearingQueryViewTest {
         final UUID defendantId = randomUUID();
         final UUID offenceId = randomUUID();
         final LocalDate expiryDate = LocalDate.now();
+        final String bailStatusCode = "C";
 
         final Offence offence = new Offence();
         offence.setId(new HearingSnapshotKey(offenceId, hearingId));
@@ -692,20 +731,21 @@ public class HearingQueryViewTest {
 
         when(hearingService.getHearingById(hearingId)).thenReturn(Optional.of(hearing));
         when(ctlExpiryDateCalculatorService.avoidCalculation(hearing, offenceId)).thenReturn(false);
-        when(ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE)).thenReturn(Optional.of(expiryDate));
+        when(ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE, bailStatusCode)).thenReturn(Optional.of(expiryDate));
 
         final JsonEnvelope query = envelopeFrom(metadataWithRandomUUID("hearing.custody-time-limit"),
                 createObjectBuilder()
                         .add(FIELD_HEARING_ID, hearingId.toString())
                         .add(FIELD_OFFENCE_ID, offenceId.toString())
                         .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .add(FIELD_BAIL_STATUS_CODE, bailStatusCode)
                         .build());
 
         final JsonEnvelope response = target.retrieveCustodyTimeLimit(query);
 
         verify(hearingService).getHearingById(hearingId);
         verify(ctlExpiryDateCalculatorService).avoidCalculation(hearing, offenceId);
-        verify(ctlExpiryDateCalculatorService).calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE);
+        verify(ctlExpiryDateCalculatorService).calculateCTLExpiryDate(offence, HEARING_DAY_LOCAL_DATE, bailStatusCode);
 
         assertThat(response.metadata().name(), is("hearing.custody-time-limit"));
         assertThat(response.payloadAsJsonObject().getString(FIELD_CUSTODY_TIME_LIMIT), is(expiryDate.toString()));
@@ -762,5 +802,9 @@ public class HearingQueryViewTest {
                         .withHearingDay(LocalDate.parse(HEARING_DAY))
                         .withTargetId(randomUUID())
                         .build())).build();
+    }
+
+    private DraftResultResponse buildDraftResultResponse(boolean target) {
+        return new DraftResultResponse(draftResult, target);
     }
 }

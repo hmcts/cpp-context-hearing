@@ -28,6 +28,8 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffec
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -59,11 +61,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-@SuppressWarnings({"squid:S3655"})
+@SuppressWarnings({"squid:S3655", "squid:CallToDeprecatedMethod"})
 public class HearingQueryView {
 
     private static final String FIELD_HEARING_ID = "hearingId";
     private static final String FIELD_HEARING_DAY = "hearingDay";
+    private static final String FIELD_BAIL_STATUS_CODE = "bailStatusCode";
     private static final String FIELD_DEFENDANT_ID = "defendantId";
     private static final String FIELD_DATE = "date";
     private static final String FIELD_COURT_CENTRE_ID = "courtCentreId";
@@ -147,6 +150,31 @@ public class HearingQueryView {
 
         return envelop(targetListResponse)
                 .withName("hearing.get-draft-result")
+                .withMetadataFrom(envelope);
+    }
+
+    public JsonEnvelope getDraftResultV2(final JsonEnvelope envelope) {
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final String hearingDay = envelope.payloadAsJsonObject().getString(FIELD_HEARING_DAY);
+        final DraftResultResponse draftResult = hearingService.getDraftResult(hearingId, hearingDay);
+
+        if (draftResult.isTarget()) {
+            return enveloper.withMetadataFrom(envelope, "hearing.results")
+                    .apply(draftResult.getPayload());
+        } else {
+            return enveloper.withMetadataFrom(envelope, "hearing.get-draft-result-v2")
+                    .apply(draftResult.getPayload());
+        }
+
+    }
+
+    public Envelope<GetShareResultsV2Response> getShareResultsV2(final JsonEnvelope envelope) {
+        final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
+        final String hearingDay = envelope.payloadAsJsonObject().getString(FIELD_HEARING_DAY);
+        final GetShareResultsV2Response response = hearingService.getShareResultsByDate(hearingId, hearingDay);
+
+        return envelop(response)
+                .withName("hearing.get-share-result-v2")
                 .withMetadataFrom(envelope);
     }
 
@@ -335,12 +363,12 @@ public class HearingQueryView {
         final UUID hearingId = UUID.fromString(payload.getString(FIELD_HEARING_ID));
         final UUID offenceId = UUID.fromString(payload.getString(FIELD_OFFENCE_ID));
         final LocalDate hearingDay = LocalDate.parse(envelope.payloadAsJsonObject().getString(FIELD_HEARING_DAY));
-
+        final String bailStatusCode = envelope.payloadAsJsonObject().getString(FIELD_BAIL_STATUS_CODE);
 
         final Hearing hearing = hearingService.getHearingById(hearingId)
                 .orElseThrow(() -> new RuntimeException("Hearing not found for hearing id: " + hearingId));
 
-        final LocalDate expiryDate = getCTLExpiryDate(hearing, offenceId, hearingDay);
+        final LocalDate expiryDate = getCTLExpiryDate(hearing, offenceId, hearingDay, bailStatusCode);
 
         if (nonNull(expiryDate)) {
 
@@ -356,7 +384,7 @@ public class HearingQueryView {
 
     }
 
-    private LocalDate getCTLExpiryDate(final Hearing hearing, final UUID offenceId, final LocalDate hearingDay) {
+    private LocalDate getCTLExpiryDate(final Hearing hearing, final UUID offenceId, final LocalDate hearingDay, final String bailStatusCode) {
 
         if (ctlExpiryDateCalculatorService.avoidCalculation(hearing, offenceId)) {
             return null;
@@ -368,7 +396,7 @@ public class HearingQueryView {
                 .filter(off -> off.getId().getId().equals(offenceId))
                 .findFirst().orElseThrow(() -> new RuntimeException("Offence not found for offence id: " + offenceId));
 
-        return ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, hearingDay).orElse(null);
+        return ctlExpiryDateCalculatorService.calculateCTLExpiryDate(offence, hearingDay, bailStatusCode).orElse(null);
 
     }
 

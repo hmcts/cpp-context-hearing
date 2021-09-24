@@ -160,9 +160,11 @@ public class Queries {
 
     }
 
-    public static ResponseData getCalculatedCustodyTimeLimitExpiryDate(final UUID hearingId, final String hearingDay, final UUID offenceId, final long timeout) {
+    public static ResponseData getCalculatedCustodyTimeLimitExpiryDate(final UUID hearingId, final String hearingDay, final UUID offenceId, final long timeout, final String bailStatusCode) {
 
-        final RequestParams requestParams = requestParams(getURL("hearing.custody-time-limit", hearingId.toString(), hearingDay, offenceId.toString()), "application/vnd.hearing.custody-time-limit+json")
+        String url = getURL("hearing.custody-time-limit", hearingId.toString(), hearingDay, offenceId.toString(), bailStatusCode);
+
+        final RequestParams requestParams = requestParams(url, "application/vnd.hearing.custody-time-limit+json")
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 

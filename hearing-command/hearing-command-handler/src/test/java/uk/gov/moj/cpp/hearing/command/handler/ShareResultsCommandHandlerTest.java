@@ -269,7 +269,6 @@ public class ShareResultsCommandHandlerTest {
                         resultLineIn.getOrderedDate(),
                         resultLineIn.getSharedDate(),
                         resultLineIn.getResultLineId(),
-                        targetDraft.getTargetId(),
                         targetDraft.getOffenceId(),
                         targetDraft.getDefendantId(),
                         resultLineIn.getResultDefinitionId(),
@@ -282,12 +281,14 @@ public class ShareResultsCommandHandlerTest {
                         targetDraft.getApplicationId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        resultLineIn.getAmendmentDate(),
+                        resultLineIn.getAmendmentDate().toLocalDate(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
                         childResultLineIds,
-                        parentResultLineIds
+                        parentResultLineIds,
+                        targetDraft.getShadowListed(),
+                        targetDraft.getDraftResult()
                 )
         ));
 
@@ -307,7 +308,6 @@ public class ShareResultsCommandHandlerTest {
         assertThat(resultsShared, isBean(ResultsShared.class)
                 .with(h -> h.getTargets().size(), is(1))
                 .with(ResultsShared::getTargets, first(isBean(Target.class)
-                        .with(Target::getTargetId, is(targetDraft.getTargetId()))
                         .with(t -> t.getResultLines().size(), is(shareResultsCommand.getResultLines().size()))
                         .with(Target::getResultLines, first(isBean(ResultLine.class)
                                         .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
@@ -369,7 +369,6 @@ public class ShareResultsCommandHandlerTest {
                         resultLineIn.getOrderedDate(),
                         resultLineIn.getSharedDate(),
                         resultLineIn.getResultLineId(),
-                        targetDraft.getTargetId(),
                         targetDraft.getOffenceId(),
                         targetDraft.getDefendantId(),
                         resultLineIn.getResultDefinitionId(),
@@ -382,12 +381,14 @@ public class ShareResultsCommandHandlerTest {
                         targetDraft.getApplicationId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        resultLineIn.getAmendmentDate(),
+                        resultLineIn.getAmendmentDate().toLocalDate(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
                         childResultLineIds,
-                        parentResultLineIds
+                        parentResultLineIds,
+                        targetDraft.getShadowListed(),
+                        targetDraft.getDraftResult()
                 )
         ));
 

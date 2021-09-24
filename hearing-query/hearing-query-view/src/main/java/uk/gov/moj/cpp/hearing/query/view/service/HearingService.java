@@ -15,7 +15,9 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
@@ -23,10 +25,13 @@ import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.mapping.DraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ResultLineJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
@@ -45,12 +50,16 @@ import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
@@ -77,6 +86,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.json.Json;
@@ -85,11 +95,13 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.transaction.Transactional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Sets;
 import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("squid:S1612")
 public class HearingService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
@@ -112,9 +124,15 @@ public class HearingService {
     @Inject
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
     @Inject
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+    @Inject
     private HearingJPAMapper hearingJPAMapper;
     @Inject
     private TargetJPAMapper targetJPAMapper;
+    @Inject
+    private ResultLineJPAMapper resultLineJPAMapper;
+    @Inject
+    private DraftResultJPAMapper draftResultJPAMapper;
     @Inject
     private GetHearingsTransformer getHearingTransformer;
     @Inject
@@ -123,6 +141,10 @@ public class HearingService {
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
     @Inject
     private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
+    @Inject
+    private DraftResultRepository draftResultRepository;
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
                                                               final LocalDate localDate,
@@ -236,7 +258,7 @@ public class HearingService {
     }
 
     private void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
-        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach( d -> d.getOffences().removeIf(Offence::isShadowListed));
+        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences().removeIf(Offence::isShadowListed));
         filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
         filteredHearings.forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
         filteredHearings.removeIf(x -> x.getProsecutionCases().isEmpty());
@@ -351,9 +373,9 @@ public class HearingService {
         }
 
         Hearing hearing = hearingRepository.findBy(hearingId);
-        if(isDDJ) {
+        if (isDDJ) {
             hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCasesId).stream().findFirst().orElse(null);
-         }
+        }
 
         if (hearing == null) {
             return new HearingDetailsResponse();
@@ -405,11 +427,11 @@ public class HearingService {
 
     private HearingState getHearingState(final Hearing hearing) {
         HearingState hearingState = hearing.getHearingState();
-        if (hearing.getHearingState() == null ){
+        if (hearing.getHearingState() == null) {
             if (hearing.getHasSharedResults()) {
                 hearingState = HearingState.SHARED;
             } else {
-                hearingState =  HearingState.INITIALISED;
+                hearingState = HearingState.INITIALISED;
             }
         }
         return hearingState;
@@ -431,7 +453,7 @@ public class HearingService {
     @Transactional
     public CrackedIneffectiveTrial fetchCrackedIneffectiveTrial(final UUID trialTypeId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes) {
 
-        if(null == trialTypeId) {
+        if (null == trialTypeId) {
             return null;
         }
 
@@ -527,6 +549,67 @@ public class HearingService {
         }
     }
 
+    public DraftResultResponse getDraftResult(final UUID hearingId, final String hearingDay) {
+        final List<DraftResult> draftResult = draftResultRepository.findDraftResultByFilter(hearingId, hearingDay);
+        if (draftResult.isEmpty()) {
+            return new DraftResultResponse(objectToJsonObjectConverter.convert(getTargetsByDate(hearingId,hearingDay)), true);
+        }
+
+        final JsonNode payload = draftResult.get(0).getDraftResultPayload();
+        return new DraftResultResponse(objectToJsonObjectConverter.convert(payload), true);
+    }
+
+    public GetShareResultsV2Response getShareResultsByDate(final UUID hearingId, final String hearingDay) {
+        final List<Target> targets = hearingRepository.findTargetsByFilters(hearingId, hearingDay);
+
+        return new GetShareResultsV2Response.Builder().withResultLines(transform(targets)).build();
+    }
+
+    private List<ResultLine> transform(final List<Target> targets) {
+        final List<ResultLine> extractedResultLines = new ArrayList<>();
+
+        targets.forEach(target -> {
+            final List<uk.gov.justice.core.courts.ResultLine> resultLines = resultLineJPAMapper.fromJPA(target.getResultLines());
+            resultLines.forEach(resultLine -> extractResultLines(extractedResultLines, target, resultLine)
+            );
+        });
+
+        return extractedResultLines.stream().collect(Collectors.toList());
+    }
+
+    private void extractResultLines(final List<ResultLine> extractedResultLines, final Target target, final uk.gov.justice.core.courts.ResultLine resultLine) {
+        final ResultLine.Builder builder = new ResultLine.Builder()
+                .withOrderedDate(resultLine.getOrderedDate())
+                .withSharedDate(resultLine.getSharedDate())
+                .withResultLineId(resultLine.getResultLineId())
+                .withOffenceId(resultLine.getOffenceId())
+                .withDefendantId(resultLine.getDefendantId())
+                .withMasterDefendantId(resultLine.getMasterDefendantId())
+                .withResultDefinitionId(resultLine.getResultDefinitionId())
+                .withPrompts(resultLine.getPrompts())
+                .withLevel(resultLine.getLevel())
+                .withShortCode(resultLine.getShortCode())
+                .withDelegatedPowers(resultLine.getDelegatedPowers())
+                .withResultLabel(resultLine.getResultLabel())
+                .withIsModified(resultLine.getIsModified())
+                .withIsComplete(resultLine.getIsComplete())
+                .withIsDeleted(resultLine.getIsDeleted())
+                .withShadowListed(resultLine.getShadowListed())
+                .withDraftResult(target.getDraftResult())
+                .withApplicationId(resultLine.getApplicationId())
+                .withCaseId(resultLine.getCaseId())
+                .withAmendmentDate(resultLine.getAmendmentDate())
+                .withAmendmentReasonId(resultLine.getAmendmentReasonId())
+                .withAmendmentReason(resultLine.getAmendmentReason())
+                .withChildResultLineIds(resultLine.getChildResultLineIds())
+                .withParentResultLineIds(resultLine.getParentResultLineIds())
+                .withFourEyesApproval(resultLine.getFourEyesApproval())
+                .withApprovedDate(resultLine.getApprovedDate())
+                .withIsDeleted(resultLine.getIsDeleted());
+
+        extractedResultLines.add(builder.build());
+    }
+
     public TargetListResponse getTargets(final UUID hearingId) {
         final List<Target> listOfTargets = hearingRepository.findTargetsByHearingId(hearingId);
         final List<ProsecutionCase> listOfProsecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
@@ -556,7 +639,7 @@ public class HearingService {
     public Timeline getTimeLineByCaseId(final UUID caseId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes, final JsonObject allCourtRooms) {
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findByCaseId(caseId)
                 .stream()
-                .map(e-> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes, allCourtRooms))
+                .map(e -> this.populateTimeLineHearingSummaries(e, crackedIneffectiveVacatedTrialTypes, allCourtRooms))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
@@ -568,7 +651,7 @@ public class HearingService {
 
         final List<TimelineHearingSummary> hearingSummaries = hearingRepository.findAllHearingsByApplicationId(applicationId)
                 .stream()
-                .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing,crackedIneffectiveVacatedTrialTypes, allCourtRooms, applicationId))
+                .map(hearing -> populateTimeLineHearingSummariesWithApplicants(hearing, crackedIneffectiveVacatedTrialTypes, allCourtRooms, applicationId))
                 .flatMap(Collection::stream)
                 .collect(toList());
 
@@ -580,7 +663,7 @@ public class HearingService {
         final List<HearingYouthCourtDefendants> hearingYouthCourtDefendants = this.hearingYouthCourtDefendantsRepository.findAllByHearingId(hearing.getId());
         return hearing.getHearingDays()
                 .stream()
-                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms,hearingYouthCourtDefendants))
+                .map(hd -> timelineHearingSummaryHelper.createTimeLineHearingSummary(hd, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendants))
                 .collect(toList());
     }
 

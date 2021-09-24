@@ -21,6 +21,10 @@ subscriptions_descriptor:
         - name: public.hearing.event-logged
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-event-logged.json
 
+        # hearing amended
+        - name: public.hearing.event-amended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.event-amended.json
+
         - name: public.hearing.event-ignored
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-event-ignored.json
 
@@ -40,6 +44,9 @@ subscriptions_descriptor:
 
         - name: public.hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-draft-result-saved.json
+
+        - name: public.hearing.draft-result-deleted-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-draft-result-deleted-v2.json
 
         - name: public.hearing.multiple-draft-results-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-multiple-draft-results-saved.json

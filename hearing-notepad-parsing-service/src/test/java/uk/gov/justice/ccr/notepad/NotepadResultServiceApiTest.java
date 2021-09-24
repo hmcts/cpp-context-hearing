@@ -157,6 +157,7 @@ public class NotepadResultServiceApiTest {
         when(resultDefinitionViewBuilder.buildFromKnowledge(any(), any(), any(), anyBoolean(),anyBoolean(), anyString(), any())).thenReturn(resultDefinitionView);
         when(enveloper.withMetadataFrom(jsonEnvelope, NAME_RESULT_DEFINITION_RESPONSE)).thenReturn(function);
         when(resultDefinitionViewBuilder.getResultDefinitionIdFromKnowledge(any(), any())).thenReturn(null);
+        when(parsingFacade.retrieveResultDefinitionById(anyString(),any())).thenReturn(ResultDefinition.builder().withShortCode("RESTROAP").build());
 
 
         testObj.getResultDefinition(jsonEnvelope);
@@ -214,6 +215,7 @@ public class NotepadResultServiceApiTest {
         when(parsingFacade.retrieveChildResultDefinitionDetail(any(), any())).thenReturn(childResultDefinitionDetail);
         final String orderedDate = "2014-06-04";
         when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
+        when(parsingFacade.retrieveResultDefinitionById(anyString(),any())).thenReturn(ResultDefinition.builder().withShortCode("RESTROAP").build());
         when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
         when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
 
@@ -275,6 +277,8 @@ public class NotepadResultServiceApiTest {
         when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
         when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
         when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
+        when(parsingFacade.retrieveResultDefinitionById(anyString(),any())).thenReturn(ResultDefinition.builder().withShortCode("RESTROAP").build());
+
 
         final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
                 "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
@@ -312,6 +316,8 @@ public class NotepadResultServiceApiTest {
         when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
         when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
         when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
+        when(parsingFacade.retrieveResultDefinitionById(anyString(),any())).thenReturn(ResultDefinition.builder().withShortCode("RESTROAP").build());
+
 
         final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
                 "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());
@@ -350,6 +356,8 @@ public class NotepadResultServiceApiTest {
         when(parsingFacade.processPrompt(parentResultDefinitionId.toString(), LocalDate.parse(orderedDate))).thenReturn(promptKnowledge);
         when(resultPromptViewBuilder.buildFromKnowledge(promptKnowledge)).thenReturn(resultPromptView);
         when(resultPromptView.getPromptChoices()).thenReturn(mockPromptChoices);
+        when(parsingFacade.retrieveResultDefinitionById(anyString(),any())).thenReturn(ResultDefinition.builder().withShortCode("RESTROAP").build());
+
 
         final ResultDefinitionView resultDefinitionView = testObj.buildResultDefinitionView(
                 "imp sus", LocalDate.of(2014, 06, 04), newArrayList(), new Knowledge());

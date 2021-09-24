@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="115" author="hearing"
+               logicalFilePath="115-add-primary-key-to-ha-draft-result.xml">
+        <addPrimaryKey columnNames="draft_result_id" constraintName="draft_result_pkey" tableName="ha_draft_result"/>
+    </changeSet>
+</databaseChangeLog>

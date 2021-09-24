@@ -1,24 +1,9 @@
 package uk.gov.justice.ccr.notepad.process;
 
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
-import static java.lang.Boolean.FALSE;
-import static java.lang.Boolean.TRUE;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.INT;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.RESULT;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TIME;
-import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
-import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
-import static uk.gov.justice.ccr.notepad.view.Part.State.UNRESOLVED;
-
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.ccr.notepad.process.ResultDefinitionMatchingOutput.MatchingType;
 import uk.gov.justice.ccr.notepad.result.cache.ResultCache;
 import uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition;
@@ -32,6 +17,7 @@ import uk.gov.justice.ccr.notepad.view.PromptChoice;
 import uk.gov.justice.ccr.notepad.view.ResultChoice;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,11 +31,24 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.CURR;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DATE;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.HIDDEN;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.INT;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.RESULT;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TIME;
+import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.TXT;
+import static uk.gov.justice.ccr.notepad.view.Part.State.RESOLVED;
+import static uk.gov.justice.ccr.notepad.view.Part.State.UNRESOLVED;
 
 /**
  * Processor class will match List of provided values with resulting metadata and return Knowledge
@@ -121,6 +120,9 @@ public class Processor {
         promptChoice.setWelshDurationElement(resultPrompt.getWelshDurationElement());
         promptChoice.setLabel(resultPrompt.getLabel());
         promptChoice.setType(resultPrompt.getType());
+        if(nonNull(resultPrompt.getHidden())){
+            promptChoice.setHidden(resultPrompt.getHidden());
+        }
         promptChoice.setPromptRef(resultPrompt.getReference());
         promptChoice.setPromptOrder(resultPrompt.getPromptOrder());
         final String resultPromptRule = resultPrompt.getResultPromptRule();
@@ -132,16 +134,15 @@ public class Processor {
         promptChoice.setAddressType(resultPrompt.getAddressType());
         promptChoice.setListLabel(resultPrompt.getListLabel());
         promptChoice.setPartName(resultPrompt.getPartName());
-        promptChoice.setDurationSequence(resultPrompt.getDurationSequence());
-        promptChoice.setHidden(resultPrompt.getHidden());
         promptChoice.setNameEmail(resultPrompt.getNameEmail());
         promptChoice.setMinLength(resultPrompt.getMinLength());
         promptChoice.setMaxLength(resultPrompt.getMaxLength());
+        promptChoice.setReferenceDataKey(resultPrompt.getReferenceDataKey());
         return promptChoice;
     }
 
     private void setNameAddressList(final ResultPrompt resultPrompt, final PromptChoice promptChoice) {
-        if (resultPrompt.getNameAddressList() != null) {
+        if (!resultPrompt.getNameAddressList().isEmpty()) {
             final Set<ResultPromptDynamicListNameAddress> nameAddressList = resultPrompt.getNameAddressList();
             if (resultPrompt.getNameEmail() != null && resultPrompt.getNameEmail().booleanValue()) {
                 final Set<ResultPromptDynamicListNameAddress> nameEmailOnlyAddressList = nameAddressList.stream().map(nameAddress ->
@@ -155,6 +156,8 @@ public class Processor {
             } else {
                 promptChoice.setNameAddressList(getNameAddressList(nameAddressList));
             }
+        } else {
+            promptChoice.setNameAddressList(null);
         }
     }
 
@@ -166,7 +169,6 @@ public class Processor {
     }
 
     private AddressParts buildAddressParts(final ResultPromptDynamicListNameAddress resultPromptDynamicListNameAddress) {
-
         return AddressParts.addressParts()
                 .withName(resultPromptDynamicListNameAddress.getName())
                 .withFirstName(resultPromptDynamicListNameAddress.getFirstName())

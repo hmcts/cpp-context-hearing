@@ -150,22 +150,10 @@ public class ReadStoreResultLoaderTest {
         final LocalDate hearingDate = LocalDate.now();
         final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
         final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
-        nameAddressSet.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
-                .withName("testName")
-                .withAddressLine1("test addressLine 1")
-                .withAddressLine2("test AddressLIne2")
-                .withPostCode("SW1A 2AA")
-                .withEmailAddress1("xyz@gmail.com")
-                .build()
+        nameAddressSet.add(getNameAddress()
         );
 
-        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet2 = new HashSet<>();
-        nameAddressSet2.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
-                .withName("EMC Test")
-                .withEmailAddress1("emc@test.com")
-                .build());
-        resultPromptDynamicListNameAddress.put("protectedperson", nameAddressSet);
-        resultPromptDynamicListNameAddress.put("electronicmonitoringcontractor", nameAddressSet2);
+        setnameAddressAndResultPromptDynamicList(resultPromptDynamicListNameAddress, nameAddressSet);
 
 
         given(resultsQueryService.getAllFixedLists(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
@@ -309,6 +297,17 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
 
+        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        nameAddressSet.add(getNameAddress()
+        );
+
+        setnameAddressAndResultPromptDynamicList(resultPromptDynamicListNameAddress, nameAddressSet);
+
+        given(nameAddressRefDataEndPointMapper.loadAllNameAddressFromRefData()).willReturn(resultPromptDynamicListNameAddress);
+
+
+
         given(responseEnvelope.payload())
                 .willReturn(givenPayload("/referencedata.fixedlists.json"))
                 .willReturn(givenPayload("/referencedata.result-definitions.json"));
@@ -394,6 +393,15 @@ public class ReadStoreResultLoaderTest {
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
 
+        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        nameAddressSet.add(getNameAddress()
+        );
+
+        setnameAddressAndResultPromptDynamicList(resultPromptDynamicListNameAddress, nameAddressSet);
+
+        given(nameAddressRefDataEndPointMapper.loadAllNameAddressFromRefData()).willReturn(resultPromptDynamicListNameAddress);
+
         //when
         final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt(hearingDate);
 
@@ -407,6 +415,16 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasSize(5));
         assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasItems("EMS Manchester (curfew)", "HLNY Alcohol Abstinence Monitor",
                 "London Alcohol Abstinence Monitor", "London GPS Tag Monitoring Centre", "Midlands GPS Tag Monitoring Centre"));
+    }
+
+    private ResultPromptDynamicListNameAddress getNameAddress() {
+        return ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
+                .withName("testName")
+                .withAddressLine1("test addressLine 1")
+                .withAddressLine2("test AddressLIne2")
+                .withPostCode("SW1A 2AA")
+                .withEmailAddress1("xyz@gmail.com")
+                .build();
     }
 
     @Test
@@ -450,6 +468,15 @@ public class ReadStoreResultLoaderTest {
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
 
+        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        nameAddressSet.add(getNameAddress()
+        );
+
+        setnameAddressAndResultPromptDynamicList(resultPromptDynamicListNameAddress, nameAddressSet);
+
+        given(nameAddressRefDataEndPointMapper.loadAllNameAddressFromRefData()).willReturn(resultPromptDynamicListNameAddress);
+
         //when
         final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt(hearingDate);
 
@@ -463,6 +490,16 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasSize(5));
         assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasItems("EMS Manchester (curfew)", "HLNY Alcohol Abstinence Monitor",
                 "London Alcohol Abstinence Monitor", "London GPS Tag Monitoring Centre", "Midlands GPS Tag Monitoring Centre"));
+    }
+
+    private void setnameAddressAndResultPromptDynamicList(final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress, final Set<ResultPromptDynamicListNameAddress> nameAddressSet) {
+        final Set<ResultPromptDynamicListNameAddress> nameAddressSet2 = new HashSet<>();
+        nameAddressSet2.add(ResultPromptDynamicListNameAddress.resultPromptDynamicListNameAddressBuilder()
+                .withName("EMC Test")
+                .withEmailAddress1("emc@test.com")
+                .build());
+        resultPromptDynamicListNameAddress.put("protectedperson", nameAddressSet);
+        resultPromptDynamicListNameAddress.put("electronicmonitoringcontractor", nameAddressSet2);
     }
 
     @Test

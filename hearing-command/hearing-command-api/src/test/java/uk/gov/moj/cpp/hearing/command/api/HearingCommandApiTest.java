@@ -67,7 +67,7 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
-            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay");
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay", "saveDraftResultV2","deleteDraftResultV2","amendHearing");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -180,7 +180,7 @@ public class HearingCommandApiTest {
 
 
     @Test
-    public void ShouldCheckHandlerNamesPassThroughSender() {
+    public void shouldCheckHandlerNamesPassThroughSender() {
         assertHandlerMethodsArePassThrough(HearingCommandApi.class, apiMethodsToHandlerNames.keySet().stream()
                 .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
                 .collect(toMap(identity(), apiMethodsToHandlerNames::get)));
@@ -481,6 +481,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.saveDraftResult(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.save-draft-result");
+    }
+
+    @Test
+    public void shouldPassThroughDeleteDraftResultV2RequestToCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.delete-draft-result-v2");
+
+        hearingCommandApi.deleteDraftResultV2(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.delete-draft-result-v2");
     }
 
     @Test

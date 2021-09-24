@@ -12,11 +12,20 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "ha_prompt")
-public class Prompt {
+public class Prompt  {
 
     @Id
+    @Column(name = "prompt_id")
+    private String promptId;
+
     @Column(name = "id")
     private UUID id;
+
+
+    @Column(name = "prompt_reference")
+    private String promptReference;
+
+
 
     @ManyToOne
     @JoinColumn(name = "result_line_id")
@@ -24,9 +33,6 @@ public class Prompt {
 
     @Column(name = "fixed_list_code")
     private String fixedListCode;
-
-    @Column(name = "prompt_reference")
-    private String promptReference;
 
     @Column(name = "label")
     private String label;
@@ -43,6 +49,15 @@ public class Prompt {
 
     public static Prompt prompt() {
         return new Prompt();
+    }
+
+    public String getPromptId() {
+        return promptId;
+    }
+
+    public Prompt setPromptId(final String promptId) {
+        this.promptId = promptId;
+        return this;
     }
 
     public UUID getId() {
@@ -103,25 +118,32 @@ public class Prompt {
         return promptReference;
     }
 
-    public void setPromptReference(String promptReference) {
+    public Prompt setPromptReference(String promptReference) {
         this.promptReference = promptReference;
+        return this;
     }
 
+
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (obj == null) {
             return false;
         }
-        final Prompt prompt = (Prompt) o;
-        return Objects.equals(id, prompt.id);
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Prompt other = (Prompt) obj;
+        return Objects.equals(this.id, other.getId())
+                && Objects.equals(this.promptReference, other.getPromptReference())
+                && Objects.equals(this.getResultLine().getId(), other.getResultLine().getId());
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id);
+        return Objects.hash(id,promptReference);
     }
 }

@@ -45,7 +45,7 @@ public class ResultDefinitionViewBuilder {
         if (knowledge.isThisPerfectMatch()) {
             final Part firstQualifiedPartInResultDefinition = getFirstQualifiedPartInResultDefinition(partValues, knowledge);
             final String resultDefinitionId = firstQualifiedPartInResultDefinition.getCode();
-            resultDefinitionView.setResultCode(resultDefinitionId);
+            resultDefinitionView.setResultDefinitionId(resultDefinitionId);
             resultDefinitionView.setResultLevel(firstQualifiedPartInResultDefinition.getResultLevel());
             resultDefinitionView.setParts(buildParts(knowledge, partValues, parts));
             resultDefinitionView.setChildResultDefinitions(childResultDefinitions);

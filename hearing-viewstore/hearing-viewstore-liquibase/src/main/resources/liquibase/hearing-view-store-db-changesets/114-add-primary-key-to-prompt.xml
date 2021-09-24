@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="114" author="hearing"
+               logicalFilePath="114-add-primary-key-to-prompt.xml">
+
+        <addColumn tableName="ha_prompt">
+            <column name="prompt_id" type="TEXT">
+            </column>
+        </addColumn>
+        <dropPrimaryKey constraintName="ha_prompt_pkey"
+                        tableName="ha_prompt"/>
+        <addPrimaryKey columnNames="prompt_id" constraintName="prompt_pkey" tableName="ha_prompt"/>
+
+        <rollback>
+            <dropColumn tableName="ha_prompt">
+                <column name="prompt_id"/>
+            </dropColumn>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

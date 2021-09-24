@@ -26,7 +26,6 @@ import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -53,7 +52,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -85,6 +83,9 @@ public class PublishResultsV2EventProcessor {
     private PublishResultsDelegate publishResultsDelegate;
 
     @Inject
+    private NewTargetToLegacyTargetConverter newTargetToLegacyTargetConverter;
+
+    @Inject
     private Sender sender;
 
     @Inject
@@ -100,6 +101,9 @@ public class PublishResultsV2EventProcessor {
         }
 
         final ResultsSharedV2 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV2.class);
+
+        resultsShared.setTargets(newTargetToLegacyTargetConverter.convert(resultsShared.getTargets()));
+
         final Hearing hearing = resultsShared.getHearing();
 
         final List<CourtApplication> courtApplications = ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty).collect(toList());
@@ -135,9 +139,6 @@ public class PublishResultsV2EventProcessor {
         }
 
         LOGGER.info("requested target size {}, saved target size {}", resultsShared.getTargets().size(), resultsShared.getSavedTargets().size());
-        final List<UUID> requestedTargetIds = resultsShared.getTargets().stream().map(Target::getTargetId).collect(Collectors.toList());
-        final List<Target> addSavedTargets = resultsShared.getSavedTargets().stream().filter(value -> !requestedTargetIds.contains(value.getTargetId())).collect(Collectors.toList());
-        resultsShared.getTargets().addAll(addSavedTargets);
         LOGGER.info("combined target size {}", resultsShared.getTargets().size());
         publishResultsDelegate.shareResults(event, sender, resultsShared);
 

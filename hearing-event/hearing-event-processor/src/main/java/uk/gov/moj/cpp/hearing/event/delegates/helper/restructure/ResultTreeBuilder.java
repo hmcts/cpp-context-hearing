@@ -117,9 +117,12 @@ public class ResultTreeBuilder {
 
     private Map<UUID, TreeNode<ResultLine>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV2 resultsShared) {
         final Map<UUID, TreeNode<ResultLine>> result = new HashMap<>();
+        final List<ResultLine>  allResultLines = resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .collect(toList());
         resultsShared.getTargets().forEach(target -> {
             final List<ResultLine> resultLines = target.getResultLines();
-            resultLines
+        resultLines
                     .stream()
                     .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .forEach(resultLine -> {
@@ -130,7 +133,7 @@ public class ResultTreeBuilder {
                                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
                         }
 
-                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, resultLines, resultsShared);
+                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, allResultLines, resultsShared);
                         final TreeNode<ResultLine> treeNode = resultLineHelper.getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
                         result.put(treeNode.getId(), treeNode);
                     });
@@ -204,7 +207,7 @@ public class ResultTreeBuilder {
         return judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
-                .withAmendmentDate(resultLine.getAmendmentDate())
+                .withAmendmentDate(getAmendmentDate(resultLine))
                 .withAmendmentReason(resultLine.getAmendmentReason())
                 .withAmendmentReasonId(resultLine.getAmendmentReasonId())
                 .withApprovedDate(resultLine.getApprovedDate())
@@ -244,6 +247,14 @@ public class ResultTreeBuilder {
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel());
+    }
+
+    private LocalDate getAmendmentDate(final ResultLine resultLineIn) {
+        LocalDate amendmentDate = null;
+        if (nonNull(resultLineIn.getAmendmentDate())){
+            amendmentDate = resultLineIn.getAmendmentDate().toLocalDate();
+        }
+        return amendmentDate;
     }
 
     private void checkResultDefinition(final ResultLine resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {

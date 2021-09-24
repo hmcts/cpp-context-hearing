@@ -13,13 +13,18 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.MetadataBuilder;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
+
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -39,8 +44,11 @@ public class HearingEventProcessor {
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
     public static final String COMMAND_LISTING_HEARING_RESCHEDULED = "hearing.command.clear-vacated-trial";
     public static final String COMMAND_REQUEST_APPROVAL = "hearing.command.request-approval";
+    public static final String PUBLIC_HEARING_EVENT_AMENDED = "public.hearing.event-amended";
+    public static final String PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2 = "public.hearing.draft-result-deleted-v2";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
+
     private final Enveloper enveloper;
     private final Sender sender;
     private final JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -53,6 +61,22 @@ public class HearingEventProcessor {
         this.sender = sender;
         this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
         this.objectToJsonObjectConverter = objectToJsonObjectConverter;
+    }
+
+    @Handles("hearing.event.amended")
+    public void publicHearingAmended(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.event.amended event received {}", event.toObfuscatedDebugString());
+        }
+
+        final HearingAmended hearingAmended = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingAmended.class);
+
+        final PublicHearingAmended publicHearingAmended = PublicHearingAmended.publicHearingAmended()
+                .setHearingId(hearingAmended.getHearingId())
+                .setNewHearingState(hearingAmended.getNewHearingState());
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingAmended);
+        this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_EVENT_AMENDED), publicEventPayload));
     }
 
     @Handles("hearing.draft-result-saved")
@@ -72,8 +96,38 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
 
         this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
+    }
 
+    @Handles("hearing.draft-result-saved-v2")
+    public void publicDraftResultSavedV2PublicEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.draft-result-saved-v2 event received {}", event.toObfuscatedDebugString());
+        }
 
+        final UUID hearingId = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSavedV2.class).getHearingId();
+
+        final PublicHearingDraftResultSaved publicHearingDraftResultSaved = PublicHearingDraftResultSaved.publicHearingDraftResultSaved()
+                .setHearingId(hearingId);
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
+
+        this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
+    }
+
+    @Handles("hearing.draft-result-deleted-v2")
+    public void publicDraftResultDeletedV2PublicEvent(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.draft-result-deleted-v2 event received {}", event.toObfuscatedDebugString());
+        }
+
+        final DraftResultDeletedV2 draftResultDeletedV2 = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultDeletedV2.class);
+
+        final PublicHearingDraftResultDeleted publicHearingDraftResultDeleted = PublicHearingDraftResultDeleted.publicHearingDraftResultSaved()
+                .setHearingId(draftResultDeletedV2.getHearingId())
+                .setHaringDay(draftResultDeletedV2.getHearingDay());
+
+        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultDeleted);
+        this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2), publicEventPayload));
     }
 
 

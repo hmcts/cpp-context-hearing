@@ -34,6 +34,7 @@ import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
@@ -161,6 +162,17 @@ public class HearingQueryApi {
     @Handles("hearing.get-draft-result")
     public JsonEnvelope getDraftResult(final JsonEnvelope query) {
         final Envelope<TargetListResponse> envelope = this.hearingQueryView.getDraftResult(query);
+        return getJsonEnvelope(envelope);
+    }
+
+    @Handles("hearing.get-draft-result-v2")
+    public JsonEnvelope getDraftResultV2(final JsonEnvelope query) {
+        return this.hearingQueryView.getDraftResultV2(query);
+    }
+
+    @Handles("hearing.get-share-result-v2")
+    public JsonEnvelope getShareResultV2(final JsonEnvelope query) {
+        final Envelope<GetShareResultsV2Response> envelope = this.hearingQueryView.getShareResultsV2(query);
         return getJsonEnvelope(envelope);
     }
 

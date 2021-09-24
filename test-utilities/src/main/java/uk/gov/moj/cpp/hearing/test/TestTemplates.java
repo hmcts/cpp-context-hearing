@@ -773,6 +773,7 @@ public class TestTemplates {
                     .withOffenceId(offence0.getId())
                     .withTargetId(UUID.randomUUID())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(randomUUID(), resultDefId, orderedDate).build()))
+                    .withShadowListed(false)
                     .build();
 
             final List<SaveDraftResultCommand> saveDraftResultCommandList = new ArrayList<>();
@@ -785,6 +786,7 @@ public class TestTemplates {
                     .withOffenceId(offence1.getId())
                     .withTargetId(UUID.randomUUID())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(randomUUID(), randomUUID(), orderedDate).build()))
+                    .withShadowListed(false)
                     .build();
 
             saveDraftResultCommandList.add(new SaveDraftResultCommand(target1, hearing.getId()));
@@ -794,8 +796,17 @@ public class TestTemplates {
         }
 
         public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
+            final List<UUID> childResultLineIds = new ArrayList<>();
+            final List<UUID> parentResultLineIds = new ArrayList<>();
+
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
+                    .withShortCode("SHORTCODE")
+                    .withAmendmentDate(ZonedDateTime.now())
+                    .withAmendmentReasonId(UUID.randomUUID())
+                    .withAmendmentReason("AMENDMENT REASON")
+                    .withChildResultLineIds(childResultLineIds)
+                    .withParentResultLineIds(parentResultLineIds)
                     .withDelegatedPowers(
                             DelegatedPowers.delegatedPowers()
                                     .withUserId(UUID.randomUUID())
@@ -933,7 +944,7 @@ public class TestTemplates {
                             .withLastName(STRING.next())
                             .withFirstName(STRING.next())
                             .build())
-                    .withAmendmentDate(now())
+                    .withAmendmentDate(ZonedDateTime.now())
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()
@@ -961,6 +972,7 @@ public class TestTemplates {
                     .withDraftResult(DRAFT_RESULTS_CONTENT)
                     .withOffenceId(offence0.getId())
                     .withTargetId(UUID.randomUUID())
+                    //.withTargetId(offence0.getId())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
                     .withShadowListed(shadowListed)
                     .withHearingDay(hearingDay)
@@ -984,8 +996,11 @@ public class TestTemplates {
             final Target target = Target.target()
                     .withHearingId(hearing.getId())
                     .withDraftResult(DRAFT_RESULTS_CONTENT)
+//                    .withMasterDefendantId(UUID.randomUUID())
                     .withTargetId(UUID.randomUUID())
+//                    .withDefendantId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getId())
                     .withApplicationId(hearing.getCourtApplications().get(0).getId())
+//                    .withCaseId(UUID.randomUUID())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
                     .withShadowListed(shadowListed)
                     .withOffenceId(offenceId)

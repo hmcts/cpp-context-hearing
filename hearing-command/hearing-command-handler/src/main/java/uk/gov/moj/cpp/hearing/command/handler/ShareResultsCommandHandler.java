@@ -15,6 +15,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.command.result.DeleteDraftResultV2Command;
+import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultV2Command;
 import uk.gov.moj.cpp.hearing.command.result.SaveMultipleDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
@@ -27,6 +29,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +57,36 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         if (target != null && userId.isPresent()) {
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
                     aggregate -> aggregate.saveDraftResults(fromString(userId.get()), target));
+        }
+    }
+
+    @Handles("hearing.command.save-draft-result-v2")
+    public void saveDraftResultV2(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.save-draft-result-v2 command received {}", envelope.toObfuscatedDebugString());
+        }
+        final Optional<String> userId = envelope.metadata().userId();
+        final SaveDraftResultV2Command saveDraftResultV2 = convertToObject(envelope, SaveDraftResultV2Command.class);
+        final JsonObject draftResult = convertToObject(envelope, JsonObject.class);
+
+        if (draftResult != null && userId.isPresent() && saveDraftResultV2.getHearingId() != null) {
+            aggregate(HearingAggregate.class, saveDraftResultV2.getHearingId(), envelope,
+                    aggregate -> aggregate.saveDraftResultV2(fromString(userId.get()), draftResult, saveDraftResultV2.getHearingId(), saveDraftResultV2.getHearingDay()));
+        }
+    }
+
+    @Handles("hearing.command.delete-draft-result-v2")
+    public void deleteDraftResultV2(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.delete-draft-result-v2 command received {}", envelope.toObfuscatedDebugString());
+        }
+        final Optional<String> userId = envelope.metadata().userId();
+        final DeleteDraftResultV2Command deleteDraftResultV2 = convertToObject(envelope, DeleteDraftResultV2Command.class);
+
+
+        if (userId.isPresent() && deleteDraftResultV2.getHearingId() != null) {
+            aggregate(HearingAggregate.class, deleteDraftResultV2.getHearingId(), envelope,
+                    aggregate -> aggregate.deleteDraftResultV2(fromString(userId.get()), deleteDraftResultV2.getHearingId(), deleteDraftResultV2.getHearingDay()));
         }
     }
 

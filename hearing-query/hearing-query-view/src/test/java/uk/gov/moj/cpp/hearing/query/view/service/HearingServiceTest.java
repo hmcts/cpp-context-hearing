@@ -1,81 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
-import com.google.common.collect.Lists;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.core.courts.DelegatedPowers;
-import uk.gov.justice.core.courts.Prompt;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.justice.hearing.courts.GetHearings;
-import uk.gov.justice.hearing.courts.HearingSummaries;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
-import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
-import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
-import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
-import uk.gov.moj.cpp.hearing.persist.NowsRepository;
-import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
-import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
-import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
-import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
-import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
-import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
-import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
-import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingRepository;
-import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
-import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
-
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import java.time.LocalDate;
-import java.time.Month;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-
 import static java.math.BigInteger.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -98,6 +22,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.Level.OFFENCE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.END_DATE_1;
@@ -124,11 +49,100 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingSummaries;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.command.result.DraftResultV2;
+import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
+import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.mapping.DraftResultJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ResultLineJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
+import uk.gov.moj.cpp.hearing.persist.NowsRepository;
+import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.DraftResult;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
+import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
+import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
+import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
+import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
+import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTarget;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
+import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
+import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
+import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.Month;
+import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+import javax.json.JsonString;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
 @RunWith(MockitoJUnitRunner.class)
 public class HearingServiceTest {
 
     @Mock
-    private  List<UUID> prosecutionCasesIdsWithAccess;
+    private List<UUID> prosecutionCasesIdsWithAccess;
 
     @Mock
     private FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
@@ -161,6 +175,9 @@ public class HearingServiceTest {
     private TargetJPAMapper targetJPAMapper;
 
     @Mock
+    private ResultLineJPAMapper resultLineJPAMapper;
+
+    @Mock
     private NowsRepository nowsRepository;
 
     @Mock
@@ -171,6 +188,9 @@ public class HearingServiceTest {
 
     @Mock
     private HearingJPAMapper hearingJPAMapper;
+
+    @Mock
+    private DraftResultJPAMapper draftResultJPAMapper;
 
     @Mock
     private GetHearingsTransformer getHearingsTransformer;
@@ -184,8 +204,13 @@ public class HearingServiceTest {
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
+    @Spy
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+
     @Mock
     private TimelineHearingSummaryHelper timelineHearingSummaryHelperMock;
+
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
 
     @Before
     public void setup() {
@@ -270,7 +295,7 @@ public class HearingServiceTest {
         when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
 
         final GetHearings response = hearingService.getHearings(START_DATE_1.toLocalDate(),
-                "10:30", "14:30", hearingEntity.getCourtCentre().getId(), null, prosecutionCasesIdsWithAccess,false);
+                "10:30", "14:30", hearingEntity.getCourtCentre().getId(), null, prosecutionCasesIdsWithAccess, false);
 
         assertThat(response.getHearingSummaries(), is(emptyCollectionOf(HearingSummaries.class)));
     }
@@ -560,6 +585,36 @@ public class HearingServiceTest {
         assertThat(targetListResponse.getTargets().isEmpty(), is(true));
     }
 
+    @Test
+    public void shouldReturnShareResultsByIdAndDate() throws IOException {
+        UUID hearingId = randomUUID();
+        LocalDate hearingDate = LocalDate.now();
+        UUID defendantId = randomUUID();
+        UUID offenceId = randomUUID();
+        UUID resultLineId = randomUUID();
+        UUID resultDefinitionId = randomUUID();
+        LocalDate sharedDate = LocalDate.now().minusDays(5);
+        LocalDate orderedDate = LocalDate.now().minusDays(3);
+        List<Prompt> prompts = asList(Prompt.prompt().build());
+        Level level = OFFENCE;
+        String shortCode = "NCOSTS";
+
+        setUpTargets(hearingId, offenceId, defendantId, resultLineId, level, orderedDate, prompts, resultDefinitionId, sharedDate, hearingDate, shortCode);
+
+        GetShareResultsV2Response response = hearingService.getShareResultsByDate(hearingId, hearingDate.toString());
+
+        assertThat(response, isBean(GetShareResultsV2Response.class)
+                .with(GetShareResultsV2Response::getResultLines, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine.class)
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getDefendantId, is(defendantId))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getResultLineId, is(resultLineId))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getOffenceId, is(offenceId))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getResultDefinitionId, is(resultDefinitionId))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getSharedDate, is(sharedDate))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getOrderedDate, is(orderedDate))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getPrompts, is(prompts))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getShortCode, is(shortCode))
+                        .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getLevel, is(level)))));
+    }
 
     @Test
     public void shouldReturnResponseWhenTargetIsAdded() {
@@ -1188,13 +1243,14 @@ public class HearingServiceTest {
 
     private CrackedIneffectiveVacatedTrialTypes buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
         final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription",null));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "fullDescription", null));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
+
     private CrackedIneffectiveVacatedTrialTypes buildVacatedTrialTypes(final UUID vacatedTrialReasonId) {
         final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "fullDescription",null));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "fullDescription", null));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
@@ -1229,6 +1285,30 @@ public class HearingServiceTest {
                 .build();
     }
 
+    private void setUpTargets(final UUID hearingId, final UUID offenceId, final UUID defendantId, final UUID resultLineId, final Level level, final LocalDate orderedDate, final List<Prompt> prompts, final UUID resultDefinitionId, final LocalDate sharedDate, final LocalDate hearingDate, final String shortCode) {
+        Target target = new Target();
+        target.setResultLines(asSet(new uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine()));
+        target.setOffenceId(offenceId);
+        target.setDefendantId(defendantId);
+        List<Target> targetList = singletonList(target);
+
+        uk.gov.justice.core.courts.ResultLine resultLine = uk.gov.justice.core.courts.ResultLine.resultLine()
+                .withResultLineId(resultLineId)
+                .withOffenceId(offenceId)
+                .withDefendantId(defendantId)
+                .withLevel(level)
+                .withOrderedDate(orderedDate)
+                .withPrompts(prompts)
+                .withResultDefinitionId(resultDefinitionId)
+                .withSharedDate(sharedDate)
+                .withIsDeleted(false)
+                .withShortCode(shortCode)
+                .build();
+        when(hearingRepository.findTargetsByFilters(hearingId, hearingDate.toString()))
+                .thenReturn(targetList);
+        targetList.forEach(t -> when(resultLineJPAMapper.fromJPA(t.getResultLines())).thenReturn(singletonList(resultLine)));
+    }
+
     private CaseDetail caseDetail3() {
         return caseDetail()
                 .withActivecase(valueOf(1))
@@ -1250,7 +1330,7 @@ public class HearingServiceTest {
         return asSet(prosecutionCase);
     }
 
-    private HearingDay plusTime(HearingDay hearingDay, long hour){
+    private HearingDay plusTime(HearingDay hearingDay, long hour) {
         hearingDay.setSittingDay(hearingDay.getSittingDay().plusHours(hour));
         return hearingDay;
     }

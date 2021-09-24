@@ -1,0 +1,37 @@
+{
+  "hearingId": "HEARING_ID",
+  "relations": [
+    {
+      "resultLineId": "RESULT_LINE_ID",
+      "childResultLineIds": [],
+      "ruleType": "standalone"
+    }
+  ],
+  "shadowListedOffenceIds": [
+    "OFFENCE_ID"
+  ],
+  "resultLines": {
+    "RESULT_LINE_ID": {
+      "caseId": "CASE_ID",
+      "masterDefendantId": "f11671e5-4476-4342-8cf3-a8193512bd98",
+      "offenceId": "OFFENCE_ID",
+      "resultLineId": "RESULT_LINE_ID",
+      "level": "C",
+      "orderedDate": "2021-05-04",
+      "originalText": "NCOSTS",
+      "unresolvedParts": [],
+      "resultDefinitionId": "baf94928-04ae-4609-8e96-efc9f081b2be",
+      "label": "No order for costs",
+      "shortCode": "NCOSTS",
+      "resultPrompts": [
+        {
+          "promptId": "be2a46db-709d-4e0d-9b63-aeb831564c1d",
+          "promptRef": "reasonForNoCosts",
+          "promptLabel": "Reason for no costs",
+          "type": "TXT",
+          "value": "Because yes!"
+        }
+      ]
+    }
+  }
+}

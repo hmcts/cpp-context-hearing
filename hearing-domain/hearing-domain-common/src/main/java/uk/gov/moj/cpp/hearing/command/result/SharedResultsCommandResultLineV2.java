@@ -13,13 +13,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings({"squid:S2384"})
 public class SharedResultsCommandResultLineV2 implements Serializable {
+    private String shortCode;
     private DelegatedPowers delegatedPowers;
     private LocalDate orderedDate;
     private LocalDate sharedDate;
     private UUID resultLineId;
-    private UUID targetId;
     private UUID offenceId;
     private UUID defendantId;
+    private UUID masterDefendantId;
     private UUID resultDefinitionId;
     @SuppressWarnings({"squid:S1948"})
     private List<SharedResultsCommandPrompt> prompts;
@@ -28,6 +29,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
     private boolean isModified;
     private boolean isComplete;
     private UUID applicationId;
+    private UUID caseId;
     private ZonedDateTime amendmentDate;
     private UUID amendmentReasonId;
     private String amendmentReason;
@@ -36,17 +38,20 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
     private boolean isDeleted;
     private List<UUID> childResultLineIds;
     private List<UUID> parentResultLineIds;
+    private boolean shadowListed;
+    private String draftResult;
 
     @SuppressWarnings({"squid:S2384"})
     @JsonCreator
     public SharedResultsCommandResultLineV2(
+            @JsonProperty("shortCode") final String shortCode,
             @JsonProperty("delegatedPowers") final DelegatedPowers delegatedPowers,
             @JsonProperty("orderedDate") final LocalDate orderedDate,
             @JsonProperty("sharedDate") final LocalDate sharedDate,
             @JsonProperty("resultLineId") final UUID resultLineId,
-            @JsonProperty("targetId") final UUID targetId,
             @JsonProperty("offenceId") final UUID offenceId,
             @JsonProperty("defendantId") final UUID defendantId,
+            @JsonProperty("masterDefendantId") final UUID masterDefendantId,
             @JsonProperty("resultDefinitionId") final UUID resultDefinitionId,
             @JsonProperty("prompts") final List<SharedResultsCommandPrompt> prompts,
             @JsonProperty("resultLabel") final String resultLabel,
@@ -54,6 +59,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             @JsonProperty("isModified") final boolean isModified,
             @JsonProperty("isComplete") final boolean isComplete,
             @JsonProperty("applicationId") final UUID applicationId,
+            @JsonProperty("caseId") final UUID caseId,
             @JsonProperty("amendmentReasonId") final UUID amendmentReasonId,
             @JsonProperty("amendmentReason") final String amendmentReason,
             @JsonProperty("amendmentDate") final ZonedDateTime amendmentDate,
@@ -61,15 +67,18 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             @JsonProperty("approvedDate") final LocalDate approvedDate,
             @JsonProperty("isDeleted") final boolean isDeleted,
             @JsonProperty("childResultLineIds") final List<UUID> childResultLineIds,
-            @JsonProperty("parentResultLineIds") final List<UUID> parentResultLineIds
+            @JsonProperty("parentResultLineIds") final List<UUID> parentResultLineIds,
+            @JsonProperty("shadowListed") final boolean shadowListed,
+            @JsonProperty("draftResult") final String draftResult
     ) {
+        this.shortCode = shortCode;
         this.delegatedPowers = delegatedPowers;
         this.orderedDate = orderedDate;
         this.sharedDate = sharedDate;
         this.resultLineId = resultLineId;
-        this.targetId = targetId;
         this.offenceId = offenceId;
         this.defendantId = defendantId;
+        this.masterDefendantId = masterDefendantId;
         this.resultDefinitionId = resultDefinitionId;
         this.resultLabel = resultLabel;
         this.prompts = prompts;
@@ -77,6 +86,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.isModified = isModified;
         this.isComplete = isComplete;
         this.applicationId = applicationId;
+        this.caseId = caseId;
         this.amendmentReasonId = amendmentReasonId;
         this.amendmentReason = amendmentReason;
         this.amendmentDate = amendmentDate;
@@ -85,6 +95,16 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.isDeleted = isDeleted;
         this.childResultLineIds = childResultLineIds;
         this.parentResultLineIds = parentResultLineIds;
+        this.shadowListed = shadowListed;
+        this.draftResult = draftResult;
+    }
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(final String shortCode) {
+        this.shortCode = shortCode;
     }
 
     public DelegatedPowers getDelegatedPowers() {
@@ -117,14 +137,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
 
     public void setResultLineId(UUID resultLineId) {
         this.resultLineId = resultLineId;
-    }
-
-    public UUID getTargetId() {
-        return targetId;
-    }
-
-    public void setTargetId(UUID targetId) {
-        this.targetId = targetId;
     }
 
     public UUID getOffenceId() {
@@ -265,18 +277,52 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         this.parentResultLineIds = parentResultLineIds;
     }
 
+
+    public boolean isShadowListed() {
+        return shadowListed;
+    }
+
+    public void setShadowListed(final boolean shadowListed) {
+        this.shadowListed = shadowListed;
+    }
+
+    public String getDraftResult() {
+        return draftResult;
+    }
+
+    public void setDraftResult(final String draftResult) {
+        this.draftResult = draftResult;
+    }
+
+    public UUID getMasterDefendantId() {
+        return masterDefendantId;
+    }
+
+    public void setMasterDefendantId(final UUID masterDefendantId) {
+        this.masterDefendantId = masterDefendantId;
+    }
+
+    public UUID getCaseId() {
+        return caseId;
+    }
+
+    public void setCaseId(final UUID caseId) {
+        this.caseId = caseId;
+    }
+
     public static Builder sharedResultsCommandResultLine(){
         return new Builder();
     }
 
     public static final class Builder {
+        private String shortCode;
         private DelegatedPowers delegatedPowers;
         private LocalDate orderedDate;
         private LocalDate sharedDate;
         private UUID resultLineId;
-        private UUID targetId;
         private UUID offenceId;
         private UUID defendantId;
+        private UUID masterDefendantId;
         private UUID resultDefinitionId;
         private List<SharedResultsCommandPrompt> prompts;
         private String resultLabel;
@@ -284,6 +330,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         private boolean isModified;
         private boolean isComplete;
         private UUID applicationId;
+        private UUID caseId;
         private ZonedDateTime amendmentDate;
         private UUID amendmentReasonId;
         private String amendmentReason;
@@ -292,6 +339,13 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
         private boolean isDeleted;
         private List<UUID> childResultLineIds;
         private List<UUID> parentResultLineIds;
+        private boolean shadowListed;
+        private String draftResult;
+
+        public Builder withShortCode(final String shortCode) {
+            this.shortCode = shortCode;
+            return this;
+        }
 
         public Builder withDelegatedPowers(final DelegatedPowers delegatedPowers) {
             this.delegatedPowers = delegatedPowers;
@@ -313,12 +367,6 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             return this;
         }
 
-        public Builder withTargetId(final UUID targetId) {
-            this.targetId = targetId;
-            return this;
-        }
-
-
         public Builder withOffenceId(final UUID offenceId) {
             this.offenceId = offenceId;
             return this;
@@ -326,6 +374,11 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
 
         public Builder withDefendantId(final UUID defendantId) {
             this.defendantId = defendantId;
+            return this;
+        }
+
+        public Builder withMasterDefendantId(final UUID masterDefendantId) {
+            this.masterDefendantId = masterDefendantId;
             return this;
         }
 
@@ -363,7 +416,10 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             this.applicationId = applicationId;
             return this;
         }
-
+        public Builder withCaseId(final UUID caseId) {
+            this.caseId = caseId;
+            return this;
+        }
         public Builder withAmendmentDate(final ZonedDateTime amendmentDate) {
             this.amendmentDate = amendmentDate;
             return this;
@@ -404,15 +460,26 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             return this;
         }
 
+        public Builder withShadowListed(final boolean shadowListed) {
+            this.shadowListed = shadowListed;
+            return this;
+        }
+
+        public Builder withDraftResult(final String draftResult) {
+            this.draftResult = draftResult;
+            return this;
+        }
+
         public SharedResultsCommandResultLineV2 build() {
             return new SharedResultsCommandResultLineV2(
+                    shortCode,
                     delegatedPowers,
                     orderedDate,
                     sharedDate,
                     resultLineId,
-                    targetId,
                     offenceId,
                     defendantId,
+                    masterDefendantId,
                     resultDefinitionId,
                     prompts,
                     resultLabel,
@@ -420,6 +487,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     isModified,
                     isComplete,
                     applicationId,
+                    caseId,
                     amendmentReasonId,
                     amendmentReason,
                     amendmentDate,
@@ -427,7 +495,9 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     approvedDate,
                     isDeleted,
                     childResultLineIds,
-                    parentResultLineIds
+                    parentResultLineIds,
+                    shadowListed,
+                    draftResult
             );
         }
     }

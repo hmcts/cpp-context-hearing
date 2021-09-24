@@ -723,7 +723,7 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "amendmentDate": "2019-09-09",
+          "amendmentDate": "2019-09-09T00:00+05:30",
           "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
           "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
           "isComplete": true,
@@ -745,7 +745,7 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "amendmentDate": "2019-09-09",
+          "amendmentDate": "2019-09-09T00:00+05:30",
           "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
           "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
           "isComplete": true,

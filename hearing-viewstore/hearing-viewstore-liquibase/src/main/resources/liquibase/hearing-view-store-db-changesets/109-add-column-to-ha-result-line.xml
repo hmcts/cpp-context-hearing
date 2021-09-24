@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+
+    <changeSet id="109" author="hearing"
+               logicalFilePath="109-add-column-to-ha-result-line.xml">
+
+        <addColumn tableName="ha_result_line">
+            <column name="amendment_date" type="DATETIME TZ"/>
+            <column name="amendment_reason_id" type="uuid"/>
+            <column name="amendment_reason" type="TEXT"/>
+            <column name="child_result_line_ids" type="TEXT"/>
+            <column name="parent_result_line_ids" type="TEXT"/>
+        </addColumn>
+
+        <rollback>
+            <dropColumn tableName="ha_result_line">
+                <column name="amendment_date" />
+                <column name="amendment_reason_id" />
+                <column name="amendment_reason"/>
+                <column name="child_result_line_ids"/>
+                <column name="parent_result_line_ids" />
+            </dropColumn>
+        </rollback>
+    </changeSet>
+</databaseChangeLog>

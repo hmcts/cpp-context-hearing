@@ -1,9 +1,10 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static java.util.Collections.emptyMap;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -18,18 +19,21 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.ResultLineReference;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
-import uk.gov.moj.cpp.hearing.command.result.NewAmendmentResult;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.command.result.NewAmendmentResult;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
+import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
+import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
-import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
-import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
@@ -37,6 +41,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -48,7 +53,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S3776", "PMD.BeanMembersShouldSerialize"})
 public class ResultsSharedDelegate implements Serializable {
@@ -195,6 +200,14 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.of(new DraftResultSaved(target, hearingState, userId));
     }
 
+    public Stream<Object> saveDraftResultV2(final UUID hearingId, LocalDate hearingDay, final JsonObject draftResult, final UUID userId) {
+        return Stream.of(new DraftResultSavedV2(hearingId, hearingDay, draftResult, userId));
+    }
+
+    public Stream<Object> deleteDraftResultV2(final UUID hearingId, LocalDate hearingDay, final UUID userId) {
+        return Stream.of(new DraftResultDeletedV2(hearingId, hearingDay,userId));
+    }
+
     public Stream<Object> rejectSaveDraftResult(final Target target) {
         return Stream.of(new SaveDraftResultFailed(target));
     }
@@ -231,7 +244,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .collect(toList())
                 )
                 .withDelegatedPowers(resultLineIn.getDelegatedPowers())
-                .withAmendmentDate(resultLineIn.getAmendmentDate())
+                .withAmendmentDate(getAmendmentDate(resultLineIn))
                 .withAmendmentReasonId(resultLineIn.getAmendmentReasonId())
                 .withAmendmentReason(resultLineIn.getAmendmentReason())
                 .withApprovedDate(resultLineIn.getApprovedDate())
@@ -242,14 +255,29 @@ public class ResultsSharedDelegate implements Serializable {
                 .build();
     }
 
+    private ZonedDateTime getAmendmentDate(final SharedResultsCommandResultLine resultLineIn) {
+        ZonedDateTime amendmentDateTime = null;
+        if (nonNull(resultLineIn.getAmendmentDate())){
+            amendmentDateTime = resultLineIn.getAmendmentDate().atStartOfDay(ZoneId.systemDefault());
+        }
+        return amendmentDateTime;
+    }
+
     @SuppressWarnings("pmd:NullAssignment")
     private ResultLine convert(final SharedResultsCommandResultLineV2 resultLineIn) {
         return ResultLine.resultLine()
+                .withShortCode(resultLineIn.getShortCode())
                 .withResultLineId(resultLineIn.getResultLineId())
                 .withIsModified(resultLineIn.getIsModified())
                 .withIsComplete(resultLineIn.getIsComplete())
                 .withSharedDate(resultLineIn.getSharedDate())
                 .withOrderedDate(resultLineIn.getOrderedDate())
+                .withApplicationId(resultLineIn.getApplicationId())
+                .withOffenceId(resultLineIn.getOffenceId())
+                .withCaseId(resultLineIn.getCaseId())
+                .withShadowListed(resultLineIn.isShadowListed())
+                .withDefendantId(resultLineIn.getDefendantId())
+                .withMasterDefendantId(resultLineIn.getMasterDefendantId())
                 .withResultLabel(resultLineIn.getResultLabel())
                 .withResultDefinitionId(resultLineIn.getResultDefinitionId())
                 .withLevel(Level.valueOf(resultLineIn.getLevel()))
@@ -266,7 +294,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .collect(toList())
                 )
                 .withDelegatedPowers(resultLineIn.getDelegatedPowers())
-                .withAmendmentDate(nonNull(resultLineIn.getAmendmentDate()) ? resultLineIn.getAmendmentDate().toLocalDate() : null)
+                .withAmendmentDate(nonNull(resultLineIn.getAmendmentDate()) ? resultLineIn.getAmendmentDate() : null)
                 .withAmendmentReasonId(resultLineIn.getAmendmentReasonId())
                 .withAmendmentReason(resultLineIn.getAmendmentReason())
                 .withApprovedDate(resultLineIn.getApprovedDate())
@@ -283,30 +311,23 @@ public class ResultsSharedDelegate implements Serializable {
         final Map<UUID, Target> targetsInAggregate = momento.getMultiDayTargets().containsKey(hearingDay) ? momento.getMultiDayTargets().get(hearingDay) : emptyMap();
 
         final Map<UUID, Target> finalTargets = new HashMap<>();
-        final Map<UUID, Target> targets = new HashMap<>();
 
         resultLines.forEach(
                 rl -> {
-                    Target target;
-                    if (targets.containsKey(rl.getTargetId())) {
-                        target = targets.get(rl.getTargetId());
-                    } else {
-                        target = target()
-                                .withApplicationId(rl.getApplicationId())
-                                .withDefendantId(rl.getDefendantId())
-                                .withHearingId(hearingId)
-                                .withOffenceId(rl.getOffenceId())
-                                .withResultLines(new ArrayList<>())
-                                .withTargetId(rl.getTargetId())
-                                .build();
-                        targets.put(target.getTargetId(), target);
-                    }
-                    setShadowListed(target, rl.getTargetId(), targetsInAggregate);
+                    final Target target = target()
+                            .withApplicationId(rl.getApplicationId())
+                            .withDefendantId(rl.getDefendantId())
+                            .withHearingId(hearingId)
+                            .withOffenceId(rl.getOffenceId())
+                            .withResultLines(new ArrayList<>())
+                            .withTargetId(randomUUID())
+                            .withShadowListed(rl.isShadowListed())
+                            .withDraftResult(rl.getDraftResult())
+                            .build();
+                    finalTargets.put(target.getTargetId(), target);
                     target.getResultLines().add(convert(rl));
                 }
         );
-        targets.values().forEach(target ->
-                setDraftResultAndPutFinalTargetsMap(finalTargets, target, targetsInAggregate));
 
         final Hearing hearing = this.momento.getHearing();
         hearing.setYouthCourt(youthCourt);
@@ -332,15 +353,13 @@ public class ResultsSharedDelegate implements Serializable {
         final Boolean previouslyShared = Boolean.TRUE.equals(momento.getHearing().getHasSharedResults());
 
         final Map<UUID, Target> finalTargets = new HashMap<>();
-        final Map<UUID, Target> targets = new HashMap<>();
         final List<NewAmendmentResult> newAmendmentResults = new ArrayList<>();
         final LocalDate hearingDay = getHearingDay();
         final Map<UUID, Target> targetsInAggregate = momento.getMultiDayTargets().containsKey(hearingDay) ? momento.getMultiDayTargets().get(hearingDay) : emptyMap();
 
         resultLines.forEach(
                 rl -> {
-                    final Target target = createTargetAndPutsToTargetsMap(hearingId, targets, rl, hearingDay);
-                    setShadowListed(target, rl.getTargetId(), targetsInAggregate);
+                    final Target target = createTargetAndPutsToTargetsMap(hearingId, finalTargets, rl, hearingDay);
                     target.getResultLines().add(convert(rl));
 
                     if (isNewAmendmentResultOrNewResult(rl)) {
@@ -348,10 +367,6 @@ public class ResultsSharedDelegate implements Serializable {
                     }
                 }
         );
-
-        targets.values().forEach(target ->
-                setDraftResultAndPutFinalTargetsMap(finalTargets, target, targetsInAggregate));
-
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
@@ -381,18 +396,17 @@ public class ResultsSharedDelegate implements Serializable {
 
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged, final YouthCourt youthCourt, final LocalDate hearingDay) {
 
+        addParenetResultLineIds(resultLines);
         final Boolean previouslyShared = Boolean.TRUE.equals(momento.getIsHearingDayPreviouslyShared().get(hearingDay));
 
         final Map<UUID, Target> finalTargets = new HashMap<>();
-        final Map<UUID, Target> targets = new HashMap<>();
         final List<NewAmendmentResult> newAmendmentResults = new ArrayList<>();
 
         final Map<UUID, Target> targetsInAggregate = momento.getMultiDayTargets().containsKey(hearingDay) ? momento.getMultiDayTargets().get(hearingDay) : emptyMap();
 
         resultLines.forEach(
                 rl -> {
-                    final Target target = createTargetAndPutsToTargetsMap(hearingId, targets, rl, hearingDay);
-                    setShadowListed(target, rl.getTargetId(), targetsInAggregate);
+                    final Target target = createTargetAndPutsToTargetsMap(hearingId, finalTargets, rl, hearingDay);
                     target.getResultLines().add(convert(rl));
 
                     if (isNewAmendmentResultOrNewResult(rl)) {
@@ -401,8 +415,7 @@ public class ResultsSharedDelegate implements Serializable {
                 }
         );
 
-        targets.values().forEach(target ->
-                setDraftResultAndPutFinalTargetsMap(finalTargets, target, targetsInAggregate));
+
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
@@ -434,30 +447,52 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines));
     }
 
-    private void setDraftResultAndPutFinalTargetsMap(final Map<UUID, Target> finalTargets, final Target target, final Map<UUID, Target> targetsInAggregate) {
-        if (finalTargets.containsKey(target.getTargetId()) && !StringUtils.isEmpty(target.getDraftResult())) {
-            target.setDraftResult(targetsInAggregate.get(target.getTargetId()).getDraftResult());
-        }
-        finalTargets.put(target.getTargetId(), target);
+    private void addParenetResultLineIds(final List<SharedResultsCommandResultLineV2> resultLineV2s) {
+        final Map<UUID,UUID> childParentMap = new HashMap();
+        resultLineV2s.stream().filter(rl -> nonNull(rl.getChildResultLineIds()) && !rl.getChildResultLineIds().isEmpty()).forEach(rl->
+            rl.getChildResultLineIds().stream().forEach(childResultLineId->
+                childParentMap.put(childResultLineId, rl.getResultLineId())
+            )
+        );
+
+        resultLineV2s.stream().forEach(rl->{
+            if (childParentMap.containsKey(rl.getResultLineId())){
+                if (rl.getParentResultLineIds() == null ){
+                    rl.setParentResultLineIds(new ArrayList());
+                }
+                rl.getParentResultLineIds().add(childParentMap.get(rl.getResultLineId()));
+            }
+        });
     }
 
     private Target createTargetAndPutsToTargetsMap(final UUID hearingId, final Map<UUID, Target> targets, final SharedResultsCommandResultLineV2 rl, final LocalDate hearingDay) {
-        Target target;
-        if (targets.containsKey(rl.getTargetId())) {
-            target = targets.get(rl.getTargetId());
-        } else {
-            target = target()
-                    .withApplicationId(rl.getApplicationId())
-                    .withDefendantId(rl.getDefendantId())
-                    .withHearingId(hearingId)
-                    .withOffenceId(rl.getOffenceId())
-                    .withResultLines(new ArrayList<>())
-                    .withTargetId(rl.getTargetId())
-                    .withHearingDay(hearingDay)
-                    .build();
-            targets.put(target.getTargetId(), target);
+
+        final UUID taregetId = getTargetId(rl);
+        if (targets.containsKey(taregetId)){
+            return targets.get(taregetId);
+
         }
+
+        final Target target = target()
+                .withApplicationId(rl.getApplicationId())
+                .withCaseId(rl.getCaseId())
+                .withDefendantId(rl.getDefendantId())
+                .withMasterDefendantId(rl.getMasterDefendantId())
+                .withHearingId(hearingId)
+                .withOffenceId(rl.getOffenceId())
+                .withResultLines(new ArrayList<>())
+                .withTargetId(taregetId)
+                .withHearingDay(hearingDay)
+                .withShadowListed(rl.isShadowListed())
+                .withDraftResult(rl.getDraftResult())
+                .build();
+
+        targets.put(target.getTargetId(), target);
         return target;
+    }
+
+    private UUID getTargetId(final SharedResultsCommandResultLineV2 rl) {
+        return nonNull(rl.getApplicationId()) ? rl.getApplicationId() : rl.getOffenceId();
     }
 
     /**
@@ -483,12 +518,6 @@ public class ResultsSharedDelegate implements Serializable {
             return true;
         }
 
-    }
-
-    private void setShadowListed(final Target target, final UUID targetId, final Map<UUID, Target> targetsInAggregate) {
-        if (targetsInAggregate.containsKey(targetId)) {
-            target.setShadowListed(targetsInAggregate.get(targetId).getShadowListed());
-        }
     }
 
     private Stream<Object> enrichHearing(final List<SharedResultsCommandResultLine> resultLines) {
@@ -647,4 +676,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .toLocalDate();
     }
 
+    public Stream<Object> amendHearing(final UUID hearingId, final UUID userId, final HearingState newHearingState) {
+        return Stream.of(new HearingAmended(hearingId, userId, newHearingState));
+    }
 }

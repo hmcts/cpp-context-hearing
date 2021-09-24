@@ -15,7 +15,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 @JsonPropertyOrder({
         "label",
         "welshLabel",
-        "type"
+        "type",
+        "minLength",
+        "maxLength"
 })
 @SuppressWarnings("squid:S2384")
 public class Children {
@@ -31,10 +33,14 @@ public class Children {
     private String partName;
     private int sequence;
     private String code;
+    private Boolean required;
+    private String minLength;
+    private String maxLength;
 
     @JsonProperty(value = "children")
     private List<Children> childrenList;
 
+    public Children(){}
 
     public Children(final String label, final String code, final String promptRef,final ResultType type,final Set<String> fixedList,final List<Children> childrenList) {
         this.label = label;
@@ -76,12 +82,87 @@ public class Children {
         this.welshLabel = welshLabel;
     }
 
-    public Children(final String label, final String promptRef, final ResultType type, final int sequenceNumber, final String partName) {
+    public Children(final String label, final String promptRef, final ResultType type,  final String partName, final Boolean required, final String minLength, final String maxLength ) {
         this.label = label;
         this.type = type;
         this.promptRef = promptRef;
-        this.sequence = sequenceNumber;
         this.partName = partName;
+        this.required = required;
+        this.minLength = minLength;
+        this.maxLength = maxLength;
+
+    }
+
+    public Children(final String label, final String promptRef, final ResultType type,  final String partName, final String addressType, final Boolean required, final String minLength, final String maxLength ) {
+        this.label = label;
+        this.type = type;
+        this.promptRef = promptRef;
+        this.partName = partName;
+        this.addressType = addressType;
+        this.required = required;
+        this.minLength = minLength;
+        this.maxLength = maxLength;
+
+    }
+
+    public Children(final String code, final String label, final String promptRef, final ResultType type,  final String partName, final Boolean required, final String minLength, final String maxLength ) {
+        this.code = code;
+        this.label = label;
+        this.type = type;
+        this.promptRef = promptRef;
+        this.partName = partName;
+        this.required = required;
+        this.minLength = minLength;
+        this.maxLength = maxLength;
+
+    }
+
+    public Children withCode(String code){
+        this.code = code;
+        return this;
+    }
+
+    public Children withLabel(String label){
+        this.label = label;
+        return this;
+    }
+    public Children withType(ResultType type){
+        this.type = type;
+        return this;
+    }
+    public Children withPromptRef(String promptRef){
+        this.promptRef = promptRef;
+        return this;
+    }
+    public Children withPartName(String partName){
+        this.partName = partName;
+        return this;
+    }
+    public Children withRequired(boolean required){
+        this.required = required;
+        return this;
+    }
+    public Children withMinLength(String minLength){
+        this.minLength = minLength;
+        return this;
+    }
+
+    public Children withMaxLength(String maxLength){
+        this.maxLength = maxLength;
+        return this;
+    }
+
+    public Children withFixedList(Set<String> fixedList){
+        this.fixedList = fixedList;
+        return this;
+    }
+    public Children withAddressType(String addressType){
+        this.addressType = addressType;
+        return this;
+    }
+    public Children withChildrenList(List<Children> childrenList){
+        this.childrenList = childrenList;
+        return this;
     }
 
     public String getLabel() { return label; }
@@ -175,5 +256,33 @@ public class Children {
 
     public void setPartName(final String partName) {
         this.partName = partName;
+    }
+
+    public void setType(ResultType type) {
+        this.type = type;
+    }
+
+    public Boolean getRequired() {
+        return required;
+    }
+
+    public void setRequired(Boolean required) {
+        this.required = required;
+    }
+
+    public String getMinLength() {
+        return minLength;
+    }
+
+    public void setMinLength(String minLength) {
+        this.minLength = minLength;
+    }
+
+    public String getMaxLength() {
+        return maxLength;
+    }
+
+    public void setMaxLength(String maxLength) {
+        this.maxLength = maxLength;
     }
 }

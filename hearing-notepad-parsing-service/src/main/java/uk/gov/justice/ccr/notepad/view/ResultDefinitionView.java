@@ -12,7 +12,8 @@ import java.util.UUID;
 @JsonPropertyOrder({
         "resultLineId",
         "originalText",
-        "resultCode",
+        "resultDefinitionId",
+        "shortCode",
         "resultLevel",
         "orderedDate",
         "parts",
@@ -26,11 +27,13 @@ public class ResultDefinitionView {
 
     private final String resultLineId = UUID.randomUUID().toString();
     private String originalText;
-    private String resultCode;
+    private String resultDefinitionId;
 
     private String resultLevel;
 
     private String orderedDate;
+
+    private String shortCode;
 
     private List<Part> parts = new ArrayList<>();
 
@@ -56,12 +59,12 @@ public class ResultDefinitionView {
         this.originalText = originalText;
     }
 
-    public String getResultCode() {
-        return resultCode;
+    public String getResultDefinitionId() {
+        return resultDefinitionId;
     }
 
-    public void setResultCode(final String resultCode) {
-        this.resultCode = resultCode;
+    public void setResultDefinitionId(final String resultDefinitionId) {
+        this.resultDefinitionId = resultDefinitionId;
     }
 
     public String getResultLevel() {
@@ -131,4 +134,13 @@ public class ResultDefinitionView {
     public void setConditionalMandatory(Boolean conditionalMandatory) {
         this.conditionalMandatory = conditionalMandatory;
     }
+
+    public String getShortCode() {
+        return shortCode;
+    }
+
+    public void setShortCode(String shortCode) {
+        this.shortCode = shortCode;
+    }
+
 }

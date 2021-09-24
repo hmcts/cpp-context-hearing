@@ -471,7 +471,6 @@ public class VerdictDelegateTest {
                 resultLineIn.getOrderedDate(),
                 resultLineIn.getSharedDate(),
                 resultLineIn.getResultLineId(),
-                targetDraft.getTargetId(),
                 targetDraft.getOffenceId(),
                 targetDraft.getDefendantId(),
                 resultLineIn.getResultDefinitionId(),
@@ -484,12 +483,14 @@ public class VerdictDelegateTest {
                 targetDraft.getApplicationId(),
                 resultLineIn.getAmendmentReasonId(),
                 resultLineIn.getAmendmentReason(),
-                resultLineIn.getAmendmentDate(),
+                resultLineIn.getAmendmentDate().toLocalDate(),
                 resultLineIn.getFourEyesApproval(),
                 resultLineIn.getApprovedDate(),
                 resultLineIn.getIsDeleted(),
                 null,
-                null
+                null,
+                targetDraft.getShadowListed(),
+                targetDraft.getDraftResult()
         );
         final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null)
                 .collect(Collectors.toList()).get(0);
@@ -538,7 +539,6 @@ public class VerdictDelegateTest {
                 resultLineIn.getOrderedDate(),
                 resultLineIn.getSharedDate(),
                 resultLineIn.getResultLineId(),
-                targetDraft.getTargetId(),
                 targetDraft.getOffenceId(),
                 targetDraft.getDefendantId(),
                 resultLineIn.getResultDefinitionId(),
@@ -551,12 +551,14 @@ public class VerdictDelegateTest {
                 targetDraft.getApplicationId(),
                 resultLineIn.getAmendmentReasonId(),
                 resultLineIn.getAmendmentReason(),
-                resultLineIn.getAmendmentDate(),
+                resultLineIn.getAmendmentDate().toLocalDate(),
                 resultLineIn.getFourEyesApproval(),
                 resultLineIn.getApprovedDate(),
                 resultLineIn.getIsDeleted(),
                 null,
-                null
+                null,
+                targetDraft.getShadowListed(),
+                targetDraft.getDraftResult()
         );
         final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getHearingId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null)
                 .collect(Collectors.toList()).get(0);

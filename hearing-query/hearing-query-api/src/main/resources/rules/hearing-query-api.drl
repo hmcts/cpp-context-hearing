@@ -79,6 +79,24 @@ rule "Query - API - hearing.get-draft-result"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get-draft-result-v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-draft-result-v2");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Query - API - hearing.get-share-result-v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get-share-result-v2");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Query - API - hearing.get-results"
   when
     $outcome: Outcome();

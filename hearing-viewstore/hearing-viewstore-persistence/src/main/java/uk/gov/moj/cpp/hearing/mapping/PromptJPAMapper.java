@@ -19,7 +19,9 @@ public class PromptJPAMapper {
             return null;
         }
         return Prompt.prompt()
+                .setPromptId(pojo.getId()+pojo.getPromptRef()+resultLine.getId())
                 .setId(pojo.getId())
+                .setPromptReference(pojo.getPromptRef())
                 .setLabel(pojo.getLabel())
                 .setValue(pojo.getValue())
                 .setFixedListCode(pojo.getFixedListCode())
@@ -45,6 +47,7 @@ public class PromptJPAMapper {
                 .withLabel(entity.getLabel())
                 .withValue(entity.getValue())
                 .withWelshValue(entity.getWelshValue())
+                .withPromptRef(entity.getPromptReference())
                 .build();
     }
 

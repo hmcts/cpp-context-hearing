@@ -105,6 +105,13 @@ baseUri:  message://command/handler/message/hearing
             example: !include json/hearing.command.save-days-draft-results.json
             schema:  !include json/schema/hearing.command.save-days-draft-results.json
 
+        application/vnd.hearing.command.save-draft-result-v2+json:
+            example: !include json/hearing.command.save-draft-result-v2.json
+            schema: !include json/schema/hearing.command.save-draft-result-v2.json
+        application/vnd.hearing.command.delete-draft-result-v2+json:
+            example: !include json/hearing.command.delete-draft-result-v2.json
+            schema: !include json/schema/hearing.command.delete-draft-result-v2.json
+
         application/vnd.hearing.command.share-results+json:
             example: !include json/hearing.command.share-results.json
             schema:  !include json/schema/hearing.command.share-results.json
@@ -451,6 +458,11 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.remove-offences-from-existing-hearing+json:
             schema: !include json/schema/hearing.command.remove-offences-from-existing-hearing.json
             example: !include json/hearing.command.remove-offences-from-existing-hearing.json
+
+        application/vnd.hearing.command.amend+json:
+            schema: !include json/schema/hearing.command.amend.json
+            example: !include json/hearing.command.amend.json
+
 
 # Extend Custody Time Limit
         application/vnd.hearing.command.extend-custody-time-limit+json:

@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.Collections.EMPTY_LIST;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -57,9 +58,9 @@ public class NotepadHearingIT extends AbstractIT {
                         )));
 
         final JSONObject jsonObject = new JSONObject(responseData.getPayload());
-        final String resultCode = jsonObject.getString("resultCode");
+        final String resultDefinitionId = jsonObject.getString("resultDefinitionId");
         final String promptsQueryAPIEndPoint = MessageFormat
-                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.prompt"), resultCode, LocalDate.now().toString());
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.prompt"), resultDefinitionId, LocalDate.now().toString());
         final String promptUrl = getBaseUri() + "/" + promptsQueryAPIEndPoint;
         final String promptMediaType = "application/vnd.hearing.notepad.parse-result-prompt+json";
 
@@ -133,6 +134,24 @@ public class NotepadHearingIT extends AbstractIT {
     }
 
     @Test
+    public void shouldParseDataForNameEmailTrue(){
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "SDO", LocalDate.now());
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+
+        poll(requestParams(url, mediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                withJsonPath("$.label", is("Supervision Default Order")),
+                                withJsonPath("$.promptChoices", hasSize(4)),
+                                withJsonPath("$.childResultDefinitions[?(@.code == '5f1da403-d5da-4a42-8b7f-02e503101603')].childResultCodes.*", hasSize(5))
+                        )));
+    }
+
+    @Test
     public void shouldParseDataForGrouping(){
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "FCOMP", LocalDate.now());
@@ -146,10 +165,11 @@ public class NotepadHearingIT extends AbstractIT {
                         payload().isJson(allOf(
                                 withJsonPath("$.promptChoices", hasSize(2)),
                                 withJsonPath("$.promptChoices[1].promptRef", is("CREDNAME")),
+                                withJsonPath("$.promptChoices[1].promptOrder", is(200)),
                                 withJsonPath("$.promptChoices[1].children", hasSize(2)),
+                                withJsonPath("$.promptChoices[1].nameAddressList", is(EMPTY_LIST)),
                                 withJsonPath("$.promptChoices[1].children[0].promptRef", is("CREDNAME")),
                                 withJsonPath("$.promptChoices[1].children[0].type", is("FIXL")),
-                                withJsonPath("$.promptChoices[1].children[1].promptRef", is("minorcreditornameandaddress")),
                                 withJsonPath("$.promptChoices[1].children[1].type", is("NAMEADDRESS")),
                                 withJsonPath("$.promptChoices[1].children[1].children", hasSize(9)),
                                 withJsonPath("$.promptChoices[1].children[1].children[0].promptRef", is("minorcreditornameandaddressOrganisationName")),
@@ -158,9 +178,7 @@ public class NotepadHearingIT extends AbstractIT {
                                 withJsonPath("$.promptChoices[1].children[1].children[3].promptRef", is("minorcreditornameandaddressAddress3")),
                                 withJsonPath("$.promptChoices[1].children[1].children[4].promptRef", is("minorcreditornameandaddressAddress4")),
                                 withJsonPath("$.promptChoices[1].children[1].children[5].promptRef", is("minorcreditornameandaddressAddress5")),
-                                withJsonPath("$.promptChoices[1].children[1].children[6].promptRef", is("minorcreditornameandaddressPostCode")),
-                                withJsonPath("$.promptChoices[1].children[1].children[7].promptRef", is("minorcreditornameandaddressEmailAddress1")),
-                                withJsonPath("$.promptChoices[1].children[1].children[8].promptRef", is("minorcreditornameandaddressCategoryCode"))
+                                withJsonPath("$.promptChoices[1].children[1].children[6].promptRef", is("minorcreditornameandaddressPostCode"))
                         )));
     }
 
@@ -169,32 +187,24 @@ public class NotepadHearingIT extends AbstractIT {
                 withJsonPath("$.promptChoices[0].label", is("Protected person's address")),
                 withJsonPath("$.promptChoices[0].type", is("TXT")),
                 withJsonPath("$.promptChoices[0].required", is(true)),
-                withJsonPath("$.promptChoices[0].durationSequence", is(0)),
-                withJsonPath("$.promptChoices[0].componentType", is("TXT")),
-                withJsonPath("$.promptChoices[0].hidden", is(false)),
+                withJsonPath("$.promptChoices[0].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[1].code", is("abc9bb61-cb5b-4cf7-be24-8866bcd2fc69")),
                 withJsonPath("$.promptChoices[1].label", is("Protected person")),
                 withJsonPath("$.promptChoices[1].type", is("TXT")),
                 withJsonPath("$.promptChoices[1].required", is(true)),
-                withJsonPath("$.promptChoices[1].durationSequence", is(0)),
-                withJsonPath("$.promptChoices[1].componentType", is("TXT")),
-                withJsonPath("$.promptChoices[1].hidden", is(false)),
+                withJsonPath("$.promptChoices[1].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[2].code", is("8df0ec7e-5985-4998-af1a-5da293d9cb3c")),
                 withJsonPath("$.promptChoices[2].label", is("Order details")),
                 withJsonPath("$.promptChoices[2].type", is("TXT")),
                 withJsonPath("$.promptChoices[2].required", is(true)),
-                withJsonPath("$.promptChoices[2].durationSequence", is(0)),
-                withJsonPath("$.promptChoices[2].componentType", is("TXT")),
-                withJsonPath("$.promptChoices[2].hidden", is(false)),
                 withJsonPath("$.promptChoices[2].minLength", is("1")),
                 withJsonPath("$.promptChoices[2].maxLength", is("4000")),
+                withJsonPath("$.promptChoices[2].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[3].code", is("a20665cc-6877-40f4-b85e-d4c87e62987b")),
                 withJsonPath("$.promptChoices[3].label", is("Period of order")),
                 withJsonPath("$.promptChoices[3].type", is("DURATION")),
                 withJsonPath("$.promptChoices[3].required", is(true)),
-                withJsonPath("$.promptChoices[3].durationSequence", is(0)),
-                withJsonPath("$.promptChoices[3].componentType", is("DURATION")),
-                withJsonPath("$.promptChoices[3].hidden", is(false)),
+                withJsonPath("$.promptChoices[3].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[3].children[0].type", is("INT")),
                 withJsonPath("$.promptChoices[3].children[0].label", is("Years")),
                 withJsonPath("$.promptChoices[3].children[0].welshLabel", is("Flynedd")),
@@ -211,29 +221,22 @@ public class NotepadHearingIT extends AbstractIT {
                 withJsonPath("$.promptChoices[4].label", is("Conviction / acquittal")),
                 withJsonPath("$.promptChoices[4].type", is("FIXL")),
                 withJsonPath("$.promptChoices[4].required", is(true)),
-                withJsonPath("$.promptChoices[4].durationSequence", is(0)),
-                withJsonPath("$.promptChoices[4].componentType", is("FIXL")),
-                withJsonPath("$.promptChoices[4].hidden", is(false)),
-                withJsonPath("$.promptChoices[5].code", is("6927b6ac-4c85-4532-838d-88ac00ea83f9")),
+                withJsonPath("$.promptChoices[4].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[5].type", is("NAMEADDRESS")),
                 withJsonPath("$.promptChoices[5].required", is(true)),
-                withJsonPath("$.promptChoices[5].promptOrder", is(500)),
-                withJsonPath("$.promptChoices[5].componentType", is("NAMEADDRESS")),
+                withJsonPath("$.promptChoices[5].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[5].children[0].label", is("Conveyor / custodian name organisation name")),
                 withJsonPath("$.promptChoices[5].children[0].type", is("TXT")),
                 withJsonPath("$.promptChoices[5].children[0].promptRef", is("conveyorcustodiannameOrganisationName")),
-                withJsonPath("$.promptChoices[5].children[0].sequence", is(500)),
                 withJsonPath("$.promptChoices[5].children[1].label", is("Conveyor / custodian name address line 1")),
                 withJsonPath("$.promptChoices[5].children[1].type", is("TXT")),
                 withJsonPath("$.promptChoices[5].children[1].promptRef", is("conveyorcustodiannameAddress1")),
-                withJsonPath("$.promptChoices[5].children[1].sequence", is(500)),
                 withJsonPath("$.promptChoices[6].code", is("ea26f773-0a91-4526-b4ad-84d07b5bf940")),
                 withJsonPath("$.promptChoices[6].label", is("Reason")),
                 withJsonPath("$.promptChoices[6].type", is("TXT")),
                 withJsonPath("$.promptChoices[6].required", is(false)),
-                withJsonPath("$.promptChoices[6].durationSequence", is(0)),
+                withJsonPath("$.promptChoices[6].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[6].minLength", is("1")),
-                withJsonPath("$.promptChoices[6].maxLength", is("1000")),
-                withJsonPath("$.promptChoices[6].componentType", is("TXT"))};
+                withJsonPath("$.promptChoices[6].maxLength", is("1000"))};
     }
 }

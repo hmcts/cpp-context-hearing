@@ -35,6 +35,7 @@ public class ResultPrompt {
     private String welshDurationElement;
     private String minLength;
     private String maxLength;
+    private String referenceDataKey;
 
     public ResultPrompt() {
 
@@ -46,7 +47,7 @@ public class ResultPrompt {
                         final Set<String> fixedList, Set<ResultPromptDynamicListNameAddress> nameAddressList, final Integer promptOrder,
                         final String reference, final Integer durationSequence, final Boolean hidden,
                         final String componentLabel, final String listLabel, final String addressType, final String partName, final Boolean nameEmail, final String welshDurationElement,
-                        final String minLength, final String maxLength) {
+                        final String minLength, final String maxLength, final String referenceDataKey) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.resultDefinitionLabel = resultDefinitionLabel;
@@ -69,6 +70,7 @@ public class ResultPrompt {
         this.welshDurationElement = welshDurationElement;
         this.minLength = minLength;
         this.maxLength = maxLength;
+        this.referenceDataKey = referenceDataKey;
     }
 
     public String getId() {
@@ -255,6 +257,15 @@ public class ResultPrompt {
         this.maxLength = maxLength;
     }
 
+
+    public String getReferenceDataKey() {
+        return referenceDataKey;
+    }
+
+    public void setReferenceDataKey(final String referenceDataKey) {
+        this.referenceDataKey = referenceDataKey;
+    }
+
     @Override
     public String toString() {
         if(nameAddressList != null) {
@@ -280,6 +291,7 @@ public class ResultPrompt {
                     ", nameEmail='" + nameEmail + '\'' +
                     ", minLength='" + minLength + '\'' +
                     ", maxLength='" + maxLength + '\'' +
+                    ", referenceDataKey='" + referenceDataKey + '\'' +
                     '}';
         } else {
             return "ResultPrompt{" +
@@ -303,7 +315,9 @@ public class ResultPrompt {
                     ", nameEmail='" + nameEmail + '\'' +
                     ", minLength='" + minLength + '\'' +
                     ", maxLength='" + maxLength + '\'' +
+                    ", referenceDataKey='" + referenceDataKey + '\'' +
                     '}';
         }
     }
+
 }

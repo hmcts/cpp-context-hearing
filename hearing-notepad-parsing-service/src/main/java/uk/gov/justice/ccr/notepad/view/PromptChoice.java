@@ -10,27 +10,30 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Objects.nonNull;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
         "code",
+        "promptOrder",
         "promptRef",
         "label",
         "type",
         "required",
-        "durationSequence",
-        "promptOrder",
+        "hidden",
         "componentType",
         "componentLabel",
         "partName",
         "addressType",
         "listLabel",
-        "nameEmail",
-        "hidden"
+        "minLength",
+        "maxLength"
 })
 public class PromptChoice {
 
     private String code;
+
+    private Integer promptOrder;
 
     private String promptRef;
 
@@ -38,15 +41,14 @@ public class PromptChoice {
 
     private ResultType type;
 
-    private Boolean required;
+    private boolean hidden;
+
+
+    private boolean required;
 
     private List<Children> children;
 
     private Set<String> fixedList;
-
-    private Integer promptOrder;
-
-    private Integer durationSequence;
 
     @JsonIgnore
     private boolean isVisible = true;
@@ -59,8 +61,6 @@ public class PromptChoice {
 
     private String componentType;
 
-    private Boolean hidden;
-
     private String addressType;
 
     private String componentLabel;
@@ -71,11 +71,15 @@ public class PromptChoice {
 
     private Set<NameAddress> nameAddressList;
 
+    @JsonIgnore
     private Boolean nameEmail;
 
     private String minLength;
 
     private String maxLength;
+
+    @JsonIgnore
+    private String referenceDataKey;
 
     public String getCode() {
         return code;
@@ -101,11 +105,19 @@ public class PromptChoice {
         type = value;
     }
 
-    public Boolean getRequired() {
+    public final void setHidden(final boolean value) {
+        hidden = value;
+    }
+
+    public boolean getHidden() {
+        return hidden;
+    }
+
+    public boolean getRequired() {
         return required;
     }
 
-    public void setRequired(final Boolean required) {
+    public void setRequired(final boolean required) {
         this.required = required;
     }
 
@@ -118,6 +130,14 @@ public class PromptChoice {
             children = newArrayList();
         }
         children.add(value);
+    }
+
+    public Integer getPromptOrder() {
+        return promptOrder;
+    }
+
+    public void setPromptOrder(final Integer promptOrder) {
+        this.promptOrder = promptOrder;
     }
 
     @JsonIgnore
@@ -154,14 +174,6 @@ public class PromptChoice {
         this.fixedList = fixedList;
     }
 
-    public Integer getDurationSequence() {
-        return durationSequence;
-    }
-
-    public void setDurationSequence(final Integer durationSequence) {
-        this.durationSequence = durationSequence;
-    }
-
     public String getComponentType() {
         return componentType;
     }
@@ -176,22 +188,6 @@ public class PromptChoice {
 
     public void setPromptRef(String promptRef) {
         this.promptRef = promptRef;
-    }
-
-    public Integer getPromptOrder() {
-        return promptOrder;
-    }
-
-    public void setPromptOrder(Integer promptOrder) {
-        this.promptOrder = promptOrder;
-    }
-
-    public Boolean getHidden() {
-        return hidden;
-    }
-
-    public void setHidden(final Boolean hidden) {
-        this.hidden = hidden;
     }
 
     public String getAddressType() {
@@ -227,7 +223,7 @@ public class PromptChoice {
     }
 
     public Set<NameAddress> getNameAddressList() {
-        if(nameAddressList !=null) {
+        if (nameAddressList != null) {
             return new HashSet<>(nameAddressList);
         } else {
             return new HashSet<>();
@@ -235,8 +231,10 @@ public class PromptChoice {
     }
 
     public void setNameAddressList(final Set<NameAddress> nameAddressList) {
-        if(nameAddressList !=null) {
+        if (nameAddressList != null) {
             this.nameAddressList = new HashSet<>(nameAddressList);
+        } else {
+            this.nameAddressList = new HashSet<>();
         }
     }
 
@@ -262,5 +260,13 @@ public class PromptChoice {
 
     public void setMaxLength(final String maxLength) {
         this.maxLength = maxLength;
+    }
+
+    public String getReferenceDataKey() {
+        return referenceDataKey;
+    }
+
+    public void setReferenceDataKey(final String referenceDataKey) {
+        this.referenceDataKey = referenceDataKey;
     }
 }

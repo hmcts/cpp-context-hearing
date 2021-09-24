@@ -459,7 +459,7 @@
       "offenceId": "f824a233-27b8-4986-af92-95b554e96476",
       "resultLines": [
         {
-          "amendmentDate": "2019-12-19",
+          "amendmentDate": "2019-12-19T00:00+05:30",
           "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
           "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
           "childResultLineIds": [

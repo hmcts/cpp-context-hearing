@@ -1142,7 +1142,6 @@ public class CustodyTimeLimitUtilTest {
                 LocalDate.now(),
                 LocalDate.now(),
                 randomUUID(),
-                randomUUID(),
                 offenceId,
                 defendantId,
                 randomUUID(),
@@ -1159,7 +1158,9 @@ public class CustodyTimeLimitUtilTest {
                 LocalDate.now(),
                 false,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                false,
+                null
         );
     }
 
@@ -1167,7 +1168,6 @@ public class CustodyTimeLimitUtilTest {
         return new SharedResultsCommandResultLine(null,
                 LocalDate.now(),
                 LocalDate.now(),
-                randomUUID(),
                 randomUUID(),
                 offenceId,
                 defendantId,
@@ -1185,7 +1185,9 @@ public class CustodyTimeLimitUtilTest {
                 LocalDate.now(),
                 true,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                false,
+                null
         );
     }
 
@@ -1193,7 +1195,6 @@ public class CustodyTimeLimitUtilTest {
         return new SharedResultsCommandResultLine(null,
                 LocalDate.now(),
                 LocalDate.now(),
-                randomUUID(),
                 randomUUID(),
                 offenceId,
                 defendantId,
@@ -1211,7 +1212,9 @@ public class CustodyTimeLimitUtilTest {
                 LocalDate.now(),
                 false,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                false,
+                null
         );
     }
 
@@ -1227,7 +1230,6 @@ public class CustodyTimeLimitUtilTest {
         return new SharedResultsCommandResultLine(null,
                 LocalDate.now(),
                 LocalDate.now(),
-                randomUUID(),
                 randomUUID(),
                 offenceId,
                 defendantId,
@@ -1245,7 +1247,9 @@ public class CustodyTimeLimitUtilTest {
                 LocalDate.now(),
                 false,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                false,
+                null
         );
     }
 
@@ -1253,7 +1257,6 @@ public class CustodyTimeLimitUtilTest {
         return new SharedResultsCommandResultLine(null,
                 LocalDate.now(),
                 LocalDate.now(),
-                randomUUID(),
                 randomUUID(),
                 offenceId,
                 defendantId,
@@ -1271,7 +1274,9 @@ public class CustodyTimeLimitUtilTest {
                 LocalDate.now(),
                 true,
                 Collections.emptyList(),
-                Collections.emptyList()
+                Collections.emptyList(),
+                false,
+                null
         );
     }
 

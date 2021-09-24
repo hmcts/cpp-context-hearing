@@ -95,6 +95,9 @@ public class NotepadResultServiceApi {
         final ResultDefinitionView buildFromKnowledge = resultDefinitionViewBuilder.buildFromKnowledge(parts, knowledge, childResultDefinitions, excludedFromResults, booleanResult,label, promptChoices);
         buildFromKnowledge.setOriginalText(originalText);
         buildFromKnowledge.setOrderedDate(orderedDate.toString());
+        if(nonNull(resultDefinition)){
+            buildFromKnowledge.setShortCode(resultDefinition.getShortCode());
+        }
         return buildFromKnowledge;
     }
 
