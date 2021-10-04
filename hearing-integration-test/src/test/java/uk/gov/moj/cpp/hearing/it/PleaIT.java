@@ -5,9 +5,11 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_GUILTY;
 import static uk.gov.justice.core.courts.IndicatedPleaValue.INDICATED_NOT_GUILTY;
@@ -29,6 +31,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
+import com.jayway.restassured.path.json.JsonPath;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -97,7 +100,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateListener.waitFor();
+        final JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -148,7 +153,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, offenceId);
 
-        convictionDateListener.waitFor();
+        JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -174,7 +181,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper pleaSecond = getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY, offenceId);
 
-        convictionDateListenerForRemove.waitFor();
+        publicEvent = convictionDateListenerForRemove.waitFor();
+        convictionDateListenerForRemove.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -225,7 +234,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, INDICATED_GUILTY, false, null, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateListener.waitFor();
+        final JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -255,6 +266,89 @@ public class PleaIT extends AbstractIT {
     }
 
     @Test
+    public void shouldRemoveIndictedPleaWhenIndicatedPleaWasGuiltyThenRemoved() {
+
+
+
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(),
+                standardInitiateHearingTemplateForIndicatedPlea(INDICATED_GUILTY, false)));
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, is(nullValue()))
+                                                .with(Offence::getConvictionDate, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+
+                )
+        );
+
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))
+                        ))
+                );
+
+        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, INDICATED_GUILTY, false, null, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
+
+        JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, is(nullValue()))
+                                                .with(Offence::getIndicatedPlea, isBean(IndicatedPlea.class)
+                                                        .with(IndicatedPlea::getIndicatedPleaValue, is(pleaOne.getFirstIndicatedPleaValue()))
+                                                        .with(IndicatedPlea::getIndicatedPleaDate, is(pleaOne.getFirstIndicatedPleaDate()))
+                                                        .with(IndicatedPlea::getOffenceId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId())))
+                                        ))
+                                ))
+                        ))
+
+                )
+        );
+
+        final EventListener convictionDateRemovedListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
+        getUpdatePleaCommandHelper(hearingOne, null, false, null, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
+
+        publicEvent = convictionDateRemovedListener.waitFor();
+        convictionDateRemovedListener.close();
+        assertNotNull(publicEvent);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, is(nullValue()))
+                                                .with(Offence::getIndicatedPlea, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+
+                )
+        );
+    }
+
+    @Test
     public void updateIndicatedPlea_toNotGuilty_WithAllocationDecision() {
 
 
@@ -277,15 +371,9 @@ public class PleaIT extends AbstractIT {
                 )
         );
 
-        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
-                .withFilter(isJson(allOf(
-                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
-                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
-
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, INDICATED_NOT_GUILTY, true, null, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateListener.waitFor();
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -337,9 +425,11 @@ public class PleaIT extends AbstractIT {
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
                         withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
 
-        final UpdatePleaCommandHelper guiltyPlea = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
+        getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateAddedListener.waitFor();
+        JsonPath publicEvent = convictionDateAddedListener.waitFor();
+        convictionDateAddedListener.close();
+        assertNotNull(publicEvent);
 
         final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
                 .withFilter(isJson(allOf(
@@ -349,7 +439,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper notGuiltyIndiatedPlea = getUpdatePleaCommandHelper(hearingOne, INDICATED_NOT_GUILTY, true, NOT_GUILTY, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateListener.waitFor();
+        publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -404,7 +496,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper guiltyPlea = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateAddedListener.waitFor();
+        JsonPath publicEvent = convictionDateAddedListener.waitFor();
+        convictionDateAddedListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -431,7 +525,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper notGuiltyPlea = getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateRemovedListener.waitFor();
+        publicEvent = convictionDateRemovedListener.waitFor();
+        convictionDateRemovedListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -453,7 +549,7 @@ public class PleaIT extends AbstractIT {
     }
 
     @Test
-    public void initiateAdjournedHearing_shouldUpdateGuiltyPleaWhenVerdictWasSetToGuiltyInEarlierHearing_andConvictionDateIsHearing1Date() {
+    public void initiateAdjournedHearing_shouldUpdateGuiltyPleaWhenVerdictWasSetToGuiltyInEarlierHearing_andConvictionDateIsNotHearing1Date() {
 
         final LocalDate convictionDate = LocalDate.now();
 
@@ -467,7 +563,18 @@ public class PleaIT extends AbstractIT {
                             offence.setIndicatedPlea(null);
                         })));
 
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(adjournedHearing.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(adjournedHearing.getFirstCase().getId().toString()))
+                        ))
+                );
+
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(adjournedHearing, null, false, GUILTY, adjournedHearing.getFirstOffenceForFirstDefendantForFirstCase().getId());
+
+        JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(adjournedHearing.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -480,7 +587,7 @@ public class PleaIT extends AbstractIT {
                                                         .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
                                                         .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue()))
                                                 )
-                                                .with(Offence::getConvictionDate, is(convictionDate))
+                                                .with(Offence::getConvictionDate, is(not(convictionDate)))
                                         ))
                                 ))
                         ))
@@ -514,10 +621,11 @@ public class PleaIT extends AbstractIT {
                         ))
                 );
 
-        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, null, hearingOne.getHearing().getCourtApplications().get(0).getId());
+        getUpdatePleaCommandHelper(hearingOne, null, false, GUILTY, null, hearingOne.getHearing().getCourtApplications().get(0).getId());
 
-        convictionDateListener.waitFor();
-
+        JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -541,7 +649,9 @@ public class PleaIT extends AbstractIT {
 
         getUpdatePleaCommandHelper(hearingOne, null, false, NOT_GUILTY, null, hearingOne.getHearing().getCourtApplications().get(0).getId());
 
-        convictionDateListenerForRemove.waitFor();
+        publicEvent = convictionDateListenerForRemove.waitFor();
+        convictionDateListenerForRemove.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -563,8 +673,8 @@ public class PleaIT extends AbstractIT {
                 .withOffenceId(offenceId)
                 .withOriginatingHearingId(randomUUID())
                 .withVerdictType(VerdictType.verdictType()
-                        .withCategoryType("Guilty")
-                        .withCategory("Guilty")
+                        .withCategoryType("GUILTY")
+                        .withCategory("GUILTY")
                         .withId(randomUUID())
                         .withDescription(STRING.next())
                         .build())
@@ -632,7 +742,9 @@ public class PleaIT extends AbstractIT {
 
         final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, CONSENTS, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
 
-        convictionDateListener.waitFor();
+        final JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
 
         getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -652,6 +764,91 @@ public class PleaIT extends AbstractIT {
 
                 )
         );
+    }
+
+    @Test
+    public void updatePleaWithGuiltyThenRemoveItShouldHaveNotConvictionDate() {
+
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+
+        final InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, is(nullValue()))
+                                                .with(Offence::getConvictionDate, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+
+                )
+        );
+
+        final EventListener convictionDateListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_CHANGED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString()))
+                        ))
+                );
+
+        final UpdatePleaCommandHelper pleaOne = getUpdatePleaCommandHelper(hearingOne, null, false, CONSENTS, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
+
+        JsonPath publicEvent = convictionDateListener.waitFor();
+        convictionDateListener.close();
+        assertNotNull(publicEvent);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, isBean(Plea.class)
+                                                        .with(Plea::getPleaDate, is(pleaOne.getFirstPleaDate()))
+                                                        .with(Plea::getPleaValue, is(pleaOne.getFirstPleaValue()))
+                                                )
+                                                .with(Offence::getConvictionDate, is(pleaOne.getFirstPleaDate()))
+                                        ))
+                                ))
+                        ))
+
+                )
+        );
+
+        final EventListener convictionDateRemovedListener = listenFor(PUBLIC_EVENT_OFFENCE_CONVICTION_DATE_REMOVED)
+                .withFilter(isJson(allOf(
+                        withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString())),
+                        withJsonPath("$.caseId", is(hearingOne.getFirstCase().getId().toString())))));
+
+        getUpdatePleaCommandHelper(hearingOne, null, false, null, hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId());
+
+        publicEvent = convictionDateRemovedListener.waitFor();
+        convictionDateRemovedListener.close();
+        assertNotNull(publicEvent);
+
+        getHearingPollForMatch(hearingOne.getHearingId(), isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingOne.getHearingId()))
+                        .with(Hearing::getProsecutionCases, first(isBean(ProsecutionCase.class)
+                                .with(ProsecutionCase::getDefendants, first(isBean(Defendant.class)
+                                        .with(Defendant::getOffences, first(isBean(Offence.class)
+                                                .with(Offence::getId, is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId()))
+                                                .with(Offence::getPlea, is(nullValue()))
+                                                .with(Offence::getConvictionDate, is(nullValue()))
+                                        ))
+                                ))
+                        ))
+
+                )
+        );
+
     }
 
     private UpdatePleaCommandHelper getUpdatePleaCommandHelper(final InitiateHearingCommandHelper hearing,

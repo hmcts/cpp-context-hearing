@@ -30,11 +30,8 @@ public class ConvictionDateDelegate implements Serializable {
     public void handleConvictionDateAdded(final ConvictionDateAdded convictionDateAdded) {
         final UUID convictionDateId = ofNullable(convictionDateAdded.getOffenceId()).orElse(convictionDateAdded.getCourtApplicationId());
 
-        // this check shouldnt be needed but is there as a defensive mechanism for events raised prior to this change going in
-        if (!this.momento.getConvictionDates().containsKey(convictionDateId)) {
-            updateConvictionDate(convictionDateAdded.getOffenceId(), convictionDateAdded.getConvictionDate(), convictionDateAdded.getCourtApplicationId());
-            this.momento.getConvictionDates().put(convictionDateId, convictionDateAdded.getConvictionDate());
-        }
+        updateConvictionDate(convictionDateAdded.getOffenceId(), convictionDateAdded.getConvictionDate(), convictionDateAdded.getCourtApplicationId());
+        this.momento.getConvictionDates().put(convictionDateId, convictionDateAdded.getConvictionDate());
     }
 
     public void handleConvictionDateRemoved(final ConvictionDateRemoved convictionDateRemoved) {

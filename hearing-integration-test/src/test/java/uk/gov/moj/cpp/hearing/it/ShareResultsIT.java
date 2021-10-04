@@ -657,8 +657,9 @@ public class ShareResultsIT extends AbstractIT {
         stubCourtRoom(hearing);
 
         final LocalDate convictionDateBasedOnVerdict = updateVerdictCommandHelper.getFirstVerdict().getVerdictDate();
+        final CommandHelpers.UpdatePleaCommandHelper updatePleaCommand = updatePleaWithChangingConvictionDate(initiateHearingCommandHelper);
 
-        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaWithoutChangingConvictionDate(initiateHearingCommandHelper), convictionDateBasedOnVerdict);
+        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaCommand , updatePleaCommand.getFirstPleaDate());
 
         try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
@@ -709,7 +710,7 @@ public class ShareResultsIT extends AbstractIT {
 
         final LocalDate convictionDateBasedOnVerdict = updateVerdictCommandHelper.getFirstVerdict().getVerdictDate();
 
-        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaWithoutChangingConvictionDate(initiateHearingCommandHelper), convictionDateBasedOnVerdict);
+        final CrackedIneffectiveTrial expectedTrialType = getExpectedTrialType(initiateHearingCommandHelper, updatePleaWithChangingConvictionDate(initiateHearingCommandHelper), convictionDateBasedOnVerdict);
 
         try (final EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
                 .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
@@ -3086,7 +3087,7 @@ public class ShareResultsIT extends AbstractIT {
         }
     }
 
-    private CommandHelpers.UpdatePleaCommandHelper updatePleaWithoutChangingConvictionDate(final InitiateHearingCommandHelper hearingOne) {
+    private CommandHelpers.UpdatePleaCommandHelper updatePleaWithChangingConvictionDate(final InitiateHearingCommandHelper hearingOne) {
         try (final EventListener hearingPleaUpdatedListener = listenFor("public.hearing.plea-updated")
                 .withFilter(isJson(
                         withJsonPath("$.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
@@ -3107,7 +3108,7 @@ public class ShareResultsIT extends AbstractIT {
             );
 
             hearingPleaUpdatedListener.waitFor();
-            convictionDateChangedListener.expectNoneWithin(DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
+            convictionDateChangedListener.waitFor();
             return pleaOne;
         }
     }
