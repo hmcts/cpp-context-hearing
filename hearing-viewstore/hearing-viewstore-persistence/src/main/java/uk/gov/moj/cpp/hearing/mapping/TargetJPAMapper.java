@@ -1,7 +1,12 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
@@ -19,6 +24,8 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 
 import org.json.JSONObject;
 
@@ -27,16 +34,40 @@ public class TargetJPAMapper {
 
     private ResultLineJPAMapper resultLineJPAMapper;
 
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    private ObjectToJsonValueConverter objectToJsonValueConverter;
+
     @Inject
-    public TargetJPAMapper(ResultLineJPAMapper resultLineJPAMapper) {
+    public TargetJPAMapper(ResultLineJPAMapper resultLineJPAMapper, ObjectToJsonObjectConverter objectToJsonObjectConverter, ObjectToJsonValueConverter objectToJsonValueConverter) {
         this.resultLineJPAMapper = resultLineJPAMapper;
+        this.objectToJsonObjectConverter  = objectToJsonObjectConverter;
+        this.objectToJsonValueConverter = objectToJsonValueConverter;
     }
 
-    //to satisfy CDI test runner
     public TargetJPAMapper() {
     }
 
     public Target toJPA(final Hearing hearing, final uk.gov.justice.core.courts.Target pojo) {
+        if (null == pojo) {
+            return null;
+        }
+        final Target target = new Target();
+        target.setId(pojo.getTargetId());
+        target.setHearing(hearing);
+        target.setDefendantId(pojo.getDefendantId());
+        target.setDraftResult(pojo.getDraftResult());
+        target.setOffenceId(pojo.getOffenceId());
+        target.setApplicationId(pojo.getApplicationId());
+        target.setResultLines(resultLineJPAMapper.toJPA(target, pojo.getResultLines()));
+        target.setShadowListed(pojo.getShadowListed());
+        if (Objects.nonNull(pojo.getHearingDay())){
+            target.setHearingDay(pojo.getHearingDay().toString());
+        }
+        return target;
+    }
+
+    public Target toJPA2(final Hearing hearing, final uk.gov.justice.core.courts.Target2 pojo) {
         if (null == pojo) {
             return null;
         }
@@ -49,14 +80,27 @@ public class TargetJPAMapper {
         target.setOffenceId(pojo.getOffenceId());
         target.setApplicationId(pojo.getApplicationId());
         target.setCaseId(pojo.getCaseId());
-        target.setResultLines(resultLineJPAMapper.toJPA(target, pojo.getResultLines()));
+        target.setResultLines(new HashSet<>());
+
+        if (nonNull(pojo.getResultLines()) && !pojo.getResultLines().isEmpty()) {
+            final JsonObject resultLinesJsonObject = createObjectBuilder()
+                    .add("resultLinesJson", pojo.getResultLines()
+                            .stream()
+                            .map(resultLine2 -> objectToJsonObjectConverter.convert(resultLine2))
+                            .reduce(createArrayBuilder(), JsonArrayBuilder::add, JsonArrayBuilder::add)
+                            .build())
+                    .build();
+
+                target.setResultLinesJson(objectToJsonValueConverter.convert(resultLinesJsonObject).toString());
+
+        }
+
         target.setShadowListed(pojo.getShadowListed());
         if (Objects.nonNull(pojo.getHearingDay())){
             target.setHearingDay(pojo.getHearingDay().toString());
         }
         return target;
     }
-
     public uk.gov.justice.core.courts.Target addMasterDefandantId(final uk.gov.justice.core.courts.Target entity, final UUID masterDefendantId) {
         if (null == entity) {
             return null;

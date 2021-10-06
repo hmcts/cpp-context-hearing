@@ -21,7 +21,7 @@ import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
@@ -320,7 +320,7 @@ public class HearingDelegate implements Serializable {
     public Stream<Object> removeTarget(final UUID hearingId, final UUID targetId) {
 
         final LocalDate hearingDay = getHearingDay();
-        final Map<UUID, Target> targetMap = this.momento.getMultiDayTargets().containsKey(hearingDay) ? this.momento.getMultiDayTargets().get(hearingDay) : new HashMap<>();
+        final Map<UUID, Target2> targetMap = this.momento.getMultiDayTargets().containsKey(hearingDay) ? this.momento.getMultiDayTargets().get(hearingDay) : new HashMap<>();
 
         if (this.momento.getHearing() == null) {
             return Stream.of(generateHearingIgnoredMessage("Rejecting action for removing draft target as hearing is null", hearingId));

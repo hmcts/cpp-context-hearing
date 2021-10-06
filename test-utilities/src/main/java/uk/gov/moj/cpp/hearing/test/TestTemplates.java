@@ -796,17 +796,8 @@ public class TestTemplates {
         }
 
         public static ResultLine.Builder standardResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
-            final List<UUID> childResultLineIds = new ArrayList<>();
-            final List<UUID> parentResultLineIds = new ArrayList<>();
-
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
-                    .withShortCode("SHORTCODE")
-                    .withAmendmentDate(ZonedDateTime.now())
-                    .withAmendmentReasonId(UUID.randomUUID())
-                    .withAmendmentReason("AMENDMENT REASON")
-                    .withChildResultLineIds(childResultLineIds)
-                    .withParentResultLineIds(parentResultLineIds)
                     .withDelegatedPowers(
                             DelegatedPowers.delegatedPowers()
                                     .withUserId(UUID.randomUUID())
@@ -838,6 +829,7 @@ public class TestTemplates {
                     );
 
         }
+
         public static ResultLine.Builder ctlResultLineTemplate(final UUID resultLineId, final UUID resultDefinitionId, final LocalDate orderedDate) {
             return ResultLine.resultLine()
                     .withResultLineId(resultLineId)
@@ -944,7 +936,7 @@ public class TestTemplates {
                             .withLastName(STRING.next())
                             .withFirstName(STRING.next())
                             .build())
-                    .withAmendmentDate(ZonedDateTime.now())
+                    .withAmendmentDate(now())
                     .withPrompts(
                             asList(
                                     uk.gov.justice.core.courts.Prompt.prompt()

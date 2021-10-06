@@ -53,7 +53,7 @@ public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest
     @Before
     public void setUp() throws IOException {
         super.setUp();
-        doReturn(Optional.empty()).when(nextHearingHelper).getNextHearing(any(), any(), any(), any(), any());
+        doReturn(Optional.empty()).when(nextHearingHelper).getNextHearing(any(), any(), any(), any());
         resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
     }
 

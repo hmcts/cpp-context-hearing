@@ -20,6 +20,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Target.target;
+import static uk.gov.justice.core.courts.Target2.target2;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
@@ -41,6 +42,7 @@ import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAmendCommand;
@@ -1171,10 +1173,11 @@ public class HearingAggregateTest {
         final List<Target> targetList = new ArrayList<>();
         targetList.add(target);
         targetList.add(dupTarget);
+
         final Stream<Object> eventStream = hearingAggregate.saveAllDraftResults(targetList, randomUUID());
+
         final Optional<MultipleDraftResultsSaved> multipleDraftResultsSaved = eventStream.filter(x -> x instanceof MultipleDraftResultsSaved).map(x -> (MultipleDraftResultsSaved) x).findFirst();
         assertThat("MultipleDraftResultsSaved not present", !multipleDraftResultsSaved.isPresent());
-
     }
 
     @Test
@@ -1505,9 +1508,9 @@ public class HearingAggregateTest {
         final Hearing hearing = initiateHearingCommand.getHearing();
         final HearingAggregate hearingAggregate = new HearingAggregate();
 
-        Map<UUID, Target> existingTargets = new HashMap<>();
+        Map<UUID, Target2> existingTargets = new HashMap<>();
 
-        final Target previousTarget = target().withTargetId(randomUUID())
+        final Target2 previousTarget = target2().withTargetId(randomUUID())
                 .withDefendantId(randomUUID())
                 .withHearingId(randomUUID())
                 .withResultLines(new ArrayList<>())

@@ -19,6 +19,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -130,25 +131,11 @@ public final class HearingJPADataTemplate {
                             .getReportingRestrictions().add(reportingRestriction);
                 });
         //
-        randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)
-                .forEach(target -> {
-                    target.setHearing(hearingEntity);
-                    hearingEntity.getTargets().add(target);
-                    randomStreamOf(1, ResultLine.class).forEach(
-                            resultLine -> {
-                                resultLine.setTarget(target);
-                                target.getResultLines().add(resultLine);
-                                randomStreamOf(1, Prompt.class).forEach(
-                                        prompt -> {
-                                            prompt.setResultLine(resultLine);
-                                            resultLine.getPrompts().add(prompt);
-                                        }
-                                );
-                            }
-                    );
-                    hearingEntity.getTargets().add(target);
-                });
-        //
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Target target = getTarget();
+        target.setHearing(hearingEntity);
+        target.setHearing(hearingEntity);
+        hearingEntity.getTargets().add(target);
+
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason.class)
                 .forEach(defendantReferralReason -> {
                     defendantReferralReason.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
@@ -178,10 +165,8 @@ public final class HearingJPADataTemplate {
 //                    hearingEntity.getProsecutionCounsels().add(prosecutionCounsel);
 //                });
         // Will be covered by GPE-5479 story
-        randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)
-                .forEach(target -> {
-                    hearingEntity.getTargets().add(target);
-                });
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Target target1 = getTarget();
+        hearingEntity.getTargets().add(target1);
         //
         this.hearing = hearingEntity;
         if (true == sysoutPrint) {
@@ -203,5 +188,21 @@ public final class HearingJPADataTemplate {
 
     public uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing getHearing() {
         return hearing;
+    }
+
+
+    private uk.gov.moj.cpp.hearing.persist.entity.ha.Target getTarget(){
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Target target = new uk.gov.moj.cpp.hearing.persist.entity.ha.Target();
+        target.setResultLinesJson(null);
+        target.setResultLines(new HashSet<>());
+        target.setShadowListed(false);
+        target.setApplicationId(randomUUID());
+        target.setMasterDefendantId(randomUUID());
+        target.setOffenceId(randomUUID());
+        target.setDefendantId(randomUUID());
+        target.setId(randomUUID());
+
+        return target;
+
     }
 }

@@ -34,26 +34,34 @@ public class HearingAmendmentsEventProcessor {
 
     @Handles("hearing.event.result-amendments-validated")
     public void onResultAmendmentsValidated(final JsonEnvelope event) {
-        log(event.toObfuscatedDebugString());
-        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(event.payloadAsJsonObject());
-        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName("public.hearing.result-amendments-validated");
-        sender.send(envelopeFrom(metadata, publicEventPayload));
+        process(event, "public.hearing.result-amendments-validated");
     }
 
     @Handles("hearing.events.result-amendments-cancelled")
     public void onResultAmendmentsCancelled(final JsonEnvelope event) {
+        process(event, "public.hearing.result-amendments-cancelled");
+    }
+
+    @Handles("hearing.events.result-amendments-cancelled-v2")
+    public void onResultAmendmentsCancelledV2(final JsonEnvelope event) {
+        process(event, "public.hearing.result-amendments-cancelled");
+    }
+
+    private void process(final JsonEnvelope event, final String s) {
         log(event.toObfuscatedDebugString());
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(event.payloadAsJsonObject());
-        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName("public.hearing.result-amendments-cancelled");
+        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName(s);
         sender.send(envelopeFrom(metadata, publicEventPayload));
     }
 
     @Handles("hearing.event.result-amendments-rejected")
     public void onResultAmendmentsRejected(final JsonEnvelope event) {
-        log( event.toObfuscatedDebugString());
-        final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(event.payloadAsJsonObject());
-        final MetadataBuilder metadata = metadataFrom(event.metadata()).withName("public.hearing.result-amendments-rejected");
-        sender.send(envelopeFrom(metadata, publicEventPayload));
+        process(event, "public.hearing.result-amendments-rejected");
+    }
+
+    @Handles("hearing.event.result-amendments-rejected-v2")
+    public void onResultAmendmentsRejectedV2(final JsonEnvelope event) {
+        process(event, "public.hearing.result-amendments-rejected");
     }
 
     public void log(String msg){

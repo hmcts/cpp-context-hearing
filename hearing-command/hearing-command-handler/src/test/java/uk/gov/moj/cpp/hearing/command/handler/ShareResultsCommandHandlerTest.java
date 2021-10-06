@@ -14,10 +14,8 @@ import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelp
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveMultipleDraftResultsCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveMultipleDraftResultsCommandTemplateWithInvalidTarget;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
@@ -63,7 +61,6 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.time.LocalDate;
@@ -281,7 +278,7 @@ public class ShareResultsCommandHandlerTest {
                         targetDraft.getApplicationId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        resultLineIn.getAmendmentDate().toLocalDate(),
+                        resultLineIn.getAmendmentDate(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
@@ -381,7 +378,7 @@ public class ShareResultsCommandHandlerTest {
                         targetDraft.getApplicationId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        resultLineIn.getAmendmentDate().toLocalDate(),
+                        resultLineIn.getAmendmentDate(),
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),

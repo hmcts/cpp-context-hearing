@@ -117,12 +117,9 @@ public class ResultTreeBuilder {
 
     private Map<UUID, TreeNode<ResultLine>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV2 resultsShared) {
         final Map<UUID, TreeNode<ResultLine>> result = new HashMap<>();
-        final List<ResultLine>  allResultLines = resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
-                .collect(toList());
         resultsShared.getTargets().forEach(target -> {
             final List<ResultLine> resultLines = target.getResultLines();
-        resultLines
+            resultLines
                     .stream()
                     .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .forEach(resultLine -> {
@@ -133,7 +130,7 @@ public class ResultTreeBuilder {
                                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
                         }
 
-                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, allResultLines, resultsShared);
+                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, resultLines, resultsShared);
                         final TreeNode<ResultLine> treeNode = resultLineHelper.getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
                         result.put(treeNode.getId(), treeNode);
                     });
@@ -196,18 +193,15 @@ public class ResultTreeBuilder {
     }
 
     private void setIsNewAmendmentResults(final Set<UUID> newAmendmentResultIds, final ResultLine resultLine, final Builder builder) {
-        if (newAmendmentResultIds.contains(resultLine.getResultLineId())) {
-            builder.withIsNewAmendment(true);
-        } else {
-            builder.withIsNewAmendment(false);
-        }
+        builder.withIsNewAmendment(newAmendmentResultIds.contains(resultLine.getResultLineId()));
+
     }
 
     private Builder getJudicialBuilder(final ResultLine resultLine, final Hearing hearing, final DelegatedPowers courtClerk, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus, final ResultDefinition resultDefinition) {
         return judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
-                .withAmendmentDate(getAmendmentDate(resultLine))
+                .withAmendmentDate(resultLine.getAmendmentDate())
                 .withAmendmentReason(resultLine.getAmendmentReason())
                 .withAmendmentReasonId(resultLine.getAmendmentReasonId())
                 .withApprovedDate(resultLine.getApprovedDate())
@@ -249,14 +243,6 @@ public class ResultTreeBuilder {
                 .withLevel(resultDefinition.getLevel());
     }
 
-    private LocalDate getAmendmentDate(final ResultLine resultLineIn) {
-        LocalDate amendmentDate = null;
-        if (nonNull(resultLineIn.getAmendmentDate())){
-            amendmentDate = resultLineIn.getAmendmentDate().toLocalDate();
-        }
-        return amendmentDate;
-    }
-
     private void checkResultDefinition(final ResultLine resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {
         if (isNull(resultDefinition)) {
             throw new ResultDefinitionNotFoundException(format(
@@ -269,7 +255,7 @@ public class ResultTreeBuilder {
         final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts());
 
         if (nonNull(judicialResultPrompts) && !judicialResultPrompts.isEmpty()) {
-            final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, resultLine, judicialResultPrompts);
+            final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, judicialResultPrompts);
             final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, hearing, resultDefinition);
             final Optional<String> qualifier = new ResultQualifier().populate(resultDefinition.getQualifier(), judicialResultPrompts, this.referenceDataService, context, resultLine.getOrderedDate());
 

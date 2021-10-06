@@ -50,6 +50,9 @@ public class Target {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "target", orphanRemoval = true)
     private Set<ResultLine> resultLines = new HashSet<>();
 
+    @Column(name = "result_lines")
+    private String resultLinesJson;
+
     @Column(name = "shadow_listed")
     private Boolean shadowListed;
 
@@ -158,6 +161,15 @@ public class Target {
 
     public void setCaseId(final UUID caseId) {
         this.caseId = caseId;
+    }
+
+
+    public String getResultLinesJson() {
+        return resultLinesJson;
+    }
+
+    public void setResultLinesJson(final String resultLinesJson) {
+        this.resultLinesJson = resultLinesJson;
     }
 
     @Override

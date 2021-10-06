@@ -502,7 +502,6 @@
       "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
       "resultLines": [
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -528,7 +527,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -542,7 +540,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -556,7 +553,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -570,7 +566,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -584,7 +579,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -598,7 +592,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -612,7 +605,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -632,7 +624,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -646,7 +637,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -660,7 +650,6 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
           "isComplete": true,
           "isDeleted": false,
           "isModified": false,
@@ -729,8 +718,7 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
-          "amendmentDate": "2019-09-09T00:00+05:30",
+          "amendmentDate": "2019-09-09",
           "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
           "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
           "isComplete": true,
@@ -752,8 +740,7 @@
           "sharedDate": "2019-09-09"
         },
         {
-          "offenceId": "9444a759-c701-4d38-8614-bfb239767156",
-          "amendmentDate": "2019-09-09T00:00+05:30",
+          "amendmentDate": "2019-09-09",
           "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
           "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
           "isComplete": true,

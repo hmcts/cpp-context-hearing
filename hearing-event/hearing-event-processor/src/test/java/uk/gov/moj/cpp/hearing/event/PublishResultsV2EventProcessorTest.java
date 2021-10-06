@@ -71,8 +71,8 @@ public class PublishResultsV2EventProcessorTest {
     @Mock
     private ReferenceDataService referenceDataService;
 
-    @Mock
-    private NewTargetToLegacyTargetConverter newTargetToLegacyTargetConverter;
+//    @Mock
+//    private NewTargetToLegacyTargetConverter newTargetToLegacyTargetConverter;
 
     @InjectMocks
     private PublishResultsV2EventProcessor publishResultsEventProcessor;
@@ -125,7 +125,7 @@ public class PublishResultsV2EventProcessorTest {
                         .withPostcode("LL55 2DF")
                         .build());
         when(jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV2.class)).thenReturn(resultsSharedV2);
-        when(newTargetToLegacyTargetConverter.convert(anyList())).thenReturn(resultsSharedV2.getTargets());
+        //when(newTargetToLegacyTargetConverter.convert(anyList())).thenReturn(resultsSharedV2.getTargets());
        publishResultsEventProcessor.resultsShared(event);
 
         verify(publishResultsDelegate).shareResults(event, sender, resultsSharedV2);

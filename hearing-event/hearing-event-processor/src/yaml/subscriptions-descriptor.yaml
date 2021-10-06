@@ -83,6 +83,10 @@ subscriptions_descriptor:
         - name: hearing.events.results-shared-v2
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-shared-v2.json
 
+        # Share Results V3
+        - name: hearing.events.results-shared-v3
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-shared-v3.json
+
         # Save Draft Results
         - name: hearing.draft-result-saved
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/draft-result-saved.json
@@ -263,8 +267,15 @@ subscriptions_descriptor:
         - name: hearing.event.result-amendments-rejected
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected.json
 
+        - name: hearing.event.result-amendments-rejected-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected-v2.json
+
         - name: hearing.events.result-amendments-cancelled
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled.json
+
+        # Hearing Amendments cancel v2
+        - name: hearing.events.result-amendments-cancelled-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled-v2.json
 
         - name: hearing.event.result-amendments-validated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-validated.json

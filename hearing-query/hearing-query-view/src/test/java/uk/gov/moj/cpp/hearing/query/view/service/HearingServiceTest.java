@@ -17,6 +17,7 @@ import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -59,7 +60,6 @@ import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
-import uk.gov.moj.cpp.hearing.command.result.DraftResultV2;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
@@ -75,7 +75,6 @@ import uk.gov.moj.cpp.hearing.persist.NowsRepository;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.DraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
@@ -100,7 +99,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRo
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
-import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
 import uk.gov.moj.cpp.hearing.repository.HearingEventRepository;
@@ -108,7 +106,6 @@ import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZonedDateTime;
@@ -126,10 +123,10 @@ import java.util.UUID;
 import javax.json.JsonObject;
 import javax.json.JsonString;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -585,8 +582,9 @@ public class HearingServiceTest {
         assertThat(targetListResponse.getTargets().isEmpty(), is(true));
     }
 
+    //@Ignore("Temporary Disable Notepad Parser")
     @Test
-    public void shouldReturnShareResultsByIdAndDate() throws IOException {
+    public void shouldReturnShareResultsByIdAndDate() {
         UUID hearingId = randomUUID();
         LocalDate hearingDate = LocalDate.now();
         UUID defendantId = randomUUID();
@@ -603,6 +601,9 @@ public class HearingServiceTest {
 
         GetShareResultsV2Response response = hearingService.getShareResultsByDate(hearingId, hearingDate.toString());
 
+        // TODO - problem with test appears to be that inside setupTargets we are mocking jpa targets
+        // But code is invoking jpa2 (target2) @ uk.gov.moj.cpp.hearing.query.view.service.HearingService.transform
+        // targets are 1, but the results lines comes at 0
         assertThat(response, isBean(GetShareResultsV2Response.class)
                 .with(GetShareResultsV2Response::getResultLines, first(isBean(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine.class)
                         .with(uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine::getDefendantId, is(defendantId))
@@ -1292,7 +1293,7 @@ public class HearingServiceTest {
         target.setDefendantId(defendantId);
         List<Target> targetList = singletonList(target);
 
-        uk.gov.justice.core.courts.ResultLine resultLine = uk.gov.justice.core.courts.ResultLine.resultLine()
+        uk.gov.justice.core.courts.ResultLine2 resultLine = uk.gov.justice.core.courts.ResultLine2.resultLine2()
                 .withResultLineId(resultLineId)
                 .withOffenceId(offenceId)
                 .withDefendantId(defendantId)
@@ -1306,7 +1307,7 @@ public class HearingServiceTest {
                 .build();
         when(hearingRepository.findTargetsByFilters(hearingId, hearingDate.toString()))
                 .thenReturn(targetList);
-        targetList.forEach(t -> when(resultLineJPAMapper.fromJPA(t.getResultLines())).thenReturn(singletonList(resultLine)));
+        targetList.forEach(t -> when(resultLineJPAMapper.fromJPA2(any(String.class))).thenReturn(singletonList(resultLine)));
     }
 
     private CaseDetail caseDetail3() {

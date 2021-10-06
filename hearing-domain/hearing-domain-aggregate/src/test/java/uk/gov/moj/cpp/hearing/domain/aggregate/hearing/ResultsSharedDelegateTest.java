@@ -25,6 +25,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -56,8 +57,8 @@ public class ResultsSharedDelegateTest {
                 .build());
         resultsSharedDelegate = new ResultsSharedDelegate(hearingAggregateMomento);
         hearingAggregate = new HearingAggregate();
-        setField(this.hearingAggregate, "resultsSharedDelegate",resultsSharedDelegate);
-        setField(this.hearingAggregate, "momento",hearingAggregateMomento);
+        setField(this.hearingAggregate, "resultsSharedDelegate", resultsSharedDelegate);
+        setField(this.hearingAggregate, "momento", hearingAggregateMomento);
     }
 
     @Test
@@ -253,14 +254,13 @@ public class ResultsSharedDelegateTest {
         UUID hearingId = UUID.randomUUID();
         LocalDate hearingDay = LocalDate.now();
 
-        Stream stream = resultsSharedDelegate.deleteDraftResultV2(hearingId,hearingDay,userId);
+        Stream stream = resultsSharedDelegate.deleteDraftResultV2(hearingId, hearingDay, userId);
         assertThat(stream.findFirst().get().getClass().getCanonicalName(), is(DraftResultDeletedV2.class.getCanonicalName()));
 
     }
 
 
-
-        @Test
+    @Test
     public void shouldAddNewResultsForTheGivenDay() {
 
         final UUID hearingId = randomUUID();
@@ -301,11 +301,11 @@ public class ResultsSharedDelegateTest {
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
 
-        final ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
-        assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
-        assertThat(resultsSharedV2.getTargets().size(), is(1));
-        assertThat(resultsSharedV2.getTargets().get(0).getHearingDay(), is(hearingDay));
-        assertThat(resultsSharedV2.getIsReshare(), is(false));
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
 
     }
 
@@ -351,17 +351,16 @@ public class ResultsSharedDelegateTest {
         List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
 
-        ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
-        assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
+        ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
 
-        assertThat(resultsSharedV2.getTargets().size(), is(1));
-        assertThat(resultsSharedV2.getTargets().get(0).getHearingDay(), is(hearingDay));
-
+        assertThat(resultsSharedV3.getTargets().size(), is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
 
         // Not previously shared hence no saved targets and result line status
-        assertThat(resultsSharedV2.getIsReshare(), is(false));
-        assertThat(resultsSharedV2.getSavedTargets().size(), is(0));
-        assertThat(resultsSharedV2.getCompletedResultLinesStatus().size(), is(0));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
+        assertThat(resultsSharedV3.getSavedTargets().size(), is(0));
+        assertThat(resultsSharedV3.getCompletedResultLinesStatus().size(), is(0));
 
         DaysResultLinesStatusUpdated daysResultLinesStatusUpdated = DaysResultLinesStatusUpdated.builder()
                 .withHearingDay(hearingDay)
@@ -370,24 +369,24 @@ public class ResultsSharedDelegateTest {
                         .withSharedResultLineId(randomUUID())
                         .build()))
                 .build();
-        hearingAggregate.apply(resultsSharedV2);
+        hearingAggregate.apply(resultsSharedV3);
         hearingAggregate.apply(daysResultLinesStatusUpdated);
 
         eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
         eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
 
-        resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
-        assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
+        resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
 
-        assertThat(resultsSharedV2.getTargets().size(), is(1));
-        assertThat(resultsSharedV2.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
 
 
         // Previously shared hence saved targets and result line status
-        assertThat(resultsSharedV2.getIsReshare(), is(true));
-        assertThat(resultsSharedV2.getSavedTargets().size(), is(1));
-        assertThat(resultsSharedV2.getCompletedResultLinesStatus().size(), is(1));
+        assertThat(resultsSharedV3.getIsReshare(), is(true));
+        assertThat(resultsSharedV3.getSavedTargets().size(), is(1));
+        assertThat(resultsSharedV3.getCompletedResultLinesStatus().size(), is(1));
 
     }
 

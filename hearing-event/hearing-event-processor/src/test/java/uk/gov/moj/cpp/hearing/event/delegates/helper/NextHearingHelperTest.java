@@ -130,7 +130,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
                 .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
 
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(12), getPrompts(event, resultDefinition));
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T22:22Z"));
     }
@@ -144,7 +144,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
                 .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
 
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(0), getPrompts(event, resultDefinition));
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2020-01-01T22:22Z"));
     }
@@ -158,7 +158,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
                 .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
 
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(0), getPrompts(event, resultDefinition));
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2020-08-25T00:00Z"));
     }
@@ -171,7 +171,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
                 .convert(givenPayload("/data/result-definition-70c98fa6-804d-11e8-adc0-fa7ae01bbebc.json"), ResultDefinition.class);
 
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(0), getPrompts(event, resultDefinition));
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.MAGISTRATES, ZonedDateTimes.fromString("2019-02-02T22:22Z"));
     }
@@ -184,7 +184,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final ResultDefinition resultDefinition = jsonObjectToObjectConverter
                 .convert(givenPayload("/data/result-definition-fbed768b-ee95-4434-87c8-e81cbc8d24c8.json"), ResultDefinition.class);
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(0), getPrompts(event, resultDefinition));
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
         assertValid(nextHearing, JurisdictionType.CROWN, null);
         assertThat(nextHearing.get().getDateToBeFixed(), is(true));
@@ -202,7 +202,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final List<JudicialResultPrompt> judicialResultPrompts = getPrompts(event, resultDefinition);
 
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(0), judicialResultPrompts);
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), judicialResultPrompts);
 
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T00:00Z"));
     }
@@ -219,7 +219,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final List<JudicialResultPrompt> judicialResultPrompts = getPrompts(event, resultDefinition);
 
-        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getResultLines(event).get(0), judicialResultPrompts);
+        final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), judicialResultPrompts);
 
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T" + defaultStartTime + "Z"));
     }

@@ -4,6 +4,7 @@ package uk.gov.moj.cpp.hearing.event;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -46,9 +47,9 @@ public class NewTargetToLegacyTargetConverterTest {
     public void convert() throws IOException {
         final JsonObject jsonObject = givenPayload("/data/hearing.results-shared-v2.json");
         JsonObject targetJson = jsonObject.getJsonArray("targets").getJsonObject(0);
-        final Target target = jsonObjectToObjectConverter
-                .convert(targetJson, Target.class);
-        List<Target> newTarget = newTargetToLegacyTargetConverter.convert(Arrays.asList(target));
+        final Target2 target = jsonObjectToObjectConverter
+                .convert(targetJson, Target2.class);
+        List<Target2> newTarget = newTargetToLegacyTargetConverter.convert(Arrays.asList(target));
         newTarget.stream().forEach(target1-> System.out.println(objectToJsonObjectConverter.convert(target1).toString()+","));
     }
 

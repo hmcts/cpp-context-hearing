@@ -103,13 +103,12 @@ public class NextHearingHelper {
     public Optional<NextHearing> getNextHearing(final JsonEnvelope context,
                                                 final ResultDefinition resultDefinition,
                                                 final List<ResultLine> resultLines,
-                                                final ResultLine resultLine,
                                                 final List<JudicialResultPrompt> prompts) {
         final String resultDefinitionId = resultDefinition.getId().toString();
 
         if (isNextHearingResult(resultDefinitionId) && canCreateNextHearing(prompts)) {
             LOGGER.info("Creating next hearing");
-            final NextHearing nextHearing = buildNextHearing(context, resultDefinition, resultLines, resultLine, prompts);
+            final NextHearing nextHearing = buildNextHearing(context, resultDefinition, resultLines, prompts);
             if (isNull(nextHearing)) {
                 final String message = format(FAILED_TO_CREATE_NEXT_HEARING_MESSAGE, resultDefinitionId);
                 LOGGER.error(message);
@@ -146,7 +145,6 @@ public class NextHearingHelper {
     private NextHearing buildNextHearing(final JsonEnvelope context,
                                          final ResultDefinition resultDefinition,
                                          final List<ResultLine> resultLines,
-                                         final ResultLine resultLine,
                                          final List<JudicialResultPrompt> prompts) {
 
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
@@ -157,7 +155,7 @@ public class NextHearingHelper {
         populateListedStartDateTime(builder, promptsMap, courtCentreOrgOptional);
         populateEstimatedDuration(builder, promptsMap);
         populateCourtCentre(builder, context, promptsMap, courtCentreOrgOptional);
-        populateAdjournmentReasons(builder, context, resultLines, resultLine);
+        populateAdjournmentReasons(builder, context, resultLines);
         populateHearingType(builder, context, promptsMap);
         populateJurisdictionType(builder, resultDefinition.getId().toString());
         populateExistingHearingId(builder, promptsMap);
@@ -238,27 +236,14 @@ public class NextHearingHelper {
 
     private void populateAdjournmentReasons(final NextHearing.Builder builder,
                                             final JsonEnvelope context,
-                                            final List<ResultLine> resultLines,
-                                            final ResultLine resultLine) {
+                                            final List<ResultLine> resultLines) {
 
         final String adjournmentReasons = resultLines.stream()
-                .filter(rl -> this.isAdjournmentReasonResult(context, rl) && belongToSameOffenceOrApplication(resultLine, rl))
+                .filter(resultLine -> this.isAdjournmentReasonResult(context, resultLine))
                 .map(this::getAdjournmentsReasons)
                 .collect(joining(format("%s", lineSeparator())));
-
-
         LOGGER.info("Populating adjournment reason: {}", adjournmentReasons);
         builder.withAdjournmentReason(adjournmentReasons);
-    }
-
-    private boolean belongToSameOffenceOrApplication(final ResultLine resultLine, final ResultLine rl) {
-        boolean match = false;
-        if (nonNull(rl.getOffenceId())) {
-            match = rl.getOffenceId().equals(resultLine.getOffenceId());
-        } else if (nonNull(rl.getApplicationId())) {
-            match = rl.getApplicationId().equals(resultLine.getApplicationId());
-        }
-        return match;
     }
 
     private boolean isAdjournmentReasonResult(final JsonEnvelope context, final ResultLine resultLine) {
@@ -340,7 +325,7 @@ public class NextHearingHelper {
     }
 
     private Optional<CourtCentreOrganisationUnit> getCourtCentreOrganisationUnit(final JsonEnvelope context, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
-        Optional<JudicialResultPrompt> courtHouse = ofNullable(ofNullable(promptsMap.get(hCHOUSEOrganisationName)).orElse(promptsMap.get(HCHOUSE)));
+        final Optional<JudicialResultPrompt> courtHouse = ofNullable(ofNullable(promptsMap.get(hCHOUSEOrganisationName)).orElse(promptsMap.get(HCHOUSE)));
 
         if (!courtHouse.isPresent()) {
             return empty();

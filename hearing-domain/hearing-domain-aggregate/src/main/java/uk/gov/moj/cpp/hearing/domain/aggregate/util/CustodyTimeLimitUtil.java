@@ -106,7 +106,6 @@ public class CustodyTimeLimitUtil implements Serializable {
 
         return Stream.empty();
     }
-
     /**
      * This method for event log flow.
      *
@@ -162,7 +161,7 @@ public class CustodyTimeLimitUtil implements Serializable {
                 resultLines.stream().filter(Objects::nonNull)
                         .filter(result -> isResultNotDeletedAndAssociatedWithOffenceForV2(offence, result))
                         .anyMatch(result -> ofNullable(result.getPrompts()).map(Collection::stream).orElseGet(Stream::empty)
-                                .anyMatch(prompt -> isPromptOnBail(prompt))
+                                .anyMatch(CustodyTimeLimitUtil::isPromptOnBail)
                         );
     }
 
@@ -171,7 +170,7 @@ public class CustodyTimeLimitUtil implements Serializable {
                 resultLines.stream().filter(Objects::nonNull)
                         .filter(result -> !result.getIsDeleted() &&  offence.getId().equals(result.getOffenceId()))
                         .anyMatch(result -> ofNullable(result.getPrompts()).map(Collection::stream).orElseGet(Stream::empty)
-                                .anyMatch(prompt -> isPromptOnBail(prompt))
+                                .anyMatch(CustodyTimeLimitUtil::isPromptOnBail)
                         );
     }
 
@@ -204,7 +203,6 @@ public class CustodyTimeLimitUtil implements Serializable {
     private static boolean isResultNotDeletedAndAssociatedWithOffenceForV2(final Offence offence, final SharedResultsCommandResultLineV2 result) {
         return !result.getIsDeleted() && offence.getId().equals(result.getOffenceId());
     }
-
 
     private static boolean isCTLExpiryExists(final Offence offence) {
         return nonNull(offence.getCustodyTimeLimit()) && nonNull(offence.getCustodyTimeLimit().getTimeLimit());

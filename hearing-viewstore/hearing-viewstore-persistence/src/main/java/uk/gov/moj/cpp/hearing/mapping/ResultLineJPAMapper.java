@@ -2,6 +2,9 @@ package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Objects.nonNull;
 
+import uk.gov.justice.core.courts.ResultLine2;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
@@ -16,6 +19,7 @@ import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,10 +30,20 @@ public class ResultLineJPAMapper {
 
     private DelegatedPowersJPAMapper delegatedPowersJPAMapper;
 
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+
+
     @Inject
-    public ResultLineJPAMapper(PromptJPAMapper promptJPAMapper, DelegatedPowersJPAMapper delegatedPowersJPAMapper) {
+    public ResultLineJPAMapper(final PromptJPAMapper promptJPAMapper,
+                               final DelegatedPowersJPAMapper delegatedPowersJPAMapper,
+                               final JsonObjectToObjectConverter jsonObjectToObjectConverter,
+                               final StringToJsonObjectConverter stringToJsonObjectConverter) {
         this.promptJPAMapper = promptJPAMapper;
         this.delegatedPowersJPAMapper = delegatedPowersJPAMapper;
+        this.jsonObjectToObjectConverter = jsonObjectToObjectConverter;
+        this.stringToJsonObjectConverter = stringToJsonObjectConverter;
     }
 
     //To kepp cdi tester happy
@@ -37,6 +51,25 @@ public class ResultLineJPAMapper {
     }
 
     public ResultLine toJPA(final Target target, final uk.gov.justice.core.courts.ResultLine pojo) {
+        if (null == pojo) {
+            return null;
+        }
+        final ResultLine resultLine = ResultLine.resultLine()
+                .setId(pojo.getResultLineId())
+                .setResultDefinitionId(pojo.getResultDefinitionId())
+                .setResultLabel(pojo.getResultLabel())
+                .setSharedDate(pojo.getSharedDate())
+                .setTarget(target)
+                .setOrderedDate(pojo.getOrderedDate())
+                .setComplete(pojo.getIsComplete())
+                .setLevel(pojo.getLevel())
+                .setModified(pojo.getIsModified())
+                .setDelegatedPowers(delegatedPowersJPAMapper.toJPA(pojo.getDelegatedPowers()));
+        resultLine.setPrompts(promptJPAMapper.toJPA(resultLine, pojo.getPrompts()));
+        target.getResultLines().add(resultLine);
+        return resultLine;
+    }
+    public ResultLine toJPA2(final Target target, final uk.gov.justice.core.courts.ResultLine2 pojo) {
         if (null == pojo) {
             return null;
         }
@@ -69,7 +102,6 @@ public class ResultLineJPAMapper {
         target.getResultLines().add(resultLine);
         return resultLine;
     }
-
     public Set<ResultLine> toJPA(final Target target, final List<uk.gov.justice.core.courts.ResultLine> pojos) {
         if (pojos == null) {
             return new HashSet<>();
@@ -77,12 +109,35 @@ public class ResultLineJPAMapper {
             return pojos.stream().map(pojo -> toJPA(target, pojo)).collect(Collectors.toSet());
         }
     }
-
+    public Set<ResultLine> toJPA2(final Target target, final List<uk.gov.justice.core.courts.ResultLine2> pojos) {
+        if (pojos == null) {
+            return new HashSet<>();
+        } else {
+            return pojos.stream().map(pojo -> toJPA2(target, pojo)).collect(Collectors.toSet());
+        }
+    }
     public uk.gov.justice.core.courts.ResultLine fromJPA(final ResultLine entity) {
         if (null == entity) {
             return null;
         }
         return uk.gov.justice.core.courts.ResultLine.resultLine()
+                .withResultLineId(entity.getId())
+                .withDelegatedPowers(delegatedPowersJPAMapper.fromJPA(entity.getDelegatedPowers()))
+                .withIsComplete(entity.getComplete())
+                .withIsModified(entity.getModified())
+                .withLevel(entity.getLevel())
+                .withOrderedDate(entity.getOrderedDate())
+                .withPrompts(promptJPAMapper.fromJPA(entity.getPrompts()))
+                .withResultDefinitionId(entity.getResultDefinitionId())
+                .withResultLabel(entity.getResultLabel())
+                .withSharedDate(entity.getSharedDate())
+                .build();
+    }
+    public uk.gov.justice.core.courts.ResultLine2 fromJPA2(final ResultLine entity) {
+        if (null == entity) {
+            return null;
+        }
+        return uk.gov.justice.core.courts.ResultLine2.resultLine2()
                 .withAmendmentDate(entity.getAmendmentDate())
                 .withApplicationId(entity.getApplicationId())
                 .withOffenceId(entity.getOffenceId())
@@ -114,6 +169,22 @@ public class ResultLineJPAMapper {
             return new ArrayList<>();
         }
         return entities.stream().map(this::fromJPA).collect(Collectors.toList());
+    }
+
+    public List<uk.gov.justice.core.courts.ResultLine2> fromJPA2(Set<ResultLine> entities) {
+        if (null == entities) {
+            return new ArrayList<>();
+        }
+        return entities.stream().map(this::fromJPA2).collect(Collectors.toList());
+    }
+
+    public List<uk.gov.justice.core.courts.ResultLine2> fromJPA2(final String resultLinesAsString) {
+        return resultLinesAsString != null ? stringToJsonObjectConverter.convert(resultLinesAsString)
+                .getJsonArray("resultLinesJson")
+                .getValuesAs(JsonObject.class)
+                .stream()
+                .map(e -> jsonObjectToObjectConverter.convert(e, ResultLine2.class))
+                .collect(Collectors.toList()) : new ArrayList<>();
     }
 
     private static List<UUID> toList(String ids) {

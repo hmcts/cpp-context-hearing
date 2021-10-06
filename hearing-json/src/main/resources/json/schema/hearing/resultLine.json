@@ -4,9 +4,6 @@
   "description": "The resultLine",
   "type": "object",
   "properties": {
-    "shortCode": {
-      "type": "string"
-    },
     "delegatedPowers": {
       "$ref": "http://justice.gov.uk/core/courts/delegatedPowers.json"
     },
@@ -51,30 +48,12 @@
       "type": "boolean"
     },
     "amendmentDate": {
-      "type": "string",
-      "format": "date-time"
+      "description": "Indicates if the result is amended and the date of amendment",
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/datePattern"
     },
     "amendmentReasonId": {
       "description": "Reference data for result amendment reasons",
       "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "applicationId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "offenceId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "defendantId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "masterDefendantId": {
-      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
-    },
-    "caseId": {
-      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
-    },
-    "shadowListed" : {
-      "type": "boolean"
     },
     "amendmentReason": {
       "description": "Reference data for result amendment reasons",

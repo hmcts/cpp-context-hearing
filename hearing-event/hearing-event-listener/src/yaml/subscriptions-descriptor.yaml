@@ -138,9 +138,12 @@ subscriptions_descriptor:
         - name: hearing.results-shared
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/results-shared.json
 
-        # Share Results V2
+        # Share Results V2/V3
         - name: hearing.events.results-shared-v2
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-shared-v2.json
+
+        - name: hearing.events.results-shared-v3
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.results-shared-v3.json
 
         # Respondent Counsel
         - name: hearing.respondent-counsel-added
@@ -264,6 +267,10 @@ subscriptions_descriptor:
         - name: hearing.events.result-amendments-cancelled
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled.json
 
+        # Hearing Amendments cancel
+        - name: hearing.events.result-amendments-cancelled-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.result-amendments-cancelled-v2.json
+
         # Hearing Deleted
         - name: hearing.events.hearing-deleted
           schema_uri: http://justice.gov.uk/hearing/courts/hearing-deleted.json
@@ -294,6 +301,9 @@ subscriptions_descriptor:
 
         - name: hearing.event.result-amendments-rejected
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected.json
+
+        - name: hearing.event.result-amendments-rejected-v2
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.result-amendments-rejected-v2.json
 
         # Offences Removed From Existing Hearing
         - name: hearing.events.offences-removed-from-existing-hearing

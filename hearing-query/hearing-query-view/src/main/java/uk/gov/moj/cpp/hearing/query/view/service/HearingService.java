@@ -569,7 +569,7 @@ public class HearingService {
         final List<ResultLine> extractedResultLines = new ArrayList<>();
 
         targets.forEach(target -> {
-            final List<uk.gov.justice.core.courts.ResultLine> resultLines = resultLineJPAMapper.fromJPA(target.getResultLines());
+            final List<uk.gov.justice.core.courts.ResultLine2> resultLines = resultLineJPAMapper.fromJPA2(target.getResultLinesJson());
             resultLines.forEach(resultLine -> extractResultLines(extractedResultLines, target, resultLine)
             );
         });
@@ -577,7 +577,7 @@ public class HearingService {
         return extractedResultLines.stream().collect(Collectors.toList());
     }
 
-    private void extractResultLines(final List<ResultLine> extractedResultLines, final Target target, final uk.gov.justice.core.courts.ResultLine resultLine) {
+    private void extractResultLines(final List<ResultLine> extractedResultLines, final Target target, final uk.gov.justice.core.courts.ResultLine2 resultLine) {
         final ResultLine.Builder builder = new ResultLine.Builder()
                 .withOrderedDate(resultLine.getOrderedDate())
                 .withSharedDate(resultLine.getSharedDate())

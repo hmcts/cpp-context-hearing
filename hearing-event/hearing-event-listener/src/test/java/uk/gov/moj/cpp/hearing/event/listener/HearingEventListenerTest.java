@@ -64,6 +64,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -720,7 +721,7 @@ public class HearingEventListenerTest {
         final JsonObject someJsonObject = new StringToJsonObjectConverter().convert("{}");
         final DraftResultSavedV2 draftResultSavedV2 = new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, amendedByUser);
 
-        when(draftResultRepository.findBy(hearingId.toString()+hearingDay.toString())).thenReturn(null);
+        when(draftResultRepository.findBy(hearingId.toString() + hearingDay.toString())).thenReturn(null);
 
         hearingEventListener.draftResultSavedV2(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved-v2"),
                 objectToJsonObjectConverter.convert(draftResultSavedV2)
@@ -812,8 +813,7 @@ public class HearingEventListenerTest {
         when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
         when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
                 .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
-
-        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
+        when(targetJPAMapper.fromJPA(asSet(target, target2), asSet(prosecutionCase))).thenReturn(targets);
         when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
         when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
 
@@ -827,7 +827,70 @@ public class HearingEventListenerTest {
         assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
                 .with(Hearing::getHasSharedResults, is(true))
                 .with(Hearing::getId, is(resultsShared.getHearingId()))
-                .with(Hearing::getTargets, hasSize(3))
+                .with(Hearing::getTargets, hasSize(2))
+                .with(Hearing::getHearingDays, first(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)
+                                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getHasSharedResults, is(true)
+                                )
+                        )
+                )
+        );
+
+        verifyNoMoreInteractions(offenceRepository);
+    }
+
+    @Test
+    public void resultsSharedV3_shouldPersist_with_hasSharedResults_true() {
+        final LocalDate today = now();
+        final LocalDate tomorrow = now().plusDays(1);
+
+        final ResultsSharedV3 resultsShared = resultsSharedV3Template(today);
+
+        final uk.gov.justice.core.courts.Target resultForToday = targetTemplate(today);
+        final uk.gov.justice.core.courts.Target resultForTomorrow = targetTemplate(tomorrow);
+        final List<uk.gov.justice.core.courts.Target> targets = asList(resultForToday, resultForTomorrow);
+        final Target target = new Target()
+                .setId(randomUUID())
+                .setHearingDay(today.toString());
+        final Target target2 = new Target()
+                .setId(randomUUID())
+                .setHearingDay(tomorrow.toString());
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        final Defendant defendant = new Defendant();
+        final Set<Defendant> defendants = asSet(defendant);
+        prosecutionCase.setDefendants(defendants);
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay hearingDay = new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay();
+        hearingDay.setDate(today);
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(false)
+                .setHearingDays(asSet(hearingDay))
+                .setTargets(asSet(target, target2))
+                .setProsecutionCases(asSet(prosecutionCase))
+                .setId(resultsShared.getHearingId()
+                );
+
+        when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
+        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
+        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
+                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
+//        when(targetJPAMapper.fromJPA(asSet(target, target2), asSet(prosecutionCase))).thenReturn(targets);
+        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
+        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
+        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
+
+        hearingEventListener.resultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
+                objectToJsonObjectConverter.convert(resultsShared)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        verify(this.approvalRequestedRepository).removeAllRequestApprovals(resultsShared.getHearingId());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(true))
+                .with(Hearing::getId, is(resultsShared.getHearingId()))
+                .with(Hearing::getTargets, hasSize(1))
                 .with(Hearing::getHearingDays, first(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)
                                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getHasSharedResults, is(true)
                                 )
@@ -958,6 +1021,41 @@ public class HearingEventListenerTest {
                 .withHearingId(hearingOne.getHearingId())
                 .withTargets(new ArrayList<>(singletonList(
                         CoreTestTemplates.target(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
+                )))
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                .withHearing(hearingOne.getHearing())
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
+                        .withCourtClerk(DelegatedPowers.delegatedPowers()
+                                .withUserId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .withId(completedResultLineId)
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                        .build()
+                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                ))
+                .withHearingDay(hearingDay)
+                .build();
+    }
+
+    private ResultsSharedV3 resultsSharedV3Template(final LocalDate hearingDay) {
+
+        CommandHelpers.InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+        UUID completedResultLineId = randomUUID();
+        hearingOne.it().getHearing().setHasSharedResults(true);
+
+        return ResultsSharedV3.builder()
+                .withHearingId(hearingOne.getHearingId())
+                .withTargets(new ArrayList<>(singletonList(
+                        CoreTestTemplates.target2(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
                 )))
                 .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
                 .withHearing(hearingOne.getHearing())
@@ -1187,7 +1285,6 @@ public class HearingEventListenerTest {
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getString(LAST_SHARED_DATE), is(sharedTime.toLocalDate().toString()));
         assertThat(enrichedDraftResultJson.getJsonArray(RESULTS).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getJsonArray(CHILD_RESULT_LINES).getJsonObject(0).getBoolean(DIRTY), is(false));
     }
-
 
 
     @Test

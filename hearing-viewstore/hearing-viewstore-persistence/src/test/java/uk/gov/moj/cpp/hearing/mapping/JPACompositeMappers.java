@@ -1,5 +1,10 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 final class JPACompositeMappers {
 
     public static final IndicatedPleaJPAMapper INDICATED_PLEA_JPA_MAPPER = new IndicatedPleaJPAMapper();
@@ -30,5 +35,5 @@ final class JPACompositeMappers {
     public static final HearingCaseNoteJPAMapper HEARING_CASE_NOTE_JPA_MAPPER = new HearingCaseNoteJPAMapper();
     public static final HearingDefenceCounselJPAMapper HEARING_DEFENCE_COUNSEL_JPA_MAPPER = new HearingDefenceCounselJPAMapper();
     private static final ResultLineJPAMapper RESULT_LINE_JPA_MAPPER = new ResultLineJPAMapper(new PromptJPAMapper(),
-            new DelegatedPowersJPAMapper());
+             new DelegatedPowersJPAMapper(), new JsonObjectToObjectConverter(new ObjectMapper()), new StringToJsonObjectConverter());
 }

@@ -663,7 +663,7 @@ public class UseCases {
                         target.getApplicationId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        nonNull(resultLineIn.getAmendmentDate())?resultLineIn.getAmendmentDate().toLocalDate():null,
+                        nonNull(resultLineIn.getAmendmentDate())?resultLineIn.getAmendmentDate():null,
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
@@ -676,7 +676,7 @@ public class UseCases {
     private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target) {
         return target.getResultLines().stream().map(resultLineIn ->
                 new SharedResultsCommandResultLineV2(
-                        resultLineIn.getShortCode(),
+                        "SHORT_CODE", //resultLineIn.getShortCode(),
                         resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
                         resultLineIn.getSharedDate(),
@@ -693,7 +693,7 @@ public class UseCases {
                         resultLineIn.getIsModified(),
                         resultLineIn.getIsComplete(),
                         target.getApplicationId(),
-                        target.getCaseId(),
+                        UUID.randomUUID(),//target.getCaseId(),
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
                         ZonedDateTime.now(),

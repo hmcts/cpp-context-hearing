@@ -72,8 +72,10 @@ import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ReferralReason;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.JudicialRoleTypeEnum;
 
@@ -100,6 +102,7 @@ public class CoreTestTemplates {
     private static final String JSON_STRING = "{\"results\":[{\"isDeleted\":false,\"isModified\":false,\"resultCode\":\"d0a369c9-5a28-40ec-99cb-da7943550b13\",\"orderedDate\":\"2021-05-27\"}]}";
     private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
     private static final String REPORTING_RESTRICTION_LABEL_SECOND = "Second";
+    public static final String VALUE = "2017-05-20";
 
     public static CoreTemplateArguments defaultArguments() {
         return new CoreTemplateArguments();
@@ -905,6 +908,16 @@ public class CoreTestTemplates {
                 .withResultLines(new ArrayList<>(asList(resultLine(resultLineId))));
     }
 
+    public static Target2.Builder target2(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
+        return Target2.target2()
+                .withTargetId(randomUUID())
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withOffenceId(offenceId)
+                .withDraftResult(JSON_STRING)
+                .withResultLines(new ArrayList<>(asList(resultLine2(resultLineId))));
+    }
+
     public static Target.Builder target(final UUID hearingId, final LocalDate hearingDay, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
         return Target.target()
                 .withTargetId(randomUUID())
@@ -926,7 +939,27 @@ public class CoreTestTemplates {
                 .withSharedDate(PAST_LOCAL_DATE.next())
                 .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
                         .withId(randomUUID())
-                        .withValue("2017-05-20")
+                        .withValue(VALUE)
+                        .build()))
+                )
+                .withDelegatedPowers(null)
+                .withIsComplete(true)
+                .withIsModified(false)
+                .withIsDeleted(false)
+                .build();
+    }
+
+    public static ResultLine2 resultLine2(final UUID resultLineId) {
+        return ResultLine2.resultLine2()
+                .withResultDefinitionId(randomUUID())
+                .withResultLineId(resultLineId)
+                .withResultLabel(STRING.next())
+                .withLevel(Level.CASE)
+                .withOrderedDate(PAST_LOCAL_DATE.next())
+                .withSharedDate(PAST_LOCAL_DATE.next())
+                .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
+                        .withId(randomUUID())
+                        .withValue(VALUE)
                         .build()))
                 )
                 .withDelegatedPowers(null)
@@ -946,7 +979,7 @@ public class CoreTestTemplates {
                 .withSharedDate(PAST_LOCAL_DATE.next())
                 .withPrompts(new ArrayList<>(singletonList(Prompt.prompt()
                         .withId(randomUUID())
-                        .withValue("2017-05-20")
+                        .withValue(VALUE)
                         .build()))
                 )
                 .withDelegatedPowers(null)

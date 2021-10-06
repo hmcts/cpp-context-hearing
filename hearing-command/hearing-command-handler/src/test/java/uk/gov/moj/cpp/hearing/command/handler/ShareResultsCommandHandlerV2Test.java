@@ -4,14 +4,9 @@ import static com.google.common.collect.ImmutableList.of;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.any;
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.notNullValue;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -80,7 +75,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -210,8 +204,8 @@ public class ShareResultsCommandHandlerV2Test {
     public void shouldRaiseDeleteDraftResultsV2Event() throws Exception {
 
         final UUID userId = UUID.randomUUID();
-        HearingAmended hearingAmended = new HearingAmended(initiateHearingCommand.getHearing().getId(),userId,HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR);
-        DraftResultDeletedV2 draftResultDeletedV2 = new DraftResultDeletedV2(initiateHearingCommand.getHearing().getId(),LocalDate.now(),userId);
+        HearingAmended hearingAmended = new HearingAmended(initiateHearingCommand.getHearing().getId(), userId, HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR);
+        DraftResultDeletedV2 draftResultDeletedV2 = new DraftResultDeletedV2(initiateHearingCommand.getHearing().getId(), LocalDate.now(), userId);
         final DeleteDraftResultV2Command deleteDraftResultV2Command = DeleteDraftResultV2Command.deleteDraftResultCommand()
                 .setHearingId(initiateHearingCommand.getHearing().getId())
                 .setHearingDay(LocalDate.now());
@@ -222,20 +216,20 @@ public class ShareResultsCommandHandlerV2Test {
         final HearingAggregate aggregate = new HearingAggregate() {{
             apply(Stream.of(new HearingInitiated(initiateHearingCommand.getHearing())));
             apply(Stream.of(hearingAmended));
-       }};
+        }};
 
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(aggregate);
 
         this.shareResultsCommandHandler.deleteDraftResultV2(envelope);
 
     }
-        @Test
+
+    @Test
     public void shouldRaiseResultsSharedV2Event() throws Exception {
         final LocalDate hearingDay = LocalDate.now();
         final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), hearingDay);
         final Target targetDraft = saveDraftResultCommand.getTarget();
         final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
-        resultLineIn.setShortCode("NCOS");
         targetDraft.setResultLines(null);
         final Prompt promptIn = resultLineIn.getPrompts().get(0);
         final DraftResultSaved draftResultSavedEvent = (new DraftResultSaved(targetDraft, HearingState.INITIALISED, randomUUID()));
@@ -266,7 +260,7 @@ public class ShareResultsCommandHandlerV2Test {
 
         shareDaysResultsCommand.setResultLines(Arrays.asList(
                 new SharedResultsCommandResultLineV2(
-                        resultLineIn.getShortCode(),
+                        null,
                         resultLineIn.getDelegatedPowers(),
                         resultLineIn.getOrderedDate(),
                         resultLineIn.getSharedDate(),
@@ -282,10 +276,10 @@ public class ShareResultsCommandHandlerV2Test {
                         resultLineIn.getIsModified(),
                         resultLineIn.getIsComplete(),
                         targetDraft.getApplicationId(),
-                        targetDraft.getCaseId(),
+                        null,
                         resultLineIn.getAmendmentReasonId(),
                         resultLineIn.getAmendmentReason(),
-                        Objects.nonNull(resultLineIn.getAmendmentDate()) ? resultLineIn.getAmendmentDate(): null,
+                        null,
                         resultLineIn.getFourEyesApproval(),
                         resultLineIn.getApprovedDate(),
                         resultLineIn.getIsDeleted(),
@@ -312,7 +306,6 @@ public class ShareResultsCommandHandlerV2Test {
                         .with(t -> t.getResultLines().size(), is(shareDaysResultsCommand.getResultLines().size()))
                         .with(Target::getResultLines, first(isBean(ResultLine.class)
                                         .with(ResultLine::getResultLineId, is(resultLineIn.getResultLineId()))
-                                        .with(ResultLine::getShortCode, is(resultLineIn.getShortCode()))
                                         .with(rl -> rl.getPrompts().size(), is(resultLineIn.getPrompts().size()))
                                         .with(ResultLine::getPrompts, first(isBean(Prompt.class)
                                                 .with(Prompt::getId, is(promptIn.getId()))))

@@ -10,7 +10,7 @@ import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
-import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
@@ -41,8 +41,8 @@ public class HearingAggregateMomento implements Serializable {
     private final Map<UUID, RespondentCounsel> respondentCounsels = new HashMap<>();
     private final Map<UUID, CompanyRepresentative> companyRepresentatives = new HashMap<>();
     private final Map<UUID, InterpreterIntermediary> interpreterIntermediary = new HashMap<>();
-    private Map<UUID, Target> sharedTargets = new HashMap<>();
-    private Map<UUID, Target> transientTargets = new HashMap<>();
+    private Map<UUID, Target2> sharedTargets = new HashMap<>();
+    private Map<UUID, Target2> transientTargets = new HashMap<>();
 
     private Hearing hearing;
     private List<Variant> variantDirectory = new ArrayList<>();
@@ -53,8 +53,8 @@ public class HearingAggregateMomento implements Serializable {
     private boolean deleted = false;
     private Map<UUID, ZonedDateTime> nextHearingStartDates = new HashMap<>();
     private Map<UUID, ZonedDateTime> resultsAmendmentDateMap = new HashMap<>();
-    private Map<LocalDate, Map<UUID, Target>> multiDayTargets = new HashMap<>();
-    private Map<LocalDate, Map<UUID, Target>> multiDaySavedTargets = new HashMap<>();
+    private Map<LocalDate, Map<UUID, Target2>> multiDayTargets = new HashMap<>();
+    private Map<LocalDate, Map<UUID, Target2>> multiDaySavedTargets = new HashMap<>();
     private Map<LocalDate, Map<UUID, CompletedResultLineStatus>> multiDayCompletedResultLinesStatus = new HashMap<>();
     private Map<LocalDate, Boolean> isHearingDayPreviouslyShared = new HashMap<>();
 
@@ -138,19 +138,19 @@ public class HearingAggregateMomento implements Serializable {
         this.duplicate = duplicate;
     }
 
-    public Map<UUID, Target> getSharedTargets() {
+    public Map<UUID, Target2> getSharedTargets() {
         return this.sharedTargets;
     }
 
-    public Map<UUID, Target> getTransientTargets() {
+    public Map<UUID, Target2> getTransientTargets() {
         return this.transientTargets;
     }
 
-    public void setSharedTargets(final Map<UUID, Target> sharedTargets) {
+    public void setSharedTargets(final Map<UUID, Target2> sharedTargets) {
         this.sharedTargets = sharedTargets;
     }
 
-    public void setTransientTargets(final Map<UUID, Target> transientTargets) {
+    public void setTransientTargets(final Map<UUID, Target2> transientTargets) {
         this.transientTargets = transientTargets;
     }
 
@@ -178,7 +178,7 @@ public class HearingAggregateMomento implements Serializable {
         return resultsAmendmentDateMap;
     }
 
-    public Map<LocalDate, Map<UUID, Target>> getMultiDaySavedTargets() {
+    public Map<LocalDate, Map<UUID, Target2>> getMultiDaySavedTargets() {
         return multiDaySavedTargets;
     }
 
@@ -190,7 +190,7 @@ public class HearingAggregateMomento implements Serializable {
         return isHearingDayPreviouslyShared;
     }
 
-    public Map<LocalDate, Map<UUID, Target>> getMultiDayTargets() {
+    public Map<LocalDate, Map<UUID, Target2>> getMultiDayTargets() {
         return multiDayTargets;
     }
 
