@@ -34,9 +34,13 @@
     },
     "resultLines": {
       "type": "object"
+    },
+    "__metadata__": {
+      "type": "object"
     }
   },
   "required": [
-    "hearingId"
+    "hearingId",
+    "__metadata__"
   ]
 }

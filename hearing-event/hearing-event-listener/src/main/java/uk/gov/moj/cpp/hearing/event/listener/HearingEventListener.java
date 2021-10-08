@@ -16,6 +16,7 @@ import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -355,13 +356,35 @@ public class HearingEventListener {
 
         final ResultsSharedV3 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
 
+        saveSharedResults(resultsShared);
+        updateDraftResultV2(resultsShared);
+    }
+
+    /**
+     * This method is used to update DraftResultV2 object with
+     * sharedDateTime informationinside __metadata__ object when Results are shared to keep
+     * DraftResult and SharedResults in sync.
+     *
+     * @param resultsShared
+     */
+    private void updateDraftResultV2(final ResultsSharedV3 resultsShared) {
+        final String draftResultPK = resultsShared.getHearingId().toString()+resultsShared.getHearingDay().toString();
+        final DraftResult draftResult = draftResultRepository.findBy(draftResultPK);
+        if (nonNull(draftResult) && nonNull(draftResult.getDraftResultPayload())) {
+            final JsonNode metadataNode = draftResult.getDraftResultPayload().get("__metadata__");
+            ((ObjectNode) metadataNode).put("lastSharedTime", ZonedDateTimes.toString(resultsShared.getSharedTime()));
+            draftResultRepository.save(draftResult);
+        }
+    }
+
+    private void saveSharedResults(final ResultsSharedV3 resultsShared) {
         final Hearing hearing = hearingRepository.findBy(resultsShared.getHearing().getId());
         if (hearing == null) {
             LOGGER.error(HEARING_NOT_FOUND);
         } else {
             final LocalDate hearingDay = resultsShared.getHearingDay();
             if (resultsShared.getHearing().getHasSharedResults()) {
-                final List<uk.gov.justice.core.courts.Target2> listOfTargets = resultsShared.getTargets();
+                final List<Target2> listOfTargets = resultsShared.getTargets();
                 final List<uk.gov.moj.cpp.hearing.persist.entity.ha.Target> legacyTargets = hearing.getTargets().stream().filter(t-> !"{}".equals(t.getDraftResult())).collect(Collectors.toList());
                 legacyTargets.forEach(legacyTarget->hearing.getTargets().remove(legacyTarget));
                 hearing.setHasSharedResults(true);
