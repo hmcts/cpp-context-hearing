@@ -25,6 +25,7 @@ public class TimelineHearingSummary {
     private final String courtHouse;
     private final String courtRoom;
     private final ZonedDateTime hearingTime;
+    private final ZonedDateTime startTime;
     private final Integer estimatedDuration;
     private final String outcome;
     private final List<String> defendants;
@@ -40,6 +41,7 @@ public class TimelineHearingSummary {
         this.courtHouse = builder.courtHouse;
         this.courtRoom = builder.courtRoom;
         this.hearingTime = builder.hearingTime;
+        this.startTime = builder.startTime;
         this.estimatedDuration = builder.estimatedDuration;
         this.defendants = builder.defendants;
         this.applicants = builder.applicants;
@@ -91,6 +93,10 @@ public class TimelineHearingSummary {
         return hearingTime.format(TIME_FORMATTER);
     }
 
+    public ZonedDateTime getStartTime() {
+        return startTime;
+    }
+
     public Integer getEstimatedDuration() {
         return estimatedDuration;
     }
@@ -114,6 +120,7 @@ public class TimelineHearingSummary {
         private String courtHouse;
         private String courtRoom;
         private ZonedDateTime hearingTime;
+        private ZonedDateTime startTime;
         private Integer estimatedDuration;
         private List<String> defendants;
         private List<String> applicants;
@@ -162,6 +169,11 @@ public class TimelineHearingSummary {
 
         public TimelineHearingSummaryBuilder withHearingTime(final ZonedDateTime hearingTime) {
             this.hearingTime = hearingTime;
+            return this;
+        }
+
+        public TimelineHearingSummaryBuilder withStartTime(final ZonedDateTime startTime) {
+            this.startTime = startTime;
             return this;
         }
 
