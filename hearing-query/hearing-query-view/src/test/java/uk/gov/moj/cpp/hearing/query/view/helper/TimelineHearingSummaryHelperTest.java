@@ -139,7 +139,6 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
-        assertThat(timeLineHearingSummary.getStartTime(), is(hearingDay.getSittingDay()));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
         assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
@@ -159,7 +158,6 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
-        assertThat(timeLineHearingSummary.getStartTime(), is(hearingDay.getSittingDay()));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
         assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
@@ -179,7 +177,6 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
-        assertThat(timeLineHearingSummary.getStartTime(), is(hearingDay.getSittingDay()));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
         assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
@@ -203,7 +200,6 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
         assertThat(timeLineHearingSummary.getHearingDateAsString(), is(hearingDay.getDate().format(DATE_FORMATTER)));
         assertThat(timeLineHearingSummary.getHearingTime(), is(hearingDay.getDateTime().format(TIME_FORMATTER)));
-        assertThat(timeLineHearingSummary.getStartTime(), is(hearingDay.getSittingDay()));
         assertThat(timeLineHearingSummary.getHearingType(), is(hearing.getHearingType().getDescription()));
         assertThat(timeLineHearingSummary.getCourtHouse(), is(courtCentreName));
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));

@@ -33,9 +33,6 @@
         "hearingTime": {
           "type": "string"
         },
-        "startTime": {
-          "type": "string"
-        },
         "estimatedDuration": {
           "type": "integer"
         },

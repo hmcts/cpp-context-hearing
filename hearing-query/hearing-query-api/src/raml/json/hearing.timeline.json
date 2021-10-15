@@ -7,7 +7,6 @@
       "courtHouse": "Court House Name",
       "courtRoom": "Court Room Name",
       "hearingTime": "hearing time",
-      "startTime": "start time",
       "estimatedDuration": "estimated duration",
       "defendants": [
         "defendant one",
@@ -23,7 +22,6 @@
       "courtHouse": "Court House Name",
       "courtRoom": "Court Room Name",
       "hearingTime": "hearing time",
-      "startTime": "start time",
       "estimatedDuration": "estimated duration",
       "defendants": [
         "defendant one",

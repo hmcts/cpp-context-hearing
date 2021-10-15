@@ -52,7 +52,6 @@ public class TimelineHearingSummaryHelper {
         timelineHearingSummaryBuilder.withCourtHouse(getCourtCentreName(hearingDay, hearing, allCourtRooms));
         timelineHearingSummaryBuilder.withCourtRoom(getCourtRoomName(hearingDay, hearing, allCourtRooms));
         timelineHearingSummaryBuilder.withHearingTime(hearingDay.getDateTime());
-        timelineHearingSummaryBuilder.withStartTime(hearingDay.getSittingDay());
         timelineHearingSummaryBuilder.withEstimatedDuration(hearingDay.getListedDurationMinutes());
         if (nonNull(hearingYouthCourtDefendants)){
             timelineHearingSummaryBuilder.withYouthDefendantIds(hearingYouthCourtDefendants.stream().map(e-> e.getId().getDefendantId().toString()).collect(toList()));
