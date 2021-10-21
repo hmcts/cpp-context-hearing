@@ -27,7 +27,7 @@
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.161</coredomain.version>
         <referencedata.version>7.0.62</referencedata.version>
-        <material.version>7.0.13</material.version>
+        <material.version>7.0.14</material.version>
         <results.version>7.0.53</results.version>
         <notification.notify.version>7.0.1</notification.notify.version>
         <stagingenforcement.version>7.0.17</stagingenforcement.version>
