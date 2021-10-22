@@ -1,27 +1,5 @@
 package uk.gov.justice.ccr.notepad.result.cache;
 
-import com.google.common.cache.LoadingCache;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
-import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
-import uk.gov.justice.ccr.notepad.result.exception.CacheItemNotFoundException;
-import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
-import uk.gov.justice.services.common.converter.LocalDates;
-import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
-
-import java.time.LocalDate;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newTreeSet;
 import static java.lang.String.format;
@@ -29,10 +7,9 @@ import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItemInArray;
-import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertFalse;
@@ -51,12 +28,22 @@ import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_
 import static uk.gov.justice.ccr.notepad.result.cache.ResultCache.RESULT_PROMPT_SYNONYM_KEY;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.INTEGER;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.randomEnum;
 
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptDynamicListNameAddress;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultPromptSynonym;
+import uk.gov.justice.ccr.notepad.result.cache.model.ResultType;
+import uk.gov.justice.ccr.notepad.result.exception.CacheItemNotFoundException;
+import uk.gov.justice.ccr.notepad.result.loader.ReadStoreResultLoader;
+import uk.gov.justice.services.common.converter.LocalDates;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -64,6 +51,18 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
+import com.google.common.cache.LoadingCache;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResultCacheTest {
@@ -111,6 +110,9 @@ public class ResultCacheTest {
 
     @Spy
     private final ConcurrentHashMap<String, Object> cacheMap = new ConcurrentHashMap<>();
+
+    @Spy
+    private final ConcurrentHashMap<String, ReentrantLock> lockByDate = new ConcurrentHashMap<>();
 
     @Before
     public void setUp() {
@@ -174,6 +176,7 @@ public class ResultCacheTest {
         target.reloadCache();
         assertThat(cacheMap.size(), is(0));
         assertFalse(cacheMap.containsKey(format(CACHE_KEY_FORMAT, RESULT_DEFINITION_KEY, LocalDates.to(LocalDate.now()))));
+
     }
 
     @Test

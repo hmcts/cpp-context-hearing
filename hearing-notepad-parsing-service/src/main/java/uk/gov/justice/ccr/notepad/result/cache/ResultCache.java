@@ -1,8 +1,12 @@
 package uk.gov.justice.ccr.notepad.result.cache;
 
-import com.google.common.cache.LoadingCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
+import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
+
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
@@ -13,14 +17,6 @@ import uk.gov.justice.ccr.notepad.result.loader.ResultLoader;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 
-import javax.annotation.PostConstruct;
-import javax.ejb.Lock;
-import javax.ejb.LockType;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
-import javax.ejb.AccessTimeout;
-import javax.inject.Inject;
-import javax.inject.Named;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -28,19 +24,27 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
-import static java.lang.String.format;
-import static java.util.Objects.nonNull;
-import static java.util.stream.Collectors.toList;
+import javax.annotation.PostConstruct;
+import javax.ejb.Lock;
+import javax.ejb.Singleton;
+import javax.ejb.Startup;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.ejb.LockType;
+
+import com.google.common.cache.LoadingCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Startup
 @Singleton
-@AccessTimeout(value = 60000)
+@Lock(LockType.READ)
+@SuppressWarnings("squid:S134")
 public class ResultCache {
 
     public static final String RESULT_DEFINITION_KEY = "resultDefinitionKey";
@@ -62,27 +66,50 @@ public class ResultCache {
 
     private LoadingCache<String, Object> cache;
 
+    private Map<LocalDate, ReentrantLock> lockByDate = new ConcurrentHashMap<>();
+
     @PostConstruct
     public void setUp() {
         cache = cacheFactory.build();
     }
 
-    @Lock(LockType.WRITE)
-    @AccessTimeout(value = 120000)
+
+    /**
+     * This method hydrate result cache.
+     * It load the cache based on orderedDate.
+     * If multiple threads with same orderedDate
+     * try to access loadCache(orderedDate) method then
+     * only one of these would be able to actually enter the
+     * ReEntrant lock block which is based on orderDate
+     * Thread with different orderedDate would execute parallelly.
+     * It lock the thread
+     * @param envelope JsonEnvelope of event
+     * @param orderedDate date for which cache is loaded
+     */
     public void lazyLoad(final JsonEnvelope envelope, final LocalDate orderedDate) {
         if (!isCacheLoadedByDate(orderedDate)) {
-            synchronized (this) {
+            final Instant first = Instant.now();
+            LOGGER.info("result cache attempting to lock at: {} for order date: {}", first, orderedDate);
+            lockByDate.putIfAbsent(orderedDate, new ReentrantLock());
+            lockByDate.get(orderedDate).lock();
+            LOGGER.info("result cache locked at: {} for order date: {}", first, orderedDate);
+            try {
                 if (!isCacheLoadedByDate(orderedDate)) {
                     if (resultLoader instanceof ReadStoreResultLoader) {
                         ((ReadStoreResultLoader) resultLoader).setJsonEnvelope(envelope);
                     }
                     loadCache(orderedDate);
                 }
+            } finally {
+                lockByDate.get(orderedDate).unlock();
+                final Instant second = Instant.now();
+                LOGGER.info("result cache lock released in {} seconds for order date: {}", Duration.between(first, second).getSeconds(), orderedDate);
             }
+            LOGGER.info("Finished loading cache for {}", orderedDate);
         }
     }
 
-    @Lock(LockType.READ)
+
     public ResultDefinition getResultDefinitionsById(final String resultDefinitionId, final LocalDate orderedDate) {
         final List<ResultDefinition> resultDefinitionList = (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
 
@@ -92,22 +119,22 @@ public class ResultCache {
                 .orElse(null);
     }
 
-    @Lock(LockType.READ)
+
     public List<ResultDefinition> getResultDefinitions(final LocalDate orderedDate) {
         return (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
     }
 
-    @Lock(LockType.READ)
+
     public Map<String, List<Long>> getResultDefinitionsIndexGroupByKeyword(final LocalDate orderedDate) {
         return (Map<String, List<Long>>) getCacheEntry(orderedDate, RESULT_DEFINITIONS_GROUP_BY_KEYWORD_KEY);
     }
 
-    @Lock(LockType.READ)
+
     public Map<String, List<Long>> getResultPromptsIndexGroupByKeyword(final LocalDate orderedDate) {
         return (Map<String, List<Long>>) getCacheEntry(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY);
     }
 
-    @Lock(LockType.READ)
+
     public List<ResultDefinitionSynonym> getResultDefinitionSynonym(final LocalDate orderedDate) {
         final Set<String> allKeyWords = newHashSet();
         final List<ResultDefinition> resultDefinitions = (List<ResultDefinition>) getCacheEntry(orderedDate, RESULT_DEFINITION_KEY);
@@ -126,12 +153,12 @@ public class ResultCache {
         return resultDefinitionKeyWordsSynonyms;
     }
 
-    @Lock(LockType.READ)
+
     public List<ResultPrompt> getResultPrompt(final LocalDate orderedDate) {
         return (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
     }
 
-    @Lock(LockType.READ)
+
     public List<ResultPrompt> getResultPromptByResultDefinitionId(final String resultDefinitionId, final LocalDate orderedDate) {
         final List<ResultPrompt> resultPromptList = (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
 
@@ -140,7 +167,7 @@ public class ResultCache {
                 .collect(toList());
     }
 
-    @Lock(LockType.READ)
+
     public List<ResultPromptSynonym> getResultPromptSynonym(final LocalDate orderedDate) {
         final Set<String> allKeyWords = newHashSet();
         final List<ResultPrompt> resultPromptList = (List<ResultPrompt>) getCacheEntry(orderedDate, RESULT_PROMPT_KEY);
@@ -158,12 +185,29 @@ public class ResultCache {
         return resultPromptSynonyms;
     }
 
+    /**
+     * This method hydrate result cache.
+     * It load the cache based on today's date.
+     * If multiple threads with same date
+     * try to access loadCache(date) method then
+     * only one of these would be able to actually enter the
+     * ReEntrant lock block which is based on date
+     * Thread with different orderedDate would execute parallelly.
+     * It lock the thread
+     */
     @SuppressWarnings({"squid:S2221"})
     public void reloadCache() {
         final Instant first = Instant.now();
         LOGGER.info("Reloading cache started at: {}", first);
         try {
-            loadCache(LocalDate.now());
+            final LocalDate today = LocalDate.now();
+            lockByDate.putIfAbsent(today,new ReentrantLock());
+            lockByDate.get(today).lock();
+            try {
+                loadCache(today);
+            } finally {
+                lockByDate.get(today).unlock();
+            }
             final Instant second = Instant.now();
             LOGGER.info("Reloading cache completed in {} seconds", Duration.between(first, second).getSeconds());
         } catch (Exception ex) {
@@ -173,6 +217,8 @@ public class ResultCache {
     }
 
     private void loadCache(final LocalDate orderedDate) {
+        final Instant first = Instant.now();
+        LOGGER.info("loading cache started at: {} for order date: {}", first, orderedDate);
         if (!cacheContains(orderedDate, RESULT_DEFINITION_KEY)) {
             putEntry(orderedDate, RESULT_DEFINITION_KEY, resultLoader.loadResultDefinition(orderedDate));
         }
@@ -191,6 +237,8 @@ public class ResultCache {
         if (!cacheContains(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY)) {
             putEntry(orderedDate, RESULT_PROMPTS_GROUP_BY_KEYWORD_KEY, getPromptsIndexByKeyword(orderedDate));
         }
+        final Instant second = Instant.now();
+        LOGGER.info("loading cache completed in {} seconds  for order date: {}", Duration.between(first, second).getSeconds(), orderedDate);
     }
 
     private Object getCacheEntry(final LocalDate orderedDate, final String key) {
@@ -209,6 +257,7 @@ public class ResultCache {
         LOGGER.debug("Add to cache key {} value {}", keyWithOrderedDate, value);
         cache.asMap().put(keyWithOrderedDate, value);
     }
+
 
     private String getFormattedKey(String key, LocalDate orderedDate) {
         return format("%s-%s", key, LocalDates.to(orderedDate));

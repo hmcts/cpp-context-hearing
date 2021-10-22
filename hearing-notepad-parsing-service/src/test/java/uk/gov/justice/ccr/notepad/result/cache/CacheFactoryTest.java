@@ -12,7 +12,18 @@ public class CacheFactoryTest {
     @Test
     public void shouldReturnAnInstanceOfTheCache() {
         final CacheFactory factory = new CacheFactory();
+        factory.cacheConcurrencyLevel = "120";
+        factory.cacheExpiryInDays = "3";
+        factory.cacheMaxSize = "20";
+        assertThat(factory.build(), is(instanceOf(LoadingCache.class)));
+    }
 
+    @Test
+    public void shouldReturnAnInstanceOfTheCacheWithZeroCacheSize() {
+        final CacheFactory factory = new CacheFactory();
+        factory.cacheConcurrencyLevel = "120";
+        factory.cacheExpiryInDays = "3";
+        factory.cacheMaxSize = "0";
         assertThat(factory.build(), is(instanceOf(LoadingCache.class)));
     }
 }
