@@ -14,6 +14,8 @@ public class RestructuringConstants {
     public static final String HEARING_RESULTS_CASE_LEVEL_SHARED_JSON = "hearing.results-shared-case-level.json";
     public static final String HEARING_RESULTS_DEFENDANT_LEVEL_SHARED_JSON = "hearing.results-shared-defendant-level.json";
     public static final String HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON = "hearing.results-shared-with-verdict-type.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON = "hearing.results-shared-with-conviction-date-jurisdiction-crown.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_MAGISTRATES_JSON = "hearing.results-shared-with-conviction-date-jurisdiction-magistrates.json";
     public static final String HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-with-indicated-plea.json";
     public static final String HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-court-application-enrich-offence-data.json";
     public static final String HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON = "hearing.results-shared-with-offence-facts.json";

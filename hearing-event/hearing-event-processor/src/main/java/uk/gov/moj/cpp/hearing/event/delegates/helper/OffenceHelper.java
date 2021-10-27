@@ -3,36 +3,46 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.JurisdictionType;
+import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
 import javax.inject.Inject;
 
 public class OffenceHelper {
 
     private final ReferenceDataService referenceDataService;
 
+    private final ReferenceDataLoader referenceDataLoader;
+
     @Inject
-    public OffenceHelper(final ReferenceDataService referenceDataService) {
+    public OffenceHelper(final ReferenceDataService referenceDataService,
+                         final ReferenceDataLoader referenceDataLoader) {
         this.referenceDataService = referenceDataService;
+        this.referenceDataLoader = referenceDataLoader;
     }
 
     public void enrichOffence(final JsonEnvelope context, final Hearing hearing) {
@@ -42,23 +52,27 @@ public class OffenceHelper {
 
         ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
                 .forEach(prosecutionCase -> prosecutionCase.getDefendants().
-                        forEach(defendant -> defendant.getOffences().forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods))));
+                        forEach(defendant -> defendant.getOffences().forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods, hearing))));
 
         ofNullable(hearing.getCourtApplications()).orElse(emptyList()).stream()
                 .flatMap(ca -> ofNullable(ca.getCourtApplicationCases()).orElse(emptyList()).stream())
                 .flatMap(c -> ofNullable(c.getOffences()).map(Collection::stream).orElseGet(Stream::empty))
                 .filter(Objects::nonNull)
-                .forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods));
+                .forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods, hearing));
 
         ofNullable(hearing.getCourtApplications()).orElse(emptyList()).stream()
                 .map(CourtApplication::getCourtOrder)
                 .filter(Objects::nonNull)
                 .flatMap(o -> o.getCourtOrderOffences().stream())
                 .map(CourtOrderOffence::getOffence)
-                .forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods));
+                .forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods, hearing));
     }
 
-    private void enrichOffence(Offence offence, final List<VerdictType> verdictTypes, final List<AlcoholLevelMethod> alcoholLevelMethods) {
+    private void enrichOffence(final Offence offence, final List<VerdictType> verdictTypes, final List<AlcoholLevelMethod> alcoholLevelMethods, final Hearing hearing) {
+
+        if (nonNull(offence.getConvictionDate())) {
+            populateConvictingCourt(offence, hearing);
+        }
 
         if (nonNull(offence.getVerdict())) {
             populateFullVerdictTypeData(offence, verdictTypes);
@@ -71,6 +85,30 @@ public class OffenceHelper {
         if (nonNull(offence.getOffenceFacts())) {
             populateAlcoholLevelMethodData(offence, alcoholLevelMethods);
         }
+    }
+
+    private void populateConvictingCourt(final Offence offence, final Hearing hearing) {
+        hearing.getHearingDays().stream()
+                .filter(hearingDay -> hearingDay.getSittingDay().toLocalDate().equals(offence.getConvictionDate()))
+                .findAny()
+                .ifPresent(hearingDay -> {
+                    final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(hearingDay.getCourtCentreId());
+
+                    final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
+                            .withId(hearingDay.getCourtCentreId())
+                            .withRoomId(hearingDay.getCourtRoomId())
+                            .withCode(organisationalUnit.getOucode())
+                            .withName(organisationalUnit.getOucodeL3Name());
+
+                    if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
+                        final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(hearingDay.getCourtCentreId());
+                        courtCentreBuilder.withLja(ljaDetails);
+                    } else {
+                        courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
+                    }
+
+                    offence.setConvictingCourt(courtCentreBuilder.build());
+                });
     }
 
     private void populateIndicatedPlea(final Offence offence) {

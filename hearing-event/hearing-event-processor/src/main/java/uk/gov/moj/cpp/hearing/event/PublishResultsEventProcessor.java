@@ -5,8 +5,8 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static uk.gov.justice.core.courts.Address.address;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
@@ -36,6 +36,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
@@ -94,6 +95,9 @@ public class PublishResultsEventProcessor {
     @Inject
     private ReferenceDataService referenceDataService;
 
+    @Inject
+    private ReferenceDataLoader referenceDataLoader;
+
     @Handles("hearing.results-shared")
     public void resultsShared(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
@@ -108,7 +112,7 @@ public class PublishResultsEventProcessor {
 
         setProsecutorInformation(event, courtApplications, prosecutionCaseList);
 
-        setCourtCentreOrganisationalUnitInfo(event, resultsShared.getHearing().getCourtCentre());
+        setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre());
 
         setLJADetails(event, resultsShared.getHearing().getCourtCentre());
 
@@ -286,9 +290,11 @@ public class PublishResultsEventProcessor {
         courtCentre.setLja(ljaDetails);
     }
 
-    private void setCourtCentreOrganisationalUnitInfo(final JsonEnvelope context, final CourtCentre courtCentre) {
-        final OrganisationalUnit organisationalUnit = referenceDataService.getOrganisationUnitById(context, courtCentre.getId());
+    private void setCourtCentreOrganisationalUnitInfo(final CourtCentre courtCentre) {
+        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(courtCentre.getId());
+
         courtCentre.setCode(organisationalUnit.getOucode());
+        courtCentre.setCourtLocationCode(organisationalUnit.getCourtLocationCode());
         if (nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh()) {
             courtCentre.setWelshName(organisationalUnit.getOucodeL3WelshName());
             courtCentre.setWelshCourtCentre(organisationalUnit.getIsWelsh());

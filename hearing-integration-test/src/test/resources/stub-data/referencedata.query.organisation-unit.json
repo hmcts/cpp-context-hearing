@@ -1,0 +1,23 @@
+{
+  "id": "OU_ID",
+  "oucode": "C04PR00",
+  "oucodeL3Code": "LV",
+  "oucodeL3Name": "Liverpool Crown Court",
+  "oucodeL1Code": "C",
+  "oucodeL1Name": "Crown Courts",
+  "oucodeL2Code": "5",
+  "oucodeL2Name": "Merseyside",
+  "region": "North West",
+  "lja": "1810",
+  "oucodeEffectiveFromDate": "2016-01-01",
+  "address1": "QEII Law Courts",
+  "address2": "Derby Square",
+  "address3": "Liverpool",
+  "postcode": "L2 1XA",
+  "oucodeL3WelshName": "Llys Y Goron Lerpwl",
+  "defaultStartTime": "10:30",
+  "defaultDurationHrs": "06:00",
+  "lastModified": "2019-11-26T17:55:30.860Z",
+  "cpsEmailAddress": "LiverpoolCrownCourt@cps.gov.uk",
+  "courtLocationCode": "0325"
+}

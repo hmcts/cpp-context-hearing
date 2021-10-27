@@ -20,7 +20,8 @@
       "defaultStartTime": "10:30",
       "defaultDurationHrs": "06:00",
       "lastModified": "2019-11-26T17:55:30.860Z",
-      "cpsEmailAddress": "LiverpoolCrownCourt@cps.gov.uk"
+      "cpsEmailAddress": "LiverpoolCrownCourt@cps.gov.uk",
+      "courtLocationCode": "0325"
     }
   ]
 }

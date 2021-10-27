@@ -47,6 +47,7 @@ import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Prompt;
@@ -69,6 +70,7 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
+import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 import java.io.IOException;
@@ -146,6 +148,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAllocationDecision().setMotReasonDescription("Defendant consents to summary trial");
 
         final Hearing hearing = createHearing(initiateHearing);
+
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
         waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
 
@@ -232,6 +240,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAllocationDecision().setMotReasonDescription("Defendant consents to summary trial");
 
         final Hearing hearing = createHearing(initiateHearing);
+
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
         waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
 
         SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
@@ -280,7 +294,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.isCtlExtended"), is("false"));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(56).toString()));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(54).toString()));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(ctlExpiryDate));
 
         }
@@ -304,6 +318,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAllocationDecision().setMotReasonDescription("Defendant consents to summary trial");
 
         final Hearing hearing = createHearing(initiateHearing);
+
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
 
         waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
@@ -373,6 +393,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAllocationDecision().setMotReasonDescription("Youth - Court directs trial by jury (grave crime)");
 
         final Hearing hearing = createHearing(initiateHearing);
+
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
         waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearing, orderDate, LocalDate.now());
 
@@ -418,7 +444,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.isCtlExtended"), is("false"));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(182).toString()));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(180).toString()));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(ctlExpiryDate));
 
         }
@@ -502,6 +528,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
 
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
+
         stubCourtRoom(hearing);
         waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         final SaveDraftResultCommand saveSingleDayDraftResultCommand = getSaveDraftResultCommandForRemandInCustody(orderDate, initiateHearingCommandHelper);
@@ -553,6 +585,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(getRequestSpec(), initiateHearing);
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
         stubCourtRoom(hearing);
 
         final SaveDraftResultCommand saveSingleDayDraftResultCommand = getSaveDraftResultCommandForRemandInCustody(orderDate, initiateHearingCommandHelper);
@@ -606,6 +644,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(getRequestSpec(), initiateHearing);
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .forEach(ReferenceDataStub::stubOrganisationUnit);
         stubCourtRoom(hearing);
         waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
         final SaveDraftResultCommand saveSingleDayDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());

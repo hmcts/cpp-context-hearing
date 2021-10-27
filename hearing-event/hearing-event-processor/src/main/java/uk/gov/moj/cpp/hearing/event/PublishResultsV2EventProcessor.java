@@ -35,6 +35,7 @@ import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
@@ -93,6 +94,9 @@ public class PublishResultsV2EventProcessor {
     @Inject
     private ReferenceDataService referenceDataService;
 
+    @Inject
+    private ReferenceDataLoader referenceDataLoader;
+
     @Handles("hearing.events.results-shared-v2")
     public void resultsShared(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
@@ -107,7 +111,7 @@ public class PublishResultsV2EventProcessor {
 
         setProsecutorInformation(event, courtApplications, prosecutionCaseList);
 
-        setCourtCentreOrganisationalUnitInfo(event, resultsShared.getHearing().getCourtCentre());
+        setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre());
 
         setLJADetails(event, resultsShared.getHearing().getCourtCentre());
 
@@ -286,8 +290,9 @@ public class PublishResultsV2EventProcessor {
         courtCentre.setLja(ljaDetails);
     }
 
-    private void setCourtCentreOrganisationalUnitInfo(final JsonEnvelope context, final CourtCentre courtCentre) {
-        final OrganisationalUnit organisationalUnit = referenceDataService.getOrganisationUnitById(context, courtCentre.getId());
+    private void setCourtCentreOrganisationalUnitInfo(final CourtCentre courtCentre) {
+        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(courtCentre.getId());
+
         courtCentre.setCode(organisationalUnit.getOucode());
         if (nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh()) {
             courtCentre.setWelshName(organisationalUnit.getOucodeL3WelshName());

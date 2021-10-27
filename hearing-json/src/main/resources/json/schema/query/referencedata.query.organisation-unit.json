@@ -96,6 +96,10 @@
     },
     "enforcementArea": {
       "$ref": "http://justice.gov.uk/hearing/courts/referencedata/enforcementAreaBacs.json"
+    },
+    "courtLocationCode": {
+      "type": "string",
+      "maxLength": 10
     }
   },
   "required": [

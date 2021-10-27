@@ -10,9 +10,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.stubExhibitFileUpload;
 
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.junit.BeforeClass;
@@ -43,7 +40,7 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
 
         /** Easier to debug when you have non-random UUIDs */
         hearingTypeId = fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed");
-        courtCentreId = "9d9824b3-8a61-472f-8b55-e532ceabb403";
+        courtCentreId = "b52f805c-2821-4904-a0e0-26f7fda6dd08";
         courtCentreId_1 = "d9c200c1-5d63-405d-8ebb-4d1ac3b37144";
         courtCentreId_2 = "c1006f71-233a-4292-aca0-9e4b66380c36";
         courtCentreId_3 = "52955c69-c749-416d-a3ca-8ca881709325";

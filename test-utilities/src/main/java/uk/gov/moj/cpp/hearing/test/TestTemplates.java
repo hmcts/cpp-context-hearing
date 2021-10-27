@@ -404,8 +404,16 @@ public class TestTemplates {
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
                             .setDefendantType(PERSON)
                             .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)).build());
+        }
+
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithConvictingCourt(final boolean withConvictingCourt) {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
                             .setJurisdictionType(CROWN)
-                    ).build());
+                    ,false, withConvictingCourt).build());
         }
 
         public static InitiateHearingCommand standardInitiateHearingTemplateWithIsBoxHearing(final boolean isBoxHearing) {
@@ -463,7 +471,7 @@ public class TestTemplates {
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)
                                     .setJurisdictionType(MAGISTRATES),
-                            true
+                            true, false
                     ).build());
         }
 
@@ -871,7 +879,7 @@ public class TestTemplates {
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)
                                     .setJurisdictionType(CROWN),
-                            true
+                            true, false
                     ).build());
         }
 

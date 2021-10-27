@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertThat;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
@@ -28,10 +29,10 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.hamcrest.Matchers;
 
 @SuppressWarnings({"squid:S2925"})
 public class Queries {
@@ -41,7 +42,7 @@ public class Queries {
                 .withHeader(HeaderConstants.USER_ID, userId)
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
         poll(requestParams)
                 .timeout(timeout, TimeUnit.SECONDS)
                 .until(
@@ -60,6 +61,31 @@ public class Queries {
 
     }
 
+    public static void getHearingPollForMatchForOneOf(final UUID hearingId, final long timeout, final Pair<BeanMatcher<HearingDetailsResponse>, BeanMatcher<HearingDetailsResponse>> resultMatchers) {
+        waitForFewSeconds(DEFAULT_WAIT_TIME_IN_SEC);
+
+        final RequestParams requestParams = requestParams(getURL("hearing.get.hearing", hearingId), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
+                .build();
+
+        final Matcher<ResponseData> expectedConditions1 = allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatchers.getLeft()));
+        final Matcher<ResponseData> expectedConditions2 = allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatchers.getRight()));
+
+        final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
+
+        ResponseData responseData = makeRequest(requestParams);
+
+        while ((!expectedConditions1.matches(responseData) && !expectedConditions2.matches(responseData)) && ZonedDateTime.now().isBefore(expiryTime)) {
+            sleep();
+            responseData = makeRequest(requestParams);
+        }
+
+        if (!expectedConditions1.matches(responseData) && !expectedConditions2.matches(responseData)) {
+            assertThat(responseData, expectedConditions1);
+            assertThat(responseData, expectedConditions2);
+        }
+    }
+
     public static void getHearingPollForMatch(final UUID hearingId, final long timeout, final long waitTime, final BeanMatcher<HearingDetailsResponse> resultMatcher) {
 
         /*
@@ -76,7 +102,7 @@ public class Queries {
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher));
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(HearingDetailsResponse.class, resultMatcher));
 
         final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
@@ -98,7 +124,7 @@ public class Queries {
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
 
         final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
@@ -120,7 +146,7 @@ public class Queries {
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
 
         final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
@@ -143,7 +169,7 @@ public class Queries {
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK), jsonPayloadMatchesBean(TargetListResponse.class, resultMatcher));
 
         final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 
@@ -168,7 +194,7 @@ public class Queries {
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser())
                 .build();
 
-        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK));
+        final Matcher<ResponseData> expectedConditions = allOf(status().is(OK));
 
         final ZonedDateTime expiryTime = ZonedDateTime.now().plusSeconds(timeout);
 

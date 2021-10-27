@@ -6,23 +6,31 @@ import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_MAGISTRATES_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.LjaDetails;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceFacts;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.VerdictType;
+import uk.gov.justice.hearing.courts.referencedata.EnforcementAreaBacs;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
@@ -46,6 +54,9 @@ public class OffenceHelperTest {
 
     @Mock
     private ReferenceDataService referenceDataService;
+
+    @Mock
+    private ReferenceDataLoader referenceDataLoader;
 
     @Mock
     private JsonEnvelope context;
@@ -78,6 +89,8 @@ public class OffenceHelperTest {
             new AlcoholLevelMethod(randomUUID(), 1, "A", "Blood"),
             new AlcoholLevelMethod(randomUUID(), 2, "B", "Breath"));
 
+    private LjaDetails ljaDetailsOfCourtCentre = LjaDetails.ljaDetails().withLjaCode("3253").withLjaName("Lincolnshire Magistrates' Court").build();
+
     @Before
     public void setUp() throws IOException {
         when(referenceDataService.getVerdictTypes(context)).thenReturn(allVerdictTypes);
@@ -99,6 +112,61 @@ public class OffenceHelperTest {
         assertThat(verdictType.getId().toString(), is("c51ce410-c124-310e-8db5-e4b97fc2af39"));
         assertThat(verdictType.getVerdictCode(), is("VC13"));
         assertThat(verdictType.getSequence(), is(13));
+    }
+
+    @Test
+    public void shareResultsWithEnrichedConvictingCourtIfJurisdictionTypeIsMagistrates() throws IOException {
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withId("f8254db1-1683-483e-afb3-b87fde5a0a26")
+                .withOucode("B01LY00")
+                .withLja(ljaDetailsOfCourtCentre.getLjaCode())
+                .withOucodeL3Name("organisationalUnitName")
+                .build();
+
+        when(referenceDataLoader.getOrganisationUnitById(any())).thenReturn(organisationalUnit);
+        when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
+
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_MAGISTRATES_JSON, ResultsShared.class);
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+
+        final Offence offence = defendant.get().getOffences().get(0);
+
+        final CourtCentre convictingCourt = offence.getConvictingCourt();
+        assertThat(convictingCourt.getId().toString(), is(organisationalUnit.getId()));
+        assertThat(convictingCourt.getCode(), is(organisationalUnit.getOucode()));
+        assertThat(convictingCourt.getLja().getLjaCode(), is(organisationalUnit.getLja()));
+        assertThat(convictingCourt.getLja().getLjaName(), is(ljaDetailsOfCourtCentre.getLjaName()));
+        assertThat(convictingCourt.getName(), is(organisationalUnit.getOucodeL3Name()));
+    }
+
+    @Test
+    public void shareResultsWithEnrichedConvictingCourtIfJurisdictionTypeIsCrown() throws IOException {
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withId("f8254db1-1683-483e-afb3-b87fde5a0a26")
+                .withOucode("B01LY00")
+                .withEnforcementArea(EnforcementAreaBacs.enforcementAreaBacs()
+                        .withCourtLocationCode("0325")
+                        .build())
+                .build();
+
+        when(referenceDataLoader.getOrganisationUnitById(any())).thenReturn(organisationalUnit);
+        when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
+
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON, ResultsShared.class);
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+
+        final Offence offence = defendant.get().getOffences().get(0);
+
+        final CourtCentre convictingCourt = offence.getConvictingCourt();
+        assertThat(convictingCourt.getId().toString(), is(organisationalUnit.getId()));
+        assertThat(convictingCourt.getCode(), is(organisationalUnit.getOucode()));
+        assertThat(convictingCourt.getCourtLocationCode(), is(organisationalUnit.getCourtLocationCode()));
     }
 
     @Test

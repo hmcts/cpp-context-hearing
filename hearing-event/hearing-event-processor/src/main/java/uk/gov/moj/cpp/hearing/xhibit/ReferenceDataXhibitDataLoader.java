@@ -13,7 +13,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
-import uk.gov.moj.cpp.hearing.xhibit.exception.ReferenceDataNotFoundException;
+import uk.gov.moj.cpp.hearing.common.exception.ReferenceDataNotFoundException;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -43,7 +43,7 @@ public class ReferenceDataXhibitDataLoader {
         final XhibitEventMappingsList payload = requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
 
         if (payload == null || isEmpty(payload.getCpXhibitHearingEventMappings())) {
-            throw new ReferenceDataNotFoundException(jsonEnvelope);
+            throw new ReferenceDataNotFoundException(jsonEnvelope, "xhibit event mapping not found");
         }
 
         return payload;

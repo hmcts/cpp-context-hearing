@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -905,7 +906,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void listingHearings_with_sorted_listingSequence() throws NoSuchAlgorithmException {
 
-        UUID courtAndRoomId = UUID.randomUUID();
+        UUID courtAndRoomId = fromString(CoreTestTemplates.COURT_CENTRE_ID);
 
         final LocalDate fifthJuly = LocalDate.of(2019, 7, 5);
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));

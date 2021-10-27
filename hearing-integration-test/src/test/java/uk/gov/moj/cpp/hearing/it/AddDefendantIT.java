@@ -49,7 +49,7 @@ public class AddDefendantIT extends AbstractIT {
         args.setStructure(toMap(newDefendantId, toMap(randomUUID(), asList(randomUUID()))));
         args.setCourtProceedingsInitiated(ZonedDateTime.now(ZoneOffset.UTC));
         Defendant addNewDefendant = defendant(hearingOne.getFirstCase().getId(), args,
-                new Pair<>(newDefendantId, asList(randomUUID())))
+                new Pair<>(newDefendantId, asList(randomUUID())), false)
                 .withAssociatedPersons(asList(associatedPerson(defaultArguments()).build()))
                 .withProsecutionCaseId(hearingOne.getFirstDefendantForFirstCase().getProsecutionCaseId())
                 .build();

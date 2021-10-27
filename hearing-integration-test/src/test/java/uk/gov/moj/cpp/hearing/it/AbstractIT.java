@@ -324,6 +324,8 @@ public class AbstractIT {
 
         ReferenceDataStub.stub(organisationalUnit);
 
+        ReferenceDataStub.stubOrganisationUnit(organisationalUnit.getId());
+
         ReferenceDataStub.stub(enforcementArea, ljaCode);
 
         ReferenceDataStub.stub(prosecutor);

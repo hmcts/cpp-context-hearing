@@ -166,7 +166,7 @@
         </dependency>
         <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
-            <artifactId>hearing-domain-common</artifactId>
+            <artifactId>hearing-common</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

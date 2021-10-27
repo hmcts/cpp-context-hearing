@@ -128,6 +128,7 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definition-rules+json";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit.v2+json";
+    private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_V1_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit+json";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE = "application/vnd.referencedata.query.enforcement-area+json";
     private static final String REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE = "application/vnd.referencedata.query.youth-courts-by-mag-uuid+json";
 
@@ -343,6 +344,11 @@ public class ReferenceDataStub {
                 REFERENCE_DATA_RESULT_ORGANISATION_UNIT_MEDIA_TYPE);
     }
 
+    public static void stubOrganisationUnit(final OrganisationalUnit organisationalUnit) {
+        stub(organisationalUnit, REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL + "/" + organisationalUnit.getId(),
+                REFERENCE_DATA_RESULT_ORGANISATION_UNIT_V1_MEDIA_TYPE);
+    }
+
     public static void stub(final Prosecutor prosecutor) {
         stub(prosecutor, REFERENCE_DATA_RESULT_PROSECUTORS_QUERY_URL + "/" + prosecutor.getId(),
                 REFERENCE_DATA_RESULT_PROSECUTOR_MEDIA_TYPE);
@@ -381,7 +387,7 @@ public class ReferenceDataStub {
             throw new RuntimeException(ex);
         }
 
-        stubFor(get(urlPathEqualTo(queryUrl))
+        stubFor(get(urlPathEqualTo(queryUrl)).withHeader("Accept", equalTo(mediaType))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", mediaType)
@@ -989,6 +995,23 @@ public class ReferenceDataStub {
 
     public static void stubGetReferenceDataXhibitHearingTypes() {
         stubDynamicPromptFixedList();
+    }
+
+    public static void stubOrganisationUnit(final String ouId) {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        final String payloadAsString = getPayload("stub-data/referencedata.query.organisation-unit.json")
+                .replace("OU_ID", ouId);
+        final JsonObject payloadJson = new StringToJsonObjectConverter().convert(payloadAsString);
+
+
+        stubFor(get(urlPathMatching(REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL + "/" + ouId)).withHeader("Accept", equalTo("application/vnd.referencedata.query.organisation-unit+json"))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_RESULT_ORGANISATION_UNIT_V1_MEDIA_TYPE)
+                        .withBody(payloadJson.toString())));
+
+        waitForStubToBeReady(REFERENCE_DATA_RESULT_ORGANISATION_UNIT_QUERY_URL + "/" + ouId, REFERENCE_DATA_RESULT_ORGANISATION_UNIT_V1_MEDIA_TYPE);
     }
 
     public static void stubOrganisationUnit(final String... ouIds) {

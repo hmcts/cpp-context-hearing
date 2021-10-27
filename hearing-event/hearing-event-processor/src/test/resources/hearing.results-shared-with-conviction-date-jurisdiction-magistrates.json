@@ -43,26 +43,15 @@
           }
         ],
         "type": {
-          "categoryCode": "CO",
-          "code": "MC80527",
-          "jurisdiction": "EITHER",
-          "legislation": "In accordance with section 14 of the Magistrates' Courts Act 1980",
-          "type": "Appearance to make statutory declaration",
+          "applicantSynonym": "Defendant",
+          "applicationCategory": "CO",
+          "applicationCode": "MC80527",
+          "applicationJurisdictionType": "EITHER",
+          "applicationLegislation": "In accordance with section 14 of the Magistrates' Courts Act 1980",
+          "applicationType": "Appearance to make statutory declaration",
           "id": "a1d421a1-4f0f-4c9f-8a20-a960e25a0894",
-          "linkType": "LINKED"
-        },
-        "subject": {
-          "id": "3adf7c90-7fc4-4c42-a79c-748c1e64f982",
-          "organisation": {
-            "name": "Testing Organisation Name"
-          },
-          "personDetails": {
-            "firstName": "Bryce",
-            "gender": "MALE",
-            "lastName": "Hammes",
-            "middleName": "Test"
-          },
-          "synonym": "Attendees"
+          "linkType": "STANDALONE",
+          "respondentSynonym": "Prosecutor"
         }
       }
     ],
@@ -84,6 +73,7 @@
     "hasSharedResults": true,
     "hearingDays": [
       {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
         "listedDurationMinutes": 40,
         "listingSequence": 1,
         "sittingDay": "2019-11-08T10:48:21.247Z"
@@ -219,17 +209,33 @@
                 },
                 "offenceCode": "OFF123",
                 "offenceDefinitionId": "ec09757a-bf2a-4f30-9887-94e0eee26206",
-                "offenceFacts": {
-                  "alcoholReadingAmount": 100,
-                  "alcoholReadingMethodCode": "pipe",
-                  "vehicleRegistration": "ABC bbc"
-                },
                 "offenceLegislation": "Contrary to section 1(1)    of the Criminal Attempts Act 1981.",
                 "offenceLegislationWelsh": "Yn groes i Adran 1(1) Deddf Ymgeisiau i Droseddu 1981.",
                 "offenceTitle": "Section 18 - attempt wounding with intent",
                 "offenceTitleWelsh": "Adran 18 - ymgais i glwyfo gan fwriadu",
                 "orderIndex": 634464054,
                 "startDate": "2018-11-20",
+                "verdict": {
+                  "jurors": {
+                    "numberOfJurors": 12,
+                    "numberOfSplitJurors": 0,
+                    "unanimous": true
+                  },
+                  "lesserOrAlternativeOffence": {
+                    "offenceCode": "TP11008",
+                    "offenceDefinitionId": "1c3ab417-d57f-4ac5-9aa1-12736fbad93b",
+                    "offenceLegislation": "Contrary to byelaws 5 and 14 of the Transport for London Road Transport Premises Byelaws made under paragraph 26 of Schedule 11 to the Greater London Authority Act 1999 and confirmed under section 67 of the Transport Act 1962.",
+                    "offenceTitle": "Enter / remain on Transport for London road transport premises while unfit / improper condition / soiled"
+                  },
+                  "offenceId": "9234e3b9-d57e-45e5-9a21-45183bbc2f44",
+                  "originatingHearingId": "31048c0d-e937-49fb-bfc5-02abc56d3f6a",
+                  "verdictDate": "2020-06-09",
+                  "verdictType": {
+                    "category": "Not Guilty",
+                    "categoryType": "NOT_GUILTY",
+                    "id": "c51ce410-c124-310e-8db5-e4b97fc2af39"
+                  }
+                },
                 "wording": "Offence wording",
                 "wordingWelsh": "Offence wording in Welsh"
               }

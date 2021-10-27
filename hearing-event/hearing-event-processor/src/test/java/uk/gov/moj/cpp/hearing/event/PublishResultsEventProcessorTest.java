@@ -36,6 +36,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.domain.OffenceResult;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegate;
@@ -95,6 +96,9 @@ public class PublishResultsEventProcessorTest {
     @Mock
     private ReferenceDataService referenceDataService;
 
+    @Mock
+    private ReferenceDataLoader referenceDataLoader;
+
     @InjectMocks
     private PublishResultsEventProcessor publishResultsEventProcessor;
 
@@ -124,9 +128,10 @@ public class PublishResultsEventProcessorTest {
 
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
+                        .withCourtLocationCode("0433")
                         .withIsWelsh(true)
                         .withOucodeL3WelshName("Welsh Court Centre")
                         .withWelshAddress1("Welsh 1")
@@ -165,7 +170,7 @@ public class PublishResultsEventProcessorTest {
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -207,7 +212,7 @@ public class PublishResultsEventProcessorTest {
 
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -241,7 +246,7 @@ public class PublishResultsEventProcessorTest {
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -292,7 +297,7 @@ public class PublishResultsEventProcessorTest {
 
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"), objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId()))).thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -345,7 +350,7 @@ public class PublishResultsEventProcessorTest {
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -398,7 +403,7 @@ public class PublishResultsEventProcessorTest {
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -461,7 +466,7 @@ public class PublishResultsEventProcessorTest {
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -495,7 +500,7 @@ public class PublishResultsEventProcessorTest {
                 .thenReturn(prosecutorTemplate());
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getCourtApplications().get(0).getThirdParties().get(0).getProsecutingAuthority().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -527,7 +532,7 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -560,7 +565,7 @@ public class PublishResultsEventProcessorTest {
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
 
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)
@@ -611,7 +616,7 @@ public class PublishResultsEventProcessorTest {
                 objectToJsonObjectConverter.convert(resultsShared));
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
-        when(referenceDataService.getOrganisationUnitById(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(OrganisationalUnit.organisationalUnit()
                         .withOucode("123ABCD")
                         .withIsWelsh(true)

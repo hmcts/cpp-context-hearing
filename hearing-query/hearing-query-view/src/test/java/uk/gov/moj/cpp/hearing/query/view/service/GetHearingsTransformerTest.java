@@ -120,7 +120,7 @@ public class GetHearingsTransformerTest {
                         .setHearingLanguage(ENGLISH)
                         .setJurisdictionType(CROWN)
                         .setMinimumAssociatedPerson(true)
-                        .setMinimumDefenceOrganisation(true), randomUUID(), randomUUID(), "CourtRoom 1",
+                        .setMinimumDefenceOrganisation(true), fromString(CoreTestTemplates.COURT_CENTRE_ID), randomUUID(), "CourtRoom 1",
                 localDate.toLocalDate(), randomUUID(), randomUUID(), Optional.of(fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed"))).build();
         final CourtApplication courtApplication = hearing.getCourtApplications().get(0);
         final CourtApplicationParty applicant = courtApplication.getApplicant();

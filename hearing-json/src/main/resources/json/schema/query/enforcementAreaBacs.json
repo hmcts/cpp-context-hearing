@@ -41,6 +41,10 @@
     },
     "remittanceAdviceEmailAddress": {
       "type": "string"
+    },
+    "courtLocationCode": {
+      "type": "string",
+      "maxLength": 10
     }
   },
   "required": [

@@ -103,6 +103,7 @@ public class CoreTestTemplates {
     private static final String REPORTING_RESTRICTION_LABEL_YES = "Yes";
     private static final String REPORTING_RESTRICTION_LABEL_SECOND = "Second";
     public static final String VALUE = "2017-05-20";
+    public static final String COURT_CENTRE_ID = "b52f805c-2821-4904-a0e0-26f7fda6dd08";
 
     public static CoreTemplateArguments defaultArguments() {
         return new CoreTemplateArguments();
@@ -117,15 +118,16 @@ public class CoreTestTemplates {
 
     public static HearingDay.Builder hearingDay(final ZonedDateTime sittingDate) {
         return HearingDay.hearingDay()
+                .withCourtCentreId(fromString(COURT_CENTRE_ID))
                 .withSittingDay(sittingDate)
                 .withListingSequence(INTEGER.next())
                 .withListedDurationMinutes(INTEGER.next());
     }
 
-    public static HearingDay.Builder hearingDay(CourtCentre courtCentre) {
+    public static HearingDay.Builder hearingDay(final ZonedDateTime sittingDay, final CourtCentre courtCentre) {
         return HearingDay.hearingDay()
                 .withHasSharedResults(true)
-                .withSittingDay(RandomGenerator.PAST_UTC_DATE_TIME.next())
+                .withSittingDay(sittingDay)
                 .withListingSequence(INTEGER.next())
                 .withListedDurationMinutes(INTEGER.next())
                 .withCourtCentreId(courtCentre.getId())
@@ -151,10 +153,10 @@ public class CoreTestTemplates {
 
     public static CourtCentre.Builder courtCentre() {
         return CourtCentre.courtCentre()
-                .withId(randomUUID())
+                .withId(fromString(COURT_CENTRE_ID))
                 .withName(STRING.next())
                 .withWelshName(STRING.next())
-                .withRoomId(randomUUID())
+                .withRoomId(fromString("5d5d7b5e-7833-4dc1-b94a-d1a5c635c623"))
                 .withRoomName(STRING.next())
                 .withWelshRoomName(STRING.next());
     }
@@ -181,7 +183,7 @@ public class CoreTestTemplates {
 
     public static CourtCentre.Builder courtCentreWithArgs(final String courtRoomName) {
         return CourtCentre.courtCentre()
-                .withId(randomUUID())
+                .withId(fromString(COURT_CENTRE_ID))
                 .withName(courtRoomName)
                 .withWelshName(STRING.next())
                 .withRoomId(randomUUID())
@@ -270,7 +272,7 @@ public class CoreTestTemplates {
 
     }
 
-    public static Offence.Builder offence(final CoreTemplateArguments args, final UUID offenceId) {
+    public static Offence.Builder offence(final CoreTemplateArguments args, final UUID offenceId, final boolean withConvictionDate) {
 
         if (args.isMinimumOffence()) {
             return Offence.offence()
@@ -285,6 +287,7 @@ public class CoreTestTemplates {
                     .withIsDiscontinued(true)
                     .withProceedingsConcluded(true)
                     .withEndorsableFlag(true)
+                    .withConvictionDate(withConvictionDate ? LocalDate.now().minusDays(2) : null)
                     .withReportingRestrictions(of(ReportingRestriction.reportingRestriction()
                                     .withId(randomUUID())
                                     .withLabel(REPORTING_RESTRICTION_LABEL_YES)
@@ -322,6 +325,7 @@ public class CoreTestTemplates {
                 .withListingNumber(INTEGER.next())
                 .withEndorsableFlag(true)
                 .withOffenceDateCode(args.getOffenceDateCode())
+                .withConvictionDate(withConvictionDate ? LocalDate.now().minusDays(2) : null)
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
                         .withDaysSpent(INTEGER.next())
                         .withTimeLimit(PAST_LOCAL_DATE.next())
@@ -503,7 +507,7 @@ public class CoreTestTemplates {
                 .withIsAssociatedByLAA(true);
     }
 
-    public static Defendant.Builder defendant(final UUID prosecutionCaseId, final CoreTemplateArguments args, final Pair<UUID, List<UUID>> structure) {
+    public static Defendant.Builder defendant(final UUID prosecutionCaseId, final CoreTemplateArguments args, final Pair<UUID, List<UUID>> structure, final boolean withConvictionDate) {
 
         return Defendant.defendant()
                 .withId(structure.getK())
@@ -514,7 +518,7 @@ public class CoreTestTemplates {
                 .withIsYouth(Boolean.TRUE)
                 .withOffences(
                         structure.getV().stream()
-                                .map(offenceId -> offence(args, offenceId).build())
+                                .map(offenceId -> offence(args, offenceId, withConvictionDate).build())
                                 .collect(toList())
                 )
                 .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : null)
@@ -556,7 +560,7 @@ public class CoreTestTemplates {
                         .build()))
                 .withOffences(
                         structure.getV().stream()
-                                .map(offenceId -> offence(args, offenceId).build())
+                                .map(offenceId -> offence(args, offenceId, false).build())
                                 .collect(toList())
                 )
                 .withAssociatedPersons(args.isMinimumAssociatedPerson() ? asList(associatedPerson(args).build()) : nonAssociatePerson)
@@ -577,7 +581,7 @@ public class CoreTestTemplates {
                 .withMarkerTypeid(UUID.randomUUID());
     }
 
-    public static ProsecutionCase.Builder prosecutionCase(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure, final boolean withJudicialResults) {
+    public static ProsecutionCase.Builder prosecutionCase(final CoreTemplateArguments args, final Pair<UUID, Map<UUID, List<UUID>>> structure, final boolean withJudicialResults, final boolean withConvictionDate) {
 
         return ProsecutionCase.prosecutionCase()
                 .withId(structure.getK())
@@ -592,7 +596,7 @@ public class CoreTestTemplates {
                 .withDefendants(
                         structure.getV().entrySet().stream()
                                 .map(entry -> withJudicialResults ? defendantJudicialResults(structure.getK(), args, p(entry.getKey(), entry.getValue())).build() :
-                                        defendant(structure.getK(), args, p(entry.getKey(), entry.getValue())).build()
+                                        defendant(structure.getK(), args, p(entry.getKey(), entry.getValue()), withConvictionDate).build()
                                 )
                                 .collect(toList())
                 );
@@ -616,12 +620,12 @@ public class CoreTestTemplates {
 
     public static HearingType.Builder hearingType(final Optional<UUID> hearingTypeId) {
         return HearingType.hearingType()
-                .withId(hearingTypeId.orElseGet(UUID::randomUUID))
+                .withId(hearingTypeId.orElse(fromString("9cc41e45-b594-4ba6-906e-1a4626b08fed")))
                 .withDescription(STRING.next())
                 .withWelshDescription(STRING.next());
     }
 
-    public static Hearing.Builder hearing(final CoreTemplateArguments args, final boolean withJudicialResults) {
+    public static Hearing.Builder hearing(final CoreTemplateArguments args, final boolean withJudicialResults, final boolean withConvictionDate) {
         final Hearing.Builder hearingBuilder = Hearing.hearing();
         CourtCentre courtCentre;
 
@@ -633,16 +637,18 @@ public class CoreTestTemplates {
             courtCentre = courtCentre().build();
         }
 
+        final ZonedDateTime sittingDay = withConvictionDate ? ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) : RandomGenerator.PAST_UTC_DATE_TIME.next();
+
         hearingBuilder.withId(randomUUID())
                 .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(hearingDay(courtCentre).build()))
+                .withHearingDays(asList(hearingDay(sittingDay, courtCentre).build()))
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), withJudicialResults).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), withJudicialResults, withConvictionDate).build())
                                 .collect(toList())
                 )
 
@@ -669,13 +675,13 @@ public class CoreTestTemplates {
                 .withType(hearingType(Optional.empty()).build())
                 .withJurisdictionType(args.jurisdictionType)
                 .withReportingRestrictionReason(STRING.next())
-                .withHearingDays(asList(hearingDay(courtCentre).build()))
+                .withHearingDays(asList(hearingDay(ZonedDateTime.now(ZoneOffset.UTC).plusDays(1), courtCentre).build()))
                 .withDefendantJudicialResults(asList(DefendantJudicialResult.defendantJudicialResult().withMasterDefendantId(randomUUID()).build()))
                 .withJudiciary(singletonList(judiciaryRole(args).build()))
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), true).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), true, false).build())
                                 .collect(toList())
                 )
 
@@ -687,7 +693,7 @@ public class CoreTestTemplates {
 
 
     public static Hearing.Builder hearing(final CoreTemplateArguments args) {
-        return hearing(args, false);
+        return hearing(args, false, false);
     }
 
     public static Hearing.Builder hearingWithParam(CoreTemplateArguments args, UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
@@ -709,7 +715,7 @@ public class CoreTestTemplates {
                 .withDefendantReferralReasons(singletonList(referralReason().build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false, false).build())
                                 .collect(toList())
                 )
 
@@ -782,7 +788,7 @@ public class CoreTestTemplates {
                                         .build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false, false).build())
                                 .collect(toList())
                 )
 
@@ -863,7 +869,7 @@ public class CoreTestTemplates {
                                         .build()))
                 .withProsecutionCases(
                         args.structure.entrySet().stream()
-                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false).build())
+                                .map(entry -> prosecutionCase(args, p(entry.getKey(), entry.getValue()), false, false).build())
                                 .collect(toList())
                 )
                 .withCourtApplications(asList((new HearingFactory().courtApplication()
