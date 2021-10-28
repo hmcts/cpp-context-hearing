@@ -319,6 +319,7 @@ public class CoreTestTemplates {
                 .withIsDiscontinued(true)
                 .withIntroducedAfterInitialProceedings(true)
                 .withLaidDate(PAST_LOCAL_DATE.next())
+                .withListingNumber(INTEGER.next())
                 .withEndorsableFlag(true)
                 .withOffenceDateCode(args.getOffenceDateCode())
                 .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()

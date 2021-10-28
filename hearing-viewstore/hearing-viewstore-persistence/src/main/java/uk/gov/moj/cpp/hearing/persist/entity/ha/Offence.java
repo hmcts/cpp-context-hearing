@@ -150,6 +150,9 @@ public class Offence {
     @Column(name = "date_held_in_custody_since")
     private LocalDate dateHeldInCustodySince;
 
+    @Column(name = "listing_number")
+    private Integer listingNumber;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "offence", orphanRemoval = true)
     private Set<ReportingRestriction> reportingRestrictions = new HashSet<>();
 
@@ -503,5 +506,13 @@ public class Offence {
 
     public void setCtlExtended(Boolean ctlExtended) {
         isCtlExtended = ctlExtended;
+    }
+
+    public Integer getListingNumber() {
+        return listingNumber;
+    }
+
+    public void setListingNumber(final Integer listingNumber) {
+        this.listingNumber = listingNumber;
     }
 }

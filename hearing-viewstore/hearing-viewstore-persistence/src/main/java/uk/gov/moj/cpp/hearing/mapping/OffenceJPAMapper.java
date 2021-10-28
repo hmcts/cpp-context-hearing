@@ -140,6 +140,7 @@ public class OffenceJPAMapper {
         }
         offence.setPreviousDaysHeldInCustody(pojo.getPreviousDaysHeldInCustody());
         offence.setDateHeldInCustodySince(pojo.getDateHeldInCustodySince());
+        offence.setListingNumber(pojo.getListingNumber());
         return offence;
     }
 
@@ -187,6 +188,7 @@ public class OffenceJPAMapper {
                 .withBailStatus(extractBailStatus(entity))
                 .withDateHeldInCustodySince(entity.getDateHeldInCustodySince())
                 .withPreviousDaysHeldInCustody(entity.getPreviousDaysHeldInCustody())
+                .withListingNumber(entity.getListingNumber())
                 .build();
     }
 

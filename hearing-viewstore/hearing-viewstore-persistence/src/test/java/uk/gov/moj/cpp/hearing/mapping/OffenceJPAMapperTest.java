@@ -106,6 +106,7 @@ public class OffenceJPAMapperTest {
                         whenCustodyTimeLimit(isBean(CustodyTimeLimit.class), entity))
                 .with(Offence::getReportingRestrictions,
                         whenFirstReportingRestriction(isBean(ReportingRestriction.class), (entity.getReportingRestrictions().iterator().next())))
+                .with(Offence::getListingNumber, is(entity.getListingNumber()))
                 ;
     }
 
@@ -160,6 +161,7 @@ public class OffenceJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isIntroduceAfterInitialProceedings, is(pojo.getIntroducedAfterInitialProceedings()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::isProceedingsConcluded, is(pojo.getProceedingsConcluded()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getLaidDate, is(pojo.getLaidDate()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Offence::getListingNumber, is(pojo.getListingNumber()))
                 ;
     }
 }

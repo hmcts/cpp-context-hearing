@@ -119,6 +119,7 @@ public final class HearingJPADataTemplate {
                     offence.getOffenceFacts().setAlcoholReadingAmount(Integer.valueOf(123).toString());
 
                     offence.setLaidDate(LocalDate.of(2019, 1, 1));
+                    offence.setListingNumber(1);
 
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().iterator().next().getOffences().add(offence);
                 });
