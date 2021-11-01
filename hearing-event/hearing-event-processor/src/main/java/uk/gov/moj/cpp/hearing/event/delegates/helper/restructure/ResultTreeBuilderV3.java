@@ -137,7 +137,7 @@ public class ResultTreeBuilderV3 {
 
         setRootJudicialResult(resultLine, resultLines, builder);
 
-        setJudicialResultPrompts(context, resultLine, resultLines, hearing, resultDefinition, builder);
+        setJudicialResultPrompts(context, resultLine, resultLines, resultDefinition, builder);
 
         return builder.build();
     }
@@ -203,12 +203,12 @@ public class ResultTreeBuilderV3 {
         }
     }
 
-    private void setJudicialResultPrompts(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final Hearing hearing, final ResultDefinition resultDefinition, final Builder builder) {
+    private void setJudicialResultPrompts(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultDefinition resultDefinition, final Builder builder) {
         final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts());
 
         if (nonNull(judicialResultPrompts) && !judicialResultPrompts.isEmpty()) {
             final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, resultLine, judicialResultPrompts);
-            final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, hearing, resultDefinition);
+            final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, resultDefinition);
             final Optional<String> qualifier = new ResultQualifier().populate(resultDefinition.getQualifier(), judicialResultPrompts, this.referenceDataService, context, resultLine.getOrderedDate());
 
             qualifier.ifPresent(builder::withQualifier);

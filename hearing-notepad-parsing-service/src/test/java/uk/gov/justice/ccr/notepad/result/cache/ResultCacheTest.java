@@ -67,6 +67,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ResultCacheTest {
 
+    public static final String MIN_LENGTH = "1";
+    public static final String MAX_LENGTH = "4000";
+    public static final String REFERENCE_DATA_KEY = STRING.next();
     private static final UUID ID = randomUUID();
     private static final UUID PROMPT_ID = randomUUID();
     private static final UUID PROMPT_ID_2 = randomUUID();
@@ -79,10 +82,6 @@ public class ResultCacheTest {
     private static final Set<String> KEYWORDS = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final Set<String> FIXED_LIST = newTreeSet(newArrayList(STRING.next(), STRING.next()));
     private static final String NAME = STRING.next();
-    public static final String MIN_LENGTH = "1";
-    public static final String MAX_LENGTH = "4000";
-    public static final String REFERENCE_DATA_KEY = STRING.next();
-    private static  Set<ResultPromptDynamicListNameAddress> NAME_ADDRESS_LIST = new HashSet<>();
     private static final int SEQUENCE = INTEGER.next();
     private static final String REFERENCE = STRING.next();
     private static final int DURATION_SEQUENCE = INTEGER.next();
@@ -94,9 +93,13 @@ public class ResultCacheTest {
     private static final String PARTNAME1 = STRING.next();
     private static final String PARTNAME2 = STRING.next();
     private static final Boolean NAMEEMAIL = true;
+    private static Set<ResultPromptDynamicListNameAddress> NAME_ADDRESS_LIST = new HashSet<>();
     private final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUIDAndName(), createObjectBuilder().build());
     private final LocalDate hearingDate = LocalDate.parse("2018-06-01");
-
+    @Spy
+    private final ConcurrentHashMap<String, Object> cacheMap = new ConcurrentHashMap<>();
+    @Spy
+    private final ConcurrentHashMap<String, ReentrantLock> lockByDate = new ConcurrentHashMap<>();
     @Mock
     private ReadStoreResultLoader resultLoader;
     @Mock
@@ -107,12 +110,6 @@ public class ResultCacheTest {
     private List<ResultDefinition> resultDefinitionList;
     @InjectMocks
     private ResultCache target;
-
-    @Spy
-    private final ConcurrentHashMap<String, Object> cacheMap = new ConcurrentHashMap<>();
-
-    @Spy
-    private final ConcurrentHashMap<String, ReentrantLock> lockByDate = new ConcurrentHashMap<>();
 
     @Before
     public void setUp() {
@@ -351,7 +348,9 @@ public class ResultCacheTest {
                 welshDurationElement1,
                 min,
                 max,
-                referenceDataKey
+                referenceDataKey,
+                false,
+                false
         ));
 
         resultPrompts.add(new ResultPrompt(
@@ -377,7 +376,9 @@ public class ResultCacheTest {
                 welshDurationElement2,
                 min,
                 max,
-                referenceDataKey
+                referenceDataKey,
+                false,
+                false
         ));
 
         when(resultLoader.loadResultPrompt(hearingDate)).thenReturn(resultPrompts);
@@ -482,9 +483,9 @@ public class ResultCacheTest {
         final ConcurrentHashMap<String, Object> cacheValue = new ConcurrentHashMap<>();
 
         final ArrayList<ResultPrompt> resultPrompts = new ArrayList<>();
-        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null,null, null, null, null, null, null, false, null, null,null, null, null, null, null, null, null));
+        resultPrompts.add(new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null, null, null, null, null, null, null, false, null, null, null, null, null, null, null, null, null, false, false));
         final UUID resultDefinitionIdToFind = randomUUID();
-        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, null, false, null, null, null, null,  null, null, null, null, null);
+        final ResultPrompt expectedResultPrompt = new ResultPrompt(randomUUID().toString(), resultDefinitionIdToFind, null, null, null, STRING.next(), null, null, null, null, null, null, null, false, null, null, null, null, null, null, null, null, null, false, false);
         resultPrompts.add(expectedResultPrompt);
 
         cacheValue.put("resultPromptKey-2017-05-08", resultPrompts);
@@ -507,7 +508,7 @@ public class ResultCacheTest {
 
         final HashSet<String> promptKeyWords = new HashSet<>();
         promptKeyWords.add(PROMPT_WORD);
-        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(),null,  promptKeyWords, null,null, null, null, null, false, null, null, null, null, null, null, null, null, null);
+        final ResultPrompt resultPrompt = new ResultPrompt(randomUUID().toString(), randomUUID(), null, null, null, STRING.next(), null, promptKeyWords, null, null, null, null, null, false, null, null, null, null, null, null, null, null, null, false, false);
         final List<ResultPrompt> prompts = newArrayList(resultPrompt);
 
         final ResultPromptSynonym givenResultPromptSynonym = new ResultPromptSynonym();
@@ -553,8 +554,8 @@ public class ResultCacheTest {
                 .build());
         return newArrayList(
                 new ResultPrompt(PROMPT_ID.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE,
-                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, NAME_ADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME1, NAMEEMAIL, WELSH_DURATION, MIN_LENGTH, MAX_LENGTH, REFERENCE_DATA_KEY),
-                new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE, RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, NAME_ADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL,LIST_LABEL,ADDRESS_TYPE,PARTNAME2, NAMEEMAIL, WELSH_DURATION, MIN_LENGTH, MAX_LENGTH, REFERENCE_DATA_KEY)
+                        RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, NAME_ADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL, LIST_LABEL, ADDRESS_TYPE, PARTNAME1, NAMEEMAIL, WELSH_DURATION, MIN_LENGTH, MAX_LENGTH, REFERENCE_DATA_KEY, false, false),
+                new ResultPrompt(PROMPT_ID_2.toString(), ID, RESULT_DEFINITION_LABEL, LABEL, TYPE, RESULT_PROMPT_RULE, DURATION, KEYWORDS, FIXED_LIST, NAME_ADDRESS_LIST, SEQUENCE, REFERENCE, DURATION_SEQUENCE, HIDDEN, COMPONENT_LABEL, LIST_LABEL, ADDRESS_TYPE, PARTNAME2, NAMEEMAIL, WELSH_DURATION, MIN_LENGTH, MAX_LENGTH, REFERENCE_DATA_KEY, false, false)
         );
     }
 

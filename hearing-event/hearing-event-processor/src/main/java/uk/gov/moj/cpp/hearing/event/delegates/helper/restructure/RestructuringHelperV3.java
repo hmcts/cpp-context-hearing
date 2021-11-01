@@ -56,7 +56,7 @@ public class RestructuringHelperV3 {
                         )
                 )
         );
-        setDurationElements(treeNodes, resultsShared.getHearing());
+        setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine2>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
                 .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))

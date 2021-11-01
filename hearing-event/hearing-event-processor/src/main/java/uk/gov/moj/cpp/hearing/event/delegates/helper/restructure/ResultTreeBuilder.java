@@ -101,7 +101,6 @@ public class ResultTreeBuilder {
                     .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .forEach(resultLine -> {
                         final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
-
                         if (isNull(resultDefinitionNode)) {
                             throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
                                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
@@ -138,7 +137,7 @@ public class ResultTreeBuilder {
         return result;
     }
 
-    @SuppressWarnings({"squid:S3776","squid:MethodCyclomaticComplexity"})
+    @SuppressWarnings({"squid:S3776", "squid:MethodCyclomaticComplexity"})
     private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final ResultsShared resultsShared) {
         final Hearing hearing = resultsShared.getHearing();
         final DelegatedPowers courtClerk = resultsShared.getCourtClerk();
@@ -159,7 +158,7 @@ public class ResultTreeBuilder {
 
         setRootJudicialResult(resultLine, resultLines, builder);
 
-        setJudicialResultPrompts(context, resultLine, resultLines, hearing, resultDefinition, builder);
+        setJudicialResultPrompts(context, resultLine, resultLines, resultDefinition, builder);
 
         return builder.build();
     }
@@ -187,7 +186,7 @@ public class ResultTreeBuilder {
 
         setRootJudicialResult(resultLine, resultLines, builder);
 
-        setJudicialResultPrompts(context, resultLine, resultLines, hearing, resultDefinition, builder);
+        setJudicialResultPrompts(context, resultLine, resultLines, resultDefinition, builder);
 
         return builder.build();
     }
@@ -251,12 +250,12 @@ public class ResultTreeBuilder {
         }
     }
 
-    private void setJudicialResultPrompts(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final Hearing hearing, final ResultDefinition resultDefinition, final Builder builder) {
+    private void setJudicialResultPrompts(final JsonEnvelope context, final ResultLine resultLine, final List<ResultLine> resultLines, final ResultDefinition resultDefinition, final Builder builder) {
         final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts());
 
         if (nonNull(judicialResultPrompts) && !judicialResultPrompts.isEmpty()) {
             final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, judicialResultPrompts);
-            final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, hearing, resultDefinition);
+            final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, resultDefinition);
             final Optional<String> qualifier = new ResultQualifier().populate(resultDefinition.getQualifier(), judicialResultPrompts, this.referenceDataService, context, resultLine.getOrderedDate());
 
             qualifier.ifPresent(builder::withQualifier);
@@ -283,10 +282,10 @@ public class ResultTreeBuilder {
         if (!isEmpty(resultDefinition.getSecondaryCJSCodes())) {
             builder.withSecondaryCJSCodes(getSecondaryCjsCodeList(resultDefinition.getSecondaryCJSCodes()));
         }
-        if(!isNull(resultDefinition.getDrivingTestStipulation())){
+        if (!isNull(resultDefinition.getDrivingTestStipulation())) {
             builder.withDrivingTestStipulation(resultDefinition.getDrivingTestStipulation());
         }
-        if(!isNull(resultDefinition.getPointsDisqualificationCode())){
+        if (!isNull(resultDefinition.getPointsDisqualificationCode())) {
             builder.withPointsDisqualificationCode(resultDefinition.getPointsDisqualificationCode());
         }
     }
@@ -351,9 +350,9 @@ public class ResultTreeBuilder {
                 .collect(toList());
     }
 
-    private List<uk.gov.justice.core.courts.SecondaryCJSCode> getSecondaryCjsCodeList(final List<SecondaryCJSCode> secondaryCJSCodes){
+    private List<uk.gov.justice.core.courts.SecondaryCJSCode> getSecondaryCjsCodeList(final List<SecondaryCJSCode> secondaryCJSCodes) {
         final List<uk.gov.justice.core.courts.SecondaryCJSCode> secondaryCJSCodeList = new ArrayList<>();
-        for (final SecondaryCJSCode secondaryCJSCode: secondaryCJSCodes) {
+        for (final SecondaryCJSCode secondaryCJSCode : secondaryCJSCodes) {
             secondaryCJSCodeList.add(secondaryCJSCode()
                     .withCjsCode(secondaryCJSCode.getCjsCode())
                     .withText(secondaryCJSCode.getText())

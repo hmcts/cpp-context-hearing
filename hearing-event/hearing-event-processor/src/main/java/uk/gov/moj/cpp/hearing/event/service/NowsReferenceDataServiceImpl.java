@@ -118,7 +118,7 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
     }
 
     @Override
-    public Set<String> retrieveGuiltyPleaTypes(){
+    public Set<String> retrieveGuiltyPleaTypes() {
         return pleaTypeReferenceDataLoader.retrieveGuiltyPleaTypes();
     }
 }

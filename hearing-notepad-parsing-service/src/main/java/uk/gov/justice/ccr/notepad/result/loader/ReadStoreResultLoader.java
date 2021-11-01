@@ -48,11 +48,15 @@ import javax.json.JsonObject;
 import javax.json.JsonString;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @SuppressWarnings("squid:S1188")
 @Named("readStoreResultLoader")
 public class ReadStoreResultLoader implements ResultLoader {
 
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReadStoreResultLoader.class);
 
     //Label
     private static final String FIELD_WORD_GROUP = "wordGroup";
@@ -195,7 +199,10 @@ public class ReadStoreResultLoader implements ResultLoader {
         final List<ResultPrompt> resultPrompts = newArrayList();
         final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList(orderedDate);
         final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = loadResultPromptDynamicListNameAddressList();
+
+        LOGGER.info("spiout:: refdata calling...");
         final JsonObject resultDefinitionsJson = resultsQueryService.getAllDefinitions(jsonEnvelope, orderedDate).payload();
+        LOGGER.info("spiout:: refdata called...");
 
         final Map<UUID, List<JsonObject>> resultPromptsByIdMap = resultDefinitionsJson.getJsonArray("resultDefinitions").getValuesAs(JsonObject.class)
                 .stream()
@@ -206,7 +213,7 @@ public class ReadStoreResultLoader implements ResultLoader {
         resultPromptsByIdMap.forEach((id, prompts) ->
                 prompts.forEach(promptJson -> {
                     final ResultPrompt resultPrompt = new ResultPrompt();
-
+                    LOGGER.info("spiout:: promptJson {}", promptJson);
                     resultPrompt.setId(promptJson.getString("id"));
                     resultPrompt.setResultDefinitionId(id);
                     resultPrompt.setLabel(promptJson.getString("label").trim());
@@ -221,6 +228,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                     resultPrompt.setPromptOrder(promptJson.getInt("sequence"));
                     setResultPromptRule(resultPrompt, promptJson);
                     resultPrompt.setDurationElement(durationElement);
+
                     resultPrompt.setWelshDurationElement(promptJson.getString("welshDuration", null));
                     resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
 
@@ -236,6 +244,9 @@ public class ReadStoreResultLoader implements ResultLoader {
                     resultPrompt.setHidden(getBooleanOrNull(promptJson, "hidden"));
                     resultPrompt.setMinLength(promptJson.getString("min", null));
                     resultPrompt.setMaxLength(promptJson.getString("max", null));
+
+                    resultPrompt.setDurationStartDate(promptJson.getBoolean("isDurationStartDate",false));
+                    resultPrompt.setDurationEndDate(promptJson.getBoolean("isDurationEndDate",false));
                     resultPrompts.add(resultPrompt);
 
                 }));

@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
-import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResultPromptDurationElement;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.JudicialResultPromptDurationHelper;
@@ -15,16 +14,14 @@ public class DurationElementHelperV3 {
     private DurationElementHelperV3() {
     }
 
-    public static void setDurationElements(final List<TreeNode<ResultLine2>> results, final Hearing hearing) {
+    public static void setDurationElements(final List<TreeNode<ResultLine2>> results) {
         results.stream()
                 .filter(LeafNodeHelperV3::isValidTreeNode)
-                .forEach(n -> setDurationElement(n, hearing));
+                .forEach(DurationElementHelperV3::setDurationElement);
     }
 
-    private static void setDurationElement(final TreeNode<ResultLine2> treeNode, final Hearing hearing) {
-        final Optional<JudicialResultPromptDurationElement> resultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(treeNode.getJudicialResult().getJudicialResultPrompts(), hearing, treeNode.getResultDefinition().getData());
-        if (resultPromptDurationElement.isPresent()) {
-            treeNode.getJudicialResult().setDurationElement(resultPromptDurationElement.get());
-        }
+    private static void setDurationElement(final TreeNode<ResultLine2> treeNode) {
+        final Optional<JudicialResultPromptDurationElement> resultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(treeNode.getJudicialResult().getJudicialResultPrompts(), treeNode.getResultDefinition().getData());
+        resultPromptDurationElement.ifPresent(judicialResultPromptDurationElement -> treeNode.getJudicialResult().setDurationElement(judicialResultPromptDurationElement));
     }
 }

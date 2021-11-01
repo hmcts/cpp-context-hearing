@@ -148,8 +148,8 @@ public class ReadStoreResultLoaderTest {
     public void loadResultPrompts() throws Exception {
         //given
         final LocalDate hearingDate = LocalDate.now();
-        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
-        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress> nameAddressSet = new HashSet<>();
         nameAddressSet.add(getNameAddress()
         );
 
@@ -196,12 +196,11 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
 
 
-
         //when
         final List<ResultPrompt> resultPrompts = underTest.loadResultPrompt(hearingDate);
 
         //then
-        final ResultPrompt resultPromptWithNameAddressList = resultPrompts.stream().filter(resultPrompt -> resultPrompt.getId() .toString().equals( "3054909b-15b6-499f-b44f-67b2b1215c72")).findFirst().get();
+        final ResultPrompt resultPromptWithNameAddressList = resultPrompts.stream().filter(resultPrompt -> resultPrompt.getId().toString().equals("3054909b-15b6-499f-b44f-67b2b1215c72")).findFirst().get();
         assertThat(resultPrompts, hasSize(35));
         assertThat(resultPrompts.get(0).getPromptOrder(), is(100));
         assertThat(resultPrompts.get(0).getReference(), is("electronicmonitoringcontractorOrganisationName"));
@@ -210,7 +209,7 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultPrompts.get(12).getReference(), is(nullValue()));
         assertThat(resultPrompts.get(12).getDurationSequence(), is(1));
         assertThat(resultPrompts.get(19).getFixedList().size(), is(9));
-        assertThat(resultPrompts.get(19).getFixedList(),hasItems("Aberdeen Sheriff Court District", "Bedfordshire YOT", "Blackfriars Crown Court", "Central Criminal Court", "Leicester and Rutland Magistrates' Court",
+        assertThat(resultPrompts.get(19).getFixedList(), hasItems("Aberdeen Sheriff Court District", "Bedfordshire YOT", "Blackfriars Crown Court", "Central Criminal Court", "Leicester and Rutland Magistrates' Court",
                 "North and East Hertfordshire Magistrates' Court", "North and West Cumbria Magistrates' Court", "Sussex (Eastern) Magistrates' Court", "West Cross Court District"));
         assertThat(resultPrompts.get(22).getReference(), is("HCHOUSE"));
         assertThat(resultPrompts.get(22).getType(), is(ResultType.FIXL));
@@ -297,15 +296,14 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
 
-        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
-        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress> nameAddressSet = new HashSet<>();
         nameAddressSet.add(getNameAddress()
         );
 
         setnameAddressAndResultPromptDynamicList(resultPromptDynamicListNameAddress, nameAddressSet);
 
         given(nameAddressRefDataEndPointMapper.loadAllNameAddressFromRefData()).willReturn(resultPromptDynamicListNameAddress);
-
 
 
         given(responseEnvelope.payload())
@@ -343,7 +341,7 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultPromptsWithFixedlist, hasSize(4));
 
         assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasSize(9));
-        assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasItems("Aberdeen Sheriff Court District","Bedfordshire YOT", "Blackfriars Crown Court", "Central Criminal Court", "Leicester and Rutland Magistrates' Court",
+        assertThat(resultPromptsWithFixedlist.get(0).getFixedList(), hasItems("Aberdeen Sheriff Court District", "Bedfordshire YOT", "Blackfriars Crown Court", "Central Criminal Court", "Leicester and Rutland Magistrates' Court",
                 "North and East Hertfordshire Magistrates' Court", "North and West Cumbria Magistrates' Court", "Sussex (Eastern) Magistrates' Court", "West Cross Court District"));
 
         assertThat(resultPromptsWithFixedlist.get(1).getFixedList(), hasSize(5));
@@ -393,8 +391,8 @@ public class ReadStoreResultLoaderTest {
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
 
-        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
-        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress> nameAddressSet = new HashSet<>();
         nameAddressSet.add(getNameAddress()
         );
 
@@ -468,8 +466,8 @@ public class ReadStoreResultLoaderTest {
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
 
-        final Map<String, Set<ResultPromptDynamicListNameAddress>>  resultPromptDynamicListNameAddress = new HashMap<>();
-        final Set<ResultPromptDynamicListNameAddress>  nameAddressSet = new HashSet<>();
+        final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = new HashMap<>();
+        final Set<ResultPromptDynamicListNameAddress> nameAddressSet = new HashSet<>();
         nameAddressSet.add(getNameAddress()
         );
 

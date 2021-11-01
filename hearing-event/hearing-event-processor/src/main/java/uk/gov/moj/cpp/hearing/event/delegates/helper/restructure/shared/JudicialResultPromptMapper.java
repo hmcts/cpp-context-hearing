@@ -38,6 +38,8 @@ public class JudicialResultPromptMapper {
                 .withWelshLabel(promptDefinition.getWelshLabel())
                 .withWelshValue(welshValue)
                 .withDurationSequence(promptDefinition.getDurationSequence())
+                .withIsDurationStartDate(promptDefinition.getIsDurationStartDate())
+                .withIsDurationEndDate(promptDefinition.getIsDurationEndDate())
                 .build();
     }
 

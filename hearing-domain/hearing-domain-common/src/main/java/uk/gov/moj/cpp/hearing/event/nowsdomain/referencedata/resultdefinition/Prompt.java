@@ -52,6 +52,10 @@ public class Prompt {
 
     private String partName;
 
+    private Boolean isDurationStartDate;
+
+    private Boolean isDurationEndDate;
+
     public static Prompt prompt() {
         return new Prompt();
     }
@@ -234,6 +238,24 @@ public class Prompt {
 
     public Prompt setPartName(final String partName) {
         this.partName = partName;
+        return this;
+    }
+
+    public Boolean getIsDurationStartDate() {
+        return isDurationStartDate;
+    }
+
+    public Prompt setIsDurationStartDate(final Boolean isDurationStartDate) {
+        this.isDurationStartDate = isDurationStartDate;
+        return this;
+    }
+
+    public Boolean getIsDurationEndDate() {
+        return isDurationEndDate;
+    }
+
+    public Prompt setIsDurationEndDate(final Boolean isDurationEndDate) {
+        this.isDurationEndDate = isDurationEndDate;
         return this;
     }
 }

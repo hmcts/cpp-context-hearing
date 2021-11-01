@@ -36,6 +36,8 @@ public class ResultPrompt {
     private String minLength;
     private String maxLength;
     private String referenceDataKey;
+    private Boolean isDurationEndDate;
+    private Boolean isDurationStartDate;
 
     public ResultPrompt() {
 
@@ -47,7 +49,7 @@ public class ResultPrompt {
                         final Set<String> fixedList, Set<ResultPromptDynamicListNameAddress> nameAddressList, final Integer promptOrder,
                         final String reference, final Integer durationSequence, final Boolean hidden,
                         final String componentLabel, final String listLabel, final String addressType, final String partName, final Boolean nameEmail, final String welshDurationElement,
-                        final String minLength, final String maxLength, final String referenceDataKey) {
+                        final String minLength, final String maxLength, final String referenceDataKey, final Boolean isDurationEndDate, final Boolean isDurationStartDate) {
         this.id = id;
         this.resultDefinitionId = resultDefinitionId;
         this.resultDefinitionLabel = resultDefinitionLabel;
@@ -71,6 +73,8 @@ public class ResultPrompt {
         this.minLength = minLength;
         this.maxLength = maxLength;
         this.referenceDataKey = referenceDataKey;
+        this.isDurationStartDate=isDurationStartDate;
+        this.isDurationEndDate=isDurationEndDate;
     }
 
     public String getId() {
@@ -266,9 +270,27 @@ public class ResultPrompt {
         this.referenceDataKey = referenceDataKey;
     }
 
+    public Boolean getDurationEndDate() {
+        return isDurationEndDate;
+    }
+
+    public ResultPrompt setDurationEndDate(final Boolean durationEndDate) {
+        isDurationEndDate = durationEndDate;
+        return this;
+    }
+
+    public Boolean getDurationStartDate() {
+        return isDurationStartDate;
+    }
+
+    public ResultPrompt setDurationStartDate(final Boolean durationStartDate) {
+        isDurationStartDate = durationStartDate;
+        return this;
+    }
+
     @Override
     public String toString() {
-        if(nameAddressList != null) {
+        if (nameAddressList != null) {
             return "ResultPrompt{" +
                     "id='" + id + '\'' +
                     ", resultDefinitionLabel='" + resultDefinitionLabel + '\'' +
@@ -292,6 +314,8 @@ public class ResultPrompt {
                     ", minLength='" + minLength + '\'' +
                     ", maxLength='" + maxLength + '\'' +
                     ", referenceDataKey='" + referenceDataKey + '\'' +
+                    ", isDurationEndDate='" + isDurationEndDate + '\'' +
+                    ", isDurationStartDate='" + isDurationStartDate + '\'' +
                     '}';
         } else {
             return "ResultPrompt{" +
@@ -316,6 +340,8 @@ public class ResultPrompt {
                     ", minLength='" + minLength + '\'' +
                     ", maxLength='" + maxLength + '\'' +
                     ", referenceDataKey='" + referenceDataKey + '\'' +
+                    ", isDurationEndDate='" + isDurationEndDate + '\'' +
+                    ", isDurationStartDate='" + isDurationStartDate + '\'' +
                     '}';
         }
     }

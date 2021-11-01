@@ -56,7 +56,7 @@ public class RestructuringHelper {
                         )
                 )
         );
-        setDurationElements(treeNodes, resultsShared.getHearing());
+        setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
                 .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))
@@ -85,7 +85,7 @@ public class RestructuringHelper {
                         )
                 )
         );
-        setDurationElements(treeNodes, resultsShared.getHearing());
+        setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
                 .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))
@@ -97,6 +97,7 @@ public class RestructuringHelper {
 
     /**
      * If the results is publish for NOWs then no nextHearing object should be set
+     *
      * @param treeNodes
      */
     private void removeNextHearingObject(List<TreeNode<ResultLine>> treeNodes) {
