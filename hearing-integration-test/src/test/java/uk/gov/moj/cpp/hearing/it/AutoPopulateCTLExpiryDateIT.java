@@ -294,7 +294,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.isCtlExtended"), is("false"));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(54).toString()));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(56).toString()));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(ctlExpiryDate));
 
         }
@@ -444,7 +444,7 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.isCtlExtended"), is("false"));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(180).toString()));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(orderDate.plusDays(182).toString()));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].custodyTimeLimit.timeLimit"), is(ctlExpiryDate));
 
         }
