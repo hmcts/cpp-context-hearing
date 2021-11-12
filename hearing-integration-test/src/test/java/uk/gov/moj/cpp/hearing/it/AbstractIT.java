@@ -260,7 +260,13 @@ public class AbstractIT {
     }
 
     protected void stubLjaDetails(final CourtCentre courtCentre, final UUID prosecutionAuthorityId) {
-        final String ljaCode = String.format("%04d", Integer.valueOf(Double.valueOf(Math.random() * 10000).intValue()));
+        stubLjaDetails(courtCentre, prosecutionAuthorityId, null);
+    }
+
+    protected void stubLjaDetails(final CourtCentre courtCentre, final UUID prosecutionAuthorityId, String ljaCode) {
+        if (ljaCode == null) {
+            ljaCode = String.format("%04d", Integer.valueOf(Double.valueOf(Math.random() * 10000).intValue()));
+        }
 
         final EnforcementAreaBacs enforcementAreaBacs = EnforcementAreaBacs.enforcementAreaBacs()
                 .withBankAccntName("account name")

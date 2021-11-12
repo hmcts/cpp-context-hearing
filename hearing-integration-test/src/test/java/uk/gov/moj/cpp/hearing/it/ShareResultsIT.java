@@ -1663,8 +1663,7 @@ public class ShareResultsIT extends AbstractIT {
         final UUID targetId = randomUUID();
         final InitiateHearingCommandHelper hearing = createInitiateHearingCommandHelperForNextHearing(initiateHearing, orderDate);
 
-        stubCourtRoom(hearing.getHearing());
-
+        stubCourtCentre(hearing.getHearing(), "1810");
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
         saveDraftResultsWithShadowListedFlag(hearing, targetId);
@@ -3036,8 +3035,12 @@ public class ShareResultsIT extends AbstractIT {
     }
 
     private void stubCourtCentre(final Hearing hearing) {
+        stubCourtCentre(hearing, null);
+    }
+
+    private void stubCourtCentre(final Hearing hearing, final String ljaCode) {
         final CourtCentre courtCentre = hearing.getCourtCentre();
-        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(courtCentre, prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId(), ljaCode));
         stubGetReferenceDataCourtRooms(courtCentre, hearing.getHearingLanguage(), ouId3, ouId4);
     }
 
