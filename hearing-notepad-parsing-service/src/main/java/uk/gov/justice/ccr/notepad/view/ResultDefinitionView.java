@@ -20,13 +20,16 @@ import java.util.UUID;
         "childResultDefinitions",
         "label",
         "conditionalMandatory",
-        "excludedFromResults"
+        "excludedFromResults",
+        "resultDefinitionGroup"
 
 })
 public class ResultDefinitionView {
 
     private final String resultLineId = UUID.randomUUID().toString();
+
     private String originalText;
+
     private String resultDefinitionId;
 
     private String resultLevel;
@@ -46,6 +49,8 @@ public class ResultDefinitionView {
     private List<PromptChoice> promptChoices = new ArrayList<>();
 
     private Boolean excludedFromResults;
+
+    private String resultDefinitionGroup;
 
     public Boolean getExcludedFromResults() { return excludedFromResults; }
 
@@ -143,4 +148,12 @@ public class ResultDefinitionView {
         this.shortCode = shortCode;
     }
 
+
+    public String getResultDefinitionGroup() {
+        return resultDefinitionGroup;
+    }
+
+    public void setResultDefinitionGroup(final String resultDefinitionGroup) {
+        this.resultDefinitionGroup = resultDefinitionGroup;
+    }
 }

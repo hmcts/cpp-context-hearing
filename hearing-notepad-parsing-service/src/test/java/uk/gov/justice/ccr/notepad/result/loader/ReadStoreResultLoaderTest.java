@@ -109,7 +109,7 @@ public class ReadStoreResultLoaderTest {
         assertThat(resultDefinition1.getRollUpPrompts(), is(TRUE));
         assertThat(resultDefinition1.getRollUpPrompts(), is(TRUE));
         assertThat(resultDefinition1.getDvlaCode(), is("C"));
-
+        assertThat(resultDefinition1.getResultDefinitionGroup(), is("Special measures"));
     }
 
     @Test

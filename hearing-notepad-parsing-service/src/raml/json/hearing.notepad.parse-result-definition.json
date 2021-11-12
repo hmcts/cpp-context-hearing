@@ -98,6 +98,7 @@
     }
   ],
   "excludedFromResults": true,
+  "resultDefinitionGroup": "test",
   "promptChoices": [
   {
     "code": "2d406cbe-c792-4a0c-af3d-25153e35f0be",

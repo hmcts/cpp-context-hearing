@@ -14,6 +14,9 @@
     "resultLevel": {
       "type": "string"
     },
+    "resultDefinitionGroup": {
+      "type": "string"
+    },
     "parts": {
       "type": "array",
       "items": {

@@ -53,7 +53,6 @@ public class ResultDefinitionViewBuilder {
             resultDefinitionView.setLabel(label);
             resultDefinitionView.setExcludedFromResults(excludedFromResults);
             resultDefinitionView.setPromptChoices(promptChoices);
-
         } else {
             resultDefinitionView.setParts(buildAmbiguousParts(knowledge, partValues, parts));
         }

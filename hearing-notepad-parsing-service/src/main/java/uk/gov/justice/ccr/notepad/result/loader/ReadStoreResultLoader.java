@@ -136,6 +136,9 @@ public class ReadStoreResultLoader implements ResultLoader {
                                     if (jsonObjectResultDefinition.containsKey("dvlaCode")) {
                                         resultDefinition.setDvlaCode(jsonObjectResultDefinition.getString("dvlaCode"));
                                     }
+                                    if (jsonObjectResultDefinition.containsKey("resultDefinitionGroup")) {
+                                        resultDefinition.setResultDefinitionGroup(jsonObjectResultDefinition.getString("resultDefinitionGroup"));
+                                    }
                                     resultDefinitions.add(resultDefinition);
                                 }
                         ));

@@ -224,6 +224,7 @@ public class HearingDetailChangeCommandHandlerTest {
         assertThat(asPojo(events.get(0), HearingDetailChanged.class), isBean(HearingDetailChanged.class)
                 .with(HearingDetailChanged::getId, Matchers.is(hearingId)));
     }
+
     @Test
     public void eventHearingAmendedShouldBeRaised() throws Exception {
 

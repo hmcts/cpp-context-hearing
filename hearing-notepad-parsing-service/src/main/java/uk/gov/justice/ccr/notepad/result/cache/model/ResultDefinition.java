@@ -3,7 +3,12 @@ package uk.gov.justice.ccr.notepad.result.cache.model;
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toCollection;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.apache.commons.collections.CollectionUtils;
 
@@ -25,6 +30,7 @@ public class ResultDefinition {
     private Boolean publishedForNows;
     private Boolean conditionalMandatory;
     private String dvlaCode;
+    private String resultDefinitionGroup;
 
     public final String getId() {
         return id;
@@ -156,6 +162,14 @@ public class ResultDefinition {
         this.dvlaCode = dvlaCode;
     }
 
+    public String getResultDefinitionGroup() {
+        return resultDefinitionGroup;
+    }
+
+    public void setResultDefinitionGroup(final String resultDefinitionGroup) {
+        this.resultDefinitionGroup = resultDefinitionGroup;
+    }
+
     @Override
     public String toString() {
         return "ResultDefinition{" +
@@ -176,6 +190,7 @@ public class ResultDefinition {
                 ", isPublishedForNows=" + publishedForNows +
                 ", isConditionalMandatory=" + conditionalMandatory +
                 ", dvlaCode= " + dvlaCode +
+                ", resultDefinitionGroup= " + resultDefinitionGroup +
                 '}';
     }
 
@@ -188,13 +203,12 @@ public class ResultDefinition {
     }
 
     public void setChildResultDefinitions(final List<ChildResultDefinition> childResultDefinitions) {
-        if(childResultDefinitions != null) {
+        if (childResultDefinitions != null) {
             this.childResultDefinitions = new ArrayList<>(childResultDefinitions);
         } else {
             this.childResultDefinitions = null;
         }
     }
-
 
 
     public static class Builder {
@@ -216,6 +230,7 @@ public class ResultDefinition {
         private Boolean isConditonalMandatory;
         private List<ChildResultDefinition> isChildResultDefinitions;
         private String dvlaCode;
+        private String resultDefinitionGroup;
 
         public Builder withId(final String id) {
             this.id = id;
@@ -302,6 +317,11 @@ public class ResultDefinition {
             return this;
         }
 
+        public Builder withResultDefinitionGroup(final String resultDefinitionGroup) {
+            this.resultDefinitionGroup = resultDefinitionGroup;
+            return this;
+        }
+
         public ResultDefinition build() {
             final ResultDefinition resultDefinition = new ResultDefinition();
             resultDefinition.setId(this.id);
@@ -321,6 +341,7 @@ public class ResultDefinition {
             resultDefinition.setConditonalMandatory(this.isConditonalMandatory);
             resultDefinition.setChildResultDefinitions(CollectionUtils.isNotEmpty(this.isChildResultDefinitions) ? new ArrayList<>(this.isChildResultDefinitions) : emptyList());
             resultDefinition.setDvlaCode(this.dvlaCode);
+            resultDefinition.setResultDefinitionGroup(this.resultDefinitionGroup);
             return resultDefinition;
         }
     }

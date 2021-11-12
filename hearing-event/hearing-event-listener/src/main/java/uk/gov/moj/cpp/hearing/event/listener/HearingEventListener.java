@@ -91,7 +91,7 @@ public class HearingEventListener {
     private static final String LAST_UPDATED_AT = "lastUpdatedAt";
     private static final String RESULTS = "results";
     private static final String CHILD_RESULT_LINES = "childResultLines";
-    public static final String HEARING_NOT_FOUND = "Hearing not found";
+    private static final String HEARING_NOT_FOUND = "Hearing not found";
 
     @Inject
     private BailStatusProducer bailStatusProducer;
@@ -182,7 +182,7 @@ public class HearingEventListener {
     private boolean isAllDeleted(final JsonArray results) {
         boolean deleted = !results.isEmpty();
         for (int i = 0; i < results.size(); i++) {
-            deleted = results.getJsonObject(i).getBoolean("isDeleted",false);
+            deleted = results.getJsonObject(i).getBoolean("isDeleted", false);
             if (!deleted) {
                 break;
             }
@@ -207,9 +207,10 @@ public class HearingEventListener {
         if (bailStatusOpt.isPresent()) {
 
             final Offence offence = getOffence(targetIn);
+
             if (nonNull(offence)) {
                 final BailStatus bailStatus = bailStatusOpt.get();
-                if(nonNull(bailStatus)) {
+                if (nonNull(bailStatus)) {
                     offence.setBailStatusId(bailStatus.getId());
                     offence.setBailStatusCode(bailStatus.getCode());
                     offence.setBailStatusDescription(bailStatus.getDescription());
@@ -238,7 +239,7 @@ public class HearingEventListener {
         }
         final DraftResultSavedV2 draftResultSavedV2 = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSavedV2.class);
 
-        final String draftResultPK = draftResultSavedV2.getHearingId().toString()+draftResultSavedV2.getHearingDay().toString();
+        final String draftResultPK = draftResultSavedV2.getHearingId().toString() + draftResultSavedV2.getHearingDay().toString();
         DraftResult draftResult = draftResultRepository.findBy(draftResultPK);
         if (draftResult == null) {
             draftResult = new DraftResult();
@@ -257,7 +258,7 @@ public class HearingEventListener {
             LOGGER.debug("hearing.draft-result-deleted-v2 event received {}", event.toObfuscatedDebugString());
         }
         final DraftResultDeletedV2 draftResultSavedV2 = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultDeletedV2.class);
-        final String draftResultPK = draftResultSavedV2.getHearingId()+draftResultSavedV2.getHearingDay().toString();
+        final String draftResultPK = draftResultSavedV2.getHearingId() + draftResultSavedV2.getHearingDay().toString();
 
         final DraftResult draftResult = draftResultRepository.findBy(draftResultPK);
         if (draftResult != null) {
@@ -363,14 +364,13 @@ public class HearingEventListener {
     }
 
     /**
-     * This method is used to update DraftResultV2 object with
-     * sharedDateTime informationinside __metadata__ object when Results are shared to keep
-     * DraftResult and SharedResults in sync.
+     * This method is used to update DraftResultV2 object with sharedDateTime informationinside
+     * __metadata__ object when Results are shared to keep DraftResult and SharedResults in sync.
      *
      * @param resultsShared
      */
     private void updateDraftResultV2(final ResultsSharedV3 resultsShared) {
-        final String draftResultPK = resultsShared.getHearingId().toString()+resultsShared.getHearingDay().toString();
+        final String draftResultPK = resultsShared.getHearingId().toString() + resultsShared.getHearingDay().toString();
         final DraftResult draftResult = draftResultRepository.findBy(draftResultPK);
         if (nonNull(draftResult) && nonNull(draftResult.getDraftResultPayload())) {
             final JsonNode metadataNode = draftResult.getDraftResultPayload().get("__metadata__");
@@ -387,8 +387,8 @@ public class HearingEventListener {
             final LocalDate hearingDay = resultsShared.getHearingDay();
             if (resultsShared.getHearing().getHasSharedResults()) {
                 final List<Target2> listOfTargets = resultsShared.getTargets();
-                final List<uk.gov.moj.cpp.hearing.persist.entity.ha.Target> legacyTargets = hearing.getTargets().stream().filter(t-> !"{}".equals(t.getDraftResult())).collect(Collectors.toList());
-                legacyTargets.forEach(legacyTarget->hearing.getTargets().remove(legacyTarget));
+                final List<uk.gov.moj.cpp.hearing.persist.entity.ha.Target> legacyTargets = hearing.getTargets().stream().filter(t -> !"{}".equals(t.getDraftResult())).collect(Collectors.toList());
+                legacyTargets.forEach(legacyTarget -> hearing.getTargets().remove(legacyTarget));
                 hearing.setHasSharedResults(true);
                 hearing.getHearingDays().stream().filter(hd -> hearingDay.equals(hd.getDate())).forEach(hd -> hd.setHasSharedResults(true));
                 listOfTargets.forEach(targetIn -> updateDraftResultV2(hearing, targetIn));
@@ -644,25 +644,24 @@ public class HearingEventListener {
      * Updates the draft results with shared time etc. Only updates draft results for the given
      * hearingDay.
      *
-     * @param hearing        - the hearing to update
-     * @param targetIn       - the target to add
-     *                       match it won't be updated.
+     * @param hearing  - the hearing to update
+     * @param targetIn - the target to add match it won't be updated.
      */
     private void updateDraftResultV2(Hearing hearing, Target2 targetIn) {
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Target targetReq = targetJPAMapper.toJPA2(hearing, targetIn);
 
-        hearing.getTargets().stream().filter(t->t.getId().equals(targetIn.getTargetId())).findFirst().ifPresent(t->t.getResultLines().removeIf(not(ResultLine::getDeleted)));
+        hearing.getTargets().stream().filter(t -> t.getId().equals(targetIn.getTargetId())).findFirst().ifPresent(t -> t.getResultLines().removeIf(not(ResultLine::getDeleted)));
 
 
-        if ( hearing.getTargets().isEmpty() || !hearing.getTargets().contains(targetReq)) {
+        if (hearing.getTargets().isEmpty() || !hearing.getTargets().contains(targetReq)) {
             hearing.getTargets().add(targetReq);
             return;
         }
 
         hearing.getTargets().stream()
-                .filter(t->t.equals(targetReq))
+                .filter(t -> t.equals(targetReq))
                 .findFirst()
-                .ifPresent(t->{
+                .ifPresent(t -> {
                     t.setCaseId(targetReq.getCaseId());
                     t.setDefendantId(targetReq.getDefendantId());
                     t.setHearingDay(targetReq.getHearingDay());
@@ -676,8 +675,8 @@ public class HearingEventListener {
 
     private void addOrReplaceResultLine(final uk.gov.moj.cpp.hearing.persist.entity.ha.Target targetReq, final uk.gov.moj.cpp.hearing.persist.entity.ha.Target t) {
 
-        targetReq.getResultLines().forEach(rl->{
-            if (t.getResultLines().contains(rl)){
+        targetReq.getResultLines().forEach(rl -> {
+            if (t.getResultLines().contains(rl)) {
                 t.getResultLines().remove(rl);
                 t.getResultLines().add(rl);
 

@@ -98,6 +98,9 @@ public class NotepadResultServiceApi {
         if(nonNull(resultDefinition)){
             buildFromKnowledge.setShortCode(resultDefinition.getShortCode());
         }
+        if (nonNull(resultDefinition)) {
+            buildFromKnowledge.setResultDefinitionGroup(resultDefinition.getResultDefinitionGroup());
+        }
         return buildFromKnowledge;
     }
 
