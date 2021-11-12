@@ -26,11 +26,15 @@ import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+
+import com.google.common.collect.Maps;
 
 public class OffenceHelper {
 
@@ -88,27 +92,33 @@ public class OffenceHelper {
     }
 
     private void populateConvictingCourt(final Offence offence, final Hearing hearing) {
-        hearing.getHearingDays().stream()
+
+        final Map.Entry<UUID, UUID> courtCentreInfo = hearing.getHearingDays().stream()
                 .filter(hearingDay -> hearingDay.getSittingDay().toLocalDate().equals(offence.getConvictionDate()))
-                .findAny()
-                .ifPresent(hearingDay -> {
-                    final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(hearingDay.getCourtCentreId());
+                .filter(hearingDay -> hearingDay.getCourtCentreId() != null)
+                .findFirst()
+                .map(hd -> Maps.immutableEntry(hd.getCourtCentreId(), hd.getCourtRoomId()))
+                .orElse(Maps.immutableEntry(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()));
 
-                    final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
-                            .withId(hearingDay.getCourtCentreId())
-                            .withRoomId(hearingDay.getCourtRoomId())
-                            .withCode(organisationalUnit.getOucode())
-                            .withName(organisationalUnit.getOucodeL3Name());
+        final UUID centreId = courtCentreInfo.getKey();
+        final UUID roomId = courtCentreInfo.getValue();
 
-                    if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
-                        final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(hearingDay.getCourtCentreId());
-                        courtCentreBuilder.withLja(ljaDetails);
-                    } else {
-                        courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
-                    }
+        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(centreId);
 
-                    offence.setConvictingCourt(courtCentreBuilder.build());
-                });
+        final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
+                .withId(centreId)
+                .withRoomId(roomId)
+                .withCode(organisationalUnit.getOucode())
+                .withName(organisationalUnit.getOucodeL3Name());
+
+        if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
+            final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(centreId);
+            courtCentreBuilder.withLja(ljaDetails);
+        } else {
+            courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
+        }
+
+        offence.setConvictingCourt(courtCentreBuilder.build());
     }
 
     private void populateIndicatedPlea(final Offence offence) {

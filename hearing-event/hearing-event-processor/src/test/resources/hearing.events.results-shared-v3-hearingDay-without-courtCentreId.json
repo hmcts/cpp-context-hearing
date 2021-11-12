@@ -1,0 +1,694 @@
+{
+  "hearingId": "6b16398a-d877-44dd-bd02-dafe2a9af467",
+  "sharedTime": "2021-11-11T11:21:41.623Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+  },
+  "hearing": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "ee002636-a2fb-422b-8a8d-5a9eb0590e22",
+          "masterDefendant": {
+            "defendantCase": [
+              {
+                "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+                "caseReference": "29GD1241421",
+                "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4"
+              }
+            ],
+            "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+            "personDefendant": {
+              "arrestSummonsNumber": "TFL",
+              "bailStatus": {
+                "code": "A",
+                "description": "Not applicable",
+                "id": "86009c70-759d-3308-8de4-194886ff9a77"
+              },
+              "personDetails": {
+                "address": {
+                  "address1": "1234",
+                  "address2": "StreetDescription",
+                  "address3": "Locality2O",
+                  "postcode": "DA6 7ND"
+                },
+                "dateOfBirth": "1967-06-29",
+                "documentationLanguageNeeds": "ENGLISH",
+                "firstName": "Ashtyn",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Cummings",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            }
+          },
+          "notificationRequired": true,
+          "summonsRequired": false
+        },
+        "applicationParticulars": "Testing R2121",
+        "applicationReceivedDate": "2021-11-11",
+        "applicationReference": "29GD1241421",
+        "applicationStatus": "IN_PROGRESS",
+        "commissionerOfOath": false,
+        "courtOrder": {
+          "canBeSubjectOfBreachProceedings": true,
+          "canBeSubjectOfVariationProceedings": true,
+          "courtOrderOffences": [
+            {
+              "offence": {
+                "allocationDecision": {
+                  "allocationDecisionDate": "2021-11-11",
+                  "motReasonCode": "01",
+                  "motReasonDescription": "Summary-only offence",
+                  "motReasonId": "b8c37e33-defd-351c-b91e-1e03e51657da",
+                  "offenceId": "7edfb28e-626d-40e8-8af8-e17194018fec",
+                  "originatingHearingId": "cdc4942c-becb-4982-b44f-db394aec19a5",
+                  "sequenceNumber": 90
+                },
+                "arrestDate": "2020-02-09",
+                "chargeDate": "2020-02-09",
+                "convictingCourt": {
+                  "code": "B42CM00",
+                  "id": "07178fbe-4b93-37d0-99c4-4859ffaa23a2",
+                  "lja": {
+                    "ljaCode": "1970",
+                    "ljaName": "North Essex Magistrates' Court"
+                  },
+                  "name": "Chelmsford Magistrates' Court",
+                  "roomId": "a102458c-301f-3fe5-88d0-5cda9455f235"
+                },
+                "convictionDate": "2021-11-11",
+                "count": 0,
+                "endDate": "2021-05-05",
+                "id": "7edfb28e-626d-40e8-8af8-e17194018fec",
+                "isDisposed": true,
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "offenceCode": "LG03127",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "00081e01-5a2f-4b86-8091-a61135e008d9",
+                "offenceLegislation": "Contrary to section 147A of the Licensing Act 2003.",
+                "offenceLegislationWelsh": "Yn groes i adran 147A o Ddeddf Trwyddedu 2003.",
+                "offenceTitle": "Sell alcohol to a child on two or more different occasions",
+                "offenceTitleWelsh": "Gwerthu alcohol i blentyn ar ddau neu fwy o achlysuron gwahanol",
+                "orderIndex": 1,
+                "plea": {
+                  "offenceId": "7edfb28e-626d-40e8-8af8-e17194018fec",
+                  "originatingHearingId": "cdc4942c-becb-4982-b44f-db394aec19a5",
+                  "pleaDate": "2021-11-11",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2020-02-09",
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              },
+              "prosecutionCaseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+              "prosecutionCaseIdentifier": {
+                "address": {
+                  "address1": "Criminal Justice Department",
+                  "address2": "Derbyshire Constabulary",
+                  "address3": "Butterley Hall",
+                  "address4": "Ripley",
+                  "address5": "Derby",
+                  "postcode": "DE5 3RS"
+                },
+                "contact": {
+                  "primaryEmail": "CCSU@derbyshire.pnn.police.uk"
+                },
+                "majorCreditorCode": "PO30",
+                "prosecutionAuthorityCode": "DERPF",
+                "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+                "prosecutionAuthorityName": "Derbyshire Police",
+                "prosecutionAuthorityOUCode": "0300000",
+                "caseURN": "29GD1241421"
+              }
+            },
+            {
+              "offence": {
+                "arrestDate": "2020-02-09",
+                "chargeDate": "2020-02-09",
+                "convictingCourt": {
+                  "code": "B42CM00",
+                  "id": "07178fbe-4b93-37d0-99c4-4859ffaa23a2",
+                  "lja": {
+                    "ljaCode": "1970",
+                    "ljaName": "North Essex Magistrates' Court"
+                  },
+                  "name": "Chelmsford Magistrates' Court",
+                  "roomId": "a102458c-301f-3fe5-88d0-5cda9455f235"
+                },
+                "convictionDate": "2021-11-11",
+                "count": 0,
+                "endDate": "2021-05-05",
+                "endorsableFlag": false,
+                "id": "2dfa6401-f9e2-4058-9f6e-d8854b325f30",
+                "isDisposed": true,
+                "listingNumber": 1,
+                "modeOfTrial": "Either Way",
+                "offenceCode": "TH68010",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "e0b08ff0-1eba-489f-923b-1982a63f3ecb",
+                "offenceLegislation": "Contrary to section 1(1) and 7 of the Theft    Act 1968.",
+                "offenceLegislationWelsh": "Yn groes i adran 1(1) a 7 Deddf Dwyn 1968.",
+                "offenceTitle": "Theft from a shop",
+                "offenceTitleWelsh": "Dwyn o siop - siop-ladrad",
+                "orderIndex": 2,
+                "plea": {
+                  "offenceId": "2dfa6401-f9e2-4058-9f6e-d8854b325f30",
+                  "originatingHearingId": "cdc4942c-becb-4982-b44f-db394aec19a5",
+                  "pleaDate": "2021-11-11",
+                  "pleaValue": "GUILTY"
+                },
+                "startDate": "2020-02-09",
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              },
+              "prosecutionCaseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+              "prosecutionCaseIdentifier": {
+                "address": {
+                  "address1": "Criminal Justice Department",
+                  "address2": "Derbyshire Constabulary",
+                  "address3": "Butterley Hall",
+                  "address4": "Ripley",
+                  "address5": "Derby",
+                  "postcode": "DE5 3RS"
+                },
+                "contact": {
+                  "primaryEmail": "CCSU@derbyshire.pnn.police.uk"
+                },
+                "majorCreditorCode": "PO30",
+                "prosecutionAuthorityCode": "DERPF",
+                "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+                "prosecutionAuthorityName": "Derbyshire Police",
+                "prosecutionAuthorityOUCode": "0300000",
+                "caseURN": "29GD1241421"
+              }
+            }
+          ],
+          "defendantIds": [
+            "a2dadf8a-8728-45ba-b806-259a7e38bbb4"
+          ],
+          "endDate": "2028-11-11",
+          "id": "8122f312-ead2-473a-8c94-3f3ddc2484db",
+          "isSJPOrder": false,
+          "judicialResultTypeId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+          "label": "Suspended sentence order - imprisonment",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "orderDate": "2021-11-11",
+          "orderingCourt": {
+            "address": {
+              "address1": "10 New Street",
+              "address2": "Chelmsford",
+              "address3": "Essex",
+              "address4": "",
+              "address5": "",
+              "postcode": "CM1 1NT"
+            },
+            "code": "B42CM00",
+            "id": "07178fbe-4b93-37d0-99c4-4859ffaa23a2",
+            "lja": {
+              "ljaCode": "1970",
+              "ljaName": "North Essex Magistrates' Court"
+            },
+            "name": "Chelmsford Magistrates' Court",
+            "roomId": "a102458c-301f-3fe5-88d0-5cda9455f235",
+            "roomName": "Courtroom 01"
+          },
+          "orderingHearingId": "cdc4942c-becb-4982-b44f-db394aec19a5",
+          "startDate": "2021-11-11"
+        },
+        "id": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+        "subject": {
+          "id": "ee002636-a2fb-422b-8a8d-5a9eb0590e22",
+          "masterDefendant": {
+            "defendantCase": [
+              {
+                "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+                "caseReference": "29GD1241421",
+                "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4"
+              }
+            ],
+            "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+            "personDefendant": {
+              "arrestSummonsNumber": "TFL",
+              "bailStatus": {
+                "code": "A",
+                "description": "Not applicable",
+                "id": "86009c70-759d-3308-8de4-194886ff9a77"
+              },
+              "personDetails": {
+                "address": {
+                  "address1": "1234",
+                  "address2": "StreetDescription",
+                  "address3": "Locality2O",
+                  "postcode": "DA6 7ND"
+                },
+                "dateOfBirth": "1967-06-29",
+                "documentationLanguageNeeds": "ENGLISH",
+                "firstName": "Ashtyn",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Cummings",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            }
+          },
+          "notificationRequired": true,
+          "summonsRequired": false
+        },
+        "type": {
+          "appealFlag": false,
+          "applicantAppellantFlag": false,
+          "boxworkNotifTemplate": "NOT_APPLICABLE",
+          "breachType": "NOT_APPLICABLE",
+          "categoryCode": "CO",
+          "code": "CJ03508",
+          "commrOfOathFlag": false,
+          "courtExtractAvlFlag": true,
+          "courtOfAppealFlag": false,
+          "hearingCode": "APN",
+          "id": "5f685a2b-1815-33f1-b117-cd5f44711a99",
+          "jurisdiction": "EITHER",
+          "legislation": "In accordance with paragraph 14 of Schedule 12 to the Criminal Justice Act 2003.",
+          "linkType": "LINKED",
+          "listingNotifTemplate": "POSTAL_NOTIFICATION",
+          "offenceActiveOrder": "COURT_ORDER",
+          "pleaApplicableFlag": false,
+          "prosecutorThirdPartyFlag": false,
+          "spiOutApplicableFlag": true,
+          "summonsTemplateType": "NOT_APPLICABLE",
+          "type": "Application to amend a suspended sentence order on change of residence"
+        }
+      }
+    ],
+    "courtCentre": {
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "name": "Lavender Hill Magistrates' Court"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 10,
+        "sittingDay": "2021-11-11T00:00:00.000Z"
+      }
+    ],
+    "id": "6b16398a-d877-44dd-bd02-dafe2a9af467",
+    "isBoxHearing": true,
+    "jurisdictionType": "MAGISTRATES",
+    "type": {
+      "description": "Application",
+      "id": "3449743b-95d6-4836-8941-57f588b52068"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {},
+  "targets": [
+    {
+      "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+      "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+      "draftResult": "{}",
+      "hearingDay": "2021-11-11",
+      "hearingId": "6b16398a-d877-44dd-bd02-dafe2a9af467",
+      "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+      "resultLines": [
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "orderedDate": "2021-11-11",
+          "prompts": [],
+          "resultDefinitionId": "2b3f7c20-8fc1-4fad-9076-df196c24b27e",
+          "resultLabel": "Granted",
+          "resultLineId": "4bfd1592-37db-4783-b71b-35be8dd114f1",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "g"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [
+            "2eddd8b8-f8d8-4db8-aa71-c020bc73ed93"
+          ],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "2dfa6401-f9e2-4058-9f6e-d8854b325f30",
+          "orderedDate": "2021-11-11",
+          "prompts": [
+            {
+              "id": "0eba630e-a486-439f-8d76-b49b1363067c",
+              "label": "Court that made the original order",
+              "promptRef": "courtThatMadeTheOriginalOrder",
+              "value": "Banff JP Court"
+            },
+            {
+              "id": "2a955180-259b-4492-9567-eec3c5ee6c27",
+              "label": "Date the original order made",
+              "promptRef": "dateTheOriginalOrderMade",
+              "value": "2021-12-11"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Bedfordshire Magistrates' Court"
+            },
+            {
+              "id": "7205f528-f69e-4950-9628-a9aff3e31a40",
+              "label": "Original total imprisonment period",
+              "promptRef": "originalTotalImprisonmentPeriod",
+              "value": "1 Weeks"
+            },
+            {
+              "id": "961da051-d955-4016-b5cc-97f6c157958b",
+              "label": "Original or amended supervision period",
+              "promptRef": "originalOrAmendedSupervisionPeriod",
+              "value": "1 Years"
+            },
+            {
+              "id": "b933f8f3-6201-401e-a257-a37507c9121c",
+              "label": "Original or amended operational period",
+              "promptRef": "origAmOpPv",
+              "value": "1 Months"
+            },
+            {
+              "id": "27bf0204-a185-4e82-8c34-7317287513c8",
+              "label": "Responsible officer for the order",
+              "promptRef": "responsibleOfficerForTheOrder",
+              "value": "a probation officer"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "London Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "londonnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "280a5606-c70a-432f-bdfe-a9dfd49f18c5",
+          "resultLabel": "Suspended sentence order of imprisonment  amended",
+          "resultLineId": "e8093a22-db84-4a71-b528-1845aa5e596d",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "suspv"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [
+            "e52f32fc-6cb5-44eb-a19d-95772ab8cc8e"
+          ],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "2dfa6401-f9e2-4058-9f6e-d8854b325f30",
+          "orderedDate": "2021-11-11",
+          "parentResultLineIds": [
+            "e8093a22-db84-4a71-b528-1845aa5e596d"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "346edadd-5b2f-4e52-9d71-cd2296508cdf",
+          "resultLabel": "The new and amended requirements are",
+          "resultLineId": "2eddd8b8-f8d8-4db8-aa71-c020bc73ed93",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "nvr"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [
+            "5b20d0ef-dc46-4d1a-9492-7bee23549bec"
+          ],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "2dfa6401-f9e2-4058-9f6e-d8854b325f30",
+          "orderedDate": "2021-11-11",
+          "parentResultLineIds": [
+            "2eddd8b8-f8d8-4db8-aa71-c020bc73ed93"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "e52f32fc-6cb5-44eb-a19d-95772ab8cc8e",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "crs"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "2dfa6401-f9e2-4058-9f6e-d8854b325f30",
+          "orderedDate": "2021-11-11",
+          "parentResultLineIds": [
+            "e52f32fc-6cb5-44eb-a19d-95772ab8cc8e"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "11 Hours"
+            }
+          ],
+          "resultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "resultLabel": "Attendance centre",
+          "resultLineId": "5b20d0ef-dc46-4d1a-9492-7bee23549bec",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "acr"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [
+            "46212a97-788c-4e41-8dff-7263abf864f7"
+          ],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "7edfb28e-626d-40e8-8af8-e17194018fec",
+          "orderedDate": "2021-11-11",
+          "prompts": [
+            {
+              "id": "0eba630e-a486-439f-8d76-b49b1363067c",
+              "label": "Court that made the original order",
+              "promptRef": "courtThatMadeTheOriginalOrder",
+              "value": "Banff JP Court"
+            },
+            {
+              "id": "2a955180-259b-4492-9567-eec3c5ee6c27",
+              "label": "Date the original order made",
+              "promptRef": "dateTheOriginalOrderMade",
+              "value": "2021-12-11"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Bedfordshire Magistrates' Court"
+            },
+            {
+              "id": "7205f528-f69e-4950-9628-a9aff3e31a40",
+              "label": "Original total imprisonment period",
+              "promptRef": "originalTotalImprisonmentPeriod",
+              "value": "1 Weeks"
+            },
+            {
+              "id": "961da051-d955-4016-b5cc-97f6c157958b",
+              "label": "Original or amended supervision period",
+              "promptRef": "originalOrAmendedSupervisionPeriod",
+              "value": "1 Years"
+            },
+            {
+              "id": "b933f8f3-6201-401e-a257-a37507c9121c",
+              "label": "Original or amended operational period",
+              "promptRef": "origAmOpPv",
+              "value": "1 Months"
+            },
+            {
+              "id": "27bf0204-a185-4e82-8c34-7317287513c8",
+              "label": "Responsible officer for the order",
+              "promptRef": "responsibleOfficerForTheOrder",
+              "value": "a probation officer"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "London Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "londonnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "280a5606-c70a-432f-bdfe-a9dfd49f18c5",
+          "resultLabel": "Suspended sentence order of imprisonment  amended",
+          "resultLineId": "86684e29-d8d5-4ae2-90f3-84076ee367ff",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "suspv"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [
+            "5d789f5a-0f28-4d30-8c61-9e990cd314f8"
+          ],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "7edfb28e-626d-40e8-8af8-e17194018fec",
+          "orderedDate": "2021-11-11",
+          "parentResultLineIds": [
+            "86684e29-d8d5-4ae2-90f3-84076ee367ff"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "346edadd-5b2f-4e52-9d71-cd2296508cdf",
+          "resultLabel": "The new and amended requirements are",
+          "resultLineId": "46212a97-788c-4e41-8dff-7263abf864f7",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "nvr"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [
+            "2fe5c197-4b50-4823-b12b-cd890477af23"
+          ],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "7edfb28e-626d-40e8-8af8-e17194018fec",
+          "orderedDate": "2021-11-11",
+          "parentResultLineIds": [
+            "46212a97-788c-4e41-8dff-7263abf864f7"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "5d789f5a-0f28-4d30-8c61-9e990cd314f8",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "crs"
+        },
+        {
+          "applicationId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5",
+          "caseId": "6eeb4f29-0308-4821-85b2-7ca2513abcc8",
+          "childResultLineIds": [],
+          "defendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "a2dadf8a-8728-45ba-b806-259a7e38bbb4",
+          "offenceId": "7edfb28e-626d-40e8-8af8-e17194018fec",
+          "orderedDate": "2021-11-11",
+          "parentResultLineIds": [
+            "5d789f5a-0f28-4d30-8c61-9e990cd314f8"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "11 Hours"
+            }
+          ],
+          "resultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "resultLabel": "Attendance centre",
+          "resultLineId": "2fe5c197-4b50-4823-b12b-cd890477af23",
+          "shadowListed": false,
+          "sharedDate": "2021-11-11",
+          "shortCode": "acr"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "36adb9e5-3a03-4ba8-bfcd-03f776f3eec5"
+    }
+  ],
+  "savedTargets": [],
+  "defendantDetailsChanged": [],
+  "isReshare": false,
+  "newAmendmentResults": [
+    {
+      "id": "4bfd1592-37db-4783-b71b-35be8dd114f1"
+    },
+    {
+      "id": "e8093a22-db84-4a71-b528-1845aa5e596d"
+    },
+    {
+      "id": "2eddd8b8-f8d8-4db8-aa71-c020bc73ed93"
+    },
+    {
+      "id": "e52f32fc-6cb5-44eb-a19d-95772ab8cc8e"
+    },
+    {
+      "id": "5b20d0ef-dc46-4d1a-9492-7bee23549bec"
+    },
+    {
+      "id": "86684e29-d8d5-4ae2-90f3-84076ee367ff"
+    },
+    {
+      "id": "46212a97-788c-4e41-8dff-7263abf864f7"
+    },
+    {
+      "id": "5d789f5a-0f28-4d30-8c61-9e990cd314f8"
+    },
+    {
+      "id": "2fe5c197-4b50-4823-b12b-cd890477af23"
+    }
+  ],
+  "hearingDay": "2021-11-11"
+}

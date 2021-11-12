@@ -9,6 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_MAGISTRATES_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -164,9 +166,42 @@ public class OffenceHelperTest {
         final Offence offence = defendant.get().getOffences().get(0);
 
         final CourtCentre convictingCourt = offence.getConvictingCourt();
-        assertThat(convictingCourt.getId().toString(), is(organisationalUnit.getId()));
-        assertThat(convictingCourt.getCode(), is(organisationalUnit.getOucode()));
-        assertThat(convictingCourt.getCourtLocationCode(), is(organisationalUnit.getCourtLocationCode()));
+        verifyConvictingCourt(organisationalUnit, convictingCourt);
+    }
+
+    @Test
+    public void shareResultsWithEnrichedConvictingCourtIfHearingDayHasNoCourtCentre() throws IOException {
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withId("f8254db1-1683-483e-afb3-b87fde5a0a26")
+                .withOucode("B01LY00")
+                .withEnforcementArea(EnforcementAreaBacs.enforcementAreaBacs()
+                        .withCourtLocationCode("0325")
+                        .build())
+                .build();
+
+        when(referenceDataLoader.getOrganisationUnitById(UUID.fromString("f8254db1-1683-483e-afb3-b87fde5a0a26"))).thenReturn(organisationalUnit);
+        when(referenceDataLoader.getOrganisationUnitById(null)).thenThrow(NullPointerException.class);;
+        when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
+
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID, ResultsShared.class);
+
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+
+        final List<Offence> offences = resultsShared.getHearing().
+                getCourtApplications()
+                .stream()
+                .map(CourtApplication::getCourtOrder)
+                .flatMap(courtOrder -> courtOrder
+                        .getCourtOrderOffences()
+                        .stream())
+                .map(CourtOrderOffence::getOffence)
+                .collect(Collectors
+                        .toList());
+
+        assertThat(offences.size(), is(2));
+
+        verifyConvictingCourt(organisationalUnit, offences.get(0).getConvictingCourt());
+        verifyConvictingCourt(organisationalUnit, offences.get(1).getConvictingCourt());
     }
 
     @Test
@@ -298,5 +333,11 @@ public class OffenceHelperTest {
         assertThat(indicatedPlea.getOffenceId().toString(), is("47ecee20-0215-11ea-9bbd-b1f5a4493d17"));
         assertThat(indicatedPlea.getOriginatingHearingId().toString(), is("31048c0d-e937-49fb-bfc5-02abc56d3f6a"));
         assertThat(indicatedPlea.getSource(), is(Source.IN_COURT));
+    }
+
+    private void verifyConvictingCourt(final OrganisationalUnit organisationalUnit, final CourtCentre convictingCourt) {
+        assertThat(convictingCourt.getId().toString(), is(organisationalUnit.getId()));
+        assertThat(convictingCourt.getCode(), is(organisationalUnit.getOucode()));
+        assertThat(convictingCourt.getCourtLocationCode(), is(organisationalUnit.getCourtLocationCode()));
     }
 }
