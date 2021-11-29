@@ -61,11 +61,11 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
                                                     @QueryParam("userId") final UUID userId);
 
     @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
-            "WHERE prosecutionCase.id.id = :caseId)")
+            "WHERE prosecutionCase.id.id = :caseId")
     public abstract List<Hearing> findByCaseId(@QueryParam("caseId") final UUID caseId);
 
     @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
-            "WHERE hearingApplication.id.applicationId = :applicationId)")
+            "WHERE hearingApplication.id.applicationId = :applicationId")
     public abstract List<Hearing> findAllHearingsByApplicationId(@QueryParam("applicationId") final UUID applicationId);
 
 

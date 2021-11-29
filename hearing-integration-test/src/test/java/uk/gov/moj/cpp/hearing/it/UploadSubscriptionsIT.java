@@ -13,6 +13,7 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
+import org.junit.Ignore;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 
@@ -23,6 +24,7 @@ import org.junit.Test;
 
 public class UploadSubscriptionsIT extends AbstractIT {
 
+    @Ignore("DD-17628: The command (hearing.upload-subscriptions) was redundant and not used anymore.")
     @Test
     public void testRetrieveSubscriptionsAfterUploading() {
 
