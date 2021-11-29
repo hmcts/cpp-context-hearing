@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.*;
-import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -19,12 +18,6 @@ import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.ALL_PLEA
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.GUILTY_PLEA_LIST;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 
-import java.lang.reflect.Field;
-import org.junit.experimental.theories.DataPoints;
-import org.junit.experimental.theories.FromDataPoints;
-import org.junit.experimental.theories.Theories;
-import org.junit.experimental.theories.Theory;
-import org.junit.runner.RunWith;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -40,7 +33,6 @@ import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
-import uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTestData;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
@@ -54,46 +46,9 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 
-@RunWith(Theories.class)
 public class PleaDelegateTest {
     private static final String NOT_GUILTY = "NOT_GUILTY";
     private static final String GUILTY = "GUILTY";
-
-    public static final LocalDate NEW_PLEA_DATE = PAST_LOCAL_DATE.next();
-    public static final LocalDate OLD_PLEA_DATE = PAST_LOCAL_DATE.next();
-
-    private static final PleaModel EMPTY_MODEL = PleaModel.pleaModel().build();
-
-    private static final Plea PLEA_GUILTY_PM = Plea.plea().withPleaValue(GUILTY).withPleaDate(NEW_PLEA_DATE).build();
-    private static final Plea PLEA_NOT_GUILTY_PM = Plea.plea().withPleaValue(NOT_GUILTY).withPleaDate(NEW_PLEA_DATE).build();
-    private static final IndicatedPlea INDICATED_PLEA_GUILTY_PM = IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_GUILTY).withIndicatedPleaDate(NEW_PLEA_DATE).build();
-    private static final IndicatedPlea INDICATED_PLEA_NOT_GUILTY_PM = IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_NOT_GUILTY).withIndicatedPleaDate(NEW_PLEA_DATE).build();
-
-
-    private static final PleaModel PAYLOAD_PLEA_GUILTY = PleaModel.pleaModel().withPlea(PLEA_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_PLEA_NOT_GUILTY = PleaModel.pleaModel().withPlea(PLEA_NOT_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_INDICATED_PLEA_GUILTY = PleaModel.pleaModel().withIndicatedPlea(INDICATED_PLEA_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_INDICATED_PLEA_NOT_GUILTY = PleaModel.pleaModel().withIndicatedPlea(INDICATED_PLEA_NOT_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_GUILTY = PleaModel.pleaModel().withPlea(PLEA_GUILTY_PM).withIndicatedPlea(INDICATED_PLEA_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY = PleaModel.pleaModel().withPlea(PLEA_GUILTY_PM).withIndicatedPlea(INDICATED_PLEA_NOT_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_PLEA_NOT_GUILTY_INDICATED_PLEA_GUILTY = PleaModel.pleaModel().withPlea(PLEA_NOT_GUILTY_PM).withIndicatedPlea(INDICATED_PLEA_GUILTY_PM).build();
-    private static final PleaModel PAYLOAD_PLEA_NOT_GUILTY_INDICATED_PLEA_NOT_GUILTY = PleaModel.pleaModel().withPlea(PLEA_NOT_GUILTY_PM).withIndicatedPlea(INDICATED_PLEA_NOT_GUILTY_PM).build();
-
-
-    private static final Plea PLEA_GUILTY_BM = Plea.plea().withPleaValue(GUILTY).withPleaDate(OLD_PLEA_DATE).build();
-    private static final Plea PLEA_NOT_GUILTY_BM = Plea.plea().withPleaValue(NOT_GUILTY).withPleaDate(OLD_PLEA_DATE).build();
-    private static final IndicatedPlea INDICATED_PLEA_GUILTY_BM = IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_GUILTY).withIndicatedPleaDate(OLD_PLEA_DATE).build();
-    private static final IndicatedPlea INDICATED_PLEA_NOT_GUILTY_BM = IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_NOT_GUILTY).withIndicatedPleaDate(OLD_PLEA_DATE).build();
-
-    private static final PleaModel BEFORE_PLEA_GUILTY = PleaModel.pleaModel().withPlea(PLEA_GUILTY_BM).build();
-    private static final PleaModel BEFORE_PLEA_NOT_GUILTY = PleaModel.pleaModel().withPlea(PLEA_NOT_GUILTY_BM).build();
-    private static final PleaModel BEFORE_INDICATED_PLEA_GUILTY = PleaModel.pleaModel().withIndicatedPlea(INDICATED_PLEA_GUILTY_BM).build();
-    private static final PleaModel BEFORE_INDICATED_PLEA_NOT_GUILTY = PleaModel.pleaModel().withIndicatedPlea(INDICATED_PLEA_NOT_GUILTY_BM).build();
-    private static final PleaModel BEFORE_PLEA_GUILTY_INDICATED_PLEA_GUILTY = PleaModel.pleaModel().withPlea(PLEA_GUILTY_BM).withIndicatedPlea(INDICATED_PLEA_GUILTY_BM).build();
-    private static final PleaModel BEFORE_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY = PleaModel.pleaModel().withPlea(PLEA_GUILTY_BM).withIndicatedPlea(INDICATED_PLEA_NOT_GUILTY_BM).build();
-    private static final PleaModel BEFORE_PLEA_NOT_GUILTY_INDICATED_PLEA_GUILTY = PleaModel.pleaModel().withPlea(PLEA_NOT_GUILTY_BM).withIndicatedPlea(INDICATED_PLEA_GUILTY_BM).build();
-    private static final PleaModel BEFORE_PLEA_NOT_GUILTY_INDICATED_PLEA_NOT_GUILTY = PleaModel.pleaModel().withPlea(PLEA_NOT_GUILTY_BM).withIndicatedPlea(INDICATED_PLEA_NOT_GUILTY_BM).build();
-
 
     private PleaDelegate pleaDelegate;
     private HearingAggregateMomento hearingAggregateMomento;
@@ -103,203 +58,12 @@ public class PleaDelegateTest {
     public static final UUID CASE_ID = randomUUID();
     public static final UUID DEFENDANT_ID = randomUUID();
     private static final UUID APPLICATION_ID = randomUUID();
-
-
-    @DataPoints("testData")
-    public static PleaTestData[] testData = {
-        new PleaTestData(EMPTY_MODEL,PAYLOAD_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(EMPTY_MODEL, PAYLOAD_PLEA_NOT_GUILTY, null, false, false),
-        new PleaTestData(EMPTY_MODEL, PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(EMPTY_MODEL, PAYLOAD_INDICATED_PLEA_NOT_GUILTY, null, false, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, null, false, true),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY,PAYLOAD_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, null, false, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE,true, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_NOT_GUILTY, null, false, true),
-        new PleaTestData(BEFORE_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_INDICATED_PLEA_NOT_GUILTY, null, false, false),
-        new PleaTestData(EMPTY_MODEL,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(EMPTY_MODEL,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(EMPTY_MODEL,PAYLOAD_PLEA_NOT_GUILTY_INDICATED_PLEA_GUILTY, null, false, false),
-        new PleaTestData(EMPTY_MODEL,PAYLOAD_PLEA_NOT_GUILTY_INDICATED_PLEA_NOT_GUILTY, null, false, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_NOT_GUILTY_INDICATED_PLEA_GUILTY, null, false, true),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_NOT_GUILTY_INDICATED_PLEA_NOT_GUILTY, null, false, true),
-        new PleaTestData(BEFORE_PLEA_GUILTY_INDICATED_PLEA_GUILTY,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY_INDICATED_PLEA_GUILTY,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,EMPTY_MODEL, null, false, true),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY,EMPTY_MODEL, null, false, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,EMPTY_MODEL, null, false, true),
-        new PleaTestData(BEFORE_INDICATED_PLEA_NOT_GUILTY,EMPTY_MODEL, null, false, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY_INDICATED_PLEA_GUILTY,EMPTY_MODEL, null, false, true),
-        new PleaTestData(BEFORE_PLEA_GUILTY_INDICATED_PLEA_NOT_GUILTY,EMPTY_MODEL, null, false, true),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY_INDICATED_PLEA_GUILTY,EMPTY_MODEL, null, false, false),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY_INDICATED_PLEA_NOT_GUILTY,EMPTY_MODEL, null, false, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_NOT_GUILTY, null, false, true),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY,PAYLOAD_INDICATED_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_PLEA_NOT_GUILTY,PAYLOAD_INDICATED_PLEA_NOT_GUILTY, null, false, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,PAYLOAD_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, null, false, true),
-        new PleaTestData(BEFORE_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_PLEA_GUILTY, NEW_PLEA_DATE, true, false),
-        new PleaTestData(BEFORE_INDICATED_PLEA_NOT_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, null, false, false),
-    } ;
-
-    @DataPoints("verdictTestData")
-    public static PleaTestData[] verdictTestData = {
-            new PleaTestData(BEFORE_PLEA_GUILTY,PAYLOAD_PLEA_NOT_GUILTY, OLD_PLEA_DATE, false, false),
-            new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,PAYLOAD_INDICATED_PLEA_NOT_GUILTY, OLD_PLEA_DATE, false, false),
-            new PleaTestData(BEFORE_PLEA_GUILTY,EMPTY_MODEL, OLD_PLEA_DATE, false, false),
-            new PleaTestData(BEFORE_INDICATED_PLEA_GUILTY,EMPTY_MODEL, OLD_PLEA_DATE, false, false),
-    };
+    public static final LocalDate PLEA_DATE = PAST_LOCAL_DATE.next();
 
     @Before
     public void setup() {
         hearingAggregateMomento = new HearingAggregateMomento();
         pleaDelegate  = new PleaDelegate(hearingAggregateMomento);
-    }
-
-    @Theory
-    public void shouldProcessPleaAndIndicatorPleaCases(@FromDataPoints("testData") final PleaTestData testData) throws NoSuchFieldException, IllegalAccessException {
-        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
-        final HearingAggregate hearingAggregate = new HearingAggregate();
-        hearingAggregateMomento = getMemonto(hearingAggregate);
-
-        hearingAggregate.initiate(hearing);
-
-        ofNullable(testData.getBeforeValue().getPlea()).ifPresent(plea -> this.hearingAggregateMomento.getPleas().put(OFFENCE_ID, Plea.plea()
-                .withOffenceId(OFFENCE_ID)
-                .withPleaDate(plea.getPleaDate())
-                .withPleaValue(plea.getPleaValue())
-                .build()));
-        ofNullable(testData.getBeforeValue().getPlea())
-                .map(plea -> plea.getPleaValue().equals(GUILTY) ? plea : null)
-                .ifPresent(plea -> this.hearingAggregateMomento.getConvictionDates().put(OFFENCE_ID, plea.getPleaDate()));
-
-        ofNullable(testData.getBeforeValue().getIndicatedPlea()).ifPresent(indicatedPlea -> this.hearingAggregateMomento.getIndicatedPlea().put(OFFENCE_ID, IndicatedPlea.indicatedPlea()
-                .withOffenceId(OFFENCE_ID)
-                .withIndicatedPleaDate(indicatedPlea.getIndicatedPleaDate())
-                .withIndicatedPleaValue(indicatedPlea.getIndicatedPleaValue())
-                .build()));
-        ofNullable(testData.getBeforeValue().getIndicatedPlea())
-                .map(indicatedPlea -> indicatedPlea.getIndicatedPleaValue().equals(INDICATED_GUILTY) ? indicatedPlea : null)
-                .map(indicatedPlea -> testData.getBeforeValue().getPlea() == null ? indicatedPlea : testData.getBeforeValue().getPlea().getPleaValue().equals(GUILTY) ? indicatedPlea : null)
-                .ifPresent(indicatedPlea -> this.hearingAggregateMomento.getConvictionDates().put(OFFENCE_ID,indicatedPlea.getIndicatedPleaDate()));
-
-        final PleaModel pleaModel = PleaModel.pleaModel()
-                .withProsecutionCaseId(CASE_ID)
-                .withDefendantId(DEFENDANT_ID)
-                .withOffenceId(OFFENCE_ID)
-                .withAllocationDecision(AllocationDecision.allocationDecision()
-                        .withOffenceId(OFFENCE_ID)
-                        .build())
-                .withIndicatedPlea(testData.getPayload().getIndicatedPlea())
-                .withPlea(testData.getPayload().getPlea())
-                .build();
-
-        final List<Object> events = hearingAggregate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
-        final PleaUpsert pleaUpsert = events.stream().filter(event -> event.getClass().equals(PleaUpsert.class)).findFirst().map(PleaUpsert.class::cast).orElse(null);
-        final ConvictionDateRemoved convictionDateRemoved = events.stream().filter(event -> event.getClass().equals(ConvictionDateRemoved.class)).findFirst().map(ConvictionDateRemoved.class::cast).orElse(null);
-        final ConvictionDateAdded convictionDateAdded = events.stream().filter(event -> event.getClass().equals(ConvictionDateAdded.class)).findFirst().map(ConvictionDateAdded.class::cast).orElse(null);
-
-        assertThat(pleaUpsert, is(notNullValue()));
-        assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
-        assertThat(pleaUpsert.getPleaModel().getPlea(), is(testData.getPayload().getPlea()));
-        assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(testData.getPayload().getIndicatedPlea()));
-
-        if(testData.isConvictionDataAdded()){
-            assertThat(convictionDateAdded, is(notNullValue()));
-            assertThat(convictionDateAdded.getOffenceId(), is(OFFENCE_ID));
-            assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
-            assertThat(convictionDateAdded.getCaseId(), is(CASE_ID));
-            assertThat(convictionDateAdded.getConvictionDate(), is(testData.getConvictionDate()));
-        }else{
-            assertThat(convictionDateAdded, is(nullValue()));
-        }
-
-        if(testData.isConvictionDataRemoved()){
-            assertThat(convictionDateRemoved, is(notNullValue()));
-            assertThat(convictionDateRemoved.getOffenceId(), is(OFFENCE_ID));
-            assertThat(convictionDateRemoved.getHearingId(), is(HEARING_ID));
-            assertThat(convictionDateRemoved.getCaseId(), is(CASE_ID));
-        }else{
-            assertThat(convictionDateRemoved, is(nullValue()));
-        }
-
-        assertThat(hearingAggregateMomento.getConvictionDates().get(OFFENCE_ID), is(testData.getConvictionDate()));
-        assertThat(hearingAggregateMomento.getPleas().get(OFFENCE_ID), is(testData.getPayload().getPlea()));
-        assertThat(hearingAggregateMomento.getIndicatedPlea().get(OFFENCE_ID), is(testData.getPayload().getIndicatedPlea()));
-        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getConvictionDate(), is(testData.getConvictionDate()));
-        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getPlea(), is(testData.getPayload().getPlea()));
-        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getIndicatedPlea(), is(testData.getPayload().getIndicatedPlea()));
-    }
-
-    @Theory
-    public void shouldNotRemoveConvictionDateWhenThereIsVerdict(@FromDataPoints("verdictTestData") final PleaTestData testData) throws NoSuchFieldException, IllegalAccessException {
-        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID, OLD_PLEA_DATE);
-        final HearingAggregate hearingAggregate = new HearingAggregate();
-        hearingAggregateMomento = getMemonto(hearingAggregate);
-
-        hearingAggregate.initiate(hearing);
-
-        hearingAggregateMomento.getVerdicts().put(OFFENCE_ID, Verdict.verdict().withVerdictType(VerdictType.verdictType().withCategoryType(GUILTY).build()).build());
-
-        ofNullable(testData.getBeforeValue().getPlea()).ifPresent(plea -> this.hearingAggregateMomento.getPleas().put(OFFENCE_ID, Plea.plea()
-                .withOffenceId(OFFENCE_ID)
-                .withPleaDate(plea.getPleaDate())
-                .withPleaValue(plea.getPleaValue())
-                .build()));
-        ofNullable(testData.getBeforeValue().getPlea())
-                .map(plea -> plea.getPleaValue().equals(GUILTY) ? plea : null)
-                .ifPresent(plea -> this.hearingAggregateMomento.getConvictionDates().put(OFFENCE_ID, plea.getPleaDate()));
-
-        ofNullable(testData.getBeforeValue().getIndicatedPlea()).ifPresent(indicatedPlea -> this.hearingAggregateMomento.getIndicatedPlea().put(OFFENCE_ID, IndicatedPlea.indicatedPlea()
-                .withOffenceId(OFFENCE_ID)
-                .withIndicatedPleaDate(indicatedPlea.getIndicatedPleaDate())
-                .withIndicatedPleaValue(indicatedPlea.getIndicatedPleaValue())
-                .build()));
-        ofNullable(testData.getBeforeValue().getIndicatedPlea())
-                .map(indicatedPlea -> indicatedPlea.getIndicatedPleaValue().equals(INDICATED_GUILTY) ? indicatedPlea : null)
-                .map(indicatedPlea -> testData.getBeforeValue().getPlea() == null ? indicatedPlea : testData.getBeforeValue().getPlea().getPleaValue().equals(GUILTY) ? indicatedPlea : null)
-                .ifPresent(indicatedPlea -> this.hearingAggregateMomento.getConvictionDates().put(OFFENCE_ID,indicatedPlea.getIndicatedPleaDate()));
-
-
-
-        final PleaModel pleaModel = PleaModel.pleaModel()
-                .withProsecutionCaseId(CASE_ID)
-                .withDefendantId(DEFENDANT_ID)
-                .withOffenceId(OFFENCE_ID)
-                .withAllocationDecision(AllocationDecision.allocationDecision()
-                        .withOffenceId(OFFENCE_ID)
-                        .build())
-                .withIndicatedPlea(testData.getPayload().getIndicatedPlea())
-                .withPlea(testData.getPayload().getPlea())
-                .build();
-
-        final List<Object> events = hearingAggregate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
-        final PleaUpsert pleaUpsert = events.stream().filter(event -> event.getClass().equals(PleaUpsert.class)).findFirst().map(PleaUpsert.class::cast).orElse(null);
-        final ConvictionDateRemoved convictionDateRemoved = events.stream().filter(event -> event.getClass().equals(ConvictionDateRemoved.class)).findFirst().map(ConvictionDateRemoved.class::cast).orElse(null);
-        final ConvictionDateAdded convictionDateAdded = events.stream().filter(event -> event.getClass().equals(ConvictionDateAdded.class)).findFirst().map(ConvictionDateAdded.class::cast).orElse(null);
-
-        assertThat(pleaUpsert, is(notNullValue()));
-        assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
-        assertThat(pleaUpsert.getPleaModel().getPlea(), is(testData.getPayload().getPlea()));
-        assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(testData.getPayload().getIndicatedPlea()));
-
-        assertThat(convictionDateAdded, is(nullValue()));
-        assertThat(convictionDateRemoved, is(nullValue()));
-
-        assertThat(hearingAggregateMomento.getConvictionDates().get(OFFENCE_ID), is(testData.getConvictionDate()));
-        assertThat(hearingAggregateMomento.getPleas().get(OFFENCE_ID), is(testData.getPayload().getPlea()));
-        assertThat(hearingAggregateMomento.getIndicatedPlea().get(OFFENCE_ID), is(testData.getPayload().getIndicatedPlea()));
-        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getConvictionDate(), is(OLD_PLEA_DATE));
-        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getPlea(), is(testData.getPayload().getPlea()));
-        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().stream().filter(offence -> offence.getId().equals(OFFENCE_ID)).findFirst().get().getIndicatedPlea(), is(testData.getPayload().getIndicatedPlea()));
     }
 
     @Test
@@ -374,7 +138,7 @@ public class PleaDelegateTest {
         this.hearingAggregateMomento.setHearing(hearing);
         final PleaUpsert pleaUpsert = PleaUpsert.pleaUpsert()
                 .setHearingId(HEARING_ID)
-                .setPleaModel(getPlea(GUILTY, NEW_PLEA_DATE));
+                .setPleaModel(getPlea(GUILTY, PLEA_DATE));
         pleaDelegate.handlePleaUpsert(pleaUpsert);
 
         assertThat(hearingAggregateMomento.getIndicatedPlea().size(), is(0));
@@ -404,7 +168,7 @@ public class PleaDelegateTest {
                         .withOffenceId(OFFENCE_ID)
                         .withPlea(Plea.plea()
                                 .withOffenceId(OFFENCE_ID)
-                                .withPleaDate(NEW_PLEA_DATE)
+                                .withPleaDate(PLEA_DATE)
                                 .withPleaValue(pleaValue)
                                 .build())
                         .withIndicatedPlea(IndicatedPlea.indicatedPlea()
@@ -424,7 +188,7 @@ public class PleaDelegateTest {
 
         final Plea plea = hearingAggregateMomento.getPleas().get(OFFENCE_ID);
         assertThat(plea.getPleaValue(), is(pleaValue));
-        assertThat(plea.getPleaDate(), is(NEW_PLEA_DATE));
+        assertThat(plea.getPleaDate(), is(PLEA_DATE));
         assertThat(plea.getOffenceId(), is(OFFENCE_ID));
 
         final IndicatedPlea indicatedPlea = hearingAggregateMomento.getIndicatedPlea().get(OFFENCE_ID);
@@ -534,7 +298,7 @@ public class PleaDelegateTest {
     }
 
     @Test
-    public void shouldNotAddConvictionDateRemovedEventWhenIndicatedPleaIsNotGuilty() {
+    public void shouldAddConvictionDateRemovedEventWhenIndicatedPleaIsNotGuilty() {
 
         final LocalDate indicatedPleaDate = PAST_LOCAL_DATE.next();
 
@@ -558,10 +322,15 @@ public class PleaDelegateTest {
 
         final List<Object> events = pleaDelegate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
-        assertThat(events.size(), is(1));
         final PleaUpsert pleaUpsert = (PleaUpsert) events.get(0);
         assertThat(pleaUpsert, is(notNullValue()));
         assertThat(pleaUpsert.getHearingId(), is(HEARING_ID));
+
+        final ConvictionDateRemoved convictionDateRemoved = (ConvictionDateRemoved) events.get(1);
+        assertThat(convictionDateRemoved, is(notNullValue()));
+        assertThat(convictionDateRemoved.getOffenceId(), is(OFFENCE_ID));
+        assertThat(convictionDateRemoved.getHearingId(), is(HEARING_ID));
+        assertThat(convictionDateRemoved.getCaseId(), is(CASE_ID));
     }
 
     @Test
@@ -598,7 +367,7 @@ public class PleaDelegateTest {
                 final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
                 events.forEach(hearingAggregate::apply);
 
-                final PleaModel pleaModel = getPlea(NOT_GUILTY, NEW_PLEA_DATE);
+                final PleaModel pleaModel = getPlea(NOT_GUILTY, PLEA_DATE);
                 final List<Object> eventsAfterGuiltyPleaUpdate = hearingAggregate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
                 final PleaUpsert pleaUpsert = (PleaUpsert) eventsAfterGuiltyPleaUpdate.get(0);
@@ -629,7 +398,7 @@ public class PleaDelegateTest {
         final List<Object> events = hearingAggregate.initiate(hearing).collect(Collectors.toList());
         events.forEach(hearingAggregate::apply);
 
-        final PleaModel pleaModel = getPlea(guiltyPleaValue, NEW_PLEA_DATE);
+        final PleaModel pleaModel = getPlea(guiltyPleaValue, PLEA_DATE);
         List<Object> eventsAfterPleaUpdate = hearingAggregate.updatePlea(HEARING_ID, pleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
         final PleaUpsert pleaUpsert = (PleaUpsert) eventsAfterPleaUpdate.get(0);
@@ -641,7 +410,7 @@ public class PleaDelegateTest {
         assertThat(convictionDateAdded.getOffenceId(), is(OFFENCE_ID));
         assertThat(convictionDateAdded.getHearingId(), is(HEARING_ID));
         assertThat(convictionDateAdded.getCaseId(), is(CASE_ID));
-        assertThat(convictionDateAdded.getConvictionDate(), is(NEW_PLEA_DATE));
+        assertThat(convictionDateAdded.getConvictionDate(), is(PLEA_DATE));
     }
 
     private void shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty(final String notGuiltyPleaValue) {
@@ -651,12 +420,12 @@ public class PleaDelegateTest {
         events.forEach(hearingAggregate::apply);
 
         // this indicates a guilty plea was set previously
-        final PleaModel guiltyPleaModel = getPlea(GUILTY, NEW_PLEA_DATE);
+        final PleaModel guiltyPleaModel = getPlea(GUILTY, PLEA_DATE);
         final List<Object> eventsAfterSettingGuiltyPlea = hearingAggregate.updatePlea(HEARING_ID, guiltyPleaModel, guiltyPleaTypes()).collect(Collectors.toList());
         eventsAfterSettingGuiltyPlea.forEach(hearingAggregate::apply);
 
         // now set plea to not guilty
-        final PleaModel notGuiltyPleaModel = getPlea(notGuiltyPleaValue, NEW_PLEA_DATE);
+        final PleaModel notGuiltyPleaModel = getPlea(notGuiltyPleaValue, PLEA_DATE);
         final List<Object> eventsAfterSettingToNotGuilty = hearingAggregate.updatePlea(HEARING_ID, notGuiltyPleaModel, guiltyPleaTypes()).collect(Collectors.toList());
 
         final PleaUpsert pleaUpsert = (PleaUpsert) eventsAfterSettingToNotGuilty.get(0);
@@ -696,23 +465,6 @@ public class PleaDelegateTest {
                 .build();
     }
 
-    private Hearing getHearing(final UUID offenceId, final UUID defendantId, final UUID prosecutionCaseId, final UUID hearingId, final LocalDate convictionDate) {
-        final Defendant defendant = defendant()
-                .withId(defendantId)
-                .withOffences(asList(Offence.offence().withId(offenceId).withConvictionDate(convictionDate).build()))
-                .build();
-
-        final ProsecutionCase prosecutionCase = prosecutionCase()
-                .withId(prosecutionCaseId)
-                .withDefendants(asList(defendant))
-                .build();
-
-        return hearing()
-                .withId(hearingId)
-                .withProsecutionCases(asList(prosecutionCase))
-                .build();
-    }
-
     private Hearing getHearing(final UUID offenceId, final UUID courtApplicationId,final UUID hearingId) {
 
         return hearing()
@@ -738,12 +490,5 @@ public class PleaDelegateTest {
                                 .build()))
                         .build()))
                 .build();
-    }
-
-    private HearingAggregateMomento getMemonto(final HearingAggregate hearingAggregate) throws NoSuchFieldException, IllegalAccessException {
-        Field hearingAggregateMomento = HearingAggregate.class.
-                getDeclaredField("momento");
-        hearingAggregateMomento.setAccessible(true);
-        return (HearingAggregateMomento) hearingAggregateMomento.get(hearingAggregate);
     }
 }

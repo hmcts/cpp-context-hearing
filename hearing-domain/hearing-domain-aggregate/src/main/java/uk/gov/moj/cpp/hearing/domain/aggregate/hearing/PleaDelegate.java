@@ -46,15 +46,10 @@ public class PleaDelegate implements Serializable {
         final UUID offenceId = pleaUpsert.getPleaModel().getOffenceId();
         if (nonNull(pleaUpsert.getPleaModel().getPlea())) {
             this.momento.getPleas().put(offenceId, pleaUpsert.getPleaModel().getPlea());
-        }else{
-            this.momento.getPleas().remove(offenceId);
         }
         if (nonNull(pleaUpsert.getPleaModel().getIndicatedPlea())) {
             this.momento.getIndicatedPlea().put(offenceId, pleaUpsert.getPleaModel().getIndicatedPlea());
-        }else{
-            this.momento.getIndicatedPlea().remove(offenceId);
         }
-
         if (nonNull(pleaUpsert.getPleaModel().getAllocationDecision())) {
             this.momento.getAllocationDecision().put(offenceId, pleaUpsert.getPleaModel().getAllocationDecision());
         }
@@ -117,68 +112,52 @@ public class PleaDelegate implements Serializable {
                 .setHearingId(hearingId)
                 .setPleaModel(pleaModel));
 
+        final Verdict existingOffenceVerdict = momento.getVerdicts().get(Optional.ofNullable(offenceId).orElse(courtApplicationId));
+        final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(Optional.ofNullable(offenceId).orElse(courtApplicationId));
+        final boolean guiltyVerdictForOffenceAlreadySet = nonNull(existingOffenceVerdict) && isGuiltyVerdict(existingOffenceVerdict.getVerdictType());
+
         if (nonNull(plea)) {
-            addConvictionDateEventForPlea(hearingId, guiltyPleaTypes, offenceId, prosecutionCaseId, courtApplicationId, events, plea);
-        } else if (nonNull(pleaModel.getIndicatedPlea()) ) {
+            if (guiltyPleaTypes.contains(plea.getPleaValue())) {
+                // do not update conviction date, if already present for offence
+                if (!convictionDateAlreadySetForOffence) {
+                    events.add(
+                            convictionDateAdded()
+                                    .setCaseId(prosecutionCaseId)
+                                    .setHearingId(hearingId)
+                                    .setOffenceId(offenceId)
+                                    .setConvictionDate(plea.getPleaDate())
+                                    .setCourtApplicationId(courtApplicationId));
+                }
+            } else if (!guiltyVerdictForOffenceAlreadySet && convictionDateAlreadySetForOffence) {
+                // its 'not guilty' plea and verdict is not already set to guilty
+                events.add(
+                        convictionDateRemoved()
+                                .setCaseId(prosecutionCaseId)
+                                .setHearingId(hearingId)
+                                .setOffenceId(offenceId)
+                                .setCourtApplicationId(courtApplicationId));
+            }
+
+        } else if (nonNull(pleaModel.getIndicatedPlea())) {
             // indicated plea logic for updating conviction dates is not changing as it is out of scope for DD-2825
             // and will be covered under a separate CR
-            addConvictionDateEventForIndicatedPlea(hearingId, pleaModel, offenceId, prosecutionCaseId, courtApplicationId, events);
-        } else if (canRemoveConvictionDate(offenceId, courtApplicationId)){
-            events.add(
-                    convictionDateRemoved()
-                            .setCaseId(prosecutionCaseId)
-                            .setHearingId(hearingId)
-                            .setOffenceId(offenceId)
-                            .setCourtApplicationId(courtApplicationId));
-        }
-
-            return events.stream();
-    }
-
-    private void addConvictionDateEventForIndicatedPlea(final UUID hearingId, final PleaModel pleaModel, final UUID offenceId, final UUID prosecutionCaseId, final UUID courtApplicationId, final List<Object> events) {
-        final IndicatedPlea indicatedPlea = pleaModel.getIndicatedPlea();
-        if(indicatedPlea.getIndicatedPleaValue() == INDICATED_GUILTY){
-            events.add(convictionDateAdded()
+            final IndicatedPlea indicatedPlea = pleaModel.getIndicatedPlea();
+            events.add(indicatedPlea.getIndicatedPleaValue() == INDICATED_GUILTY ?
+                    convictionDateAdded()
                             .setCaseId(prosecutionCaseId)
                             .setHearingId(hearingId)
                             .setOffenceId(offenceId)
                             .setConvictionDate(indicatedPlea.getIndicatedPleaDate())
-                            .setCourtApplicationId(courtApplicationId));
-        }else if(canRemoveConvictionDate(offenceId, courtApplicationId)) {
-            events.add(convictionDateRemoved()
+                            .setCourtApplicationId(courtApplicationId) :
+                    convictionDateRemoved()
                             .setCaseId(prosecutionCaseId)
                             .setHearingId(hearingId)
                             .setOffenceId(offenceId)
                             .setCourtApplicationId(courtApplicationId)
             );
         }
-    }
 
-    private void addConvictionDateEventForPlea(final UUID hearingId, final Set<String> guiltyPleaTypes, final UUID offenceId, final UUID prosecutionCaseId, final UUID courtApplicationId, final List<Object> events, final Plea plea) {
-        if (guiltyPleaTypes.contains(plea.getPleaValue())) {
-            events.add(
-                    convictionDateAdded()
-                            .setCaseId(prosecutionCaseId)
-                            .setHearingId(hearingId)
-                            .setOffenceId(offenceId)
-                            .setConvictionDate(plea.getPleaDate())
-                            .setCourtApplicationId(courtApplicationId));
-        } else if (canRemoveConvictionDate(offenceId, courtApplicationId)) {
-            // its 'not guilty' plea and verdict is not already set to guilty
-            events.add(
-                    convictionDateRemoved()
-                            .setCaseId(prosecutionCaseId)
-                            .setHearingId(hearingId)
-                            .setOffenceId(offenceId)
-                            .setCourtApplicationId(courtApplicationId));
-        }
-    }
-
-    private boolean canRemoveConvictionDate(final UUID offenceId,  final UUID courtApplicationId){
-        final Verdict existingOffenceVerdict = momento.getVerdicts().get(Optional.ofNullable(offenceId).orElse(courtApplicationId));
-        final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(Optional.ofNullable(offenceId).orElse(courtApplicationId));
-        final boolean guiltyVerdictForOffenceAlreadySet = nonNull(existingOffenceVerdict) && isGuiltyVerdict(existingOffenceVerdict.getVerdictType());
-        return !guiltyVerdictForOffenceAlreadySet && convictionDateAlreadySetForOffence;
+        return events.stream();
     }
 
     private UUID findCourtApplicationByOffence(final UUID offenceId) {
