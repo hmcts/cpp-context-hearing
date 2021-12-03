@@ -11,11 +11,6 @@
         <class>uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing</class>
         <class>uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote</class>
         <class>uk.gov.moj.cpp.hearing.persist.entity.ui.HearingOutcome</class>
-
-        <properties>
-            <property name="jboss.as.jpa.providerModule" value="org.hibernate:5.2"/>
-        </properties>
-
     </persistence-unit>
 
 </persistence>

@@ -13,13 +13,13 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UploadSubscriptionsCommandTemplates.buildUploadSubscriptionsCommand;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
-import org.junit.Ignore;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.subscription.UploadSubscriptionsCommand;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class UploadSubscriptionsIT extends AbstractIT {
