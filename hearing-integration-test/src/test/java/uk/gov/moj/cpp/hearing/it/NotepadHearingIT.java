@@ -152,6 +152,25 @@ public class NotepadHearingIT extends AbstractIT {
     }
 
     @Test
+    public void shouldParseDataForElectronicMonitoring(){
+        final String queryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "EMONE", LocalDate.now());
+        final String url = getBaseUri() + "/" + queryAPIEndPoint;
+        final String mediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+
+        poll(requestParams(url, mediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.label", is("Electronic Monitoring End - notify contractor")),
+                                withJsonPath("$.promptChoices", hasSize(5)),
+                                withJsonPath("$.promptChoices[3].label", is("Name of court that imposed electronic monitoring"))
+                        ))).toString();
+    }
+
+    @Test
     public void shouldParseDataForGrouping(){
         final String queryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "FCOMP", LocalDate.now());

@@ -379,10 +379,12 @@ public class ReadStoreResultLoader implements ResultLoader {
         final Set<String> crownCourtNames = getCrownCourtNames();
         final Set<String> scottishNICourtNames = getScottishNICourtNames();
         final Set<String> youthCourtNames = getYouthCourtNames();
+        final Set<String> magistrateCourtNames = getMagistrateCourtNames();
         judicialAuthorityNames.addAll(localJusticeAreaNames);
         judicialAuthorityNames.addAll(crownCourtNames);
         judicialAuthorityNames.addAll(scottishNICourtNames);
         judicialAuthorityNames.addAll(youthCourtNames);
+        judicialAuthorityNames.addAll(magistrateCourtNames);
         return judicialAuthorityNames;
     }
 
@@ -407,6 +409,15 @@ public class ReadStoreResultLoader implements ResultLoader {
 
     private Set<String> getCrownCourtNames() {
         return resultsQueryService.getCrownCourtsNameAddress(this.jsonEnvelope).payload()
+                .getJsonArray(ORGANISATIONUNITS).getValuesAs(JsonObject.class)
+                .stream()
+                .map(element -> element.getString(OUCODE_L_3_NAME, null))
+                .filter(Objects::nonNull)
+                .collect(toCollection(TreeSet::new));
+    }
+
+    private Set<String> getMagistrateCourtNames() {
+        return resultsQueryService.getMagistrateCourtsNameAddress(this.jsonEnvelope).payload()
                 .getJsonArray(ORGANISATIONUNITS).getValuesAs(JsonObject.class)
                 .stream()
                 .map(element -> element.getString(OUCODE_L_3_NAME, null))
