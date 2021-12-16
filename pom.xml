@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>10.3.2</version>
+        <version>10.4.0</version>
     </parent>
 
     <groupId>uk.gov.moj.cpp.hearing</groupId>
@@ -27,7 +27,7 @@
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.166</coredomain.version>
         <referencedata.version>7.0.66</referencedata.version>
-        <material.version>7.0.17</material.version>
+        <material.version>7.0.20</material.version>
         <results.version>7.0.73</results.version>
         <notification.notify.version>7.0.10</notification.notify.version>
         <stagingenforcement.version>7.0.26</stagingenforcement.version>
