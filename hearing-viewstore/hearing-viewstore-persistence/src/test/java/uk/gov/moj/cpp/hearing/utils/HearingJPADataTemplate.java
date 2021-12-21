@@ -8,6 +8,7 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.AllocationDecision;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingOffenceReportingRestrictionKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NotifiedPlea;
@@ -15,8 +16,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Plea;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -125,7 +124,7 @@ public final class HearingJPADataTemplate {
                 });
         randomStreamOf(1, uk.gov.moj.cpp.hearing.persist.entity.ha.ReportingRestriction.class)
                 .forEach(reportingRestriction -> {
-                    reportingRestriction.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
+                    reportingRestriction.setId(aNewHearingOffenceReportingRestrictionKey(hearingEntity.getId(), randomUUID()));
                     hearingEntity.getProsecutionCases().iterator().next()
                             .getDefendants().iterator().next()
                             .getOffences().iterator().next()
@@ -179,6 +178,10 @@ public final class HearingJPADataTemplate {
         return new HearingSnapshotKey(randomUUID(), hearingId);
     }
 
+    private static HearingOffenceReportingRestrictionKey aNewHearingOffenceReportingRestrictionKey(final UUID hearingId, final UUID offenceId) {
+        return new HearingOffenceReportingRestrictionKey(randomUUID(), hearingId, offenceId);
+    }
+
     public static HearingJPADataTemplate aNewHearingJPADataTemplate() {
         return new HearingJPADataTemplate();
     }
@@ -191,8 +194,7 @@ public final class HearingJPADataTemplate {
         return hearing;
     }
 
-
-    private uk.gov.moj.cpp.hearing.persist.entity.ha.Target getTarget(){
+    private uk.gov.moj.cpp.hearing.persist.entity.ha.Target getTarget() {
         uk.gov.moj.cpp.hearing.persist.entity.ha.Target target = new uk.gov.moj.cpp.hearing.persist.entity.ha.Target();
         target.setResultLinesJson(null);
         target.setResultLines(new HashSet<>());

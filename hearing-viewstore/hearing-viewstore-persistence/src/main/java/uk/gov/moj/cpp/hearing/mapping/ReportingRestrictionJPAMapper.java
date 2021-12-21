@@ -1,7 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingOffenceReportingRestrictionKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ReportingRestriction;
 
 import java.util.HashSet;
@@ -16,18 +16,16 @@ import javax.enterprise.context.ApplicationScoped;
 public class ReportingRestrictionJPAMapper {
 
     public ReportingRestriction toJPA(final Hearing hearing, final UUID offenceId, final uk.gov.justice.core.courts.ReportingRestriction pojo) {
+
         if (null == pojo) {
             return null;
         }
+
         final ReportingRestriction reportingRestriction = new ReportingRestriction();
-
-        reportingRestriction.setId(new HearingSnapshotKey(pojo.getId(), hearing.getId()));
-        reportingRestriction.setOffenceId(offenceId);
-
+        reportingRestriction.setId(new HearingOffenceReportingRestrictionKey(pojo.getId(), hearing.getId(), offenceId));
         reportingRestriction.setJudicialResultId(pojo.getJudicialResultId());
         reportingRestriction.setLabel(pojo.getLabel());
         reportingRestriction.setOrderedDate(pojo.getOrderedDate());
-
         return reportingRestriction;
     }
 
@@ -49,7 +47,7 @@ public class ReportingRestrictionJPAMapper {
         if (null == pojos) {
             return new HashSet<>();
         }
-        return pojos.stream().map(pojo -> toJPA(hearing, offenceId, pojo)).collect(Collectors.toSet());
+        return pojos.stream().distinct().map(pojo -> toJPA(hearing, offenceId, pojo)).collect(Collectors.toSet());
     }
 
     public List<uk.gov.justice.core.courts.ReportingRestriction> fromJPA(final Set<ReportingRestriction> entities) {

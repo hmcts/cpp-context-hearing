@@ -15,6 +15,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingOffenceReportingRestrictionKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
@@ -63,7 +64,7 @@ public class HearingTestUtils {
     }
 
     public static Hearing buildHearingWithRandomDefendants(final Defendant... defendants) {
-        final UUID hearingId = UUID.randomUUID();
+        final UUID hearingId = randomUUID();
         final Defendant defendant1 = buildRandomDefendant(hearingId);
         final Defendant defendant2 = buildRandomDefendantNoDoBNoNINO(hearingId);
         final Set<Defendant> defendantSet = asSet(defendants);
@@ -124,7 +125,7 @@ public class HearingTestUtils {
     public static Hearing buildHearingWithRandomRoom(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
                                                      final Set<ProsecutionCase> cases) {
         final Hearing hearing = buildHearing1(hearingId, startDateTime, endDateTime, cases);
-        hearing.getCourtCentre().setRoomId(UUID.randomUUID());
+        hearing.getCourtCentre().setRoomId(randomUUID());
         hearing.getCourtCentre().setRoomName(randomIdentifier(3));
         return hearing;
     }
@@ -193,7 +194,7 @@ public class HearingTestUtils {
         final Defendant defendant = new Defendant();
         final PersonDefendant personDefendant = new PersonDefendant();
         final Person person = new Person();
-        defendant.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        defendant.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         person.setFirstName(randomIdentifier(0));
         person.setLastName(randomIdentifier(0));
         person.setDateOfBirth(parse("1970-01-01T00:00:00Z").toLocalDate());
@@ -209,7 +210,7 @@ public class HearingTestUtils {
         final Defendant defendant = new Defendant();
         final PersonDefendant personDefendant = new PersonDefendant();
         final Person person = new Person();
-        defendant.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingId));
+        defendant.setId(new HearingSnapshotKey(randomUUID(), hearingId));
         person.setFirstName(randomIdentifier(0));
         person.setLastName(randomIdentifier(0));
         personDefendant.setPersonDetails(person);
@@ -223,9 +224,9 @@ public class HearingTestUtils {
         final Defendant defendant = new Defendant();
         final Organisation legalEntityOrganisation = new Organisation();
         legalEntityOrganisation.setName(randomIdentifier(10));
-        legalEntityOrganisation.setId(UUID.randomUUID());
+        legalEntityOrganisation.setId(randomUUID());
         defendant.setLegalEntityOrganisation(legalEntityOrganisation);
-        defendant.setId(new HearingSnapshotKey(UUID.randomUUID(), null));
+        defendant.setId(new HearingSnapshotKey(randomUUID(), null));
         return defendant;
     }
 
@@ -296,8 +297,8 @@ public class HearingTestUtils {
 
     private static ReportingRestriction buildReportingRestriction(final Hearing hearing, final Offence offence) {
         ReportingRestriction reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()));
-        reportingRestriction.setJudicialResultId(new HearingSnapshotKey(UUID.randomUUID(), hearing.getId()).getId());
+        reportingRestriction.setId(new HearingOffenceReportingRestrictionKey(randomUUID(), hearing.getId(),randomUUID()));
+        reportingRestriction.setJudicialResultId(new HearingSnapshotKey(randomUUID(), hearing.getId()).getId());
         reportingRestriction.setLabel("The result label provided from reference data during the resulting process");
         reportingRestriction.setOffence(offence);
         reportingRestriction.setOrderedDate(now().toLocalDate());

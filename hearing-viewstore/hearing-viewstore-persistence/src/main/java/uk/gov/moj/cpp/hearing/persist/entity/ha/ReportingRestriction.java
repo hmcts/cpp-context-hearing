@@ -17,16 +17,13 @@ import javax.persistence.Table;
 public class ReportingRestriction {
 
     @EmbeddedId
-    private HearingSnapshotKey id;
+    private HearingOffenceReportingRestrictionKey id;
 
     @ManyToOne
     @JoinColumns({
             @JoinColumn(name = "offence_id", insertable = false, updatable = false, referencedColumnName = "id"),
             @JoinColumn(name = "hearing_id", insertable = false, updatable = false, referencedColumnName = "hearing_id")})
     private Offence offence;
-
-    @Column(name = "offence_id")
-    private UUID offenceId;
 
     @Column(name = "judicial_result_id")
     private UUID judicialResultId;
@@ -41,11 +38,11 @@ public class ReportingRestriction {
         //For JPA
     }
 
-    public HearingSnapshotKey getId() {
+    public HearingOffenceReportingRestrictionKey getId() {
         return id;
     }
 
-    public void setId(final HearingSnapshotKey id) {
+    public void setId(final HearingOffenceReportingRestrictionKey id) {
         this.id = id;
     }
 
@@ -55,14 +52,6 @@ public class ReportingRestriction {
 
     public void setOffence(final Offence offence) {
         this.offence = offence;
-    }
-
-    public UUID getOffenceId() {
-        return offenceId;
-    }
-
-    public void setOffenceId(final UUID offenceId) {
-        this.offenceId = offenceId;
     }
 
     public UUID getJudicialResultId() {
@@ -102,7 +91,7 @@ public class ReportingRestriction {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, offence, offenceId, judicialResultId, label, orderedDate);
+        return Objects.hash(id);
     }
 
     @Override
@@ -110,7 +99,6 @@ public class ReportingRestriction {
         return "ReportingRestriction{" +
                 "id=" + id +
                 ", offence=" + offence +
-                ", offenceId=" + offenceId +
                 ", judicialResultId=" + judicialResultId +
                 ", label='" + label + '\'' +
                 ", orderedDate=" + orderedDate +
