@@ -172,7 +172,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine"})
 public class HearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = -6059812881894748570L;
@@ -375,18 +375,22 @@ public class HearingAggregate implements Aggregate {
         return apply(defenceCounselDelegate.updateDefenceCounsel(defenceCounsel, hearingId));
     }
 
+
     public Stream<Object> initiate(final Hearing hearing) {
         if (hearing.getHasSharedResults() == null) {
             hearing.setHasSharedResults(false);
         }
 
         //check if offence count is missing for crown court hearing
+        //removing this bit of code here as offence count is not a mandatory field to initiatehearing
+        /*
         if (JurisdictionType.CROWN.equals(hearing.getJurisdictionType()) && hearing.getProsecutionCases() != null) {
             final List<Offence> offences = this.hearingDelegate.getAllOffencesMissingCount(hearing);
             if (!offences.isEmpty()) {
                 return apply(this.hearingDelegate.ignoreHearingInitiate(offences, hearing.getId()));
             }
         }
+        */
         return apply(this.hearingDelegate.initiate(hearing));
     }
 
