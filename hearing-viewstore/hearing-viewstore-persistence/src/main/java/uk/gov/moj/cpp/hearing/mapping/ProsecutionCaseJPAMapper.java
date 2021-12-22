@@ -1,5 +1,8 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
@@ -7,7 +10,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +47,7 @@ public class ProsecutionCaseJPAMapper {
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
         prosecutionCase.setId(new HearingSnapshotKey(pojo.getId(), hearing.getId()));
 
-        if (Objects.nonNull(pojo.getProsecutor())) {
+        if (nonNull(pojo.getProsecutor())) {
             prosecutionCase.setCpsProsecutor(cpsProsecutorJPAMapper.toJPA(pojo.getProsecutor()));
         }
         prosecutionCase.setProsecutionCaseIdentifier(prosecutionCaseIdentifierJPAMapper.toJPA(pojo.getProsecutionCaseIdentifier()));
@@ -77,7 +79,31 @@ public class ProsecutionCaseJPAMapper {
                 .withTrialReceiptType(entity.getTrialReceiptType())
                 .withCaseMarkers(caseMarkerJPAMapper.fromJPA(entity.getMarkers()));
 
-        if (Objects.nonNull(entity.getCpsProsecutor())) {
+        if (nonNull(entity.getCpsProsecutor())) {
+            prosecutionCase.withProsecutor(cpsProsecutorJPAMapper.fromJPA(entity.getCpsProsecutor()));
+        }
+
+        prosecutionCase.withProsecutionCaseIdentifier(prosecutionCaseIdentifierJPAMapper.fromJPA(entity.getProsecutionCaseIdentifier()));
+        return prosecutionCase.build();
+    }
+
+    uk.gov.justice.core.courts.ProsecutionCase fromJPAWithCourtListRestrictions(final ProsecutionCase entity) {
+        if (null == entity) {
+            return null;
+        }
+
+        final uk.gov.justice.core.courts.ProsecutionCase.Builder prosecutionCase = uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase()
+                .withId(entity.getId().getId())
+                .withOriginatingOrganisation(entity.getOriginatingOrganisation())
+                .withInitiationCode(entity.getInitiationCode())
+                .withCaseStatus(entity.getCaseStatus())
+                .withStatementOfFacts(entity.getStatementOfFacts())
+                .withStatementOfFactsWelsh(entity.getStatementOfFactsWelsh())
+                .withDefendants(defendantJPAMapper.fromJPAWithCourtListRestrictions(entity.getDefendants()))
+                .withTrialReceiptType(entity.getTrialReceiptType())
+                .withCaseMarkers(caseMarkerJPAMapper.fromJPA(entity.getMarkers()));
+
+        if (nonNull(entity.getCpsProsecutor())) {
             prosecutionCase.withProsecutor(cpsProsecutorJPAMapper.fromJPA(entity.getCpsProsecutor()));
         }
 
@@ -97,6 +123,16 @@ public class ProsecutionCaseJPAMapper {
             return new ArrayList<>();
         }
         return entities.stream().filter(pc -> !CASE_STATUS_EJECTED.equals(pc.getCaseStatus())).map(this::fromJPA).collect(Collectors.toList());
+    }
+
+    public List<uk.gov.justice.core.courts.ProsecutionCase> fromJPAWithCourtListRestrictions(Set<ProsecutionCase> entities) {
+        if (null == entities) {
+            return new ArrayList<>();
+        }
+        return entities.stream()
+                .filter(pc -> nonNull(pc) && !CASE_STATUS_EJECTED.equals(pc.getCaseStatus()))
+                .filter(pc -> isNull(pc.getCourtListRestricted()) || !pc.getCourtListRestricted())
+                .map(this::fromJPAWithCourtListRestrictions).collect(Collectors.toList());
     }
 
 }

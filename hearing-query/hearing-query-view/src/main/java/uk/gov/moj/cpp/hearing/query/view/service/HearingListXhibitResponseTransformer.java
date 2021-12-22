@@ -245,22 +245,23 @@ public class HearingListXhibitResponseTransformer {
     private List<CaseDetail> buildCaseDetailsForStandaloneApplication(final Hearing hearing, final HearingEvent hearingEvent, final BigInteger isActiveHearing, final BigInteger hearingprogessValue) {
         final List<CaseDetail> caseDetailList = new ArrayList<>();
 
-        hearing.getCourtApplications()
-                .forEach(courtApplication -> {
-                    final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication.getApplicant(), StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
-                    final PublicNotices publicNotices = getPublicNoticesForCourtApplication(courtApplication);
-                    caseDetailList.add(buildCaseDetail(hearing,
-                            hearingEvent,
-                            isActiveHearing, defendants,
-                            courtApplication.getApplicationReference(),
-                            hearingprogessValue, publicNotices));
-                });
-
+        if (nonNull(hearing.getCourtApplications())) {
+            hearing.getCourtApplications()
+                    .forEach(courtApplication -> {
+                        final List<Defendant> defendants = getDefendantsForStandaloneApplication(courtApplication.getApplicant(), StringUtils.isNotEmpty(hearing.getReportingRestrictionReason()));
+                        final PublicNotices publicNotices = getPublicNoticesForCourtApplication(courtApplication);
+                        caseDetailList.add(buildCaseDetail(hearing,
+                                hearingEvent,
+                                isActiveHearing, defendants,
+                                courtApplication.getApplicationReference(),
+                                hearingprogessValue, publicNotices));
+                    });
+        }
         return caseDetailList;
     }
 
     private List<Defendant> getDefendantsForStandaloneApplication(final CourtApplicationParty applicant, final boolean needToBeOmitted) {
-        if (needToBeOmitted || (Objects.isNull(applicant.getPersonDetails()) && Objects.isNull(applicant.getOrganisation()))) {
+        if (needToBeOmitted || Objects.isNull(applicant) || (Objects.isNull(applicant.getPersonDetails()) && Objects.isNull(applicant.getOrganisation()))) {
             return asList(defendant().build());
         }
         if (nonNull(applicant.getPersonDetails())) {

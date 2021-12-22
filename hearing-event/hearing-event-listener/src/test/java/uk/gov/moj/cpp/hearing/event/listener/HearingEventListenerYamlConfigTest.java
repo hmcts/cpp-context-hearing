@@ -2,8 +2,8 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertThat;
 
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -13,7 +13,6 @@ import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersEnrichedWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
-import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceWitnessAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
@@ -27,12 +26,11 @@ import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundPleaForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.FoundVerdictForHearingToInherit;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAdjourned;
-import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
-import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiateIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
@@ -45,15 +43,15 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingResultLineSharedDatesUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
-import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
-import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
+import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.NowsVariantsSavedEvent;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesQueried;
+import uk.gov.moj.cpp.hearing.domain.event.OutstandingFinesRequested;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstCase;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
@@ -205,6 +203,7 @@ public class HearingEventListenerYamlConfigTest {
                 HearingDeletedEventListener.class,
                 HearingUnallocatedEventListener.class,
                 ReusableInfoEventListener.class,
+                CourtListRestrictionEventListener.class,
                 CustodyTimeLimitEventListener.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();

@@ -413,4 +413,12 @@ public class HearingTestUtils {
         }
     }
 
+    public static Hearing buildHearingWithDefendantCourtListRestriction() {
+        final UUID hearingId = randomUUID();
+        Defendant defendant1 = buildDefendant1(hearingId);
+        defendant1.setCourtListRestricted(true);
+        final Defendant defendant2 = buildDefendant2(hearingId);
+        final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
+        return buildHearing1(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
+    }
 }

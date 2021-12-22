@@ -395,4 +395,7 @@ subscriptions_descriptor:
         - name: public.events.progression.custody-time-limit-extended
           schema_uri: http://justice.gov.uk/core/courts/public.events.progression.custody-time-limit-extended.json
 
+        - name: public.listing.court-list-restricted
+          schema_uri: http://justice.gov.uk/listing/courts/court-list-restricted.json
+
       event_source_name: public.event.source

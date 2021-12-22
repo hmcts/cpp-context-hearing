@@ -175,6 +175,9 @@ public class Defendant {
     @Column(name = "proceedingsConcluded")
     private boolean proceedingsConcluded;
 
+    @Column(name = "is_court_list_restricted")
+    private Boolean isCourtListRestricted;
+
     public Defendant() {
         //For JPA
     }
@@ -363,5 +366,11 @@ public class Defendant {
         this.courtProceedingsInitiated = courtProceedingsInitiated;
     }
 
+    public Boolean getCourtListRestricted() {
+        return isCourtListRestricted;
+    }
 
+    public void setCourtListRestricted(Boolean courtListRestricted) {
+        isCourtListRestricted = courtListRestricted;
+    }
 }

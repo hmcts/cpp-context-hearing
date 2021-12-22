@@ -1,23 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-import uk.gov.justice.services.test.utils.core.http.ResponseData;
-import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import javax.json.JsonObject;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -25,7 +7,6 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.core.AllOf.allOf;
@@ -52,13 +33,33 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.json.JsonObject;
+
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
+
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     final private static UUID RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER = RESUME_HEARING_EVENT_DEFINITION_ID;
     private static final String LISTING_COMMAND_PUBLISH_COURT_LIST = "hearing.command.publish-court-list";
     private static final String MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST = "application/vnd.hearing.publish-court-list+json";
-    private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191026163445\\.xml";
+    public static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191026163445\\.xml";
     private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_20 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191020163445\\.xml";
     private static final String XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_21 = "/xhibit-gateway/send-to-xhibit/WebPage.*.20191021163445\\.xml";
     private ZonedDateTime eventTime;
@@ -98,12 +99,12 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
                 "                                    <publicnotice>Yes</publicnotice>\n" +
                 "                                </publicnotices>";
 
-        assertThat(filePayload, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+        assertThat(filePayload, containsString(E20903_PCO_TYPE));
         assertThat(filePayload, containsString(expectedDefendantXMLValueForWeb));
         assertThat(filePayloadForPubDisplay, containsString("activecase>1</activecase"));
         assertThat(filePayloadForPubDisplay, containsString(expectedDefendantXMLValueForPublic));
         assertThat(filePayloadForPubDisplay, containsString(expectedPublicNoticeXMLValueForPublic));
-        assertThat(filePayloadForPubDisplay, containsString("E20903_PCO_Type>E20903_Prosecution_Opening</E20903_PCO_Type"));
+        assertThat(filePayloadForPubDisplay, containsString(E20903_PCO_TYPE));
 
         assertThat(filePayloadForPubDisplay, containsString("<judgename>Recorder Mark J Ainsworth</judgename>"));
     }
@@ -180,24 +181,6 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
         publishCourtListSteps.verifyLatestHearingEvents(hearing.getHearing(), eventTime.toLocalDate(), expectedHearingEventId);
     }
 
-    private String sendPublishCourtListCommand(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
-
-        try (final Utilities.EventListener eventTopic = listenFor("hearing.event.publish-court-list-export-successful", "hearing.event")
-                .withFilter(isJson(withJsonPath("$.publishStatus", is("EXPORT_SUCCESSFUL")
-                )))) {
-
-            makeCommand(requestSpec, LISTING_COMMAND_PUBLISH_COURT_LIST)
-                    .ofType(MEDIA_TYPE_LISTING_COMMAND_PUBLISH_COURT_LIST)
-                    .withPayload(publishCourtListJsonObject.toString())
-                    .withCppUserId(USER_ID_VALUE_AS_ADMIN)
-
-                    .executeSuccessfully();
-
-            eventTopic.waitFor();
-        }
-        return courtCentreId;
-    }
-
     private String sendPublishCourtListCommandForExportFailed(final JsonObject publishCourtListJsonObject, final String courtCentreId) {
 
         try (final Utilities.EventListener eventTopic = listenFor("hearing.event.publish-court-list-export-failed", "hearing.event")
@@ -214,10 +197,6 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
             eventTopic.waitFor();
         }
         return courtCentreId;
-    }
-
-    private JsonObject buildPublishCourtListJsonString(final String courtCentreId, final String day) {
-        return createObjectBuilder().add("courtCentreId", courtCentreId).add("createdTime", "2019-10-" + day + "T16:34:45.132Z").build();
     }
 
     private CommandHelpers.InitiateHearingCommandHelper createHearingEvent(final UUID hearingEventId, final String courtRoomId, final String defenceCounselId, final UUID eventDefinitionId, final ZonedDateTime eventTime, final Optional<UUID> hearingTypeId, String courtCenter) throws NoSuchAlgorithmException {

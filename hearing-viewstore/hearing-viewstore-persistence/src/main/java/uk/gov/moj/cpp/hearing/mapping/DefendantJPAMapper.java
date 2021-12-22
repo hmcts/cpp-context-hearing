@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 import uk.gov.justice.core.courts.LegalEntityDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
@@ -130,6 +131,15 @@ public class DefendantJPAMapper {
         if (null == entities) {
             return new ArrayList<>();
         }
-        return entities.stream().map(entity -> fromJPA(entity)).collect(Collectors.toList());
+        return entities.stream().map(this::fromJPA).collect(Collectors.toList());
+    }
+
+    public List<uk.gov.justice.core.courts.Defendant> fromJPAWithCourtListRestrictions(final Set<Defendant> entities) {
+        if (null == entities) {
+            return new ArrayList<>();
+        }
+        return entities.stream()
+                .filter(defendant -> nonNull(defendant) && (isNull(defendant.getCourtListRestricted()) || !defendant.getCourtListRestricted()))
+                .map(this::fromJPA).collect(Collectors.toList());
     }
 }

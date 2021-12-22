@@ -32,6 +32,7 @@ import uk.gov.justice.hearing.courts.referencedata.LocalJusticeAreasResult;
 import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.justice.services.test.utils.persistence.DatabaseCleaner;
 import uk.gov.justice.services.test.utils.persistence.TestJdbcConnectionProvider;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 import uk.gov.moj.cpp.hearing.utils.StubPerExecution;
@@ -69,7 +70,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class AbstractIT {
-
+    public static final String CONTEXT_NAME = "hearing";
     public static final Properties ENDPOINT_PROPERTIES = new Properties();
     protected static final UUID USER_ID_VALUE = randomUUID();
     protected static final UUID USER_ID_VALUE_AS_ADMIN = fromString("46986cb7-eefa-48b3-b7e2-34431c3265e5");
@@ -357,5 +358,10 @@ public class AbstractIT {
 
     protected void stubProsecutionCases(final Hearing hearing) {
         hearing.getProsecutionCases().forEach(prosecutionCase -> stubGetProgressionProsecutionCases(prosecutionCase.getId()));
+    }
+
+    protected void cleanDatabase(final String dbTableName) {
+        final DatabaseCleaner databaseCleaner = new DatabaseCleaner();
+        databaseCleaner.cleanViewStoreTables(CONTEXT_NAME, dbTableName);
     }
 }

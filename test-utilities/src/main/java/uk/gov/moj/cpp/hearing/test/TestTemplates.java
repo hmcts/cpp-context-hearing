@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.test;
 
 import static java.time.LocalDate.now;
+import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
@@ -576,6 +577,31 @@ public class TestTemplates {
                                     .setDefendantType(PERSON)
                                     .setHearingLanguage(ENGLISH)
                                     .setJurisdictionType(CROWN)
+                                    .setMinimumAssociatedPerson(true)
+                                    .setMinimumDefenceOrganisation(true)
+                            , courtId, courtRoomId, courtRoomName, localDate, defenceCounselId, caseId, hearingTypeId).build());
+        }
+
+        public static InitiateHearingCommand initiateHearingTemplateWithParamNoReportingRestriction(final UUID courtId, final UUID courtRoomId, final String courtRoomName, final LocalDate localDate, final UUID defenceCounselId, final UUID caseId, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
+                                    .setDefendantType(PERSON)
+                                    .setHearingLanguage(ENGLISH)
+                                    .setJurisdictionType(CROWN)
+                                    .setReportingRestriction(false)
+                                    .setMinimumAssociatedPerson(true)
+                                    .setMinimumDefenceOrganisation(true)
+                            , courtId, courtRoomId, courtRoomName, localDate, defenceCounselId, caseId, hearingTypeId).build());
+        }
+
+        public static InitiateHearingCommand initiateHearingTemplateForApplicationNoReportingRestriction(final UUID courtId, final UUID courtRoomId, final String courtRoomName, final LocalDate localDate, final UUID defenceCounselId, final UUID caseId, final Optional<UUID> hearingTypeId) throws NoSuchAlgorithmException {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
+                                    .setStructure(emptyMap())
+                                    .setDefendantType(PERSON)
+                                    .setHearingLanguage(ENGLISH)
+                                    .setJurisdictionType(CROWN)
+                                    .setReportingRestriction(false)
                                     .setMinimumAssociatedPerson(true)
                                     .setMinimumDefenceOrganisation(true)
                             , courtId, courtRoomId, courtRoomName, localDate, defenceCounselId, caseId, hearingTypeId).build());

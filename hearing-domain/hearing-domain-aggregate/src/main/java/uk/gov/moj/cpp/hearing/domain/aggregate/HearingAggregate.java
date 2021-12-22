@@ -82,6 +82,7 @@ import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitExtended;
@@ -995,5 +996,18 @@ public class HearingAggregate implements Aggregate {
 
     }
 
-
+    public Stream<Object> courtListRestrictions(final uk.gov.justice.hearing.courts.CourtListRestricted courtListRestrictedCmd) {
+        return apply(Stream.of(CourtListRestricted.courtListRestricted()
+                .withCaseIds(courtListRestrictedCmd.getCaseIds())
+                .withCourtApplicationApplicantIds(courtListRestrictedCmd.getCourtApplicationApplicantIds())
+                .withCourtApplicationIds(courtListRestrictedCmd.getCourtApplicationIds())
+                .withCourtApplicationRespondentIds(courtListRestrictedCmd.getCourtApplicationRespondentIds())
+                .withCourtApplicationType(courtListRestrictedCmd.getCourtApplicationType())
+                .withDefendantIds(courtListRestrictedCmd.getDefendantIds())
+                .withRestrictCourtList(courtListRestrictedCmd.getRestrictCourtList())
+                .withHearingId(courtListRestrictedCmd.getHearingId())
+                .withOffenceIds(courtListRestrictedCmd.getOffenceIds())
+                .withCourtApplicationType(courtListRestrictedCmd.getCourtApplicationType())
+                .build()));
+    }
 }

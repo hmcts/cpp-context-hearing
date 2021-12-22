@@ -155,7 +155,7 @@ public class HearingService {
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
                 .map(hearingEvent -> hearingRepository.findBy(hearingEvent.getHearingId()))
-                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .map(ha -> hearingJPAMapper.fromJPAWithCourtListRestrictions(ha))
                 .collect(toList());
 
 
@@ -176,7 +176,7 @@ public class HearingService {
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = hearingsForDate
                 .stream()
-                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .map(ha -> hearingJPAMapper.fromJPAWithCourtListRestrictions(ha))
                 .collect(toList());
 
         final List<HearingEvent> allHearingEvents = hearingEventRepository.findBy(courtCentreList, localDate.atStartOfDay(ZoneOffset.UTC), cppHearingEventIds);

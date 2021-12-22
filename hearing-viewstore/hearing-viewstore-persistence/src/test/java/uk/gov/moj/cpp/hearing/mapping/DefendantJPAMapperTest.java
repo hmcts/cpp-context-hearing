@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static org.apache.deltaspike.core.util.ArraysUtils.asSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertNotNull;
@@ -23,6 +24,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.junit.Assert;
@@ -144,6 +146,25 @@ public class DefendantJPAMapperTest {
         Defendant results = defendantJPAMapper.fromJPA(defendantEntity);
         Assert.assertNull(results.getLegalEntityDefendant());
         assertNotNull(results.getPersonDefendant());
+    }
+
+    @Test
+    public void testFromJPAMapWithDefendantCourtListRestriction() {
+        uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity1 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        UUID hearingID = UUID.randomUUID();
+        defendantEntity1.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingID));
+        defendantEntity1.setPersonDefendant(personDefendant1);
+        defendantEntity1.setCourtListRestricted(true);
+
+        uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendantEntity2 = new uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant();
+        defendantEntity2.setId(new HearingSnapshotKey(UUID.randomUUID(), hearingID));
+        defendantEntity2.setPersonDefendant(personDefendant2);
+        defendantEntity2.setCourtListRestricted(false);
+
+        List<Defendant> results = defendantJPAMapper.fromJPAWithCourtListRestrictions(asSet(defendantEntity1, defendantEntity2));
+        Assert.assertEquals(1, results.size());
     }
 
     @Test

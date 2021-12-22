@@ -16,14 +16,17 @@ import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:CommentedOutCodeLine", "squid:S1172"})
 @ApplicationScoped
@@ -46,6 +49,7 @@ public class HearingJPAMapper {
     private HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper;
     private ApprovalRequestedJPAMapper approvalRequestedJPAMapper;
     private HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository;
+    private ApplicationCourtListRestrictionMapper applicationCourtListRestrictionMapper;
 
     @Inject
     public HearingJPAMapper(final CourtCentreJPAMapper courtCentreJPAMapper,
@@ -64,7 +68,8 @@ public class HearingJPAMapper {
                             final HearingInterpreterIntermediaryJPAMapper hearingInterpreterIntermediaryJPAMapper,
                             final HearingCompanyRepresentativeJPAMapper hearingCompanyRepresentativeJPAMapper,
                             final ApprovalRequestedJPAMapper approvalRequestedJPAMapper,
-                            final HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository) {
+                            final HearingYouthCourtDefendantsRepository hearingYouthCourtDefendantsRepository,
+                            final ApplicationCourtListRestrictionMapper applicationCourtListRestrictionMapper) {
         this.courtCentreJPAMapper = courtCentreJPAMapper;
         this.hearingDefenceCounselJPAMapper = hearingDefenceCounselJPAMapper;
         this.defendantAttendanceJPAMapper = defendantAttendanceJPAMapper;
@@ -82,6 +87,7 @@ public class HearingJPAMapper {
         this.hearingCompanyRepresentativeJPAMapper = hearingCompanyRepresentativeJPAMapper;
         this.approvalRequestedJPAMapper = approvalRequestedJPAMapper;
         this.hearingYouthCourtDefendantsRepository = hearingYouthCourtDefendantsRepository;
+        this.applicationCourtListRestrictionMapper = applicationCourtListRestrictionMapper;
     }
 
     //to keep cditester happy
@@ -163,6 +169,52 @@ public class HearingJPAMapper {
                 .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
                 .build();
     }
+
+    public uk.gov.justice.core.courts.Hearing fromJPAWithCourtListRestrictions(final Hearing entity) {
+        if (null == entity) {
+            return null;
+        }
+        List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(entity.getCourtApplicationsJson());
+        if (!isEmpty(courtApplications)) {
+            courtApplications = courtApplications.stream().filter(ca -> !EJECTED.equals(ca.getApplicationStatus())).collect(toList());
+
+            final Optional<ApplicationCourtListRestriction> applicationCourtListRestriction = applicationCourtListRestrictionMapper.getCourtListRestriction(entity.getRestrictCourtListJson());
+            if(applicationCourtListRestriction.isPresent()) {
+                courtApplications = applicationCourtListRestrictionMapper.getCourtApplications(courtApplications, applicationCourtListRestriction.get());
+            }
+        }
+
+        return uk.gov.justice.core.courts.Hearing.hearing()
+                .withId(entity.getId())
+                .withCourtCentre(courtCentreJPAMapper.fromJPA(entity.getCourtCentre()))
+                .withDefenceCounsels(hearingDefenceCounselJPAMapper.fromJPA(entity.getDefenceCounsels()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withDefendantReferralReasons(defendantReferralReasonsJPAMapper.fromJPA(entity.getDefendantReferralReasons()))
+                .withHasSharedResults(entity.getHasSharedResults())
+                .withIsBoxHearing(entity.getIsBoxHearing())
+                .withIsVacatedTrial(entity.getIsVacatedTrial())
+                .withHearingCaseNotes(hearingCaseNoteJPAMapper.fromJPA(entity.getHearingCaseNotes()))
+                .withHearingDays(hearingDayJPAMapper.fromJPA(entity.getHearingDays()))
+                .withHearingLanguage(entity.getHearingLanguage())
+                .withJudiciary(judicialRoleJPAMapper.fromJPA(entity.getJudicialRoles()))
+                .withJurisdictionType(entity.getJurisdictionType())
+                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPAWithCourtListRestrictions(entity.getProsecutionCases()))
+                .withProsecutionCounsels(hearingProsecutionCounselJPAMapper.fromJPA(entity.getProsecutionCounsels()))
+                .withReportingRestrictionReason(entity.getReportingRestrictionReason())
+                .withType(hearingTypeJPAMapper.fromJPA(entity.getHearingType()))
+                .withDefendantAttendance(defendantAttendanceJPAMapper.fromJPA(entity.getDefendantAttendance()))
+                .withCourtApplications(courtApplications == null || courtApplications.isEmpty() ? null : courtApplications)
+                .withRespondentCounsels(hearingRespondentCounselJPAMapper.fromJPA(entity.getRespondentCounsels()))
+                .withApplicantCounsels(hearingApplicantCounselJPAMapper.fromJPA(entity.getApplicantCounsels()))
+                .withIntermediaries(hearingInterpreterIntermediaryJPAMapper.fromJPA(entity.getHearingInterpreterIntermediaries()))
+                .withCompanyRepresentatives(hearingCompanyRepresentativeJPAMapper.fromJPA(entity.getCompanyRepresentatives()))
+                .withApprovalsRequested(approvalRequestedJPAMapper.fromJPA(entity.getApprovalsRequested()))
+                .withYouthCourtDefendantIds(getDefendantsSelectedForYouthDefendant(entity))
+                .withEarliestNextHearingDate(entity.getEarliestNextHearingDate())
+                .build();
+    }
+
+
 
     @SuppressWarnings("squid:S1172")
     private List<UUID> getDefendantsSelectedForYouthDefendant(final Hearing hearing){

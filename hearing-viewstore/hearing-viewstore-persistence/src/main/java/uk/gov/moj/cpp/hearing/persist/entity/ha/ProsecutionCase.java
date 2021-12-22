@@ -61,6 +61,9 @@ public class ProsecutionCase {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "prosecutionCase", orphanRemoval = true)
     private Set<CaseMarker> markers = new HashSet<>();
 
+    @Column(name = "is_court_list_restricted")
+    private Boolean isCourtListRestricted;
+
     public ProsecutionCase() {
         //For JPA
     }
@@ -160,6 +163,14 @@ public class ProsecutionCase {
 
     public void setTrialReceiptType(final String trialReceiptType) {
         this.trialReceiptType = trialReceiptType;
+    }
+
+    public Boolean getCourtListRestricted() {
+        return isCourtListRestricted;
+    }
+
+    public void setCourtListRestricted(Boolean courtListRestricted) {
+        isCourtListRestricted = courtListRestricted;
     }
 
     @Override

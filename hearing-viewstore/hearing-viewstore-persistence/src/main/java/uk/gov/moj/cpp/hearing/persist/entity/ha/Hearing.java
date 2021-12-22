@@ -132,6 +132,8 @@ public class Hearing {
     @Column(name = "earliest_next_hearing_date")
     private ZonedDateTime earliestNextHearingDate;
 
+    @Column(name = "restrict_court_list_json", columnDefinition = "TEXT")
+    private String restrictCourtListJson;
 
     public Hearing() {
         //For JPA
@@ -423,6 +425,14 @@ public class Hearing {
     public Hearing setEarliestNextHearingDate(final ZonedDateTime earliestNextHearingDate) {
         this.earliestNextHearingDate = earliestNextHearingDate;
         return this;
+    }
+
+    public String getRestrictCourtListJson() {
+        return restrictCourtListJson;
+    }
+
+    public void setRestrictCourtListJson(String restrictCourtListJson) {
+        this.restrictCourtListJson = restrictCourtListJson;
     }
 
     @Override

@@ -1,12 +1,10 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -46,11 +44,11 @@ import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantReferralReason;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
+import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,7 +63,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HearingJPAMapperTest {
@@ -651,4 +648,96 @@ public class HearingJPAMapperTest {
         );
     }
 
+    @Test
+    public void testFromJPAWithCourtListRestrictionsForCase() {
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearingEntity = new uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing();
+        hearingEntity.setId(randomUUID());
+        hearingEntity.setCourtCentre(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre.class));
+        hearingEntity.setDefendantAttendance(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.DefendantAttendance.class)));
+        hearingEntity.setHearingDays(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)));
+        hearingEntity.setHearingLanguage(RandomGenerator.values(HearingLanguage.values()).next());
+        hearingEntity.setJudicialRoles(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole.class)));
+        hearingEntity.setJurisdictionType(RandomGenerator.values(JurisdictionType.values()).next());
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCase.setCourtListRestricted(true);
+        hearingEntity.setProsecutionCases(asSet(prosecutionCase));
+
+        hearingEntity.setReportingRestrictionReason(RandomGenerator.STRING.next());
+        hearingEntity.setTargets(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.Target.class)));
+        hearingEntity.setHearingType(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType.class));
+        hearingEntity.setHearingCaseNotes(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCaseNote.class)));
+        hearingEntity.setIsVacatedTrial(Boolean.TRUE);
+        hearingEntity.setApprovalsRequested(asSet(mock(uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested.class)));
+
+        CourtCentre courtCentreMock = mock(CourtCentre.class);
+        when(courtCentreJPAMapper.fromJPA(hearingEntity.getCourtCentre())).thenReturn(courtCentreMock);
+
+        ReferralReason referralReasonMock = mock(ReferralReason.class);
+        when(defendantReferralReasonsJPAMapper.fromJPA(hearingEntity.getDefendantReferralReasons())).thenReturn(asList(referralReasonMock));
+
+        uk.gov.justice.core.courts.HearingDay hearingDayMock = mock(uk.gov.justice.core.courts.HearingDay.class);
+        when(hearingDayJPAMapper.fromJPA(hearingEntity.getHearingDays())).thenReturn(asList(hearingDayMock));
+
+        uk.gov.justice.core.courts.JudicialRole judicialRoleMock = mock(uk.gov.justice.core.courts.JudicialRole.class);
+        when(judicialRoleJPAMapper.fromJPA(hearingEntity.getJudicialRoles())).thenReturn(asList(judicialRoleMock));
+
+        ProsecutionCase prosecutionCaseMock = mock(ProsecutionCase.class);
+        when(prosecutionCaseJPAMapper.fromJPA(hearingEntity.getProsecutionCases())).thenReturn(asList(prosecutionCaseMock));
+
+        Target targetMock = mock(Target.class);
+        when(targetJPAMapper.fromJPA(hearingEntity.getTargets(), emptySet())).thenReturn(asList(targetMock));
+
+        HearingType hearingTypeMock = mock(HearingType.class);
+        when(hearingTypeJPAMapper.fromJPA(hearingEntity.getHearingType())).thenReturn(hearingTypeMock);
+
+        DefendantAttendance defendantAttendanceMock = mock(DefendantAttendance.class);
+        when(defendantAttendanceJPAMapper.fromJPA(hearingEntity.getDefendantAttendance())).thenReturn(asList(defendantAttendanceMock));
+
+        HearingCaseNote hearingCaseNoteMock = mock(HearingCaseNote.class);
+        when(hearingCaseNoteJPAMapper.fromJPA(hearingEntity.getHearingCaseNotes())).thenReturn(asList(hearingCaseNoteMock));
+
+        ProsecutionCounsel prosecutionCounselMock = mock(ProsecutionCounsel.class);
+        when(hearingProsecutionCounselJPAMapper.fromJPA(hearingEntity.getProsecutionCounsels())).thenReturn(asList(prosecutionCounselMock));
+
+        RespondentCounsel respondentCounselMock = mock(RespondentCounsel.class);
+        when(hearingRespondentCounselJPAMapper.fromJPA(hearingEntity.getRespondentCounsels())).thenReturn(asList(respondentCounselMock));
+
+        ApplicantCounsel applicantCounselMock = mock(ApplicantCounsel.class);
+        when(hearingApplicantCounselJPAMapper.fromJPA(hearingEntity.getApplicantCounsels())).thenReturn(asList(applicantCounselMock));
+
+        DefenceCounsel defenceCounselMock = mock(DefenceCounsel.class);
+        when(defenceCounselJPAMapper.fromJPA(hearingEntity.getDefenceCounsels())).thenReturn(asList(defenceCounselMock));
+
+        InterpreterIntermediary interpreterIntermediaryMock = mock(InterpreterIntermediary.class);
+        when(hearingInterpreterIntermediaryJPAMapper.fromJPA(hearingEntity.getHearingInterpreterIntermediaries())).thenReturn(asList(interpreterIntermediaryMock));
+
+        CompanyRepresentative companyRepresentativeMock = mock(CompanyRepresentative.class);
+        when(hearingCompanyRepresentativeJPAMapper.fromJPA(hearingEntity.getCompanyRepresentatives())).thenReturn(asList(companyRepresentativeMock));
+
+        ApprovalRequest approvalRequestMock = mock(ApprovalRequest.class);
+        when(approvalRequestedJPAMapper.fromJPA(hearingEntity.getApprovalsRequested())).thenReturn(asList(approvalRequestMock));
+
+        final List<CourtApplication> expectedCourtApplications = asList();
+        when(courtApplicationsSerializer.courtApplications(hearingEntity.getCourtApplicationsJson())).thenReturn(expectedCourtApplications);
+
+        assertThat(hearingJPAMapper.fromJPAWithCourtListRestrictions(hearingEntity), isBean(Hearing.class)
+                .with(Hearing::getId, is(hearingEntity.getId()))
+                .with(Hearing::getCourtCentre, is(courtCentreMock))
+                .with(Hearing::getDefendantReferralReasons, first(is(referralReasonMock)))
+                .with(Hearing::getHasSharedResults, is(hearingEntity.getHasSharedResults()))
+                .with(Hearing::getHearingDays, first(is(hearingDayMock)))
+                .with(Hearing::getHearingLanguage, is(hearingEntity.getHearingLanguage()))
+                .with(Hearing::getJudiciary, first(is(judicialRoleMock)))
+                .with(Hearing::getJurisdictionType, is(hearingEntity.getJurisdictionType()))
+                .withValue(Hearing::getProsecutionCases, new ArrayList())
+                .with(Hearing::getReportingRestrictionReason, is(hearingEntity.getReportingRestrictionReason()))
+                .with(Hearing::getType, is(hearingTypeMock))
+                .with(Hearing::getDefendantAttendance, first(is(defendantAttendanceMock)))
+                .with(Hearing::getHearingCaseNotes, first(is(hearingCaseNoteMock)))
+                .with(Hearing::getApprovalsRequested, first(is(approvalRequestMock)))
+                .withValue(Hearing::getCourtApplications, null)
+                .with(Hearing::getIsVacatedTrial, is(Boolean.TRUE))
+        );
+    }
 }

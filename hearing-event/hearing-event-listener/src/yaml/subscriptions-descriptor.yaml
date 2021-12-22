@@ -315,4 +315,7 @@ subscriptions_descriptor:
         - name: hearing.event.custody-time-limit-extended
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.event.custody-time-limit-extended.json
 
+        - name: hearing.event.court-list-restricted
+          schema_uri: http://justice.gov.uk/hearing/json/schema/event/court-list-restricted.json
+
       event_source_name: hearing

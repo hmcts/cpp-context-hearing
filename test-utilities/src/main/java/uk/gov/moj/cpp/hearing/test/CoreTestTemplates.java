@@ -768,7 +768,7 @@ public class CoreTestTemplates {
                 .withId(randomUUID())
                 .withType(hearingType(hearingTypeId).build())
                 .withJurisdictionType(args.jurisdictionType)
-                .withReportingRestrictionReason(STRING.next())
+                .withReportingRestrictionReason(args.reportingRestriction ? STRING.next() : "")
                 .withHearingDays(asList(hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
                         hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
                         hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build()))
@@ -849,7 +849,7 @@ public class CoreTestTemplates {
                 .withId(randomUUID())
                 .withType(hearingType(hearingTypeId).build())
                 .withJurisdictionType(args.jurisdictionType)
-                .withReportingRestrictionReason(STRING.next())
+                .withReportingRestrictionReason(args.reportingRestriction ? STRING.next() : "")
                 .withHearingDays(asList(hearingDayWithParam(dayAfter.getYear(), dayAfter.getMonthValue(), dayAfter.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
                         hearingDayWithParam(localDate.getYear(), localDate.getMonthValue(), localDate.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build(),
                         hearingDayWithParam(daybefore.getYear(), daybefore.getMonthValue(), daybefore.getDayOfMonth(), random.nextInt((max - min) + 1) + min).build()))
@@ -1104,6 +1104,7 @@ public class CoreTestTemplates {
         private boolean isAllocationDecision = true;
         private boolean putCustodialEstablishment = true;
         private Boolean isBoxHearing;
+        private Boolean reportingRestriction = true;
 
         private Map<UUID, Map<UUID, List<UUID>>> structure = toMap(randomUUID(), toMap(randomUUID(), asList(randomUUID())));
 
@@ -1244,6 +1245,11 @@ public class CoreTestTemplates {
 
         public CoreTemplateArguments setIsBoxHearing(final boolean isBoxHearing){
             this.isBoxHearing = isBoxHearing;
+            return this;
+        }
+
+        public CoreTemplateArguments setReportingRestriction(final boolean reportingRestriction) {
+            this.reportingRestriction = reportingRestriction;
             return this;
         }
     }

@@ -17,7 +17,6 @@ import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -126,7 +125,6 @@ import javax.json.JsonString;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -1015,7 +1013,7 @@ public class HearingServiceTest {
 
         when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
         when(hearingRepository.findBy(hearingEvent.getHearingId())).thenReturn(hearing);
-        when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearinPojo);
+        when(hearingJPAMapper.fromJPAWithCourtListRestrictions(hearing)).thenReturn(hearinPojo);
         when(hearingListXhibitResponseTransformer.transformFrom(any(HearingEventsToHearingMapper.class))).thenReturn(expectedCurrentCourtStatus);
 
         final Optional<CurrentCourtStatus> response = hearingService.getHearingsForWebPage(courtCentreIds, now, hearingEventRequiredDefinitionsIds);

@@ -8,6 +8,7 @@ import static java.util.Objects.nonNull;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
@@ -149,6 +150,10 @@ public class UseCases {
     public static InitiateHearingCommand initiateHearingWithNsp(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
         return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true);
+    }
+
+    public static InitiateHearingCommand initiateHearingForApplication(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
+        return initiateHearing(requestSpec, initiateHearing, true, true, false, false, false);
     }
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp) {
@@ -325,8 +330,7 @@ public class UseCases {
                         .withNote(note)
                 , consumer).build();
 
-        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier();
-        final String reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
+        final String reference = getReference(initiateHearingCommand.getHearing());
 
         try (final EventListener publicEventTopic = listenFor("public.hearing.event-logged")
                 .withFilter(convertStringTo(PublicHearingEventLogged.class, isBean(PublicHearingEventLogged.class)
@@ -338,7 +342,7 @@ public class UseCases {
                                 .with(HearingEvent::getLastModifiedTime, is(logEvent.getLastModifiedTime().withZoneSameInstant(ZoneId.of("UTC"))))
 
                         )
-                        .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
+                       .with(PublicHearingEventLogged::getCase, isBean(uk.gov.moj.cpp.hearing.eventlog.Case.class)
                                 .with(uk.gov.moj.cpp.hearing.eventlog.Case::getCaseUrn, is(reference))
                         )
                         .with(PublicHearingEventLogged::getHearingEventDefinition, isBean(HearingEventDefinition.class)
@@ -368,6 +372,16 @@ public class UseCases {
         return logEvent;
     }
 
+    private static String getReference(final Hearing hearing) {
+        String reference = "";
+        if(isNotEmpty(hearing.getProsecutionCases())) {
+            final ProsecutionCaseIdentifier prosecutionCaseIdentifier = hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier();
+            reference = isNull(prosecutionCaseIdentifier.getProsecutionAuthorityReference()) ? prosecutionCaseIdentifier.getCaseURN() : prosecutionCaseIdentifier.getProsecutionAuthorityReference();
+        } else if(isNotEmpty(hearing.getCourtApplications())) {
+            reference = hearing.getCourtApplications().get(0).getApplicationReference();
+        }
+        return  reference;
+    }
 
     public static LogEventCommand logEvent(final UUID hearingEventId,
                                            final RequestSpecification requestSpec,

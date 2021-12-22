@@ -54,7 +54,7 @@
   <xs:element name="cases">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="caseDetails" maxOccurs="unbounded"/>
+        <xs:element ref="caseDetails" maxOccurs="unbounded" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -71,7 +71,7 @@
   <xs:element name="defendants">
     <xs:complexType>
       <xs:sequence>
-        <xs:element ref="defendant" maxOccurs="unbounded"/>
+        <xs:element ref="defendant" maxOccurs="unbounded" minOccurs="0"/>
       </xs:sequence>
     </xs:complexType>
   </xs:element>

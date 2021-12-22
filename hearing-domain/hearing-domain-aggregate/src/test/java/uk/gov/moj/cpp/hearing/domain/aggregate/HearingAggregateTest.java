@@ -43,6 +43,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
+import uk.gov.justice.hearing.courts.CourtListRestricted;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.CaseDefendantDetailsWithHearingCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAmendCommand;
@@ -1614,4 +1615,25 @@ public class HearingAggregateTest {
         assertThat(hearingUnallocated.getOffenceIds().size(), is(1));
     }
 
+    @Test
+    public void shouldRestrictCourtList() {
+        final UUID hearingId = randomUUID();
+        final List<UUID> caseIds = Arrays.asList(randomUUID(),  randomUUID());
+        final CourtListRestricted courtListRestricted = CourtListRestricted.courtListRestricted()
+                .withHearingId(hearingId)
+                .withCaseIds(caseIds).build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Stream<Object> stream = hearingAggregate.courtListRestrictions(courtListRestricted);
+
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+
+        final uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted courtListRestrictedEvent = (uk.gov.moj.cpp.hearing.domain.event.CourtListRestricted) objectList.get(0);
+        assertThat(courtListRestrictedEvent.getHearingId(), is(hearingId));
+
+        assertThat(caseIds.size(), is(courtListRestrictedEvent.getCaseIds().size()));
+        assertThat(caseIds.get(0), is(courtListRestrictedEvent.getCaseIds().get(0)));
+        assertThat(caseIds.get(1), is(courtListRestrictedEvent.getCaseIds().get(1)));
+    }
 }

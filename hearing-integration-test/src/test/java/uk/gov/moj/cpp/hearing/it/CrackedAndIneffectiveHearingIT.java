@@ -96,6 +96,7 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
     @Test
     public void shouldNotCancelRemainingHearingDaysWhenMultidayHearingIsIneffective() {
+        cleanDatabase("ha_hearing");
         shouldNotCancelAfterResultSharedDaysWhenMultidayHearing(INEFFECTIVE_TRIAL_TYPE_ID, null, null);
     }
 
