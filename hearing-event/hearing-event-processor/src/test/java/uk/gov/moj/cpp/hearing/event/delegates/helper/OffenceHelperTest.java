@@ -5,6 +5,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -12,6 +13,8 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_MAGISTRATES_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_MATCHING_SITTING_DAY_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_NOT_MATCHING_SITTING_DAY_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_WITH_VERDICT_TYPE_JSON;
@@ -93,6 +96,9 @@ public class OffenceHelperTest {
 
     private LjaDetails ljaDetailsOfCourtCentre = LjaDetails.ljaDetails().withLjaCode("3253").withLjaName("Lincolnshire Magistrates' Court").build();
 
+    private LjaDetails ljaDetailsWithCourtCentre = LjaDetails.ljaDetails().withLjaCode("2575").withLjaName("South East London Magistrates' Court").build();
+
+
     @Before
     public void setUp() throws IOException {
         when(referenceDataService.getVerdictTypes(context)).thenReturn(allVerdictTypes);
@@ -142,6 +148,61 @@ public class OffenceHelperTest {
         assertThat(convictingCourt.getLja().getLjaCode(), is(organisationalUnit.getLja()));
         assertThat(convictingCourt.getLja().getLjaName(), is(ljaDetailsOfCourtCentre.getLjaName()));
         assertThat(convictingCourt.getName(), is(organisationalUnit.getOucodeL3Name()));
+    }
+
+    @Test
+    public void shareResultsWithEnrichedConvictingCourtIfConvictionDateMatchesSittingDay() throws IOException {
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withId("7e967376-eacf-4fca-9b30-21b0c5aad427")
+                .withOucode("B01BH00")
+                .withLja(ljaDetailsWithCourtCentre.getLjaCode())
+                .withOucodeL3Name("organisationalUnitName")
+                .build();
+
+        when(referenceDataLoader.getOrganisationUnitById(any())).thenReturn(organisationalUnit);
+        when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsWithCourtCentre);
+
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_MATCHING_SITTING_DAY_JSON, ResultsShared.class);
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+
+        final Offence offenceWithExistingConvictingCourt = defendant.get().getOffences().get(0);
+        final Offence offenceWithEnrichedConvictingCourt = defendant.get().getOffences().get(1);
+
+        final CourtCentre convictingCourt = offenceWithExistingConvictingCourt.getConvictingCourt();
+        final CourtCentre enrichedConvictingCourt = offenceWithEnrichedConvictingCourt.getConvictingCourt();
+        assertThat(convictingCourt.getId().toString(), is("f8254db1-1683-483e-afb3-b87fde5a0a26"));
+        assertThat(convictingCourt.getName(), is("Lavender Hill Magistrates' Court"));
+        assertThat(enrichedConvictingCourt.getId().toString(), is(organisationalUnit.getId()));
+        assertThat(enrichedConvictingCourt.getCode(), is(organisationalUnit.getOucode()));
+        assertThat(enrichedConvictingCourt.getLja().getLjaCode(), is(organisationalUnit.getLja()));
+        assertThat(enrichedConvictingCourt.getLja().getLjaName(), is(ljaDetailsWithCourtCentre.getLjaName()));
+    }
+
+    @Test
+    public void shareResultsWithOutEnrichedConvictingCourtIfSittingDayNotMatchingConvictionDate() throws IOException {
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withId("f8254db1-1683-483e-afb3-b87fde5a0a26")
+                .withOucode("B01LY00")
+                .withLja(ljaDetailsOfCourtCentre.getLjaCode())
+                .withOucodeL3Name("organisationalUnitName")
+                .build();
+
+        when(referenceDataLoader.getOrganisationUnitById(any())).thenReturn(organisationalUnit);
+        when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
+
+        final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_NOT_MATCHING_SITTING_DAY_JSON, ResultsShared.class);
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
+        assertThat(defendant.isPresent(), is(true));
+
+        final Offence offence = defendant.get().getOffences().get(0);
+
+        assertThat(offence.getConvictingCourt(), nullValue());
+
     }
 
     @Test

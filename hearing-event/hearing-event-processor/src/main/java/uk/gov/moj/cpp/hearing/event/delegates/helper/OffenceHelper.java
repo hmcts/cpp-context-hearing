@@ -100,25 +100,29 @@ public class OffenceHelper {
                 .map(hd -> Maps.immutableEntry(hd.getCourtCentreId(), hd.getCourtRoomId()))
                 .orElse(Maps.immutableEntry(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()));
 
-        final UUID centreId = courtCentreInfo.getKey();
-        final UUID roomId = courtCentreInfo.getValue();
+        hearing.getHearingDays().stream().forEach(hearingDay -> {
+            if(hearingDay.getSittingDay().toLocalDate().equals(offence.getConvictionDate())){
 
-        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(centreId);
+                final UUID centreId = courtCentreInfo.getKey();
+                final UUID roomId = courtCentreInfo.getValue();
 
-        final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
-                .withId(centreId)
-                .withRoomId(roomId)
-                .withCode(organisationalUnit.getOucode())
-                .withName(organisationalUnit.getOucodeL3Name());
+                final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(centreId);
 
-        if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
-            final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(centreId);
-            courtCentreBuilder.withLja(ljaDetails);
-        } else {
-            courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
-        }
+                final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
+                        .withId(centreId)
+                        .withRoomId(roomId)
+                        .withCode(organisationalUnit.getOucode())
+                        .withName(organisationalUnit.getOucodeL3Name());
 
-        offence.setConvictingCourt(courtCentreBuilder.build());
+                if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
+                    final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(centreId);
+                    courtCentreBuilder.withLja(ljaDetails);
+                } else {
+                    courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
+                }
+                offence.setConvictingCourt(courtCentreBuilder.build());
+            }
+        });
     }
 
     private void populateIndicatedPlea(final Offence offence) {

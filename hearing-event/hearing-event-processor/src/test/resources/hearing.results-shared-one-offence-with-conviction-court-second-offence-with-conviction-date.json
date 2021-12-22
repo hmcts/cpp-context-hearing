@@ -1,0 +1,574 @@
+{
+  "hearingId": "5bca0ab0-9fbb-4f3e-93ff-13e2b4dd7929",
+  "sharedTime": "2021-12-08T17:01:22.882Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "Norwich Place",
+        "address2": "Bexleyheath",
+        "address3": "Kent",
+        "address4": "",
+        "address5": "",
+        "postcode": "DA6 7ND"
+      },
+      "code": "B01BH00",
+      "id": "7e967376-eacf-4fca-9b30-21b0c5aad427",
+      "lja": {
+        "ljaCode": "2575",
+        "ljaName": "South East London Magistrates' Court"
+      },
+      "name": "Bexley Magistrates' Court",
+      "roomId": "8e912353-3b5d-36c3-953e-ad3b94b19de3",
+      "roomName": "Courtroom 01"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "7e967376-eacf-4fca-9b30-21b0c5aad427",
+        "courtRoomId": "8e912353-3b5d-36c3-953e-ad3b94b19de3",
+        "isCancelled": false,
+        "listedDurationMinutes": 360,
+        "listingSequence": 0,
+        "sittingDay": "2021-12-13T10:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "5bca0ab0-9fbb-4f3e-93ff-13e2b4dd7929",
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2021-12-08T16:52:32.956Z",
+            "id": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+            "isYouth": false,
+            "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+            "offences": [
+              {
+                "allocationDecision": {
+                  "allocationDecisionDate": "2021-12-12",
+                  "motReasonCode": "01",
+                  "motReasonDescription": "Summary-only offence",
+                  "motReasonId": "b8c37e33-defd-351c-b91e-1e03e51657da",
+                  "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+                  "originatingHearingId": "0508c826-9553-456d-8925-66b338cd5531",
+                  "sequenceNumber": 90
+                },
+                "arrestDate": "2017-12-12",
+                "chargeDate": "2017-12-12",
+                "convictingCourt": {
+                  "code": "B01LY00",
+                  "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+                  "lja": {
+                    "ljaCode": "2577",
+                    "ljaName": "South West London Magistrates' Court"
+                  },
+                  "name": "Lavender Hill Magistrates' Court",
+                  "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8"
+                },
+                "convictionDate": "2021-12-12",
+                "count": 0,
+                "dvlaOffenceCode": "IN10",
+                "endorsableFlag": true,
+                "id": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+                "isDisposed": false,
+                "lastAdjournDate": "2021-12-12",
+                "lastAdjournedHearingType": "To attend or a warrant to issue",
+                "listingNumber": 2,
+                "modeOfTrial": "Summary",
+                "offenceCode": "RT88191",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "609e24df-eec1-4a45-8cae-8a5b75342e69",
+                "offenceLegislation": "Contrary to section 143 of the Road Traffic Act    1988 and Schedule 2 to the Road Traffic Offenders Act 1988.",
+                "offenceLegislationWelsh": "Yn groes i adran 143 Deddf Traffig Ffyrdd 1988 ac Atodlen 2 Deddf Troseddwyr Traffig Ffyrdd 1988.",
+                "offenceTitle": "Use a motor vehicle on a road / public place without third party insurance",
+                "offenceTitleWelsh": "Defnyddio cerbyd modur heb yswiriant trydydd parti",
+                "orderIndex": 1,
+                "plea": {
+                  "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+                  "originatingHearingId": "0508c826-9553-456d-8925-66b338cd5531",
+                  "pleaDate": "2021-12-12",
+                  "pleaValue": "GUILTY"
+                },
+                "proceedingsConcluded": false,
+                "startDate": "2017-12-12",
+                "wording": "On TEST  at  TEST  used or threatened unlawful violence towards another and your conduct was such as would cause a person of reasonable firmness present at the scene to fear for his personal safety. Contrary to section 3(1) and (7) of the Public Order Act 1986."
+              },
+              {
+                "allocationDecision": {
+                  "allocationDecisionDate": "2021-12-13",
+                  "motReasonCode": "01",
+                  "motReasonDescription": "Summary-only offence",
+                  "motReasonId": "b8c37e33-defd-351c-b91e-1e03e51657da",
+                  "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+                  "originatingHearingId": "5bca0ab0-9fbb-4f3e-93ff-13e2b4dd7929",
+                  "sequenceNumber": 90
+                },
+                "arrestDate": "2016-12-12",
+                "chargeDate": "2016-12-12",
+                "convictionDate": "2021-12-13",
+                "count": 0,
+                "dvlaOffenceCode": "BA10",
+                "endorsableFlag": true,
+                "id": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+                "isDisposed": false,
+                "lastAdjournDate": "2021-12-12",
+                "lastAdjournedHearingType": "To attend or a warrant to issue",
+                "listingNumber": 2,
+                "modeOfTrial": "Summary",
+                "offenceCode": "RT88333",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "1200f34f-f4b9-4688-bc58-aefe092e3d47",
+                "offenceLegislation": "Contrary to section 103(1)(b) of the Road Traffic Act 1988 and Schedule 2 to the Road Traffic Offenders Act 1988.",
+                "offenceLegislationWelsh": "Yn groes i adran 103(1)(b) Deddf Traffig Ffyrdd 1988 ac Atodlen 2 Deddf Troseddwyr Traffig Ffyrdd 1988.",
+                "offenceTitle": "Drive whilst disqualified",
+                "offenceTitleWelsh": "Gyrru dan waharddiad",
+                "orderIndex": 2,
+                "plea": {
+                  "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+                  "originatingHearingId": "5bca0ab0-9fbb-4f3e-93ff-13e2b4dd7929",
+                  "pleaDate": "2021-12-13",
+                  "pleaValue": "GUILTY"
+                },
+                "proceedingsConcluded": false,
+                "startDate": "2017-12-12",
+                "wording": "Drive whilst disqualified"
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "REF2",
+              "bailConditions": "",
+              "bailStatus": {
+                "code": "A",
+                "description": "Not applicable",
+                "id": "86009c70-759d-3308-8de4-194886ff9a77"
+              },
+              "personDetails": {
+                "address": {
+                  "address1": "823 MALLERTON WAY",
+                  "address2": "DUNSTABLE",
+                  "postcode": "LN5 5TT"
+                },
+                "contact": {
+                  "home": "015324443756"
+                },
+                "dateOfBirth": "1979-10-04",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "John",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Smith",
+                "occupation": "Accountant",
+                "occupationCode": "2201",
+                "title": "MR"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "prosecutionAuthorityReference": "REF2",
+            "prosecutionCaseId": "4f241713-451c-4f88-a7f6-89f088fce0ac"
+          }
+        ],
+        "id": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+        "initiationCode": "C",
+        "originatingOrganisation": "053NP",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Police HQ",
+            "address2": "No 1 Waterwells Drive",
+            "address3": "Quedgeley",
+            "address4": "Gloucester",
+            "postcode": "GL2 2AN"
+          },
+          "contact": {
+            "primaryEmail": "Resultingteam@gloucestershire.pnn.POLICE.UK"
+          },
+          "majorCreditorCode": "PO53",
+          "prosecutionAuthorityCode": "GLOSPF",
+          "prosecutionAuthorityId": "9d38428b-7f9d-3aab-8269-f1427dd15c57",
+          "prosecutionAuthorityName": "Gloucestershire Police",
+          "prosecutionAuthorityOUCode": "0530000",
+          "caseURN": "42GD5091221"
+        }
+      }
+    ],
+    "shadowListedOffences": [
+
+    ],
+    "type": {
+      "description": "Plea",
+      "id": "511fe0a3-1391-4954-8158-6b10eed0dad9"
+    }
+  },
+  "variantDirectory": [
+
+  ],
+  "completedResultLinesStatus": {
+
+  },
+  "targets": [
+    {
+      "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+      "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+      "draftResult": "{}",
+      "hearingDay": "2021-12-13",
+      "hearingId": "5bca0ab0-9fbb-4f3e-93ff-13e2b4dd7929",
+      "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+      "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+      "resultLines": [
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+            "0de4e5c0-464e-484c-bad4-87cc503dc8f7"
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+          "orderedDate": "2021-12-13",
+          "prompts": [
+            {
+              "id": "a8719de4-7783-448a-b792-e3f94e670ad0",
+              "label": "Penalty points for this offence",
+              "promptRef": "PENPT",
+              "value": "8"
+            },
+            {
+              "id": "a593ae4a-9d69-45b9-9585-c11aeed28404",
+              "label": "Defendant driving licence number",
+              "promptRef": "defendantDrivingLicenceNumber",
+              "value": "AFESL811111B99TX"
+            }
+          ],
+          "resultDefinitionId": "cee54856-4450-4f28-a8a9-72b688726201",
+          "resultLabel": "Driving record endorsed with penalty points",
+          "resultLineId": "f99dca6d-2e43-4866-9103-a52b8e0e8040",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "lep"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+            "5211ac95-7ca4-4800-b8cd-802702ea1a5f"
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+          "orderedDate": "2021-12-13",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "promptRef": "AOF",
+              "value": "100.00"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "57b495c7-58b9-4c8f-892a-dad103333dbe",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "fo"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+            "f622d7ef-e44c-4898-bcd9-7afad21e0243"
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+          "orderedDate": "2021-12-13",
+          "parentResultLineIds": [
+            "f99dca6d-2e43-4866-9103-a52b8e0e8040"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "ea1ee5a4-be13-48dc-8411-78f22e01c236",
+          "resultLabel": "Licence produced in court",
+          "resultLineId": "0de4e5c0-464e-484c-bad4-87cc503dc8f7",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "lpc"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+          "orderedDate": "2021-12-13",
+          "parentResultLineIds": [
+            "0de4e5c0-464e-484c-bad4-87cc503dc8f7"
+          ],
+          "prompts": [
+            {
+              "id": "11a939b1-71e6-4065-8c29-007e4b52da7a",
+              "label": "Licence issue number",
+              "promptRef": "licenceIssueNumber",
+              "value": "1"
+            }
+          ],
+          "resultDefinitionId": "c83def9d-9a92-4ea0-8923-87fdd7601077",
+          "resultLabel": "2: Full DVLA produced",
+          "resultLineId": "f622d7ef-e44c-4898-bcd9-7afad21e0243",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "full"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+            "d47122e4-1497-4593-94fd-dc67e4070f73"
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+          "orderedDate": "2021-12-13",
+          "parentResultLineIds": [
+            "57b495c7-58b9-4c8f-892a-dad103333dbe"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "4fdd9548-c521-48c9-baa3-1bd2f13a4fcc",
+          "resultLabel": "Payment terms",
+          "resultLineId": "5211ac95-7ca4-4800-b8cd-802702ea1a5f",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "payt"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "01abff07-948e-44d2-bcab-6a7cddfeae8a",
+          "orderedDate": "2021-12-13",
+          "parentResultLineIds": [
+            "5211ac95-7ca4-4800-b8cd-802702ea1a5f"
+          ],
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "promptRef": "PBD",
+              "value": "2021-12-31"
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "d47122e4-1497-4593-94fd-dc67e4070f73",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "pdate"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "01abff07-948e-44d2-bcab-6a7cddfeae8a"
+    },
+    {
+      "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+      "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+      "draftResult": "{}",
+      "hearingDay": "2021-12-13",
+      "hearingId": "5bca0ab0-9fbb-4f3e-93ff-13e2b4dd7929",
+      "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+      "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+      "resultLines": [
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+            "be7e504d-bf01-447a-bb8c-74a7adcce754"
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+          "orderedDate": "2021-12-13",
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "b0aeb4fc-df63-4e2f-af88-97e3f23e847f",
+          "resultLabel": "Driving record endorsed (no points)",
+          "resultLineId": "e2d0d730-0171-4a3e-8149-780f886f01bd",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "len"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+          "orderedDate": "2021-12-13",
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "49939c7c-750f-403e-9ce1-f82e3e568065",
+          "resultLabel": "No separate penalty",
+          "resultLineId": "89d22d5a-112f-48ba-88ff-b3d820943b6e",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "nsp"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+            "3547e4d2-1317-48f0-a51c-86d62f07f5f4"
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+          "orderedDate": "2021-12-13",
+          "parentResultLineIds": [
+            "e2d0d730-0171-4a3e-8149-780f886f01bd"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "ea1ee5a4-be13-48dc-8411-78f22e01c236",
+          "resultLabel": "Licence produced in court",
+          "resultLineId": "be7e504d-bf01-447a-bb8c-74a7adcce754",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "lpc"
+        },
+        {
+          "caseId": "4f241713-451c-4f88-a7f6-89f088fce0ac",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "cd7dcd66-392d-4bee-8469-4d1796c1dc85",
+          "offenceId": "7d14f893-43c0-41de-bbf2-68f342c57f84",
+          "orderedDate": "2021-12-13",
+          "parentResultLineIds": [
+            "be7e504d-bf01-447a-bb8c-74a7adcce754"
+          ],
+          "prompts": [
+            {
+              "id": "11a939b1-71e6-4065-8c29-007e4b52da7a",
+              "label": "Licence issue number",
+              "promptRef": "licenceIssueNumber",
+              "value": "1"
+            }
+          ],
+          "resultDefinitionId": "c83def9d-9a92-4ea0-8923-87fdd7601077",
+          "resultLabel": "2: Full DVLA produced",
+          "resultLineId": "3547e4d2-1317-48f0-a51c-86d62f07f5f4",
+          "shadowListed": false,
+          "sharedDate": "2021-12-08",
+          "shortCode": "full"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "7d14f893-43c0-41de-bbf2-68f342c57f84"
+    }
+  ],
+  "savedTargets": [
+
+  ],
+  "defendantDetailsChanged": [
+
+  ],
+  "isReshare": false,
+  "newAmendmentResults": [
+    {
+      "id": "f99dca6d-2e43-4866-9103-a52b8e0e8040"
+    },
+    {
+      "id": "57b495c7-58b9-4c8f-892a-dad103333dbe"
+    },
+    {
+      "id": "e2d0d730-0171-4a3e-8149-780f886f01bd"
+    },
+    {
+      "id": "89d22d5a-112f-48ba-88ff-b3d820943b6e"
+    },
+    {
+      "id": "0de4e5c0-464e-484c-bad4-87cc503dc8f7"
+    },
+    {
+      "id": "be7e504d-bf01-447a-bb8c-74a7adcce754"
+    },
+    {
+      "id": "f622d7ef-e44c-4898-bcd9-7afad21e0243"
+    },
+    {
+      "id": "5211ac95-7ca4-4800-b8cd-802702ea1a5f"
+    },
+    {
+      "id": "d47122e4-1497-4593-94fd-dc67e4070f73"
+    },
+    {
+      "id": "3547e4d2-1317-48f0-a51c-86d62f07f5f4"
+    }
+  ],
+  "hearingDay": "2021-12-13"
+}

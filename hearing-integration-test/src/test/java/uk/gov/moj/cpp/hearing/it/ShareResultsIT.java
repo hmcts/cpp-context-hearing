@@ -84,6 +84,7 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaD
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataResultDefinitionsWithDefaultValues;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
@@ -244,6 +245,12 @@ public class ShareResultsIT extends AbstractIT {
         testSaveDraftResult(saveDraftResultCommand);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
 
         hearing.getHearingDays()
                 .stream()
@@ -1466,6 +1473,11 @@ public class ShareResultsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingWithApplicationTemplate(courtApplications)));
 
         stubCourtCentre(hearingOne.getHearing());
+        stubOrganisationUnit(hearingOne.getHearing().getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
         hearingOne.getHearing().getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
@@ -3003,6 +3015,12 @@ public class ShareResultsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingCommand));
 
         stubCourtCentre(hearingCommandHelper.getHearing());
+
+        stubOrganisationUnit(hearingCommandHelper.getHearing().getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
 
         hearingCommandHelper.getHearing().getHearingDays()
                 .stream()

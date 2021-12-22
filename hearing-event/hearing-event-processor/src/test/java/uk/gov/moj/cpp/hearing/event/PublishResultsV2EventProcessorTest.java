@@ -27,6 +27,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegate;
 import uk.gov.moj.cpp.hearing.event.relist.ResultsSharedFilter;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.Before;

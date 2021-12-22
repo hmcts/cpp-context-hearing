@@ -38,6 +38,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubPublicHolidays;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_WAIT_TIME_IN_SEC;
@@ -81,6 +82,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -148,6 +150,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAllocationDecision().setMotReasonDescription("Defendant consents to summary trial");
 
         final Hearing hearing = createHearing(initiateHearing);
+
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
 
         hearing.getHearingDays()
                 .stream()
@@ -241,6 +249,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Hearing hearing = createHearing(initiateHearing);
 
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
+
         hearing.getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
@@ -319,6 +333,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
 
         final Hearing hearing = createHearing(initiateHearing);
 
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
+
         hearing.getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
@@ -393,6 +413,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         initiateHearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getAllocationDecision().setMotReasonDescription("Youth - Court directs trial by jury (grave crime)");
 
         final Hearing hearing = createHearing(initiateHearing);
+
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
 
         hearing.getHearingDays()
                 .stream()
@@ -528,6 +554,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
 
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
+
         hearing.getHearingDays()
                 .stream()
                 .map(HearingDay::getCourtCentreId)
@@ -585,6 +617,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(getRequestSpec(), initiateHearing);
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
 
         hearing.getHearingDays()
                 .stream()
@@ -644,6 +682,12 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
         final InitiateHearingCommand initiateHearingCommand = initiateHearing(getRequestSpec(), initiateHearing);
         final CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = h(initiateHearingCommand);
         final Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        stubOrganisationUnit(hearing.getHearingDays()
+                .stream()
+                .map(HearingDay::getCourtCentreId)
+                .map(UUID::toString)
+                .collect(Collectors.joining()));
 
         hearing.getHearingDays()
                 .stream()

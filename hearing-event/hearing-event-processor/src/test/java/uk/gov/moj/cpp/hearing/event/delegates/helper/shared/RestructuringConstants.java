@@ -17,6 +17,8 @@ public class RestructuringConstants {
     public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_CROWN_JSON = "hearing.results-shared-with-conviction-date-jurisdiction-crown.json";
     public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID = "hearing.events.results-shared-v3-hearingDay-without-courtCentreId.json";
     public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_JURISDICTION_MAGISTRATES_JSON = "hearing.results-shared-with-conviction-date-jurisdiction-magistrates.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_NOT_MATCHING_SITTING_DAY_JSON = "hearing.results-shared-with-conviction-date-not-matching-sitting-day.json";
+    public static final String HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_MATCHING_SITTING_DAY_JSON = "hearing.results-shared-one-offence-with-conviction-court-second-offence-with-conviction-date.json";
     public static final String HEARING_RESULTS_SHARED_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-with-indicated-plea.json";
     public static final String HEARING_RESULTS_SHARED_COURT_APPLICATION_WITH_INDICATED_PLEA_JSON = "hearing.results-shared-court-application-enrich-offence-data.json";
     public static final String HEARING_RESULTS_SHARED_WITH_OFFENCE_FACTS_JSON = "hearing.results-shared-with-offence-facts.json";
