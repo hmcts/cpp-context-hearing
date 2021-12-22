@@ -896,12 +896,7 @@ public class InitiateHearingIT extends AbstractIT {
                                                                 .with(OffenceFacts::getAlcoholReadingMethodCode, is(offenceFacts.getAlcoholReadingMethodCode())))))))))));
     }
 
-    @Test
-    public void ignoreInitiateHearing_whenOffenceCountMissingForCrownCourtHearing() {
-
-        UseCases.verifyIgnoreInitiateHearing(getRequestSpec(), initiateHearingTemplateForCrownCourtOffenceCountNull());
-
-    }
+  
 
     @Test
     public void listingHearings_with_sorted_listingSequence() throws NoSuchAlgorithmException {
