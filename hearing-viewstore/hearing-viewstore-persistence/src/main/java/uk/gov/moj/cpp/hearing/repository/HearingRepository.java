@@ -60,6 +60,18 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     public abstract List<Hearing> findByUserFilters(@QueryParam("date") final LocalDate date,
                                                     @QueryParam("userId") final UUID userId);
 
+    @Query(value = "SELECT hearing " +
+            "FROM Hearing hearing " +
+            "inner join hearing.prosecutionCases prosecutionCase " +
+            "inner join prosecutionCase.defendants defendant " +
+            "inner join hearing.hearingDays day " +
+            "where defendant.id.id = :defendantId " +
+            "and day.date > :date "
+
+    )
+    public abstract List<Hearing> findByDefendantAndHearingType(@QueryParam("date") final LocalDate date,
+                                                                @QueryParam("defendantId") final UUID defendantId);
+
     @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
             "WHERE prosecutionCase.id.id = :caseId")
     public abstract List<Hearing> findByCaseId(@QueryParam("caseId") final UUID caseId);

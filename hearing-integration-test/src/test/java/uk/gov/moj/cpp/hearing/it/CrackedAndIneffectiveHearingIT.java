@@ -269,8 +269,8 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
     private List<CrackedIneffectiveVacatedTrialType> buildTrialTypes(final UUID reasonId, final String reasonCode, final String trialType) {
         List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(reasonId, reasonCode, trialType,
-                "On the date of trial the prosecution agrees to the defendant being bound-over having previously rejected the offer.", null));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(reasonId, reasonCode, trialType,"On the date of trial the prosecution "
+                ,"On the date of trial the prosecution agrees to the defendant being bound-over having previously rejected the offer.", null));
         return trialList;
     }
 

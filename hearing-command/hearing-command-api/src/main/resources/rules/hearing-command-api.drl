@@ -390,7 +390,7 @@ rule "Command - API - Action - hearing.set-trial-type"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.set-trial-type");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders"));
   then
     $outcome.setSuccess(true);
 end
@@ -433,7 +433,7 @@ rule "Command - API - Action - hearing.book-provisional-hearing-slots"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.book-provisional-hearing-slots");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Associate", "Legal Advisers", "Court Clerks"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Associate", "Legal Advisers", "Court Clerks"));
   then
     $outcome.setSuccess(true);
 end

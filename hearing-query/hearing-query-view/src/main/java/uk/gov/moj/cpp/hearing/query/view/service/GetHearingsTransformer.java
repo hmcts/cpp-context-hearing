@@ -60,6 +60,18 @@ public class GetHearingsTransformer {
                 );
     }
 
+    public HearingSummaries.Builder summaryForHearingsForFuture(final Hearing hearing) {
+        return buildHearingSummary(hearing)
+                .withHearingDays(hearing.getHearingDays())
+                .withCourtCentreId(hearing.getCourtCentre().getId())
+                .withRoomId(hearing.getCourtCentre().getRoomId())
+                .withProsecutionCaseSummaries(
+                        hearing.getProsecutionCases() == null ? emptyList() :
+                                hearing.getProsecutionCases().stream().map(pc -> summaryForToday(pc).build())
+                                        .collect(toList())
+                );
+    }
+
     private HearingSummaries.Builder buildHearingSummary(final Hearing hearing) {
         return HearingSummaries.hearingSummaries()
                 .withType(hearing.getType())

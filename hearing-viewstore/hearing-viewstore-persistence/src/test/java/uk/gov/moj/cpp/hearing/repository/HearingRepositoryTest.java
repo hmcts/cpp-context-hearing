@@ -47,7 +47,7 @@ import org.junit.runner.RunWith;
 @RunWith(CdiTestRunner.class)
 public class HearingRepositoryTest {
 
-    private static final List<uk.gov.justice.core.courts.Hearing> hearings = new ArrayList<>();
+    private static final List<uk.gov.justice.core.courts.Hearing>       hearings = new ArrayList<>();
     private static final List<uk.gov.justice.core.courts.Hearing> hearingsWithHearingDay = new ArrayList<>();
     private static final uk.gov.justice.core.courts.Hearing simpleHearing = minimumInitiateHearingTemplate().getHearing();
 
@@ -214,6 +214,25 @@ public class HearingRepositoryTest {
         final UUID hearingId = hearings.get(0).getId();
         final List<Target> targets = hearingRepository.findTargetsByHearingId(hearingId);
         assertThat(targets.size(), is(1));
+    }
+
+    @Test
+    public void shouldFindFutureHearing() {
+        LocalDate hearingDay = hearings.get(0).getHearingDays().get(0).getSittingDay().toLocalDate().minusDays(1);
+        UUID defendantId = hearings.get(0).getProsecutionCases().get(0).getDefendants().get(0).getId();
+        final List<Hearing> hearingList  = hearingRepository.findByDefendantAndHearingType(hearingDay,defendantId);
+        assertThat(hearingList.size(), is(1));
+
+    }
+
+    @Test
+    public void shouldNotFindFutureHearing() {
+
+        LocalDate hearingDay = hearings.get(0).getHearingDays().get(0).getSittingDay().toLocalDate().plusDays(1);
+        UUID defendantId = hearings.get(0).getProsecutionCases().get(0).getDefendants().get(0).getId();
+        final List<Hearing> hearingList  = hearingRepository.findByDefendantAndHearingType(hearingDay,defendantId);
+        assertThat(hearingList.size(), is(0));
+
     }
 
     @Test

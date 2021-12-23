@@ -47,6 +47,11 @@ public class ResultsQueryService {
                 .build());
     }
 
+    public Envelope<JsonObject> getOtherFixedValues(final JsonEnvelope envelope) {
+        return sendEnvelopeWithName(envelope, "referencedata.query.cracked-ineffective-vacated-trial-types", createObjectBuilder()
+                .build());
+    }
+
     public Envelope<JsonObject> getAllCourtCentre(final JsonEnvelope envelope) {
         return sendEnvelopeWithName(envelope, "referencedata.query.courtrooms");
     }

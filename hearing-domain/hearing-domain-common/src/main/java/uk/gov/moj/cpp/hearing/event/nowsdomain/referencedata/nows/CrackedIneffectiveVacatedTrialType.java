@@ -11,6 +11,7 @@ public class CrackedIneffectiveVacatedTrialType {
     private UUID id;
     private String reasonCode;
     private String trialType;
+    private String reasonShortDescription;
     private String reasonFullDescription;
     private LocalDate date;
 
@@ -18,11 +19,13 @@ public class CrackedIneffectiveVacatedTrialType {
     public CrackedIneffectiveVacatedTrialType(@JsonProperty("id") final UUID id,
                                               @JsonProperty("reasonCode") final String reasonCode,
                                               @JsonProperty("trialType") final String trialType,
+                                              @JsonProperty("reasonShortDescription") final String reasonShortDescription,
                                               @JsonProperty("reasonFullDescription") final String reasonFullDescription,
                                               @JsonProperty("date") final LocalDate date) {
         this.id = id;
         this.reasonCode = reasonCode;
         this.trialType = trialType;
+        this.reasonShortDescription = reasonShortDescription;
         this.reasonFullDescription = reasonFullDescription;
         this.date = date;
     }
@@ -45,5 +48,9 @@ public class CrackedIneffectiveVacatedTrialType {
 
     public LocalDate getDate() {
         return date;
+    }
+
+    public String getReasonShortDescription() {
+        return reasonShortDescription;
     }
 }

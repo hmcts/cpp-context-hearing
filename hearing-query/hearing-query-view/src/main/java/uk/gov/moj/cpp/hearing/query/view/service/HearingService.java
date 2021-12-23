@@ -23,6 +23,7 @@ import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.notification.Subscriptions;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.DraftResultJPAMapper;
@@ -257,11 +258,36 @@ public class HearingService {
                 .build();
     }
 
+    public GetHearings getHearingsForFuture(final LocalDate date, final UUID userId, final List<HearingType> hearingTypeList) {
+
+        if (null == date || null == userId) {
+            return new GetHearings(null);
+        }
+        List<Hearing> filteredHearings = hearingRepository.findByDefendantAndHearingType(date, userId);
+        filteredHearings = filterForTrial(filteredHearings,hearingTypeList);
+        if (CollectionUtils.isEmpty(filteredHearings)) {
+            return new GetHearings(null);
+        }
+
+        filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(filteredHearings.stream()
+                        .map(ha -> hearingJPAMapper.fromJPA(ha))
+                        .map(h -> getHearingTransformer.summaryForHearingsForFuture(h).build())
+                        .collect(toList()))
+                .build();
+    }
+
     private void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
         filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences().removeIf(Offence::isShadowListed));
         filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
         filteredHearings.forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
         filteredHearings.removeIf(x -> x.getProsecutionCases().isEmpty());
+    }
+
+    private List<Hearing> filterForTrial(final List<Hearing> filteredHearings, final List<HearingType> hearingTypeList) {
+        return filteredHearings.stream().filter(hearing -> hearingTypeList.stream().anyMatch(hearingType -> hearingType.getId().equals(hearing.getHearingType().getId()))).collect(Collectors.toList());
     }
 
     @Transactional

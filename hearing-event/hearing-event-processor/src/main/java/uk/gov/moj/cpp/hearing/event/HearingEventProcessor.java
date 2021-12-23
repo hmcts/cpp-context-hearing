@@ -32,6 +32,7 @@ import javax.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@SuppressWarnings("squid:CallToDeprecatedMethod")
 @ServiceComponent(EVENT_PROCESSOR)
 public class HearingEventProcessor {
 
@@ -43,7 +44,7 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
     public static final String COMMAND_LISTING_HEARING_RESCHEDULED = "hearing.command.clear-vacated-trial";
-    public static final String COMMAND_REQUEST_APPROVAL = "hearing.command.request-approval";
+
     public static final String PUBLIC_HEARING_EVENT_AMENDED = "public.hearing.event-amended";
     public static final String PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2 = "public.hearing.draft-result-deleted-v2";
 

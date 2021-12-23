@@ -11,6 +11,7 @@ import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -18,12 +19,14 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.moj.cpp.hearing.command.result.NewAmendmentResult;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 
@@ -44,6 +47,9 @@ public class ResultsSharedDelegateTest {
     private HearingAggregateMomento hearingAggregateMomento;
     private ResultsSharedDelegate resultsSharedDelegate;
     private HearingAggregate hearingAggregate;
+
+    private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
+    private static final String VACATED_TRIAL_REASON_ID = "05d90ca2-2009-40aa-b5a1-5b7720807e54";
 
 
     @Before
@@ -280,6 +286,7 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
                 .build();
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
@@ -287,6 +294,7 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
                 .build();
 
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
@@ -329,6 +337,7 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
                 .build();
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
@@ -336,6 +345,7 @@ public class ResultsSharedDelegateTest {
                 .withLevel("OFFENCE")
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
                 .build();
 
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
@@ -414,5 +424,143 @@ public class ResultsSharedDelegateTest {
         assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).size(), is(2));
         assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).get(target.getTargetId()), notNullValue());
         assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).get(target2.getTargetId()), notNullValue());
+    }
+
+    @Test
+    public void shouldRaiseHearingVacatedRequestedEvent() {
+
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+        final UUID APPLICATION_ID = randomUUID();
+        final UUID HEARING_ID_TO_BE_VACATED = randomUUID();
+
+
+        Hearing hearing = hearingAggregateMomento.getHearing();
+        CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(APPLICATION_ID)
+                .withHearingIdToBeVacated(HEARING_ID_TO_BE_VACATED)
+                .build();
+        hearing.setCourtApplications(Arrays.asList(courtApplication));
+
+
+        final String REASON = "random reason";
+        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID),null,null, REASON,null,null,"reasonForVacatingTrial");
+
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(Arrays.asList(prompt))
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.fromString(HEARING_VACATED_RESULT_DEFINITION_ID))
+                .withApplicationIds(APPLICATION_ID)
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(2));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(2));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
+
+        final HearingVacatedRequested hearingVacatedRequested = (HearingVacatedRequested) eventCollection.get(1);
+        assertThat(hearingVacatedRequested.getHearingIdToBeVacated(), is(HEARING_ID_TO_BE_VACATED));
+        assertThat(hearingVacatedRequested.getVacatedTrialReasonShortDesc(), is(REASON));
+
+
+    }
+
+    @Test
+    public void shouldNotRaiseHearingVacatedRequestedEvent() {
+
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+        final UUID APPLICATION_ID = randomUUID();
+        final UUID HEARING_ID_TO_BE_VACATED = randomUUID();
+
+
+        Hearing hearing = hearingAggregateMomento.getHearing();
+        CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withId(APPLICATION_ID)
+                .withHearingIdToBeVacated(HEARING_ID_TO_BE_VACATED)
+                .build();
+        hearing.setCourtApplications(Arrays.asList(courtApplication));
+
+
+        final String REASON = "random reason";
+        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID),null,null, REASON,null,null,"reasonForVacatingTrial");
+
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(Arrays.asList(prompt))
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.fromString(UUID.randomUUID().toString()))
+                .withApplicationIds(APPLICATION_ID)
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(2));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
+
+
     }
 }

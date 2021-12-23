@@ -18,6 +18,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
@@ -120,6 +121,14 @@ public class HearingQueryApi {
     @Handles("hearing.get.hearings-for-today")
     public JsonEnvelope findHearingsForToday(final JsonEnvelope query) {
         final Envelope<GetHearings> envelope = this.hearingQueryView.findHearingsForToday(query);
+        return getJsonEnvelope(envelope);
+    }
+
+    @Handles("hearing.get.hearings-for-future")
+    public JsonEnvelope findHearingsForFuture(final JsonEnvelope query) {
+        final HearingTypes hearingTypes = referenceDataService.getAllHearingTypes();
+
+        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearingsForFuture(query,hearingTypes);
         return getJsonEnvelope(envelope);
     }
 
@@ -291,7 +300,7 @@ public class HearingQueryApi {
         return this.hearingQueryView.retrieveCustodyTimeLimit(query);
     }
 
-    @SuppressWarnings("squid:S2629")
+    @SuppressWarnings({"squid:S2629","squid:CallToDeprecatedMethod"})
     private JsonEnvelope requestStagingEnforcementToGetOutstandingFines(final JsonEnvelope query, final JsonObject viewResponseEnvelopePayload) {
         final JsonEnvelope enforcementResultEnvelope;
         final JsonEnvelope enforcementRequestEnvelope = enveloper.withMetadataFrom(query, STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES)

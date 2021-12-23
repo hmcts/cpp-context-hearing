@@ -24,6 +24,14 @@ rule "Query - API - hearing.get.hearings-for-today"
     $outcome.setSuccess(true);
 end
 
+rule "Query - API - hearing.get.hearings-for-future"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.hearings-for-future");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders"));
+  then
+    $outcome.setSuccess(true);
+end
 
 rule "Query - API - hearing.get.hearing"
   when

@@ -11,6 +11,7 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.toSet;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.FIXL;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.isFixedListType;
@@ -20,6 +21,7 @@ import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDyna
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.getPromptReferenceDynamicFixListUuids;
 
 import uk.gov.justice.ccr.notepad.result.cache.model.ChildResultDefinition;
+import uk.gov.justice.ccr.notepad.result.cache.model.CrackedIneffectiveVacatedTrialType;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinition;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultDefinitionSynonym;
 import uk.gov.justice.ccr.notepad.result.cache.model.ResultPrompt;
@@ -91,6 +93,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     private static final String SUPERVISING_COURT_KEY = "supervisingCourt".toLowerCase();
     private static final String WHICH_WAS_IMPOSED_BY_KEY = "whichWasImpBy".toLowerCase();
     private static final String COURT_NAME = "courtName";
+    public static final String REASON_FOR_VACATING_TRIAL = "reasonForVacatingTrial";
 
 
     @Inject
@@ -201,6 +204,7 @@ public class ReadStoreResultLoader implements ResultLoader {
     public List<ResultPrompt> loadResultPrompt(final LocalDate orderedDate) {
         final List<ResultPrompt> resultPrompts = newArrayList();
         final Map<String, Set<String>> resultPromptFixedListMap = loadResultPromptFixedList(orderedDate);
+        final Set<String> resultPromptOtherFixedValueSet = loadOtherFixedValues();
         final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = loadResultPromptDynamicListNameAddressList();
 
         LOGGER.info("spiout:: refdata calling...");
@@ -236,7 +240,7 @@ public class ReadStoreResultLoader implements ResultLoader {
                     resultPrompt.setKeywords(getKeywordsForPrompts(promptJson));
 
                     final String fixedListId = promptJson.getString("fixedListId", null);
-                    setFixedList(resultPromptFixedListMap, promptJson, resultPrompt, promptReference, fixedListId);
+                    setFixedList(resultPromptFixedListMap, resultPromptOtherFixedValueSet, promptJson, resultPrompt, promptReference, fixedListId);
                     final String referenceDataKey = promptJson.getString("referenceDataKey", null);
                     resultPrompt.setReferenceDataKey(referenceDataKey);
                     if (referenceDataKey != null && ResultType.NAMEADDRESS.equals(resultPrompt.getType())) {
@@ -269,7 +273,7 @@ public class ReadStoreResultLoader implements ResultLoader {
         resultPrompt.setNameEmail(getBooleanOrNull(promptJson, "nameEmail"));
     }
 
-    private void setFixedList(final Map<String, Set<String>> resultPromptFixedListMap, final JsonObject promptJson, final ResultPrompt resultPrompt, final String promptReference, final String fixedListId) {
+    private void setFixedList(final Map<String, Set<String>> resultPromptFixedListMap, final Set<String> resultPromptOtherFixedValueSet, final JsonObject promptJson, final ResultPrompt resultPrompt, final String promptReference, final String fixedListId) {
         if (isFixedListType(resultPrompt.getType())) {
             if (fixedListId != null) {
                 resultPrompt.setFixedList(resultPromptFixedListMap.get(fixedListId.trim()));
@@ -281,6 +285,10 @@ public class ReadStoreResultLoader implements ResultLoader {
             }
         } else if (HCHOUSE.equals(promptReference) || HTYPE.equals(promptReference)) {
             setFixedListValues(resultPromptFixedListMap, resultPrompt, promptReference);
+        }
+        if( REASON_FOR_VACATING_TRIAL.equals(promptReference)){
+            setFixedListValuesForVacatingTrial(resultPromptOtherFixedValueSet, resultPrompt);
+
         }
     }
 
@@ -297,7 +305,11 @@ public class ReadStoreResultLoader implements ResultLoader {
         //overriding type as this is dynamicFixedList discovered by system
         resultPrompt.setType(FIXL);
     }
-
+    private void setFixedListValuesForVacatingTrial(final Set<String> resultPromptOtherFixedValueSet, final ResultPrompt resultPrompt) {
+        resultPrompt.setFixedList(resultPromptOtherFixedValueSet);
+        //overriding type as this is dynamicFixedList discovered by system
+        resultPrompt.setType(FIXL);
+    }
     private List<String> getKeywordsForPrompts(final JsonObject resultPromptJson) {
         if (!resultPromptJson.containsKey(FIELD_WORD_GROUP)) {
             return emptyList();
@@ -326,6 +338,21 @@ public class ReadStoreResultLoader implements ResultLoader {
         staticFixedList.keySet().removeAll(dynaMicFixedList.keySet());
         return Stream.concat(dynaMicFixedList.entrySet().stream(), staticFixedList.entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Set<String>  loadOtherFixedValues() {
+
+        return resultsQueryService.getOtherFixedValues(this.jsonEnvelope).payload()
+                .getJsonArray("crackedIneffectiveVacatedTrialTypes").getValuesAs(JsonObject.class)
+                .stream()
+                        .map(element -> {
+                            final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType();
+                            crackedIneffectiveVacatedTrialType.setId(element.getString("id").trim());
+                            crackedIneffectiveVacatedTrialType.setReasonShortDescription(element.getString("reasonShortDescription").trim());
+                            return crackedIneffectiveVacatedTrialType.getReasonShortDescription();
+                        }).collect(toSet());
+
+
     }
 
     private Map<String, Set<ResultPromptDynamicListNameAddress>> loadResultPromptDynamicListNameAddressList() {

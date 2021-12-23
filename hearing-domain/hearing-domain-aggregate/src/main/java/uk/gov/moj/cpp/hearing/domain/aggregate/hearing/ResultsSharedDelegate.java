@@ -11,6 +11,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.core.courts.Target2.target2;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Level;
@@ -37,6 +38,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
@@ -64,6 +66,10 @@ import javax.json.JsonObject;
 public class ResultsSharedDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
+    private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
+
+    public static final String REASON_FOR_VACATING_TRIAL = "reasonForVacatingTrial";
+
 
     private final HearingAggregateMomento momento;
 
@@ -494,7 +500,11 @@ public class ResultsSharedDelegate implements Serializable {
         if (!defendantDetailsChanged.isEmpty()) {
             resultsSharedV2Builder.withDefendantDetailsChanged(defendantDetailsChanged);
         }
-        streamBuilder.add(resultsSharedV2Builder.build());
+
+
+        final ResultsSharedV3 resultsSharedV3 = resultsSharedV2Builder.build();
+        streamBuilder.add(resultsSharedV3);
+        isHearingVacatedRequired(hearing, resultsSharedV3, streamBuilder);
 
         if (!this.momento.getNextHearingStartDates().isEmpty()) {
             streamBuilder.add(new EarliestNextHearingDateCleared(hearingId));
@@ -502,6 +512,41 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream<Object> streams = Stream.concat(enrichHearingV2(resultLines), streamBuilder.build());
         return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines));
+    }
+
+    private void isHearingVacatedRequired(final Hearing hearing, final ResultsSharedV3 resultsSharedV3, final Stream.Builder<Object> streamBuilder) {
+
+
+        resultsSharedV3.getTargets().stream().forEach(target ->
+            target.getResultLines().forEach(resultLine -> {
+                if (HEARING_VACATED_RESULT_DEFINITION_ID.equals(resultLine.getResultDefinitionId().toString())) {
+
+                        final Optional<UUID> hearingIdToBeVacated  = hearing.getCourtApplications().stream()
+                                .filter(courtApplication -> courtApplication.getId().equals(resultLine.getApplicationId()))
+                                .filter(courtApplication->nonNull(courtApplication.getHearingIdToBeVacated()))
+                                .findFirst()
+                                .map(CourtApplication::getHearingIdToBeVacated);
+
+
+
+                    final String vacatedTrialReasonShortDesc = resultLine
+                            .getPrompts()
+                            .stream()
+                            .filter(prompt -> prompt.getPromptRef().equals(REASON_FOR_VACATING_TRIAL))
+                            .findFirst()
+                            .map(Prompt::getValue)
+                            .get();
+                    if (nonNull(hearingIdToBeVacated) && hearingIdToBeVacated.isPresent() && nonNull(vacatedTrialReasonShortDesc)) {
+                        final HearingVacatedRequested hearingVacatedRequested = HearingVacatedRequested.builder()
+                                .withHearingIdToBeVacated(hearingIdToBeVacated.get())
+                                .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc)
+                                .build();
+                        streamBuilder.add(hearingVacatedRequested);
+                    }
+
+                }
+            })
+        );
     }
 
     private void addParenetResultLineIds(final List<SharedResultsCommandResultLineV2> resultLineV2s) {

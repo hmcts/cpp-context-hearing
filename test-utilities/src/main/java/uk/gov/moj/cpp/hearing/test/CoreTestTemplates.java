@@ -78,6 +78,7 @@ import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.JudicialRoleTypeEnum;
+import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -95,7 +96,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"WeakerAccess", "squid:S1067"})
+@SuppressWarnings({"WeakerAccess", "squid:S1067","pmd:NullAssignment"})
 public class CoreTestTemplates {
 
     private static final UUID BAIL_STATUS_ID = randomUUID();
@@ -915,6 +916,11 @@ public class CoreTestTemplates {
                 .withResultLines(new ArrayList<>(asList(resultLine(resultLineId))));
     }
 
+    public static HearingVacatedRequested.Builder hearingVacatedRequested(final UUID hearingIdToBeVacated, final String vacatedTrialReasonShortDesc) {
+        return HearingVacatedRequested.builder()
+                .withHearingIdToBeVacated(hearingIdToBeVacated)
+                .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc);
+    }
     public static Target2.Builder target2(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
         return Target2.target2()
                 .withTargetId(randomUUID())

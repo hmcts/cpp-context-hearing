@@ -1,6 +1,66 @@
 {
   "resultDefinitions": [
     {
+      "id": "8cdc7be1-fc94-485b-83ee-410e710f6665",
+      "version": "2021-12-10T10:23:51.677Z",
+      "startDate": "2021-12-11",
+      "label": "Application to vacate granted",
+      "shortCode": "VT",
+      "level": "O",
+      "rank": 22100,
+      "wordGroups": [
+        {
+          "wordGroup": [
+            "VT"
+          ]
+        },
+        {
+          "wordGroup": [
+            "Vacate",
+            "Trial"
+          ]
+        }
+      ],
+      "prompts": [
+        {
+          "id": "9a739e75-5302-48f4-bd85-6ff50c36d823",
+          "label": "Reason for vacating trial",
+          "resultPromptRule": "mandatory",
+          "type": "FIXL",
+          "sequence": 100,
+          "financial": "N",
+          "reference": "reasonForVacatingTrial",
+          "userGroups": [],
+          "courtExtract": "N",
+          "jurisdiction": "B",
+          "hidden": false,
+          "referenceDataKey": "reasonForVacatingTrial",
+          "nameEmail": false,
+          "associatedWithReferenceData": true
+        }
+      ],
+      "financial": "N",
+      "unscheduled": false,
+      "adjournment": "N",
+      "category": "F",
+      "urgent": false,
+      "convicted": "N",
+      "d20": false,
+      "postHearingCustodyStatus": "A",
+      "terminatesOffenceProceedings": false,
+      "lifeDuration": false,
+      "rollUpPrompts": false,
+      "publishedForNows": false,
+      "publishedAsAPrompt": false,
+      "excludedFromResults": false,
+      "alwaysPublished": false,
+      "jurisdiction": "B",
+      "canBeSubjectOfBreach": false,
+      "canBeSubjectOfVariation": false,
+      "isAvailableForCourtExtract": true,
+      "isBooleanResult": false
+    },
+    {
       "id": "fd391847-f640-402e-a958-f33a014e6684",
       "version": "2021-03-24T10:56:52.135Z",
       "startDate": "2021-03-25",

@@ -394,6 +394,17 @@ public class ResultsQueryServiceTest {
         ));
     }
 
+    @Test
+    public void shouldGetCrackedIneffectiveVacatedTrialTypes() {
+
+        final JsonEnvelope envelope = buildDummyJsonRequestEnvelope();
+
+        resultsQueryService.getOtherFixedValues(envelope);
+
+        verify(requester).requestAsAdmin(captor.capture(), Mockito.eq(JsonObject.class));
+        assertThat(captor.getValue().metadata().name(), is("referencedata.query.cracked-ineffective-vacated-trial-types"));
+
+    }
     private JsonEnvelope buildDummyJsonRequestEnvelope() {
         return buildDummyJsonRequestEnvelopeWithName("name");
     }

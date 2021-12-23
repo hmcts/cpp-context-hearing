@@ -16,6 +16,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 
+import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
@@ -26,6 +27,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.LinkedApplicationsSummary;
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
@@ -164,4 +166,18 @@ public class HearingQueryApiTest {
         verify(hearingQueryView, times(0)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
     }
 
+    @Test
+    public void shouldReturnFutureHearings() {
+
+        when(hearingQueryView.findHearingsForFuture(any(),any())).thenReturn(null);
+
+       final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.hearings-for-future", createObjectBuilder()
+                .add("defendantId", UUID.randomUUID().toString())
+                .build());
+
+        hearingQueryApi.findHearingsForFuture(query);
+
+        verify(referenceDataService, times(1)).getAllHearingTypes();
+        verify(hearingQueryView, times(1)).findHearingsForFuture(any(JsonEnvelope.class), any(HearingTypes.class));
+    }
 }

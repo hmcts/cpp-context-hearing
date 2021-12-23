@@ -187,6 +187,9 @@ public class UseCases {
                             .build())
                     .build());
         }
+        if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
+            hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
+        }
         if(!includeProsecutionCase){
             hearing.setProsecutionCases(null);
         }

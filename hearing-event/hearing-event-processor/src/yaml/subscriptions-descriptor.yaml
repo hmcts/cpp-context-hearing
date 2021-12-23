@@ -39,6 +39,10 @@ subscriptions_descriptor:
         - name: hearing.event.amended
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-event-amended.json
 
+        # hearing vacated
+        - name: hearing.hearing-vacated-requested
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-vacated-requested.json
+
         # Log Event
         - name: hearing.hearing-event-logged
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-event-logged.json

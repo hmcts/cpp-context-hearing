@@ -12,6 +12,7 @@ import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -20,6 +21,7 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -51,6 +53,7 @@ public class ReferenceDataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceDataService.class);
     private static final String GET_ALL_CRACKED_INEFFECTIVE_TRIAL_TYPES = "referencedata.query.cracked-ineffective-vacated-trial-types";
     private static final String XHIBIT_EVENT_MAPPINGS = "referencedata.query.cp-xhibit-hearing-event-mappings";
+    private static final String REFERENCEDATA_QUERY_HEARING_TYPES ="referencedata.query.hearing-types";
     private static final String REFERENCEDATA_QUERY_COURT_CENTRES = "referencedata.query.courtrooms";
     private static final String REFERENCEDATA_GET_ALL_RESULT_DEFINITIONS = "referencedata.get-all-result-definitions";
     private static final String RESULT_DEFINITIONS = "resultDefinitions";
@@ -174,6 +177,19 @@ public class ReferenceDataService {
                 .forEach(countryNationality -> countryCodesMap.putIfAbsent(countryNationality.getString(ISO_CODE), countryNationality.getString(COUNTRY_NAME)));
 
         return countryCodesMap;
+    }
+
+    public HearingTypes getAllHearingTypes() {
+        final JsonEnvelope requestEnvelope = envelopeFrom(
+                metadataBuilder().
+                        withId(randomUUID()).
+                        withName(REFERENCEDATA_QUERY_HEARING_TYPES),
+                createObjectBuilder());
+
+        final Envelope<JsonObject> jsonResultEnvelope = requester.requestAsAdmin(requestEnvelope, JsonObject.class);
+
+        return jsonObjectToObjectConverter.convert(jsonResultEnvelope.payload(), HearingTypes.class);
+
     }
 
 }

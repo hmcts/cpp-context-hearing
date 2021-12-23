@@ -258,7 +258,7 @@
       "validTo": null,
       "exhibitHearingCode": "CCT",
       "exhibitHearingDescription": "Plea and Trial Preparation",
-      "trialTypeFlag": false
+      "trialTypeFlag": true
     }
   ]
 }

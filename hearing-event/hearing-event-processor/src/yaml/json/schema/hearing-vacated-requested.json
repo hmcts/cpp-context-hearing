@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-vacated-requested.json",
+  "type": "object",
+  "properties": {
+    "hearingIdToBeVacated" : {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "vacatedTrialReasonShortDesc" : {
+      "type": "string"
+    }
+  },
+  "required": [
+    "hearingIdToBeVacated",
+    "vacatedTrialReasonShortDesc"
+
+  ],
+  "additionalProperties": true
+}

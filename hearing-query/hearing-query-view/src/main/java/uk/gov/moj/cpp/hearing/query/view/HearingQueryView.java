@@ -23,6 +23,8 @@ import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingType;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
@@ -131,6 +133,16 @@ public class HearingQueryView {
                 .withMetadataFrom(envelope);
     }
 
+    @SuppressWarnings({"squid:S3655"})
+    public Envelope<GetHearings> findHearingsForFuture(final JsonEnvelope envelope, final HearingTypes hearingTypes) {
+        final List<HearingType> hearingTypeList = hearingTypes.getHearingTypes().stream().filter(HearingType::getTrialTypeFlag).collect(Collectors.toList());
+        final String defendantId = envelope.payloadAsJsonObject().getString(FIELD_DEFENDANT_ID);
+        final GetHearings hearingListResponse = hearingService.getHearingsForFuture(now(), UUID.fromString(defendantId),hearingTypeList);
+
+        return envelop(hearingListResponse)
+                .withName("hearing.get.hearings-for-future")
+                .withMetadataFrom(envelope);
+    }
     public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope,
                                                         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
                                                         final List<UUID> accessibleCasesId,
@@ -275,7 +287,7 @@ public class HearingQueryView {
         final Optional<String> courtCentreIds = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_IDS);
         final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
 
-        final List<UUID> courtCentreList = Stream.of(courtCentreIds.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
+        final List<UUID> courtCentreList = Stream.of(courtCentreIds.get().split(",")).map(UUID::fromString).collect(Collectors.toList());
 
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsForWebPage(courtCentreList, LocalDate.parse(dateOfHearing.get()), cppHearingEventIds);
 
@@ -287,7 +299,7 @@ public class HearingQueryView {
         final Optional<String> courtCentreId = getString(envelope.payloadAsJsonObject(), FIELD_COURT_CENTRE_IDS);
         final Optional<String> dateOfHearing = getString(envelope.payloadAsJsonObject(), DATE_OF_HEARING);
 
-        final List<UUID> courtCentreList = Stream.of(courtCentreId.get().split(",")).map(x -> fromString(x)).collect(Collectors.toList());
+        final List<UUID> courtCentreList = Stream.of(courtCentreId.get().split(",")).map(UUID::fromString).collect(Collectors.toList());
 
         final Optional<CurrentCourtStatus> currentCourtStatus = hearingService.getHearingsByDate(courtCentreList, LocalDate.parse(dateOfHearing.get()), cppHearingEventIds);
 

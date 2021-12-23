@@ -166,9 +166,9 @@ public class ReferenceDataStub {
     public static final UUID INEFFECTIVE_TRIAL_TYPE_ID = fromString("9b738c6e-04fc-4e18-bc49-b599973af7e7");
     public static final UUID VACATED_TRIAL_TYPE_ID = fromString("9c738c6e-04fc-4e18-bc49-b599973af7b8");
     public static final UUID CRACKED_TRIAL_TYPE_ID = fromString("9d738c6e-04fc-4e18-bc49-b599973af7c6");
-    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "fullDescription", null);
-    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "fullDescription", null);
-    public static final CrackedIneffectiveVacatedTrialType CRACKED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(CRACKED_TRIAL_TYPE_ID, "code", "Cracked", "fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "Prosecution witness absent: police", "fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "Prosecution failed to disclose unused material","fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType CRACKED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(CRACKED_TRIAL_TYPE_ID, "code", "Cracked", "Prosecution not ready: specify in comments","fullDescription", null);
     private static final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList<>();
 
     private static final String REFERENCE_DATA_PUBLIC_HOLIDAYS_MEDIA_TYPE = "application/vnd.referencedata.query.public-holidays+json";
@@ -195,6 +195,7 @@ public class ReferenceDataStub {
         stubGetReferenceDataResultBailStatuses();
         changeCourtRoomsStubWithAdding();
         stubDynamicPromptFixedList();
+        //stubCrackedIneffectiveVacatedTrialTypes();
         stubReferenceDataResultListForNameAddress();
 
         stubGetAllVerdictTypes();
@@ -862,6 +863,20 @@ public class ReferenceDataStub {
                         .withHeader("CPPID", randomUUID().toString())
                         .withHeader("Content-Type", hearingTypePathCT)
                         .withBody(getPayload("stub-data/referencedata.query.hearing-types.json"))));
+
+        waitForStubToBeReady(hearingTypePath, hearingTypePathCT);
+    }
+
+    private static void stubCrackedIneffectiveVacatedTrialTypes() {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        final String hearingTypePath = "/referencedata-service/query/api/rest/referencedata//cracked-ineffective-vacated-trial-types";
+        final String hearingTypePathCT = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
+        stubFor(get(urlPathEqualTo(hearingTypePath))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", hearingTypePathCT)
+                        .withBody(getPayload("stub-data/referencedata.fixedlists.cracked.ineffective.vacated.trial.types.json"))));
 
         waitForStubToBeReady(hearingTypePath, hearingTypePathCT);
     }

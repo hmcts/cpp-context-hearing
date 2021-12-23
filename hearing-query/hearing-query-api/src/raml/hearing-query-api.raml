@@ -256,6 +256,26 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.get.hearings-for-today.json
                     schema:  !include  json/schema/hearing.get.hearings-for-today.json
 
+/hearings-for-future:
+   get:
+      description: |
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.hearings-for-future+json
+            name: hearing.get.hearings-for-future
+        ...
+      queryParameters:
+        defendantId:
+          description: defendant id
+          type: string
+          required: true
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.hearings-for-future+json:
+                    example:  !include json/hearing.get.hearings-for-future.json
+                    schema:  !include  json/schema/hearing.get.hearings-for-future.json
 
 /search:
    get:

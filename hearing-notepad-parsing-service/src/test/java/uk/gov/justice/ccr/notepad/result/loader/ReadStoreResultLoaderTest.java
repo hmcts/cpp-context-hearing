@@ -78,6 +78,8 @@ public class ReadStoreResultLoaderTest {
     private Envelope<JsonObject> jsonEnvelopeYouthCourtNames;
 
     @Mock
+    private Envelope<JsonObject> jsonEnvelopeCrackedIneffectiveVacatedTrialTypes;
+    @Mock
     private Envelope<JsonObject> jsonEnvelopeMagistrateCourtsNameAddress;
 
 
@@ -171,6 +173,9 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getCrownCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeCrownCourtNames);
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
+        given(resultsQueryService.getOtherFixedValues(jsonEnvelope)).willReturn(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes);
+
+
         given(resultsQueryService.getMagistrateCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeMagistrateCourtsNameAddress);
         given(nameAddressRefDataEndPointMapper.loadAllNameAddressFromRefData()).willReturn(resultPromptDynamicListNameAddress);
         given(responseEnvelope.payload())
@@ -196,6 +201,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.scottis-ni-courts.json"));
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
+        given(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes.payload())
+                .willReturn(givenPayload("/referencedata.dyna.fixedlists.cracked.ineffective.vacated.trial.types.json"));
         given(jsonEnvelopeMagistrateCourtsNameAddress.payload())
                 .willReturn(givenPayload("/referencedata.megistrate-court-name-address.json"));
 
@@ -249,6 +256,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getCrownCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeCrownCourtNames);
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
+        given(resultsQueryService.getOtherFixedValues(jsonEnvelope)).willReturn(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes);
         given(resultsQueryService.getMagistrateCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeMagistrateCourtsNameAddress);
 
         given(responseEnvelope.payload())
@@ -274,6 +282,9 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.scottis-ni-courts.json"));
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
+        given(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes.payload())
+                .willReturn(givenPayload("/referencedata.dyna.fixedlists.cracked.ineffective.vacated.trial.types.json"));
+
         given(jsonEnvelopeMagistrateCourtsNameAddress.payload())
                 .willReturn(givenPayload("/referencedata.megistrate-court-name-address.json"));
         //when
@@ -301,6 +312,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getCrownCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeCrownCourtNames);
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
+        given(resultsQueryService.getOtherFixedValues(jsonEnvelope)).willReturn(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes);
         given(resultsQueryService.getMagistrateCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeMagistrateCourtsNameAddress);
 
         final Map<String, Set<ResultPromptDynamicListNameAddress>> resultPromptDynamicListNameAddress = new HashMap<>();
@@ -336,6 +348,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.scottis-ni-courts.json"));
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
+        given(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes.payload())
+                .willReturn(givenPayload("/referencedata.dyna.fixedlists.cracked.ineffective.vacated.trial.types.json"));
         given(jsonEnvelopeMagistrateCourtsNameAddress.payload())
                 .willReturn(givenPayload("/referencedata.megistrate-court-name-address.json"));
 
@@ -375,6 +389,8 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getCrownCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeCrownCourtNames);
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
+        given(resultsQueryService.getOtherFixedValues(jsonEnvelope)).willReturn(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes);
+
         given(resultsQueryService.getMagistrateCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeMagistrateCourtsNameAddress);
 
         given(responseEnvelope.payload())
@@ -400,6 +416,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.scottis-ni-courts.json"));
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
+        given(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes.payload())
+                .willReturn(givenPayload("/referencedata.dyna.fixedlists.cracked.ineffective.vacated.trial.types.json"));
         given(jsonEnvelopeMagistrateCourtsNameAddress.payload())
                 .willReturn(givenPayload("/referencedata.megistrate-court-name-address.json"));
 
@@ -453,6 +471,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getCrownCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeCrownCourtNames);
         given(resultsQueryService.getScottishCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeScottishNICourtNames);
         given(resultsQueryService.getYouthCourtAddress(jsonEnvelope)).willReturn(jsonEnvelopeYouthCourtNames);
+        given(resultsQueryService.getOtherFixedValues(jsonEnvelope)).willReturn(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes);
         given(resultsQueryService.getMagistrateCourtsNameAddress(jsonEnvelope)).willReturn(jsonEnvelopeMagistrateCourtsNameAddress);
 
         given(responseEnvelope.payload())
@@ -478,6 +497,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.scottis-ni-courts.json"));
         given(jsonEnvelopeYouthCourtNames.payload())
                 .willReturn(givenPayload("/referencedata.youth-courts.json"));
+        given(jsonEnvelopeCrackedIneffectiveVacatedTrialTypes.payload())
+                .willReturn(givenPayload("/referencedata.dyna.fixedlists.cracked.ineffective.vacated.trial.types.json"));
         given(jsonEnvelopeMagistrateCourtsNameAddress.payload())
                 .willReturn(givenPayload("/referencedata.megistrate-court-name-address.json"));
 

@@ -21,6 +21,7 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
@@ -67,6 +68,13 @@ public class ReferenceDataServiceTest {
         when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(crackedInEffectiveTrialTypesResponseEnvelope());
         final CrackedIneffectiveVacatedTrialTypes trialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         assertEquals(2, trialTypes.getCrackedIneffectiveVacatedTrialTypes().size());
+    }
+
+    @Test
+    public void shouldRequestAllHearingTypes() {
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(hearingTypesResponseEnvelope());
+        final HearingTypes hearingTypes = referenceDataService.getAllHearingTypes();
+        assertEquals(2, hearingTypes.getHearingTypes().size());
     }
 
     @Test
