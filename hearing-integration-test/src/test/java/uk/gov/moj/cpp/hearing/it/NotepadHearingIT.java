@@ -74,6 +74,47 @@ public class NotepadHearingIT extends AbstractIT {
     }
 
     @Test
+    public void shldPrseDataAvlbleTdayWthAssctdPrmpts_MjrCredtrNme() {
+        final String definitionQueryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "FCOMP", LocalDate.now().toString());
+        final String definitionUrl = getBaseUri() + "/" + definitionQueryAPIEndPoint;
+        final String definitionMediaType = "application/vnd.hearing.notepad.parse-result-definition+json";
+
+        final Matcher[] matchersForResultDefinition = {
+                withJsonPath("$.originalText", is("FCOMP")),
+                withJsonPath("$.parts[0].value", is("Compensation")),
+                withJsonPath("$.parts[0].state", is("RESOLVED")),
+                withJsonPath("$.parts[0].type", is("RESULT")),
+                withJsonPath("$.excludedFromResults", is(false)),
+                withJsonPath("$.conditionalMandatory", is(false)),
+                withJsonPath("$.promptChoices", hasSize(2))
+        };
+
+        final ResponseData responseData = poll(requestParams(definitionUrl, definitionMediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                ArrayUtils.addAll(matchersForResultDefinition, getMtchrsForPrmptChioces_MjrCredtrNme())
+                        )));
+
+        final JSONObject jsonObject = new JSONObject(responseData.getPayload());
+        final String resultDefinitionId = jsonObject.getString("resultDefinitionId");
+        final String promptsQueryAPIEndPoint = MessageFormat
+                .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.prompt"), resultDefinitionId, LocalDate.now().toString());
+        final String promptUrl = getBaseUri() + "/" + promptsQueryAPIEndPoint;
+        final String promptMediaType = "application/vnd.hearing.notepad.parse-result-prompt+json";
+
+        poll(requestParams(promptUrl, promptMediaType).withHeader(USER_ID, getLoggedInUser().toString()).build())
+                .timeout(125, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(allOf(
+                                getMtchrsForPrmptChioces_MjrCredtrNme()
+                        )));
+    }
+
+
+    @Test
     public void shouldParseDataThatAreAvailableTodayWithUsingSynonyms() {
         final String definitionQueryAPIEndPoint = MessageFormat
                 .format(ENDPOINT_PROPERTIES.getProperty("hearing.notepad.result-definition"), "Restraining", LocalDate.now().toString());
@@ -257,5 +298,25 @@ public class NotepadHearingIT extends AbstractIT {
                 withJsonPath("$.promptChoices[6].nameAddressList", is(EMPTY_LIST)),
                 withJsonPath("$.promptChoices[6].minLength", is("1")),
                 withJsonPath("$.promptChoices[6].maxLength", is("1000"))};
+    }
+
+    private Matcher[] getMtchrsForPrmptChioces_MjrCredtrNme() {
+        return new Matcher[]{withJsonPath("$.promptChoices[0].code", is("26985e5b-fe1f-4d7d-a21a-57207c5966e7")),
+                withJsonPath("$.promptChoices[0].label", is("Amount of compensation")),
+                withJsonPath("$.promptChoices[0].type", is("CURR")),
+                withJsonPath("$.promptChoices[0].required", is(true)),
+                withJsonPath("$.promptChoices[0].nameAddressList", is(EMPTY_LIST)),
+                withJsonPath("$.promptChoices[1].code", is("af921cf4-06e7-4f6b-a4ea-dcb58aab0dbe")),
+                withJsonPath("$.promptChoices[1].label", is("Major creditor name")),
+                withJsonPath("$.promptChoices[1].type", is("FIXL")),
+                withJsonPath("$.promptChoices[1].required", is(true)),
+                withJsonPath("$.promptChoices[1].children[0].label", is("Major creditor name")),
+                withJsonPath("$.promptChoices[1].children[0].type", is("FIXL")),
+                withJsonPath("$.promptChoices[1].children[0].promptRef", is("CREDNAME")),
+                withJsonPath("$.promptChoices[1].children[0].fixedList[0]", is("Transport for London One")),
+                withJsonPath("$.promptChoices[1].children[0].fixedList[1]", is("Transport for London Two")),
+                withJsonPath("$.promptChoices[1].fixedList[0]", is("Transport for London One")),
+                withJsonPath("$.promptChoices[1].fixedList[1]", is("Transport for London Two"))
+        };
     }
 }

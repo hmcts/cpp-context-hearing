@@ -197,6 +197,7 @@ public class ReferenceDataStub {
         stubDynamicPromptFixedList();
         //stubCrackedIneffectiveVacatedTrialTypes();
         stubReferenceDataResultListForNameAddress();
+        stubProsecutorByMajorCreditorFlag();
 
         stubGetAllVerdictTypes();
         stubGetAllAlcoholLevelMethods();
@@ -879,6 +880,20 @@ public class ReferenceDataStub {
                         .withBody(getPayload("stub-data/referencedata.fixedlists.cracked.ineffective.vacated.trial.types.json"))));
 
         waitForStubToBeReady(hearingTypePath, hearingTypePathCT);
+    }
+
+    private static void stubProsecutorByMajorCreditorFlag() {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        final String prosecutorByMajorCreditorFlagTypePath = "/referencedata-service/query/api/rest/referencedata/prosecutors"; //Correct?
+        final String prosecutorByMajorCreditorFlagPathCT = "application/vnd.referencedata.query.get.prosecutorMajorCreditor+json";
+        stubFor(get(urlPathEqualTo(prosecutorByMajorCreditorFlagTypePath))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", prosecutorByMajorCreditorFlagPathCT)
+                        .withBody(getPayload("stub-data/referencedata.query.prosecutors-by-major-creditor-flag.json"))));
+
+        waitForStubToBeReady(prosecutorByMajorCreditorFlagTypePath, prosecutorByMajorCreditorFlagPathCT);
     }
 
     public synchronized static void stubGetReferenceDataCourtRooms(final CourtCentre courtCentre,

@@ -60,6 +60,10 @@ public class ResultsQueryService {
         return sendEnvelopeWithName(envelope, "referencedata.query.hearing-types");
     }
 
+    public Envelope<JsonObject> getProsecutorsByMajorCreditorFlag(final JsonEnvelope envelope) {
+        return sendEnvelopeWithName(envelope, "referencedata.query.get.prosecutor.by.major-creditor-flag");
+    }
+
     public Envelope<JsonObject> getAllResultPromptWordSynonyms(final JsonEnvelope envelope, final LocalDate orderedDate) {
         return sendEnvelopeWithName(envelope, "referencedata.get-all-result-prompt-word-synonyms", createObjectBuilder()
                 .add("on", to(orderedDate))

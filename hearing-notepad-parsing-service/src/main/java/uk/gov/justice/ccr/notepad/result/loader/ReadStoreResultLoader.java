@@ -16,6 +16,7 @@ import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.DURATION;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.FIXL;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.isFixedListType;
 import static uk.gov.justice.ccr.notepad.result.cache.model.ResultType.valueOf;
+import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.CREDNAME;
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.HCHOUSE;
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.HTYPE;
 import static uk.gov.justice.ccr.notepad.result.loader.ResultPromptReferenceDynamicFixListUUIDMapper.getPromptReferenceDynamicFixListUuids;
@@ -290,6 +291,9 @@ public class ReadStoreResultLoader implements ResultLoader {
             setFixedListValuesForVacatingTrial(resultPromptOtherFixedValueSet, resultPrompt);
 
         }
+        if (CREDNAME.equalsIgnoreCase(promptReference)){
+            setFixedListValues(resultPromptFixedListMap, resultPrompt, promptReference);
+        }
     }
 
     private void setResultPromptRule(final ResultPrompt resultPrompt, final JsonObject promptJson) {
@@ -366,6 +370,7 @@ public class ReadStoreResultLoader implements ResultLoader {
         final Map<String, Set<String>> result = new ConcurrentHashMap<>();
         result.put(getPromptReferenceDynamicFixListUuids().get(HCHOUSE), getCourtCentres());
         result.put(getPromptReferenceDynamicFixListUuids().get(HTYPE), getHearingTypes());
+        result.put(getPromptReferenceDynamicFixListUuids().get(CREDNAME), getMajorCreditorNames());
         final Set<String> ljaNames = getLocalJusticeAreaNames();
         result.put(LOCAL_JUSTICE_AREA_FIXED_PENALTY_ISSUE_KEY, ljaNames);
         result.put(LOCAL_JUSTICE_AREA_KEY, ljaNames);
@@ -466,6 +471,15 @@ public class ReadStoreResultLoader implements ResultLoader {
                 .getJsonArray("hearingTypes").getValuesAs(JsonObject.class)
                 .stream()
                 .map(element -> element.getString("hearingDescription", null))
+                .filter(Objects::nonNull)
+                .collect(toCollection(TreeSet::new));
+    }
+
+    private Set<String> getMajorCreditorNames() {
+        return resultsQueryService.getProsecutorsByMajorCreditorFlag(this.jsonEnvelope).payload()
+                .getJsonArray("prosecutors").getValuesAs(JsonObject.class)
+                .stream()
+                .map(element -> element.getString("fullName", null))
                 .filter(Objects::nonNull)
                 .collect(toCollection(TreeSet::new));
     }

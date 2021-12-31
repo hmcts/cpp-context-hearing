@@ -54,6 +54,9 @@ public class ReadStoreResultLoaderTest {
     private Envelope<JsonObject> jsonEnvelopeDynaHearingType;
 
     @Mock
+    private Envelope<JsonObject> jsonEnvelopeProsecutorsByMajorCreditor;
+
+    @Mock
     private Envelope<JsonObject> jsonEnvelopeLocalJusticeArea;
 
     @Mock
@@ -165,6 +168,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
         given(resultsQueryService.getAllCourtCentre(jsonEnvelope)).willReturn(jsonEnvelopeDynaCourtCentre);
         given(resultsQueryService.getHearingTypes(jsonEnvelope)).willReturn(jsonEnvelopeDynaHearingType);
+        given(resultsQueryService.getProsecutorsByMajorCreditorFlag(jsonEnvelope)).willReturn(jsonEnvelopeProsecutorsByMajorCreditor);
         given(resultsQueryService.getLocalJusticeAreas(jsonEnvelope)).willReturn(jsonEnvelopeLocalJusticeArea);
         given(resultsQueryService.getCountriesNames(jsonEnvelope)).willReturn(jsonEnvelopeCountries);
         given(resultsQueryService.getLanguages(jsonEnvelope)).willReturn(jsonEnvelopeLanguages);
@@ -185,6 +189,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.court.centre.json"));
         given(jsonEnvelopeDynaHearingType.payload())
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.hearing.type.json"));
+        given(jsonEnvelopeProsecutorsByMajorCreditor.payload())
+                .willReturn(givenPayload("/referencedata.prosecutors-by-major-creditor.json"));
         given(jsonEnvelopeLocalJusticeArea.payload())
                 .willReturn(givenPayload("/referencedata.local-justice-area.json"));
         given(jsonEnvelopeCountries.payload())
@@ -248,6 +254,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
         given(resultsQueryService.getAllCourtCentre(jsonEnvelope)).willReturn(jsonEnvelopeDynaCourtCentre);
         given(resultsQueryService.getHearingTypes(jsonEnvelope)).willReturn(jsonEnvelopeDynaHearingType);
+        given(resultsQueryService.getProsecutorsByMajorCreditorFlag(jsonEnvelope)).willReturn(jsonEnvelopeProsecutorsByMajorCreditor);
         given(resultsQueryService.getLocalJusticeAreas(jsonEnvelope)).willReturn(jsonEnvelopeLocalJusticeArea);
         given(resultsQueryService.getCountriesNames(jsonEnvelope)).willReturn(jsonEnvelopeCountries);
         given(resultsQueryService.getLanguages(jsonEnvelope)).willReturn(jsonEnvelopeLanguages);
@@ -266,6 +273,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.court.centre.json"));
         given(jsonEnvelopeDynaHearingType.payload())
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.hearing.type.json"));
+        given(jsonEnvelopeProsecutorsByMajorCreditor.payload())
+                .willReturn(givenPayload("/referencedata.prosecutors-by-major-creditor.json"));
         given(jsonEnvelopeLocalJusticeArea.payload())
                 .willReturn(givenPayload("/referencedata.local-justice-area.json"));
         given(jsonEnvelopeCountries.payload())
@@ -304,6 +313,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
         given(resultsQueryService.getAllCourtCentre(jsonEnvelope)).willReturn(jsonEnvelopeDynaCourtCentre);
         given(resultsQueryService.getHearingTypes(jsonEnvelope)).willReturn(jsonEnvelopeDynaHearingType);
+        given(resultsQueryService.getProsecutorsByMajorCreditorFlag(jsonEnvelope)).willReturn(jsonEnvelopeProsecutorsByMajorCreditor);
         given(resultsQueryService.getLocalJusticeAreas(jsonEnvelope)).willReturn(jsonEnvelopeLocalJusticeArea);
         given(resultsQueryService.getCountriesNames(jsonEnvelope)).willReturn(jsonEnvelopeCountries);
         given(resultsQueryService.getLanguages(jsonEnvelope)).willReturn(jsonEnvelopeLanguages);
@@ -332,6 +342,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.court.centre.json"));
         given(jsonEnvelopeDynaHearingType.payload())
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.hearing.type.json"));
+        given(jsonEnvelopeProsecutorsByMajorCreditor.payload())
+                .willReturn(givenPayload("/referencedata.prosecutors-by-major-creditor.json"));
         given(jsonEnvelopeLocalJusticeArea.payload())
                 .willReturn(givenPayload("/referencedata.local-justice-area.json"));
         given(jsonEnvelopeCountries.payload())
@@ -381,6 +393,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
         given(resultsQueryService.getAllCourtCentre(jsonEnvelope)).willReturn(jsonEnvelopeDynaCourtCentre);
         given(resultsQueryService.getHearingTypes(jsonEnvelope)).willReturn(jsonEnvelopeDynaHearingType);
+        given(resultsQueryService.getProsecutorsByMajorCreditorFlag(jsonEnvelope)).willReturn(jsonEnvelopeProsecutorsByMajorCreditor);
         given(resultsQueryService.getLocalJusticeAreas(jsonEnvelope)).willReturn(jsonEnvelopeLocalJusticeArea);
         given(resultsQueryService.getCountriesNames(jsonEnvelope)).willReturn(jsonEnvelopeCountries);
         given(resultsQueryService.getLanguages(jsonEnvelope)).willReturn(jsonEnvelopeLanguages);
@@ -400,6 +413,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.court.centre.json"));
         given(jsonEnvelopeDynaHearingType.payload())
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.hearing.type.json"));
+        given(jsonEnvelopeProsecutorsByMajorCreditor.payload())
+                .willReturn(givenPayload("/referencedata.prosecutors-by-major-creditor.json"));
         given(jsonEnvelopeLocalJusticeArea.payload())
                 .willReturn(givenPayload("/referencedata.local-justice-area.json"));
         given(jsonEnvelopeCountries.payload())
@@ -463,6 +478,7 @@ public class ReadStoreResultLoaderTest {
         given(resultsQueryService.getAllDefinitions(jsonEnvelope, hearingDate)).willReturn(responseEnvelope);
         given(resultsQueryService.getAllCourtCentre(jsonEnvelope)).willReturn(jsonEnvelopeDynaCourtCentre);
         given(resultsQueryService.getHearingTypes(jsonEnvelope)).willReturn(jsonEnvelopeDynaHearingType);
+        given(resultsQueryService.getProsecutorsByMajorCreditorFlag(jsonEnvelope)).willReturn(jsonEnvelopeProsecutorsByMajorCreditor);
         given(resultsQueryService.getLocalJusticeAreas(jsonEnvelope)).willReturn(jsonEnvelopeLocalJusticeArea);
         given(resultsQueryService.getCountriesNames(jsonEnvelope)).willReturn(jsonEnvelopeCountries);
         given(resultsQueryService.getLanguages(jsonEnvelope)).willReturn(jsonEnvelopeLanguages);
@@ -481,6 +497,8 @@ public class ReadStoreResultLoaderTest {
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.court.centre.json"));
         given(jsonEnvelopeDynaHearingType.payload())
                 .willReturn(givenPayload("/referencedata.dyna.fixedlists.hearing.type.json"));
+        given(jsonEnvelopeProsecutorsByMajorCreditor.payload())
+                .willReturn(givenPayload("/referencedata.prosecutors-by-major-creditor.json"));
         given(jsonEnvelopeLocalJusticeArea.payload())
                 .willReturn(givenPayload("/referencedata.local-justice-area.json"));
         given(jsonEnvelopeCountries.payload())
