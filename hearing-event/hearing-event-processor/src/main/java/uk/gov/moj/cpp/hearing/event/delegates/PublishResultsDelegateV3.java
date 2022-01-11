@@ -148,7 +148,7 @@ public class PublishResultsDelegateV3 {
 
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope);
+            LOGGER.info("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
         }
         sender.send(jsonEnvelope);
 
@@ -391,6 +391,8 @@ public class PublishResultsDelegateV3 {
             for (final JudicialResult judicialResult : judicialResults) {
                 if (isEmpty(judicialResult.getJudicialResultPrompts())) {
                     judicialResult.setJudicialResultPrompts(null);
+                }else {
+                    removeParentGuardianPromptIfFalse(judicialResult);
                 }
             }
         }
@@ -399,7 +401,13 @@ public class PublishResultsDelegateV3 {
     private void setJudicialResultPromptsAsNull(JudicialResult judicialResult) {
         if (isEmpty(judicialResult.getJudicialResultPrompts())) {
             judicialResult.setJudicialResultPrompts(null);
+        } else {
+            removeParentGuardianPromptIfFalse(judicialResult);
         }
+    }
+
+    private void removeParentGuardianPromptIfFalse(JudicialResult judicialResult) {
+        judicialResult.getJudicialResultPrompts().removeIf(judicialResultPrompt -> "PARENT_GAURDIAN_TO_PAY".equalsIgnoreCase(judicialResultPrompt.getPromptReference()) && "false".equals(judicialResultPrompt.getValue()));
     }
 
     private List<JudicialResult> getOffenceLevelJudicialResults(final List<TreeNode<ResultLine2>> results, final UUID id) {

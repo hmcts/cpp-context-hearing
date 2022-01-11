@@ -8,8 +8,11 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -27,22 +30,27 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplateWithApplication;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
+import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllNowsMetaData;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetAllResultDefinitions;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForResultDefinition;
 
+import com.jayway.restassured.path.json.JsonPath;
 import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -51,6 +59,8 @@ import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
+import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.NowDefinition;
@@ -79,6 +89,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
@@ -137,6 +148,46 @@ public class ShareResultsV2IT extends AbstractIT {
 
     }
 
+    @Test
+    public void doesNotIncludeParentGuardianPromptInPublicHearingPayloadIfFalseWhenShareResult() {
+        final LocalDate orderedDate = PAST_LOCAL_DATE.next();
+        final UUID withDrawnResultDefId = fromString("14d66587-8fbe-424f-a369-b1144f1684e3");
+        final LocalDate hearingDay = LocalDate.now();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        assertHearingWithMultipleCasesCreatedAndResultAreNotShared(hearing);
+
+        stubCourtRoom(hearing);
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderedDate);
+        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt
+                now1MandatoryResultDefinitionPrompt = getMandatoryNowResultDefPrompt(orderedDate, withDrawnResultDefId, allNows);
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(hearingCommand.it(), orderedDate, hearingDay);
+        setPromptForSaveDraftResultCommand(now1MandatoryResultDefinitionPrompt, saveDraftResultCommand);
+
+
+        final List<Target> targets = new ArrayList<>();
+        targets.add(saveDraftResultCommand.getTarget());
+
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getList("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].judicialResultPrompts").size(), is(1));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].judicialResultPrompts[0].promptReference"), is("bailConditionReason"));
+        }
+        assertHearingResultsAreShared(hearing);
+    }
+
     private void getSharedResult(final Hearing hearing, final LocalDate hearingDay) {
 
         poll(requestParams(getURL("hearing.get-share-result-v2", hearing.getId(), hearingDay), "application/vnd.hearing.get-share-result-v2+json")
@@ -167,14 +218,21 @@ public class ShareResultsV2IT extends AbstractIT {
 
     private SaveDraftResultCommand setPromptForSaveDraftResultCommand(final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt now1MandatoryResultDefinitionPrompt, final SaveDraftResultCommand saveDraftResultCommand) {
         saveDraftResultCommand.getTarget().getResultLines().get(0).setPrompts(
-                singletonList(Prompt.prompt()
-                        .withLabel(now1MandatoryResultDefinitionPrompt.getLabel())
-                        .withPromptRef("promptRefValue")
-                        .withFixedListCode("fixedListCode")
-                        .withValue("value1")
-                        .withWelshValue("wvalue1")
-                        .withId(now1MandatoryResultDefinitionPrompt.getId())
-                        .build()));
+                asList(Prompt.prompt()
+                                .withLabel(now1MandatoryResultDefinitionPrompt.getLabel())
+                                .withPromptRef(now1MandatoryResultDefinitionPrompt.getReference())
+                                .withFixedListCode("fixedListCode")
+                                .withValue("value1")
+                                .withWelshValue("wvalue1")
+                                .withId(now1MandatoryResultDefinitionPrompt.getId())
+                                .build(),
+                        Prompt.prompt()
+                                .withLabel(now1MandatoryResultDefinitionPrompt.getLabel())
+                                .withPromptRef("PARENT_GAURDIAN_TO_PAY")
+                                .withValue("false")
+                                .withWelshValue("false")
+                                .withId(now1MandatoryResultDefinitionPrompt.getId())
+                                .build()));
         saveDraftResultCommand.getTarget().getResultLines().get(0).setResultDefinitionId(saveDraftResultCommand.getTarget().getResultLines().get(0).getPrompts().get(0).getId());
         return saveDraftResultCommand;
     }
@@ -319,13 +377,20 @@ public class ShareResultsV2IT extends AbstractIT {
                                                 .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
                                                 .setFinancial("Y")
                                                 .setCategory(getCategoryForResultDefinition(resultDefinitionId))
-                                                .setPrompts(singletonList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                .setPrompts(asList(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
                                                                 .setId(resultDefinitionId)
                                                                 .setMandatory(true)
                                                                 .setLabel("promptLabel")
                                                                 .setWelshLabel(STRING.next())
                                                                 .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
-                                                                .setReference("bailConditionReason")
+                                                                .setReference("bailConditionReason"),
+                                                        uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt.prompt()
+                                                                .setId(resultDefinitionId)
+                                                                .setMandatory(false)
+                                                                .setLabel("Parent Guardian to Pay")
+                                                                .setWelshLabel(STRING.next())
+                                                                .setUserGroups(singletonList(LISTING_OFFICER_USER_GROUP))
+                                                                .setReference("PARENT_GAURDIAN_TO_PAY")
                                                         )
                                                 )
                                                 .setSecondaryCJSCodes(getSecondaryCjsCodes())

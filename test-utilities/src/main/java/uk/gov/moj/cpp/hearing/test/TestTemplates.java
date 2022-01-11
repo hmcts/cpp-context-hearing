@@ -54,6 +54,7 @@ import uk.gov.justice.core.courts.Jurisdiction;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LaaReference;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
+import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.LinkType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceActiveOrder;
@@ -842,7 +843,7 @@ public class TestTemplates {
                     .withIsComplete(true)
                     .withIsModified(true)
                     .withIsDeleted(false)
-                    .withLevel(uk.gov.justice.core.courts.Level.OFFENCE)
+                    .withLevel(Level.OFFENCE)
                     .withOrderedDate(orderedDate)
                     .withResultLineId(UUID.randomUUID())
                     .withResultLabel(IMPRISONMENT)
@@ -1019,19 +1020,15 @@ public class TestTemplates {
                 offenceId = null;
             }
 
-            final Target target = Target.target()
+            final Target.Builder targetBuilder = Target.target()
                     .withHearingId(hearing.getId())
                     .withDraftResult(DRAFT_RESULTS_CONTENT)
-//                    .withMasterDefendantId(UUID.randomUUID())
-                    .withTargetId(UUID.randomUUID())
-//                    .withDefendantId(hearing.getProsecutionCases().get(0).getDefendants().get(0).getId())
+                    .withTargetId(randomUUID())
                     .withApplicationId(hearing.getCourtApplications().get(0).getId())
-//                    .withCaseId(UUID.randomUUID())
-                    .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .withResultLines(singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
                     .withShadowListed(shadowListed)
-                    .withOffenceId(offenceId)
-                    .build();
-            return new SaveDraftResultCommand(target, null);
+                    .withOffenceId(offenceId);
+            return new SaveDraftResultCommand(targetBuilder.build(), null);
         }
 
         public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplication(

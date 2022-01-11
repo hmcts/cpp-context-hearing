@@ -42,7 +42,9 @@ import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelperV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
@@ -187,6 +189,12 @@ public abstract class AbstractRestructuringTest {
     }
 
     protected JsonEnvelope getEnvelope(final ResultsSharedV2 resultsShared) {
+        return envelopeFrom(
+                Envelope.metadataBuilder().withId(randomUUID()).withName(HEARING_RESULTS_SHARED_EVENT).build(),
+                objectToJsonObjectConverter.convert(resultsShared));
+    }
+
+    protected JsonEnvelope getEnvelope(final ResultsSharedV3 resultsShared) {
         return envelopeFrom(
                 Envelope.metadataBuilder().withId(randomUUID()).withName(HEARING_RESULTS_SHARED_EVENT).build(),
                 objectToJsonObjectConverter.convert(resultsShared));
