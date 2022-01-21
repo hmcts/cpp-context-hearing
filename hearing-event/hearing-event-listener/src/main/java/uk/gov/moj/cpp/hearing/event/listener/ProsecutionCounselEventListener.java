@@ -52,7 +52,7 @@ public class ProsecutionCounselEventListener {
         final ProsecutionCounselAdded prosecutionCounselAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), ProsecutionCounselAdded.class);
         final Hearing hearing = hearingRepository.findBy(prosecutionCounselAdded.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", prosecutionCounselAdded);
+            LOGGER.debug("hearing.prosecution-counsel-added for hearingId {} ", hearing.getId());
         }
         if (hearing == null) {
             LOGGER.error("Hearing not found");
@@ -70,7 +70,7 @@ public class ProsecutionCounselEventListener {
         final ProsecutionCounselRemoved prosecutionCounselRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ProsecutionCounselRemoved.class);
         final Hearing hearing = hearingRepository.findBy(prosecutionCounselRemoved.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", prosecutionCounselRemoved);
+            LOGGER.debug("hearing.prosecution-counsel-removed for hearingId {} ", hearing.getId());
         }
         if (hearing == null) {
             LOGGER.error("Hearing not found");
@@ -94,7 +94,7 @@ public class ProsecutionCounselEventListener {
         final ProsecutionCounselUpdated prosecutionCounselUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), ProsecutionCounselUpdated.class);
         final Hearing hearing = hearingRepository.findBy(prosecutionCounselUpdated.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", prosecutionCounselUpdated);
+            LOGGER.debug("hearing.prosecution-counsel-updated for hearingId {} ", hearing.getId());
         }
         if (hearing == null) {
             LOGGER.error(HEARING_NOT_FOUND);

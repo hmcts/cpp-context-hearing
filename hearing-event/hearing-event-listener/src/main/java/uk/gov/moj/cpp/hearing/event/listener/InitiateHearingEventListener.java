@@ -95,11 +95,12 @@ public class InitiateHearingEventListener {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
-        LOGGER.debug("hearing.initiated event received {}", payload);
-
         final HearingInitiated initiated = jsonObjectToObjectConverter.convert(payload, HearingInitiated.class);
 
         final Hearing hearingEntity = hearingJPAMapper.toJPA(initiated.getHearing());
+
+        LOGGER.debug("hearing.initiated event received for hearingId {}", hearingEntity.getId());
+
         hearingEntity.setHearingState(HearingState.INITIALISED);
         getOffencesForHearing(hearingEntity)
                 .forEach(x -> updateOffenceForShadowListedStatus(initiated.getHearing().getShadowListedOffences(), x));
@@ -113,11 +114,11 @@ public class InitiateHearingEventListener {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
-        LOGGER.debug("hearing.hearingExtended event received {}", payload);
-
         final HearingExtended hearingExtended = jsonObjectToObjectConverter.convert(payload, HearingExtended.class);
 
         final Hearing hearingEntity = hearingRepository.findBy(hearingExtended.getHearingId());
+
+        LOGGER.debug("hearing.hearingExtended event received for hearingId {}", hearingEntity.getId());
 
         if (nonNull(hearingExtended.getCourtApplication())) {
             final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), hearingExtended.getCourtApplication());
@@ -145,11 +146,11 @@ public class InitiateHearingEventListener {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
-        LOGGER.debug("hearing.events.application-detail-changed event received {}", payload);
-
         final ApplicationDetailChanged applicationDetailChanged = jsonObjectToObjectConverter.convert(payload, ApplicationDetailChanged.class);
 
         final Hearing hearingEntity = hearingRepository.findBy(applicationDetailChanged.getHearingId());
+
+        LOGGER.debug("hearing.events.application-detail-changed event received for hearingId{}", hearingEntity.getId());
 
         final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), applicationDetailChanged.getCourtApplication());
 
@@ -230,14 +231,13 @@ public class InitiateHearingEventListener {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.existing-hearing-updated event received {}", payload);
-        }
-
         final ExistingHearingUpdated existingHearingUpdated = jsonObjectToObjectConverter.convert(payload, ExistingHearingUpdated.class);
 
         final Hearing hearingEntity = hearingRepository.findBy(existingHearingUpdated.getHearingId());
 
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.existing-hearing-updated event received {}", hearingEntity.getId());
+        }
         updateHearing(hearingEntity, existingHearingUpdated.getProsecutionCases(), existingHearingUpdated.getShadowListedOffences());
     }
 

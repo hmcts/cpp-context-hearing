@@ -32,9 +32,6 @@ public class SessionTimeEventListener {
     public void sessionTimeRecorded(final Envelope<SessionTimeRecorded> event) {
 
         LOGGER.debug("Entered SessionTimeRecordedEventListener");
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.event.session-time-recorded event received {}", event.payload());
-        }
 
         final SessionTimeRecorded sessionTimeRecorded = event.payload();
 
@@ -43,6 +40,10 @@ public class SessionTimeEventListener {
         sessionTime.setCourtHouseId(sessionTimeRecorded.getCourtHouseId());
         sessionTime.setCourtRoomId(sessionTimeRecorded.getCourtRoomId());
         sessionTime.setCourtSessionDate(sessionTimeRecorded.getCourtSessionDate());
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.event.session-time-recorded event received for courtSessionId{} with courtHouseId {} and courtRoomId {}", sessionTimeRecorded.getCourtSessionId(), sessionTimeRecorded.getCourtHouseId(), sessionTimeRecorded.getCourtRoomId());
+        }
 
         ofNullable(sessionTimeRecorded.getAmCourtSession())
                 .ifPresent(amCourtSession -> sessionTime.setAmCourtSession(objectMapper.valueToTree(amCourtSession)));

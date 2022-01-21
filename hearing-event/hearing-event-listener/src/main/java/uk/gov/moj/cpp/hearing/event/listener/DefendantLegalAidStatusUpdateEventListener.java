@@ -35,15 +35,17 @@ public class DefendantLegalAidStatusUpdateEventListener {
     public void updateDefendantLegalAidStatusForHearing(final JsonEnvelope event) {
 
         final JsonObject payload = event.payloadAsJsonObject();
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.defendant-legalaid-status-updated-for-hearing event received {}", payload);
-        }
         final DefendantLegalAidStatusUpdatedForHearing defendantLegalAidStatusUpdated = jsonObjectToObjectConverter.convert(payload, DefendantLegalAidStatusUpdatedForHearing.class);
 
         final UUID defendantId = defendantLegalAidStatusUpdated.getDefendantId();
         final String legalAidStatus = defendantLegalAidStatusUpdated.getLegalAidStatus();
         final UUID hearingId = defendantLegalAidStatusUpdated.getHearingId();
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantId, hearingId));
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.defendant-legalaid-status-updated-for-hearing event received for hearingId {}", hearingId);
+        }
+
 
         if("NO_VALUE".equals(legalAidStatus)) {
             defendant.setLegalaidStatus(null);

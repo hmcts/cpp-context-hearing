@@ -58,7 +58,7 @@ public class CompanyRepresentativeEventListener {
     public void companyRepresentativeUpdated(final JsonEnvelope envelope) {
         final CompanyRepresentativeUpdated companyRepresentativeUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), CompanyRepresentativeUpdated.class);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Company representative updated event payload {} ", companyRepresentativeUpdated);
+            LOGGER.debug("Company representative updated for hearingId {} ", companyRepresentativeUpdated.getHearingId());
         }
         final Hearing hearing = getHearing(companyRepresentativeUpdated.getHearingId());
         saveCompanyRepresentative(hearing, companyRepresentativeUpdated.getCompanyRepresentative());
@@ -69,7 +69,7 @@ public class CompanyRepresentativeEventListener {
     public void companyRepresentativeRemoved(final JsonEnvelope event) {
         final CompanyRepresentativeRemoved companyRepresentativeRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), CompanyRepresentativeRemoved.class);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", companyRepresentativeRemoved);
+            LOGGER.debug("Company representative removed for hearingId {} ", companyRepresentativeRemoved.getHearingId());
         }
         final Hearing hearing = getHearing(companyRepresentativeRemoved.getHearingId());
         if (Objects.nonNull(hearing)) {
