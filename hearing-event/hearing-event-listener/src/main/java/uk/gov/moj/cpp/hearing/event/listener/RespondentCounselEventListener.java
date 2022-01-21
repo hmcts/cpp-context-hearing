@@ -51,7 +51,7 @@ public class RespondentCounselEventListener {
         final RespondentCounselAdded respondentCounselAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), RespondentCounselAdded.class);
         final Hearing hearing = hearingRepository.findBy(respondentCounselAdded.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.respondent-counsel-added for hearingId {} ", hearing.getId());
+            LOGGER.debug("payload {} ", respondentCounselAdded);
         }
         if (hearing == null) {
             LOGGER.error(HEARING_NOT_FOUND);
@@ -69,7 +69,7 @@ public class RespondentCounselEventListener {
         final RespondentCounselRemoved respondentCounselRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), RespondentCounselRemoved.class);
         final Hearing hearing = hearingRepository.findBy(respondentCounselRemoved.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.respondent-counsel-removed for hearingId {} ", hearing.getId());
+            LOGGER.debug("payload {} ", respondentCounselRemoved);
         }
         if (hearing == null) {
             LOGGER.error(HEARING_NOT_FOUND);
@@ -93,7 +93,7 @@ public class RespondentCounselEventListener {
         final RespondentCounselUpdated respondentCounselUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), RespondentCounselUpdated.class);
         final Hearing hearing = hearingRepository.findBy(respondentCounselUpdated.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.respondent-counsel-updated for hearingId {} ", hearing.getId());
+            LOGGER.debug("payload {} ", respondentCounselUpdated);
         }
         if (hearing == null) {
             LOGGER.error(HEARING_NOT_FOUND);
