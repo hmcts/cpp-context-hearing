@@ -22,12 +22,14 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
 import org.junit.Before;
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 
 public class OffenceDelegateTest {
 
@@ -223,6 +225,76 @@ public class OffenceDelegateTest {
         assertThat(offences.get(0).getCustodyTimeLimit(), notNullValue());
         assertThat(offences.get(0).getCustodyTimeLimit().getTimeLimit(), is(extendedCTLDate));
         assertThat(offences.get(0).getCustodyTimeLimit().getIsCtlExtended(), is(true));
+
+    }
+
+    @Test
+    public void shouldNotAddDuplicateOffenceIfOffenceExistAlreadyForDefendant() {
+
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(Defendant.defendant()
+                                .withId(defendantId)
+                                .withOffences(new ArrayList<>(Arrays.asList(Offence.offence()
+                                                .withId(offenceId)
+                                                .build())))
+                                .build()))
+                        .build()))
+                .build());
+
+        final Offence offence = Offence.offence()
+                .withId(offenceId)
+                .build();
+
+
+        hearingAggregate.apply(OffenceAdded.offenceAdded()
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withOffence(offence));
+
+        final List<Offence> offences = hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+        assertThat(offences.size(), is(1));
+
+    }
+
+    public void shouldAddOffenceToDefendantIfTheOffenceIsNotDuplicate() {
+
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offence1Id = randomUUID();
+        final UUID offence2Id = randomUUID();
+
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(Defendant.defendant()
+                                .withId(defendantId)
+                                .withOffences(new ArrayList<>(Arrays.asList(Offence.offence()
+                                        .withId(offence1Id)
+                                        .build())))
+                                .build()))
+                        .build()))
+                .build());
+
+        final Offence offence = Offence.offence()
+                .withId(offence2Id)
+                .build();
+
+
+        hearingAggregate.apply(OffenceAdded.offenceAdded()
+                .withHearingId(hearingId)
+                .withDefendantId(defendantId)
+                .withProsecutionCaseId(prosecutionCaseId)
+                .withOffence(offence));
+
+        final List<Offence> offences = hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences();
+        assertThat(offences.size(), is(2));
 
     }
 

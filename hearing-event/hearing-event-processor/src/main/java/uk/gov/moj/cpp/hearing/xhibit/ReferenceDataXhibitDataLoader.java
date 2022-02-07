@@ -43,7 +43,7 @@ public class ReferenceDataXhibitDataLoader {
         final XhibitEventMappingsList payload = requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
 
         if (payload == null || isEmpty(payload.getCpXhibitHearingEventMappings())) {
-            throw new ReferenceDataNotFoundException(jsonEnvelope, "xhibit event mapping not found");
+            throw new ReferenceDataNotFoundException("xhibit event mapping not found" + XHIBIT_EVENT_MAPPINGS);
         }
 
         return payload;

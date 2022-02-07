@@ -35,10 +35,18 @@ public class OffenceDelegate implements Serializable {
     }
 
     public void handleOffenceAdded(final OffenceAdded offenceAdded) {
-        this.momento.getHearing().getProsecutionCases().stream()
+        final Optional<Offence> offenceInHearing = this.momento.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
-                .filter(defendant -> defendant.getId().equals(offenceAdded.getDefendantId()))
-                .forEach(defendant -> defendant.getOffences().add(offenceAdded.getOffence()));
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .filter(offence1 -> offence1.getId().equals(offenceAdded.getOffence().getId()))
+                .findAny();
+
+        if (!offenceInHearing.isPresent()) {
+            this.momento.getHearing().getProsecutionCases().stream()
+                    .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                    .filter(defendant -> defendant.getId().equals(offenceAdded.getDefendantId()))
+                    .forEach(defendant -> defendant.getOffences().add(offenceAdded.getOffence()));
+        }
     }
 
     public void handleOffenceUpdated(final OffenceUpdated offenceUpdated) {
@@ -130,11 +138,23 @@ public class OffenceDelegate implements Serializable {
         if (this.momento.isPublished()) {
             return empty();
         }
+
+        final Optional<Offence> offenceInHearing = this.momento.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .filter(offence1 -> offence1.getId().equals(offence.getId()))
+                .findAny();
+
+        if (offenceInHearing.isPresent()) {
+            return empty();
+        }
+
         return Stream.of(OffenceAdded.offenceAdded()
                 .withHearingId(hearingId)
                 .withDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withOffence(offence));
+
     }
 
     public Stream<Object> updateOffence(final UUID hearingId, final UUID defendantId, final Offence offence) {

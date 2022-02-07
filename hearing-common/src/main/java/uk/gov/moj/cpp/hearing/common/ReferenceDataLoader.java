@@ -56,7 +56,7 @@ public class ReferenceDataLoader {
         final Envelope<OrganisationunitsResult> response = requester.requestAsAdmin(requestEnvelope, OrganisationunitsResult.class);
 
         if (isNull(response) || isNull(response.payload()) || isEmpty(response.payload().getOrganisationunits())) {
-            throw new ReferenceDataNotFoundException(requestEnvelope, "Cannot find organisationunits");
+            throw new ReferenceDataNotFoundException("Cannot find organisationunits" + REFERENCEDATA_QUERY_ORGANISATION_UNITS);
         }
 
         return of(response.payload());
@@ -75,7 +75,7 @@ public class ReferenceDataLoader {
         final Envelope<OrganisationalUnit> responseEnvelope = requester.requestAsAdmin(requestEnvelope, OrganisationalUnit.class);
 
         if (isNull(responseEnvelope) || isNull(responseEnvelope.payload())) {
-            throw new ReferenceDataNotFoundException(requestEnvelope, format("Cannot find this organisationunit %s", courtCentreId));
+            throw new ReferenceDataNotFoundException(format("Cannot find this organisationunit %s", courtCentreId + REFERENCEDATA_QUERY_ORGANISATION_UNIT));
         }
 
         LOGGER.debug("'referencedata.query.organisation-unit' response with payload {}", responseEnvelope.payload());
@@ -105,7 +105,7 @@ public class ReferenceDataLoader {
         final EnforcementArea enforcementArea = responseEnvelope.payload();
 
         if (isNull(enforcementArea)) {
-            throw new ReferenceDataNotFoundException(requestEnvelope, format("No enforcement area found for court centreId %s", courtCentreId));
+            throw new ReferenceDataNotFoundException(format("No enforcement area found for court centreId %s", courtCentreId + ENFORCEMENT_AREA_QUERY_NAME));
         }
 
         return enforcementArea;
