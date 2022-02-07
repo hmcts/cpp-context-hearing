@@ -38,10 +38,10 @@ public class LogEventHearingEventProcessor {
     private ObjectToJsonValueConverter objectToJsonValueConverter;
 
     @Handles("hearing.hearing-event-logged")
+    @SuppressWarnings({"squid:S3457", "squid:S2629"})
     public void publishHearingEventLoggedPublicEvent(final JsonEnvelope event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.hearing-event-logged event received {}", event.toObfuscatedDebugString());
-        }
+
+        LOGGER.info("hearing.hearing-event-logged event received {}", event.toString());
 
         final HearingEventLogged hearingEventLogged = this.jsonObjectToObjectConverter
                 .convert(event.payloadAsJsonObject(), HearingEventLogged.class);

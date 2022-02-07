@@ -6,7 +6,6 @@
         <artifactId>service-parent-pom</artifactId>
         <version>10.4.0</version>
     </parent>
-
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
     <version>7.0.150-SNAPSHOT</version>

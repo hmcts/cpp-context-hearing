@@ -47,7 +47,7 @@ public class RemoveNonPublishableLinesHelperV3 {
                         parent.get().getJudicialResult().setJudicialResultPrompts(new ArrayList<>());
                         judicialResultPrompts.forEach(promptPair -> parent.get().getJudicialResult().getJudicialResultPrompts().addAll(promptPair.getValue()));
                         parent.get().getChildren().remove(treeNode);
-                        candidateNodeForRemoval.add(treeNode);
+                        removeCandidateNodeIfNotAlwaysPublished(candidateNodeForRemoval, treeNode);
                         //Only set next hearing object if the parent node doesn't have it
                         if(nextHearingOnlyExistsOnChildNode(treeNode, parent.get())) {
                             parent.get().getJudicialResult().setNextHearing(treeNode.getJudicialResult().getNextHearing());
@@ -61,6 +61,16 @@ public class RemoveNonPublishableLinesHelperV3 {
         });
         treeNodeList.removeAll(candidateNodeForRemoval);
         return treeNodeList;
+    }
+
+    private static void removeCandidateNodeIfNotAlwaysPublished(final List<TreeNode<ResultLine2>> candidateNodeForRemoval, final TreeNode<ResultLine2> treeNode) {
+        if (!treeNode.getJudicialResult().getAlwaysPublished()) {
+            candidateNodeForRemoval.add(treeNode);
+        }
+        else {
+            treeNode.removeAllChildren();
+            treeNode.removeAllParents();
+        }
     }
 
     private static boolean nextHearingOnlyExistsOnChildNode(TreeNode<ResultLine2> childNode, TreeNode<ResultLine2> parent) {

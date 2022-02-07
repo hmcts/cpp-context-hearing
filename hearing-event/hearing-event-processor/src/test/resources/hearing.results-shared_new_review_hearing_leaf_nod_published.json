@@ -1,0 +1,625 @@
+{
+  "hearingId": "f48d461a-cec2-4ecf-9449-dc525cea57ab",
+  "sharedTime": "2022-01-18T14:19:42.774Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 0,
+        "sittingDay": "2022-01-11T17:30:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "f48d461a-cec2-4ecf-9449-dc525cea57ab",
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "INACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2022-01-11T13:47:17.143Z",
+            "id": "5df58214-9fd0-4024-9360-79e491231d2f",
+            "isYouth": true,
+            "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+            "offences": [
+              {
+                "arrestDate": "2020-12-01",
+                "chargeDate": "2020-12-02",
+                "count": 0,
+                "dvlaOffenceCode": "TS10",
+                "endorsableFlag": true,
+                "id": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "offenceCode": "RT88972",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "f0740f10-42da-43e1-9fbd-bd57d4356750",
+                "offenceLegislation": "Contrary to section 36(1) of the Road Traffic Act 1988, the Traffic Signs Regulations and General Directions 2016 and Schedule 2 to the Road Traffic Offenders Act 1988.",
+                "offenceLegislationWelsh": "Yn groes i adran 36(1) Deddf Traffig Ffyrdd 1988, Rheoliadau a Chyfarwyddiadau Cyffredinol Arwyddion Traffig 2016 ac Atodlen 2 Deddf Troseddwyr Traffig Ffyrdd 1988.",
+                "offenceTitle": "Drive motor vehicle fail comply with red / green arrow / lane closure light signals - automatic equipment",
+                "offenceTitleWelsh": "Gyrru c / m a methu â chydymffurfio ag arwyddion golau - saeth goch / saeth werdd / lonydd ar gau – cyfarpar awtomatig",
+                "orderIndex": 1,
+                "reportingRestrictions": [
+                  {
+                    "id": "178d906d-590f-4346-937f-a4856fd98f1c",
+                    "label": "Section 49 of the Children and Young Persons Act 1933 applies",
+                    "orderedDate": "2022-01-11"
+                  }
+                ],
+                "startDate": "2019-11-28",
+                "wording": "From 13th November 2018, an aggravated version of this offence applies where the offence is committed against an emergency worker acting in the exercise of his / her functions as such a worker, as per section 1 of the Assaults on emergency Workers (Offences) Act 2018; see offence wording document H19568."
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "E28GC01123537143",
+              "bailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              },
+              "driverNumber": "CRIME709136TC8GZ",
+              "personDetails": {
+                "address": {
+                  "address1": "o",
+                  "address2": "Ewald Meadow",
+                  "address3": "Britneyside",
+                  "address4": "Avon",
+                  "postcode": "DA6 7ND"
+                },
+                "contact": {
+                  "home": "433-328-6583"
+                },
+                "dateOfBirth": "2006-10-13",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "1",
+                  "observedEthnicityDescription": "White",
+                  "observedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Brooke",
+                "gender": "FEMALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Langworth",
+                "title": "Mr"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "proceedingsConcluded": true,
+            "prosecutionAuthorityReference": "E28GC01123537143",
+            "prosecutionCaseId": "91235fef-a9ae-4e00-923e-977ad405efd8"
+          }
+        ],
+        "id": "91235fef-a9ae-4e00-923e-977ad405efd8",
+        "initiationCode": "C",
+        "originatingOrganisation": "0450000",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Surrey Police",
+            "address2": "Mount Browne",
+            "address3": "Sandy Lane",
+            "address4": "Guildford",
+            "postcode": "GU3 1HG"
+          },
+          "contact": {
+            "primaryEmail": "mail_data_bureau_res@surrey.pnn.police.uk"
+          },
+          "majorCreditorCode": "PO45",
+          "prosecutionAuthorityCode": "SURRPF",
+          "prosecutionAuthorityId": "764bff92-a135-34cb-b858-8bb6b4b66301",
+          "prosecutionAuthorityName": "Surrey Police",
+          "prosecutionAuthorityOUCode": "0450000",
+          "caseURN": "45FL1101225"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [
+
+  ],
+  "completedResultLinesStatus": {
+    "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4": {
+      "id": "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4",
+      "lastSharedDateTime": "2022-01-18T13:26:37.666Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "0cb933b3-b956-4c70-bc06-6ac8aa1d23fd": {
+      "id": "0cb933b3-b956-4c70-bc06-6ac8aa1d23fd",
+      "lastSharedDateTime": "2022-01-18T13:26:37.666Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "27ebfba2-24cb-40f3-9de2-028c436e629d": {
+      "id": "27ebfba2-24cb-40f3-9de2-028c436e629d",
+      "lastSharedDateTime": "2022-01-18T13:26:37.666Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    },
+    "0b6e23c1-ee6a-49e8-b912-32e7622abb7d": {
+      "id": "0b6e23c1-ee6a-49e8-b912-32e7622abb7d",
+      "lastSharedDateTime": "2022-01-18T13:26:37.666Z",
+      "courtClerk": {
+        "firstName": "Emma",
+        "lastName": "Cleaner",
+        "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+      }
+    }
+  },
+  "targets": [
+    {
+      "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+      "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+      "draftResult": "{}",
+      "hearingDay": "2022-01-11",
+      "hearingId": "f48d461a-cec2-4ecf-9449-dc525cea57ab",
+      "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+      "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+      "resultLines": [
+        {
+          "amendmentDate": "2022-01-18T14:01:41.955Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "promptRef": "AOF",
+              "value": "298.00"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "27ebfba2-24cb-40f3-9de2-028c436e629d",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "fo"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:01:41.955Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "4fdd9548-c521-48c9-baa3-1bd2f13a4fcc",
+          "resultLabel": "Payment terms",
+          "resultLineId": "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "payt"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:01:41.955Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "promptRef": "PBD",
+              "value": "2022-01-30"
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "0b6e23c1-ee6a-49e8-b912-32e7622abb7d",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "pdate"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:01:41.955Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": true,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+            {
+              "id": "e6861c6e-0de2-4029-ab8c-c89769daea29",
+              "label": "Account to be consolidated with existing accounts",
+              "promptRef": "accountToBeConsolidatedWithExistingAccounts",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "923f8b82-d4b5-4c9b-8b54-6d1ec8e16dd6",
+          "resultLabel": "Account Consolidated",
+          "resultLineId": "0cb933b3-b956-4c70-bc06-6ac8aa1d23fd",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "acon"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:19:27.095Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+            "6e1c0dee-bcd6-45c8-bc5a-c6d16c7d14c8"
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "338684ad-b260-40dc-9e55-a78aa9f50fb1"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "f7dfefd2-64c6-11e8-adc0-fa7ae01bbebc",
+          "resultLabel": "Application made for benefit deductions",
+          "resultLineId": "674570c5-6e19-4e3e-afb1-1b4f99418097",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "abdc"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:19:27.095Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+            "4818fcfa-f151-42ff-b68b-a233b3d69204"
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "674570c5-6e19-4e3e-afb1-1b4f99418097"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "4871697d-6dd1-4da2-8894-707e6b13c361",
+          "resultLabel": "Reserve Terms",
+          "resultLineId": "6e1c0dee-bcd6-45c8-bc5a-c6d16c7d14c8",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "rt"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:19:27.095Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+            "674570c5-6e19-4e3e-afb1-1b4f99418097"
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "promptRef": "AOF",
+              "value": "200.00"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "338684ad-b260-40dc-9e55-a78aa9f50fb1",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "fo"
+        },
+        {
+          "amendmentDate": "2022-01-18T14:19:27.095Z",
+          "amendmentReason": "Error or Omission in result announced in court (Amendment under the Slip rule)",
+          "amendmentReasonId": "a02018a1-915c-3343-95ad-abc5f99b339a",
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "6e1c0dee-bcd6-45c8-bc5a-c6d16c7d14c8"
+          ],
+          "prompts": [
+            {
+              "id": "c131cab0-5dd6-11e8-9c2d-fa7ae01bbebc",
+              "label": "Pay lump sum in full within",
+              "promptRef": "LSPW",
+              "value": "lump sum 14 days"
+            }
+          ],
+          "resultDefinitionId": "a09bbfa0-5dd5-11e8-9c2d-fa7ae01bbebc",
+          "resultLabel": "Reserve Terms Lump sum",
+          "resultLineId": "4818fcfa-f151-42ff-b68b-a233b3d69204",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "rlsum"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "22889a55-fe09-46f2-9033-b1a7f0c77584"
+    }
+  ],
+  "savedTargets": [
+    {
+      "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+      "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+      "draftResult": "{}",
+      "hearingDay": "2022-01-11",
+      "hearingId": "f48d461a-cec2-4ecf-9449-dc525cea57ab",
+      "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+      "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+      "resultLines": [
+        {
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+            "0cb933b3-b956-4c70-bc06-6ac8aa1d23fd",
+            "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4"
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+            {
+              "id": "7cd1472f-2379-4f5b-9e67-98a43d86e122",
+              "label": "Amount of fine",
+              "promptRef": "AOF",
+              "value": "298.00"
+            }
+          ],
+          "resultDefinitionId": "969f150c-cd05-46b0-9dd9-30891efcc766",
+          "resultLabel": "Fine",
+          "resultLineId": "27ebfba2-24cb-40f3-9de2-028c436e629d",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "fo"
+        },
+        {
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "27ebfba2-24cb-40f3-9de2-028c436e629d"
+          ],
+          "prompts": [
+            {
+              "id": "e6861c6e-0de2-4029-ab8c-c89769daea29",
+              "label": "Account to be consolidated with existing accounts",
+              "promptRef": "accountToBeConsolidatedWithExistingAccounts",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "923f8b82-d4b5-4c9b-8b54-6d1ec8e16dd6",
+          "resultLabel": "Account Consolidated",
+          "resultLineId": "0cb933b3-b956-4c70-bc06-6ac8aa1d23fd",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "acon"
+        },
+        {
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+            "0b6e23c1-ee6a-49e8-b912-32e7622abb7d"
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "27ebfba2-24cb-40f3-9de2-028c436e629d"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "4fdd9548-c521-48c9-baa3-1bd2f13a4fcc",
+          "resultLabel": "Payment terms",
+          "resultLineId": "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "payt"
+        },
+        {
+          "caseId": "91235fef-a9ae-4e00-923e-977ad405efd8",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "5df58214-9fd0-4024-9360-79e491231d2f",
+          "offenceId": "22889a55-fe09-46f2-9033-b1a7f0c77584",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4"
+          ],
+          "prompts": [
+            {
+              "id": "ee7d253a-c629-11e8-a355-529269fb1459",
+              "label": "Date to pay in full by",
+              "promptRef": "PBD",
+              "value": "2022-01-30"
+            }
+          ],
+          "resultDefinitionId": "bcb5a496-f7cf-11e8-8eb2-f2801f1b9fd1",
+          "resultLabel": "Pay by date",
+          "resultLineId": "0b6e23c1-ee6a-49e8-b912-32e7622abb7d",
+          "shadowListed": false,
+          "sharedDate": "2022-01-18",
+          "shortCode": "pdate"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "22889a55-fe09-46f2-9033-b1a7f0c77584"
+    }
+  ],
+  "defendantDetailsChanged": [
+
+  ],
+  "isReshare": true,
+  "newAmendmentResults": [
+    {
+      "id": "27ebfba2-24cb-40f3-9de2-028c436e629d",
+      "amendmentDateTime": "2022-01-18T14:01:41.955Z"
+    },
+    {
+      "id": "2f51c98f-c46e-4c93-bf35-3861fb1a5ac4",
+      "amendmentDateTime": "2022-01-18T14:01:41.955Z"
+    },
+    {
+      "id": "0b6e23c1-ee6a-49e8-b912-32e7622abb7d",
+      "amendmentDateTime": "2022-01-18T14:01:41.955Z"
+    },
+    {
+      "id": "0cb933b3-b956-4c70-bc06-6ac8aa1d23fd",
+      "amendmentDateTime": "2022-01-18T14:01:41.955Z"
+    },
+    {
+      "id": "674570c5-6e19-4e3e-afb1-1b4f99418097",
+      "amendmentDateTime": "2022-01-18T14:19:27.095Z"
+    },
+    {
+      "id": "6e1c0dee-bcd6-45c8-bc5a-c6d16c7d14c8",
+      "amendmentDateTime": "2022-01-18T14:19:27.095Z"
+    },
+    {
+      "id": "338684ad-b260-40dc-9e55-a78aa9f50fb1",
+      "amendmentDateTime": "2022-01-18T14:19:27.095Z"
+    },
+    {
+      "id": "4818fcfa-f151-42ff-b68b-a233b3d69204",
+      "amendmentDateTime": "2022-01-18T14:19:27.095Z"
+    }
+  ],
+  "hearingDay": "2022-01-11"
+}

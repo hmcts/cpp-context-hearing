@@ -1,0 +1,571 @@
+{
+  "hearingId": "4567e17c-3cf2-4022-848a-819617b0f909",
+  "sharedTime": "2021-11-17T14:18:11.050Z",
+  "courtClerk": {
+    "firstName": "Emma",
+    "lastName": "Cleaner",
+    "userId": "2781b565-4514-4805-8744-a3e827f0f611"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "defendantReferralReasons": [
+      {
+        "defendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+        "description": "For trial",
+        "id": "809f7aac-d285-43a5-9fb1-3a894db71530"
+      },
+      {
+        "defendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+        "description": "For trial",
+        "id": "809f7aac-d285-43a5-9fb1-3a894db71530"
+      }
+    ],
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "isCancelled": false,
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2021-11-17T10:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "4567e17c-3cf2-4022-848a-819617b0f909",
+    "judiciary": [
+      {
+        "firstName": "Christine Lesley",
+        "isBenchChairman": false,
+        "isDeputy": true,
+        "judicialId": "0fc170ec-bb8f-31af-b2c6-de48ea5343e7",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0fc170ec-bb8f-31af-b2c6-de48ea5343e7",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Marsters",
+        "title": "Mrs"
+      },
+      {
+        "firstName": "Robert Stewart",
+        "isBenchChairman": false,
+        "isDeputy": true,
+        "judicialId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Horton",
+        "title": "Mr"
+      },
+      {
+        "firstName": "Susan Katherine",
+        "isBenchChairman": true,
+        "isDeputy": false,
+        "judicialId": "00ac8ed3-b432-3bdd-8ebb-ebcb2ba10a00",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "00ac8ed3-b432-3bdd-8ebb-ebcb2ba10a00",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Bonnell",
+        "title": "Mrs"
+      }
+    ],
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "SJP_REFERRAL",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2021-11-17T13:42:42.085Z",
+            "id": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+            "isYouth": false,
+            "masterDefendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+            "numberOfPreviousConvictionsCited": 0,
+            "offences": [
+              {
+                "chargeDate": "2020-11-26",
+                "count": 1,
+                "dvlaOffenceCode": "DR20",
+                "endorsableFlag": true,
+                "id": "0683711c-29ae-42f6-8ae4-e7c92deb43b6",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2021-11-17",
+                  "notifiedPleaValue": "NO_NOTIFICATION",
+                  "offenceId": "0683711c-29ae-42f6-8ae4-e7c92deb43b6"
+                },
+                "offenceCode": "RT88339",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "d681aad6-8ab0-4a84-a6ed-9d8b93d3e13d",
+                "offenceFacts": {
+                  "vehicleMake": "CITROEN XSARA PICASSO",
+                  "vehicleRegistration": "A2"
+                },
+                "offenceLegislation": "Contrary to section 4(1) of the Road Traffic Act 1988 and Schedule 2 to the Road Traffic Offenders Act 1988.",
+                "offenceLegislationWelsh": "Yn groes i adran 4(1) Deddf Traffig Ffyrdd 1988 ac Atodlen 2 Deddf Troseddwyr Traffig Ffyrdd 1988.",
+                "offenceTitle": "Drive whilst unfit through drink",
+                "offenceTitleWelsh": "Gyrru a'r unigolyn heb fod mewn cyflwr i yrru oherwydd diod",
+                "orderIndex": 1,
+                "startDate": "2020-08-01",
+                "wording": "english words",
+                "wordingWelsh": "welsh words"
+              }
+            ],
+            "personDefendant": {
+              "personDetails": {
+                "address": {
+                  "address1": "Rowe Dale",
+                  "address2": "BRISTOL",
+                  "postcode": "CR8 2EJ"
+                },
+                "contact": {
+
+                },
+                "dateOfBirth": "2001-05-25",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+
+                },
+                "firstName": "uuubyxrunee",
+                "gender": "NOT_SPECIFIED",
+                "lastName": "llvkiZozk",
+                "occupationCode": "0",
+                "title": "MR"
+              }
+            },
+            "prosecutionCaseId": "bd848e6d-5484-47e6-ab7c-bfc712a5c055"
+          }
+        ],
+        "id": "bd848e6d-5484-47e6-ab7c-bfc712a5c055",
+        "initiationCode": "J",
+        "originatingOrganisation": "G94DV00",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Finance Operations",
+            "address2": "C3 East",
+            "address3": "DVLA",
+            "address4": "Longview Road",
+            "address5": "Swansea",
+            "postcode": "SA6 7JL"
+          },
+          "contact": {
+            "primaryEmail": "sjp@dvla.gov.uk"
+          },
+          "majorCreditorCode": "DVL2",
+          "prosecutionAuthorityCode": "DVLA",
+          "prosecutionAuthorityId": "6ae4b163-658b-3ae2-a66d-43401cac2f96",
+          "prosecutionAuthorityName": "Driver and Vehicle Licensing Agency",
+          "prosecutionAuthorityOUCode": "G94DV00",
+          "prosecutionAuthorityReference": "DV02011416"
+        }
+      }
+    ],
+    "type": {
+      "description": "Trial",
+      "id": "bf8155e1-90b9-4080-b133-bfbad895d6e4"
+    }
+  },
+  "variantDirectory": [
+
+  ],
+  "completedResultLinesStatus": {
+
+  },
+  "targets": [
+    {
+      "caseId": "bd848e6d-5484-47e6-ab7c-bfc712a5c055",
+      "defendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+      "draftResult": "{}",
+      "hearingDay": "2021-11-17",
+      "hearingId": "4567e17c-3cf2-4022-848a-819617b0f909",
+      "masterDefendantId": "79f62022-7486-4c92-8aa0-a24ac8bf37a5",
+      "offenceId": "0683711c-29ae-42f6-8ae4-e7c92deb43b6",
+      "resultLines": [
+        {
+          "caseId": "7c1e2494-6279-4cd2-b07d-1a701e65ad4b",
+          "childResultLineIds": [
+            "1e0890b1-d033-4415-9cef-dd31369cb2d4",
+            "3d48de73-ac61-4b3c-a3d8-c51f50da7713",
+            "72fba8c9-5d28-4a09-895a-4f323838fde2"
+          ],
+          "defendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "offenceId": "9151cffc-346a-42b7-a41d-391ae1f1d19a",
+          "orderedDate": "2022-01-11",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2022-08-25"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "a probation officer"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Central London Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "London Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "londonnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "9fb4c279-d3dc-44b7-9daf-2ce3c9d7fc7c",
+          "shadowListed": false,
+          "sharedDate": "2022-01-13",
+          "shortCode": "co"
+        },
+        {
+          "caseId": "7c1e2494-6279-4cd2-b07d-1a701e65ad4b",
+          "childResultLineIds": [
+            "6949368e-e07e-4401-b98b-58e883bc84e9"
+          ],
+          "defendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "offenceId": "9151cffc-346a-42b7-a41d-391ae1f1d19a",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "9fb4c279-d3dc-44b7-9daf-2ce3c9d7fc7c"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "1e0890b1-d033-4415-9cef-dd31369cb2d4",
+          "shadowListed": false,
+          "sharedDate": "2022-01-13",
+          "shortCode": "crs"
+        },
+        {
+          "caseId": "7c1e2494-6279-4cd2-b07d-1a701e65ad4b",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "offenceId": "9151cffc-346a-42b7-a41d-391ae1f1d19a",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "9fb4c279-d3dc-44b7-9daf-2ce3c9d7fc7c"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "3d48de73-ac61-4b3c-a3d8-c51f50da7713",
+          "shadowListed": false,
+          "sharedDate": "2022-01-13",
+          "shortCode": "emreq"
+        },
+        {
+          "caseId": "7c1e2494-6279-4cd2-b07d-1a701e65ad4b",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "offenceId": "9151cffc-346a-42b7-a41d-391ae1f1d19a",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "9fb4c279-d3dc-44b7-9daf-2ce3c9d7fc7c"
+          ],
+          "prompts": [
+            {
+              "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+              "label": "First review date",
+              "promptRef": "firstReviewDate",
+              "value": "2022-02-05"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "11:30"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "City of London Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "1 Queen Victoria Street"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "EC4N 4XY"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 1",
+              "promptRef": "hCHOUSEEmailAddress1",
+              "value": "London.magistrates@cps.gov.uk"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 2",
+              "promptRef": "hCHOUSEEmailAddress2",
+              "value": "PECSCityofLondonMags@serco.com"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 01"
+            },
+            {
+              "id": "978001b1-47d5-4cda-a1b6-b6c3a2e4975d",
+              "label": "Review frequency",
+              "promptRef": "reviewFrequency",
+              "value": "weekly"
+            },
+            {
+              "id": "fe774a35-5353-4e4f-adef-44b7a8717dc6",
+              "label": "Defendant to attend review",
+              "promptRef": "defendantToAttendReview",
+              "value": "true"
+            },
+            {
+              "id": "34f900f3-132c-4baa-a9d3-b7fd5c7b24d0",
+              "label": "Judge reserves review hearing",
+              "promptRef": "judgeReservesReviewHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "1f4146dd-e389-4973-8951-876e3634efd5",
+          "resultLabel": "First Review Hearing - CO",
+          "resultLineId": "72fba8c9-5d28-4a09-895a-4f323838fde2",
+          "shadowListed": false,
+          "sharedDate": "2022-01-13",
+          "shortCode": "frhc"
+        },
+        {
+          "caseId": "7c1e2494-6279-4cd2-b07d-1a701e65ad4b",
+          "childResultLineIds": [
+            "9fcc8526-0890-47ed-9e8f-c1b6c8ed7430"
+          ],
+          "defendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "offenceId": "9151cffc-346a-42b7-a41d-391ae1f1d19a",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "1e0890b1-d033-4415-9cef-dd31369cb2d4"
+          ],
+          "prompts": [
+            {
+              "id": "f092fe58-2297-4d10-818a-8b303692ac39",
+              "label": "Under direction of",
+              "promptRef": "underDirectionOf",
+              "value": "Court"
+            },
+            {
+              "id": "0b74fb53-acb7-42db-b9b6-976ce74b59b5",
+              "label": "Treatment place",
+              "promptRef": "treatmentPlace",
+              "value": "London"
+            },
+            {
+              "id": "10028ef8-efc7-4a40-9703-1e121a6fbc84",
+              "label": "Period to provide samples",
+              "promptRef": "periodToProvideSamples",
+              "value": "3 Months"
+            }
+          ],
+          "resultDefinitionId": "61ea03c9-c113-446b-a392-402144fcd9e8",
+          "resultLabel": "Drug rehabilitation residential with review",
+          "resultLineId": "6949368e-e07e-4401-b98b-58e883bc84e9",
+          "shadowListed": false,
+          "sharedDate": "2022-01-13",
+          "shortCode": "drr"
+        },
+        {
+          "caseId": "7c1e2494-6279-4cd2-b07d-1a701e65ad4b",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "3eb04676-cb5f-4e1e-9815-87f5773cfe75",
+          "offenceId": "9151cffc-346a-42b7-a41d-391ae1f1d19a",
+          "orderedDate": "2022-01-11",
+          "parentResultLineIds": [
+            "6949368e-e07e-4401-b98b-58e883bc84e9"
+          ],
+          "prompts": [
+            {
+              "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+              "label": "First review date",
+              "promptRef": "firstReviewDate",
+              "value": "2022-01-25"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:30"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "City of London Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "1 Queen Victoria Street"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "London"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "EC4N 4XY"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 1",
+              "promptRef": "hCHOUSEEmailAddress1",
+              "value": "London.magistrates@cps.gov.uk"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 2",
+              "promptRef": "hCHOUSEEmailAddress2",
+              "value": "PECSCityofLondonMags@serco.com"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 02"
+            },
+            {
+              "id": "978001b1-47d5-4cda-a1b6-b6c3a2e4975d",
+              "label": "Review frequency",
+              "promptRef": "reviewFrequency",
+              "value": "Monthly"
+            },
+            {
+              "id": "fe774a35-5353-4e4f-adef-44b7a8717dc6",
+              "label": "Defendant to attend review",
+              "promptRef": "defendantToAttendReview",
+              "value": "true"
+            },
+            {
+              "id": "34f900f3-132c-4baa-a9d3-b7fd5c7b24d0",
+              "label": "Judge reserves review hearing",
+              "promptRef": "judgeReservesReviewHearing",
+              "value": "true"
+            }
+          ],
+          "resultDefinitionId": "b3ed14c1-d921-459c-90fd-400a5d8d0076",
+          "resultLabel": "First Review Hearing – Drug Rehab",
+          "resultLineId": "9fcc8526-0890-47ed-9e8f-c1b6c8ed7430",
+          "shadowListed": false,
+          "sharedDate": "2022-01-13",
+          "shortCode": "frh"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "9151cffc-346a-42b7-a41d-391ae1f1d19a"
+    }
+  ],
+  "savedTargets": [
+
+  ],
+  "defendantDetailsChanged": [
+
+  ],
+  "isReshare": false,
+  "newAmendmentResults": [
+    {
+      "id": "297b6d3e-85b2-482e-bd68-78b7c2c9ac89"
+    },
+    {
+      "id": "677acf52-0050-4ad2-82ed-5e4196e05c44"
+    },
+    {
+      "id": "e2180bc9-83d2-4467-a352-7e4e38789918"
+    }
+  ],
+  "hearingDay": "2021-11-17"
+}

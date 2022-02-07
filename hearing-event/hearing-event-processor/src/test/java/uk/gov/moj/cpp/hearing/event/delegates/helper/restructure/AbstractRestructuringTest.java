@@ -29,6 +29,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.metadataFor;
 
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -46,6 +47,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelperV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelperV3;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -154,6 +156,13 @@ public abstract class AbstractRestructuringTest {
     @Spy
     @InjectMocks
     protected final NextHearingHelper nextHearingHelper = new NextHearingHelper();
+
+    @Spy
+    @InjectMocks
+    protected final NextHearingHelperV3 nextHearingHelperV3 = new NextHearingHelperV3();
+
+    @Spy
+    protected final ResultLineHelperV3 resultLineHelperV3 = new ResultLineHelperV3();
 
     @Spy
     @InjectMocks
@@ -303,6 +312,10 @@ public abstract class AbstractRestructuringTest {
     }
 
     protected List<TreeNode<ResultLine>> filterBy(List<TreeNode<ResultLine>> inputList, Predicate<TreeNode<ResultLine>> predicate) {
+        return inputList.stream().filter(predicate).collect(Collectors.toList());
+    }
+
+    protected List<TreeNode<ResultLine2>> filterV3ResultsBy(List<TreeNode<ResultLine2>> inputList, Predicate<TreeNode<ResultLine2>> predicate) {
         return inputList.stream().filter(predicate).collect(Collectors.toList());
     }
 
