@@ -60,9 +60,9 @@ public class PleaUpdateEventListener {
     @Transactional
     @Handles("hearing.hearing-offence-plea-updated")
     public void offencePleaUpdated(final JsonEnvelope envelope) {
-        LOGGER.debug("hearing.hearing-offence-plea-updated event received {}", envelope.payloadAsJsonObject());
 
         final PleaUpsert event = convertToObject(envelope);
+        LOGGER.debug("hearing.hearing-offence-plea-updated event received for hearingId {} with offenceID {}", event.getHearingId(), event.getPleaModel().getOffenceId());
 
         if(event.getPleaModel().getApplicationId() != null){
             courtApplicationPleaUpdated(event.getHearingId(), event.getPleaModel().getPlea());

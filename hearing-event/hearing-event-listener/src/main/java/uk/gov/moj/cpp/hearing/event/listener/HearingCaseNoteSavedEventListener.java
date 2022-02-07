@@ -75,7 +75,7 @@ public class HearingCaseNoteSavedEventListener {
 
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} , caseNoteSaved {}", payloadAsJsonObject, caseNoteSaved);
+            LOGGER.debug("hearingId {} , caseNote {}", hearingCaseNote.getOriginatingHearingId(), caseNoteSaved.getHearingCaseNote().getNote());
         }
 
         if (hearing == null) {

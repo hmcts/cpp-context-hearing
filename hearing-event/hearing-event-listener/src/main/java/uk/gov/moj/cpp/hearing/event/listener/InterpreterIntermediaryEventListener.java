@@ -48,13 +48,13 @@ public class InterpreterIntermediaryEventListener {
     @Handles("hearing.interpreter-intermediary-added")
     public void interpreterIntermediaryAdded(final JsonEnvelope envelope) {
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", envelope.toObfuscatedDebugString());
-        }
-
         final InterpreterIntermediaryAdded interpreterIntermediaryAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), InterpreterIntermediaryAdded.class);
 
         final UUID hearingId = interpreterIntermediaryAdded.getHearingId();
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.interpreter-intermediary-added for hearingId {} ", hearingId);
+        }
 
         final Hearing hearingEntity = hearingRepository.findBy(hearingId);
 
@@ -69,13 +69,13 @@ public class InterpreterIntermediaryEventListener {
     @Handles("hearing.interpreter-intermediary-removed")
     public void interpreterIntermediaryRemoved(final JsonEnvelope event) {
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", event.toObfuscatedDebugString());
-        }
-
         final InterpreterIntermediaryRemoved interpreterIntermediaryRemoved = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), InterpreterIntermediaryRemoved.class);
 
         final Hearing hearing = hearingRepository.findBy(interpreterIntermediaryRemoved.getHearingId());
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.interpreter-intermediary-removed for hearingId {} ", interpreterIntermediaryRemoved.getHearingId());
+        }
 
         if(nonNull(hearing)) {
 
@@ -95,13 +95,13 @@ public class InterpreterIntermediaryEventListener {
     @Handles("hearing.interpreter-intermediary-updated")
     public void interpreterIntermediaryUpdated(final JsonEnvelope envelope) {
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("payload {} ", envelope.toObfuscatedDebugString());
-        }
-
         final InterpreterIntermediaryUpdated interpreterIntermediaryUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), InterpreterIntermediaryUpdated.class);
 
         final Hearing hearing = hearingRepository.findBy(interpreterIntermediaryUpdated.getHearingId());
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.interpreter-intermediary-updated for hearingId {} ", interpreterIntermediaryUpdated.getHearingId());
+        }
 
         if(nonNull(hearing)) {
             final HearingInterpreterIntermediary hearingInterpreterIntermediary = interpreterIntermediaryJPAMapper.toJPA(hearing, interpreterIntermediaryUpdated.getInterpreterIntermediary());

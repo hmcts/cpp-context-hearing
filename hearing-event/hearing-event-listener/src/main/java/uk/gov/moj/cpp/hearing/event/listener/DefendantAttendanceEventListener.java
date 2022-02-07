@@ -37,10 +37,11 @@ public class DefendantAttendanceEventListener {
     public void updateDefendantAttendance(final JsonEnvelope event) {
 
         final JsonObject payload = event.payloadAsJsonObject();
-        LOGGER.debug("hearing.defendant-attendance-updated event received {}", payload);
         final DefendantAttendanceUpdated defendantAttendanceUpdated = jsonObjectToObjectConverter.convert(payload, DefendantAttendanceUpdated.class);
-
         DefendantAttendance defendantAttendance = defendantAttendanceRepository.findByHearingIdDefendantIdAndDate(defendantAttendanceUpdated.getHearingId(), defendantAttendanceUpdated.getDefendantId(), defendantAttendanceUpdated.getAttendanceDay().getDay());
+
+        LOGGER.debug("hearing.defendant-attendance-updated event received for hearingId {}", defendantAttendanceUpdated.getHearingId());
+
         if (null == defendantAttendance) {
             defendantAttendance = new DefendantAttendance();
             defendantAttendance.setId(new HearingSnapshotKey(UUID.randomUUID(), defendantAttendanceUpdated.getHearingId()));

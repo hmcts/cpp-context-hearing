@@ -49,9 +49,11 @@ public class HearingLogEventListener {
     @Handles("hearing.hearing-event-definitions-created")
     public void hearingEventDefinitionsCreated(final JsonEnvelope event) {
 
-        LOGGER.info("hearing.hearing-event-definitions-created {} ", event.payloadAsJsonObject());
+
 
         final HearingEventDefinitionsCreated eventDefinitionsCreated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDefinitionsCreated.class);
+
+        LOGGER.info("hearing.hearing-event-definitions-created for Id {} ", eventDefinitionsCreated.getId());
 
         eventDefinitionsCreated.getEventDefinitions().stream()
                 .map(e -> new HearingEventDefinition(e.getId(),
@@ -74,9 +76,9 @@ public class HearingLogEventListener {
 
     @Handles("hearing.hearing-event-logged")
     public void hearingEventLogged(final JsonEnvelope event) {
-        LOGGER.info("hearing.hearing-event-logged {} ", event.payloadAsJsonObject());
-        final HearingEventLogged hearingEventLogged = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventLogged.class);
 
+        final HearingEventLogged hearingEventLogged = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventLogged.class);
+        LOGGER.info("hearing.hearing-event-logged for hearingId {} with hearingEventId {}", hearingEventLogged.getHearingId(), hearingEventLogged.getHearingEventId());
         final ZonedDateTime eventTimeUTC = hearingEventLogged.getEventTime().withZoneSameInstant(ZoneId.of("UTC"));
         final ZonedDateTime modifiedTimeUTC = hearingEventLogged.getLastModifiedTime().withZoneSameInstant(ZoneId.of("UTC"));
 
@@ -97,9 +99,9 @@ public class HearingLogEventListener {
     @Handles("hearing.hearing-event-deleted")
     public void hearingEventDeleted(final JsonEnvelope event) {
 
-        LOGGER.info("hearing.hearing-event-deleted {} ", event.payloadAsJsonObject());
 
         final HearingEventDeleted hearingEventDeleted = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDeleted.class);
+        LOGGER.info("hearing.hearing-event-deleted for eventHearingID {} ", hearingEventDeleted.getHearingEventId());
 
         final Optional<HearingEvent> optionalHearingEvent = hearingEventRepository.findOptionalById(hearingEventDeleted.getHearingEventId());
         optionalHearingEvent.ifPresent(hearingEvent -> hearingEventRepository.save(hearingEvent.setDeleted(true)));
@@ -108,10 +110,8 @@ public class HearingLogEventListener {
     @Handles("hearing.hearing-events-updated")
     public void hearingEventsUpdated(final JsonEnvelope event) {
 
-        LOGGER.info("hearing.hearing-events-updated {} ", event.payloadAsJsonObject());
-
         final HearingEventsUpdated hearingEventsUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventsUpdated.class);
-
+        LOGGER.info("hearing.hearing-events-updated for hearingId {}", hearingEventsUpdated.getHearingId());
         final Map<UUID, HearingEvent> hearingEventIdToHearingEvent = hearingEventRepository
                 .findByHearingIdOrderByEventTimeAsc(hearingEventsUpdated.getHearingId()).stream()
                 .collect(Collectors.toMap(HearingEvent::getId, hearingEvent -> hearingEvent));

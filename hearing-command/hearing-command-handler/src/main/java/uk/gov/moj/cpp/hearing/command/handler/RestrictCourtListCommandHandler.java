@@ -18,7 +18,7 @@ public class RestrictCourtListCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.restrict-court-list")
     public void restrictCourtList(final Envelope<CourtListRestricted> envelope) throws EventStreamException {
-        LOGGER.info("hearing.command.restrict-court-list event received {}", envelope.payload());
+        LOGGER.info("hearing.command.restrict-court-list event received for hearingId {}", envelope.payload().getHearingId());
 
         aggregate(
                 uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate.class,
