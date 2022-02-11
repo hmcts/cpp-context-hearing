@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="122" author="hearing" logicalFilePath="122-add-indexes-to-hearing-tables.xml">
+
+        <createIndex tableName="ha_hearing_case_note" indexName="ha_hearing_case_note_hearing_id_idx">
+            <column name="hearing_id"/>
+        </createIndex>
+        <createIndex tableName="ha_hearing_prosecution_counsel" indexName="ha_hearing_prosecution_counsel_hearing_id_idx">
+            <column name="hearing_id"/>
+        </createIndex>
+        <createIndex tableName="ha_defendant_attendance" indexName="ha_defendant_attendance_hearing_id_idx">
+            <column name="hearing_id"/>
+        </createIndex>
+
+        <addPrimaryKey columnNames="id" constraintName="ha_hearing_case_note_pk" tableName="ha_hearing_case_note"/>
+        <addPrimaryKey columnNames="id" constraintName="ha_defendant_attendance_pk" tableName="ha_defendant_attendance"/>
+
+    </changeSet>
+
+</databaseChangeLog>
