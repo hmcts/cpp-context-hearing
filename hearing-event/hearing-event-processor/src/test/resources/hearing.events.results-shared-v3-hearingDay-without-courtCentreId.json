@@ -74,16 +74,6 @@
                 },
                 "arrestDate": "2020-02-09",
                 "chargeDate": "2020-02-09",
-                "convictingCourt": {
-                  "code": "B42CM00",
-                  "id": "07178fbe-4b93-37d0-99c4-4859ffaa23a2",
-                  "lja": {
-                    "ljaCode": "1970",
-                    "ljaName": "North Essex Magistrates' Court"
-                  },
-                  "name": "Chelmsford Magistrates' Court",
-                  "roomId": "a102458c-301f-3fe5-88d0-5cda9455f235"
-                },
                 "convictionDate": "2021-11-11",
                 "count": 0,
                 "endDate": "2021-05-05",

@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
@@ -101,7 +102,7 @@ public class OffenceHelper {
                 .orElse(Maps.immutableEntry(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()));
 
         hearing.getHearingDays().stream().forEach(hearingDay -> {
-            if(hearingDay.getSittingDay().toLocalDate().equals(offence.getConvictionDate())){
+            if (nonNull(offence.getConvictionDate()) && isNull(offence.getConvictingCourt())) {
 
                 final UUID centreId = courtCentreInfo.getKey();
                 final UUID roomId = courtCentreInfo.getValue();
@@ -121,6 +122,7 @@ public class OffenceHelper {
                     courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
                 }
                 offence.setConvictingCourt(courtCentreBuilder.build());
+
             }
         });
     }

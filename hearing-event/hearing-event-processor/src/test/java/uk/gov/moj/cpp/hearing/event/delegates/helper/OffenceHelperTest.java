@@ -5,7 +5,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -194,14 +194,29 @@ public class OffenceHelperTest {
         when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
 
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_NOT_MATCHING_SITTING_DAY_JSON, ResultsShared.class);
+        final List<Offence> initialOffences = resultsShared.getHearing().
+                getProsecutionCases()
+                .stream()
+                .flatMap(prosectionCase -> prosectionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .collect(Collectors.toList());
+
         offenceHelper.enrichOffence(context, resultsShared.getHearing());
+        final List<Offence> enrichedOffences = resultsShared.getHearing().
+                getProsecutionCases()
+                .stream()
+                .flatMap(prosectionCase -> prosectionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .collect(Collectors.toList());
+
         final Optional<Defendant> defendant = resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).findFirst();
         assertThat(defendant.isPresent(), is(true));
 
         final Offence offence = defendant.get().getOffences().get(0);
 
-        assertThat(offence.getConvictingCourt(), nullValue());
+        assertThat(offence.getConvictingCourt(), notNullValue());
+        verifyConvictingCourtNotUpdated(initialOffences, enrichedOffences);
 
     }
 
@@ -246,9 +261,7 @@ public class OffenceHelperTest {
 
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID, ResultsShared.class);
 
-        offenceHelper.enrichOffence(context, resultsShared.getHearing());
-
-        final List<Offence> offences = resultsShared.getHearing().
+        final List<Offence> initialOffences = resultsShared.getHearing().
                 getCourtApplications()
                 .stream()
                 .map(CourtApplication::getCourtOrder)
@@ -259,10 +272,23 @@ public class OffenceHelperTest {
                 .collect(Collectors
                         .toList());
 
-        assertThat(offences.size(), is(2));
+        offenceHelper.enrichOffence(context, resultsShared.getHearing());
 
-        verifyConvictingCourt(organisationalUnit, offences.get(0).getConvictingCourt());
-        verifyConvictingCourt(organisationalUnit, offences.get(1).getConvictingCourt());
+        final List<Offence> enrichedOffences = resultsShared.getHearing().
+                getCourtApplications()
+                .stream()
+                .map(CourtApplication::getCourtOrder)
+                .flatMap(courtOrder -> courtOrder
+                        .getCourtOrderOffences()
+                        .stream())
+                .map(CourtOrderOffence::getOffence)
+                .collect(Collectors
+                        .toList());
+
+        assertThat(enrichedOffences.size(), is(2));
+
+        verifyConvictingCourt(organisationalUnit, enrichedOffences.get(0).getConvictingCourt());
+        verifyConvictingCourtNotUpdated(initialOffences, enrichedOffences);
     }
 
     @Test
@@ -400,5 +426,11 @@ public class OffenceHelperTest {
         assertThat(convictingCourt.getId().toString(), is(organisationalUnit.getId()));
         assertThat(convictingCourt.getCode(), is(organisationalUnit.getOucode()));
         assertThat(convictingCourt.getCourtLocationCode(), is(organisationalUnit.getCourtLocationCode()));
+    }
+
+    private void verifyConvictingCourtNotUpdated(final List<Offence> initialOffences, final List<Offence> enrichedOffences) {
+        enrichedOffences.stream().forEach(enrichedOffence -> initialOffences.stream()
+                .filter(initialOffence -> initialOffence.getId().equals(enrichedOffence.getId()))
+                .forEach(initialOffence -> assertThat(initialOffence.getConvictingCourt(), is(enrichedOffence.getConvictingCourt()))));
     }
 }
