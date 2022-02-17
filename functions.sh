@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 declare -rx CONTEXT_NAME=hearing
-declare -rx FRAMEWORK_VERSION=7.0.10
-declare -rx EVENT_STORE_VERSION=7.0.8
-declare -rx FRAMEWORK_LIBRARIES_VERSION=7.0.10
+declare -rx FRAMEWORK_VERSION=8.0.2
+declare -rx EVENT_STORE_VERSION=8.1.1
+declare -rx FRAMEWORK_LIBRARIES_VERSION=8.0.2
 
 function buildWars {
   echo
@@ -58,7 +58,7 @@ function deployWiremock() {
 function checkWiremock(){
     while [ true ]
     do 
-      CHECK_STRING="curl -i --connect-timeout 1 -s http://localhost:8080/__admin/"
+      CHECK_STRING="curl -i --connect-timeout 5 -s http://localhost:8080/__admin/"
       echo -n $CHECK_STRING
       CHECK=$( $CHECK_STRING )  >/dev/null 2>&1
       echo $CHECK

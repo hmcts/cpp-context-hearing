@@ -17,11 +17,11 @@
 #
 ##################################################################################################
 
-FRAMEWORK_JMX_COMMAND_CLIENT_VERSION=7.0.7
+FRAMEWORK_VERSION=8.0.2
 CONTEXT_NAME="hearing"
 USER_NAME="admin"
 PASSWORD="admin"
-JAR=target/framework-jmx-command-client-${FRAMEWORK_JMX_COMMAND_CLIENT_VERSION}.jar
+JAR=target/framework-jmx-command-client-${FRAMEWORK_VERSION}.jar
 
 #fail script on error
 set -e
@@ -32,7 +32,7 @@ echo "Framework System Command Client for '$CONTEXT_NAME' context"
 if [ ! -f "$JAR" ]; then
     echo "Downloading artifacts..."
     echo
-    mvn --quiet org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:framework-jmx-command-client:${FRAMEWORK_JMX_COMMAND_CLIENT_VERSION}:jar
+    mvn --quiet org.apache.maven.plugins:maven-dependency-plugin:3.0.1:copy -DoutputDirectory=target -Dartifact=uk.gov.justice.services:framework-jmx-command-client:${FRAMEWORK_VERSION}:jar
 fi
 
 if [ -z "$1" ]; then
