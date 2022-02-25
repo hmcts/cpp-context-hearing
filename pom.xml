@@ -4,11 +4,11 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>10.8.3</version>
+        <version>10.4.0</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>8.0.2-SNAPSHOT</version>
+    <version>7.0.152-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
@@ -28,7 +28,7 @@
         <referencedata.version>7.0.73</referencedata.version>
         <material.version>7.0.22</material.version>
         <results.version>7.0.73</results.version>
-        <notification.notify.version>7.0.10</notification.notify.version>
+        <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>7.0.26</stagingenforcement.version>
         <progression.version>7.0.199</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
