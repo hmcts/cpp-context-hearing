@@ -159,6 +159,7 @@
                                 </goals>
                                 <configuration>
                                     <threadCount>1</threadCount>
+                                    <perCoreThreadCount>false</perCoreThreadCount>
                                     <parallel>classesAndMethods</parallel>
                                     <systemProperties>
                                         <property>

@@ -11,6 +11,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -25,7 +26,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.conver
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
-
+@NotThreadSafe
 public class DefendantAttendanceIT extends AbstractIT {
 
     @Test

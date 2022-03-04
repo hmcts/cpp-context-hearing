@@ -1,5 +1,17 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.junit.Before;
+import org.junit.Test;
+import uk.gov.moj.cpp.hearing.steps.CourtListRestrictionSteps;
+import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.json.JsonObject;
+import java.security.NoSuchAlgorithmException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
@@ -7,27 +19,12 @@ import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.allOf;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static uk.gov.moj.cpp.hearing.it.PublishLatestCourtCentreHearingEventsIT.XHIBIT_GATEWAY_SEND_WEB_PAGE_TO_XHIBIT_FILE_NAME_26;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
-
-import uk.gov.moj.cpp.hearing.steps.CourtListRestrictionSteps;
-import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.security.NoSuchAlgorithmException;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
-import javax.json.JsonObject;
-
-import org.junit.Before;
-import org.junit.Test;
-
+@NotThreadSafe
 public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     private ZonedDateTime eventTime;

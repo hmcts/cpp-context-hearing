@@ -1,5 +1,19 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import com.google.common.collect.ImmutableSet;
+import org.junit.Test;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
 import static java.time.ZonedDateTime.now;
 import static java.util.Collections.emptyList;
 import static java.util.UUID.randomUUID;
@@ -16,20 +30,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
-
-import com.google.common.collect.ImmutableSet;
-import org.junit.Test;
-
+@NotThreadSafe
 public class CorrectHearingDaysWithoutCourtCentreIdIT extends AbstractIT {
 
     private static final int WAIT_TIME = 3;

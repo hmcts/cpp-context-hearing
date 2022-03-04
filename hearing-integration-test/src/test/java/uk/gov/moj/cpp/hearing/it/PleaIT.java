@@ -1,12 +1,25 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
-import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import com.jayway.restassured.path.json.JsonPath;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import uk.gov.justice.core.courts.*;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
+import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
+import uk.gov.moj.cpp.hearing.test.HearingFactory;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import java.time.LocalDate;
+import java.util.Collections;
+import java.util.UUID;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.*;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.allOf;
-import static org.hamcrest.CoreMatchers.not;
-import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsNull.nullValue;
 import static org.junit.Assert.assertNotNull;
@@ -21,45 +34,14 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.updatePlea;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateForIndicatedPlea;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithDefaultApplicationTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.*;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdatePleaCommandTemplates.updatePleaTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
-import com.jayway.restassured.path.json.JsonPath;
-import uk.gov.justice.core.courts.AllocationDecision;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationCase;
-import uk.gov.justice.core.courts.Defendant;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.IndicatedPleaValue;
-import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.ProsecutionCase;
-import uk.gov.justice.core.courts.Verdict;
-import uk.gov.justice.core.courts.VerdictType;
-import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
-import uk.gov.moj.cpp.hearing.it.Utilities.EventListener;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.UpdatePleaCommandHelper;
-import uk.gov.moj.cpp.hearing.test.HearingFactory;
-
-import java.time.LocalDate;
-import java.util.Collections;
-import java.util.UUID;
-
-import org.hamcrest.CoreMatchers;
-import org.hamcrest.Matchers;
-import org.junit.Test;
-
-
+@NotThreadSafe
 public class PleaIT extends AbstractIT {
     private static final String GUILTY = "GUILTY";
     private static final String NOT_GUILTY = "NOT_GUILTY";

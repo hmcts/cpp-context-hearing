@@ -1,5 +1,24 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import org.hamcrest.Matchers;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
+import org.junit.Test;
+import org.junit.runners.MethodSorters;
+import uk.gov.justice.services.test.utils.core.http.ResponseData;
+import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.json.JsonObject;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -20,11 +39,7 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.APPELLANT_OPPENS_EVENT_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.RESUME_HEARING_EVENT_DEFINITION_ID;
-import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.START_HEARING_EVENT_DEFINITION_ID;
+import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.*;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
@@ -32,27 +47,7 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
-
-import uk.gov.justice.services.test.utils.core.http.ResponseData;
-import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import javax.json.JsonObject;
-
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.FixMethodOrder;
-import org.junit.Test;
-import org.junit.runners.MethodSorters;
-
+@NotThreadSafe
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLatestCourtCentreHearingIT {
 

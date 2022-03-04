@@ -13,6 +13,7 @@ import uk.gov.justice.services.test.utils.core.rest.RestClient;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.ws.rs.core.Response;
 import java.time.ZonedDateTime;
 import java.util.UUID;
@@ -35,6 +36,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubStagingEnforcementOutstandingFines;
 
 @SuppressWarnings("unchecked")
+@NotThreadSafe
 public class DefendantOutstandingFinesIT extends AbstractIT {
 
     @Before

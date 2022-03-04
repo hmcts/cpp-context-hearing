@@ -8,16 +8,12 @@ import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 import java.text.MessageFormat;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -36,13 +32,7 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMa
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
-import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
-import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
-import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
-import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
-import static uk.gov.moj.cpp.hearing.it.UseCases.logEventForOverrideCourtRoom;
-import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
-import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
+import static uk.gov.moj.cpp.hearing.it.UseCases.*;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -53,6 +43,7 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 
 @SuppressWarnings("unchecked")
+@NotThreadSafe
 public class HearingEventsIT extends AbstractIT {
 
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));

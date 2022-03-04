@@ -6,6 +6,7 @@ import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.concurrent.TimeUnit;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
@@ -21,7 +22,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_ID;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
-
+@NotThreadSafe
 public class ClearVacatedTrialIT extends AbstractIT {
     private static final String MEDIA_TYPE = "application/vnd.hearing.get.hearing+json";
     private static final String EVENT = "hearing.get.hearing";

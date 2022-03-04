@@ -8,6 +8,7 @@ import uk.gov.justice.hearing.courts.UpdateRespondentCounsel;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +31,7 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 @SuppressWarnings("unchecked")
+@NotThreadSafe
 public class RespondentCounselIT extends AbstractIT {
 
     public static RespondentCounsel createFirstRespondentCounsel(final InitiateHearingCommandHelper hearingOne) {

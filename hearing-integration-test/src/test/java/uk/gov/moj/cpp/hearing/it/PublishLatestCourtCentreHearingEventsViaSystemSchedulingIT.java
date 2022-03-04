@@ -9,6 +9,7 @@ import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 import javax.ws.rs.core.Response;
 import java.security.NoSuchAlgorithmException;
@@ -37,7 +38,7 @@ import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
-
+@NotThreadSafe
 public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends AbstractPublishLatestCourtCentreHearingIT {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT.class);
