@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static uk.gov.moj.cpp.util.DuplicateOffencesHelper.filterDuplicateOffencesByIdForHearing;
 import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRestrictions;
 
 import uk.gov.justice.core.courts.AllocationDecision;
@@ -98,6 +99,7 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setHearing(Hearing hearing) {
         this.hearing = dedupAllReportingRestrictions(hearing);
+        filterDuplicateOffencesByIdForHearing(hearing);
     }
 
     public List<Variant> getVariantDirectory() {
