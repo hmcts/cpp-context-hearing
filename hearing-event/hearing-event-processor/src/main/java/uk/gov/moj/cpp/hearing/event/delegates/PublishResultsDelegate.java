@@ -18,6 +18,7 @@ import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.CategoryEnumUtils.getCategory;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromHearing;
+import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupReportingRestrictions;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
@@ -572,9 +573,15 @@ public class PublishResultsDelegate {
 
                     }
                 });
-                if (!restrictions.isEmpty()) {
-                    offence.setReportingRestrictions(restrictions);
+
+                if (isNotEmpty(offence.getReportingRestrictions())) {
+                    restrictions.addAll(offence.getReportingRestrictions());
                 }
+
+                if (!restrictions.isEmpty()) {
+                    offence.setReportingRestrictions(dedupReportingRestrictions(restrictions));
+                }
+
             } else {
                 offence.setJudicialResults(null);
             }
@@ -605,8 +612,13 @@ public class PublishResultsDelegate {
 
                             }
                         });
+
+                        if (isNotEmpty(offence.getReportingRestrictions())) {
+                            restrictions.addAll(offence.getReportingRestrictions());
+                        }
+
                         if (!restrictions.isEmpty()) {
-                            offence.setReportingRestrictions(restrictions);
+                            offence.setReportingRestrictions(dedupReportingRestrictions(restrictions));
                         }
                     } else {
                         offence.setJudicialResults(null);

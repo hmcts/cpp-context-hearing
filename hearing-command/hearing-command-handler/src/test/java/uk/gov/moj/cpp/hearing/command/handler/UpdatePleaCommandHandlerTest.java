@@ -127,6 +127,15 @@ public class UpdatePleaCommandHandlerTest {
             apply(new HearingInitiated(hearing.getHearing()));
         }};
 
+        ConvictionDateAdded convictionDateAdded = ConvictionDateAdded.
+                convictionDateAdded().
+                setConvictionDate(pleaDate).
+                setHearingId(hearing.getHearingId()).
+                setOffenceId(plea.getOffenceId()).
+                setCaseId(plea.getApplicationId())
+                .setCourtApplicationId(plea.getApplicationId());
+
+        hearingAggregate.apply(convictionDateAdded);
 
         when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingAggregateEventStream);
 
@@ -155,6 +164,7 @@ public class UpdatePleaCommandHandlerTest {
                 .with(ConvictionDateRemoved::getOffenceId, is(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId()))
         );
     }
+
 
     @SuppressWarnings("serial")
     @Test

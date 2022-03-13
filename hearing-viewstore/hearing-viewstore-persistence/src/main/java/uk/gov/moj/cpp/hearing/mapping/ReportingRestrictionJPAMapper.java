@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
+import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupReportingRestrictions;
+
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingOffenceReportingRestrictionKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ReportingRestriction;
@@ -47,7 +49,7 @@ public class ReportingRestrictionJPAMapper {
         if (null == pojos) {
             return new HashSet<>();
         }
-        return pojos.stream().distinct().map(pojo -> toJPA(hearing, offenceId, pojo)).collect(Collectors.toSet());
+        return dedupReportingRestrictions(pojos).stream().map(pojo -> toJPA(hearing, offenceId, pojo)).collect(Collectors.toSet());
     }
 
     public List<uk.gov.justice.core.courts.ReportingRestriction> fromJPA(final Set<ReportingRestriction> entities) {

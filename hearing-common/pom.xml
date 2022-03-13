@@ -13,6 +13,7 @@
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-domain-common</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

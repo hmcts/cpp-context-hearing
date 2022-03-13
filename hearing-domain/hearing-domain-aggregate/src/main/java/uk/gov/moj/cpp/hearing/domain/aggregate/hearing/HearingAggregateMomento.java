@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRestrictions;
+
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.CompanyRepresentative;
@@ -28,7 +30,7 @@ import java.util.UUID;
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569227L;
+    private static final long serialVersionUID = -561416825201569228L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -95,7 +97,7 @@ public class HearingAggregateMomento implements Serializable {
     }
 
     public void setHearing(Hearing hearing) {
-        this.hearing = hearing;
+        this.hearing = dedupAllReportingRestrictions(hearing);
     }
 
     public List<Variant> getVariantDirectory() {
