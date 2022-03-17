@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>10.8.3</version>
+        <version>10.3.19-DOCGENMOVE-SNAPSHOT</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
@@ -26,7 +26,7 @@
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.177</coredomain.version>
         <referencedata.version>7.0.73</referencedata.version>
-        <material.version>7.0.22</material.version>
+        <material.version>7.0.19-DOCGENMOVE-SNAPSHOT</material.version>
         <results.version>7.0.73</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>7.0.26</stagingenforcement.version>
