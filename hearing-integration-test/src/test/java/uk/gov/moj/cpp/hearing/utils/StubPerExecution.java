@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.utils;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDocumentCreate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubFixedListForWelshValues;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubForReferenceDataResults;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationUnit;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class StubPerExecution {
+    public static final String DOCUMENT_TEXT = "someDocumentText";
     private final static Logger LOGGER = LoggerFactory.getLogger(StubPerExecution.class);
 
     /**
@@ -41,6 +43,7 @@ public class StubPerExecution {
         stubForReferenceDataResults();
         stubRelistReferenceDataResults();
         stubFixedListForWelshValues();
+        stubDocumentCreate(DOCUMENT_TEXT);
         setupAsWildcardUserBelongingToAllGroups();
         stubAddMapping();
         stubEnforceFinancialImposition();
