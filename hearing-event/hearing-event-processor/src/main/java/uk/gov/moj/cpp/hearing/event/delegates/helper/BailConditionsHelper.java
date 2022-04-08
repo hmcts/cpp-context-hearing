@@ -18,8 +18,13 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -88,16 +93,53 @@ public class BailConditionsHelper {
 
     private StringBuilder constructBailConditions(final List<JudicialResultsLabelAndResultPrompts> judicialResultsLabelAndResultPrompts) {
         final StringBuilder bailConditionsBuilder = new StringBuilder();
-        for (final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt : judicialResultsLabelAndResultPrompts) {
+        final List<JudicialResultsLabelAndResultPrompts> distinctJudicialResultsLabelAndResultPrompts = filterOutDuplicateLabels(judicialResultsLabelAndResultPrompts);
+        final Iterator<JudicialResultsLabelAndResultPrompts> resultIterator = distinctJudicialResultsLabelAndResultPrompts.iterator();
+        while (resultIterator.hasNext()) {
+            final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt = resultIterator.next();
             final String label = judicialResultsLabelAndResultPrompt.getLabel();
-            if(!bailConditionsBuilder.toString().contains(label)) {
-                bailConditionsBuilder.append(String.format("%s%n", label));
-                for (final JudicialResultPrompt judicialResultPrompt : judicialResultsLabelAndResultPrompt.getJudicialResultPrompts()) {
-                    bailConditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+            if (!bailConditionsBuilder.toString().contains(label)) {
+                final Iterator<JudicialResultPrompt> promptsIterator = judicialResultsLabelAndResultPrompt.getJudicialResultPrompts().iterator();
+                addLabelToBailCondition(bailConditionsBuilder, resultIterator, label, promptsIterator);
+                while (promptsIterator.hasNext()) {
+                    final JudicialResultPrompt judicialResultPrompt = promptsIterator.next();
+                    addPromptToBailConditions(bailConditionsBuilder, resultIterator, promptsIterator, judicialResultPrompt);
                 }
             }
         }
         return bailConditionsBuilder;
+    }
+
+    private void addLabelToBailCondition(final StringBuilder bailConditionsBuilder, final Iterator<JudicialResultsLabelAndResultPrompts> resultIterator, final String label, final Iterator<JudicialResultPrompt> promptsIterator) {
+        if (promptsIterator.hasNext()) {
+            bailConditionsBuilder.append(String.format("%s%n", label));
+        } else {
+            if (resultIterator.hasNext()) {
+                bailConditionsBuilder.append(String.format("%s ;", label));
+            } else {
+                bailConditionsBuilder.append(String.format("%s", label));
+            }
+        }
+    }
+
+    private void addPromptToBailConditions(final StringBuilder bailConditionsBuilder, final Iterator<JudicialResultsLabelAndResultPrompts> resultIterator, final Iterator<JudicialResultPrompt> promptsIterator, final JudicialResultPrompt judicialResultPrompt) {
+        if (promptsIterator.hasNext()) {
+            bailConditionsBuilder.append(String.format("%s : %s%n", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+        } else {
+            bailConditionsBuilder.append(String.format("%s : %s", judicialResultPrompt.getLabel(), judicialResultPrompt.getValue()));
+            if (resultIterator.hasNext()) {
+                bailConditionsBuilder.append(" ;");
+            }
+        }
+    }
+
+    private List<JudicialResultsLabelAndResultPrompts> filterOutDuplicateLabels(final List<JudicialResultsLabelAndResultPrompts> judicialResultsLabelAndResultPrompts) {
+        return judicialResultsLabelAndResultPrompts.stream().filter(distinctByKey(JudicialResultsLabelAndResultPrompts::getLabel)).collect(toList());
+    }
+
+    public static <T> Predicate<T> distinctByKey(Function<? super T, Object> keyExtractor) {
+        final Map<Object, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
     private List<JudicialResultsLabelAndResultPrompts> getJudicialResultsLabelBasedOnRankAndResultPrompts(final List<Offence> offences) {
