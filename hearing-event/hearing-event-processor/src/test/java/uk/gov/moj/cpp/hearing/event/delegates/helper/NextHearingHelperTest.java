@@ -10,6 +10,7 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -132,8 +133,10 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
 
         final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(event, resultDefinition, getResultLines(event), getPrompts(event, resultDefinition));
 
+        assertEquals("B47GL", nextHearing.get().getCourtCentre().getCode());
+
         assertValid(nextHearing, JurisdictionType.CROWN, ZonedDateTimes.fromString("2019-02-02T22:22Z"));
-    }
+}
 
     @Test
     public void shouldPopulateNextHearingForCrownCourtHearingFixedDate() {

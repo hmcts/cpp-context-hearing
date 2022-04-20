@@ -308,6 +308,7 @@ public class NextHearingHelperV3 {
         final CourtCentre.Builder courtCentreBuilder = courtCentre()
                 .withName(courtCentreOrg.getOucodeL3Name())
                 .withWelshName(courtCentreOrg.getOucodeL3WelshName())
+                .withCode(courtCentreOrg.getOucode())
                 .withPsaCode(parseInt(courtCentreOrg.getLja()))
                 .withAddress(Address.address()
                         .withPostcode(courtCentreOrg.getPostcode())
