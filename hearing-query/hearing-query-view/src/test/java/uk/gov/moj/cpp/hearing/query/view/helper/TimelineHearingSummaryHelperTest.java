@@ -10,10 +10,12 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.services.test.utils.core.random.Generator;
 import uk.gov.justice.services.test.utils.core.random.StringGenerator;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
@@ -25,6 +27,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
 import javax.json.JsonObject;
@@ -77,6 +80,7 @@ public class TimelineHearingSummaryHelperTest {
     private Organisation organisation;
     private ProsecutionCase prosecutionCase;
     private UUID applicationId;
+    private ProsecutionCaseIdentifier prosecutionCaseIdentifier;
     private List<HearingYouthCourtDefendants> hearingYouthCourtDefendantList;
     @Mock
     private CourtApplicationsSerializer courtApplicationsSerializer;
@@ -130,6 +134,9 @@ public class TimelineHearingSummaryHelperTest {
         HearingYouthCourDefendantsKey hearingYouthCourDefendantsKey = new HearingYouthCourDefendantsKey(UUID.randomUUID(),UUID.randomUUID());
         HearingYouthCourtDefendants hearingYouthCourtDefendants = new HearingYouthCourtDefendants(hearingYouthCourDefendantsKey);
         hearingYouthCourtDefendantList = Arrays.asList(hearingYouthCourtDefendants);
+        prosecutionCaseIdentifier = new ProsecutionCaseIdentifier();
+        prosecutionCaseIdentifier.setProsecutionAuthorityCode(STRING.next());
+        prosecutionCaseIdentifier.setProsecutorAuthorityName(STRING.next());
     }
 
     @Test
@@ -237,6 +244,18 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
 
+    @Test
+    public void shouldCreateTimelineHearingSummaryForApplicantProsecutingAuthorityFilteredByApplicationId() {
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplicationApplicantAsProsecutingAuthority(applicationId)));
+
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
+                .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, null, applicationId);
+
+        assertThat(timeLineHearingSummary.getApplicants().size(), is(1));
+        assertThat(timeLineHearingSummary.getApplicants().get(0), is(prosecutionCaseIdentifier.getProsecutionAuthorityCode()));
+        assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
+    }
+
     private CourtApplication getCourtApplication(UUID applicationId) {
         return CourtApplication.courtApplication()
                 .withId(applicationId)
@@ -259,6 +278,15 @@ public class TimelineHearingSummaryHelperTest {
                 .withApplicant(CourtApplicationParty.courtApplicationParty()
                         .withMasterDefendant(MasterDefendant.masterDefendant().withLegalEntityDefendant(legalEntityDefendant()
                                 .withOrganisation(organisation().withName(organisation.getName()).build()).build()).build())
+                        .build()).build();
+    }
+
+    private CourtApplication getCourtApplicationApplicantAsProsecutingAuthority(UUID applicationId) {
+        return CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withProsecutingAuthority(ProsecutingAuthority.prosecutingAuthority().withName(prosecutionCaseIdentifier.getProsecutorAuthorityName())
+                                .withProsecutionAuthorityCode(prosecutionCaseIdentifier.getProsecutionAuthorityCode()).build())
                         .build()).build();
     }
 

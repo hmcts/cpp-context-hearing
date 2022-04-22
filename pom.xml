@@ -24,8 +24,8 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>1.0.177</coredomain.version>
-        <referencedata.version>7.0.73</referencedata.version>
+        <coredomain.version>1.0.178</coredomain.version>
+        <referencedata.version>7.0.79</referencedata.version>
         <material.version>7.0.28</material.version>
         <results.version>7.0.85</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
@@ -37,8 +37,8 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
-        <usersgroups.version>7.0.42</usersgroups.version>
-        <listing.version>8.0.2</listing.version>
+        <usersgroups.version>7.0.44</usersgroups.version>
+        <listing.version>8.0.3</listing.version>
     </properties>
 
     <modules>

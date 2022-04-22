@@ -150,6 +150,10 @@ public class TimelineHearingSummaryHelper {
             }
         }
 
+        if (!displayName.isPresent() && nonNull(applicant.getProsecutingAuthority())) {
+            displayName = ofNullable(applicant.getProsecutingAuthority().getProsecutionAuthorityCode()).filter(StringUtils::isNotBlank);
+        }
+
         return displayName.orElse(EMPTY);
     }
 
