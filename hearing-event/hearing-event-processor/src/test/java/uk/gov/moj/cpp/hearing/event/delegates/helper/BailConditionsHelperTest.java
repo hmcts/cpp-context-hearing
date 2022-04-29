@@ -213,6 +213,40 @@ public class BailConditionsHelperTest {
     }
 
     @Test
+    public void testMapBailConditionsWhenMultipleResultDefinitionGroups() {
+        final String bailCondition = getBailCondition("Bail condition: Courthouse name", "Date of hearing : 777", "Courtroom : 555", "Courthouse name : 666", "Bail condition: Courtroom", "Bail condition: Time of hearing", "Time of hearing : 999", "Courthouse name : 666");
+
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("P", "Bail conditions,ELMON", true, true, true, false, false, true);
+        setRankAsNull(resultsSharedTemplate);
+
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
+
+        final String bailConditionsResult = resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
+        assertNotNull(bailConditionsResult);
+        assertThat(bailConditionsResult, is(bailCondition));
+
+    }
+
+    @Test
+    public void testMapBailConditionsWhenMultipleResultDefinitionGroupsWithSpaceBetweenGroupDefinitionName() {
+        final String bailCondition = getBailCondition("Bail condition: Courthouse name", "Date of hearing : 777", "Courtroom : 555", "Courthouse name : 666", "Bail condition: Courtroom", "Bail condition: Time of hearing", "Time of hearing : 999", "Courthouse name : 666");
+
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("P", "ELMON, Bail conditions", true, true, true, false, false, true);
+        setRankAsNull(resultsSharedTemplate);
+
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate);
+        bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
+
+        final String bailConditionsResult = resultsSharedTemplate.getHearing()
+                .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
+        assertNotNull(bailConditionsResult);
+        assertThat(bailConditionsResult, is(bailCondition));
+
+    }
+
+    @Test
     public void testMapBailConditions_when_rank_isNotPresentForCourtApplicationCases() {
         final String bailCondition = getBailCondition("Bail condition: Courthouse name", "Date of hearing : 777", "Courtroom : 555", "Courthouse name : 666", "Bail condition: Courtroom", "Bail condition: Time of hearing", "Time of hearing : 999", "Courthouse name : 666");
 

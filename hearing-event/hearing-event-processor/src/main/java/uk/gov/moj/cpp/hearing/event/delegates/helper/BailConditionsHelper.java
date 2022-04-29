@@ -1,11 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsLast;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.split;
+import static org.apache.commons.lang3.StringUtils.strip;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -28,10 +31,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class BailConditionsHelper {
 
     private static final String BAIL_CONDITIONS = "Bail Conditions";
     private static final String[] applicableBailStatusCodes = new String[]{"L", "P", "B"};
+    public static final String DELIMITER = ",";
 
     public void setBailConditions(final Hearing hearing) {
         ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
@@ -161,7 +167,7 @@ public class BailConditionsHelper {
                 .map(Offence::getJudicialResults)
                 .flatMap(List::stream)
                 .filter(jr -> nonNull(jr.getResultDefinitionGroup()))
-                .filter(jr -> jr.getResultDefinitionGroup().equalsIgnoreCase(BAIL_CONDITIONS))
+                .filter(jr -> asList(split(jr.getResultDefinitionGroup(), DELIMITER)).stream().map(StringUtils::strip).anyMatch(BAIL_CONDITIONS::equalsIgnoreCase))
                 .collect(Collectors.toList());
     }
 
