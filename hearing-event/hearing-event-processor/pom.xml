@@ -160,11 +160,6 @@
             <artifactId>file-service-persistence</artifactId>
         </dependency>
         <dependency>
-            <groupId>uk.gov.moj.cpp.system.documentgenerator</groupId>
-            <artifactId>system-documentgenerator-client</artifactId>
-            <version>1.0.4</version>
-        </dependency>
-        <dependency>
             <groupId>uk.gov.moj.cpp.hearing</groupId>
             <artifactId>hearing-common</artifactId>
             <version>${project.version}</version>
