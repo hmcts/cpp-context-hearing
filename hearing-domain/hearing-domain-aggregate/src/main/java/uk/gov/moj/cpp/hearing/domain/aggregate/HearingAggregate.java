@@ -22,6 +22,7 @@ import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.DefendantsWithWelshTranslation;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -46,6 +47,8 @@ import uk.gov.moj.cpp.hearing.command.ReusableInfo;
 import uk.gov.moj.cpp.hearing.command.ReusableInfoResults;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
 import uk.gov.moj.cpp.hearing.command.defendant.Defendant;
+import uk.gov.moj.cpp.hearing.command.defendant.DefendantWelshInfo;
+import uk.gov.moj.cpp.hearing.command.defendant.DefendantsWithWelshTranslationsCommand;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLine;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
@@ -94,6 +97,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsInYouthCourtUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantsWelshInformationRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
@@ -173,7 +177,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine", "squid:CallToDeprecatedMethod", "squid:S1068", "squid:S1450"})
 public class HearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = -6059812881894748570L;
@@ -221,6 +225,8 @@ public class HearingAggregate implements Aggregate {
     private HearingState hearingState;
 
     private UUID amendingSharedHearingUserId;
+
+    private List<DefendantWelshInfo> defendantsWelshInformationList;
 
     @Override
     public Object apply(final Object event) {
@@ -346,6 +352,7 @@ public class HearingAggregate implements Aggregate {
                 when(ExistingHearingUpdated.class).apply(offenceDelegate::handleExistingHearingUpdated),
                 when(CustodyTimeLimitClockStopped.class).apply(offenceDelegate::handleCustodyTimeLimitClockStopped),
                 when(CustodyTimeLimitExtended.class).apply(offenceDelegate::handleCustodyTimeLimitExtended),
+                when(DefendantsWelshInformationRecorded.class).apply(this::handleDefendantsWelshTranslation),
                 otherwiseDoNothing()
         );
 
@@ -1010,4 +1017,34 @@ public class HearingAggregate implements Aggregate {
                 .withCourtApplicationType(courtListRestrictedCmd.getCourtApplicationType())
                 .build()));
     }
+
+    /**
+     * Method to record the DefendantsWelshInformationRecorded event
+     * @param defendantsWithWelshTranslationsCommand
+     * @return Hearing Stream instance
+     */
+    public Stream<Object> recordDefendantsWelshTranslation(final DefendantsWithWelshTranslationsCommand defendantsWithWelshTranslationsCommand) {
+        return apply(Stream.of(new DefendantsWelshInformationRecorded(defendantsWithWelshTranslationsCommand.getDefendantsWelshList())));
+    }
+
+    /**
+     * Method to set the defendantsWelshInformationList when the rule is met in
+     * apply
+     *
+     * @param defendantsWelshInformationRecorded
+     */
+    private void handleDefendantsWelshTranslation(final DefendantsWelshInformationRecorded defendantsWelshInformationRecorded) {
+        this.defendantsWelshInformationList = defendantsWelshInformationRecorded.getDefendantsWelshInfoList();
+
+        final List<DefendantsWithWelshTranslation> defendantsWelshRequiringList =
+                defendantsWelshInformationList
+                        .stream()
+                        .filter(d -> d.isWelshTranslation())
+                        .map(d -> {return new DefendantsWithWelshTranslation(d.getDefendantId(), d.isWelshTranslation());})
+                        .collect(Collectors.toList());
+
+        this.momento.getHearing().setDefendantsWithWelshTranslationList(defendantsWelshRequiringList);
+    }
+
+
 }

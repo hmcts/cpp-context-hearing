@@ -84,6 +84,7 @@ public class HearingCommandApiTest {
     private Map<String, String> sessionTimeApiMethodsToHandlerNames;
     private Map<String, String> reusableInfoApiMethodsToHandlerNames;
     private Map<String, String> youthCourtDefendantsApiMethodsToHandlerNames;
+    private Map<String, String> defendantsWelshTranslationInformationToHandlerNames;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
@@ -115,6 +116,7 @@ public class HearingCommandApiTest {
         sessionTimeApiMethodsToHandlerNames = apiMethodsToHandlerNames(SessionTimeCommandApi.class);
         reusableInfoApiMethodsToHandlerNames = apiMethodsToHandlerNames(ReusableInfoCommandApi.class);
         youthCourtDefendantsApiMethodsToHandlerNames = apiMethodsToHandlerNames(YouthCourtDefendantsCommandApi.class);
+        defendantsWelshTranslationInformationToHandlerNames = apiMethodsToHandlerNames(DefendantsWelshTranslationsCommandApi.class);
 
     }
 
@@ -134,6 +136,7 @@ public class HearingCommandApiTest {
                 outstandingFinesCommandApiMethodsToHandlerNames.values().stream(),
                 sessionTimeApiMethodsToHandlerNames.values().stream(),
                 reusableInfoApiMethodsToHandlerNames.values().stream(),
+                defendantsWelshTranslationInformationToHandlerNames.values().stream(),
                 youthCourtDefendantsApiMethodsToHandlerNames.values().stream())
                 .reduce(Stream::concat)
                 .orElseGet(Stream::empty)

@@ -318,6 +318,10 @@ subscriptions_descriptor:
         - name: hearing.events.registered-hearing-against-case
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.registered-hearing-against-case.json
 
+        # Defendants welsh translations
+        - name: hearing.event.defendants-welsh-information-recorded
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.defendants-welsh-information-recorded.json
+
       event_source_name: hearing
 
     - name: public event subscription

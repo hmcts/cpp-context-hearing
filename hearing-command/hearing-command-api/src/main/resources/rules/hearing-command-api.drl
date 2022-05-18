@@ -25,6 +25,15 @@ rule "Command - API - Action - hearing.add-prosecution-counsel"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.save-defendants-welsh-translations"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.save-defendants-welsh-translations");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.remove-prosecution-counsel"
   when
     $outcome: Outcome();

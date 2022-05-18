@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.save-defendants-welsh-translations.json",
+  "type": "object",
+  "properties": {
+    "hearingId": {
+      "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+    },
+    "defendantsWelshList": {
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "#/definitions/defendantWelshInfo"
+      }
+    }
+  },
+  "required": [
+    "hearingId"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "defendantWelshInfo": {
+      "type": "object",
+      "properties": {
+        "defendantId": {
+          "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
+        },
+        "welshTranslation": {
+          "type": "boolean",
+          "description": "Does defendant need welsh translation"
+        }
+      }
+    }
+  }
+}
+

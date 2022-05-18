@@ -190,4 +190,8 @@ subscriptions_descriptor:
         - name: public.events.hearing.prosecution-case-created-in-hearing
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.prosecution-case-created-in-hearing.json
 
+        # Defendants Welsh information recorded
+        - name: public.hearing.defendants-welsh-information-recorded
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.defendants-welsh-information-recorded.json
+
       event_source_name: public.event.source
