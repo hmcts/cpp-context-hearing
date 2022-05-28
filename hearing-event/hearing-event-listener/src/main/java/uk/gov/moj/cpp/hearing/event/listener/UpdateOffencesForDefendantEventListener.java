@@ -19,10 +19,11 @@ import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
 import java.util.List;
 import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 @ServiceComponent(EVENT_LISTENER)
 public class UpdateOffencesForDefendantEventListener {
@@ -41,6 +42,9 @@ public class UpdateOffencesForDefendantEventListener {
 
     @Inject
     private OffenceJPAMapper offenceJPAMapper;
+
+    @Inject
+    private UpdateOffencesForDefendantService updateOffencesForDefendantService;
 
     @Transactional
     @Handles("hearing.events.offence-added")
@@ -92,17 +96,7 @@ public class UpdateOffencesForDefendantEventListener {
         final List<UUID> defendantIds = offencesRemovedFromExistingHearing.getDefendantIds();
         final List<UUID> offenceIds = offencesRemovedFromExistingHearing.getOffenceIds();
 
-        final Hearing hearing = hearingRepository.findBy(hearingId);
-        hearing.getProsecutionCases().forEach(prosecutionCase ->
-            prosecutionCase.getDefendants().forEach(defendant ->
-                defendant.getOffences().removeIf(o -> offenceIds.contains(o.getId().getId()))
-        ));
-
-        hearing.getProsecutionCases().forEach(
-                prosecutionCase -> prosecutionCase.getDefendants().removeIf(defendant -> defendantIds.contains(defendant.getId().getId()))
-        );
-
-        hearing.getProsecutionCases().removeIf(prosecutionCase -> prosecutionCaseIds.contains(prosecutionCase.getId().getId()));
+        final Hearing hearing = updateOffencesForDefendantService.removeOffencesFromExistingHearing(hearingRepository.findBy(hearingId), prosecutionCaseIds, defendantIds, offenceIds);
 
         hearingRepository.save(hearing);
 

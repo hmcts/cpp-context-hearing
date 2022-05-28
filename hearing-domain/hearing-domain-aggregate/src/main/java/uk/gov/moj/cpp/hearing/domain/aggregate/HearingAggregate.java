@@ -755,8 +755,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingTrialTypeDelegate.setTrialType(hearingEffectiveTrial));
     }
 
-    public Stream<Object> setTrialType(final HearingTrialVacated trialType) {
-        return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
+    public Stream<Object> setTrialType(final UUID hearingId, final UUID vacatedTrialReasonId, final String code, final String description, final String type) {
+        return apply(this.hearingTrialTypeDelegate.setTrialType(hearingId, vacatedTrialReasonId, code, description, type));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {
@@ -805,11 +805,14 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
-    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots) {
+    public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements) {
 
         return apply(Stream.of(BookProvisionalHearingSlots.bookProvisionalHearingSlots()
                 .withHearingId(hearingId)
                 .withSlots((new ArrayList<>(slots)))
+                .withBookingType(bookingType)
+                .withPriority(priority)
+                .withSpecialRequirements(specialRequirements)
                 .build()));
     }
 
@@ -887,6 +890,9 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> deleteHearing(final UUID hearingId) {
+        if(momento.isDeleted()){
+            return Stream.empty();
+        }
         return apply(this.hearingDelegate.deleteHearing(hearingId));
     }
 

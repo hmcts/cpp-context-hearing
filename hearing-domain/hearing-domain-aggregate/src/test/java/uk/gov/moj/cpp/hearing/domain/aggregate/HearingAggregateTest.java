@@ -1017,7 +1017,7 @@ public class HearingAggregateTest {
         final UUID hearingId = randomUUID();
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
-        final Stream<Object> stream = hearingAggregate.bookProvisionalHearingSlots(hearingId, provisionalHearingSlotInfos);
+        final Stream<Object> stream = hearingAggregate.bookProvisionalHearingSlots(hearingId, provisionalHearingSlotInfos, null, null, null);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -1573,12 +1573,6 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(hearing));
 
         final UUID hearingId = hearing.getId();
-        final UUID offenceId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
-        final UUID defendantId = hearing.getProsecutionCases().get(0).getDefendants().get(0).getId();
-        final UUID caseId = hearing.getProsecutionCases().get(0).getId();
-        final UUID courtApplicationId = hearing.getCourtApplications().get(0).getId();
-
-        hearingAggregate.apply(new HearingDeleted(asList(caseId), asList(defendantId), asList(offenceId), asList(courtApplicationId), hearingId));
 
         final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).collect(toList());
 

@@ -13,16 +13,22 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.NextHearingStartDateRecorded;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
@@ -40,6 +46,7 @@ import org.junit.Test;
 
 public class HearingDelegateTest {
     private static final String GUILTY = "GUILTY";
+    public static final String SKIP_EXTEND_HEARING_NOT_CREATED = "Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet";
 
     private HearingAggregateMomento momento = new HearingAggregateMomento();
     private HearingDelegate hearingDelegate = new HearingDelegate(momento);
@@ -265,6 +272,22 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void shouldSkipExtendHearingIfHearingIsNotCreatedYet() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantID = UUID.randomUUID();
+        final UUID newOffenceID = UUID.randomUUID();
+        final UUID currentOffenceID = UUID.randomUUID();
+        final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
+        momento.setHearing(null);
+        final List<Object> eventStream = hearingDelegate.extend(hearingId,Collections.singletonList(HearingDay.hearingDay().build()), CourtCentre.courtCentre().build(), JurisdictionType.MAGISTRATES, CourtApplication.courtApplication().build(), extendedCases,null).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) eventStream.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(),is(hearingId));
+        assertThat(hearingChangeIgnored.getReason(),is(SKIP_EXTEND_HEARING_NOT_CREATED));
+    }
+
+    @Test
     public void shouldRemoveProsecutionCaseAndDefendantWhenAllOffencesAreRemoved() {
         final UUID hearingId = UUID.randomUUID();
         final UUID prosecutionCaseId1 = UUID.randomUUID();
@@ -470,6 +493,24 @@ public class HearingDelegateTest {
         assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
 
 
+    }
+
+    @Test
+    public void shouldHandleHearingMarkedAsDuplicate() {
+        final UUID hearingId = UUID.randomUUID();
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+        hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
+
+        final List<Object> eventStream = hearingDelegate.markAsDuplicate(hearingId).collect(toList());
+
+        assertThat(eventStream.size(), is(1));
+
+        final HearingMarkedAsDuplicate hearingMarkedAsDuplicate = (HearingMarkedAsDuplicate) eventStream.get(0);
+        assertThat(hearingMarkedAsDuplicate.getHearingId(), is(hearingId));
+        assertThat(hearingMarkedAsDuplicate.getCourtCentreId(), is(hearing.getCourtCentre().getId()));
+        assertThat(hearingMarkedAsDuplicate.getDefendantIds().size(), is(1));
+        assertThat(hearingMarkedAsDuplicate.getProsecutionCaseIds().size(), is(1));
+        assertThat(hearingMarkedAsDuplicate.getOffenceIds().size(), is(1));
     }
 
     private List<ProsecutionCase> caseList(ProsecutionCase... cases) {

@@ -83,6 +83,7 @@ public class HearingQueryView {
     private static final String FIELD_ID = "id";
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
+    private static final String FIELD_CASE_IDS = "caseIds";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
 
@@ -412,4 +413,15 @@ public class HearingQueryView {
 
     }
 
+
+    public Envelope<GetHearings> getFutureHearingsByCaseIds(final JsonEnvelope envelope) {
+        final Optional<String> caseIds = getString(envelope.payloadAsJsonObject(), FIELD_CASE_IDS);
+        final List<UUID> caseIdList = Stream.of(caseIds.get().split(",")).map(UUID::fromString).collect(Collectors.toList());
+
+        final GetHearings hearingListResponse = hearingService.getFutureHearingsByCaseIds(caseIdList);
+
+        return envelop(hearingListResponse)
+                .withName("hearing.get.hearings")
+                .withMetadataFrom(envelope);
+    }
 }

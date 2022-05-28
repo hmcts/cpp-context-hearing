@@ -31,6 +31,8 @@ import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 
+
+import java.io.IOException;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
@@ -1303,7 +1305,17 @@ public class UseCases {
 
     public static void bookHearingSlots(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots) throws Exception {
 
-        final String commandPayloadString = getStringFromResource("hearing.book-provisional-hearing-slots.json")
+        callCommand(requestSpec, hearingId, hearingSlots, "hearing.book-provisional-hearing-slots.json");
+
+    }
+    public static void bookHearingSlotsWithAdditionalFields(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots) throws Exception {
+
+        callCommand(requestSpec, hearingId, hearingSlots, "hearing.book-provisional-hearing-slots-with-additional-fields.json");
+
+    }
+
+    private static void callCommand(final RequestSpecification requestSpec, final UUID hearingId, final List<ProvisionalHearingSlotInfo> hearingSlots, final String payload) throws IOException {
+        final String commandPayloadString = getStringFromResource(payload)
                 .replace("UUID1", hearingSlots.get(0).getCourtScheduleId().toString())
                 .replace("UUID2", hearingSlots.get(1).getCourtScheduleId().toString())
                 .replace("HEARING_START_TIME1", hearingSlots.get(0).getHearingStartTime().format(DATE_TIME_FORMATTER))
@@ -1314,7 +1326,6 @@ public class UseCases {
                 .withArgs(hearingId)
                 .withPayload(commandPayloadString)
                 .executeSuccessfully();
-
     }
 
     public static void correctHearingDaysWithoutCourtCentre(final RequestSpecification requestSpec, final UUID hearingId, final List<HearingDay> hearingDays) {

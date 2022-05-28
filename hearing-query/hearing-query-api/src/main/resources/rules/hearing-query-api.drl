@@ -250,3 +250,12 @@ rule "Query - API - hearing.custody-time-limit"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.get.future-hearings"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.get.future-hearings");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end

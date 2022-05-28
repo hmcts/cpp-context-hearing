@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
@@ -16,7 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 
-import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
@@ -25,8 +24,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
-import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.LinkedApplicationsSummary;
-import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
@@ -37,7 +34,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
 import java.io.File;
 import java.lang.reflect.Method;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -62,7 +58,7 @@ public class HearingQueryApiTest {
     private static final String NAME = "name:";
     private static final UUID CASE_ID = randomUUID();
     private static final UUID APPLICATION_ID_1 = randomUUID();
-    private static final UUID APPLICATION_ID_2 = randomUUID();
+    private static final String FIELD_CASE_IDS = "caseIds";
 
     @Spy
     private Enveloper enveloper = createEnveloper();
@@ -87,6 +83,9 @@ public class HearingQueryApiTest {
 
     @Mock
     private Envelope<JsonValue> mockJsonValueEnvelope;
+
+    @Mock
+    private Envelope<GetHearings> mockGetHearingsEnvelope;
 
     @Mock
     private JsonEnvelope mockJsonEnvelope;
@@ -169,9 +168,9 @@ public class HearingQueryApiTest {
     @Test
     public void shouldReturnFutureHearings() {
 
-        when(hearingQueryView.findHearingsForFuture(any(),any())).thenReturn(null);
+        when(hearingQueryView.findHearingsForFuture(any(), any())).thenReturn(null);
 
-       final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.hearings-for-future", createObjectBuilder()
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.hearings-for-future", createObjectBuilder()
                 .add("defendantId", UUID.randomUUID().toString())
                 .build());
 
@@ -179,5 +178,25 @@ public class HearingQueryApiTest {
 
         verify(referenceDataService, times(1)).getAllHearingTypes();
         verify(hearingQueryView, times(1)).findHearingsForFuture(any(JsonEnvelope.class), any(HearingTypes.class));
+    }
+
+    @Test
+    public void shouldGetFutureHearingsByCaseIds() {
+        final String caseId1 = "ebdaeb99-8952-4c07-99c4-d27c39d3e63a";
+        final String caseId2 = "c0a03dfd-f6f2-4590-a026-17f1cf5268e1";
+        final String caseIdString = caseId1 + "," + caseId2;
+
+        when(hearingQueryView.getFutureHearingsByCaseIds(any(JsonEnvelope.class))).thenReturn(mockGetHearingsEnvelope);
+        when(mockEnvelopePayloadTypeConverter.convert(any(JsonEnvelope.class), any(Class.class))).thenReturn(mockJsonValueEnvelope);
+        when(mockJsonEnvelopeRepacker.repack(mockJsonValueEnvelope)).thenReturn(mockJsonEnvelope);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.hearings", createObjectBuilder()
+                .add(FIELD_CASE_IDS, caseIdString)
+                .build());
+
+        final JsonEnvelope result = hearingQueryApi.getFutureHearingsByCaseIds(query);
+
+        verify(hearingQueryView).getFutureHearingsByCaseIds(any(JsonEnvelope.class));
+        assertThat(result, is(mockJsonEnvelope));
     }
 }

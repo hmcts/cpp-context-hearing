@@ -50,7 +50,6 @@ public class HearingLogEventListener {
     public void hearingEventDefinitionsCreated(final JsonEnvelope event) {
 
 
-
         final HearingEventDefinitionsCreated eventDefinitionsCreated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), HearingEventDefinitionsCreated.class);
 
         LOGGER.info("hearing.hearing-event-definitions-created for Id {} ", eventDefinitionsCreated.getId());

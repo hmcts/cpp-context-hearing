@@ -2,8 +2,6 @@ package uk.gov.moj.cpp.hearing.event.listener;
 
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -18,11 +16,16 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCompanyRepresentative;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.HearingCompanyRepresentativeRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
-import javax.inject.Inject;
-import javax.transaction.Transactional;
+
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.inject.Inject;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_LISTENER)
 public class CompanyRepresentativeEventListener {

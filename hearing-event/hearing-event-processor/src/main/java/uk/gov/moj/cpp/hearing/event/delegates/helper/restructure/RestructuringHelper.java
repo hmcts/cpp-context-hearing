@@ -15,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.PublishA
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.PublishedForNowsHelper.getNodesWithPublishedForNows;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RemoveNonPublishableLinesHelper.removeNonPublishableResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructureNextHearingHelper.restructureNextHearing;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RollUpPromptsHelper.filterNodesWithRollUpPrompts;
 
 import uk.gov.justice.core.courts.ResultLine;
@@ -109,10 +110,12 @@ public class RestructuringHelper {
             if (nonNull(treeNode.getJudicialResult()) && isNotEmpty(treeNode.getJudicialResult().getJudicialResultPrompts())) {
                 final String sortedPrompts = treeNode.getJudicialResult().getJudicialResultPrompts()
                         .stream()
+                        .filter(JUDICIAL_RESULT_PROMPT_PREDICATE)
                         .map(p -> format("%s %s", p.getLabel(), p.getValue()))
                         .collect(joining(lineSeparator()));
 
                 final String resultText = ResultTextHelper.getResultText(treeNode.getJudicialResult().getLabel(), sortedPrompts);
+
                 treeNode.getJudicialResult().setResultText(resultText);
             }
         });

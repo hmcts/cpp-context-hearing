@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
@@ -126,7 +127,7 @@ public class HearingRepositoryTest {
         assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledFalse.getId()))));
 
         final uk.gov.justice.core.courts.Hearing hearingWithCancelledNull = addHearingWithCancelledStatus(null);
-            hearingList = hearingRepository.findByFilters(hearingWithCancelledNull.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledNull.getCourtCentre().getId(), hearingWithCancelledNull.getCourtCentre().getRoomId());
+        hearingList = hearingRepository.findByFilters(hearingWithCancelledNull.getHearingDays().get(0).getSittingDay().toLocalDate(), hearingWithCancelledNull.getCourtCentre().getId(), hearingWithCancelledNull.getCourtCentre().getRoomId());
         assertThat(hearingList, hasItem(isBean(Hearing.class).with(Hearing::getId, is(hearingWithCancelledNull.getId()))));
     }
 
@@ -186,7 +187,7 @@ public class HearingRepositoryTest {
 
     @Test
     public void shouldFindAll() {
-        assertEquals(hearings.size()+hearingsWithHearingDay.size(), hearingRepository.findAll().size());
+        assertEquals(hearings.size() + hearingsWithHearingDay.size(), hearingRepository.findAll().size());
     }
 
     @Test
@@ -398,6 +399,14 @@ public class HearingRepositoryTest {
                 isBean(Hearing.class).with(Hearing::getId, is(hearing1.getId())),
                 isBean(Hearing.class).with(Hearing::getId, is(hearing2.getId()))
         ));
+    }
+
+    @Test
+    public void shouldFindHearingsByCaseIdsLaterThan() {
+        final List<UUID> caseIdList = new ArrayList<>();
+        caseIdList.add(hearingsWithHearingDay.get(0).getProsecutionCases().get(0).getId());
+        final List<Hearing> prosecutionCases = hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, new UtcClock().now().toLocalDate().minusYears(10));
+        assertThat(prosecutionCases.size(), is(1));
     }
 
     public uk.gov.justice.core.courts.Hearing addSampleHearing(final Boolean isBoxHearing, final ZonedDateTime... sittingDays) {

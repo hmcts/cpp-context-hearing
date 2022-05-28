@@ -453,7 +453,7 @@ public class BailConditionsHelperTest {
     public void shouldMapBailCondition_blank_when_not_a_bailConditions() {
         final String bailCondition = "";
 
-        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("L","Not a Bail Conditions", true, true, true, false, false, true);
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("L", "Not a Bail Conditions", true, true, true, false, false, true);
         bailConditionsHelper.setBailConditions(resultsSharedTemplate);
         bailConditionsHelper.setBailConditions(resultsSharedTemplate.getHearing());
 
@@ -491,7 +491,7 @@ public class BailConditionsHelperTest {
                                 .withSittingDay(of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), systemDefault()))
                                 .build()))
                         .withProsecutionCases(withProsecutionCases ? getProsecutionCases(bailStatus, resultDefinitionGroup, withPersonDefendant, withResults, withPrompt) : null)
-                        .withCourtApplications(withCourtApplicationCases || withCourtApplicationCourtOrder ? getCourtApplication(bailStatus, resultDefinitionGroup, withPersonDefendant, withResults, withCourtApplicationCases, withCourtApplicationCourtOrder): null)
+                        .withCourtApplications(withCourtApplicationCases || withCourtApplicationCourtOrder ? getCourtApplication(bailStatus, resultDefinitionGroup, withPersonDefendant, withResults, withCourtApplicationCases, withCourtApplicationCourtOrder) : null)
                         .build())
                 .build();
     }
@@ -583,7 +583,7 @@ public class BailConditionsHelperTest {
     }
 
     private List<JudicialResultPrompt> getJudicialResultPromptList(final boolean withPrompt) {
-        if(!withPrompt){
+        if (!withPrompt) {
             return emptyList();
         }
         List<JudicialResultPrompt> list = new ArrayList<>();

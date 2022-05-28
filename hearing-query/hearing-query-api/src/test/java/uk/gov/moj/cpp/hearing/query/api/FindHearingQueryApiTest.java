@@ -1,11 +1,11 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.util.UUID.randomUUID;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
 import uk.gov.justice.services.core.dispatcher.JsonEnvelopeRepacker;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -14,6 +14,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleApplications;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.RecorderChecker;
@@ -23,7 +24,6 @@ import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataServi
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 
-import javax.ws.rs.BadRequestException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,24 +31,27 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
-import static java.util.UUID.randomUUID;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import javax.ws.rs.BadRequestException;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 
 
 @RunWith(MockitoJUnitRunner.class)
 public class FindHearingQueryApiTest {
 
     @Mock
-    private List<UUID> accessibleCaseList;
-
-    @Mock
     private Metadata metadata;
 
     @Mock
     private AccessibleCases accessibleCases;
+
+    @Mock
+    private AccessibleApplications accessibleApplications;
 
     @Mock
     private Permissions permissions;
@@ -108,13 +111,15 @@ public class FindHearingQueryApiTest {
         when(ddjChecker.isDDJ(permissions)).thenReturn(true);
         when(recorderChecker.isRecorder(permissions)).thenReturn(false);
 
-        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
-        when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), accessibleCaseList, true))
+        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
+        when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(getAccessibleApplicationsList());
+        when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), getAccessibleCasesAndApplicationsList(), true))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearing(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
-        verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
+        verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
 
@@ -128,13 +133,15 @@ public class FindHearingQueryApiTest {
         when(usersAndGroupsService.permissions(userId.toString())).thenReturn(permissions);
         when(ddjChecker.isDDJ(permissions)).thenReturn(false);
         when(recorderChecker.isRecorder(permissions)).thenReturn(false);
-        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
-        when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), accessibleCaseList, false))
+        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
+        when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(getAccessibleApplicationsList());
+        when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), getAccessibleCasesAndApplicationsList(), false))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearing(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
-        verify(accessibleCases, times(0)).findCases(permissions,userId.toString());
+        verify(accessibleCases, times(0)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(0)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
 
@@ -149,13 +156,15 @@ public class FindHearingQueryApiTest {
         when(ddjChecker.isDDJ(permissions)).thenReturn(false);
         when(recorderChecker.isRecorder(permissions)).thenReturn(true);
 
-        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(accessibleCaseList);
-        when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), accessibleCaseList, true))
+        when(accessibleCases.findCases(permissions, userId.toString())).thenReturn(getAccessibleCaseList());
+        when(accessibleApplications.findApplications(permissions, userId.toString())).thenReturn(getAccessibleApplicationsList());
+        when(hearingQueryView.findHearing(jsonInputEnvelope, getCrackedIneffectiveVacatedTrialTypes(), getAccessibleCasesAndApplicationsList(), true))
                 .thenReturn(jsonOutputEnvelope);
 
         hearingQueryApi.findHearing(jsonInputEnvelope);
         verify(ddjChecker, times(1)).isDDJ(permissions);
-        verify(accessibleCases, times(1)).findCases(permissions,userId.toString());
+        verify(accessibleCases, times(1)).findCases(permissions, userId.toString());
+        verify(accessibleApplications, times(1)).findApplications(permissions, userId.toString());
         verify(usersAndGroupsService, times(1)).permissions(userId.toString());
     }
 
@@ -171,5 +180,22 @@ public class FindHearingQueryApiTest {
         return crackedIneffectiveVacatedTrialTypes1;
     }
 
+    private List<UUID> getAccessibleCaseList() {
+        final List<UUID> accessibleCaseList = new ArrayList<>();
+        accessibleCaseList.add(UUID.randomUUID());
+        return accessibleCaseList;
+    }
 
+    private List<UUID> getAccessibleApplicationsList() {
+        final List<UUID> accessibleApplicationsList = new ArrayList<>();
+        accessibleApplicationsList.add(UUID.randomUUID());
+        return accessibleApplicationsList;
+    }
+
+    private List<UUID> getAccessibleCasesAndApplicationsList() {
+        final List<UUID> accessibleCasesAndApplicationsList = new ArrayList<>();
+        accessibleCasesAndApplicationsList.addAll(getAccessibleCaseList());
+        accessibleCasesAndApplicationsList.addAll(getAccessibleApplicationsList());
+        return accessibleCasesAndApplicationsList;
+    }
 }

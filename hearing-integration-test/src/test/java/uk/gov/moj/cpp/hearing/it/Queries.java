@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.it;
 
+import static java.text.MessageFormat.format;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.Matchers.allOf;
 import static org.junit.Assert.assertThat;
+import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.it.AbstractIT.ENDPOINT_PROPERTIES;
 import static uk.gov.moj.cpp.hearing.it.AbstractIT.getURL;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapJsonObjectToTypeMatcher.convertTo;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
@@ -33,6 +36,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.hamcrest.Matchers;
 
 @SuppressWarnings({"squid:S2925"})
 public class Queries {
@@ -258,5 +262,22 @@ public class Queries {
                 jsonObjectMatcher.describeTo(description);
             }
         };
+    }
+
+    public static void getHearingForTomorrowPollForMatch(final UUID userId, final UUID prosecutionCaseId, final BeanMatcher<GetHearings> resultMatcher) {
+        final String queryPart = format(ENDPOINT_PROPERTIES.getProperty("hearing.get.hearings-for-future"), prosecutionCaseId);
+        final String searchCourtListUrl = String.format("%s/%s", getBaseUri(), queryPart);
+        final Matcher<ResponseData> expectedConditions = Matchers.allOf(status().is(OK), jsonPayloadMatchesBean(GetHearings.class, resultMatcher));
+        final RequestParams requestParams = requestParams(searchCourtListUrl, "application/vnd.hearing.get.future-hearings+json")
+                .withHeader(HeaderConstants.USER_ID, userId)
+                .build();
+
+
+        poll(requestParams)
+                .timeout(10, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        expectedConditions
+                );
     }
 }

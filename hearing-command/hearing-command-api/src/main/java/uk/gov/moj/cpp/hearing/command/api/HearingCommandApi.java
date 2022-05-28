@@ -309,6 +309,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.change-cancel-amendments");
     }
 
+    @Handles("hearing.remove-offences-from-existing-hearing")
+    public void removeOffences(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.remove-offences-from-existing-hearing");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *

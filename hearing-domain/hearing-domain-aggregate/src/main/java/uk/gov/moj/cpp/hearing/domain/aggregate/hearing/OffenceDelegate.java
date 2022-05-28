@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.empty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -184,6 +185,17 @@ public class OffenceDelegate implements Serializable {
 
         if (this.momento.isPublished()) {
             return empty();
+        }
+
+        final List<UUID> existingOffencIds = ofNullable(momento.getHearing()).map(hearing -> hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .map(Offence::getId)
+                .filter(offenceIds::contains)
+                .collect(toList());
+
+        if(existingOffencIds.isEmpty()){
+            return Stream.empty();
         }
 
         final List<UUID> defendantsToBeRemoved = momento.getHearing().getProsecutionCases()

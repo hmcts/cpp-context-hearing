@@ -21,7 +21,6 @@ import uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.utils.EventHandler;
 
-
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 

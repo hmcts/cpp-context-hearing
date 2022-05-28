@@ -1,46 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.view.helper;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
-import uk.gov.justice.core.courts.MasterDefendant;
-import uk.gov.justice.core.courts.ProsecutingAuthority;
-import uk.gov.justice.services.test.utils.core.random.Generator;
-import uk.gov.justice.services.test.utils.core.random.StringGenerator;
-import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.CpsProsecutor;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourDefendantsKey;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
-import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
-
-import javax.json.JsonObject;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.UUID;
-
 import static com.google.common.collect.ImmutableSet.of;
 import static java.lang.String.format;
 import static java.time.ZonedDateTime.now;
@@ -58,6 +17,48 @@ import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.LegalEntityDefendant.legalEntityDefendant;
 import static uk.gov.justice.core.courts.Organisation.organisation;
 import static uk.gov.justice.core.courts.Person.person;
+
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
+import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
+import uk.gov.justice.services.test.utils.core.random.Generator;
+import uk.gov.justice.services.test.utils.core.random.StringGenerator;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourDefendantsKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
+import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TimelineHearingSummaryHelperTest {
@@ -131,7 +132,7 @@ public class TimelineHearingSummaryHelperTest {
         crackedIneffectiveTrial = new CrackedIneffectiveTrial(STRING.next(), LocalDate.now(), STRING.next(), randomUUID(), STRING.next());
         applicationId = UUID.randomUUID();
         allCourtRooms = buildCourtRoomsJson();
-        HearingYouthCourDefendantsKey hearingYouthCourDefendantsKey = new HearingYouthCourDefendantsKey(UUID.randomUUID(),UUID.randomUUID());
+        HearingYouthCourDefendantsKey hearingYouthCourDefendantsKey = new HearingYouthCourDefendantsKey(UUID.randomUUID(), UUID.randomUUID());
         HearingYouthCourtDefendants hearingYouthCourtDefendants = new HearingYouthCourtDefendants(hearingYouthCourDefendantsKey);
         hearingYouthCourtDefendantList = Arrays.asList(hearingYouthCourtDefendants);
         prosecutionCaseIdentifier = new ProsecutionCaseIdentifier();
@@ -292,7 +293,7 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldHandleEmptyFields() {
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null,  null,null, null),createObjectBuilder().build(), hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(new HearingDay(), new Hearing(), new CrackedIneffectiveTrial(null, null, null, null, null), createObjectBuilder().build(), hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary, is(notNullValue()));
     }
 

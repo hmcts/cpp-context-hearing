@@ -47,6 +47,8 @@ public class BookProvisionalHearingSlotsProcessorTest {
     private BookProvisionalHearingSlotsProcessor bookProvisionalHearingSlotsProcessor;
     @Mock
     private ProvisionalBookingService provisionalBookingService;
+    @Captor
+    private ArgumentCaptor<JsonObject> provisionalBookingServiceCaptor;
 
     @Before
     public void initMocks() {

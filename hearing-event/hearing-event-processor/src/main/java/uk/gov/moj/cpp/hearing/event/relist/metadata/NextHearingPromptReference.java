@@ -4,7 +4,7 @@ import static java.util.Arrays.stream;
 
 @SuppressWarnings("squid:S00115")
 public enum NextHearingPromptReference {
-    HDATE, HTIME, HTYPE, HEST, HCHOUSE, hCHOUSEOrganisationName, HCROOM, bookingReference, existingHearingId, reservedJudiciary, weekCommencing, timeOfHearing, fixedDate, dateToBeFixed;
+    HDATE, HTIME, HTYPE, HEST, HCHOUSE, hCHOUSEOrganisationName, HCROOM, bookingReference, existingHearingId, reservedJudiciary, weekCommencing, timeOfHearing, fixedDate, dateToBeFixed, hmiSlots;
 
       public static boolean isPresent(final String value){
           return stream(values()).anyMatch(v -> v.name().equals(value));

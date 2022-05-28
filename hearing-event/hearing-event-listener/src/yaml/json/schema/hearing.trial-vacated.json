@@ -17,6 +17,9 @@
     },
     "description": {
       "type": "string"
+    },
+    "courtCentreId": {
+      "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
     }
   },
   "required": [

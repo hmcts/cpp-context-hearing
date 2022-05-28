@@ -6,6 +6,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -59,6 +60,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -89,6 +91,9 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
     @Spy
     private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Mock
+    private UpdateOffencesForDefendantService updateOffencesForDefendantService;
 
     @Before
     public void setup() {
@@ -299,6 +304,20 @@ public class UpdateOffencesForDefendantEventListenerTest {
         hearing.getProsecutionCases().add(prosecutionCase);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        final Hearing hearing1 = new Hearing();
+        hearing1.setId(hearingId);
+        final Offence offence3 = new Offence();
+        offence1.setId(new HearingSnapshotKey(offenceId1, hearingId));
+        final Defendant defendant1 = new Defendant();
+        defendant1.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendant1.getOffences().add(offence3);
+        final ProsecutionCase prosecutionCase1 = new ProsecutionCase();
+        prosecutionCase1.setId(new HearingSnapshotKey(prosecutionId, hearingId));
+        prosecutionCase1.getDefendants().add(defendant1);
+        hearing1.getProsecutionCases().add(prosecutionCase1);
+
+        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class))).thenReturn(hearing1);
+
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
 
@@ -349,6 +368,13 @@ public class UpdateOffencesForDefendantEventListenerTest {
         hearing.getProsecutionCases().add(prosecutionCase);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        final Hearing hearing1 = new Hearing();
+        hearing1.setId(hearingId);
+        final ProsecutionCase prosecutionCase1 = new ProsecutionCase();
+        prosecutionCase1.setId(new HearingSnapshotKey(prosecutionId, hearingId));
+        hearing1.getProsecutionCases().add(prosecutionCase1);
+
+        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class))).thenReturn(hearing1);
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
 
@@ -398,6 +424,10 @@ public class UpdateOffencesForDefendantEventListenerTest {
         hearing.getProsecutionCases().add(prosecutionCase);
 
         when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        final Hearing hearing1 = new Hearing();
+        hearing1.setId(hearingId);
+
+        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class))).thenReturn(hearing1);
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
 

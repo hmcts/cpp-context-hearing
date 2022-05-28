@@ -23,6 +23,20 @@
           "hearingStartTime"
         ]
       }
+    },
+    "bookingType": {
+      "type": "string"
+    },
+    "priority": {
+      "type": "string"
+    },
+    "specialRequirements": {
+      "description": "Special requirements on hearings/cases",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
     }
   },
   "required": [

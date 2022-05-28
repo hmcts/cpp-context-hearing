@@ -508,7 +508,7 @@ rule "Command - API - Action - hearing.mark-as-duplicate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.mark-as-duplicate");
-    eval(userAndGroupProvider.isSystemUser($action));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "System Users"));
   then
     $outcome.setSuccess(true);
 end
@@ -554,6 +554,15 @@ rule "Command - API - Action - hearing.update-related-hearing"
     $outcome: Outcome();
     $action: Action(name == "hearing.update-related-hearing");
     eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Crown Court Admin", "Court Administrators", "Legal Advisers", "Court Clerks", "System Users", "Court Associate"));
+  then
+    $outcome.setSuccess(true);
+end
+
+rule "Command - API - Action - hearing.remove-offences-from-existing-hearing"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.remove-offences-from-existing-hearing");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
   then
     $outcome.setSuccess(true);
 end

@@ -8,6 +8,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsLast;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper.PROMPT_PREDICATE;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
 import uk.gov.justice.core.courts.ResultLine2;
@@ -50,10 +51,13 @@ public class ResultTextHelperV3 {
 
         final String sortedPrompts = sortedPromptList
                 .stream()
+                .filter(PROMPT_PREDICATE)
                 .map(p -> format("%s %s", p.getLabel(), getPromptValue(p, referencePromptList)))
                 .collect(joining(lineSeparator()));
 
-        return getResultText(resultDefinition.getLabel(), sortedPrompts);
+        final String res = getResultText(resultDefinition.getLabel(), sortedPrompts);
+
+        return res;
     }
 
     public static String getResultText(final String label, final String sortedPrompts){

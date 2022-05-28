@@ -1,8 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -12,12 +12,14 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
+import java.util.UUID;
+
 import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.transaction.Transactional;
-import java.util.UUID;
 
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ServiceComponent(EVENT_LISTENER)
 public class DefendantLegalAidStatusUpdateEventListener {
@@ -42,12 +44,12 @@ public class DefendantLegalAidStatusUpdateEventListener {
         final UUID hearingId = defendantLegalAidStatusUpdated.getHearingId();
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantId, hearingId));
 
-        if(LOGGER.isDebugEnabled()) {
+        if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.defendant-legalaid-status-updated-for-hearing event received for hearingId {}", hearingId);
         }
 
 
-        if("NO_VALUE".equals(legalAidStatus)) {
+        if ("NO_VALUE".equals(legalAidStatus)) {
             defendant.setLegalaidStatus(null);
         } else {
             defendant.setLegalaidStatus(legalAidStatus);

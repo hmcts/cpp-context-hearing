@@ -322,7 +322,6 @@ public class ReferenceDataStub {
     }
 
 
-
     public static void stubGetAllAlcoholLevelMethods() {
         final AllAlcoholLevelMethods allAlcoholLevelMethods = new AllAlcoholLevelMethods();
 
@@ -1095,7 +1094,7 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCE_DATA_JUDICIARIES_URL, REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE);
     }
 
-    public static void stubPleaTypeGuiltyFlags(){
+    public static void stubPleaTypeGuiltyFlags() {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
         String payload = getPayload("stub-data/referencedata.query.plea-types.json");
 
@@ -1109,7 +1108,7 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCE_DATA_PLEA_TYPES_URL, REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE);
     }
 
-    public static void stubPublicHolidays(){
+    public static void stubPublicHolidays() {
         InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
         String payload = getPayload("stub-data/referencedata.query.public-holidays.json");
 
@@ -1123,7 +1122,7 @@ public class ReferenceDataStub {
         waitForStubToBeReady(REFERENCE_DATA_PUBLIC_HOLIDAYS_URL, REFERENCE_DATA_PUBLIC_HOLIDAYS_MEDIA_TYPE);
     }
 
-    public static void stubForYouthCourtForMagUUID(final UUID  magsUUID) {
+    public static void stubForYouthCourtForMagUUID(final UUID magsUUID) {
         final JsonObjectBuilder builder = createObjectBuilder();
         builder.add("courtCode", "5410");
         builder.add("courtName", "courtName");
@@ -1137,4 +1136,19 @@ public class ReferenceDataStub {
         stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
 
+    public static void stubOrganisationalUnit(final UUID id, final String oucode) {
+        final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+                .withOucode(oucode)
+                .withId(id.toString())
+                .withIsWelsh(true)
+                .withWelshAddress1("Welsh address1")
+                .withWelshAddress2("Welsh address2")
+                .withWelshAddress3("Welsh address3")
+                .withWelshAddress4("Welsh address4")
+                .withWelshAddress4("Welsh address5")
+                .withPostcode("Post Code")
+                .build();
+
+        ReferenceDataStub.stub(organisationalUnit);
+    }
 }

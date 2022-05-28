@@ -13,8 +13,8 @@ import uk.gov.moj.cpp.hearing.mapping.HearingRespondentCounselJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingRespondentCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
-import uk.gov.moj.cpp.hearing.repository.HearingRespondentCounselRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingRespondentCounselRepository;
 
 import java.util.Optional;
 

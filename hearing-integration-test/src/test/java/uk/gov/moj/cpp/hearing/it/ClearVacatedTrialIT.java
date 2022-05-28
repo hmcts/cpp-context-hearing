@@ -1,14 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.lang.Boolean.FALSE;
 import static javax.ws.rs.core.Response.Status.OK;
@@ -20,23 +11,37 @@ import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMat
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.VACATED_TRIAL_TYPE_ID;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationalUnit;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
+
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.command.HearingVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.command.TrialType;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.concurrent.NotThreadSafe;
+
+import org.junit.Test;
+
 @NotThreadSafe
 public class ClearVacatedTrialIT extends AbstractIT {
     private static final String MEDIA_TYPE = "application/vnd.hearing.get.hearing+json";
     private static final String EVENT = "hearing.get.hearing";
+    private final String OUCODE = "A46AF00";
 
     @Test
     public void shouldRescheduleHearing() throws Exception {
-
-
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
-
+        final UUID courCentreId = hearingOne.getCourtCentre().getId();
         final TrialType addTrialType = TrialType.builder()
                 .withVacatedTrialReasonId(VACATED_TRIAL_TYPE_ID)
                 .build();
 
+        stubOrganisationalUnit(courCentreId, OUCODE);
         UseCases.setTrialType(getRequestSpec(), hearingOne.getHearingId(), addTrialType, true);
         UseCases.rescheduleHearing(new HearingVacatedTrialCleared(hearingOne.getHearingId()));
 
@@ -51,5 +56,4 @@ public class ClearVacatedTrialIT extends AbstractIT {
                         )));
 
     }
-
 }

@@ -23,33 +23,33 @@ import com.google.common.base.Strings;
 
 /**
  * EventListener
- *
+ * <p>
  * An instantiated helper which makes it easier listen and receive the events happening in result of
  * an asynchronous request. It exposes a fluent API, in which it expects you to call a few methods
  * in a subsequent fashion.
- *
+ * <p>
  * First, it expects you to specify probable events that you are interested in by calling
  * 'subscribe' methods. For each event you subscribed, execution will wait for those to occur (or
  * timeout) synchronously before continuing. Each subscribe call creates a separate event stack for
  * that event type, in the events map. When subscribing, it decides the topic of the event based on
  * the event naming convention.
- *
+ * <p>
  * Then, it expects you to call 'run' method with runnables or callables which would possibly
  * execute asynchronous behaviour that may result in the subscribed events. If the passed lambda
  * returns a value then it is interpreted as a callable and runner expects that return value to be
  * correlationId to filter coming events against. If the passed lambda does not return a value it is
  * interpreted as a runnable and runner treats the first incoming subscribed event to be the
  * relevant one.
- *
+ * <p>
  * Finally, it expect you to call 'popEvent' with the wanted event type, to access event payloads
  * that has been pushed to several different stacks.
- *
+ * <p>
  * Same instance could be used with different jobs by calling 'reset' in between.
- *
+ * <p>
  * Example usage; EventListener runner = new EventListener() .subscribe("event")
  * .subscribe("differentEvent") .subscribe("totallyDifferentEvent") .run(() ->
  * runnableThatDoesSomethingAsync()) .run(() -> anotherRunnableThatDoesSomethingAsyncAlso())
- *
+ * <p>
  * JsonObject event = runner.popEvent("event"); JsonObject anotherInstanceOfTheSameEvent =
  * runner.popEvent("event"); JsonObject differentEvent = runner.popEvent("differentEvent");
  * JsonObject totallyDifferentEvent = runner.popEvent("totallyDifferentEvent");

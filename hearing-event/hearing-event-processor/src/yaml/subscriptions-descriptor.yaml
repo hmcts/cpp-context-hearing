@@ -322,6 +322,10 @@ subscriptions_descriptor:
         - name: hearing.event.defendants-welsh-information-recorded
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.defendants-welsh-information-recorded.json
 
+        # Offences Removed From Existing Hearing
+        - name: hearing.events.offences-removed-from-existing-hearing
+          schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.offences-removed-from-existing-hearing.json
+
       event_source_name: hearing
 
     - name: public event subscription
@@ -405,5 +409,14 @@ subscriptions_descriptor:
 
         - name: public.listing.court-list-restricted
           schema_uri: http://justice.gov.uk/listing/courts/court-list-restricted.json
+
+        - name: public.progression.offences-removed-from-existing-allocated-hearing
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.offences-removed-from-existing-allocated-hearing.json
+
+        - name: public.staginghmi.hearing-updated-from-hmi
+          schema_uri: http://justice.gov.uk/staginghmi/courts/public.staginghmi.hearing-updated-from-hmi.json
+
+        - name: public.staginghmi.hearing-deleted-from-hmi
+          schema_uri: http://justice.gov.uk/staginghmi/courts/public.staginghmi.hearing-deleted-from-hmi.json
 
       event_source_name: public.event.source

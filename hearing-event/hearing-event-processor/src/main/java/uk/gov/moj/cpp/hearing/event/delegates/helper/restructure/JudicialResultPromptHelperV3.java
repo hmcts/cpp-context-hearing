@@ -8,6 +8,7 @@ import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.joining;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelperV3.JUDICIAL_RESULT_PROMPT_PREDICATE;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
 import uk.gov.justice.core.courts.JudicialResult;
@@ -33,6 +34,7 @@ public class JudicialResultPromptHelperV3 {
                         .map(JudicialResult::getJudicialResultPrompts)
                         .map(Collection::stream)
                         .orElseGet(Stream::empty)
+                        .filter(JUDICIAL_RESULT_PROMPT_PREDICATE)
                         .map(p -> format("%s:%s", p.getLabel(), getPromptValue(p.getValue(),p.getType())))
                         .collect(joining(lineSeparator()));
 

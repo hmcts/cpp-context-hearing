@@ -14,6 +14,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.iterableWithSize;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
@@ -59,6 +60,7 @@ import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
@@ -1158,6 +1160,51 @@ public class HearingServiceTest {
 
         verify(hearingRepository).findCourtCenterByHearingId(Mockito.any(UUID.class));
         assertThat(optionalCourtCentre.isPresent(), is(false));
+    }
+
+    @Test
+    public void shouldGetFutureHearingsByCaseIds() {
+        final UUID caseId = randomUUID();
+        final List<UUID> caseIdList = new ArrayList<>();
+        caseIdList.add(caseId);
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final List<Hearing> hearingList = new ArrayList<>();
+        hearingList.add(hearingEntity);
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+        final UUID hearingSummaryId = randomUUID();
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
+
+        when(hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, new UtcClock().now().toLocalDate())).thenReturn(hearingList);
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summary(hearingPojo)).thenReturn(hearingSummariesBuilder);
+
+        final GetHearings response = hearingService.getFutureHearingsByCaseIds(caseIdList);
+
+        assertNotNull(response.getHearingSummaries());
+        assertThat(response.getHearingSummaries().size(), is(1));
+        assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+    }
+
+    @Test
+    public void shouldNotGetFutureHearingsByCaseIdsEmptyCaseIdList() {
+        final List<UUID> caseIdList = new ArrayList<>();
+
+        final GetHearings response = hearingService.getFutureHearingsByCaseIds(caseIdList);
+
+        assertNull(response.getHearingSummaries());
+    }
+
+    @Test
+    public void shouldNotGetFutureHearingsByCaseIdsNoDBRecord() {
+        final UUID caseId = randomUUID();
+        final List<UUID> caseIdList = new ArrayList<>();
+        caseIdList.add(caseId);
+
+        when(hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, LocalDate.now())).thenReturn(emptyList());
+
+        final GetHearings response = hearingService.getFutureHearingsByCaseIds(caseIdList);
+
+        assertNull(response.getHearingSummaries());
     }
 
     private void assertCurrentCourtStatus(final CurrentCourtStatus actual, final CurrentCourtStatus expected) {

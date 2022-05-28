@@ -32,6 +32,7 @@ import static uk.gov.moj.cpp.hearing.event.HearingEventProcessor.PUBLIC_HEARING_
 
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
@@ -50,7 +51,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
-import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
@@ -88,6 +88,7 @@ public class HearingEventProcessorTest {
     private static final String RESULTS_SHARED_EVENT = "hearing.results-shared";
     private static final String DRAFT_RESULT_SAVED_PRIVATE_EVENT = "hearing.draft-result-saved";
     private static final String SHARE_RESULTS_FAILED_PRIVATE_EVENT = "hearing.share-results-failed";
+    private static final String DELETE_HEARING_HMI_EVENT = "staginghmi.delete-hearing";
     private static final String FIELD_GENERIC_ID = "id";
     private static final String FIELD_GENERIC_TYPE = "type";
     private static final String FIELD_LEVEL = "level";
@@ -135,7 +136,8 @@ public class HearingEventProcessorTest {
     private static final String FIELD_DRAFT_RESULT = "draftResult";
     private static final String FIELD_AMENDED_BY_USER_ID = "amendedByUserId";
     private static final String FIELD_HEARING_STATE = "hearingState";
-
+    private static final String FIELD_VACATED_TRIAL_REASON_ID = "vacatedTrialReasonId";
+    private static final String FIELD_CANCELLATION_REASON_CODE = "cancellationReasonCode";
     private static final int DURATION = 15;
     private static final String START_DATE_TIME = PAST_ZONED_DATE_TIME.next().toString();
     private static final String HEARING_TYPE = "TRIAL";
@@ -178,6 +180,16 @@ public class HearingEventProcessorTest {
     private static final String FIELD_JUDGE_LAST_NAME = "lastName";
     private static final String FIELD_JUDGE_TITLE = "title";
     private static final UUID USER_ID = randomUUID();
+    private static final String OUCODE = "A46AF00";
+    private static final String CANCELLATION_REASON_CODE = "CNCL";
+    private static final UUID hearingId = randomUUID();
+    private static final UUID vacatedTrialReasonId = randomUUID();
+    private static final UUID courtCentreId = randomUUID();
+    private static final UUID organisationUnitId = randomUUID();
+    private static final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()
+            .withId(organisationUnitId.toString())
+            .withOucode(OUCODE)
+            .build();
 
     @Spy
     private final Enveloper enveloper = createEnveloper();
@@ -383,19 +395,32 @@ public class HearingEventProcessorTest {
 
     @Test
     public void shouldTriggerPublicHearingTrialVacatedEventForVacatedTrial() {
-        final UUID hearingId = randomUUID();
-        final UUID trialTypeId = randomUUID();
-        final HearingTrialVacated hearingTrialType = new HearingTrialVacated(hearingId, trialTypeId, "code", "cracked", "desc");
-        final JsonEnvelope eventIn = createJsonEnvelope(hearingTrialType);
-
-        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(eventIn);
+        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(buildJsonEnvelopeToVacateHearing());
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
-        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
-        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
-        final PublicHearingEventTrialVacated publicEventOut = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), PublicHearingEventTrialVacated.class);
-        assertThat(publicEventOut.getHearingId(), is(hearingTrialType.getHearingId()));
-        assertThat(publicEventOut.getVacatedTrialReasonId(), is(hearingTrialType.getVacatedTrialReasonId()));
+
+        List<JsonEnvelope> capturedMessages = this.envelopeArgumentCaptor.getAllValues();
+        final JsonEnvelope vacatedEvent = capturedMessages.get(0);
+        final JsonObject vacatedEventPayload = vacatedEvent.payloadAsJsonObject();
+
+        assertThat(vacatedEvent.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        assertThat(vacatedEventPayload.getString(FIELD_HEARING_ID), is(hearingId.toString()));
+        assertThat(vacatedEventPayload.getString(FIELD_VACATED_TRIAL_REASON_ID), is(vacatedTrialReasonId.toString()));
+    }
+
+    @Test
+    public void shouldTriggerPublicHearingTrialVacatedEventForVacatedTrialAndCourtCentreIdIsNotExist() {
+        this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(buildJsonEnvelopeToVacateHearingWithoutCourtCentreId());
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> capturedMessages = this.envelopeArgumentCaptor.getAllValues();
+        final JsonEnvelope vacatedEvent = capturedMessages.get(0);
+        final JsonObject vacatedEventPayload = vacatedEvent.payloadAsJsonObject();
+
+        assertThat(vacatedEvent.metadata().name(), is(HearingEventProcessor.PUBLIC_HEARING_TRIAL_VACATED));
+        assertThat(vacatedEventPayload.getString(FIELD_HEARING_ID), is(hearingId.toString()));
+        assertThat(vacatedEventPayload.getString(FIELD_VACATED_TRIAL_REASON_ID), is(vacatedTrialReasonId.toString()));
     }
 
     @Test
@@ -611,5 +636,26 @@ public class HearingEventProcessorTest {
 
     private String getStringFromResource(final String path) throws IOException {
         return Resources.toString(getResource(path), defaultCharset());
+    }
+
+    private JsonEnvelope buildJsonEnvelopeToVacateHearing() {
+        return envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("vacatedTrialReasonId", vacatedTrialReasonId.toString())
+                .add("code", "code")
+                .add("type", "cracked")
+                .add("description", "desc")
+                .add("courtCentreId", courtCentreId.toString())
+                .build());
+    }
+
+    private JsonEnvelope buildJsonEnvelopeToVacateHearingWithoutCourtCentreId() {
+        return envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("vacatedTrialReasonId", vacatedTrialReasonId.toString())
+                .add("code", "code")
+                .add("type", "cracked")
+                .add("description", "desc")
+                .build());
     }
 }

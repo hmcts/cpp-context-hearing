@@ -23,12 +23,15 @@ public class HearingMarkedAsDuplicate implements Serializable {
 
     private UUID hearingId;
 
+    private UUID courtCentreId;
+
     @JsonCreator
-    public HearingMarkedAsDuplicate(@JsonProperty("prosecutionCaseIds") final List<UUID> prosecutionCaseIds, @JsonProperty("defendantIds") final List<UUID> defendantIds, @JsonProperty("offenceIds") final List<UUID> offenceIds, @JsonProperty("hearingId") final UUID hearingId) {
+    public HearingMarkedAsDuplicate(@JsonProperty("prosecutionCaseIds") final List<UUID> prosecutionCaseIds, @JsonProperty("defendantIds") final List<UUID> defendantIds, @JsonProperty("offenceIds") final List<UUID> offenceIds, @JsonProperty("hearingId") final UUID hearingId, @JsonProperty("courtCentreId") final UUID courtCentreId) {
         this.prosecutionCaseIds = prosecutionCaseIds;
         this.defendantIds = defendantIds;
         this.offenceIds = offenceIds;
         this.hearingId = hearingId;
+        this.courtCentreId = courtCentreId;
     }
 
     public List<UUID> getProsecutionCaseIds() {
@@ -61,5 +64,13 @@ public class HearingMarkedAsDuplicate implements Serializable {
 
     public void setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
+    }
+
+    public UUID getCourtCentreId() {
+        return courtCentreId;
+    }
+
+    public void setCourtCentreId(final UUID courtCentreId) {
+        this.courtCentreId = courtCentreId;
     }
 }

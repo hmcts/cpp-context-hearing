@@ -602,3 +602,21 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
     responses:
       202:
         description: Request accepted
+
+/remove-offences-from-existing-hearing:
+  post:
+    description: |
+      Rmove Offence from Manage Hearing :
+      ...
+      (mapping):
+        requestType: application/vnd.hearing.remove-offences-from-existing-hearing+json
+        name: hearing.remove-offences-from-existing-hearing
+      ...
+    body:
+      application/vnd.hearing.remove-offences-from-existing-hearing+json:
+        schema: !include json/schema/hearing.remove-offences-from-existing-hearing.json
+        example: !include json/hearing.remove-offences-from-existing-hearing.json
+
+    responses:
+      202:
+        description: Request accepted

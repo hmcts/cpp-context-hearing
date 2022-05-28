@@ -8,6 +8,7 @@ import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsLast;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
 import uk.gov.justice.core.courts.ResultLine;
@@ -18,9 +19,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelper {
+
+    public static final Predicate<uk.gov.justice.core.courts.Prompt> PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptRef());
 
     private ResultTextHelper(){
         //required by sonar
@@ -50,10 +54,13 @@ public class ResultTextHelper {
 
         final String sortedPrompts = sortedPromptList
                 .stream()
+                .filter(PROMPT_PREDICATE)
                 .map(p -> format("%s %s", p.getLabel(), getPromptValue(p, referencePromptList)))
                 .collect(joining(lineSeparator()));
 
-        return getResultText(resultDefinition.getLabel(), sortedPrompts);
+        final String res = getResultText(resultDefinition.getLabel(), sortedPrompts);
+
+        return res;
     }
 
     public static String getResultText(final String label, final String sortedPrompts){

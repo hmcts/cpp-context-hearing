@@ -126,8 +126,9 @@ public class SetTrialTypeCommandHandlerTest {
     public void eventHearingSetVacateTrialTypeShouldBeCreated() throws EventStreamException {
         CommandHelpers.InitiateHearingCommandHelper hearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
         final UUID hearingId = hearingObject.getHearingId();
+        final UUID courtCentreId = hearingObject.getCourtCentre().getId();
 
-        HearingTrialVacated vacateTrialType = new HearingTrialVacated(hearingId, vacatedTrialReasonId, "A", "Vacated", "Vacated Trial");
+        HearingTrialVacated vacateTrialType = new HearingTrialVacated(hearingId, vacatedTrialReasonId, "A", "Vacated", "Vacated Trial", courtCentreId);
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearingObject.getHearing()));
         }};
@@ -146,6 +147,7 @@ public class SetTrialTypeCommandHandlerTest {
         assertThat(asPojo(events.get(0), HearingTrialVacated.class), isBean(HearingTrialVacated.class)
                 .with(HearingTrialVacated::getHearingId, Matchers.is(hearingId))
                 .with(HearingTrialVacated::getVacatedTrialReasonId, Matchers.is(vacatedTrialReasonId))
+                .with(HearingTrialVacated::getCourtCentreId, Matchers.is(courtCentreId))
         );
 
     }

@@ -8,6 +8,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.JsonObjects;
 
 import javax.inject.Inject;
 import javax.json.JsonObject;
@@ -33,6 +34,7 @@ public class DuplicateHearingEventProcessor {
     private static final String DEFENDANT_IDS_FIELD = "defendantIds";
     private static final String OFFENCE_IDS_FIELD = "offenceIds";
     private static final String HEARING_ID_FIELD = "hearingId";
+    private static final String COURT_CENTRE_ID_FIELD = "courtCentreId";
 
     @Inject
     private Sender sender;
@@ -49,7 +51,9 @@ public class DuplicateHearingEventProcessor {
 
         final JsonObject payload = event.payloadAsJsonObject();
 
-        sender.send(envelop(payload)
+        final JsonObject publicEventPayload = getPublicEventPayload(payload);
+
+        sender.send(envelop(publicEventPayload)
                 .withName(PUBLIC_HEARING_MARKED_AS_DUPLICATE_EVENT)
                 .withMetadataFrom(event));
     }
@@ -73,5 +77,9 @@ public class DuplicateHearingEventProcessor {
                     .withName(commandName)
                     .withMetadataFrom(event));
         }
+    }
+
+    private JsonObject getPublicEventPayload(final JsonObject payload) {
+        return JsonObjects.createObjectBuilderWithFilter(payload, s -> !s.equals(COURT_CENTRE_ID_FIELD)).build();
     }
 }

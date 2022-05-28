@@ -16,7 +16,9 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.Publishe
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RemoveNonPublishableLinesHelperV3.removeNonPublishableResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructureNextHearingHelperV3.restructureNextHearing;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RollUpPromptsHelperV3.filterNodesWithRollUpPrompts;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
 
+import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
@@ -24,10 +26,13 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
 public class RestructuringHelperV3 {
+
+    public static final Predicate<JudicialResultPrompt> JUDICIAL_RESULT_PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptReference());
 
     private final ResultTreeBuilderV3 resultTreeBuilder;
 
@@ -79,10 +84,12 @@ public class RestructuringHelperV3 {
             if (nonNull(treeNode.getJudicialResult()) && isNotEmpty(treeNode.getJudicialResult().getJudicialResultPrompts())) {
                 final String sortedPrompts = treeNode.getJudicialResult().getJudicialResultPrompts()
                         .stream()
+                        .filter(JUDICIAL_RESULT_PROMPT_PREDICATE)
                         .map(p -> format("%s %s", p.getLabel(), p.getValue()))
                         .collect(joining(lineSeparator()));
 
                 final String resultText = ResultTextHelper.getResultText(treeNode.getJudicialResult().getLabel(), sortedPrompts);
+
                 treeNode.getJudicialResult().setResultText(resultText);
             }
         });

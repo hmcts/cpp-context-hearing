@@ -15,9 +15,11 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
+import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
@@ -108,6 +110,7 @@ public class HearingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingService.class);
     private static final DateTimeFormatter FORMATTER = ofPattern("ddMMyyyy");
     private static final ZoneId ZONE_ID = ZoneId.of(ZoneOffset.UTC.getId());
+    private static final UtcClock UTC_CLOCK = new UtcClock();
     @Inject
     private HearingRepository hearingRepository;
     @Inject
@@ -768,4 +771,24 @@ public class HearingService {
         return o1.getHearingDays().stream().filter(d -> d.getDate().isEqual(date)).map(HearingDay::getListingSequence).findFirst().orElse(0);
     }
 
+    public GetHearings getFutureHearingsByCaseIds(final List<UUID> caseIdList) {
+        if (caseIdList.isEmpty()) {
+            return new GetHearings(null);
+        }
+
+        final List<Hearing> filteredHearings = hearingRepository.findHearingsByCaseIdsLaterThan(caseIdList, UTC_CLOCK.now().toLocalDate());
+
+        if (CollectionUtils.isEmpty(filteredHearings)) {
+            return new GetHearings(null);
+        }
+
+        final List<HearingSummaries> hearingSummaries = filteredHearings.stream()
+                .map(ha -> hearingJPAMapper.fromJPA(ha))
+                .map(h -> getHearingTransformer.summary(h).build())
+                .collect(toList());
+
+        return GetHearings.getHearings()
+                .withHearingSummaries(hearingSummaries)
+                .build();
+    }
 }

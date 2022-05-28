@@ -58,7 +58,7 @@ public class InterpreterIntermediaryEventListener {
 
         final Hearing hearingEntity = hearingRepository.findBy(hearingId);
 
-        if(nonNull(hearingEntity)) {
+        if (nonNull(hearingEntity)) {
             final HearingInterpreterIntermediary hearingInterpreterIntermediary = interpreterIntermediaryJPAMapper.toJPA(hearingEntity, interpreterIntermediaryAdded.getInterpreterIntermediary());
             hearingInterpreterIntermediary.setId(new HearingSnapshotKey(interpreterIntermediaryAdded.getInterpreterIntermediary().getId(), hearingEntity.getId()));
             hearingInterpreterIntermediaryRepository.saveAndFlush(hearingInterpreterIntermediary);
@@ -77,7 +77,7 @@ public class InterpreterIntermediaryEventListener {
             LOGGER.debug("hearing.interpreter-intermediary-removed for hearingId {} ", interpreterIntermediaryRemoved.getHearingId());
         }
 
-        if(nonNull(hearing)) {
+        if (nonNull(hearing)) {
 
             final Optional<HearingInterpreterIntermediary> hearingInterpreterIntermediary =
                     hearing.getHearingInterpreterIntermediaries().stream().filter(pc -> pc.getId().getId().equals(interpreterIntermediaryRemoved.getId()))
@@ -103,7 +103,7 @@ public class InterpreterIntermediaryEventListener {
             LOGGER.debug("hearing.interpreter-intermediary-updated for hearingId {} ", interpreterIntermediaryUpdated.getHearingId());
         }
 
-        if(nonNull(hearing)) {
+        if (nonNull(hearing)) {
             final HearingInterpreterIntermediary hearingInterpreterIntermediary = interpreterIntermediaryJPAMapper.toJPA(hearing, interpreterIntermediaryUpdated.getInterpreterIntermediary());
             hearingInterpreterIntermediary.setId(new HearingSnapshotKey(interpreterIntermediaryUpdated.getInterpreterIntermediary().getId(), hearing.getId()));
             hearingInterpreterIntermediaryRepository.saveAndFlush(hearingInterpreterIntermediary);

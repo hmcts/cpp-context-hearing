@@ -10,11 +10,11 @@ import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
@@ -39,6 +39,7 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -69,6 +70,7 @@ import uk.gov.moj.cpp.hearing.repository.CourtListPublishStatusResult;
 import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import uk.gov.moj.cpp.hearing.test.FileUtil;
+import uk.gov.moj.cpp.hearing.test.SampleData;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -91,6 +93,7 @@ import javax.persistence.NoResultException;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.hamcrest.MatcherAssert;
 import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
@@ -120,6 +123,7 @@ public class HearingQueryViewTest {
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_BAIL_STATUS_CODE = "bailStatusCode";
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
+    private static final String FIELD_CASE_IDS = "caseIds";
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -750,6 +754,32 @@ public class HearingQueryViewTest {
         assertThat(response.metadata().name(), is("hearing.custody-time-limit"));
         assertThat(response.payloadAsJsonObject().getString(FIELD_CUSTODY_TIME_LIMIT), is(expiryDate.toString()));
 
+    }
+
+    @Test
+    public void shouldGetFutureHearingsByCaseIds() {
+        final String caseId1 = "ebdaeb99-8952-4c07-99c4-d27c39d3e63a";
+        final String caseId2 = "c0a03dfd-f6f2-4590-a026-17f1cf5268e1";
+        final String caseIdString = caseId1 + "," + caseId2;
+        final List<UUID> caseIdList = new ArrayList();
+        caseIdList.add(fromString(caseId1));
+        caseIdList.add(fromString(caseId2));
+        final GetHearings getHearings = SampleData.getHearings();
+
+        when(hearingService.getFutureHearingsByCaseIds(caseIdList)).thenReturn(getHearings);
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.get.hearings"),
+                createObjectBuilder()
+                        .add(FIELD_CASE_IDS, caseIdString)
+                        .build());
+
+
+        final Envelope<GetHearings> results = target.getFutureHearingsByCaseIds(query);
+
+        verify(hearingService).getFutureHearingsByCaseIds(caseIdList);
+        MatcherAssert.assertThat(results.metadata().name(), is("hearing.get.hearings"));
+        MatcherAssert.assertThat(results.payload().getHearingSummaries().size(), is(2));
     }
 
     private List<Prompt> prepareResultPromptsData(final UUID promptId) {

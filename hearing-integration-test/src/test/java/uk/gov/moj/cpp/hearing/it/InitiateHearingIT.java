@@ -19,6 +19,7 @@ import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -37,6 +38,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.second;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.third;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationalUnit;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
@@ -106,6 +108,7 @@ import org.junit.Test;
 public class InitiateHearingIT extends AbstractIT {
 
     private static final String COURT_ROOM_NAME = "Room 1";
+    private final String OUCODE = "A46AF00";
 
     @Test
     public void initiateHearing_withOnlyMandatoryFields() {
@@ -312,7 +315,7 @@ public class InitiateHearingIT extends AbstractIT {
     @Test
     public void initiateHearing_shouldInitiateHearing_whenDefendantTypeIsPerson() {
 
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing hearing = hearingOne.getHearing();
 
@@ -904,8 +907,8 @@ public class InitiateHearingIT extends AbstractIT {
         UUID courtAndRoomId = fromString(CoreTestTemplates.COURT_CENTRE_ID);
 
         final LocalDate fifthJuly = LocalDate.of(2019, 7, 5);
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));
-        UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly.minusDays(1)));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly)));
+        initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(courtAndRoomId, COURT_ROOM_NAME, fifthJuly.minusDays(1)));
 
         Hearing hearing = hearingOne.getHearing();
         hearing.setProsecutionCases(null);
@@ -1150,7 +1153,6 @@ public class InitiateHearingIT extends AbstractIT {
     public void shouldRemoveHearingFromViewStoreAndRaisePublicEventWhenMarkedAsDuplicate() {
         stubUsersAndGroupsUserRoles(getLoggedInAdminUser());
 
-
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
         final Hearing hearing = hearingOne.getHearing();
         final UUID hearingId = hearing.getId();
@@ -1160,7 +1162,9 @@ public class InitiateHearingIT extends AbstractIT {
         final UUID defendantId = defendant.getId();
         final Offence offence = defendant.getOffences().get(0);
         final UUID offenceId = offence.getId();
+        final UUID courCentreId = hearing.getCourtCentre().getId();
 
+        stubOrganisationalUnit(courCentreId, OUCODE);
 
         Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
@@ -1172,7 +1176,8 @@ public class InitiateHearingIT extends AbstractIT {
                 .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))))
                 .withFilter(isJson(withJsonPath("$.prosecutionCaseIds[0]", Is.is(prosecutionCaseId.toString()))))
                 .withFilter(isJson(withJsonPath("$.defendantIds[0]", Is.is(defendantId.toString()))))
-                .withFilter(isJson(withJsonPath("$.offenceIds[0]", Is.is(offenceId.toString()))))) {
+                .withFilter(isJson(withJsonPath("$.offenceIds[0]", Is.is(offenceId.toString()))))
+                .withFilter(isJson(withoutJsonPath("$.courtCentreId")))) {
             markHearingAsADuplicate(hearingId);
             publicEventResulted.waitFor();
         }
@@ -1199,7 +1204,7 @@ public class InitiateHearingIT extends AbstractIT {
                 .until(
                         status().is(OK),
                         payload().isJson(allOf(
-                                withoutJsonPath("$.hearing.id")//,
+                                withoutJsonPath("$.hearing.id")
                         ))
                 );
     }

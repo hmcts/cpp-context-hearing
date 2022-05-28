@@ -107,14 +107,13 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
 
     /**
      * <code>hearingDay</code> is introduced with DD-3426.
-     * For the results saved before DD-3426 feature, <code>hearingDay</code> field will be empty.
-     * To enable backward compatibility, null values also included in the filter
+     * For the results saved before DD-3426 feature, <code>hearingDay</code> field will be empty. To
+     * enable backward compatibility, null values also included in the filter
      *
-     * @param hearingId The id of the hearing
+     * @param hearingId  The id of the hearing
      * @param hearingDay The hearing day that the results are entered for
-     *
-     * @return A list of targets against the given hearing id and hearing day.
-     * If no result is found, returns empty list.
+     * @return A list of targets against the given hearing id and hearing day. If no result is
+     * found, returns empty list.
      */
     @Query(value = "SELECT target FROM Target target " +
             "WHERE target.hearing.id = :hearingId " +
@@ -129,4 +128,13 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     @Query(value = "SELECT prosecutionCase FROM ProsecutionCase prosecutionCase " +
             "WHERE prosecutionCase.hearing.id = :hearingId")
     public abstract List<ProsecutionCase> findProsecutionCasesByHearingId(@QueryParam("hearingId") final UUID hearingId);
+
+    @Query(value = "SELECT distinct hearing " +
+            "FROM Hearing hearing INNER JOIN hearing.hearingDays day INNER JOIN hearing.prosecutionCases prosecutionCase " +
+            "WHERE (hearing.isBoxHearing IS null OR hearing.isBoxHearing != true) " +
+            "AND (hearing.isVacatedTrial IS null OR hearing.isVacatedTrial != true) " +
+            "AND day.date > :date " +
+            "AND prosecutionCase.id.id IN (:caseIds)")
+    public abstract List<Hearing> findHearingsByCaseIdsLaterThan(@QueryParam("caseIds") final List<UUID> caseIds,
+                                                                 @QueryParam("date") final LocalDate date);
 }

@@ -28,6 +28,8 @@ public class JudicialResultPromptHelperTest {
     private static final String PROMPT_VALUE_1 = "Prompt Value 1";
     private static final String PROMPT_LABEL_2 = "Prompt Label 2";
     private static final String PROMPT_VALUE_2 = "Prompt Value 2";
+    private static final String PROMPT_LABEL_3 = "Prompt Label 3";
+    private static final String PROMPT_VALUE_3 = "Prompt Value 3";
     private static final String PROMPT_VALUE_TRUE = "true";
     private static final String PROMPT_VALUE_FALSE = "false";
     private static final String RESULT_DEFINITION_LABEL = "Result Definition Label";
@@ -55,11 +57,44 @@ public class JudicialResultPromptHelperTest {
         assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
     }
 
+    @Test
+    public void shouldNotMakePromptForHmiSlots() {
+        final TreeNode<ResultLine> resultLineTreeNode = createResultLineTreeNode();
+
+        final JudicialResultPrompt judicialResultPrompt1 = createJudicialResultPrompt(PROMPT_LABEL_1, PROMPT_VALUE_1, "TEXT");
+
+        final JudicialResultPrompt judicialResultPrompt2 = createJudicialResultPrompt(PROMPT_LABEL_2, PROMPT_VALUE_2, "TEXT");
+
+        final JudicialResultPrompt judicialResultPrompt3 = createJudicialResultPromptwithHmiSlotReference(PROMPT_LABEL_3, PROMPT_VALUE_3, "TEXT", "hmiSlots");
+
+        createJudicialResult(resultLineTreeNode,of(judicialResultPrompt1, judicialResultPrompt2, judicialResultPrompt3), null);
+
+        final BigDecimal newPromptSequenceNumber = new BigDecimal(1000);
+        final JudicialResultPrompt judicialResultPrompt = makePrompt(resultLineTreeNode, newPromptSequenceNumber);
+        assertThat(judicialResultPrompt.getPromptSequence(), is(newPromptSequenceNumber));
+        assertThat(judicialResultPrompt.getLabel(), is(RESULT_DEFINITION_LABEL));
+        assertThat(judicialResultPrompt.getQualifier(), is(RESULT_DEFINITION_QUALIFIER));
+        assertThat(judicialResultPrompt.getValue(), is(PROMPT_LABEL_1+":"+PROMPT_VALUE_1 + System.lineSeparator() + PROMPT_LABEL_2+":"+PROMPT_VALUE_2));
+        assertThat(judicialResultPrompt.getCourtExtract(), is("N"));
+        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), notNullValue());
+        assertThat(judicialResultPrompt.getJudicialResultPromptTypeId(), is(resultLineTreeNode.getResultDefinition().getData().getId()));
+        assertThat(judicialResultPrompt.getPromptReference(), is(resultLineTreeNode.getJudicialResult().getJudicialResultId().toString()));
+    }
+
     private JudicialResultPrompt createJudicialResultPrompt(final String s, final String s2, final String type) {
         return judicialResultPrompt()
                 .withLabel(s)
                 .withValue(s2)
                 .withType(type)
+                .build();
+    }
+
+    private JudicialResultPrompt createJudicialResultPromptwithHmiSlotReference(final String s, final String s2, final String type, String reference) {
+        return judicialResultPrompt()
+                .withLabel(s)
+                .withValue(s2)
+                .withType(type)
+                .withPromptReference(reference)
                 .build();
     }
 

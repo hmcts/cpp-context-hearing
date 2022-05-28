@@ -1285,9 +1285,10 @@ public class HearingEventListenerTest {
 
         final UUID hearingId = randomUUID();
         final UUID vacateTrialTypeId = randomUUID();
+        final UUID courtCentreId = randomUUID();
         final Hearing hearingEntity = new Hearing()
                 .setId(hearingId);
-        final HearingTrialVacated hearingTrialVacated = new HearingTrialVacated(hearingId, vacateTrialTypeId, "A", "Vacated", "full description");
+        final HearingTrialVacated hearingTrialVacated = new HearingTrialVacated(hearingId, vacateTrialTypeId, "A", "Vacated", "full description", courtCentreId);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
 
         hearingEventListener.setHearingVacateTrialType(envelopeFrom(metadataWithRandomUUID("hearing.trial-vacated"),

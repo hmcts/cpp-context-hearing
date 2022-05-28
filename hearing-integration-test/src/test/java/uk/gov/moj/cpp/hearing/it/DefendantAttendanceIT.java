@@ -1,20 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Test;
-import uk.gov.justice.core.courts.AttendanceDay;
-import uk.gov.justice.core.courts.AttendanceType;
-import uk.gov.justice.core.courts.CustodialEstablishment;
-import uk.gov.justice.core.courts.DefendantAttendance;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
-import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
-import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import java.time.LocalDate;
-import java.util.UUID;
-
 import static org.hamcrest.Matchers.is;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -25,6 +10,23 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
+
+import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
+import uk.gov.justice.core.courts.CustodialEstablishment;
+import uk.gov.justice.core.courts.DefendantAttendance;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.time.LocalDate;
+import java.util.UUID;
+
+import javax.annotation.concurrent.NotThreadSafe;
+
+import org.junit.Test;
 
 @NotThreadSafe
 public class DefendantAttendanceIT extends AbstractIT {

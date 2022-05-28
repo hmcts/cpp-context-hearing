@@ -614,3 +614,26 @@ protocols: [ HTTP, HTTPS ]
                      application/vnd.hearing.custody-time-limit+json:
                         example: !include json/hearing.custody-time-limit.json
                         schema: !include json/schema/hearing.custody-time-limit.json
+
+/future-hearings-by-cases:
+    get:
+      description: |
+        Get all future hearings in the hearing context for the given case IDs
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.future-hearings+json
+            name: hearing.get.future-hearings
+        ...
+      queryParameters:
+        caseIds:
+          description: comma separated case ids.
+          type: string
+          required: true
+
+      responses:
+              200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.future-hearings+json:
+                     example: !include json/hearing.get.hearings.json
+                     schema: !include json/schema/hearing.get.hearings.json

@@ -47457,6 +47457,26 @@
       "terminatesOffenceProceedings": false,
       "prompts": [
         {
+          "id": "664059b1-1cb1-424c-9275-63e3145229e7",
+          "label": "Hmi Slots",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 100,
+          "hidden": false,
+          "userGroups": [
+            "Court Clerks",
+            "Legal Advisers",
+            "Probation Admin",
+            "Police Admin",
+            "Victim & Witness Care Admin",
+            "Youth Offending Service Admin"
+          ],
+          "courtExtract": "N",
+          "financial": "N",
+          "jurisdiction": "B",
+          "reference": "hmiSlots"
+        },
+        {
           "id": "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
           "label": "Date of hearing",
           "resultPromptRule": "mandatory",

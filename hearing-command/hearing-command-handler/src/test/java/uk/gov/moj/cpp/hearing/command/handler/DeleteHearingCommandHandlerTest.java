@@ -7,6 +7,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.AllOf.allOf;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
@@ -18,6 +19,12 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeStreamMatcher.streamContaining;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import org.junit.Assert;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
@@ -224,6 +231,45 @@ public class DeleteHearingCommandHandlerTest {
                         )
                 )
         ));
+    }
+
+    @Test
+    public void shouldNotDeleteHearingWhenHearingDoesNotExist() throws EventStreamException {
+        final UUID hearingId = randomUUID();
+
+        final JsonEnvelope envelope = createHearingDeletedCommandEnvelopeForHearing(hearingId);
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        handler.handleDeleteHearing(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).size(), is(0));
+    }
+
+    @Test
+    public void shouldNotRaiseDeleteEventForSecondTime() throws EventStreamException {
+        final UUID hearingId = randomUUID();
+        final UUID caseId1 = randomUUID();
+        final UUID caseId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final JsonEnvelope envelope = createHearingDeletedCommandEnvelopeForHearing(hearingId);
+        when(this.eventSource.getStreamById(hearingId)).thenReturn(this.hearingEventStream);
+        final HearingAggregate hearingAggregate = setInitialHearingDataIntoAggregate(hearingId, caseId1, caseId2, defendantId1, defendantId2, offenceId1, offenceId2);
+        when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        handler.handleDeleteHearing(envelope);
+
+        handler.handleDeleteHearing(envelope);
+
+        ArgumentCaptor<Stream> argumentCaptor = ArgumentCaptor.forClass(Stream.class);
+        ((EventStream) Mockito.verify(hearingEventStream, times(2))).append((Stream)argumentCaptor.capture());
+        final List eventss = ((List) argumentCaptor.getAllValues().stream().flatMap(i -> i).collect(Collectors.toList()));
+        Assert.assertThat(eventss.size(), is (1));
     }
 
     private JsonEnvelope createHearingDeletedCommandEnvelopeForHearing(final UUID hearingId) {

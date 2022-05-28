@@ -211,6 +211,9 @@ public class HearingDelegate implements Serializable {
                                  final List<HearingDay> hearingDays, final CourtCentre courtCentre, final JurisdictionType jurisdictionType,
                                  final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases,
                                  final List<UUID> shadowListedOffences) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(generateHearingIgnoredMessage("Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet",hearingId));
+        }
 
         return Stream.of(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences));
     }
@@ -281,7 +284,7 @@ public class HearingDelegate implements Serializable {
         }
         return Stream.of(new ApplicationDetailChanged(hearingId, courtApplication));
     }
-    
+
     /**
      * Adds defendants, as long as they don't already exist on the case.
      *
@@ -338,8 +341,9 @@ public class HearingDelegate implements Serializable {
         final List<UUID> prosecutionCaseIds = momento.getHearing().getProsecutionCases().stream().map(ProsecutionCase::getId).collect(Collectors.toList());
         final List<UUID> defendantIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().map(Defendant::getId)).collect(Collectors.toList());
         final List<UUID> offenceIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().flatMap(d -> d.getOffences().stream().map(Offence::getId))).collect(Collectors.toList());
+        final UUID courtCentreId = momento.getHearing().getCourtCentre().getId();
 
-        return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId));
+        return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId, courtCentreId));
     }
 
     public void handleHearingMarkedAsDuplicate() {
@@ -367,7 +371,9 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> deleteHearing(final UUID hearingId) {
-
+        if (isNull(momento.getHearing())) {
+            return Stream.empty();
+        }
         final List<UUID> prosecutionCaseIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getProsecutionCaseIds(momento.getHearing()) : null;
         final List<UUID> defendantIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getDefendantIds(momento.getHearing()) : null;
         final List<UUID> offenceIds = isNotEmpty(momento.getHearing().getProsecutionCases()) ? getOffenceIds(momento.getHearing()) : null;

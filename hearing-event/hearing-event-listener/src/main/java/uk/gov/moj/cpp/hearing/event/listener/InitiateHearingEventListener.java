@@ -123,10 +123,10 @@ public class InitiateHearingEventListener {
         if (nonNull(hearingExtended.getCourtApplication())) {
             final String courtApplicationsJson = hearingJPAMapper.addOrUpdateCourtApplication(hearingEntity.getCourtApplicationsJson(), hearingExtended.getCourtApplication());
             hearingEntity.setCourtApplicationsJson(courtApplicationsJson);
-            if(nonNull(hearingExtended.getCourtCentre())) {
+            if (nonNull(hearingExtended.getCourtCentre())) {
                 hearingEntity.setCourtCentre(courtCentreJPAMapper.toJPA(hearingExtended.getCourtCentre()));
             }
-            if(nonNull(hearingExtended.getHearingDays()) && isNotEmpty(hearingExtended.getHearingDays())){
+            if (nonNull(hearingExtended.getHearingDays()) && isNotEmpty(hearingExtended.getHearingDays())) {
                 final Set<HearingDay> existingHearingDays = hearingEntity.getHearingDays();
                 existingHearingDays.clear();
                 existingHearingDays.addAll(hearingDayJPAMapper.toJPA(hearingEntity, hearingExtended.getHearingDays()));

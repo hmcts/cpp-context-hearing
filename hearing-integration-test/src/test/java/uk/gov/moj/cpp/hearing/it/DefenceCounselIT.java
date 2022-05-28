@@ -1,24 +1,5 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import com.jayway.restassured.path.json.JsonPath;
-import org.junit.Test;
-import uk.gov.justice.core.courts.DefenceCounsel;
-import uk.gov.justice.hearing.courts.AddDefenceCounsel;
-import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
-import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
-import uk.gov.justice.services.common.http.HeaderConstants;
-import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
-import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withoutJsonPath;
@@ -49,6 +30,27 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateDefenceCounselComm
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
+
+import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.hearing.courts.AddDefenceCounsel;
+import uk.gov.justice.hearing.courts.RemoveDefenceCounsel;
+import uk.gov.justice.hearing.courts.UpdateDefenceCounsel;
+import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import javax.annotation.concurrent.NotThreadSafe;
+
+import com.jayway.restassured.path.json.JsonPath;
+import org.junit.Test;
 
 @SuppressWarnings("unchecked")
 @NotThreadSafe

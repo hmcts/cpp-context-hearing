@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.test;
 import static java.util.stream.Collectors.toList;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -194,15 +195,21 @@ public class CommandHelpers {
         public uk.gov.justice.core.courts.Offence getFirstOffenceForFirstFirstCaseForFirstApplication() {
             return this.initiateHearingCommand.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0);
         }
+
         public uk.gov.justice.core.courts.Offence getFirstOffenceForFirstFirstCourtOrderForFirstApplication() {
             return this.initiateHearingCommand.getHearing().getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().get(0).getOffence();
         }
+
         public uk.gov.justice.core.courts.ReportingRestriction getFirstReportingRestrictionForFirstOffenceForFirstDefendantForFirstCase() {
             return this.initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getReportingRestrictions().get(0);
         }
 
-        public CourtApplication getCourtApplication(){
+        public CourtApplication getCourtApplication() {
             return this.getHearing().getCourtApplications().get(0);
+        }
+
+        public CourtCentre getCourtCentre() {
+            return this.getHearing().getCourtCentre();
         }
     }
 

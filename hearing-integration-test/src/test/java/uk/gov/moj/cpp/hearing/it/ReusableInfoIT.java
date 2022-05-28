@@ -24,7 +24,6 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

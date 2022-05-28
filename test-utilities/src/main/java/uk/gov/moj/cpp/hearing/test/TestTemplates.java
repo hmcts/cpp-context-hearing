@@ -5,12 +5,14 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.unmodifiableList;
 import static java.util.Optional.ofNullable;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.HearingLanguage.WELSH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
 import static uk.gov.justice.core.courts.PleaModel.pleaModel;
+import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_LOCAL_DATE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.FUTURE_ZONED_DATE_TIME;
@@ -46,9 +48,11 @@ import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.DefendantAlias;
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
+import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.Jurisdiction;
 import uk.gov.justice.core.courts.Jurors;
@@ -58,8 +62,11 @@ import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.LinkType;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceActiveOrder;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutingAuthority;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ReportingRestriction;
@@ -134,6 +141,7 @@ public class TestTemplates {
     private static final String HEARING_DAY = "2021-03-01";
     private static final String WELSH_LABEL_SPACE = "welshLabel ";
     private static final String IMPRISONMENT = "imprisonment";
+    private static final String HMISLOTS = "hmiSlots";
     private static final String DRAFT_RESULTS_CONTENT = "{}";
     public static final String FIXEDLISTCODE_0 = "fixedlistcode0";
     public static final String IMPRISONMENT_TERM = "imprisonment term";
@@ -521,6 +529,87 @@ public class TestTemplates {
                             .build());
         }
 
+        public static InitiateHearingCommand initiateHearingWith2Defendants(final UUID defendantId1,
+                                                                             final UUID offenceId1,
+                                                                             final UUID offenceId2,
+                                                                             final UUID defendantId2,
+                                                                             final UUID offenceId3) {
+            final UUID prosecutionCaseId = randomUUID();
+
+            final List<ProsecutionCase> prosecutionCases = Collections.singletonList(
+                    ProsecutionCase.prosecutionCase()
+                            .withId(prosecutionCaseId)
+                            .withDefendants(Arrays.asList(
+                                    uk.gov.justice.core.courts.Defendant.defendant()
+                                            .withId(defendantId1)
+                                            .withMasterDefendantId(randomUUID())
+                                            .withProsecutionCaseId(prosecutionCaseId)
+                                            .withCourtProceedingsInitiated(ZonedDateTime.now())
+                                            .withPersonDefendant(PersonDefendant.personDefendant()
+                                                    .withPersonDetails(Person.person()
+                                                            .withGender(Gender.FEMALE)
+                                                            .withLastName(STRING.next())
+                                                            .build())
+                                                    .build())
+                                            .withOffences(Arrays.asList(Offence.offence()
+                                                            .withId(offenceId1)
+                                                            .withOffenceDefinitionId(randomUUID())
+                                                            .withOffenceCode("OFC")
+                                                            .withOffenceTitle("OFC TITLE")
+                                                            .withWording("WORDING")
+                                                            .withStartDate(LocalDate.now())
+                                                            .withOffenceLegislation("OffenceLegislation")
+                                                            .build(),
+                                                    Offence.offence()
+                                                            .withId(offenceId2)
+                                                            .withOffenceDefinitionId(randomUUID())
+                                                            .withOffenceCode("OFC")
+                                                            .withOffenceTitle("OFC TITLE")
+                                                            .withWording("WORDING")
+                                                            .withStartDate(LocalDate.now())
+                                                            .withOffenceLegislation("OffenceLegislation")
+                                                            .build()))
+                                            .build(),
+                                    uk.gov.justice.core.courts.Defendant.defendant()
+                                            .withId(defendantId2)
+                                            .withMasterDefendantId(randomUUID())
+                                            .withProsecutionCaseId(prosecutionCaseId)
+                                            .withCourtProceedingsInitiated(ZonedDateTime.now())
+                                            .withPersonDefendant(PersonDefendant.personDefendant()
+                                                    .withPersonDetails(Person.person()
+                                                            .withGender(Gender.MALE)
+                                                            .withLastName(STRING.next())
+                                                            .build())
+                                                    .build())
+                                            .withOffences(singletonList(Offence.offence()
+                                                    .withId(offenceId3)
+                                                    .withOffenceDefinitionId(randomUUID())
+                                                    .withOffenceCode("OFC")
+                                                    .withOffenceTitle("OFC TITLE")
+                                                    .withWording("WORDING")
+                                                    .withStartDate(LocalDate.now())
+                                                    .withOffenceLegislation("OffenceLegislation")
+                                                    .build()))
+                                            .build()
+                            ))
+                            .withInitiationCode(InitiationCode.C)
+                            .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
+                                            .withProsecutionAuthorityId(randomUUID())
+                                            .withProsecutionAuthorityCode(STRING.next())
+                                            .withCaseURN("caseUrn")
+                                            .build())
+                            .build());
+
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(MAGISTRATES)
+                    )
+                            .withProsecutionCases(prosecutionCases)
+                            .build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingTemplateWithJurisdictionMagistrate() {
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()
@@ -768,6 +857,10 @@ public class TestTemplates {
             return saveDraftResultCommandTemplate(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE, hearingDay);
         }
 
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithHmiSlots(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final LocalDate hearingDay) {
+            return saveDraftResultCommandTemplateWithHmiSlots(initiateHearingCommand, orderedDate, UUID.randomUUID(), Boolean.FALSE, hearingDay);
+        }
+
         public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplication(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
             return saveDraftResultCommandTemplateWithApplication(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE);
         }
@@ -859,6 +952,62 @@ public class TestTemplates {
                                             .withWelshLabel(WELSH_LABEL_SPACE + IMPRISONMENT_TERM)
                                             .withWelshValue(WELSH_VALUE)
                                             .withPromptRef(IMPRISONMENT)
+                                            .build()
+                            )
+                    );
+
+        }
+
+        public static ResultLine.Builder standardResultLineTemplateWithHmiSlots(final UUID resultLineId, final LocalDate orderedDate) {
+            return ResultLine.resultLine()
+                    .withResultLineId(resultLineId)
+                    .withDelegatedPowers(
+                            DelegatedPowers.delegatedPowers()
+                                    .withUserId(UUID.randomUUID())
+                                    .withLastName(BOWIE)
+                                    .withFirstName(DAVID)
+                                    .build()
+                    )
+                    .withIsComplete(false)
+                    .withIsModified(true)
+                    .withIsDeleted(false)
+                    .withLevel(Level.OFFENCE)
+                    .withOrderedDate(orderedDate)
+                    .withResultLineId(UUID.randomUUID())
+                    .withResultLabel(IMPRISONMENT)
+                    .withSharedDate(now())
+                    .withResultDefinitionId(fromString("70c98fa6-804d-11e8-adc0-fa7ae01bbebc"))
+                    .withPrompts(
+                            asList(
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withId(fromString("664059b1-1cb1-424c-9275-63e3145229e7"))
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue("{\"hmiSlots\" : [ {\"startTime\":\"2020-08-25T10:00:00.000Z\"}]}")
+                                            .withPromptRef(HMISLOTS)
+                                            .build(),
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withId(fromString("c1116d12-dd35-4171-807a-2cb845357d22"))
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue("Trial")
+                                            .withPromptRef("HTYPE")
+                                            .build(),
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withId(fromString("66868c04-72c4-46d9-a4fc-860a82107475"))
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue("Wycombe Magistrates' Court")
+                                            .withPromptRef("HCHOUSE")
+                                            .build(),
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withId(fromString("d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac"))
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue("20 MINUTES")
+                                            .withPromptRef("HEST")
+                                            .build(),
+                                    uk.gov.justice.core.courts.Prompt.prompt()
+                                            .withId(fromString("d27a5d86-d51f-4c6e-914b-cb4b0abc4283"))
+                                            .withLabel(IMPRISONMENT_TERM)
+                                            .withValue("2022-05-05")
+                                            .withPromptRef("HDATE")
                                             .build()
                             )
                     );
@@ -1001,6 +1150,26 @@ public class TestTemplates {
                     .withTargetId(UUID.randomUUID())
                     //.withTargetId(offence0.getId())
                     .withResultLines(Collections.singletonList(standardResultLineTemplate(resultLineId, resultDefinitionId, orderedDate).build()))
+                    .withShadowListed(shadowListed)
+                    .withHearingDay(hearingDay)
+                    .build();
+            return new SaveDraftResultCommand(target, null);
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithHmiSlots(
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
+                final UUID resultLineId, final Boolean shadowListed, final LocalDate hearingDay) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final uk.gov.justice.core.courts.Defendant defendant0 = hearing.getProsecutionCases().get(0).getDefendants().get(0);
+            final Offence offence0 = defendant0.getOffences().get(0);
+            final Target target = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withDefendantId(defendant0.getId())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withOffenceId(offence0.getId())
+                    .withTargetId(UUID.randomUUID())
+                    //.withTargetId(offence0.getId())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplateWithHmiSlots(resultLineId, orderedDate).build()))
                     .withShadowListed(shadowListed)
                     .withHearingDay(hearingDay)
                     .build();

@@ -94,7 +94,7 @@ public class ProsecutionCounselEventListener {
         final ProsecutionCounselUpdated prosecutionCounselUpdated = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), ProsecutionCounselUpdated.class);
         final Hearing hearing = hearingRepository.findBy(prosecutionCounselUpdated.getHearingId());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.prosecution-counsel-updated for hearingId {} ", prosecutionCounselUpdated.getHearingId()  );
+            LOGGER.debug("hearing.prosecution-counsel-updated for hearingId {} ", prosecutionCounselUpdated.getHearingId());
         }
         if (hearing == null) {
             LOGGER.error(HEARING_NOT_FOUND);

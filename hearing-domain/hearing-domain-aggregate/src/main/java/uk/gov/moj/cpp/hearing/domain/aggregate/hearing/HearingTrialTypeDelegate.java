@@ -8,6 +8,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 
 import java.io.Serializable;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public class HearingTrialTypeDelegate implements Serializable {
@@ -62,8 +63,8 @@ public class HearingTrialTypeDelegate implements Serializable {
         return Stream.of(hearingEffectiveTrial);
     }
 
-    public Stream<Object> setTrialType(final HearingTrialVacated hearingTrialVacated) {
-        return Stream.of(hearingTrialVacated);
+    public Stream<Object> setTrialType(final UUID hearingId, final UUID vacatedTrialReasonId, final String code, final String description, final String type) {
+        final UUID courtCentreId = momento.getHearing().getCourtCentre().getId();
+        return Stream.of(new HearingTrialVacated(hearingId, vacatedTrialReasonId, code, description, type, courtCentreId));
     }
-
 }

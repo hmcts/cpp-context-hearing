@@ -42,12 +42,16 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.existingHearingId;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hCHOUSEOrganisationName;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hmiSlots;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.isPresent;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.reservedJudiciary;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.timeOfHearing;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.valueOf;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.weekCommencing;
 
+
+import java.util.ArrayList;
+import javax.json.JsonObject;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingType;
@@ -55,8 +59,11 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.ResultLine2;
+import uk.gov.justice.core.courts.RotaSlot;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.NextHearingCreateException;
@@ -99,6 +106,10 @@ public class NextHearingHelperV3 {
     private CourtRoomOuCodeReverseLookup courtRoomOuCodeReverseLookup;
     @Inject
     private ReferenceDataService referenceDataService;
+    @Inject
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+    @Inject
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     public Optional<NextHearing> getNextHearing(final JsonEnvelope context,
                                                 final ResultDefinition resultDefinition,
@@ -165,6 +176,7 @@ public class NextHearingHelperV3 {
         populateWeekCommencingDate(builder, promptsMap);
         populateBookingReference(builder, promptsMap);
         populateDateToBeFixed(builder, promptsMap);
+        populateHmiSlots(builder, promptsMap);
 
         return builder.build();
     }
@@ -206,6 +218,17 @@ public class NextHearingHelperV3 {
         final String promptValue = getPromptValue(promptsMap, bookingReference);
         LOGGER.info("Populating booking reference: {}", promptValue);
         builder.withBookingReference(nonNull(promptValue) ? UUID.fromString(promptValue) : null);
+    }
+
+    private void populateHmiSlots(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, hmiSlots);
+        LOGGER.info("Populating booking reference: {}", promptValue);
+        if(nonNull(promptValue)) {
+            final JsonObject jsonObject = stringToJsonObjectConverter.convert(promptValue);
+            final List<RotaSlot> hmiSlots = new ArrayList<>();
+            jsonObject.getJsonArray("hmiSlots").forEach(jsonValue -> hmiSlots.add(jsonObjectToObjectConverter.convert(((JsonObject) jsonValue), RotaSlot.class)));
+            builder.withHmiSlots(hmiSlots);
+        }
     }
 
     private void populateExistingHearingId(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {

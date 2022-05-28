@@ -40,13 +40,13 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_MULTIPLE_DRAFT_RESULTS_SAVED = "public.hearing.multiple-draft-results-saved";
     public static final String PUBLIC_HEARING_SAVE_DRAFT_RESULT_FAILED = "public.hearing.save-draft-result-failed";
     public static final String PUBLIC_HEARING_SHARE_RESULTS_FAILED = "public.hearing.share-results-failed";
-
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
     public static final String COMMAND_LISTING_HEARING_RESCHEDULED = "hearing.command.clear-vacated-trial";
 
     public static final String PUBLIC_HEARING_EVENT_AMENDED = "public.hearing.event-amended";
     public static final String PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2 = "public.hearing.draft-result-deleted-v2";
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
 

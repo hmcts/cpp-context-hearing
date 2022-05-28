@@ -256,7 +256,8 @@ public class OffenceHelperTest {
                 .build();
 
         when(referenceDataLoader.getOrganisationUnitById(UUID.fromString("f8254db1-1683-483e-afb3-b87fde5a0a26"))).thenReturn(organisationalUnit);
-        when(referenceDataLoader.getOrganisationUnitById(null)).thenThrow(NullPointerException.class);;
+        when(referenceDataLoader.getOrganisationUnitById(null)).thenThrow(NullPointerException.class);
+        ;
         when(referenceDataLoader.getLjaDetails(any())).thenReturn(ljaDetailsOfCourtCentre);
 
         final ResultsShared resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_SHARED_WITH_CONVICTION_DATE_HEARING_DAY_WITHOUT_COURT_CENTRE_ID, ResultsShared.class);

@@ -18,18 +18,21 @@ public class HearingTrialVacated implements Serializable {
     private String code;
     private String description;
     private String type;
+    private UUID courtCentreId;
 
     @JsonCreator
     public HearingTrialVacated(@JsonProperty("hearingId") final UUID hearingId,
                                @JsonProperty("vacatedTrialReasonId") final UUID vacatedTrialReasonId,
                                @JsonProperty("code") final String code,
                                @JsonProperty("type") final String type,
-                               @JsonProperty("description") final String description) {
+                               @JsonProperty("description") final String description,
+                               @JsonProperty("courtCentreId") final UUID courtCentreId) {
         this.hearingId = hearingId;
         this.vacatedTrialReasonId = vacatedTrialReasonId;
         this.code = code;
         this.description = description;
         this.type = type;
+        this.courtCentreId = courtCentreId;
     }
 
     public UUID getHearingId() {
@@ -52,6 +55,10 @@ public class HearingTrialVacated implements Serializable {
         return type;
     }
 
+    public UUID getCourtCentreId() {
+        return courtCentreId;
+    }
+
     public void setHearingId(final UUID hearingId) {
         this.hearingId = hearingId;
     }
@@ -70,5 +77,9 @@ public class HearingTrialVacated implements Serializable {
 
     public void setType(final String type) {
         this.type = type;
+    }
+
+    public void setCourtCentreId(final UUID courtCentreId) {
+        this.courtCentreId = courtCentreId;
     }
 }

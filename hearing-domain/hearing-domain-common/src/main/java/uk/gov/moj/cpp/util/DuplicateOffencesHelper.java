@@ -1,5 +1,7 @@
 package uk.gov.moj.cpp.util;
 
+import static java.util.Objects.isNull;
+
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
@@ -9,8 +11,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static java.util.Objects.isNull;
 
 public class DuplicateOffencesHelper {
 
@@ -29,7 +29,7 @@ public class DuplicateOffencesHelper {
         if (isNull(prosecutionCase)) {
             return;
         }
-        if(prosecutionCase.getDefendants() != null) {
+        if (prosecutionCase.getDefendants() != null) {
             prosecutionCase.getDefendants().forEach(c -> filterDuplicateOffencesByIdForDefendant(c));
         }
     }
@@ -45,7 +45,7 @@ public class DuplicateOffencesHelper {
         if (isNull(hearing)) {
             return;
         }
-        if(hearing.getProsecutionCases() != null) {
+        if (hearing.getProsecutionCases() != null) {
             hearing.getProsecutionCases().forEach(c -> filterDuplicateOffencesByIdForCase(c));
         }
     }
