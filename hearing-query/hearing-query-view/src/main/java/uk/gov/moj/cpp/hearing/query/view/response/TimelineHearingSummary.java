@@ -14,6 +14,7 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@SuppressWarnings("squid:S2384")
 public class TimelineHearingSummary {
 
     private static final DateTimeFormatter DATE_FORMATTER = ofPattern("dd MMM yyyy");
@@ -28,8 +29,9 @@ public class TimelineHearingSummary {
     private final ZonedDateTime startTime;
     private final Integer estimatedDuration;
     private final String outcome;
-    private final List<String> defendants;
+    private final List<Defendant> defendants;
     private final List<String> applicants;
+    private final List<Application> applications;
     private List<String> youthDefendantIds;
     private final YouthCourt youthCourt;
     private final Boolean isBoxHearing;
@@ -44,6 +46,7 @@ public class TimelineHearingSummary {
         this.startTime = builder.startTime;
         this.estimatedDuration = builder.estimatedDuration;
         this.defendants = builder.defendants;
+        this.applications = builder.applications;
         this.applicants = builder.applicants;
         this.outcome = builder.outcome;
         this.youthDefendantIds = builder.youthDefendantIds;
@@ -101,17 +104,26 @@ public class TimelineHearingSummary {
         return estimatedDuration;
     }
 
-    public List<String> getDefendants() {
+    public List<Defendant> getDefendants() {
         return defendants;
     }
 
-    public List<String> getApplicants() { return applicants; }
+
+    public List<Application> getApplications() {
+        return applications;
+    }
+
+    public List<String> getApplicants() {
+        return applicants;
+    }
 
     public String getOutcome() {
         return outcome;
     }
 
-    public Boolean getIsBoxHearing(){ return isBoxHearing;}
+    public Boolean getIsBoxHearing() {
+        return isBoxHearing;
+    }
 
     public static class TimelineHearingSummaryBuilder {
         private UUID hearingId;
@@ -122,11 +134,12 @@ public class TimelineHearingSummary {
         private ZonedDateTime hearingTime;
         private ZonedDateTime startTime;
         private Integer estimatedDuration;
-        private List<String> defendants;
-        private List<String> applicants;
+        private List<Defendant> defendants;
+        private List<Application> applications;
         private String outcome;
         private List<String> youthDefendantIds;
         private YouthCourt youthCourt;
+        private List<String> applicants;
 
         public List<String> getYouthDefendantIds() {
             return new ArrayList<>(youthDefendantIds);
@@ -182,12 +195,18 @@ public class TimelineHearingSummary {
             return this;
         }
 
-        public TimelineHearingSummaryBuilder withDefendants(final List<String> defendants) {
+        public TimelineHearingSummaryBuilder withDefendants(final List<Defendant> defendants) {
             this.defendants = defendants;
             return this;
         }
+
         public TimelineHearingSummaryBuilder withApplicants(final List<String> applicants) {
             this.applicants = applicants;
+            return this;
+        }
+
+        public TimelineHearingSummaryBuilder withApplications(final List<Application> applications) {
+            this.applications = applications;
             return this;
         }
 
@@ -200,12 +219,13 @@ public class TimelineHearingSummary {
             this.youthDefendantIds = new ArrayList<>(youthDefendantIds);
             return this;
         }
+
         public TimelineHearingSummaryBuilder withOutcome(final String outcome) {
             this.outcome = outcome;
             return this;
         }
 
-        public TimelineHearingSummaryBuilder withIsBoxHearing(final Boolean isBoxHearing){
+        public TimelineHearingSummaryBuilder withIsBoxHearing(final Boolean isBoxHearing) {
             this.isBoxHearing = isBoxHearing;
             return this;
         }

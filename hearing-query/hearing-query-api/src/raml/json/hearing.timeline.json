@@ -10,11 +10,13 @@
       "startTime": "start time",
       "estimatedDuration": "estimated duration",
       "defendants": [
-        "defendant one",
-        "defendant two"
+        {
+          "id": "46fac3f0-7149-491b-838d-21dba91eb4c7",
+          "name": "defendant name"
+        }
       ],
       "outcome": "Cracked or ineffective",
-      "isBoxHearing" : false
+      "isBoxHearing": false
     },
     {
       "hearingId": "5f25702a-b02f-4513-a5da-3333d1ac8ce5",
@@ -30,7 +32,7 @@
         "defendant two"
       ],
       "outcome": "Cracked or ineffective",
-      "isBoxHearing" : false
+      "isBoxHearing": false
     }
   ]
 }

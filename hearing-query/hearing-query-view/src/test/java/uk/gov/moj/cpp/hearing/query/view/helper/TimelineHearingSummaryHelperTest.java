@@ -53,6 +53,7 @@ import java.util.UUID;
 
 import javax.json.JsonObject;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -75,6 +76,7 @@ public class TimelineHearingSummaryHelperTest {
     private String courtRoomName;
     private UUID courtCentreId;
     private UUID courtRoomId;
+    private UUID defendantId;
     @InjectMocks
     private TimelineHearingSummaryHelper timelineHearingSummaryHelper;
     private Person person;
@@ -88,6 +90,7 @@ public class TimelineHearingSummaryHelperTest {
 
     @Before
     public void setup() throws IOException {
+        defendantId = randomUUID();
         courtCentreId = UUID.randomUUID();
         courtRoomId = UUID.randomUUID();
         courtCentreName = STRING.next();
@@ -115,7 +118,7 @@ public class TimelineHearingSummaryHelperTest {
         personDefendant1.setPersonDetails(person);
         final Defendant defendant1 = new Defendant();
         final HearingSnapshotKey hearingSnapshotKey1 = new HearingSnapshotKey();
-        hearingSnapshotKey1.setId(randomUUID());
+        hearingSnapshotKey1.setId(defendantId);
         defendant1.setId(hearingSnapshotKey1);
         defendant1.setPersonDefendant(personDefendant1);
         final Defendant defendant2 = new Defendant();
@@ -142,6 +145,11 @@ public class TimelineHearingSummaryHelperTest {
 
     @Test
     public void shouldCreateTimelineHearingSummary() {
+        UUID applicantMasterDefendantId = randomUUID();
+        UUID resMasterDefendantId = randomUUID();
+        UUID subjectMasterDefendantId = randomUUID();
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId, applicantMasterDefendantId, resMasterDefendantId, subjectMasterDefendantId)));
+
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getHearingId(), is(hearing.getId()));
         assertThat(timeLineHearingSummary.getHearingDate(), is(hearingDay.getDate()));
@@ -153,10 +161,18 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
-        assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
-        assertThat(timeLineHearingSummary.getDefendants().get(1), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getName(), is(format("%s %s", person.getFirstName(), person.getLastName())));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(defendantId));
+
+        assertThat(timeLineHearingSummary.getDefendants().get(1).getName(), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
+
+        assertThat(timeLineHearingSummary.getApplications().get(0).getApplicants().get(0).getMasterDefendantId(), is(applicantMasterDefendantId));
+        assertThat(timeLineHearingSummary.getApplications().get(0).getRespondents().size(), is(1));
+        assertThat(timeLineHearingSummary.getApplications().get(0).getRespondents().get(0).getMasterDefendantId(), is(resMasterDefendantId));
+        assertThat(timeLineHearingSummary.getApplications().get(0).getSubjects().size(), is(1));
+        assertThat(timeLineHearingSummary.getApplications().get(0).getSubjects().get(0).getMasterDefendantId(), is(subjectMasterDefendantId));
     }
 
     @Test
@@ -173,8 +189,9 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
-        assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
-        assertThat(timeLineHearingSummary.getDefendants().get(1), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getName(), is(format("%s %s", person.getFirstName(), person.getLastName())));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(timeLineHearingSummary.getDefendants().get(1).getName(), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
         assertThat(timeLineHearingSummary.getIsBoxHearing(), is(true));
     }
@@ -193,8 +210,9 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getCourtRoom(), is(courtRoomName));
         assertThat(timeLineHearingSummary.getEstimatedDuration(), is(hearingDay.getListedDurationMinutes()));
         assertThat(timeLineHearingSummary.getDefendants().size(), is(2));
-        assertThat(timeLineHearingSummary.getDefendants().get(0), is(format("%s %s", person.getFirstName(), person.getLastName())));
-        assertThat(timeLineHearingSummary.getDefendants().get(1), is(organisation.getName()));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getName(), is(format("%s %s", person.getFirstName(), person.getLastName())));
+        assertThat(timeLineHearingSummary.getDefendants().get(0).getId(), is(defendantId));
+        assertThat(timeLineHearingSummary.getDefendants().get(1).getName(), is(organisation.getName()));
         assertThat(timeLineHearingSummary.getOutcome(), is(crackedIneffectiveTrial.getType()));
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
@@ -202,7 +220,10 @@ public class TimelineHearingSummaryHelperTest {
     @Test
     public void shouldCreateTimelineHearingSummaryFilteredByApplicationId() {
 
-        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId)));
+        UUID applicantMasterDefendantId = randomUUID();
+        UUID resMasterDefendantId = randomUUID();
+        UUID subjectMasterDefendantId = randomUUID();
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(getCourtApplication(applicationId, applicantMasterDefendantId, resMasterDefendantId, subjectMasterDefendantId)));
 
         final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper
                 .createTimeLineHearingSummary(hearingDay, hearing, crackedIneffectiveTrial, allCourtRooms, hearingYouthCourtDefendantList, applicationId);
@@ -257,12 +278,20 @@ public class TimelineHearingSummaryHelperTest {
         assertThat(timeLineHearingSummary.getIsBoxHearing(), nullValue());
     }
 
-    private CourtApplication getCourtApplication(UUID applicationId) {
+    private CourtApplication getCourtApplication(UUID applicationId, UUID masterDefendantId, UUID respondentMasterDefendantId, UUID subjectMasterDefendantId) {
         return CourtApplication.courtApplication()
                 .withId(applicationId)
                 .withApplicant(CourtApplicationParty.courtApplicationParty()
                         .withPersonDetails(person().withFirstName(person.getFirstName()).withLastName(person.getLastName()).build())
-                        .build()).build();
+                        .withMasterDefendant(MasterDefendant.masterDefendant().withMasterDefendantId(masterDefendantId).build())
+                        .build())
+                .withRespondents(ImmutableList.of(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant().withMasterDefendantId(respondentMasterDefendantId).build())
+                        .build()))
+                .withSubject(CourtApplicationParty.courtApplicationParty()
+                        .withMasterDefendant(MasterDefendant.masterDefendant().withMasterDefendantId(subjectMasterDefendantId).build())
+                        .build())
+                .build();
     }
 
     private CourtApplication getCourtApplicationApplicantAsOrganisation(UUID applicationId) {
@@ -310,7 +339,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateEffectiveOutcomeInTimelineHearingSummary() {
         hearing.setIsEffectiveTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null, null, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getOutcome(), is("Effective"));
     }
 
@@ -318,7 +347,7 @@ public class TimelineHearingSummaryHelperTest {
     public void shouldIndicateVacatedOutcomeInTimelineHearingSummary() {
         hearing.setIsVacatedTrial(true);
 
-        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null,null, hearingYouthCourtDefendantList);
+        final TimelineHearingSummary timeLineHearingSummary = timelineHearingSummaryHelper.createTimeLineHearingSummary(hearingDay, hearing, null, null, hearingYouthCourtDefendantList);
         assertThat(timeLineHearingSummary.getOutcome(), is("Vacated"));
     }
 
@@ -334,17 +363,17 @@ public class TimelineHearingSummaryHelperTest {
                                                 .add("courtroomName", "Dummy Court Room 1")))
                                 .build())
                         .add(createObjectBuilder()
-                            .add("id", courtCentreId.toString())
-                            .add("oucodeL3Name", courtCentreName)
-                            .add("courtrooms", createArrayBuilder()
-                                    .add(createObjectBuilder()
-                                            .add("id", courtRoomId.toString())
-                                            .add("courtroomName", "Dummy Court Room 2")))
-                            .add("courtrooms", createArrayBuilder()
-                                    .add(createObjectBuilder()
-                                            .add("id", courtRoomId.toString())
-                                            .add("courtroomName", courtRoomName)))
-                            .build())
+                                .add("id", courtCentreId.toString())
+                                .add("oucodeL3Name", courtCentreName)
+                                .add("courtrooms", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", courtRoomId.toString())
+                                                .add("courtroomName", "Dummy Court Room 2")))
+                                .add("courtrooms", createArrayBuilder()
+                                        .add(createObjectBuilder()
+                                                .add("id", courtRoomId.toString())
+                                                .add("courtroomName", courtRoomName)))
+                                .build())
                         .build()
                 )
                 .build();

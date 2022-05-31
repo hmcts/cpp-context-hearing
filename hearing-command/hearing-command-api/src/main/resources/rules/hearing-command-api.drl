@@ -19,8 +19,8 @@ end
 rule "Command - API - Action - hearing.add-prosecution-counsel"
   when
     $outcome: Outcome();
-    $action: Action(name == "hearing.add-prosecution-counsel");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "CPS", "Advocates", "Non CPS Prosecutors"));
+    $action: Action(name == "hearing.add-prosecution-counsel")
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Advocates", "Non CPS Prosecutors", "Defence Lawyers"));
   then
     $outcome.setSuccess(true);
 end
@@ -110,7 +110,7 @@ rule "Command - API - Action - hearing.add-defence-counsel"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.add-defence-counsel");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers","Defence Users","Advocates","Court Associate"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers","Defence Users","Advocates","Court Associate", "Defence Lawyers"));
   then
     $outcome.setSuccess(true);
 end

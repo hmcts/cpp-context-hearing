@@ -122,7 +122,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddProsecutionCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_PROSECUTION_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "CPS", "Advocates", "Non CPS Prosecutors"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action,  "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Advocates", "Non CPS Prosecutors", "Defence Lawyers"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -151,7 +151,7 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     @Test
     public void shouldAllowAuthorisedUserToAddDefenceCounsel() {
         final Action action = createActionFor(ACTION_NAME_ADD_DEFENCE_COUNSEL);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers","Defence Users","Advocates", "Court Associate"))
+        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers","Defence Users","Advocates", "Court Associate", "Defence Lawyers"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);

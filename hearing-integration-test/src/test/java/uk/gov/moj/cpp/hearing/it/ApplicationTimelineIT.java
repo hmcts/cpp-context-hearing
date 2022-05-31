@@ -36,20 +36,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Person;
-import uk.gov.moj.cpp.hearing.command.TrialType;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.Before;
-import org.junit.Test;
-
 public class ApplicationTimelineIT extends AbstractIT {
 
     private Hearing hearingOne;
@@ -108,6 +94,7 @@ public class ApplicationTimelineIT extends AbstractIT {
                                 withJsonPath("$.hearingSummaries[0].youthDefendantIds", is(empty()))
                         )));
 
+
     }
 
     @Test
@@ -147,7 +134,9 @@ public class ApplicationTimelineIT extends AbstractIT {
         hearingSummaryMap.put("courtRoom", hearing.getCourtCentre().getRoomName());
         hearingSummaryMap.put("listedDurationMinutes", hearingDay.getListedDurationMinutes().toString());
         hearingSummaryMap.put("applicant", organisation.getName());
-
+        hearingSummaryMap.put("applicantId", hearing.getCourtApplications().get(0).getApplicant().getId().toString());
+        hearingSummaryMap.put("respondentId", hearing.getCourtApplications().get(0).getRespondents().get(0).getId().toString());
+        hearingSummaryMap.put("subjectId", hearing.getCourtApplications().get(0).getSubject().getId().toString());
         return hearingSummaryMap;
     }
 

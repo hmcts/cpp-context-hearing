@@ -42,7 +42,7 @@
         "defendants": {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/definitions/person"
           }
         },
         "applicants": {
@@ -51,11 +51,57 @@
             "type": "string"
           }
         },
+        "applications": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/application"
+          }
+        },
         "outcome": {
           "type": "string"
         },
         "isBoxHearing": {
           "type": "boolean"
+        }
+      }
+    },
+    "person" : {
+      "type": "object",
+      "properties": {
+        "id": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "name": {
+          "type": "string"
+        },
+        "masterDefendantId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        }
+      }
+    },
+    "application" : {
+      "type": "object",
+      "properties": {
+        "applicationId": {
+          "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+        },
+        "applicants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/person"
+          }
+        },
+        "respondents": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/person"
+          }
+        },
+        "subjects": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/person"
+          }
         }
       }
     }

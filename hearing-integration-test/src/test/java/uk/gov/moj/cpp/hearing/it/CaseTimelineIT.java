@@ -99,7 +99,7 @@ public class CaseTimelineIT extends AbstractIT {
     }
 
     private void setUpHearing(final ZonedDateTime sittingDay, final Boolean isBoxHearing) {
-        final InitiateHearingCommand initiateHearingCommand = isBoxHearing == null ? standardInitiateHearingTemplate() :   standardInitiateHearingTemplateWithIsBoxHearing(isBoxHearing);
+        final InitiateHearingCommand initiateHearingCommand = isBoxHearing == null ? standardInitiateHearingTemplate() : standardInitiateHearingTemplateWithIsBoxHearing(isBoxHearing);
         hearing = initiateHearingCommand.getHearing();
         hearingDay = hearing.getHearingDays().get(0);
         hearingDay.setSittingDay(sittingDay);
@@ -134,8 +134,12 @@ public class CaseTimelineIT extends AbstractIT {
                 withJsonPath("$.hearingSummaries[0].courtRoom", is(courtRoom)),
                 withJsonPath("$.hearingSummaries[0].hearingTime", is(hearingTime)),
                 withJsonPath("$.hearingSummaries[0].estimatedDuration", is(listedDurationMinutes)),
-                withJsonPath("$.hearingSummaries[0].defendants[0]", is(defendant)),
+                withJsonPath("$.hearingSummaries[0].defendants[0].name", is(defendant)),
                 withJsonPath("$.hearingSummaries[0].outcome", is("InEffective")),
+                withJsonPath("$.hearingSummaries[0].applications[0].applicationId", is(hearing.getCourtApplications().get(0).getId().toString())),
+                withJsonPath("$.hearingSummaries[0].applications[0].applicants[0].id", is(hearing.getCourtApplications().get(0).getApplicant().getId().toString())),
+                withJsonPath("$.hearingSummaries[0].applications[0].respondents[0].id", is(hearing.getCourtApplications().get(0).getRespondents().get(0).getId().toString())),
+                withJsonPath("$.hearingSummaries[0].applications[0].subjects[0].id", is(hearing.getCourtApplications().get(0).getSubject().getId().toString())),
                 isBoxHearing ? withJsonPath("$.hearingSummaries[0].isBoxHearing", is(true)) : hasNoJsonPath("$.hearingSummaries[0].isBoxHearing")
         );
 
