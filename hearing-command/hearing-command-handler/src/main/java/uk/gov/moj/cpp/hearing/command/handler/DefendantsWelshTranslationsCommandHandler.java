@@ -22,9 +22,6 @@ public class DefendantsWelshTranslationsCommandHandler extends AbstractCommandHa
 
     @Handles("hearing.command.save-defendants-welsh-translations")
     public void saveDefendantsForWelshTranslations(final JsonEnvelope envelope) throws EventStreamException {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.command.save-defendants-welsh-translations event received {}", envelope.payloadAsJsonString());
-        }
         final DefendantsWithWelshTranslationsCommand defendantsWithWelshTranslationsCommand = convertToObject(envelope, DefendantsWithWelshTranslationsCommand.class);
 
         final UUID hearingId = defendantsWithWelshTranslationsCommand.getHearingId();
