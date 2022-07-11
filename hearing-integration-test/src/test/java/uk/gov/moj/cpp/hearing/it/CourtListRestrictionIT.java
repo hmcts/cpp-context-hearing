@@ -44,7 +44,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
     public void shouldRequestToPublishCourtListWithCaseRestriction() throws Exception {
         final CourtListRestrictionSteps courtListRestrictionSteps = new CourtListRestrictionSteps();
 
-        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEvent(caseId, randomUUID(), courtRoom2Id, defenceCounselId,
+        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEvent(caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
 
         courtListRestrictionSteps.hideCaseFromXhibit(initiateHearingCommandHelper.getHearing(), true);
@@ -100,7 +100,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
     public void shouldRequestToPublishCourtListWithDefendantRestrictionOnOff() throws Exception {
         final CourtListRestrictionSteps courtListRestrictionSteps = new CourtListRestrictionSteps();
 
-        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEvent(caseId, randomUUID(), courtRoom2Id, defenceCounselId,
+        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEvent(caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
 
         courtListRestrictionSteps.hideDefendantFromXhibit(initiateHearingCommandHelper.getHearing(), true);
@@ -164,7 +164,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
     public void shouldRequestToPublishCourtListForApplicationRestrictionOnOff() throws NoSuchAlgorithmException {
         final CourtListRestrictionSteps courtListRestrictionSteps = new CourtListRestrictionSteps();
 
-        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEventForApplication(caseId, randomUUID(), courtRoom2Id, defenceCounselId,
+        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEventForApplication(caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
 
         courtListRestrictionSteps.hideApplicationFromXhibit(initiateHearingCommandHelper.getHearing(), true);
@@ -222,7 +222,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
     public void shouldRequestToPublishCourtListForApplicationApplicantRestrictionOnOff() throws NoSuchAlgorithmException {
         final CourtListRestrictionSteps courtListRestrictionSteps = new CourtListRestrictionSteps();
 
-        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEventForApplication(caseId, randomUUID(), courtRoom2Id, defenceCounselId,
+        CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper = courtListRestrictionSteps.createHearingEventForApplication(caseId, randomUUID(), courtRoom2Id, randomUUID().toString(),
                 OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId, eventTime.toLocalDate());
 
         courtListRestrictionSteps.hideApplicationApplicantFromXhibit(initiateHearingCommandHelper.getHearing(), true);

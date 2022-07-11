@@ -35,7 +35,6 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
     protected static String courtRoom3Id;
     protected static String courtRoom4Id;
     protected static String courtRoom5Id;
-    protected static String defenceCounselId;
     protected static UUID caseId;
     protected static UUID hearingTypeId;
     protected static LocalDate localDate;
@@ -62,7 +61,6 @@ public class AbstractPublishLatestCourtCentreHearingIT extends AbstractIT {
         courtRoom3Id = "b8e8d8e7-1964-4613-b5e7-940feaa7957a";
         courtRoom4Id = "5ea96bd6-0712-4415-ac24-0194a4fa8251";
         courtRoom5Id = "9a0124b3-8a61-472f-8b55-e532ceabb402";
-        defenceCounselId = "9dc824b3-8a61-472f-8b55-e532ceabb403";
         caseId = fromString("9c9824b3-8a61-472f-8b55-e532ceabb403");
 
         stubGetReferenceDataCourtRoomMappings(courtRoom1Id, courtRoom2Id, courtRoom3Id, courtRoom4Id, courtRoom5Id);

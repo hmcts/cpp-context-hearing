@@ -58,19 +58,19 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
     public void setup() throws NoSuchAlgorithmException {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
         eventTime = now().withZoneSameLocal(ZoneId.of("UTC"));
-        hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), fromString(defenceCounselId), caseId, of(hearingTypeId))));
+        hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), randomUUID(), caseId, of(hearingTypeId))));
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);
     }
 
     @Test
     public void shouldProduceWebPageOnlyWithLatestEventOfTheDayForTheCourtRoom() throws NoSuchAlgorithmException {
-        createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
+        createHearingEvent(hearing, randomUUID().toString(), START_HEARING, eventTime.plusHours(1).plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
-                false, fromString(defenceCounselId), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()), null);
+                false, randomUUID(), eventTime.plusHours(2).plusMinutes(rand()).plusSeconds(rand()), null);
 
-        createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
+        createHearingEvent(hearing, randomUUID().toString(), START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
         logEvent(getRequestSpec(), asDefault(), hearing.it(), getHearingEventDefinition(END_HEARING).getId(),
-                false, fromString(defenceCounselId), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()), null);
+                false, randomUUID(), eventTime.plusHours(3).plusMinutes(rand()).plusSeconds(rand()), null);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, eventTime.toLocalDate());
 
@@ -88,7 +88,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
 
     @Test
     public void shouldRequestToPublishHearingList() throws NoSuchAlgorithmException {
-        createHearingEvent(hearing, defenceCounselId, START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
+        createHearingEvent(hearing, randomUUID().toString(), START_HEARING, eventTime.plusMinutes(rand()).plusSeconds(rand()));
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, eventTime.toLocalDate());
 

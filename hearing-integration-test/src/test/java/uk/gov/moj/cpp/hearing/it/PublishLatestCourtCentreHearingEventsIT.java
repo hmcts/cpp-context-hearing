@@ -76,7 +76,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     @Test
     public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
 
-        createHearingEvent(randomUUID(), courtRoom2Id, defenceCounselId, OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
+        createHearingEvent(randomUUID(), courtRoom2Id, randomUUID().toString(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
 
@@ -114,7 +114,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     @Test
     public void shouldRequestToPublishCourtListDefenceCouncilOpensCase() throws NoSuchAlgorithmException {
         UUID hearingEventId = randomUUID();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom3Id, defenceCounselId, DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_1);
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom3Id, randomUUID().toString(), DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_1);
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_1, "21");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -129,7 +129,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRequestToPublishCourtList() throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_2);
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, randomUUID().toString(), START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_2);
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_2, "28");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -141,7 +141,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRecordFailureIfSchemaValidationFails() throws NoSuchAlgorithmException {
-        createHearingEvent(randomUUID(), courtRoom5Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_3);
+        createHearingEvent(randomUUID(), courtRoom5Id, randomUUID().toString(), START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_3);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_3, "28");
 
@@ -155,7 +155,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     @Test
     public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
         UUID hearingEventId = randomUUID();
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom4Id, defenceCounselId, APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_4);
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom4Id, randomUUID().toString(), APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_4);
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_4, "20");
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
@@ -170,13 +170,13 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
-        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, defenceCounselId, START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
+        final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, randomUUID().toString(), START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
         final UUID expectedHearingEventId = randomUUID();
         final UUID hearingEventId = randomUUID();
-        logEvent(expectedHearingEventId, requestSpec, asDefault(), hearing.it(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, false, fromString(defenceCounselId), eventTime.plusMinutes(10), null);
+        logEvent(expectedHearingEventId, requestSpec, asDefault(), hearing.it(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, false, randomUUID(), eventTime.plusMinutes(10), null);
         pollHearingEventLog(hearing.getHearingId(), 2, eventTime.plusMinutes(10));
         ZonedDateTime updatedEventTime = eventTime.plusMinutes(15);
-        logEvent(hearingEventId, requestSpec, asDefault(), hearing.it(), RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER, false, fromString(defenceCounselId), updatedEventTime, null);
+        logEvent(hearingEventId, requestSpec, asDefault(), hearing.it(), RESUME_ID_WHICH_IS_NOT_TO_BE_INCLUDED_IN_FILTER, false, randomUUID(), updatedEventTime, null);
         pollHearingEventLog(hearing.getHearingId(), 3, updatedEventTime);
 
         final PublishCourtListSteps publishCourtListSteps = new PublishCourtListSteps();
