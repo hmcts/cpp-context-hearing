@@ -23,6 +23,8 @@ import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingVacatedTrialDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.event.HearingEventIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVacatedTrialDetailUpdated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
@@ -46,7 +48,8 @@ public class HearingVacatedTrialDetailUpdateCommandHandlerTest {
 
     @Spy
     private final Enveloper enveloper = createEnveloperWithEvents(
-            HearingVacatedTrialDetailUpdated.class
+            HearingVacatedTrialDetailUpdated.class,
+            HearingEventIgnored.class
     );
 
     @Mock
@@ -57,6 +60,9 @@ public class HearingVacatedTrialDetailUpdateCommandHandlerTest {
 
     @Mock
     private AggregateService aggregateService;
+
+    @Mock
+    private HearingAggregateMomento hearingAggregateMomento;
 
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
@@ -86,6 +92,8 @@ public class HearingVacatedTrialDetailUpdateCommandHandlerTest {
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingVacatedTrialDetailUpdated(hearingId, true, vacatedTrialReasonId ));
         }};
+        when(hearingAggregateMomento.getHearing()).thenReturn(hearing.getHearing());
+        setField(hearingAggregate, "momento", hearingAggregateMomento);
 
         when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingEventStream);
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);

@@ -41,6 +41,8 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.DefendantAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
@@ -61,6 +63,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeleteHearingCommandHandlerTest {
@@ -71,7 +75,8 @@ public class DeleteHearingCommandHandlerTest {
             HearingDeletedForProsecutionCase.class,
             HearingDeletedForCourtApplication.class,
             HearingDeletedForDefendant.class,
-            HearingDeletedForOffence.class);
+            HearingDeletedForOffence.class,
+            HearingChangeIgnored.class);
 
     @Mock
     private EventSource eventSource;
@@ -244,7 +249,7 @@ public class DeleteHearingCommandHandlerTest {
 
         handler.handleDeleteHearing(envelope);
 
-        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).size(), is(0));
+        assertThat(verifyAppendAndGetArgumentFrom(hearingEventStream).collect(Collectors.toList()).size(), is(1));
     }
 
     @Test

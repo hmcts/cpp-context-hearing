@@ -60,6 +60,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
+import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventDeleted;
@@ -1586,6 +1587,31 @@ public class HearingAggregateTest {
     }
 
     @Test
+    public void shouldRaiseHearingIgnoreEventforHearingDeletedIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final List<Object> eventStream = hearingAggregate.deleteHearing(hearingId).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) eventStream.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+    }
+
+
+    @Test
+    public void shouldRaiseHearingIgnoreEventForNextHearingDateChangedIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final Stream<Object> stream = hearingAggregate.changeNextHearingStartDate(hearingId,randomUUID(),ZonedDateTime.now());
+
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+    }
+
+    @Test
     public void shouldRaiseEventHearingUnallocated() {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
@@ -1610,14 +1636,30 @@ public class HearingAggregateTest {
     }
 
     @Test
-    public void shouldRestrictCourtList() {
+    public void shouldRaiseHearingIgnoredForHearingUnallocatedIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
+        final List<Object> eventStream = hearingAggregate.unAllocateHearing(hearingId, Arrays.asList(randomUUID())).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) eventStream.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void shouldRestrictCourtList() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        final UUID hearingId = hearing.getId();
+
         final List<UUID> caseIds = Arrays.asList(randomUUID(),  randomUUID());
         final CourtListRestricted courtListRestricted = CourtListRestricted.courtListRestricted()
                 .withHearingId(hearingId)
                 .withCaseIds(caseIds).build();
 
-        final HearingAggregate hearingAggregate = new HearingAggregate();
         final Stream<Object> stream = hearingAggregate.courtListRestrictions(courtListRestricted);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
@@ -1629,5 +1671,47 @@ public class HearingAggregateTest {
         assertThat(caseIds.size(), is(courtListRestrictedEvent.getCaseIds().size()));
         assertThat(caseIds.get(0), is(courtListRestrictedEvent.getCaseIds().get(0)));
         assertThat(caseIds.get(1), is(courtListRestrictedEvent.getCaseIds().get(1)));
+    }
+
+    @Test
+    public void shouldRaiseHearingIgnoredForRestrictCourtListIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        final List<UUID> caseIds = Arrays.asList(randomUUID(),  randomUUID());
+        final CourtListRestricted courtListRestricted = CourtListRestricted.courtListRestricted()
+                .withHearingId(hearingId)
+                .withCaseIds(caseIds).build();
+        final Stream<Object> stream = hearingAggregate.courtListRestrictions(courtListRestricted);
+
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void shouldRaiseHearingIgnoredForRemoveOffencesFromExistingHearingIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearingId, Arrays.asList(randomUUID()));
+
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void shouldRaiseHearingIgnoredForUpdateHearingVacateTrialDetailsIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = UUID.randomUUID();
+
+        final Stream<Object> stream = hearingAggregate.updateHearingVacateTrialDetails(hearingId, true, randomUUID());
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+
     }
 }

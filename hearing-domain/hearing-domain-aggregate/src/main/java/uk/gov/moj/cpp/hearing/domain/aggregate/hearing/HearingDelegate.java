@@ -55,7 +55,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871"})
+@SuppressWarnings({"squid:S00107", "squid:S3655", "squid:S1871","PMD:BeanMembersShouldSerialize"})
 public class HearingDelegate implements Serializable {
 
     private static final long serialVersionUID = 6948738797633524093L;
@@ -245,7 +245,7 @@ public class HearingDelegate implements Serializable {
         return Stream.of(new HearingEventVacatedTrialCleared(hearingId));
     }
 
-    private HearingChangeIgnored generateHearingIgnoredMessage(final String reason,
+    public HearingChangeIgnored generateHearingIgnoredMessage(final String reason,
                                                                final UUID hearingId) {
         return new HearingChangeIgnored(hearingId, reason);
     }

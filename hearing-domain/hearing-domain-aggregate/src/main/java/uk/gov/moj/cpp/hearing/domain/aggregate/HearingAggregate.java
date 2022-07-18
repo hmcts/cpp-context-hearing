@@ -177,7 +177,7 @@ import java.util.stream.Stream;
 
 import javax.json.JsonObject;
 
-@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine", "squid:CallToDeprecatedMethod", "squid:S1068", "squid:S1450"})
+@SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
     private static final long serialVersionUID = -6059812881894748570L;
@@ -467,6 +467,10 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> updateHearingVacateTrialDetails(final UUID hearingId,
                                                           final Boolean isVacated,
                                                           final UUID vacatedTrialReasonId) {
+
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'updateHearingVacateTrialDetails' event as hearing not found", hearingId));
+        }
         return apply(this.hearingDelegate.updateHearingVacateTrialDetails(hearingId, isVacated, vacatedTrialReasonId));
     }
 
@@ -691,6 +695,10 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> removeOffencesFromExistingHearing(final UUID hearingId, final List<UUID> offenceIds) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'removeOffencesFromExistingHearing' event as hearing not found", hearingId));
+        }
+
         return apply(this.offenceDelegate.removeOffencesFromAllocatedHearing(hearingId, offenceIds));
     }
 
@@ -893,14 +901,25 @@ public class HearingAggregate implements Aggregate {
         if(momento.isDeleted()){
             return Stream.empty();
         }
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing not found", hearingId));
+        }
         return apply(this.hearingDelegate.deleteHearing(hearingId));
     }
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        }
+
         return apply(this.hearingDelegate.unAllocateHearing(hearingId, removedOffenceIds));
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingDay) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'changeNextHearingStartDate' event as hearing not found", hearingId));
+        }
+
         return apply(this.hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingDay));
     }
 
@@ -1010,6 +1029,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> courtListRestrictions(final uk.gov.justice.hearing.courts.CourtListRestricted courtListRestrictedCmd) {
+
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'hearing.event.court-list-restricted' event as hearing not found", courtListRestrictedCmd.getHearingId()));
+        }
+
         return apply(Stream.of(CourtListRestricted.courtListRestricted()
                 .withCaseIds(courtListRestrictedCmd.getCaseIds())
                 .withCourtApplicationApplicantIds(courtListRestrictedCmd.getCourtApplicationApplicantIds())
