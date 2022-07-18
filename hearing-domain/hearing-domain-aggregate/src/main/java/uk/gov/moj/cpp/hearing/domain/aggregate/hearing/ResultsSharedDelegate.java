@@ -1,16 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.core.courts.Target.target;
-import static uk.gov.justice.core.courts.Target2.target2;
-
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -45,6 +34,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
+import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -60,9 +50,19 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.JsonObject;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.Target.target;
+import static uk.gov.justice.core.courts.Target2.target2;
+import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
 
-@SuppressWarnings({"squid:S3776","squid:S1188", "PMD.BeanMembersShouldSerialize","pmd:NullAssignment"})
+@SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -138,8 +138,8 @@ public class ResultsSharedDelegate implements Serializable {
         resultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLine ->
 
                 statusMap.computeIfAbsent(sharedResultLine.getSharedResultLineId(), resultLineId -> CompletedResultLineStatus.builder()
-                        .withId(resultLineId)
-                        .build())
+                                .withId(resultLineId)
+                                .build())
                         .setCourtClerk(resultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(resultLinesStatusUpdated.getLastSharedDateTime())
         );
@@ -173,8 +173,8 @@ public class ResultsSharedDelegate implements Serializable {
         daysResultLinesStatusUpdated.getSharedResultLines().forEach(sharedResultLine ->
 
                 statusMap.computeIfAbsent(sharedResultLine.getSharedResultLineId(), resultLineId -> CompletedResultLineStatus.builder()
-                        .withId(resultLineId)
-                        .build())
+                                .withId(resultLineId)
+                                .build())
                         .setCourtClerk(daysResultLinesStatusUpdated.getCourtClerk())
                         .setLastSharedDateTime(daysResultLinesStatusUpdated.getLastSharedDateTime())
         );
@@ -261,14 +261,14 @@ public class ResultsSharedDelegate implements Serializable {
                 .withLevel(Level.valueOf(resultLineIn.getLevel()))
                 .withPrompts(
                         resultLineIn.getPrompts().stream().map(pin -> Prompt.prompt()
-                                .withFixedListCode(pin.getFixedListCode())
-                                .withValue(pin.getValue())
-                                .withWelshValue(pin.getWelshValue())
-                                .withWelshLabel(pin.getWelshLabel())
-                                .withId(pin.getId())
-                                .withLabel(pin.getLabel())
-                                .withPromptRef(pin.getPromptRef())
-                                .build())
+                                        .withFixedListCode(pin.getFixedListCode())
+                                        .withValue(pin.getValue())
+                                        .withWelshValue(pin.getWelshValue())
+                                        .withWelshLabel(pin.getWelshLabel())
+                                        .withId(pin.getId())
+                                        .withLabel(pin.getLabel())
+                                        .withPromptRef(pin.getPromptRef())
+                                        .build())
                                 .collect(toList())
                 )
                 .withDelegatedPowers(resultLineIn.getDelegatedPowers())
@@ -296,14 +296,14 @@ public class ResultsSharedDelegate implements Serializable {
                 .withLevel(Level.valueOf(resultLineIn.getLevel()))
                 .withPrompts(
                         resultLineIn.getPrompts().stream().map(pin -> Prompt.prompt()
-                                .withFixedListCode(pin.getFixedListCode())
-                                .withValue(pin.getValue())
-                                .withWelshValue(pin.getWelshValue())
-                                .withWelshLabel(pin.getWelshLabel())
-                                .withId(pin.getId())
-                                .withLabel(pin.getLabel())
-                                .withPromptRef(pin.getPromptRef())
-                                .build())
+                                        .withFixedListCode(pin.getFixedListCode())
+                                        .withValue(pin.getValue())
+                                        .withWelshValue(pin.getWelshValue())
+                                        .withWelshLabel(pin.getWelshLabel())
+                                        .withId(pin.getId())
+                                        .withLabel(pin.getLabel())
+                                        .withPromptRef(pin.getPromptRef())
+                                        .build())
                                 .collect(toList())
                 )
                 .withDelegatedPowers(resultLineIn.getDelegatedPowers())
@@ -338,14 +338,14 @@ public class ResultsSharedDelegate implements Serializable {
                 .withLevel(Level.valueOf(resultLineIn.getLevel()))
                 .withPrompts(
                         resultLineIn.getPrompts().stream().map(pin -> Prompt.prompt()
-                                .withFixedListCode(pin.getFixedListCode())
-                                .withValue(pin.getValue())
-                                .withWelshValue(pin.getWelshValue())
-                                .withWelshLabel(pin.getWelshLabel())
-                                .withId(pin.getId())
-                                .withLabel(pin.getLabel())
-                                .withPromptRef(pin.getPromptRef())
-                                .build())
+                                        .withFixedListCode(pin.getFixedListCode())
+                                        .withValue(pin.getValue())
+                                        .withWelshValue(pin.getWelshValue())
+                                        .withWelshLabel(pin.getWelshLabel())
+                                        .withId(pin.getId())
+                                        .withLabel(pin.getLabel())
+                                        .withPromptRef(pin.getPromptRef())
+                                        .build())
                                 .collect(toList())
                 )
                 .withDelegatedPowers(resultLineIn.getDelegatedPowers())
@@ -389,7 +389,7 @@ public class ResultsSharedDelegate implements Serializable {
                 }
         );
 
-        final Hearing hearing = this.momento.getHearing();
+        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setYouthCourt(youthCourt);
 
         final ResultsShared.Builder builder = ResultsShared.builder()
@@ -441,7 +441,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withSharedTime(sharedTime)
                 .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants(targetsInAggregate))
-                .withHearing(this.momento.getHearing())
+                .withHearing(dedupAllApplications(this.momento.getHearing()))
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(getSavedTargetsForHearingDay(momento.getMultiDaySavedTargets(), hearingDay))
                 .withCompletedResultLinesStatus(getCompletedResultLineStatusForHearingDay(this.momento.getMultiDayCompletedResultLinesStatus(), hearingDay))
@@ -482,7 +482,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        final Hearing hearing = this.momento.getHearing();
+        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setYouthCourt(youthCourt);
 
         final ResultsSharedV3.Builder resultsSharedV2Builder = ResultsSharedV3.builder()
@@ -518,34 +518,33 @@ public class ResultsSharedDelegate implements Serializable {
 
 
         resultsSharedV3.getTargets().stream().forEach(target ->
-            target.getResultLines().forEach(resultLine -> {
-                if (HEARING_VACATED_RESULT_DEFINITION_ID.equals(resultLine.getResultDefinitionId().toString())) {
+                target.getResultLines().forEach(resultLine -> {
+                    if (HEARING_VACATED_RESULT_DEFINITION_ID.equals(resultLine.getResultDefinitionId().toString())) {
 
-                        final Optional<UUID> hearingIdToBeVacated  = hearing.getCourtApplications().stream()
+                        final Optional<UUID> hearingIdToBeVacated = hearing.getCourtApplications().stream()
                                 .filter(courtApplication -> courtApplication.getId().equals(resultLine.getApplicationId()))
-                                .filter(courtApplication->nonNull(courtApplication.getHearingIdToBeVacated()))
+                                .filter(courtApplication -> nonNull(courtApplication.getHearingIdToBeVacated()))
                                 .findFirst()
                                 .map(CourtApplication::getHearingIdToBeVacated);
 
 
+                        final String vacatedTrialReasonShortDesc = resultLine
+                                .getPrompts()
+                                .stream()
+                                .filter(prompt -> prompt.getPromptRef().equals(REASON_FOR_VACATING_TRIAL))
+                                .findFirst()
+                                .map(Prompt::getValue)
+                                .get();
+                        if (nonNull(hearingIdToBeVacated) && hearingIdToBeVacated.isPresent() && nonNull(vacatedTrialReasonShortDesc)) {
+                            final HearingVacatedRequested hearingVacatedRequested = HearingVacatedRequested.builder()
+                                    .withHearingIdToBeVacated(hearingIdToBeVacated.get())
+                                    .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc)
+                                    .build();
+                            streamBuilder.add(hearingVacatedRequested);
+                        }
 
-                    final String vacatedTrialReasonShortDesc = resultLine
-                            .getPrompts()
-                            .stream()
-                            .filter(prompt -> prompt.getPromptRef().equals(REASON_FOR_VACATING_TRIAL))
-                            .findFirst()
-                            .map(Prompt::getValue)
-                            .get();
-                    if (nonNull(hearingIdToBeVacated) && hearingIdToBeVacated.isPresent() && nonNull(vacatedTrialReasonShortDesc)) {
-                        final HearingVacatedRequested hearingVacatedRequested = HearingVacatedRequested.builder()
-                                .withHearingIdToBeVacated(hearingIdToBeVacated.get())
-                                .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc)
-                                .build();
-                        streamBuilder.add(hearingVacatedRequested);
                     }
-
-                }
-            })
+                })
         );
     }
 

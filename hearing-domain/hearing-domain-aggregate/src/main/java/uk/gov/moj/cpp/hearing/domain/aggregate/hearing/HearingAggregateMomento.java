@@ -1,8 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static uk.gov.moj.cpp.util.DuplicateOffencesHelper.filterDuplicateOffencesByIdForHearing;
-import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRestrictions;
-
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.ApplicantCounsel;
 import uk.gov.justice.core.courts.CompanyRepresentative;
@@ -27,6 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
+import static uk.gov.moj.cpp.util.DuplicateOffencesHelper.filterDuplicateOffencesByIdForHearing;
+import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRestrictions;
 
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class HearingAggregateMomento implements Serializable {
@@ -99,7 +100,8 @@ public class HearingAggregateMomento implements Serializable {
 
     public void setHearing(Hearing hearing) {
         this.hearing = dedupAllReportingRestrictions(hearing);
-        filterDuplicateOffencesByIdForHearing(hearing);
+        this.hearing = dedupAllApplications(this.hearing);
+        filterDuplicateOffencesByIdForHearing(this.hearing);
     }
 
     public List<Variant> getVariantDirectory() {

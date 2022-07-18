@@ -255,6 +255,94 @@ public class ResultsSharedDelegateTest {
     }
 
     @Test
+    public void shouldAddRemoveDuplicateApplications() {
+        final UUID hearingId = randomUUID();
+        final UUID duplicatedApplicationId = randomUUID();
+        final CourtApplication courtApplicationOne = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        final CourtApplication courtApplicationTwo = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        final CourtApplication courtApplicationThree = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        hearingAggregateMomento.getHearing().setCourtApplications(Arrays.asList(courtApplicationOne, courtApplicationTwo, courtApplicationThree));
+        final ZonedDateTime shared1Time = ZonedDateTime.now();
+        final ZonedDateTime shared2Time = ZonedDateTime.now().plusMinutes(1);
+        final ZonedDateTime shared3Time = ZonedDateTime.now().plusMinutes(3);
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .build();
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .build();
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList());
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+        final ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
+        assertThat(resultsSharedV2.getNewAmendmentResults().size(), is(2));
+        assertThat(resultsSharedV2.getHearing().getCourtApplications().size(), is(1));
+
+        assertThat(resultsSharedV2.getNewAmendmentResults().stream().map(NewAmendmentResult::getId).collect(toList()).containsAll(Arrays.asList(resultLine1Id, resultLine2Id)), is(true));
+        hearingAggregate.apply(resultsSharedV2);
+
+        final SharedResultsCommandResultLineV2 resharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .build();
+        final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .build();
+        final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
+
+
+        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList());
+
+        final List<Object> resharedEventCollection = resharedEventStreams.collect(toList());
+        assertThat(resharedEventCollection.size(), is(1));
+        final ResultsSharedV2 resharedResultsSharedV2 = (ResultsSharedV2) resharedEventCollection.get(0);
+        assertThat(resharedResultsSharedV2.getNewAmendmentResults().size(), is(0));
+
+        final SharedResultsCommandResultLineV2 secondResharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .build();
+        final SharedResultsCommandResultLineV2 secondResharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(shared3Time)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .build();
+        final List<SharedResultsCommandResultLineV2> secondResharedResultLines = Arrays.asList(secondResharedResultLine1, secondResharedResultLine2);
+
+
+        final Stream<Object> secondResharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared3Time, secondResharedResultLines, emptyList());
+
+        final List<Object> secondResharedEventCollection = secondResharedEventStreams.collect(toList());
+        assertThat(secondResharedEventCollection.size(), is(1));
+        final ResultsSharedV2 secondResharedResultsSharedV2 = (ResultsSharedV2) secondResharedEventCollection.get(0);
+        assertThat(secondResharedResultsSharedV2.getNewAmendmentResults().size(), is(1));
+        assertThat(secondResharedResultsSharedV2.getNewAmendmentResults().stream().map(NewAmendmentResult::getId).collect(toList()).contains(resultLine2Id), is(true));
+    }
+
+    @Test
     public void shouldDeleteDraftResult() {
         UUID userId = UUID.randomUUID();
         UUID hearingId = UUID.randomUUID();
@@ -424,6 +512,127 @@ public class ResultsSharedDelegateTest {
         assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).size(), is(2));
         assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).get(target.getTargetId()), notNullValue());
         assertThat(hearingAggregateMomento.getMultiDayTargets().get(hearingDay).get(target2.getTargetId()), notNullValue());
+    }
+
+    @Test
+    public void shouldFilterDuplicateApplications() {
+        final UUID duplicatedApplicationId = randomUUID();
+        final CourtApplication courtApplicationOne = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        final CourtApplication courtApplicationTwo = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        final CourtApplication courtApplicationThree = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        hearingAggregateMomento.getHearing().setCourtApplications(Arrays.asList(courtApplicationOne, courtApplicationTwo, courtApplicationThree));
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+               final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearing().getCourtApplications().size(), is(1));
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
+    }
+
+    @Test
+    public void shouldFilterDuplicateApplicationsOnlyKeepingUniqueOnes() {
+        final UUID duplicatedApplicationId = randomUUID();
+        final UUID uniqueApplicationId = randomUUID();
+        final CourtApplication courtApplicationOne = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        final CourtApplication courtApplicationTwo = CourtApplication.courtApplication()
+                .withId(uniqueApplicationId)
+                .build();
+        final CourtApplication courtApplicationThree = CourtApplication.courtApplication()
+                .withId(duplicatedApplicationId)
+                .build();
+        hearingAggregateMomento.getHearing().setCourtApplications(Arrays.asList(courtApplicationOne, courtApplicationTwo, courtApplicationThree));
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearing().getCourtApplications().size(), is(2));
+        assertThat(resultsSharedV3.getHearing().getCourtApplications().get(0).getId(), is(duplicatedApplicationId));
+        assertThat(resultsSharedV3.getHearing().getCourtApplications().get(1).getId(), is(uniqueApplicationId));
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
     }
 
     @Test
