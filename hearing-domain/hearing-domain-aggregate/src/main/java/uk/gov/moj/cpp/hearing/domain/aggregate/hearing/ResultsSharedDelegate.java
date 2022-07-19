@@ -60,7 +60,6 @@ import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.core.courts.Target2.target2;
-import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
 
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
@@ -389,7 +388,8 @@ public class ResultsSharedDelegate implements Serializable {
                 }
         );
 
-        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
+        this.momento.setHearing(this.momento.getHearing());
+        final Hearing hearing =  this.momento.getHearing();
         hearing.setYouthCourt(youthCourt);
 
         final ResultsShared.Builder builder = ResultsShared.builder()
@@ -435,13 +435,15 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
+        this.momento.setHearing(this.momento.getHearing());
+        final Hearing hearing =  this.momento.getHearing();
         final ResultsSharedV2.Builder resultsSharedV2Builder = ResultsSharedV2.builder()
                 .withIsReshare(previouslyShared)
                 .withHearingId(hearingId)
                 .withSharedTime(sharedTime)
                 .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants(targetsInAggregate))
-                .withHearing(dedupAllApplications(this.momento.getHearing()))
+                .withHearing(hearing)
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(getSavedTargetsForHearingDay(momento.getMultiDaySavedTargets(), hearingDay))
                 .withCompletedResultLinesStatus(getCompletedResultLineStatusForHearingDay(this.momento.getMultiDayCompletedResultLinesStatus(), hearingDay))
@@ -482,7 +484,8 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
+        this.momento.setHearing(this.momento.getHearing());
+        final Hearing hearing =  this.momento.getHearing();
         hearing.setYouthCourt(youthCourt);
 
         final ResultsSharedV3.Builder resultsSharedV2Builder = ResultsSharedV3.builder()

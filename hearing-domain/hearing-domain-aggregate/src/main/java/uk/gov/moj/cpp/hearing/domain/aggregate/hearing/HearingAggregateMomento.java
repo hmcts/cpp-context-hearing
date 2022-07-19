@@ -104,6 +104,7 @@ public class HearingAggregateMomento implements Serializable {
         filterDuplicateOffencesByIdForHearing(this.hearing);
     }
 
+
     public List<Variant> getVariantDirectory() {
         return variantDirectory;
     }
