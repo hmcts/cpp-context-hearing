@@ -803,7 +803,13 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(isJson(
                         withJsonPath("$.offenceId", is(offenceId.toString())
                         )
-                ))) {
+                ));
+             final EventListener publicHearingPleaUpdatedListener = listenFor("public.hearing.hearing-offence-plea-updated")
+                     .withFilter(isJson(
+                             withJsonPath("$.pleaModel.plea.offenceId", is(offenceId.toString())
+                             )
+                     ))
+        ) {
 
             updatedPlea = new CommandHelpers.UpdatePleaCommandHelper(
                     UseCases.updatePlea(getRequestSpec(), hearing.getId(), offenceId,
@@ -812,6 +818,7 @@ public class ShareResultsIT extends AbstractIT {
             );
 
             hearingPleaUpdatedListener.waitFor();
+            publicHearingPleaUpdatedListener.waitFor();
         }
 
         try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -3433,7 +3440,14 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(isJson(allOf(
                         withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))
                         ))
-                )) {
+                );
+             final EventListener offenceVerdictUpdatedPublicEventListener = listenFor("public.hearing.hearing-offence-verdict-updated")
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                             withJsonPath("$.verdict.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
+                             ))
+                     );
+        ) {
 
             final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                     UpdateVerdictCommandTemplates.updateVerdictTemplate(
@@ -3445,6 +3459,7 @@ public class ShareResultsIT extends AbstractIT {
             ));
 
             verdictUpdatedPublicEventListener.waitFor();
+            offenceVerdictUpdatedPublicEventListener.waitFor();
             return updateVerdict;
         }
     }
@@ -3454,7 +3469,14 @@ public class ShareResultsIT extends AbstractIT {
                 .withFilter(isJson(allOf(
                         withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))
                         ))
-                )) {
+                );
+             final EventListener offenceVerdictUpdatedPublicEventListener = listenFor("public.hearing.hearing-offence-verdict-updated")
+                     .withFilter(isJson(allOf(
+                             withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                             withJsonPath("$.verdict.offenceId", is(hearingOne.getCourtApplication().getCourtApplicationCases().get(0).getOffences().get(0).getId().toString()))
+                             ))
+                     );
+             ) {
 
             final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                     UpdateVerdictCommandTemplates.updateVerdictTemplate(
@@ -3466,6 +3488,7 @@ public class ShareResultsIT extends AbstractIT {
             ));
 
             verdictUpdatedPublicEventListener.waitFor();
+            offenceVerdictUpdatedPublicEventListener.waitFor();
             return updateVerdict;
         }
     }

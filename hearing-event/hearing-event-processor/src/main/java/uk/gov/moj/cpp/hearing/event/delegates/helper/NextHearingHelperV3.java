@@ -80,6 +80,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -209,9 +210,17 @@ public class NextHearingHelperV3 {
     }
 
     private void populateEstimatedDuration(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
-        final int estimatedMinutes = convertDurationIntoMinutes(Sets.newHashSet(promptsMap.get(HEST).getValue()));
+        final HashSet<String> distinctEstimatedDurations = Sets.newHashSet(promptsMap.get(HEST).getValue());
+        final Optional<String> firstEstimatedDuration = distinctEstimatedDurations.stream().findFirst();
+        final int estimatedMinutes = convertDurationIntoMinutes(firstEstimatedDuration);
         LOGGER.info("Populating estimated duration minutes: {}", estimatedMinutes);
         builder.withEstimatedMinutes(estimatedMinutes);
+
+        if(firstEstimatedDuration.isPresent()){
+            final String estimatedDuration = firstEstimatedDuration.get();
+            LOGGER.info("Populating estimated duration: {}", estimatedDuration);
+            builder.withEstimatedDuration(estimatedDuration);
+        }
     }
 
     private void populateBookingReference(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
@@ -401,8 +410,7 @@ public class NextHearingHelperV3 {
         return null;
     }
 
-    private static int convertDurationIntoMinutes(final Set<String> distinctValueSize) {
-        final Optional<String> durationValueOptional = distinctValueSize.stream().findFirst();
+    private static int convertDurationIntoMinutes(final Optional<String> durationValueOptional) {
         final int[] estimateMinutes = {0};
 
         if (durationValueOptional.isPresent()) {

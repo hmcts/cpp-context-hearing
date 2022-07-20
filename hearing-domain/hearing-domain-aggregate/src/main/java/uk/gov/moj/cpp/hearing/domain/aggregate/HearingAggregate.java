@@ -496,8 +496,8 @@ public class HearingAggregate implements Aggregate {
         return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt));
     }
 
-    public Stream<Object> shareResultsV2(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines) {
-        return apply(resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged()));
+    public Stream<Object> shareResultsV2(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final LocalDate hearingDay) {
+        return apply(resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), hearingDay));
     }
 
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final HearingState newHearingState, final YouthCourt youthCourt, final LocalDate hearingDay) {

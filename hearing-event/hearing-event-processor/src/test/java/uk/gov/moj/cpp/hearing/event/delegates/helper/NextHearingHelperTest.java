@@ -279,6 +279,7 @@ public class NextHearingHelperTest extends ReferenceDataClientTestBase {
         final NextHearing nextHearing = nextHearingResult.get();
 
         assertThat(nextHearing.getEstimatedMinutes(), is(valueOf(8793)));
+        assertThat(nextHearing.getEstimatedDuration(), is("3 Weeks, 3 Days, 33 Hours, 333 Minutes"));
         assertThat(nextHearing.getListedStartDateTime(), is(expectedListedStartDateTime));
         assertCourtCentre(nextHearing.getCourtCentre());
 

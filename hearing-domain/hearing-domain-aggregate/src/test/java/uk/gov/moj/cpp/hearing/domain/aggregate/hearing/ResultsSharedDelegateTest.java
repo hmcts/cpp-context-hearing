@@ -41,12 +41,12 @@ import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
 
-
 public class ResultsSharedDelegateTest {
 
     private HearingAggregateMomento hearingAggregateMomento;
     private ResultsSharedDelegate resultsSharedDelegate;
     private HearingAggregate hearingAggregate;
+    private HearingDaySharedResults hearingDaySharedResults;
 
     private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
     private static final String VACATED_TRIAL_REASON_ID = "05d90ca2-2009-40aa-b5a1-5b7720807e54";
@@ -54,7 +54,7 @@ public class ResultsSharedDelegateTest {
 
     @Before
     public void setup() {
-
+        hearingDaySharedResults = new HearingDaySharedResults();
         hearingAggregateMomento = new HearingAggregateMomento();
         hearingAggregateMomento.setHearing(Hearing.hearing()
                 .withHearingDays(Arrays.asList(HearingDay.hearingDay()
@@ -91,7 +91,7 @@ public class ResultsSharedDelegateTest {
                 .withLastName(STRING.next())
                 .withUserId(randomUUID())
                 .build();
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList());
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
@@ -114,7 +114,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
 
-        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resharedResultLines, emptyList());
+        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resharedResultLines, emptyList(), LocalDate.now());
 
         final List<Object> resharedEventCollection = resharedEventStreams.collect(toList());
         assertThat(resharedEventCollection.size(), is(1));
@@ -143,11 +143,8 @@ public class ResultsSharedDelegateTest {
                 .withResultLineId(resultLine2Id)
                 .build();
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
-        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
-                .withLastName(STRING.next())
-                .withUserId(randomUUID())
-                .build();
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList());
+        final DelegatedPowers courtClerk = getDelegatedPowers();
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
@@ -169,7 +166,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
 
-        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList());
+        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList(), LocalDate.now());
 
         final List<Object> resharedEventCollection = resharedEventStreams.collect(toList());
         assertThat(resharedEventCollection.size(), is(1));
@@ -202,7 +199,7 @@ public class ResultsSharedDelegateTest {
                 .withLastName(STRING.next())
                 .withUserId(randomUUID())
                 .build();
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList());
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
@@ -224,7 +221,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
 
-        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList());
+        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList(), LocalDate.now());
 
         final List<Object> resharedEventCollection = resharedEventStreams.collect(toList());
         assertThat(resharedEventCollection.size(), is(1));
@@ -245,7 +242,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> secondResharedResultLines = Arrays.asList(secondResharedResultLine1, secondResharedResultLine2);
 
 
-        final Stream<Object> secondResharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared3Time, secondResharedResultLines, emptyList());
+        final Stream<Object> secondResharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared3Time, secondResharedResultLines, emptyList(), LocalDate.now());
 
         final List<Object> secondResharedEventCollection = secondResharedEventStreams.collect(toList());
         assertThat(secondResharedEventCollection.size(), is(1));
@@ -288,7 +285,7 @@ public class ResultsSharedDelegateTest {
                 .withLastName(STRING.next())
                 .withUserId(randomUUID())
                 .build();
-        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList());
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared1Time, resultLines, emptyList(), LocalDate.now());
 
         final List<Object> eventCollection = eventStreams.collect(toList());
         assertThat(eventCollection.size(), is(1));
@@ -312,7 +309,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> resharedResultLines = Arrays.asList(resharedResultLine1, resharedResultLine2);
 
 
-        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList());
+        final Stream<Object> resharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared2Time, resharedResultLines, emptyList(), LocalDate.now());
 
         final List<Object> resharedEventCollection = resharedEventStreams.collect(toList());
         assertThat(resharedEventCollection.size(), is(1));
@@ -333,7 +330,7 @@ public class ResultsSharedDelegateTest {
         final List<SharedResultsCommandResultLineV2> secondResharedResultLines = Arrays.asList(secondResharedResultLine1, secondResharedResultLine2);
 
 
-        final Stream<Object> secondResharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared3Time, secondResharedResultLines, emptyList());
+        final Stream<Object> secondResharedEventStreams = resultsSharedDelegate.shareResultsV2(hearingId, courtClerk, shared3Time, secondResharedResultLines, emptyList(), LocalDate.now());
 
         final List<Object> secondResharedEventCollection = secondResharedEventStreams.collect(toList());
         assertThat(secondResharedEventCollection.size(), is(1));
@@ -772,4 +769,129 @@ public class ResultsSharedDelegateTest {
 
 
     }
+
+    @Test
+    public void shouldSetHearingDaySharedResultsV3TrueIfHearingDaySameAsSittingDay() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+
+        final List<HearingDay> hearingDays = new ArrayList<>();
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build());
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now().minusDays(1)).build());
+        hearingAggregateMomento.getHearing().setHearingDays(hearingDays);
+
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), getYouthCourt(), hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getHearing().getHearingDays().get(0).getHasSharedResults(), is(true));
+        assertThat(resultsSharedV3.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+    }
+
+    @Test
+    public void shouldSetHearingDaySharedResultsV3TrueIfHearingDayDifferentToSittingDay() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.now().minusDays(10);
+
+        final List<HearingDay> hearingDays = new ArrayList<>();
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build());
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now().minusDays(1)).build());
+        hearingAggregateMomento.getHearing().setHearingDays(hearingDays);
+
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), getYouthCourt(), hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getHearing().getHearingDays().get(0).getHasSharedResults(), is(false));
+        assertThat(resultsSharedV3.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+    }
+
+    @Test
+    public void shouldSetHearingDaySharedResultsV2TrueIfHearingDaySameAsSittingDay() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+
+        final List<HearingDay> hearingDays = new ArrayList<>();
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build());
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now().minusDays(1)).build());
+        hearingAggregateMomento.getHearing().setHearingDays(hearingDays);
+
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
+        assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV2.getHearing().getHearingDays().get(0).getHasSharedResults(), is(true));
+        assertThat(resultsSharedV2.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+    }
+
+    @Test
+    public void shouldSetHearingDaySharedResultsV2TrueIfHearingDayDifferentToSittingDay() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.now().minusDays(10);
+
+        final List<HearingDay> hearingDays = new ArrayList<>();
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).build());
+        hearingDays.add(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now().minusDays(1)).build());
+        hearingAggregateMomento.getHearing().setHearingDays(hearingDays);
+
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultsV2(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(1));
+
+        final ResultsSharedV2 resultsSharedV2 = (ResultsSharedV2) eventCollection.get(0);
+        assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV2.getHearing().getHearingDays().get(0).getHasSharedResults(), is(false));
+        assertThat(resultsSharedV2.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+    }
+
+    private YouthCourt getYouthCourt() {
+        return YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+    }
+
+    private DelegatedPowers getDelegatedPowers() {
+        return DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+    }
+
+    private List<SharedResultsCommandResultLineV2> getSharedResultsCommandResultLineV2s(final ZonedDateTime sharedTime) {
+        final UUID resultLine1Id = randomUUID();
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel("OFFENCE")
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(randomUUID())
+                .build();
+
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1);
+        return resultLines;
+    }
+
 }

@@ -3,7 +3,6 @@ package uk.gov.moj.cpp.hearing.event;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -111,7 +110,7 @@ public class VerdictUpdateEventProcessorTest {
 
         this.verdictUpdateEventProcessor.verdictUpdate(event);
 
-        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(3)).send(this.envelopeArgumentCaptor.capture());
 
         List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
@@ -124,6 +123,12 @@ public class VerdictUpdateEventProcessorTest {
 
         assertThat(events.get(1).metadata().name(), is("public.hearing.verdict-updated"));
 
+        assertThat(events.get(2).metadata().name(), is("public.hearing.hearing-offence-verdict-updated"));
+
+        assertThat(asPojo(events.get(2), VerdictUpsert.class), isBean(VerdictUpsert.class)
+                .with(VerdictUpsert::getHearingId, is(verdictUpsert.getHearingId()))
+                .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
+                        .with(Verdict::getOffenceId, is(verdictUpsert.getVerdict().getOffenceId()))));
     }
 
     @Test
@@ -219,10 +224,17 @@ public class VerdictUpdateEventProcessorTest {
 
         this.verdictUpdateEventProcessor.verdictUpdate(event);
 
-        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
 
         List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
 
         assertThat(events.get(0).metadata().name(), is("public.hearing.verdict-updated"));
+
+        assertThat(events.get(1).metadata().name(), is("public.hearing.hearing-offence-verdict-updated"));
+
+        assertThat(asPojo(events.get(1), VerdictUpsert.class), isBean(VerdictUpsert.class)
+                .with(VerdictUpsert::getHearingId, is(verdictUpsert.getHearingId()))
+                .with(VerdictUpsert::getVerdict, isBean(Verdict.class)
+                        .with(Verdict::getApplicationId, is(verdictUpsert.getVerdict().getApplicationId()))));
     }
 }

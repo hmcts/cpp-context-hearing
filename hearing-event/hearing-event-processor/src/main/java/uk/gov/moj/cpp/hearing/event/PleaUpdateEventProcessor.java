@@ -48,6 +48,8 @@ public class PleaUpdateEventProcessor {
                     .add(APPLICATION_ID, getApplicationIdFromPayload(envelop))
                     .build()).withName("public.hearing.plea-updated").withMetadataFrom(envelop));
         }
+        this.sender.send(Enveloper.envelop(envelop.payloadAsJsonObject()).withName("public.hearing.hearing-offence-plea-updated").withMetadataFrom(envelop));
+
     }
 
     @Handles("hearing.events.enrich-update-plea-with-associated-hearings")

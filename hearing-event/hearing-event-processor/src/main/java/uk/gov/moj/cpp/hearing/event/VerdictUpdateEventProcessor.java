@@ -43,6 +43,9 @@ public class VerdictUpdateEventProcessor {
                 .apply(createObjectBuilder()
                         .add("hearingId", envelop.payloadAsJsonObject().getJsonString("hearingId"))
                         .build()));
+
+        this.sender.send(this.enveloper.withMetadataFrom(envelop, "public.hearing.hearing-offence-verdict-updated")
+                .apply(envelop.payloadAsJsonObject()));
     }
 
     @Handles("hearing.events.enrich-update-verdict-with-associated-hearings")

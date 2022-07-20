@@ -153,7 +153,7 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final ShareDaysResultsCommand command = convertToObject(envelope, ShareDaysResultsCommand.class);
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                aggregate -> aggregate.shareResultsV2(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines()));
+                aggregate -> aggregate.shareResultsV2(command.getHearingId(), command.getCourtClerk(), clock.now(), command.getResultLines(), command.getHearingDay()));
     }
 
     @Handles("hearing.command.share-days-results")

@@ -68,6 +68,9 @@ subscriptions_descriptor:
         - name: public.hearing.verdict-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-verdict-updated.json
 
+        - name: public.hearing.hearing-offence-verdict-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-offence-verdict-updated.json
+
         # Conviction Date
         - name: public.hearing.offence-conviction-date-changed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-offence-conviction-date-changed.json
@@ -189,6 +192,9 @@ subscriptions_descriptor:
         # Prosecution Case created in Hearing
         - name: public.events.hearing.prosecution-case-created-in-hearing
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.events.hearing.prosecution-case-created-in-hearing.json
+
+        - name: public.hearing.hearing-offence-plea-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing-offence-plea-updated.json
 
         # Defendants Welsh information recorded
         - name: public.hearing.defendants-welsh-information-recorded
