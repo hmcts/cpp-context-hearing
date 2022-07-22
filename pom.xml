@@ -8,7 +8,7 @@
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
-    <version>8.0.26-SNAPSHOT</version>
+    <version>8.0.25</version>
     <packaging>pom</packaging>
 
     <name>Hearing Context - Parent Module</name>
