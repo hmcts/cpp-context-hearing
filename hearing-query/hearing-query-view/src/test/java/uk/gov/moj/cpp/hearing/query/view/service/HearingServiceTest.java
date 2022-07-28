@@ -224,7 +224,7 @@ public class HearingServiceTest {
         final String startTime = "09:15";
         final String endTime = "10:29";
 
-        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
+        when(filterHearingsBasedOnPermissions.filterCaseHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
 
         final GetHearings response = hearingService.getHearings(sittingDate, startTime, endTime, hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
         assertThat(response.getHearingSummaries(), is(emptyCollectionOf(HearingSummaries.class)));
@@ -240,7 +240,7 @@ public class HearingServiceTest {
         final String startTime = "10:31";
         final String endTime = "11:30";
 
-        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
+        when(filterHearingsBasedOnPermissions.filterCaseHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
 
         final GetHearings response = hearingService.getHearings(sittingDate, startTime, endTime, hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
         assertThat(response.getHearingSummaries(), is(emptyCollectionOf(HearingSummaries.class)));
@@ -289,7 +289,7 @@ public class HearingServiceTest {
         when(hearingEventRepository.findHearingEvents(hearingEntity.getId(), "Hearing ended")).thenReturn(asList(hearingEvent));
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
         when(getHearingsTransformer.summary(hearingPojo)).thenReturn(hearingSummariesBuilder);
-        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
+        when(filterHearingsBasedOnPermissions.filterCaseHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
 
         final GetHearings response = hearingService.getHearings(START_DATE_1.toLocalDate(),
                 "10:30", "14:30", hearingEntity.getCourtCentre().getId(), null, prosecutionCasesIdsWithAccess, false);
@@ -330,7 +330,7 @@ public class HearingServiceTest {
         when(hearingJPAMapper.fromJPA(hearingEntity)).thenReturn(hearingPojo);
         when(getHearingsTransformer.summary(hearingPojo)).thenReturn(hearingSummariesBuilder);
 
-        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
+        when(filterHearingsBasedOnPermissions.filterCaseHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
 
         final GetHearings response = hearingService.getHearings(START_DATE_1.toLocalDate(),
                 "10:15", "14:30", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
@@ -373,7 +373,7 @@ public class HearingServiceTest {
         when(hearingJPAMapper.fromJPA(eq(hearingEntity2))).thenReturn(hearingPojo2);
         when(getHearingsTransformer.summary(eq(hearingPojo))).thenReturn(hearingSummariesBuilder);
         when(getHearingsTransformer.summary(eq(hearingPojo2))).thenReturn(hearingSummariesBuilder2);
-        when(filterHearingsBasedOnPermissions.filterHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
+        when(filterHearingsBasedOnPermissions.filterCaseHearings(hearings, prosecutionCasesIdsWithAccess)).thenReturn(hearings);
 
         final GetHearings response = hearingService.getHearings(START_DATE_1.toLocalDate(),
                 "10:15", "14:30", hearingEntity.getCourtCentre().getId(), hearingEntity.getCourtCentre().getRoomId(), prosecutionCasesIdsWithAccess, false);
@@ -468,7 +468,7 @@ public class HearingServiceTest {
 
         when(hearingJPAMapper.fromJPA(entity)).thenReturn(pojo);
 
-        when(filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(entity), prosecutionCasesIdsWithAccess)).thenReturn(Arrays.asList(entity));
+        when(filterHearingsBasedOnPermissions.filterCaseHearings(Arrays.asList(entity), prosecutionCasesIdsWithAccess)).thenReturn(Arrays.asList(entity));
 
         final UUID trialTypeId = randomUUID();
         final HearingDetailsResponse response = hearingService.getHearingDetailsResponseById(hearingId, buildCrackedIneffectiveVacatedTrialTypes(trialTypeId), prosecutionCasesIdsWithAccess, false);

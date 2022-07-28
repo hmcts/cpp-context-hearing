@@ -110,7 +110,7 @@ public class HearingQueryView {
     private CourtListRepository courtListRepository;
 
     public Envelope<GetHearings> findHearings(final JsonEnvelope envelope,
-                                              final List<UUID> accessibleCasesId,
+                                              final List<UUID> accessibleCasesAndApplicationIds,
                                               final boolean isDDJorRecorder) {
         final JsonObject payload = envelope.payloadAsJsonObject();
         final LocalDate date = LocalDates.from(payload.getString(FIELD_DATE));
@@ -119,7 +119,7 @@ public class HearingQueryView {
         final String startTime = payload.containsKey(FIELD_START_TIME) ? payload.getString(FIELD_START_TIME) : "00:00";
         final String endTime = payload.containsKey(FIELD_END_TIME) ? payload.getString(FIELD_END_TIME) : "23:59";
 
-        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesId, isDDJorRecorder);
+        final GetHearings hearingListResponse = hearingService.getHearings(date, startTime, endTime, courtCentreId, roomId, accessibleCasesAndApplicationIds, isDDJorRecorder);
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
                 .withMetadataFrom(envelope);
@@ -146,10 +146,10 @@ public class HearingQueryView {
     }
     public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope,
                                                         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
-                                                        final List<UUID> accessibleCasesId,
+                                                        final List<UUID> accessibleCaseAndApplicationIds,
                                                         final boolean isDDJ) {
         final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
-        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(hearingId.get(), crackedIneffectiveVacatedTrialTypes, accessibleCasesId, isDDJ);
+        final HearingDetailsResponse hearingDetailsResponse = hearingService.getHearingDetailsResponseById(hearingId.get(), crackedIneffectiveVacatedTrialTypes, accessibleCaseAndApplicationIds, isDDJ);
 
         return envelop(hearingDetailsResponse)
                 .withName("hearing.get-hearing")

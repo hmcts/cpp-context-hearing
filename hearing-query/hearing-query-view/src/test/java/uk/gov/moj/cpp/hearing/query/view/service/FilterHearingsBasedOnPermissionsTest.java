@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import junit.framework.TestCase;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -58,6 +57,15 @@ public class FilterHearingsBasedOnPermissionsTest {
 
     @Test
     public void shouldReturnNoFilteredHearingsWhenRoleIsDDJAndHasNoHearings() {
+
+        final List<Hearing> hearings = new ArrayList();
+        final List<UUID> accessableCaseList = new ArrayList();
+        final List<Hearing> filterHearings = filterHearingsBasedOnPermissions.filterCaseHearings(hearings, accessableCaseList);
+        assertThat(filterHearings.size(), is(0));
+    }
+
+    @Test
+    public void shouldReturnNoFilteredHearingsContainingCasesAndApplicationsWhenRoleIsDDJAndHasNoHearings() {
 
         final List<Hearing> hearings = new ArrayList();
         final List<UUID> accessableCaseList = new ArrayList();
@@ -111,7 +119,7 @@ public class FilterHearingsBasedOnPermissionsTest {
         when(hearing3.getProsecutionCases()).thenReturn(caseSetHearing3);
 
         final List<Hearing> filterHearings =
-                filterHearingsBasedOnPermissions.filterHearings(hearings, accessableCaseList);
+                filterHearingsBasedOnPermissions.filterCaseHearings(hearings, accessableCaseList);
 
         assertThat(filterHearings.size(), is(2));
     }
@@ -153,7 +161,7 @@ public class FilterHearingsBasedOnPermissionsTest {
         when(hearing3.getProsecutionCases()).thenReturn(caseSetHearing3);
 
         final List<Hearing> filterHearings =
-                filterHearingsBasedOnPermissions.filterHearings(hearings, accessableCaseList);
+                filterHearingsBasedOnPermissions.filterCaseHearings(hearings, accessableCaseList);
 
         assertThat(filterHearings.size(), is(0));
     }

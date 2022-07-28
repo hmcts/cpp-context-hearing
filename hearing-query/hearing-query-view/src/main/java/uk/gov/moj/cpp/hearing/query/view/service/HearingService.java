@@ -197,7 +197,7 @@ public class HearingService {
     @Transactional
     public GetHearings getHearings(final LocalDate date, final String startTime,
                                    final String endTime, final UUID courtCentreId,
-                                   final UUID roomId, final List<UUID> accessibleCasesId,
+                                   final UUID roomId, final List<UUID> accessibleCasesAndApplicationIds,
                                    final boolean isDDJorRecorder) {
 
         if (null == date || null == courtCentreId) {
@@ -212,7 +212,7 @@ public class HearingService {
         }
 
         if (isDDJorRecorder) {
-            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesId);
+            source = filterHearingsBasedOnPermissions.filterHearings(source, accessibleCasesAndApplicationIds);
         }
 
         if (CollectionUtils.isEmpty(source)) {
@@ -395,7 +395,7 @@ public class HearingService {
 
     @Transactional
     public HearingDetailsResponse getHearingDetailsResponseById(final UUID hearingId, final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
-                                                                final List<UUID> accessibleCasesId,
+                                                                final List<UUID> accessibleCaseAndApplicationIds,
                                                                 final boolean isDDJ) {
         if (null == hearingId) {
             return new HearingDetailsResponse();
@@ -403,7 +403,7 @@ public class HearingService {
 
         Hearing hearing = hearingRepository.findBy(hearingId);
         if (isDDJ) {
-            hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCasesId).stream().findFirst().orElse(null);
+           hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCaseAndApplicationIds).stream().findFirst().orElse(null);
         }
 
         if (hearing == null) {
