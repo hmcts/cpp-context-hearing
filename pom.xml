@@ -30,14 +30,14 @@
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>7.0.26</stagingenforcement.version>
-        <progression.version>8.0.50</progression.version>
+        <progression.version>8.0.53</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
-        <usersgroups.version>7.0.45</usersgroups.version>
+        <usersgroups.version>8.0.5</usersgroups.version>
         <listing.version>8.0.17</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
     </properties>
