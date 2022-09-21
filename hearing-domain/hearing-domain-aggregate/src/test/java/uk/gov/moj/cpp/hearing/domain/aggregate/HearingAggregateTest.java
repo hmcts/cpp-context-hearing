@@ -30,6 +30,7 @@ import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADM
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -270,6 +271,41 @@ public class HearingAggregateTest {
         assertThat(hearingEventIgnored.getHearingEventId(), is(logEventCommand.getHearingEventId()));
         assertThat(hearingEventIgnored.isAlterable(), is(false));
 
+    }
+
+    @Test
+    public void shouldIgnoreLogHearingEventGivenHearingIsBoxHearing() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithIsBoxHearing(true);
+
+        final LogEventCommand logEventCommand = LogEventCommand.builder()
+                .withHearingEventId(randomUUID())
+                .withHearingId(randomUUID())
+                .withEventTime(PAST_ZONED_DATE_TIME.next())
+                .withLastModifiedTime(PAST_ZONED_DATE_TIME.next())
+                .withRecordedLabel(STRING.next())
+                .withHearingEventDefinitionId(randomUUID())
+                .withAlterable(false)
+                .build();
+
+        final uk.gov.moj.cpp.hearing.eventlog.HearingEvent hearingEvent = uk.gov.moj.cpp.hearing.eventlog.HearingEvent.builder()
+                .withHearingEventId(logEventCommand.getHearingEventId())
+                .withEventTime(logEventCommand.getEventTime())
+                .withLastModifiedTime(logEventCommand.getLastModifiedTime())
+                .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+
+        assertThat(hearingEventIgnored.getReason(), is("Hearing Event Log not allowed for Box Hearing"));
+        assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
+        assertThat(hearingEventIgnored.getEventTime(), is(logEventCommand.getEventTime()));
+        assertThat(hearingEventIgnored.getRecordedLabel(), is(logEventCommand.getRecordedLabel()));
+        assertThat(hearingEventIgnored.getHearingEventDefinitionId(), is(logEventCommand.getHearingEventDefinitionId()));
+        assertThat(hearingEventIgnored.getHearingEventId(), is(logEventCommand.getHearingEventId()));
+        assertThat(hearingEventIgnored.isAlterable(), is(false));
     }
 
     @Test
@@ -538,6 +574,8 @@ public class HearingAggregateTest {
         assertThat(hearingEventIgnored.getHearingEventId(), is(logEventCommand.getHearingEventId()));
         assertThat(hearingEventIgnored.isAlterable(), is(false));
     }
+
+
 
     @Test
     public void shouldHearingEventNotIgnoredGivenEventHasPreivouslyBeenDeleted() {

@@ -28,6 +28,9 @@ public class HearingEventDelegate implements Serializable {
     private static final String REASON_EVENT_NOT_FOUND = "Hearing event not found";
     private static final String REASON_HEARING_NOT_FOUND = "Hearing not found";
     private static final String REASON_CASEURN_NOT_FOUND = "Case URN not found";
+    private static final String REASON_EVENT_LOG_NOT_ALLOWED_FOR_BOX_HEARING = "Hearing Event Log not allowed for Box Hearing";
+
+
 
     private final HearingAggregateMomento momento;
 
@@ -56,6 +59,7 @@ public class HearingEventDelegate implements Serializable {
             ignoreReason = Optional.of(REASON_CASEURN_NOT_FOUND);
             return Stream.of(new HearingEventIgnored(hearingEvent.getHearingEventId(), hearingId, hearingEventDefinitionId, hearingEvent.getRecordedLabel(), hearingEvent.getEventTime(), ignoreReason.get(), alterable, hearingEvent.getNote()));
         }
+
 
         final CourtCentre courtCentre = CourtCentre.courtCentre()
                 .withId(momento.getHearing().getCourtCentre().getId())
@@ -163,6 +167,9 @@ public class HearingEventDelegate implements Serializable {
             }
             return Optional.of(REASON_ALREADY_LOGGED);
         }
+        if(nonNull(momento.getHearing().getIsBoxHearing()) && momento.getHearing().getIsBoxHearing()) {
+            return Optional.of(REASON_EVENT_LOG_NOT_ALLOWED_FOR_BOX_HEARING);
+        }
         return Optional.empty();
     }
 
@@ -176,6 +183,9 @@ public class HearingEventDelegate implements Serializable {
         }
         if (this.momento.getHearingEvents().get(hearingEventId).isDeleted()) {
             return Optional.of(REASON_ALREADY_DELETED);
+        }
+        if(nonNull(momento.getHearing().getIsBoxHearing()) && momento.getHearing().getIsBoxHearing()) {
+            return Optional.of(REASON_EVENT_LOG_NOT_ALLOWED_FOR_BOX_HEARING);
         }
         return Optional.empty();
     }
