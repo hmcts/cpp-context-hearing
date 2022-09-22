@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Event("hearing.events.registered-hearing-against-defendant")
-public final class RegisteredHearingAgainstDefendant implements Serializable {
+public class RegisteredHearingAgainstDefendant implements Serializable {
 
     private static final long serialVersionUID = 1L;
 

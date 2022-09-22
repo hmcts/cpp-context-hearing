@@ -326,6 +326,10 @@ subscriptions_descriptor:
         - name: hearing.events.offences-removed-from-existing-hearing
           schema_uri: http://justice.gov.uk/hearing/courts/hearing.events.offences-removed-from-existing-hearing.json
 
+        # Case Defendants Updated For Hearing
+        - name: hearing.case-defendants-updated-for-hearing
+          schema_uri: http://justice.gov.uk/core/courts/hearing.case-defendants-updated-for-hearing.json
+
       event_source_name: hearing
 
     - name: public event subscription
