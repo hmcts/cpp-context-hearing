@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
@@ -147,10 +148,11 @@ public class PublishResultsDelegateV3 {
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
-
+        final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), Json.createObjectBuilder().build());
+        sender.send(successEvent);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
         }
         sender.send(jsonEnvelope);
 
