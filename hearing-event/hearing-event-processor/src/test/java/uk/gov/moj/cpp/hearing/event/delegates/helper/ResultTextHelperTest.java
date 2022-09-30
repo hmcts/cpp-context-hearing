@@ -1,11 +1,18 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.lang.System.lineSeparator;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
 
+
+import java.util.Arrays;
+import org.hamcrest.CoreMatchers;
+import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
@@ -18,166 +25,38 @@ import org.junit.Test;
 public class ResultTextHelperTest {
 
     @Test
-    public void shouldSortPrompts() {
+    public void shouldSetResultTextForPromptDirective(){
+        final List<TreeNode<ResultLine>> treeNodeList = singletonList(new TreeNode<>(randomUUID(), null));
+
+        treeNodeList.get(0).setJudicialResult(JudicialResult.judicialResult()
+                .withResultTextTemplate("Exclusion Requirement: Not to enter {placeArea} between {fromDate} and {untilDate}. This exclusion requirement lasts until {endDateOfExclusion}. {additionalInformation}")
+                .withJudicialResultPrompts(Arrays.asList(judicialResultPrompt()
+                        .withPromptReference("placeArea")
+                        .withValue("area1")
+                        .withType("TXT")
+                        .build(), judicialResultPrompt()
+                        .withPromptReference("fromDate")
+                        .withType("DATE")
+                        .withValue("01-01-2012")
+                        .build(), judicialResultPrompt()
+                        .withPromptReference("untilDate")
+                        .withType("DATE")
+                        .withValue("01-01-2013")
+                        .build(), judicialResultPrompt()
+                        .withPromptReference("endDateOfExclusion")
+                        .withType("DATE")
+                        .withValue("01-01-2014")
+                        .build(), judicialResultPrompt()
+                        .withPromptReference("additionalInformation")
+                        .withType("TXT")
+                        .withValue("text prompt")
+                        .build())
+                )
+                .build());
 
 
-        final UUID uuid0 = randomUUID();
-        final UUID uuid1 = randomUUID();
-        final UUID uuid2 = randomUUID();
-        final UUID uuid3 = randomUUID();
+        ResultTextHelper.setResultText(treeNodeList);
 
-        final Prompt prompt0 = Prompt.prompt().setSequence(3).setId(uuid0).setHidden(false);
-        final Prompt prompt1 = Prompt.prompt().setSequence(4).setId(uuid1).setHidden(false);
-        final Prompt prompt2 = Prompt.prompt().setSequence(1).setId(uuid2);
-        final Prompt prompt3 = Prompt.prompt().setSequence(2).setId(uuid3);
-
-
-        final List<Prompt> resultDefinitionPrompts = new ArrayList<>();
-        resultDefinitionPrompts.add(prompt0);
-        resultDefinitionPrompts.add(prompt1);
-        resultDefinitionPrompts.add(prompt2);
-        resultDefinitionPrompts.add(prompt3);
-
-        final uk.gov.justice.core.courts.Prompt resultLinePromp0 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label1").withValue("value1").withId(uuid0).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp1 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label2").withValue("value2").withId(uuid1).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp2 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label3").withValue("value3").withId(uuid2).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp3 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label4").withValue("value4").withId(uuid3).build();
-
-        final List<uk.gov.justice.core.courts.Prompt> resultLinePrompts = new ArrayList<>();
-        resultLinePrompts.add(resultLinePromp0);
-        resultLinePrompts.add(resultLinePromp1);
-        resultLinePrompts.add(resultLinePromp2);
-        resultLinePrompts.add(resultLinePromp3);
-
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition().setLabel("Result definition label").setPrompts(resultDefinitionPrompts);
-        final ResultLine resultLine = ResultLine.resultLine().withPrompts(resultLinePrompts).build();
-
-        final String result = ResultTextHelper.getResultText(resultDefinition, resultLine);
-
-        assertThat(result, is(String.format("Result definition label%slabel3 value3%slabel4 value4%slabel1 value1%slabel2 value2", lineSeparator(), lineSeparator(), lineSeparator(), lineSeparator())));
-    }
-
-    @Test
-    public void shouldNotGetPromptsWithHmiSlotreference() {
-
-
-        final UUID uuid0 = randomUUID();
-        final UUID uuid1 = randomUUID();
-        final UUID uuid2 = randomUUID();
-        final UUID uuid3 = randomUUID();
-        final UUID uuid4 = randomUUID();
-
-        final Prompt prompt0 = Prompt.prompt().setSequence(3).setId(uuid0).setHidden(false);
-        final Prompt prompt1 = Prompt.prompt().setSequence(4).setId(uuid1).setHidden(false);
-        final Prompt prompt2 = Prompt.prompt().setSequence(1).setId(uuid2);
-        final Prompt prompt3 = Prompt.prompt().setSequence(2).setId(uuid3);
-        final Prompt prompt4 = Prompt.prompt().setSequence(5).setId(uuid4);
-
-
-        final List<Prompt> resultDefinitionPrompts = new ArrayList<>();
-        resultDefinitionPrompts.add(prompt0);
-        resultDefinitionPrompts.add(prompt1);
-        resultDefinitionPrompts.add(prompt2);
-        resultDefinitionPrompts.add(prompt3);
-        resultDefinitionPrompts.add(prompt4);
-
-        final uk.gov.justice.core.courts.Prompt resultLinePromp0 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label1").withValue("value1").withId(uuid0).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp1 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label2").withValue("value2").withId(uuid1).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp2 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label3").withValue("value3").withId(uuid2).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp3 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label4").withValue("value4").withId(uuid3).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp4 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label5").withValue("value5").withId(uuid4).withPromptRef("hmiSlots").build();
-
-        final List<uk.gov.justice.core.courts.Prompt> resultLinePrompts = new ArrayList<>();
-        resultLinePrompts.add(resultLinePromp0);
-        resultLinePrompts.add(resultLinePromp1);
-        resultLinePrompts.add(resultLinePromp2);
-        resultLinePrompts.add(resultLinePromp3);
-        resultLinePrompts.add(resultLinePromp4);
-
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition().setLabel("Result definition label").setPrompts(resultDefinitionPrompts);
-        final ResultLine resultLine = ResultLine.resultLine().withPrompts(resultLinePrompts).build();
-
-        final String result = ResultTextHelper.getResultText(resultDefinition, resultLine);
-
-        assertThat(result, is(String.format("Result definition label%slabel3 value3%slabel4 value4%slabel1 value1%slabel2 value2", lineSeparator(), lineSeparator(), lineSeparator(), lineSeparator())));
-    }
-
-    @Test
-    public void shouldNotDisplayResultTextForHiddenPrompts() {
-
-        final UUID uuid0 = randomUUID();
-        final UUID uuid1 = randomUUID();
-        final UUID uuid2 = randomUUID();
-        final UUID uuid3 = randomUUID();
-
-        final Prompt prompt0 = Prompt.prompt().setSequence(3).setId(uuid0);
-        final Prompt prompt1 = Prompt.prompt().setSequence(4).setId(uuid1).setHidden(true);
-        final Prompt prompt2 = Prompt.prompt().setSequence(1).setId(uuid2).setHidden(false);
-        final Prompt prompt3 = Prompt.prompt().setSequence(2).setId(uuid3);
-
-
-        final List<Prompt> resultDefinitionPrompts = new ArrayList<>();
-        resultDefinitionPrompts.add(prompt0);
-        resultDefinitionPrompts.add(prompt1);
-        resultDefinitionPrompts.add(prompt2);
-        resultDefinitionPrompts.add(prompt3);
-
-        final uk.gov.justice.core.courts.Prompt resultLinePromp0 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label1").withValue("value1").withId(uuid0).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp1 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label2").withValue("value2").withId(uuid1).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp2 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label3").withValue("value3").withId(uuid2).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp3 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label4").withValue("value4").withId(uuid3).build();
-
-        final List<uk.gov.justice.core.courts.Prompt> resultLinePrompts = new ArrayList<>();
-        resultLinePrompts.add(resultLinePromp0);
-        resultLinePrompts.add(resultLinePromp1);
-        resultLinePrompts.add(resultLinePromp2);
-        resultLinePrompts.add(resultLinePromp3);
-
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition().setLabel("Result definition label").setPrompts(resultDefinitionPrompts);
-        final ResultLine resultLine = ResultLine.resultLine().withPrompts(resultLinePrompts).build();
-
-        final String result = ResultTextHelper.getResultText(resultDefinition, resultLine);
-
-        assertThat(result, is(String.format("Result definition label%slabel3 value3%slabel4 value4%slabel1 value1", lineSeparator(), lineSeparator(), lineSeparator(), lineSeparator())));
-    }
-
-    @Test
-    public void shouldDisplayEnglishValuesForBooleanPompts() {
-
-        final UUID uuid0 = randomUUID();
-        final UUID uuid1 = randomUUID();
-        final UUID uuid2 = randomUUID();
-        final UUID uuid3 = randomUUID();
-
-        final Prompt prompt0 = Prompt.prompt().setSequence(3).setId(uuid0).setType("BOOLEAN");
-        final Prompt prompt1 = Prompt.prompt().setSequence(4).setId(uuid1).setHidden(false).setType("BOOLEAN");
-        final Prompt prompt2 = Prompt.prompt().setSequence(1).setId(uuid2).setHidden(false).setType("BOOLEAN");
-        final Prompt prompt3 = Prompt.prompt().setSequence(2).setId(uuid3).setType("TEXT");
-
-
-        final List<Prompt> resultDefinitionPrompts = new ArrayList<>();
-        resultDefinitionPrompts.add(prompt0);
-        resultDefinitionPrompts.add(prompt1);
-        resultDefinitionPrompts.add(prompt2);
-        resultDefinitionPrompts.add(prompt3);
-
-        final uk.gov.justice.core.courts.Prompt resultLinePromp0 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label1").withValue("true").withId(uuid0).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp1 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label2").withValue("value2").withId(uuid1).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp2 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label3").withValue("false").withId(uuid2).build();
-        final uk.gov.justice.core.courts.Prompt resultLinePromp3 = new uk.gov.justice.core.courts.Prompt.Builder().withLabel("label4").withValue("value4").withId(uuid3).build();
-
-        final List<uk.gov.justice.core.courts.Prompt> resultLinePrompts = new ArrayList<>();
-        resultLinePrompts.add(resultLinePromp0);
-        resultLinePrompts.add(resultLinePromp1);
-        resultLinePrompts.add(resultLinePromp2);
-        resultLinePrompts.add(resultLinePromp3);
-
-        final ResultDefinition resultDefinition = ResultDefinition.resultDefinition().setLabel("Result definition label").setPrompts(resultDefinitionPrompts);
-        final ResultLine resultLine = ResultLine.resultLine().withPrompts(resultLinePrompts).build();
-
-        final String result = ResultTextHelper.getResultText(resultDefinition, resultLine);
-
-        assertThat(result, is(String.format("Result definition label%slabel3 No%slabel4 value4%slabel1 Yes%slabel2 No", lineSeparator(), lineSeparator(), lineSeparator(), lineSeparator())));
-
+        assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("Exclusion Requirement: Not to enter area1 between 01-01-2012 and 01-01-2013. This exclusion requirement lasts until 01-01-2014. text prompt"));
     }
 }

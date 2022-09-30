@@ -34,7 +34,6 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.JudicialResultPromptDuratio
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier;
-import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.SecondaryCJSCode;
@@ -223,7 +222,6 @@ public class ResultTreeBuilder {
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withPostHearingCustodyStatus(resultDefinition.getPostHearingCustodyStatus())
-                .withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine))
                 .withLifeDuration(getBooleanValue(resultDefinition.getLifeDuration(), false))
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
                 .withTerminatesOffenceProceedings(getBooleanValue(resultDefinition.getTerminatesOffenceProceedings(), false))

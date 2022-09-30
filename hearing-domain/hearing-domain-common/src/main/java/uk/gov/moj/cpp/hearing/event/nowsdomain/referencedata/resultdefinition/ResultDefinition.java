@@ -93,6 +93,8 @@ public class ResultDefinition {
 
     private String dvlaCode;
 
+    private String resultTextTemplate;
+
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
     }
@@ -454,6 +456,15 @@ public class ResultDefinition {
 
     public ResultDefinition setDvlaCode(final String dvlaCode) {
         this.dvlaCode = dvlaCode;
+        return this;
+    }
+
+    public String getResultTextTemplate() {
+        return resultTextTemplate;
+    }
+
+    public ResultDefinition setResultTextTemplate(final String resultTextTemplate) {
+        this.resultTextTemplate = resultTextTemplate;
         return this;
     }
 }

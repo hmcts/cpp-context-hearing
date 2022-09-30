@@ -1,0 +1,149 @@
+{
+  "caseId": "CASE_ID",
+  "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+  "draftResult": "{}",
+  "hearingDay": "2022-09-28",
+  "hearingId": "HEARING_ID",
+  "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+  "offenceId": "OFFENCE_ID",
+  "shadowListed" : false,
+  "resultLines": [
+    {
+      "caseId": "CASE_ID",
+      "childResultLineIds": [
+        "d41479d5-4fe6-4dfb-b20c-53cff5146e8f",
+        "59a91352-36ea-4a12-b049-3cc03fe0ebb4"
+      ],
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "offenceId": "OFFENCE_ID",
+      "orderedDate": "ORDERED_DATE",
+      "prompts": [
+        {
+          "id": "746c833a-7d33-4800-a40c-425dbacf7492",
+          "label": "Concurrent",
+          "promptRef": "concurrent",
+          "value": "true"
+        },
+        {
+          "id": "3d5ab9b6-12d2-4ca6-a70a-f3e322552190",
+          "label": "Or in default to serve",
+          "promptRef": "orInDefaultToServe",
+          "value": "1"
+        },
+        {
+          "id": "bd988332-7fc9-42a8-a69b-b291376005b8",
+          "label": "For a debt and costs of",
+          "promptRef": "forADebtAndCostsOf",
+          "value": "200"
+        },
+        {
+          "id": "f0fbb5ef-d84a-49ce-b47a-8e390c4ce360",
+          "label": "Consecutive to",
+          "promptRef": "consecutiveTo",
+          "value": "Bexley Court"
+        },
+        {
+          "id": "da9c91a6-7090-44f3-8644-b4b184533fc4",
+          "label": "which is on case number",
+          "promptRef": "whereConsecutiveToAnOffenceOnAnotherCaseSpecifyThatCaseNumber",
+          "value": "Case 13"
+        },
+        {
+          "id": "84df0bcf-5c38-4e46-8c00-be1633ca4570",
+          "label": "The term of imprisonment is postponed on condition that",
+          "promptRef": "theTermOfImprisonmentIsPostponedOnConditionThat",
+          "value": "Term 2"
+        },
+        {
+          "id": "9d3cae46-9fc7-4a44-abe2-5b60eb863515",
+          "label": "The court finds that the debtor's failure is due to their wilful refusal and other methods of enforcement are inappropriate or unsuccessful",
+          "promptRef": "herWilfulRefusal",
+          "value": "false"
+        },
+        {
+          "id": "cfe191a4-6374-401b-bef8-e2e1c8578cbf",
+          "label": "The court finds that the debtor's failure is due to their culpable neglect and other methods of enforcement are inappropriate or unsuccessful",
+          "promptRef": "herCulpable",
+          "value": "false"
+        },
+        {
+          "id": "35cd63eb-022d-4443-a4bd-331551a248a6",
+          "label": "Reason for the finding",
+          "promptRef": "reasonForTheFinding",
+          "value": "reason for HMRCFP"
+        }
+      ],
+      "resultDefinitionId": "e8b659f3-1f6f-4570-8be7-022bca6a2c66",
+      "resultLabel": "Committal to prison further postponed (civil debt)",
+      "resultLineId": "ed108e19-618d-4892-96fc-a13a0c2632fe",
+      "shadowListed": false,
+      "sharedDate": "2022-09-29",
+      "shortCode": "HMRCFPP"
+    },
+    {
+      "caseId": "CASE_ID",
+      "childResultLineIds": [
+      ],
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "offenceId": "OFFENCE_ID",
+      "orderedDate": "ORDERED_DATE",
+      "prompts": [
+        {
+          "id": "6211bbd2-3bbf-4ed8-bcea-16d021c84fd1",
+          "label": "Taking control of goods (warrant of control) was tried and unsuccessful",
+          "promptRef": "takingControlOfGoodsWarrantOfControlWasTriedAndUnsuccessful",
+          "value": "true"
+        },
+        {
+          "id": "c10b4c83-1856-4ca9-9592-d8b8183a0324",
+          "label": "Reasons",
+          "promptRef": "reasons",
+          "value": "reasons for TCG"
+        }
+      ],
+      "resultDefinitionId": "a1c41f6b-6347-4c2a-b2b0-12190b5bf17d",
+      "resultLabel": "Taking control of goods (warrant of control)",
+      "resultLineId": "d41479d5-4fe6-4dfb-b20c-53cff5146e8f",
+      "shadowListed": false,
+      "sharedDate": "2022-09-29",
+      "shortCode": "TCG"
+    },
+    {
+      "caseId": "CASE_ID",
+      "childResultLineIds": [
+      ],
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "offenceId": "OFFENCE_ID",
+      "orderedDate": "ORDERED_DATE",
+      "prompts": [
+        {
+          "id": "40c78a73-c1e4-4fdd-8361-d27b2ca8a72e",
+          "label": "An application to the High Court or County Court was tried and unsuccessful",
+          "promptRef": "anApplicationToTheHighCourtOrCountyCourtWasTriedAndUnsuccessful",
+          "value": "true"
+        },
+        {
+          "id": "c10b4c83-1856-4ca9-9592-d8b8183a0324",
+          "label": "Reasons",
+          "promptRef": "reasons",
+          "value": "reasons for AHCC"
+        }
+      ],
+      "resultDefinitionId": "860f3376-9833-49eb-a04e-19dc659104f4",
+      "resultLabel": "Application to High Court or County Court",
+      "resultLineId": "59a91352-36ea-4a12-b049-3cc03fe0ebb4",
+      "shadowListed": false,
+      "sharedDate": "2022-09-29",
+      "shortCode": "AHCC"
+    }
+  ]
+}

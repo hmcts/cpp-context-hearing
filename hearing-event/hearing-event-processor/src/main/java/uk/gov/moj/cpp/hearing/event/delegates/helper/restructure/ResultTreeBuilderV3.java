@@ -33,7 +33,6 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.JudicialResultPromptDuratio
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelperV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelperV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier;
-import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelperV3;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.SecondaryCJSCode;
@@ -176,7 +175,6 @@ public class ResultTreeBuilderV3 {
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withPostHearingCustodyStatus(resultDefinition.getPostHearingCustodyStatus())
-                .withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine))
                 .withLifeDuration(getBooleanValue(resultDefinition.getLifeDuration(), false))
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
                 .withTerminatesOffenceProceedings(getBooleanValue(resultDefinition.getTerminatesOffenceProceedings(), false))
@@ -192,7 +190,9 @@ public class ResultTreeBuilderV3 {
                 .withCanBeSubjectOfBreach(resultDefinition.getCanBeSubjectOfBreach())
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
-                .withLevel(resultDefinition.getLevel());
+                .withLevel(resultDefinition.getLevel())
+                .withShortCode(resultDefinition.getShortCode())
+                .withResultTextTemplate(resultDefinition.getResultTextTemplate());
     }
 
     private void checkResultDefinition(final ResultLine2 resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {

@@ -1,0 +1,61 @@
+{
+  "caseId": "CASE_ID",
+  "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+  "draftResult": "{}",
+  "hearingDay": "2022-09-28",
+  "hearingId": "HEARING_ID",
+  "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+  "offenceId": "OFFENCE_ID",
+  "shadowListed" : false,
+  "resultLines": [
+    {
+      "caseId": "CASE_ID",
+      "childResultLineIds": [
+      ],
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "offenceId": "OFFENCE_ID",
+      "orderedDate": "ORDERED_DATE",
+      "prompts": [
+        {
+          "id": "a528bbfd-54b8-45d6-bad0-26a3a95eb274",
+          "label": "Date of hearing",
+          "promptRef": "dateOfHearing",
+          "value": "2022-02-02"
+        },
+        {
+          "id": "bf3d1854-77ce-44ea-8bf7-e2afe595e45d",
+          "label": "Reasons",
+          "promptRef": "reasons",
+          "value": "reason for test"
+        },
+        {
+          "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+          "label": "Time of hearing",
+          "promptRef": "timeOfHearing",
+          "value": "10:00"
+        },
+        {
+          "id": "f869f54d-d209-477b-9bc1-9f611d838cde",
+          "label": "County Court where the proceedings have been transferred to organisation name",
+          "promptRef": "countycourtwheretheproceedingshavebeentransferredtoOrganisationName",
+          "value": "Bexley Court"
+        },
+        {
+          "id": "f869f54d-d209-477b-9bc1-9f611d838cde",
+          "label": "County Court where the proceedings have been transferred to address line 1",
+          "promptRef": "countycourtwheretheproceedingshavebeentransferredtoAddress1",
+          "value": "line 1"
+        }
+      ],
+      "resultDefinitionId": "482983fc-6a69-4c37-8c17-95109bf70d88",
+      "resultLabel": "Anti-social behaviour injunction transferred",
+      "resultLineId": "b645746a-86c8-474c-baae-6abe8209db9f",
+      "shadowListed": false,
+      "sharedDate": "2022-09-29",
+      "shortCode": "ABTR"
+    }
+  ]
+}

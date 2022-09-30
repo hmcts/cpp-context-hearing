@@ -1,80 +1,35 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
-import static java.lang.Boolean.TRUE;
-import static java.lang.String.format;
-import static java.lang.System.lineSeparator;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsLast;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
+import java.util.Objects;
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Predicate;
 
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelper {
-
-    public static final Predicate<uk.gov.justice.core.courts.Prompt> PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptRef());
 
     private ResultTextHelper(){
         //required by sonar
     }
 
-    public static String getResultText(final ResultDefinition resultDefinition, final ResultLine resultLine) {
-
-        final List<Prompt> referencePromptList = resultDefinition
-                .getPrompts()
-                .stream()
-                .filter(p -> !TRUE.equals(p.isHidden()))
-                .sorted(comparing(Prompt::getSequence, nullsLast(naturalOrder())))
-                .filter(Objects::nonNull)
-                .collect(toList());
-
-        final List<UUID> referenceList = referencePromptList
-                .stream()
-                .map(Prompt::getId)
-                .collect(toList());
-
-        final List<uk.gov.justice.core.courts.Prompt> sortedPromptList = resultLine
-                .getPrompts()
-                .stream()
-                .filter(p -> referenceList.contains(p.getId()))
-                .sorted(new UUIDComparator(referenceList))
-                .collect(toList());
-
-        final String sortedPrompts = sortedPromptList
-                .stream()
-                .filter(PROMPT_PREDICATE)
-                .map(p -> format("%s %s", p.getLabel(), getPromptValue(p, referencePromptList)))
-                .collect(joining(lineSeparator()));
-
-        final String res = getResultText(resultDefinition.getLabel(), sortedPrompts);
-
-        return res;
+    public static void setResultText(final List<TreeNode<ResultLine>> treeNodeList){
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .forEach(ResultTextHelper::setResultText);
     }
 
-    public static String getResultText(final String label, final String sortedPrompts){
-        return format("%s%s%s", label, lineSeparator(), sortedPrompts);
-    }
-
-    private static String getPromptValue(final uk.gov.justice.core.courts.Prompt prompt, final List<Prompt> referencePromptList) {
-        final Optional<Prompt> optionalPrompt = referencePromptList.stream().filter(p -> p.getId().equals(prompt.getId())).findFirst();
-        final String originalValue = prompt.getValue();
-
-        if (optionalPrompt.isPresent() && "BOOLEAN".equalsIgnoreCase(optionalPrompt.get().getType())) {
-            return convertBooleanPromptValue(originalValue);
+    private static void setResultText(final TreeNode<ResultLine> node) {
+        node.getChildren().forEach(ResultTextHelper::setResultText);
+        final String resultTemplate = node.getJudicialResult().getResultTextTemplate();
+        if(Objects.isNull(resultTemplate)){
+            return;
         }
-        return originalValue;
+        final ResultTextParseRule<ResultLine> resultTextParseRule = new ResultTextParseRule<>();
+        final String newResultText = resultTextParseRule.getNewResultText(node, resultTemplate);
+        node.getJudicialResult().setResultText("".equals(newResultText) ? null : newResultText);
     }
 
 }
