@@ -113,8 +113,9 @@ public class HearingEventProcessor {
                 .setHearingId(hearingId);
 
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
-
+        if(LOGGER.isErrorEnabled())  {LOGGER.error("raising public event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
         this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
+        if(LOGGER.isErrorEnabled()) {LOGGER.error("raised public event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
     }
 
     @Handles("hearing.draft-result-deleted-v2")
