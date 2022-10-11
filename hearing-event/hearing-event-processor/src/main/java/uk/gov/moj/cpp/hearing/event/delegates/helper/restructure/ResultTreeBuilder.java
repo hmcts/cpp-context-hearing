@@ -237,7 +237,9 @@ public class ResultTreeBuilder {
                 .withCanBeSubjectOfBreach(resultDefinition.getCanBeSubjectOfBreach())
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
-                .withLevel(resultDefinition.getLevel());
+                .withLevel(resultDefinition.getLevel())
+                .withShortCode(resultDefinition.getShortCode())
+                .withResultTextTemplate(resultDefinition.getResultTextTemplate());
     }
 
     private void checkResultDefinition(final ResultLine resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {

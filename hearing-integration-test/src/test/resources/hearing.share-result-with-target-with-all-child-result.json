@@ -12,6 +12,7 @@
       "caseId": "CASE_ID",
       "childResultLineIds": [
         "d41479d5-4fe6-4dfb-b20c-53cff5146e8f",
+        "d41479d5-4fe6-4dfb-b20c-53cff5146e9f",
         "59a91352-36ea-4a12-b049-3cc03fe0ebb4"
       ],
       "isComplete": true,
@@ -113,6 +114,37 @@
       "shadowListed": false,
       "sharedDate": "2022-09-29",
       "shortCode": "TCG"
+    },
+    {
+      "caseId": "CASE_ID",
+      "childResultLineIds": [
+      ],
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "offenceId": "OFFENCE_ID",
+      "orderedDate": "ORDERED_DATE",
+      "prompts": [
+        {
+          "id": "6211bbd2-3bbf-4ed8-bcea-16d021c84fd1",
+          "label": "Taking control of goods (warrant of control) was tried and unsuccessful",
+          "promptRef": "takingControlOfGoodsWarrantOfControlWasTriedAndUnsuccessful",
+          "value": "true"
+        },
+        {
+          "id": "c10b4c83-1856-4ca9-9592-d8b8183a0324",
+          "label": "Reasons",
+          "promptRef": "reasons",
+          "value": "reasons for TCGG"
+        }
+      ],
+      "resultDefinitionId": "a1c41f6b-6347-4c2a-b2b0-12190b5bf17e",
+      "resultLabel": "Taking control of goods (warrant of control)",
+      "resultLineId": "d41479d5-4fe6-4dfb-b20c-53cff5146e9f",
+      "shadowListed": false,
+      "sharedDate": "2022-09-29",
+      "shortCode": "TCGG"
     },
     {
       "caseId": "CASE_ID",

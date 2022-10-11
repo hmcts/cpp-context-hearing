@@ -332,6 +332,48 @@ public class ResultTextHelperV3Test {
     }
 
     @Test
+    public void shouldSetResultTextForFixedResultDirectiveWithAlwaysPublishedResults(){
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(new TreeNode<>(randomUUID(), null));
+        treeNodeList.get(0).setJudicialResult(JudicialResult.judicialResult()
+                .withResultTextTemplate("result Text with %AllChildText%")
+                .build()
+        );
+
+        treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMTS, "make Of Vehicle", "No", null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirectiveWithAlwaysPublished(TEXT_FOR_PROMTS, "make Of Vehicle", "No", null, null,  null));
+
+        ResultTextHelperV3.setResultText(treeNodeList);
+
+        assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), is ("To pay costs to Organisation Name"));
+        assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), is ("Vehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
+        assertThat(treeNodeList.get(0).getChildren().get(2).getJudicialResult().getResultText(), is ("NEXT - Result Label alwaysPublished" +System.lineSeparator() + "Vehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
+        assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), is ("result Text with To pay costs to Organisation Name, Vehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
+
+    }
+
+    @Test
+    public void shouldSetResultTextForFixedResultDirectiveWithEmptyValuesAndAlwaysPublished(){
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(new TreeNode<>(randomUUID(), null));
+        treeNodeList.get(0).setJudicialResult(JudicialResult.judicialResult()
+                .withResultTextTemplate("result Text with %AllChildText%")
+                .build()
+        );
+
+        treeNodeList.get(0).addChildren(getTreeNodesForNameAddress(null, null, null, null, "~Name"));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMTS_WITH_ALL_EMPTY, null, null, null, null,  null));
+        treeNodeList.get(0).addChildren(getTreeNodesForPromptDirectiveWithAlwaysPublished(TEXT_FOR_PROMTS_WITH_ALL_EMPTY, null, null, null, null,  null));
+
+        ResultTextHelperV3.setResultText(treeNodeList);
+
+        assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), is (nullValue()));
+        assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), is (nullValue()));
+        assertThat(treeNodeList.get(0).getChildren().get(2).getJudicialResult().getResultText(), is ("NEXT - Result Label alwaysPublished"));
+        assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), is (nullValue()));
+
+    }
+
+    @Test
     public void shouldSetResultTextWithResultLabel(){
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(new TreeNode<>(randomUUID(), null));
 
@@ -365,6 +407,14 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(new TreeNode<>(randomUUID(), null));
 
         treeNodeList.get(0).setJudicialResult(getJudicialResult(templateText, makeOfVehicle, vehicleToBeReleasedOnPaymentOfTheChargesDue, makeOfSecondVehicle, vehicleRegistrationOfSecondVehicle, reasons));
+        return treeNodeList;
+    }
+
+    private List<TreeNode<ResultLine2>> getTreeNodesForPromptDirectiveWithAlwaysPublished(final String templateText, final String makeOfVehicle, final String vehicleToBeReleasedOnPaymentOfTheChargesDue,
+                                                                       final String makeOfSecondVehicle, final String vehicleRegistrationOfSecondVehicle, final String reasons) {
+        final List<TreeNode<ResultLine2>> treeNodeList = singletonList(new TreeNode<>(randomUUID(), null));
+
+        treeNodeList.get(0).setJudicialResult(getJudicialResultWithAlwaysPublished(templateText, makeOfVehicle, vehicleToBeReleasedOnPaymentOfTheChargesDue, makeOfSecondVehicle, vehicleRegistrationOfSecondVehicle, reasons));
         return treeNodeList;
     }
 
@@ -492,4 +542,60 @@ public class ResultTextHelperV3Test {
                 .build();
     }
 
+    private JudicialResult getJudicialResultWithAlwaysPublished(final String templateText, final String makeOfVehicle, final String vehicleToBeReleasedOnPaymentOfTheChargesDue,
+                                             final String makeOfSecondVehicle, final String vehicleRegistrationOfSecondVehicle, final String reasons) {
+        return JudicialResult.judicialResult()
+                .withResultTextTemplate(templateText)
+                .withShortCode("NEXT")
+                .withLabel("Result Label alwaysPublished")
+                .withAlwaysPublished(true)
+                .withJudicialResultPrompts(Arrays.asList(judicialResultPrompt()
+                        .withLabel("Make of vehicle")
+                        .withPromptReference("makeOfVehicle")
+                        .withValue(makeOfVehicle)
+                        .withType("TXT")
+                        .build(), judicialResultPrompt()
+                        .withLabel("Vehicle registration")
+                        .withPromptReference("vehicleRegistration")
+                        .withValue("vehicle Registration Value")
+                        .withType("TXT")
+                        .build(), judicialResultPrompt()
+                        .withLabel("Clamping order made on")
+                        .withPromptReference("clampingOrderMadeOn")
+                        .withType("DATE")
+                        .withValue("01-01-2012")
+                        .build(), judicialResultPrompt()
+                        .withPromptReference("vehicleToBeReleasedOnPaymentOfTheChargesDue")
+                        .withType("BOOLEAN")
+                        .withLabel("Vehicle to be released on payment of the charges due")
+                        .withValue(vehicleToBeReleasedOnPaymentOfTheChargesDue)
+                        .build(), judicialResultPrompt()
+                        .withPromptReference("vehicleToBeReleasedForthwithWithoutPaymentOfAnyChargesDue")
+                        .withLabel("Vehicle to be released forthwith, without payment of any charges due")
+                        .withType("BOOLEAN")
+                        .withValue("Yes")
+                        .build(), judicialResultPrompt()
+                        .withLabel("Additional information")
+                        .withPromptReference("additionalInformation")
+                        .withType("TXT")
+                        .withValue("text prompt")
+                        .build(), judicialResultPrompt()
+                        .withLabel("Make of second vehicle")
+                        .withPromptReference("makeOfSecondVehicle")
+                        .withType("TXT")
+                        .withValue(makeOfSecondVehicle)
+                        .build(), judicialResultPrompt()
+                        .withLabel("Vehicle registration of second vehicle")
+                        .withPromptReference("vehicleRegistrationOfSecondVehicle")
+                        .withType("TXT")
+                        .withValue(vehicleRegistrationOfSecondVehicle)
+                        .build(), judicialResultPrompt()
+                        .withLabel("Reasons")
+                        .withPromptReference("reasons")
+                        .withType("TXT")
+                        .withValue(reasons)
+                        .build())
+                )
+                .build();
+    }
 }

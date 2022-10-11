@@ -238,9 +238,11 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("TCGG - Taking control of goods (warrant of control)" +  System.lineSeparator() + "Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCGG."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[3].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+
         }
 
     }

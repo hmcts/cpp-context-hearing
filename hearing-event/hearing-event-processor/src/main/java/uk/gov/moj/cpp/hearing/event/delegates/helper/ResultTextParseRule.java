@@ -5,6 +5,7 @@ import static java.lang.Boolean.parseBoolean;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsLast;
+import static java.util.Optional.ofNullable;
 
 
 import java.util.List;
@@ -96,6 +97,7 @@ public class ResultTextParseRule <T>{
         switch (childCode) {
             case "AllChildText" :
                 return node.getChildren().stream()
+                        .filter(child -> ! ofNullable(child.getJudicialResult().getAlwaysPublished()).orElse(false))
                         .map(child -> child.getJudicialResult().getResultText())
                         .filter(Objects::nonNull)
                         .collect(Collectors.joining(", "));
