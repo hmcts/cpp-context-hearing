@@ -4,6 +4,7 @@ import static javax.json.Json.createArrayBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 import static uk.gov.moj.cpp.FeatureToggle.REUSE_OF_INFORMATION;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
@@ -27,6 +28,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.RecorderChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
+import uk.gov.moj.cpp.hearing.query.api.service.referencedata.PIEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
@@ -39,6 +41,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 
 import java.util.ArrayList;
@@ -61,6 +64,7 @@ import org.slf4j.LoggerFactory;
 public class HearingQueryApi {
     public static final String STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES = "stagingenforcement.defendant.outstanding-fines";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryApi.class);
+    private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
 
     @Inject
     private Requester requester;
@@ -91,6 +95,9 @@ public class HearingQueryApi {
 
     @Inject
     private XhibitEventMapperCache xhibitEventMapperCache;
+
+    @Inject
+    private PIEventMapperCache piEventMapperCache;
 
     @Inject
     private UsersAndGroupsService usersAndGroupsService;
@@ -132,7 +139,7 @@ public class HearingQueryApi {
     public JsonEnvelope findHearingsForFuture(final JsonEnvelope query) {
         final HearingTypes hearingTypes = referenceDataService.getAllHearingTypes();
 
-        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearingsForFuture(query,hearingTypes);
+        final Envelope<GetHearings> envelope = this.hearingQueryView.findHearingsForFuture(query, hearingTypes);
         return getJsonEnvelope(envelope);
     }
 
@@ -148,7 +155,7 @@ public class HearingQueryApi {
 
         final boolean ddJorRecorder = isDDJorRecorder(permissions);
 
-        final List<UUID> accessibleCasesAndApplications= getAccessibleCasesAndApplications(userId, ddJorRecorder, permissions);
+        final List<UUID> accessibleCasesAndApplications = getAccessibleCasesAndApplications(userId, ddJorRecorder, permissions);
 
         final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCasesAndApplications, ddJorRecorder);
         return getJsonEnvelope(envelope);
@@ -304,7 +311,7 @@ public class HearingQueryApi {
         return this.hearingQueryView.retrieveCustodyTimeLimit(query);
     }
 
-    @SuppressWarnings({"squid:S2629","squid:CallToDeprecatedMethod"})
+    @SuppressWarnings({"squid:S2629", "squid:CallToDeprecatedMethod"})
     private JsonEnvelope requestStagingEnforcementToGetOutstandingFines(final JsonEnvelope query, final JsonObject viewResponseEnvelopePayload) {
         final JsonEnvelope enforcementResultEnvelope;
         final JsonEnvelope enforcementRequestEnvelope = enveloper.withMetadataFrom(query, STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES)
@@ -346,5 +353,17 @@ public class HearingQueryApi {
     public JsonEnvelope getFutureHearingsByCaseIds(final JsonEnvelope query) {
         final Envelope<GetHearings> envelope = this.hearingQueryView.getFutureHearingsByCaseIds(query);
         return getJsonEnvelope(envelope);
+    }
+
+    @Handles("hearing.prosecution-case-by-hearingid")
+    public JsonEnvelope getProsecutionCaseForHearing(final JsonEnvelope query) {
+
+        final Optional<UUID> hearingEventDefinitionId = getUUID(query.payloadAsJsonObject(), FIELD_HEARING_EVENT_DEFINITION_ID);
+        final Set<UUID> cppHearingEventIds = piEventMapperCache.getCppHearingEventIds();
+        if ((hearingEventDefinitionId.isPresent()) && cppHearingEventIds.contains(hearingEventDefinitionId.get())) {
+            final Envelope<ProsecutionCaseResponse> envelope = this.hearingQueryView.getProsecutionCaseForHearing(query);
+            return getJsonEnvelope(envelope);
+        }
+        return query;
     }
 }

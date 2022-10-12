@@ -20,6 +20,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
@@ -53,6 +54,7 @@ public class ReferenceDataService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceDataService.class);
     private static final String GET_ALL_CRACKED_INEFFECTIVE_TRIAL_TYPES = "referencedata.query.cracked-ineffective-vacated-trial-types";
     private static final String XHIBIT_EVENT_MAPPINGS = "referencedata.query.cp-xhibit-hearing-event-mappings";
+    private static final String PI_EVENT_MAPPINGS = "referencedata.query.cp-pi-hearing-event-mappings"; //CCT-877 - TBD
     private static final String REFERENCEDATA_QUERY_HEARING_TYPES ="referencedata.query.hearing-types";
     private static final String REFERENCEDATA_QUERY_COURT_CENTRES = "referencedata.query.courtrooms";
     private static final String REFERENCEDATA_GET_ALL_RESULT_DEFINITIONS = "referencedata.get-all-result-definitions";
@@ -108,6 +110,18 @@ public class ReferenceDataService {
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, createObjectBuilder().build());
 
         return requester.requestAsAdmin(jsonEnvelope, XhibitEventMappingsList.class).payload();
+    }
+
+    //CCT-877 - TBD
+    public PIEventMappingsList listAllPIEventMappings() {
+        final Metadata metadata = JsonEnvelope.metadataBuilder()
+                .withName(PI_EVENT_MAPPINGS)
+                .withId(randomUUID())
+                .build();
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadata, createObjectBuilder().build());
+
+        return requester.requestAsAdmin(jsonEnvelope, PIEventMappingsList.class).payload();
     }
 
     public JsonObject getAllCourtRooms(final JsonEnvelope eventEnvelope) {

@@ -7,6 +7,7 @@ import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.core.AllOf.allOf;
 import static uk.gov.justice.services.common.http.HeaderConstants.USER_ID;
 import static uk.gov.justice.services.test.utils.core.http.BaseUriProvider.getBaseUri;
@@ -22,11 +23,21 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventForOverrideCourtRoom;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
+import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
+import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
+import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logEventForOverrideCourtRoom;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
+import static uk.gov.moj.cpp.hearing.it.UseCases.logPIEvent;
+import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForCrowns;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetPIReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
@@ -65,6 +76,7 @@ public class HearingEventsIT extends AbstractIT {
     public static void setupPerClass() {
         UUID userId = randomUUID();
         setupAsAuthorisedUser(userId);
+        stubGetPIReferenceDataEventMappings();
     }
 
     @Test
@@ -320,7 +332,7 @@ public class HearingEventsIT extends AbstractIT {
         final LogEventCommand logEventCommand = logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
                 hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null);
 
-        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), "RL1" ,"note");
+        final HearingEvent hearingEvent = new HearingEvent(logEventCommand.getHearingEventId(), "RL1", "note");
 
         final String commandAPIEndPoint = MessageFormat.format(
                 ENDPOINT_PROPERTIES.getProperty("hearing.update-hearing-events"),
@@ -507,8 +519,76 @@ public class HearingEventsIT extends AbstractIT {
                         payload().isJson(allOf(
                                 withJsonPath("$.hearingState", is(SHARED_AMEND_LOCKED_ADMIN_ERROR.toString())
 
-                        )))
+                                )))
                 );
 
     }
+
+    @Test
+    public void shouldpublishLiveCaseUpdateEvent_ForCrown() {
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForCrowns()));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition, notNullValue());
+
+        final LogEventCommand logEventCommand = logPIEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null, hearingEventDefinition.getActionLabel());
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
+                "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                                withJsonPath("$.events", hasSize(1)),
+                                withJsonPath("$.events[0].hearingEventId", is(logEventCommand.getHearingEventId().toString())),
+                                withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
+                                withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
+                                withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
+                                withJsonPath("$.events[0].defenceCounselId", is(logEventCommand.getDefenceCounselId().toString())),
+                                withJsonPath("$.events[0].alterable", is(false))
+                        ))
+                );
+    }
+
+    @Test
+    public void shouldNotPublishLiveCaseUpdateEvent_ForCrown() {
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateForCrowns()));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Arraign defendant.name");
+
+        assertThat(hearingEventDefinition, notNullValue());
+
+        final LogEventCommand logEventCommand = logPIEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, EVENT_TIME, null, hearingEventDefinition.getActionLabel());
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log", hearingOne.getHearingId(), EVENT_TIME.toLocalDate()),
+                "application/vnd.hearing.hearing-event-log+json").withHeader(USER_ID, getLoggedInUser()))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
+                                withJsonPath("$.events", hasSize(1)),
+                                withJsonPath("$.events[0].hearingEventId", is(logEventCommand.getHearingEventId().toString())),
+                                withJsonPath("$.events[0].recordedLabel", is(logEventCommand.getRecordedLabel())),
+                                withJsonPath("$.events[0].eventTime", is(ZonedDateTimes.toString(logEventCommand.getEventTime()))),
+                                withJsonPath("$.events[0].lastModifiedTime", is(ZonedDateTimes.toString(logEventCommand.getLastModifiedTime()))),
+                                withJsonPath("$.events[0].defenceCounselId", is(logEventCommand.getDefenceCounselId().toString())),
+                                withJsonPath("$.events[0].alterable", is(false))
+                        ))
+                );
+    }
+
+
 }

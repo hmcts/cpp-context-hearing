@@ -259,3 +259,11 @@ rule "Query - API - hearing.get.future-hearings"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Query - API - hearing.prosecution-case-by-hearingid"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.prosecution-case-by-hearingid");
+  then
+    $outcome.setSuccess(true);
+end

@@ -650,6 +650,15 @@ public class TestTemplates {
                     ).build());
         }
 
+        public static InitiateHearingCommand initiateHearingTemplateForCrowns() {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)
+                    ).build());
+        }
+
         public static InitiateHearingCommand initiateHearingTemplateWithParam(final UUID courtAndRoomId, final String courtRoomName, final LocalDate localDate) throws NoSuchAlgorithmException {
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearingWithParam(defaultArguments()
