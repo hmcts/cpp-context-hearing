@@ -163,7 +163,6 @@ public class HearingEventStepDefinitions {
 
     private static List<HearingEventDefinition> hearingDefinitions() {
         return asList(
-                new HearingEventDefinition(randomUUID(), RECORDED_LABEL_START_HEARING, INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(randomUUID(), RECORDED_LABEL_END_HEARING, INTEGER.next(), RECORDED_LABEL_END_HEARING, "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID, "Start Hearing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(randomUUID(), "Identify defendant", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
