@@ -249,6 +249,38 @@
             ],
             "reference": "fixedDate",
             "welshLabel":"TBD"
+        },
+        {
+            "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
+            "label": "Total custodial period",
+            "sequence":15,
+            "mandatory":false,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference":"totalCustodialPeriod",
+            "type":"TXT",
+            "welshLabel":"TBD"
+        },
+        {
+            "id":"d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+            "label":"End Date",
+            "mandatory":false,
+            "type":"DATE",
+            "sequence":16,
+            "userGroups":[
+                "Court Clerks",
+                "Probation Admin",
+                "Police Admin",
+                "Victims & Witness Care Admin",
+                "Youth Offending Service Admin"
+            ],
+            "reference":"endDate",
+            "welshLabel":"TBD"
         }
     ]
 }

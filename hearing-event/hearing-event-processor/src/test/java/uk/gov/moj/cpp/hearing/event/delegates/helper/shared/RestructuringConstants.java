@@ -26,6 +26,7 @@ public class RestructuringConstants {
     public static final String IMP_TIMP_HEARING_RESULTS_SHARED_JSON = "imp-timp-hearing-results-shared.json";
     public static final String HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON = "hearing.results-shared_multiple_defendant.json";
     public static final String HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON = "hearing.results-shared_multiple_defendant_multiple_case.json";
+    public static final String HEARING_RESULTS_NEW_REVIEW_HEARING_JSON = "hearing.results-shared_new_review_hearing.json";
     public static final String RESULT_DEFINITIONS_JSON = "result-definitions.json";
     public static final String SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON = "scenario1-shortCode-SendToCCOnCB.json";
     public static final String HEARING_RESULTS_SHARED_WITH_NO_PROMPTS_JSON = "hearing.results-shared-with-no-prompts.json";
@@ -35,7 +36,6 @@ public class RestructuringConstants {
     public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE = "hearing.results-shared-with-acquittal-date.json";
     public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTAPPLICATIONCASES = "hearing.results-shared-with-acquittal-date-for-courtapplication-cases.json";
     public static final String HEARING_RESULTS_SHARED_WITH_ACQUITTAL_DATE_FOR_COURTORDER = "hearing.results-shared-with-acquittal-date-for-courtorder.json";
-    public static final String HEARING_RESULTS_NEW_REVIEW_HEARING_JSON = "hearing.results-shared_new_review_hearing.json";
     public static final String HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON = "hearing.results-shared_new_review_hearing_leaf_nod_published.json";
     public static final String DIRS_HEARING_JSON = "DIRS-hearing.json";
     public static final String FIXED_LIST_JSON = "fixed-list.json";

@@ -1,5 +1,17 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.Target.target;
+import static uk.gov.justice.core.courts.Target2.target2;
+import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
+
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -49,17 +61,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.core.courts.Target.target;
-import static uk.gov.justice.core.courts.Target2.target2;
 
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
@@ -391,9 +392,9 @@ public class ResultsSharedDelegate implements Serializable {
                 }
         );
 
-        this.momento.setHearing(this.momento.getHearing());
-        final Hearing hearing =  this.momento.getHearing();
+        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setYouthCourt(youthCourt);
+        hearing.setHasSharedResults(true);
 
         final ResultsShared.Builder builder = ResultsShared.builder()
                 .withHearingId(hearingId)
@@ -436,22 +437,23 @@ public class ResultsSharedDelegate implements Serializable {
                 }
         );
 
+        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
+        hearing.setHasSharedResults(true);
+
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        this.momento.setHearing(this.momento.getHearing());
-        final Hearing hearing =  this.momento.getHearing();
         final ResultsSharedV2.Builder resultsSharedV2Builder = ResultsSharedV2.builder()
                 .withIsReshare(previouslyShared)
                 .withHearingId(hearingId)
                 .withSharedTime(sharedTime)
-                .withHearingDay(hearingDay)
                 .withCourtClerk(courtClerk)
                 .withVariantDirectory(calculateNewVariants(targetsInAggregate))
                 .withHearing(hearing)
                 .withTargets(new ArrayList<>(finalTargets.values()))
                 .withSavedTargets(getSavedTargetsForHearingDay(momento.getMultiDaySavedTargets(), hearingDay))
                 .withCompletedResultLinesStatus(getCompletedResultLineStatusForHearingDay(this.momento.getMultiDayCompletedResultLinesStatus(), hearingDay))
-                .withNewAmendmentResults(newAmendmentResults);
+                .withNewAmendmentResults(newAmendmentResults)
+                .withHearingDay(hearingDay);
         if (!defendantDetailsChanged.isEmpty()) {
             resultsSharedV2Builder.withDefendantDetailsChanged(defendantDetailsChanged);
         }
@@ -489,9 +491,9 @@ public class ResultsSharedDelegate implements Serializable {
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
 
-        this.momento.setHearing(this.momento.getHearing());
-        final Hearing hearing =  this.momento.getHearing();
+        final Hearing hearing = dedupAllApplications(this.momento.getHearing());
         hearing.setYouthCourt(youthCourt);
+        hearing.setHasSharedResults(true);
 
         final ResultsSharedV3.Builder resultsSharedV2Builder = ResultsSharedV3.builder()
                 .withIsReshare(previouslyShared)

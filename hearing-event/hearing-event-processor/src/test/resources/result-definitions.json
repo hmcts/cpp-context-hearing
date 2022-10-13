@@ -476,6 +476,22 @@
           "associatedWithReferenceData": false
         },
         {
+          "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label" : "Hearing type",
+          "welshLabel" : null,
+          "resultPromptRule" : "mandatory",
+          "type" : "TXT",
+          "sequence" : 500,
+          "duration" : null,
+          "wordGroup" : null,
+          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+          "fixedListId" : null,
+          "qual" : null,
+          "reference" : "HTYPE",
+          "courtExtract" : "Y",
+          "durationSequence" : null
+        },
+        {
           "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
           "label": "Time of hearing",
           "welshLabel": "Amser y gwrandawiad",
@@ -1025,7 +1041,24 @@
           "hidden": false,
           "nameEmail": false,
           "associatedWithReferenceData": false
+        },
+        {
+          "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label" : "Hearing type",
+          "welshLabel" : null,
+          "resultPromptRule" : "mandatory",
+          "type" : "TXT",
+          "sequence" : 500,
+          "duration" : null,
+          "wordGroup" : null,
+          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+          "fixedListId" : null,
+          "qual" : null,
+          "reference" : "HTYPE",
+          "courtExtract" : "Y",
+          "durationSequence" : null
         }
+
       ],
       "welshLabel": "Adsefydlu defnyddiwr cyffuriau - preswyl gydag adolygiad",
       "financial": "N",
@@ -1539,6 +1572,22 @@
           "hidden": false,
           "nameEmail": false,
           "associatedWithReferenceData": false
+        },
+        {
+          "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label" : "Hearing type",
+          "welshLabel" : null,
+          "resultPromptRule" : "mandatory",
+          "type" : "TXT",
+          "sequence" : 500,
+          "duration" : null,
+          "wordGroup" : null,
+          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+          "fixedListId" : null,
+          "qual" : null,
+          "reference" : "HTYPE",
+          "courtExtract" : "Y",
+          "durationSequence" : null
         }
       ],
       "welshLabel": "Adsefydlu defnyddiwr cyffuriau - dibreswyl gydag adolygiad",
@@ -2389,6 +2438,22 @@
           "hidden": false,
           "nameEmail": false,
           "associatedWithReferenceData": false
+        },
+        {
+          "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label" : "Hearing type",
+          "welshLabel" : null,
+          "resultPromptRule" : "mandatory",
+          "type" : "TXT",
+          "sequence" : 500,
+          "duration" : null,
+          "wordGroup" : null,
+          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+          "fixedListId" : null,
+          "qual" : null,
+          "reference" : "HTYPE",
+          "courtExtract" : "Y",
+          "durationSequence" : null
         },
         {
           "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
@@ -28832,6 +28897,26 @@
           "jurisdiction": "B",
           "hidden": false,
           "nameEmail": false,
+          "associatedWithReferenceData": false},
+        {
+
+          "id": "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label": "REV",
+          "welshLabel": "REV",
+          "resultPromptRule": "optional",
+          "type": "TXT",
+          "sequence": 400,
+          "financial": "N",
+          "reference": "HTYPE",
+          "userGroups": [
+
+          ],
+          "min": "1",
+          "max": "1000",
+          "courtExtract": "Y",
+          "jurisdiction": "B",
+          "hidden": false,
+          "nameEmail": false,
           "associatedWithReferenceData": false
         }
       ],
@@ -36814,6 +36899,22 @@
             "Youth Offending Service Admin"
           ],
           "welshLabel":"TBD"
+        },
+        {
+          "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
+          "label" : "Hearing type",
+          "welshLabel" : null,
+          "resultPromptRule" : "mandatory",
+          "type" : "TXT",
+          "sequence" : 500,
+          "duration" : null,
+          "wordGroup" : null,
+          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+          "fixedListId" : null,
+          "qual" : null,
+          "reference" : "HTYPE",
+          "courtExtract" : "Y",
+          "durationSequence" : null
         },
         {
           "id": "f622f008-f8e7-4f34-a7df-df85a7ed4d47",

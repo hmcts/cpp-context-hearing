@@ -19,7 +19,7 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
-@SuppressWarnings({"squid:S00112", "squid:S1181"})
+@SuppressWarnings({"squid:S00112", "squid:S1181", "squid:CallToDeprecatedMethod"})
 public class HearingTypeReverseLookup {
 
     public static final String GET_HEARING_TYPES_ID = "referencedata.query.hearing-types";
@@ -56,6 +56,21 @@ public class HearingTypeReverseLookup {
                 }
             }
         } catch (Throwable tw) {
+            throw new RuntimeException(String.format("failed to find hearing type with description %s", typeName), tw);
+        }
+        return null;
+    }
+
+    public Integer getDefaultDurationInMin(JsonEnvelope context,  String typeName)  {
+        typeName  = normalize(typeName);
+        try {
+            final HearingTypesResult hearingTypeResult = hearingTypesResult(context);
+            for (final HearingTypes hearingTypes : hearingTypeResult.getHearingTypes()) {
+                if (typeName.equals(normalize(hearingTypes.getHearingDescription()))) {
+                    return hearingTypes.getDefaultDurationMin();
+                }
+            }
+        }catch (Throwable tw) {
             throw new RuntimeException(String.format("failed to find hearing type with description %s", typeName), tw);
         }
         return null;

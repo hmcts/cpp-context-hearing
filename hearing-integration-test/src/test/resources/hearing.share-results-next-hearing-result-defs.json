@@ -1,0 +1,619 @@
+{
+  "hearingId": "a7237ffe-9cbf-4c97-bf05-2c3d79debea6",
+  "sharedTime": "2021-11-23T12:17:06.985Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "31ec3a16-8721-498c-8da5-f099390ee254"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "isCancelled": false,
+        "listedDurationMinutes": 20,
+        "listingSequence": 6,
+        "sittingDay": "2021-11-23T09:01:01.001Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "a7237ffe-9cbf-4c97-bf05-2c3d79debea6",
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "cpsOrganisation": "A30AB00",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2021-11-22T13:53:28.847Z",
+            "id": "012bee28-005b-4283-9fea-cec1b51a60d7",
+            "isYouth": false,
+            "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+            "offences": [
+              {
+                "arrestDate": "2004-12-09",
+                "chargeDate": "2004-12-09",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "1df702f2-5efc-45a8-8602-6baee499463b",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "offenceCode": "TW01040",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "14f241f3-5888-43e0-8f7e-535a84da164b",
+                "offenceLegislation": "Contrary to byelaw 16(6) and 31(1) of the Tyne and Wear Metro Byelaws made under sections 58 and 62 of the Tyneside Metropolitan Railway Act 1973.",
+                "offenceTitle": "Fail to carry an animal on a moving escalator on the Tyne and Wear Metro",
+                "orderIndex": 500,
+                "startDate": "2004-12-09",
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              },
+              {
+                "arrestDate": "2004-12-09",
+                "chargeDate": "2014-02-09",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "6c43a34e-1561-46ed-8453-656a963b38bd",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "offenceCode": "TW01046",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "62fa56a4-3cea-41b7-a062-4d71e8ca74bc",
+                "offenceLegislation": "Contrary to byelaw 19 and 31(1) of the Tyne and Wear Metro Byelaws made under sections 58 and 62 of the Tyneside Metropolitan Railway Act 1973.",
+                "offenceTitle": "Occupy reserved seat / berth without a valid ticket on the Tyne and Wear Metro",
+                "orderIndex": 502,
+                "startDate": "2014-02-09",
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "DTFL",
+              "bailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              },
+              "personDetails": {
+                "address": {
+                  "address1": "S34hKIaW4Q",
+                  "address2": "56Police House",
+                  "address3": "StreetDescription",
+                  "address4": "Locality2O",
+                  "address5": "TownD",
+                  "postcode": "TW14 9XD"
+                },
+                "contact": {
+                  "home": "09998021888",
+                  "mobile": "09998021889",
+                  "primaryEmail": "robert@gmail.com",
+                  "secondaryEmail": "ormsby@gmail.com",
+                  "work": "0917894278022"
+                },
+                "dateOfBirth": "1923-10-15",
+                "documentationLanguageNeeds": "ENGLISH",
+                "firstName": "John",
+                "gender": "MALE",
+                "hearingLanguageNeeds": "ENGLISH",
+                "lastName": "Smith"
+              },
+              "policeBailStatus": {
+                "code": "C",
+                "description": "Custody",
+                "id": "12e69486-4d01-3403-a50a-7419ca040635"
+              }
+            },
+            "prosecutionAuthorityReference": "DTFL",
+            "prosecutionCaseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d"
+          },
+          {
+            "aliases": [
+              {
+                "legalEntityName": "Alias0"
+              }
+            ],
+            "courtProceedingsInitiated": "2021-11-22T13:53:28.847Z",
+            "croNumber": "HNPywSYTmepy",
+            "id": "dc006638-b52d-497e-b76a-04f3791b4f26",
+            "legalEntityDefendant": {
+              "organisation": {
+                "address": {
+                  "address1": "S34hKIaW4Q",
+                  "address2": "Southern House",
+                  "address3": "Westmister  Street",
+                  "address4": "Croydon",
+                  "address5": "London",
+                  "postcode": "W1 9XD"
+                },
+                "contact": {
+                  "primaryEmail": "corp1@test.com",
+                  "secondaryEmail": "corp2@test.com",
+                  "work": "02012345675"
+                },
+                "name": "HMCTS"
+              }
+            },
+            "masterDefendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+            "offences": [
+              {
+                "arrestDate": "2015-11-19",
+                "chargeDate": "2006-05-30",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "3439e955-6740-4cf6-8fe2-7497440adc83",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "offenceCode": "TW01040",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "14f241f3-5888-43e0-8f7e-535a84da164b",
+                "offenceLegislation": "Contrary to byelaw 16(6) and 31(1) of the Tyne and Wear Metro Byelaws made under sections 58 and 62 of the Tyneside Metropolitan Railway Act 1973.",
+                "offenceTitle": "Fail to carry an animal on a moving escalator on the Tyne and Wear Metro",
+                "orderIndex": 551,
+                "startDate": "2004-12-09",
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              },
+              {
+                "arrestDate": "2004-12-09",
+                "chargeDate": "2014-02-09",
+                "count": 0,
+                "endorsableFlag": false,
+                "id": "d0206b16-1b17-4e65-99b6-b8d8609e237a",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "offenceCode": "TW01046",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "62fa56a4-3cea-41b7-a062-4d71e8ca74bc",
+                "offenceLegislation": "Contrary to byelaw 19 and 31(1) of the Tyne and Wear Metro Byelaws made under sections 58 and 62 of the Tyneside Metropolitan Railway Act 1973.",
+                "offenceTitle": "Occupy reserved seat / berth without a valid ticket on the Tyne and Wear Metro",
+                "orderIndex": 502,
+                "startDate": "2014-02-09",
+                "wording": "Has a violent past and fear that he will commit further offences and\n                interfere with witnesse"
+              }
+            ],
+            "pncId": "1773.5434126",
+            "prosecutionAuthorityReference": "CORPTFL",
+            "prosecutionCaseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d"
+          }
+        ],
+        "id": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+        "initiationCode": "C",
+        "originatingOrganisation": "0300000",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Criminal Justice Department",
+            "address2": "Derbyshire Constabulary",
+            "address3": "Butterley Hall",
+            "address4": "Ripley",
+            "address5": "Derby",
+            "postcode": "DE5 3RS"
+          },
+          "contact": {
+            "primaryEmail": "CCSU@derbyshire.pnn.police.uk"
+          },
+          "majorCreditorCode": "PO30",
+          "prosecutionAuthorityCode": "DERPF",
+          "prosecutionAuthorityId": "bdc190e7-c939-37ca-be4b-9f615d6ef40e",
+          "prosecutionAuthorityName": "Derbyshire Police",
+          "prosecutionAuthorityOUCode": "0300000",
+          "caseURN": "53NP1280921"
+        },
+        "prosecutor": {
+          "address": {
+            "address1": "King Edward Court",
+            "address2": "Nottingham",
+            "postcode": "NG1 1EL"
+          },
+          "prosecutorCode": "CPS-EM",
+          "prosecutorId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "prosecutorName": "CPS East Midlands"
+        }
+      }
+    ],
+    "type": {
+      "description": "First hearing",
+      "id": "4a0e892d-c0c5-3c51-95b8-704d8c781776"
+    }
+  },
+  "variantDirectory": [
+
+  ],
+  "completedResultLinesStatus": {
+
+  },
+  "targets": [
+    {
+      "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+      "defendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+      "draftResult": "{}",
+      "hearingDay": "2021-11-23",
+      "hearingId": "a7237ffe-9cbf-4c97-bf05-2c3d79debea6",
+      "masterDefendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+      "offenceId": "d0206b16-1b17-4e65-99b6-b8d8609e237a",
+      "resultLines": [
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+            "e7beba15-b553-41a8-89ab-ce775948f9e1"
+          ],
+          "defendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+          "offenceId": "d0206b16-1b17-4e65-99b6-b8d8609e237a",
+          "orderedDate": "2021-11-23",
+          "prompts": [
+            {
+              "id": "76f15753-1706-42fb-b922-0d56d01e5706",
+              "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
+              "value": "15 Weeks"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "13"
+            }
+          ],
+          "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+          "resultLabel": "Suspended sentence order - imprisonment",
+          "resultLineId": "b30abcd7-5047-48c1-b7c6-10b4eacad7eb",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "susps"
+        },
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "dc006638-b52d-497e-b76a-04f3791b4f26",
+          "offenceId": "d0206b16-1b17-4e65-99b6-b8d8609e237a",
+          "orderedDate": "2021-11-23",
+          "parentResultLineIds": [
+            "b30abcd7-5047-48c1-b7c6-10b4eacad7eb"
+          ],
+          "prompts": [
+            {
+              "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
+              "label": "Total custodial period",
+              "promptRef": "totalCustodialPeriod",
+              "value": "13 Days"
+            },
+            {
+              "id": "95618691-0742-417e-82b9-c4d4bff94585",
+              "label": "Suspended period",
+              "promptRef": "suspendedPeriod",
+              "value": "14 Months"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "South West and Central Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "SWSCNPS.Court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+          "resultLabel": "Total suspended custodial period",
+          "resultLineId": "e7beba15-b553-41a8-89ab-ce775948f9e1",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "stimp"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "d0206b16-1b17-4e65-99b6-b8d8609e237a"
+    },
+    {
+      "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+      "defendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+      "draftResult": "{}",
+      "hearingDay": "2021-11-23",
+      "hearingId": "a7237ffe-9cbf-4c97-bf05-2c3d79debea6",
+      "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+      "offenceId": "1df702f2-5efc-45a8-8602-6baee499463b",
+      "resultLines": [
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+            "8299355e-78d7-4258-85a2-adf23ea5623b",
+            "f0d50e1b-aecc-4761-a988-93b99797322c"
+          ],
+          "defendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "offenceId": "1df702f2-5efc-45a8-8602-6baee499463b",
+          "orderedDate": "2021-11-23",
+          "prompts": [
+            {
+              "id": "76f15753-1706-42fb-b922-0d56d01e5706",
+              "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
+              "value": "1 Months"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "12"
+            }
+          ],
+          "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+          "resultLabel": "Suspended sentence order - imprisonment",
+          "resultLineId": "4a0b03ec-05d0-48f6-8f37-128386cfe78d",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "susps"
+        },
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+            "43fd1502-a689-48ca-8e41-86a7b8641e49"
+          ],
+          "defendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "offenceId": "1df702f2-5efc-45a8-8602-6baee499463b",
+          "orderedDate": "2021-11-23",
+          "parentResultLineIds": [
+            "4a0b03ec-05d0-48f6-8f37-128386cfe78d"
+          ],
+          "prompts": [
+
+          ],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "8299355e-78d7-4258-85a2-adf23ea5623b",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "crs"
+        },
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+            "9ab5b330-69f9-47f0-a65a-72584df88874"
+          ],
+          "defendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "offenceId": "1df702f2-5efc-45a8-8602-6baee499463b",
+          "orderedDate": "2021-11-23",
+          "parentResultLineIds": [
+            "4a0b03ec-05d0-48f6-8f37-128386cfe78d"
+          ],
+          "prompts": [
+            {
+              "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
+              "label": "Total custodial period",
+              "promptRef": "totalCustodialPeriod",
+              "value": "1 Months"
+            },
+            {
+              "id": "95618691-0742-417e-82b9-c4d4bff94585",
+              "label": "Suspended period",
+              "promptRef": "suspendedPeriod",
+              "value": "1 Months"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "South West and Central Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "SWSCNPS.Court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+          "resultLabel": "Total suspended custodial period",
+          "resultLineId": "f0d50e1b-aecc-4761-a988-93b99797322c",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "stimp"
+        },
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "offenceId": "1df702f2-5efc-45a8-8602-6baee499463b",
+          "orderedDate": "2021-11-23",
+          "parentResultLineIds": [
+            "f0d50e1b-aecc-4761-a988-93b99797322c"
+          ],
+          "prompts": [
+            {
+              "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+              "label": "First review date",
+              "promptRef": "firstReviewDate",
+              "value": "2015-12-10"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "10:10"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Stoke-on-Trent Crown Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "Stoke-on-Trent Combined Crt Centre"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Bethesda Street"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 3",
+              "promptRef": "hCHOUSEAddress3",
+              "value": "Hanley"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 4",
+              "promptRef": "hCHOUSEAddress4",
+              "value": "Stoke-on-Trent"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 5",
+              "promptRef": "hCHOUSEAddress5",
+              "value": "Staffs"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "ST1 3BP"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 1",
+              "promptRef": "hCHOUSEEmailAddress1",
+              "value": "WestMids.CrownCourt@cps.gov.uk"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 2",
+              "promptRef": "hCHOUSEEmailAddress2",
+              "value": "stokeontrentcc@geoamey.co.uk"
+            },
+            {
+              "id": "fe774a35-5353-4e4f-adef-44b7a8717dc6",
+              "label": "Defendant to attend review",
+              "promptRef": "defendantToAttendReview",
+              "value": "false"
+            },
+            {
+              "id": "34f900f3-132c-4baa-a9d3-b7fd5c7b24d0",
+              "label": "Judge reserves review hearing",
+              "promptRef": "judgeReservesReviewHearing",
+              "value": "false"
+            }
+          ],
+          "resultDefinitionId": "b3ed14c1-d921-459c-90fd-400a5d8d0076",
+          "resultLabel": "First review hearing",
+          "resultLineId": "9ab5b330-69f9-47f0-a65a-72584df88874",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "frh"
+        },
+        {
+          "caseId": "fa7b1c88-6a44-4c4b-b74d-af9c407d762d",
+          "childResultLineIds": [
+
+          ],
+          "defendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "012bee28-005b-4283-9fea-cec1b51a60d7",
+          "offenceId": "1df702f2-5efc-45a8-8602-6baee499463b",
+          "orderedDate": "2021-11-23",
+          "parentResultLineIds": [
+            "8299355e-78d7-4258-85a2-adf23ea5623b"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "5 Hours"
+            }
+          ],
+          "resultDefinitionId": "f9eac601-a1e7-4d45-99ee-c49e2c4ca85b",
+          "resultLabel": "Attendance centre",
+          "resultLineId": "43fd1502-a689-48ca-8e41-86a7b8641e49",
+          "shadowListed": false,
+          "sharedDate": "2021-11-23",
+          "shortCode": "acr"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "1df702f2-5efc-45a8-8602-6baee499463b"
+    }
+  ],
+  "savedTargets": [
+
+  ],
+  "defendantDetailsChanged": [
+
+  ],
+  "isReshare": false,
+  "newAmendmentResults": [
+    {
+      "id": "9ab5b330-69f9-47f0-a65a-72584df88874"
+    },
+    {
+      "id": "43fd1502-a689-48ca-8e41-86a7b8641e49"
+    },
+    {
+      "id": "b30abcd7-5047-48c1-b7c6-10b4eacad7eb"
+    },
+    {
+      "id": "e7beba15-b553-41a8-89ab-ce775948f9e1"
+    }
+  ],
+  "hearingDay": "2021-11-23"
+}

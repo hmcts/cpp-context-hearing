@@ -28,6 +28,7 @@ import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.RecorderChecker;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.UsersAndGroupsService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.vo.Permissions;
+import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.PIEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
@@ -113,6 +114,9 @@ public class HearingQueryApi {
 
     @Inject
     private RecorderChecker recorderChecker;
+
+    @Inject
+    private ProgressionService progressionService;
 
     @Handles("hearing.get.hearings")
     public JsonEnvelope findHearings(final JsonEnvelope query) {
@@ -236,10 +240,23 @@ public class HearingQueryApi {
     public JsonEnvelope getCaseTimeline(final JsonEnvelope query) {
         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes();
         final JsonObject allCourtRooms = referenceDataService.getAllCourtRooms(query);
-
+        final Optional<UUID> caseId = getUUID(query.payloadAsJsonObject(), "id");
         final Envelope<Timeline> timelineForCase = this.hearingQueryView.getTimeline(query, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
 
+        final List<TimelineHearingSummary> summaryToRemove = new ArrayList<>();
+        timelineForCase.payload().getHearingSummaries().stream().filter(timelineHearingSummary -> "Review".equals(timelineHearingSummary.getHearingType())).findFirst().ifPresent(rev -> {
+            if (!progressionService.getProsecutionCaseDetails(caseId.get()).getLinkedApplicationsSummary().isEmpty()) {
+                summaryToRemove.add(rev);
+            }
+        });
+
         final List<TimelineHearingSummary> allTimelineHearingSummaries = new ArrayList<>(timelineForCase.payload().getHearingSummaries());
+
+        summaryToRemove.stream().forEach(summary -> {
+            final Optional<TimelineHearingSummary> summaryOptional = allTimelineHearingSummaries.stream().filter(qualifiedSummary -> qualifiedSummary.getHearingId().equals(summary.getHearingId())).findFirst();
+            summaryOptional.ifPresent(allTimelineHearingSummaries::remove);
+        });
+
 
         final Timeline timeline = new Timeline(allTimelineHearingSummaries);
 
