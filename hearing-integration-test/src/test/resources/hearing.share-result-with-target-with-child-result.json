@@ -25,55 +25,64 @@
           "id": "746c833a-7d33-4800-a40c-425dbacf7492",
           "label": "Concurrent",
           "promptRef": "concurrent",
-          "value": "true"
+          "value": "true",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "3d5ab9b6-12d2-4ca6-a70a-f3e322552190",
           "label": "Or in default to serve",
           "promptRef": "orInDefaultToServe",
-          "value": "1"
+          "value": "1",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "bd988332-7fc9-42a8-a69b-b291376005b8",
           "label": "For a debt and costs of",
           "promptRef": "forADebtAndCostsOf",
-          "value": "200"
+          "value": "200",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "f0fbb5ef-d84a-49ce-b47a-8e390c4ce360",
           "label": "Consecutive to",
           "promptRef": "consecutiveTo",
-          "value": "Bexley Court"
+          "value": "Bexley Court",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "da9c91a6-7090-44f3-8644-b4b184533fc4",
           "label": "which is on case number",
           "promptRef": "whereConsecutiveToAnOffenceOnAnotherCaseSpecifyThatCaseNumber",
-          "value": "Case 13"
+          "value": "Case 13",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "84df0bcf-5c38-4e46-8c00-be1633ca4570",
           "label": "The term of imprisonment is postponed on condition that",
           "promptRef": "theTermOfImprisonmentIsPostponedOnConditionThat",
-          "value": "Term 2"
+          "value": "Term 2",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "9d3cae46-9fc7-4a44-abe2-5b60eb863515",
           "label": "The court finds that the debtor's failure is due to their wilful refusal and other methods of enforcement are inappropriate or unsuccessful",
           "promptRef": "herWilfulRefusal",
-          "value": "false"
+          "value": "false",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "cfe191a4-6374-401b-bef8-e2e1c8578cbf",
           "label": "The court finds that the debtor's failure is due to their culpable neglect and other methods of enforcement are inappropriate or unsuccessful",
           "promptRef": "herCulpable",
-          "value": "false"
+          "value": "false",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "35cd63eb-022d-4443-a4bd-331551a248a6",
           "label": "Reason for the finding",
           "promptRef": "reasonForTheFinding",
-          "value": "reason for HMRCFP"
+          "value": "reason for HMRCFP",
+          "welshValue": "reasons for AHCC"
         }
       ],
       "resultDefinitionId": "e8b659f3-1f6f-4570-8be7-022bca6a2c65",
@@ -98,13 +107,15 @@
           "id": "6211bbd2-3bbf-4ed8-bcea-16d021c84fd1",
           "label": "Taking control of goods (warrant of control) was tried and unsuccessful",
           "promptRef": "takingControlOfGoodsWarrantOfControlWasTriedAndUnsuccessful",
-          "value": "true"
+          "value": "true",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "c10b4c83-1856-4ca9-9592-d8b8183a0324",
           "label": "Reasons",
           "promptRef": "reasons",
-          "value": "reasons for TCG"
+          "value": "reasons for TCG",
+          "welshValue": "reasons for AHCC"
         }
       ],
       "resultDefinitionId": "a1c41f6b-6347-4c2a-b2b0-12190b5bf17d",
@@ -129,13 +140,15 @@
           "id": "40c78a73-c1e4-4fdd-8361-d27b2ca8a72e",
           "label": "An application to the High Court or County Court was tried and unsuccessful",
           "promptRef": "anApplicationToTheHighCourtOrCountyCourtWasTriedAndUnsuccessful",
-          "value": "true"
+          "value": "true",
+          "welshValue": "reasons for AHCC"
         },
         {
           "id": "c10b4c83-1856-4ca9-9592-d8b8183a0324",
           "label": "Reasons",
           "promptRef": "reasons",
-          "value": "reasons for AHCC"
+          "value": "reasons for AHCC",
+          "welshValue": "reasons for AHCC"
         }
       ],
       "resultDefinitionId": "860f3376-9833-49eb-a04e-19dc659104f4",
@@ -145,5 +158,10 @@
       "sharedDate": "2022-09-29",
       "shortCode": "AHCC"
     }
-  ]
+  ],
+  "courtClerk": {
+    "firstName": "Andrew",
+    "userId": "05683290-f82a-456f-8017-12d9717b703a",
+    "lastName": "Eldritch"
+  }
 }

@@ -38,14 +38,15 @@ public class RestructuringHelper {
 
         final List<TreeNode<ResultLine>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 
-        updateResultText(
-                removeNonPublishableResults(
-                        restructureNextHearing(
-                                processAlwaysPublishResults(
-                                        deDupNextHearing(
-                                                filterNodesWithRollUpPrompts(
-                                                        processPublishAsPrompt(
-                                                                removeExcludedResults(treeNodes))
+        removeNonPublishableResults(
+                restructureNextHearing(
+                        processAlwaysPublishResults(
+                                deDupNextHearing(
+                                        filterNodesWithRollUpPrompts(
+                                                processPublishAsPrompt(
+                                                        removeExcludedResults(
+                                                                updateResultText(treeNodes)
+                                                        )
                                                 )
                                         )
                                 )

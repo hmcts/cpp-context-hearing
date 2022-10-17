@@ -190,9 +190,7 @@ public class ResultTreeBuilderV3 {
                 .withCanBeSubjectOfBreach(resultDefinition.getCanBeSubjectOfBreach())
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
-                .withLevel(resultDefinition.getLevel())
-                .withShortCode(resultDefinition.getShortCode())
-                .withResultTextTemplate(resultDefinition.getResultTextTemplate());
+                .withLevel(resultDefinition.getLevel());
     }
 
     private void checkResultDefinition(final ResultLine2 resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {

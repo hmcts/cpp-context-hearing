@@ -95,6 +95,8 @@ public class ResultDefinition {
 
     private String resultTextTemplate;
 
+    private String dependantResultDefinitionGroup;
+
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
     }
@@ -465,6 +467,15 @@ public class ResultDefinition {
 
     public ResultDefinition setResultTextTemplate(final String resultTextTemplate) {
         this.resultTextTemplate = resultTextTemplate;
+        return this;
+    }
+
+    public String getDependantResultDefinitionGroup() {
+        return dependantResultDefinitionGroup;
+    }
+
+    public ResultDefinition setDependantResultDefinitionGroup(final String dependantResultDefinitionGroup) {
+        this.dependantResultDefinitionGroup = dependantResultDefinitionGroup;
         return this;
     }
 }

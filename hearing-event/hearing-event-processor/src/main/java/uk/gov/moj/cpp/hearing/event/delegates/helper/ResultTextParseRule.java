@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
+@SuppressWarnings("java:S3740")
 public class ResultTextParseRule <T>{
     public static final String PROMPT = "PROMPT";
     public static final String NAMEADDRESS = "NAMEADDRESS";
@@ -67,6 +68,7 @@ public class ResultTextParseRule <T>{
     public String getNewResultText(final TreeNode<T> node, final String text){
         String newResultText = text;
         boolean isChanged = false;
+        boolean isOnlyText = true;
         int nextPosition = -1;
         for (int i = 0 ; i < text.length() ; i++){
             if(i <= nextPosition){
@@ -74,6 +76,7 @@ public class ResultTextParseRule <T>{
             }
             final String control = String.valueOf(text.charAt(i));
             if(ResultTextParseRule.shouldBeParsed(control)){
+                isOnlyText = false;
                 final ResultTextParseRule resultTextParseRule = ResultTextParseRule.fromValue(control);
                 final int position = text.indexOf(resultTextParseRule.lastControlChar(), i+1);
                 final String subString = text.substring(i, position+1);
@@ -85,7 +88,7 @@ public class ResultTextParseRule <T>{
                 nextPosition = position;
             }
         }
-        if(isChanged){
+        if(isChanged || isOnlyText){
             return newResultText;
         }else{
             return "";
@@ -125,7 +128,7 @@ public class ResultTextParseRule <T>{
 
     private String getChildResultTexts(final TreeNode<T> node, final String childCode) {
         return node.getChildren().stream()
-                .filter(child -> child.getJudicialResult().getShortCode().equals(childCode))
+                .filter(child -> child.getResultDefinition().getData().getShortCode().equals(childCode))
                 .map(child -> child.getJudicialResult().getResultText())
                 .filter(Objects::nonNull)
                 .findFirst()
