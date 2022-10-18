@@ -56,7 +56,7 @@ import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 public class ResultTextIT extends AbstractIT {
 
-    public static final String RESULT_PARENT = "End Date: 12/10/2024, Responsible officer: a probation officer, Supervising Court: Banbury Magistrates' Court, Probation team to be notified organisation name: London Division NPS, Probation team to be notified email address 1: londonnps.court@justice.gov.uk" + System.lineSeparator() +
+    public static final String RESULT_PARENT = "co - Community order England / Wales\nEnd Date: 12/10/2024, Responsible officer: a probation officer, Supervising Court: Banbury Magistrates' Court, Probation team to be notified organisation name: London Division NPS, Probation team to be notified email address 1: londonnps.court@justice.gov.uk" + System.lineSeparator() +
             "Number of hours: 100 Hours" + System.lineSeparator() +
             "Offender to comply with any instructions of the responsible officer to attend appointments (with the responsible officer or someone else nominated by them), or to participate in any activity as required by the responsible officer up to a maximum of: 28 Days";
     public static final String RESULT_CHILD_1 = "UPWR - Unpaid work" + System.lineSeparator() +
@@ -109,7 +109,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("County Court where the proceedings have been transferred to organisation name: Bexley Court, County Court where the proceedings have been transferred to address line 1: line 1, Date of hearing: 02/02/2022, Time of hearing: 10:00, Reasons: reason for test"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("ABTRR - Anti-social behaviour injunction transferred\nCounty Court where the proceedings have been transferred to organisation name: Bexley Court, County Court where the proceedings have been transferred to address line 1: line 1, Date of hearing: 02/02/2022, Time of hearing: 10:00, Reasons: reason for test"));
         }
 
         try (final Utilities.EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -126,7 +126,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResulted.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("County Court where the proceedings have been transferred to organisation name: Bexley Court, County Court where the proceedings have been transferred to address line 1: line 1, Date of hearing: 02/02/2022, Time of hearing: 10:00, Reasons: reason for test"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("ABTRR - Anti-social behaviour injunction transferred\nCounty Court where the proceedings have been transferred to organisation name: Bexley Court, County Court where the proceedings have been transferred to address line 1: line 1, Date of hearing: 02/02/2022, Time of hearing: 10:00, Reasons: reason for test"));
         }
 
     }
@@ -160,7 +160,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("Anti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("ABTR - Anti-social behaviour injunction transferred\nAnti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
         }
 
         try (final Utilities.EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -177,7 +177,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResulted.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("Anti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("ABTR - Anti-social behaviour injunction transferred\nAnti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
         }
 
     }
@@ -211,7 +211,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("Anti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("ABTR - Anti-social behaviour injunction transferred\nAnti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
         }
 
         try (final Utilities.EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -228,7 +228,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResulted.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("Anti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("ABTR - Anti-social behaviour injunction transferred\nAnti-social behaviour injunction proceedings transferred to Bexley Court on 02/02/2022 at 10:00. Reasons: reason for test"));
         }
     }
 
@@ -261,7 +261,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("For a debt and costs of £200 or in default to serve 1 Concurrent consecutive to Bexley Court which is on case number Case 13 further postponed. The term of imprisonment is postponed on condition that Term 2. . Reason for the finding: reason for HMRCFP. Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG. An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC.      "));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("HMRCFP - Committal to prison further postponed (civil debt)\nFor a debt and costs of £200 or in default to serve 1 Concurrent consecutive to Bexley Court which is on case number Case 13 further postponed. The term of imprisonment is postponed on condition that Term 2. . Reason for the finding: reason for HMRCFP. Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG. An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC.      "));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
         }
@@ -280,7 +280,7 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResulted.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("For a debt and costs of £200 or in default to serve 1 Concurrent consecutive to Bexley Court which is on case number Case 13 further postponed. The term of imprisonment is postponed on condition that Term 2. . Reason for the finding: reason for HMRCFP. Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG. An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC.      "));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("HMRCFP - Committal to prison further postponed (civil debt)\nFor a debt and costs of £200 or in default to serve 1 Concurrent consecutive to Bexley Court which is on case number Case 13 further postponed. The term of imprisonment is postponed on condition that Term 2. . Reason for the finding: reason for HMRCFP. Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG. An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC.      "));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
         }
@@ -318,7 +318,7 @@ public class ResultTextIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("TCGG - Taking control of goods (warrant of control)" +  System.lineSeparator() + "Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCGG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[3].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("HMRCFPP - Committal to prison further postponed (civil debt)\nTaking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
         }
 
         try (final Utilities.EventListener publicEventResulted = listenFor("public.hearing.resulted")
@@ -338,7 +338,7 @@ public class ResultTextIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("TCGG - Taking control of goods (warrant of control)" +  System.lineSeparator() + "Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCGG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[3].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("HMRCFPP - Committal to prison further postponed (civil debt)\nTaking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
         }
     }
 

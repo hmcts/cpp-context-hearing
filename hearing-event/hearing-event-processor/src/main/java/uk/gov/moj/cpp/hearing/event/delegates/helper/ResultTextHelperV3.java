@@ -1,17 +1,18 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 
+import static java.lang.System.lineSeparator;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
-
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelperV3 {
@@ -19,11 +20,11 @@ public class ResultTextHelperV3 {
     public static final String CHAR_DASH = " - ";
     public static final String CHAR_EMPTY = "";
 
-    private ResultTextHelperV3(){
+    private ResultTextHelperV3() {
         //required by sonar
     }
 
-    public static void setResultText(final List<TreeNode<ResultLine2>> treeNodeList){
+    public static void setResultText(final List<TreeNode<ResultLine2>> treeNodeList) {
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
                 .forEach(ResultTextHelperV3::setResultText);
@@ -36,11 +37,16 @@ public class ResultTextHelperV3 {
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
                 .forEach(ResultTextHelperV3::updateResultTextForAlwaysPublished);
+
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .filter(node ->!ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false))
+                .forEach(node -> updateResultTextTop(node,node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel()));
     }
 
     private static void updateResultTextForAlwaysPublished(final TreeNode<ResultLine2> node) {
         node.getChildren().forEach(ResultTextHelperV3::updateResultTextForAlwaysPublished);
-        if(ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false)){
+        if (ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false)) {
             updateResultTextTop(node, node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel());
         }
 
@@ -56,16 +62,16 @@ public class ResultTextHelperV3 {
         }
     }
 
-    private static void updateResultTextTop(final TreeNode<ResultLine2> node, final String text) {
+    private static void updateResultTextTop(final TreeNode<ResultLine2> node, final String prefix) {
         node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
-                .map(resultText -> text + System.lineSeparator() + resultText)
-                .orElse(text)
+                .map(resultText -> ofNullable(prefix).map(s -> s + lineSeparator() + resultText).orElse(resultText))
+                .orElse(prefix)
         );
     }
 
     private static void updateResultTextBottom(final TreeNode<ResultLine2> node, final String text) {
         node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
-                .map(resultText -> resultText + System.lineSeparator() + text)
+                .map(resultText -> resultText + lineSeparator() + text)
                 .orElse(text)
         );
     }
@@ -80,7 +86,7 @@ public class ResultTextHelperV3 {
         }else{
             return node.getChildren().stream().map( n -> ResultTextHelperV3.getGroupResultText(n, dependantResultDefinitionGroup))
                     .filter(StringUtils::isNoneEmpty)
-                    .collect(Collectors.joining(System.lineSeparator()));
+                    .collect(Collectors.joining(lineSeparator()));
         }
     }
 }

@@ -1,16 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static java.lang.System.lineSeparator;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
-
-import java.util.stream.Collectors;
-import org.apache.commons.lang3.StringUtils;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelper {
@@ -23,6 +24,8 @@ public class ResultTextHelper {
     }
 
     public static void setResultText(final List<TreeNode<ResultLine>> treeNodeList){
+
+
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
                 .forEach(ResultTextHelper::setResultText);
@@ -35,7 +38,13 @@ public class ResultTextHelper {
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
                 .forEach(ResultTextHelper::updateResultTextForAlwaysPublished);
+
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .filter(node ->!ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false))
+                .forEach(node -> updateResultTextTop(node, node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel()));
     }
+
 
     private static void setResultText(final TreeNode<ResultLine> node) {
         node.getChildren().forEach(ResultTextHelper::setResultText);
@@ -55,16 +64,16 @@ public class ResultTextHelper {
 
     }
 
-    private static void updateResultTextTop(final TreeNode<ResultLine> node, final String text) {
+    private static void updateResultTextTop(final TreeNode<ResultLine> node, final String prefix) {
         node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
-                .map(resultText -> text + System.lineSeparator() + resultText)
-                .orElse(text)
+                .map(resultText -> ofNullable(prefix).map(s -> s + lineSeparator() + resultText).orElse(resultText))
+                .orElse(prefix)
         );
     }
 
     private static void updateResultTextBottom(final TreeNode<ResultLine> node, final String text) {
         node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
-                .map(resultText -> resultText + System.lineSeparator() + text)
+                .map(resultText -> resultText + lineSeparator() + text)
                 .orElse(text)
         );
     }
@@ -79,7 +88,7 @@ public class ResultTextHelper {
         }else{
             return node.getChildren().stream().map( n -> ResultTextHelper.getGroupResultText(n, dependantResultDefinitionGroup))
                     .filter(StringUtils::isNoneEmpty)
-                    .collect(Collectors.joining(System.lineSeparator()));
+                    .collect(Collectors.joining(lineSeparator()));
         }
     }
 }
