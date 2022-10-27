@@ -158,7 +158,6 @@ public class NextHearingHelperV3 {
                 if (nonNull(nextHearing.getReservedJudiciary()) && nextHearing.getReservedJudiciary().equals(true)) {
                      nextHearing.setJudiciary(resultSharedV3.getHearing().getJudiciary());
                 }
-                nextHearing.setJurisdictionType(resultSharedV3.getHearing().getJurisdictionType());
                 return Optional.of(nextHearing);
             }
         }
