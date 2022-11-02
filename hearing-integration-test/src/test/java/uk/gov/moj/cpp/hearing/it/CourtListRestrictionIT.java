@@ -1,29 +1,8 @@
 package uk.gov.moj.cpp.hearing.it;
 
-import org.junit.Before;
-import org.junit.Test;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.InitiationCode;
-import uk.gov.justice.core.courts.ReportingRestriction;
-import uk.gov.moj.cpp.hearing.steps.CourtListRestrictionSteps;
-import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
-
-import javax.annotation.concurrent.NotThreadSafe;
-import javax.json.JsonObject;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.isJson;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.time.ZonedDateTime.now;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
@@ -31,7 +10,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.CourtCentre.courtCentre;
 import static uk.gov.justice.core.courts.Defendant.defendant;
 import static uk.gov.justice.core.courts.Gender.MALE;
@@ -53,6 +32,29 @@ import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getSentXmlForPubDisplay;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsMagistrateUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
+
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.InitiationCode;
+import uk.gov.justice.core.courts.ReportingRestriction;
+import uk.gov.moj.cpp.hearing.steps.CourtListRestrictionSteps;
+import uk.gov.moj.cpp.hearing.steps.PublishCourtListSteps;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import javax.annotation.concurrent.NotThreadSafe;
+import javax.json.JsonObject;
+
+import org.junit.Before;
+import org.junit.Test;
+
 
 @NotThreadSafe
 public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHearingIT {
@@ -347,7 +349,7 @@ public class CourtListRestrictionIT extends AbstractPublishLatestCourtCentreHear
                         .withName("Lavender hill")
                         .withRoomId(roomId)
                         .build())
-                .withHearingDays(asList(
+                .withHearingDays(Arrays.asList(
                         hearingDay()
                                 .withListedDurationMinutes(10)
                                 .withListingSequence(0)

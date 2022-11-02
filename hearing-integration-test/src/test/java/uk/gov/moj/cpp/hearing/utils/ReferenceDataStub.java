@@ -30,6 +30,10 @@ import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.hearing.courts.referencedata.Prosecutor;
 import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AllAlcoholLevelMethods;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
@@ -62,7 +66,17 @@ public class ReferenceDataStub {
 
     public static final String VERDICT_TYPE_GUILTY_ID = "c4ca4238-a0b9-3382-8dcc-509a6f75849b";
     public static final String VERDICT_TYPE_GUILTY_CODE = "VC01";
-
+    /*todo These 2 data is for same stub, but different tests are trying to add different values, so we put static list to not loose data for other tests.
+     * And these data prevent running tests on multiple JVM forks, Currently we support one JVM/MultipleThreads. see  hearing-integration-test/pom.xml
+     */
+    public static final String ALCOHOL_LEVEL_METHOD_B_CODE = "B";
+    public static final String ALCOHOL_LEVEL_METHOD_B_DESCRIPTION = "Breath";
+    public static final UUID INEFFECTIVE_TRIAL_TYPE_ID = fromString("9b738c6e-04fc-4e18-bc49-b599973af7e7");
+    public static final UUID VACATED_TRIAL_TYPE_ID = fromString("9c738c6e-04fc-4e18-bc49-b599973af7b8");
+    public static final UUID CRACKED_TRIAL_TYPE_ID = fromString("9d738c6e-04fc-4e18-bc49-b599973af7c6");
+    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "Prosecution witness absent: police", "fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "Prosecution failed to disclose unused material", "fullDescription", null);
+    public static final CrackedIneffectiveVacatedTrialType CRACKED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(CRACKED_TRIAL_TYPE_ID, "code", "Cracked", "Prosecution not ready: specify in comments", "fullDescription", null);
     private static final String REFERENCE_DATA_SERVICE_NAME = "referencedata-service";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions?on=%s";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_QUERY_URL_WITHOUT_DATE = "/referencedata-service/query/api/rest/referencedata/result-definitions";
@@ -88,11 +102,8 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_DRINK_DRIVING_COURSE_PROVIDERS = "/referencedata-service/query/api/rest/referencedata/organisation?orgType=DDRP";
     private static final String REFERENCE_DATA_RESULT_YOUTH_COURT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/youth-courts";
     private static final String REFERENCE_DATA_ALCOHOL_LEVEL_METHODS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/alcohol-level-methods";
-
-
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-prompt-word-synonyms?on=%s";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_RULE_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definition-rule?on=%s";
-
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_WITHDRAWN_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/withdrawn";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_NEXT_HEARING_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/result-definitions/next-hearing";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/nows-metadata";
@@ -103,8 +114,6 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cracked-ineffective-vacated-trial-types";
     private static final String REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/local-justice-areas";
     private static final String REFERENCE_DATA_RESULT_PROSECUTORS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/prosecutors";
-
-
     private static final String REFERENCE_DATA_RESULT_LOCAL_JUSTICE_AREAS_MEDIA_TYPE = "application/vnd.referencedata.query.local-justice-areas+json";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definitions+json";
     private static final String REFERENCE_DATA_RESULT_DEFINITIONS_BY_CODE_MEDIA_TYPE = "application/vnd.referencedata.query-result-definitions+json";
@@ -122,8 +131,6 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_PROMP_COUNTRIES_MEDIA_TYPE = "application/vnd.referencedata.query.country-nationality+json";
     private static final String REFERENCE_DATA_RESULT_PROMP_LANGUAGES_MEDIA_TYPE = "application/vnd.referencedata.query.languages+json";
     private static final String REFERENCE_DATA_RESULT_PROMPT_YOUTH_COURTS_MEDIA_TYPE = "application/vnd.referencedata.query.youth-courts+json";
-
-
     private static final String REFERENCE_DATA_RESULT_PROMPT_WORD_SYNONYMS_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-prompt-word-synonyms+json";
     private static final String REFERENCE_DATA_RESULT_DEFINITION_RULE_MEDIA_TYPE = "application/vnd.referencedata.get-all-result-definition-rules+json";
     private static final String REFERENCE_DATA_RESULT_NOWS_METADATA_MEDIA_TYPE = "application/vnd.referencedata.get-all-now-metadata+json";
@@ -131,7 +138,6 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_ORGANISATION_UNIT_V1_MEDIA_TYPE = "application/vnd.referencedata.query.organisation-unit+json";
     private static final String REFERENCE_DATA_RESULT_ENFORCEMENT_AREA_MEDIA_TYPE = "application/vnd.referencedata.query.enforcement-area+json";
     private static final String REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE = "application/vnd.referencedata.query.youth-courts-by-mag-uuid+json";
-
     private static final String REFERENCE_DATA_RESULT_BAIL_STATUSES_MEDIA_TYPE = "application/vnd.referencedata.bail-statuses+json";
     private static final String REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE = "application/vnd.referencedata.cracked-ineffective-vacated-trial-types+json";
     private static final String REFERENCE_DATA_COURTROOM_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-courtroom-mappings";
@@ -139,36 +145,23 @@ public class ReferenceDataStub {
     private static final String REFERENCE_DATA_RESULT_PROSECUTOR_MEDIA_TYPE = "application/vnd.referencedata.query.get-prosecutor+json";
     private static final String REFERENCE_DATA_VERDICT_TYPES_MEDIA_TYPE = "application/vnd.reference-data.verdict-types+json";
     private static final String REFERENCE_DATA_ALCOHOL_LEVEL_METHODS_MEDIA_TYPE = "application/vnd.referencedata.alcohol-level-methods+json";
-
     private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS_URL = "/referencedata-service/query/api/rest/referencedata/organisationunits";
     private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS_MEDIA_TYPE = "application/vnd.referencedata.query.organisationunits";
-
     private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-court-mappings";
     private static final String REFERENCEDATA_QUERY_XHIBIT_COURT_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-court-mappings";
-
     private static final String COURT_ROOM_MEDIA_TYPE = "application/vnd.referencedata.ou-courtrooms+json";
     private static final String COURT_ROOM_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/courtrooms";
-
     private static final String REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/cp-xhibit-hearing-event-mappings";
+    //CCT877 - TBD - End
     private static final String REFERENCE_DATA_XHIBIT_EVENT_MAPPINGS_MEDIA_TYPE = "application/vnd.referencedata.query.cp-xhibit-hearing-event-mappings+json";
-
     private static final String REFERENCE_DATA_JUDICIARIES_MEDIA_TYPE = "application/vnd.reference-data.judiciaries+json";
     private static final String REFERENCE_DATA_JUDICIARIES_URL = "/referencedata-service/query/api/rest/referencedata/judiciaries";
-
     private static final String REFERENCE_DATA_PLEA_TYPES_MEDIA_TYPE = "application/vnd.referencedata.plea-types+json";
     private static final String REFERENCE_DATA_PLEA_TYPES_URL = "/referencedata-service/query/api/rest/referencedata/plea-types";
-    /*todo These 2 data is for same stub, but different tests are trying to add different values, so we put static list to not loose data for other tests.
-     * And these data prevent running tests on multiple JVM forks, Currently we support one JVM/MultipleThreads. see  hearing-integration-test/pom.xml
-     */
-    public static final String ALCOHOL_LEVEL_METHOD_B_CODE = "B";
-    public static final String ALCOHOL_LEVEL_METHOD_B_DESCRIPTION = "Breath";
-
-    public static final UUID INEFFECTIVE_TRIAL_TYPE_ID = fromString("9b738c6e-04fc-4e18-bc49-b599973af7e7");
-    public static final UUID VACATED_TRIAL_TYPE_ID = fromString("9c738c6e-04fc-4e18-bc49-b599973af7b8");
-    public static final UUID CRACKED_TRIAL_TYPE_ID = fromString("9d738c6e-04fc-4e18-bc49-b599973af7c6");
-    public static final CrackedIneffectiveVacatedTrialType INEFFECTIVE_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(INEFFECTIVE_TRIAL_TYPE_ID, "code", "InEffective", "Prosecution witness absent: police", "fullDescription", null);
-    public static final CrackedIneffectiveVacatedTrialType VACATED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(VACATED_TRIAL_TYPE_ID, "code", "Vacated", "Prosecution failed to disclose unused material","fullDescription", null);
-    public static final CrackedIneffectiveVacatedTrialType CRACKED_TRIAL_TYPE = new CrackedIneffectiveVacatedTrialType(CRACKED_TRIAL_TYPE_ID, "code", "Cracked", "Prosecution not ready: specify in comments","fullDescription", null);
+    //CCT877 - TBD - Start
+    private static final String PI_EVENT_MAPPINGS = "referencedata.query.cp-pi-hearing-event-mappings";
+    private static final String REFERENCE_DATA_PI_EVENT_QUERY_URL = "/referencedata-service/query/api/rest/referencedata/pi-events";
+    private static final String REFERENCE_DATA_QUERY_PI_EVENT_MEDIA_TYPE = "application/vnd.referencedata.query.pi-events+json";
     private static final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList<>();
 
     private static final String REFERENCE_DATA_PUBLIC_HOLIDAYS_MEDIA_TYPE = "application/vnd.referencedata.query.public-holidays+json";
@@ -1135,6 +1128,23 @@ public class ReferenceDataStub {
                 Json.createObjectBuilder().add("youthCourts", youthCourtsBuilder.build()).build();
         stub(payload, REFERENCE_DATA_YOUTH_COURT_QUERY_URL, REFERENCE_DATA_QUERY_YOUTH_COURT_MEDIA_TYPE, "magsUUID", magsUUID.toString());
     }
+
+    //TBD - CCT-877
+    public static void stubGetPIReferenceDataEventMappings() {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        final String payload = getPayload("stub-data/referencedata.query.cp-pi-hearing-event-mappings.json");
+        stubFor(get(urlPathMatching(REFERENCE_DATA_PI_EVENT_QUERY_URL))
+                .willReturn(aResponse()
+                        .withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", REFERENCE_DATA_QUERY_PI_EVENT_MEDIA_TYPE)
+                        .withBody(payload)));
+
+        waitForStubToBeReady(REFERENCE_DATA_PI_EVENT_QUERY_URL, REFERENCE_DATA_QUERY_PI_EVENT_MEDIA_TYPE);
+
+    }
+
 
     public static void stubOrganisationalUnit(final UUID id, final String oucode) {
         final OrganisationalUnit organisationalUnit = OrganisationalUnit.organisationalUnit()

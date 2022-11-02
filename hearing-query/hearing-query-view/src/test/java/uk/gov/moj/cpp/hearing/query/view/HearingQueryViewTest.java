@@ -35,8 +35,13 @@ import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderF
 import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCCESSFUL;
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 
+import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.Organisation;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.hearing.courts.GetHearings;
@@ -61,6 +66,7 @@ import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConver
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
@@ -75,6 +81,7 @@ import uk.gov.moj.cpp.hearing.test.SampleData;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -127,13 +134,13 @@ public class HearingQueryViewTest {
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
-
+    private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Spy
-    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
-    @Spy
     private final ObjectToJsonValueConverter objectToJsonValueConverter = new ObjectToJsonValueConverter(objectMapper);
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectConvertersFactory().jsonObjectToObjectConverter();
     @Spy
     private Enveloper enveloper = createEnveloper();
     @Mock
@@ -161,6 +168,10 @@ public class HearingQueryViewTest {
 
     @InjectMocks
     private HearingQueryView target;
+
+    private LocalDate date(String strDate) {
+        return LocalDate.parse(strDate, dateTimeFormatter);
+    }
 
     @Test
     public void shouldReturnCorrectPublishCourtListStatus() {
@@ -262,7 +273,7 @@ public class HearingQueryViewTest {
     }
 
     private CrackedIneffectiveVacatedTrialTypes getCrackedIneffectiveVacatedTrialTypes() {
-        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(randomUUID(), "", "", "", "",LocalDate.now());
+        final CrackedIneffectiveVacatedTrialType crackedIneffectiveVacatedTrialType = new CrackedIneffectiveVacatedTrialType(randomUUID(), "", "", "", "", LocalDate.now());
 
         final List<CrackedIneffectiveVacatedTrialType> crackedIneffectiveVacatedTrialTypes = new ArrayList();
         crackedIneffectiveVacatedTrialTypes.add(crackedIneffectiveVacatedTrialType);
@@ -348,7 +359,7 @@ public class HearingQueryViewTest {
     public void should_send_an_empty_payload_when_no_result_from_courtroom() {
 
         final UUID courtCentreId = randomUUID();
-        final List<UUID> courtRoomIds = asList(new UUID[]{randomUUID(), randomUUID()});
+        final List<UUID> courtRoomIds = asList(randomUUID(), randomUUID());
         final LocalDate hearingDate = LocalDate.now();
 
         when(hearingService.getHearingsByCourtRoomList(hearingDate, courtCentreId, courtRoomIds)).thenThrow(NoResultException.class);
@@ -782,6 +793,25 @@ public class HearingQueryViewTest {
         MatcherAssert.assertThat(results.payload().getHearingSummaries().size(), is(2));
     }
 
+
+    @Test
+    public void shouldGetProsecutionCaseByHearingId() {
+
+        when(hearingService.getProsecutionCaseForHearings(HEARING_ID)).thenReturn(buildProsecutionListResponse());
+
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-prosecutioncase-result"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .build());
+
+        final Envelope<ProsecutionCaseResponse> prosecutionCaseResult = target.getProsecutionCaseForHearing(query);
+
+        verify(hearingService).getProsecutionCaseForHearings(HEARING_ID);
+        assertThat(prosecutionCaseResult.payload().getProsecutionCases(), Matchers.hasSize(1));
+        assertThat(prosecutionCaseResult.metadata().name(), is("hearing.get-prosecutioncase-result"));
+    }
+
     private List<Prompt> prepareResultPromptsData(final UUID promptId) {
         final Prompt prompt1 = new Prompt();
         prompt1.setId(promptId);
@@ -805,12 +835,12 @@ public class HearingQueryViewTest {
         final DefendantInfoQueryResult defendantInfoQueryResult = new DefendantInfoQueryResult();
         defendantInfoQueryResult.getCourtRooms().add(
                 CourtRoom.courtRoom().withDefendantDetails(
-                        asList(
-                                DefendantDetail.defendantDetail().withDefendantId(randomUUID()).withDateOfBirth("1980-06-25 00:00:00").withFirstName("Mr").withLastName("Brown").build(),
-                                DefendantDetail.defendantDetail().withDefendantId(randomUUID()).withFirstName("Mrs").withLastName("Brown").withNationalInsuranceNumber("AB123456Z").build(),
-                                DefendantDetail.defendantDetail().withDefendantId(randomUUID()).withLegalEntityOrganizationName("ACME").build()
+                                asList(
+                                        DefendantDetail.defendantDetail().withDefendantId(randomUUID()).withDateOfBirth("1980-06-25 00:00:00").withFirstName("Mr").withLastName("Brown").build(),
+                                        DefendantDetail.defendantDetail().withDefendantId(randomUUID()).withFirstName("Mrs").withLastName("Brown").withNationalInsuranceNumber("AB123456Z").build(),
+                                        DefendantDetail.defendantDetail().withDefendantId(randomUUID()).withLegalEntityOrganizationName("ACME").build()
+                                )
                         )
-                )
                         .withCourtRoomName("Room-1")
                         .build()
         );
@@ -832,6 +862,34 @@ public class HearingQueryViewTest {
                         .withHearingDay(LocalDate.parse(HEARING_DAY))
                         .withTargetId(randomUUID())
                         .build())).build();
+    }
+
+    private ProsecutionCaseResponse buildProsecutionListResponse() {
+
+        Address address = Address.address().withAddress1("addr1").withAddress2("addr2").withAddress3("addr3").
+                withAddress4("addr4").withPostcode("AA1 1AA").build();
+
+        List<ProsecutionCase> prosecutionCases = new ArrayList<ProsecutionCase>();
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withDefendants(Arrays.asList(Defendant.defendant()
+                        .withId(randomUUID())
+                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                .withArrestSummonsNumber("")
+                                .withPersonDetails(Person.person()
+                                        .withAddress(address)
+                                        .withDateOfBirth(date("12/11/1978"))
+                                        .withFirstName("First Name")
+                                        .withGender(Gender.MALE)
+                                        .withLastName("Last Name").build())
+                                .withEmployerOrganisation(Organisation.organisation()
+                                        .withName("").build()).build()).build())).build();
+
+        prosecutionCases.add(prosecutionCase);
+
+        ProsecutionCaseResponse prosecutionCaseResponse = new ProsecutionCaseResponse();
+        prosecutionCaseResponse.setProsecutionCases(prosecutionCases);
+        return prosecutionCaseResponse;
+
     }
 
     private DraftResultResponse buildDraftResultResponse(boolean target) {

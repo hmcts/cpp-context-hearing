@@ -30,6 +30,7 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffec
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.mapping.DraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ResultLineJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
@@ -58,6 +59,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResult
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
@@ -131,6 +133,8 @@ public class HearingService {
     private StringToJsonObjectConverter stringToJsonObjectConverter;
     @Inject
     private HearingJPAMapper hearingJPAMapper;
+    @Inject
+    private ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
     @Inject
     private TargetJPAMapper targetJPAMapper;
     @Inject
@@ -267,7 +271,7 @@ public class HearingService {
             return new GetHearings(null);
         }
         List<Hearing> filteredHearings = hearingRepository.findByDefendantAndHearingType(date, userId);
-        filteredHearings = filterForTrial(filteredHearings,hearingTypeList);
+        filteredHearings = filterForTrial(filteredHearings, hearingTypeList);
         if (CollectionUtils.isEmpty(filteredHearings)) {
             return new GetHearings(null);
         }
@@ -581,7 +585,7 @@ public class HearingService {
     public DraftResultResponse getDraftResult(final UUID hearingId, final String hearingDay) {
         final List<DraftResult> draftResult = draftResultRepository.findDraftResultByFilter(hearingId, hearingDay);
         if (draftResult.isEmpty()) {
-            return new DraftResultResponse(objectToJsonObjectConverter.convert(getTargetsByDate(hearingId,hearingDay)), true);
+            return new DraftResultResponse(objectToJsonObjectConverter.convert(getTargetsByDate(hearingId, hearingDay)), true);
         }
 
         final JsonNode payload = draftResult.get(0).getDraftResultPayload();
@@ -790,5 +794,14 @@ public class HearingService {
         return GetHearings.getHearings()
                 .withHearingSummaries(hearingSummaries)
                 .build();
+    }
+
+
+    public ProsecutionCaseResponse getProsecutionCaseForHearings(final UUID hearingId) {
+
+        final List<ProsecutionCase> prosecutionCases = hearingRepository.findProsecutionCasesByHearingId(hearingId);
+
+        return (ProsecutionCaseResponse.builder()
+                .withProsecutionCases(prosecutionCaseJPAMapper.fromJPA(Sets.newHashSet(prosecutionCases))).build());
     }
 }

@@ -163,7 +163,6 @@ public class HearingEventStepDefinitions {
 
     private static List<HearingEventDefinition> hearingDefinitions() {
         return asList(
-                new HearingEventDefinition(randomUUID(), RECORDED_LABEL_START_HEARING, INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(randomUUID(), RECORDED_LABEL_END_HEARING, INTEGER.next(), RECORDED_LABEL_END_HEARING, "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(START_HEARING_EVENT_DEFINITION_ID, "Start Hearing", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(randomUUID(), "Identify defendant", INTEGER.next(), STRING.next(), "SENTENCING", STRING.next(), INTEGER.next(), true),
@@ -178,8 +177,8 @@ public class HearingEventStepDefinitions {
                 new HearingEventDefinition(OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, "Open case prosecution", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, "Defence counsel.name opens case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "OPEN_CASE", STRING.next(), INTEGER.next(), false),
                 new HearingEventDefinition(fromString("cc00cca8-39ba-431c-b08f-8c6f9be185d1"), "Defence counsel.name closes case regarding defendant defendant.name", INTEGER.next(), STRING.next(), "CLOSE_CASE", STRING.next(), INTEGER.next(), false),
-                new HearingEventDefinition(fromString("b335327a-7f58-4f26-a2ef-7e07134ba60b"), "Point of law discussion prosecution", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false)
-
+                new HearingEventDefinition(fromString("b335327a-7f58-4f26-a2ef-7e07134ba60b"), "Point of law discussion prosecution", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false),
+                new HearingEventDefinition(fromString("c3edf650-13c4-4ecb-9f85-6100ad8e4ffc"), "Arraign defendant.name", INTEGER.next(), STRING.next(), "DISCUSSION", STRING.next(), INTEGER.next(), false)
         );
     }
 

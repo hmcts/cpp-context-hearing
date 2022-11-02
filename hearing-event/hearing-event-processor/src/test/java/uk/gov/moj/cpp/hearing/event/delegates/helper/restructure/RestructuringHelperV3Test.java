@@ -3,9 +3,12 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
+import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -64,6 +67,7 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
         final ResultLine2 firstReviewResultLint = resultsShared.getTargets().get(0).getResultLines().stream().filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("First Review Hearing – Drug Rehab")).findFirst().get();
         assertThat(rl2.getPrompts().size(), is(3));
         assertThat(firstReviewResultLint.getPrompts().size(), is(12));
+        when(hearingTypeReverseLookup.getHearingTypeByName(any(), any())).thenReturn(HearingType.hearingType().withDescription("REV").build());
         final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared);
         assertThat(restructuredTree.size(), is(2));
         assertThat(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j->j.getLabel().equals("Drug rehabilitation residential with review")).findFirst().get().getJudicialResultPrompts().size(), is(firstReviewResultLint.getPrompts().size()+ rl2.getPrompts().size()));

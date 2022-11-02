@@ -12,6 +12,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static com.jayway.awaitility.Awaitility.waitAtMost;
 import static com.jayway.awaitility.Duration.TEN_SECONDS;
 import static java.text.MessageFormat.format;
+import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
 import static javax.ws.rs.client.Entity.entity;
@@ -31,7 +32,14 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 import uk.gov.justice.service.wiremock.testutil.InternalEndpointMockUtils;
 import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.json.JsonObject;
@@ -56,6 +64,8 @@ public class WireMockStubUtils {
             "/material-service/command/api/rest/material/material";
     private static final String HOST = System.getProperty("INTEGRATION_HOST_KEY", "localhost");
     private static final String CONTENT_TYPE_QUERY_GROUPS = "application/vnd.usersgroups.groups+json";
+    private static final String CONTENT_TYPE_QUERY_PROSECTIONCASE = "application/vnd.hearing.prosecution-case-by-hearingid+json";
+
     private static final String BASE_URI = "http://" + HOST + ":8080";
 
     private final static String QUERY_GET_LOGGED_IN_USER_PERMISSIONS = "/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user/permissions";
@@ -129,7 +139,7 @@ public class WireMockStubUtils {
 
     }
 
-    public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(final UUID case1,final UUID userId) {
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCases(final UUID case1, final UUID userId) {
         final String response = getPayload("stub-data/usersgroups.permissions-for-filtered-cases-ddj.json")
                 .replaceAll("%CASE_1%", case1.toString())
                 .replaceAll("%USER_ID%", userId.toString());
@@ -143,7 +153,7 @@ public class WireMockStubUtils {
 
     }
 
-    public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder(final UUID case1,final UUID userId) {
+    public static void stubUsersAndGroupsGetLoggedInPermissionsWithFilteredCasesForRecorder(final UUID case1, final UUID userId) {
         final String response = getPayload("stub-data/usersgroups.permissions-for-filtered-cases-recorder.json")
                 .replaceAll("%CASE_1%", case1.toString())
                 .replaceAll("%USER_ID%", userId.toString());
@@ -315,6 +325,7 @@ public class WireMockStubUtils {
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)));
 
     }
+
     public static void stubRequestApproval() {
         InternalEndpointMockUtils.stubPingFor("hearing-service");
 
@@ -333,7 +344,7 @@ public class WireMockStubUtils {
 
     }
 
-    public static void stubAzure(){
+    public static void stubAzure() {
         stubFor(get(urlPathMatching("/azure/featuremanager/*"))
                 .willReturn(aResponse().withStatus(SC_OK)
                         .withBody("{\"items\" : [{ \"content_type\" : \"temp\" , \"key\" : \"reuseOfInformation\", \"value\" : \"{\\\"enabled\\\": true}\"}]}")
@@ -386,5 +397,58 @@ public class WireMockStubUtils {
                 .add("caseUrn", caseUrn)
                 .build();
     }
+
+    public static void setupProsecutionCaseByHearingId(final UUID hearingId, final UUID hearingEventDefinitionId) {
+
+        Set<UUID> refHearingEventId = stubPIEventMapperCache(); // TBD
+
+        if (refHearingEventId.contains(hearingEventDefinitionId)) { //TBD
+            stubPingFor("hearing-query-api");
+
+            stubFor(get(urlPathEqualTo(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId)))
+                    .willReturn(aResponse().withStatus(SC_OK)
+                            .withHeader("Accept", "application/vnd.hearing.prosecution-case-by-hearingid+json")
+                            .withBody(getPayload("stub-data/hearing.get-prosecutioncase-result.json"))));
+
+            waitForStubToBeReady(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId), CONTENT_TYPE_QUERY_PROSECTIONCASE);
+        }
+    }
+
+    public static void setupNoProsecutionCaseByHearingId(final UUID hearingId, final UUID hearingEventDefinitionId) {
+
+        Set<UUID> refHearingEventId = stubPIEventMapperCache(); // TBD
+
+        if (!refHearingEventId.contains(hearingEventDefinitionId)) { //TBD
+
+            stubFor(get(urlPathEqualTo(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId)))
+                    .willReturn(aResponse().withStatus(SC_OK)
+                            .withHeader("Accept", "application/vnd.hearing.prosecution-case-by-hearingid+json")));
+            waitForStubToBeReady(format("/query/api/rest/hearing/hearings/{0}/{1}/prosecution-case", hearingId, hearingEventDefinitionId), CONTENT_TYPE_QUERY_PROSECTIONCASE);
+
+        }
+    }
+
+    public static Set<UUID> stubPIEventMapperCache() {
+
+        List<PIEventMapping> cpPIHearingEventMappings = new ArrayList<PIEventMapping>();
+        Map<UUID, PIEventMapping> eventMapperCache = new HashMap<>();
+
+        final PIEventMapping piEventMapping1 = new PIEventMapping(fromString("b71e7d2a-d3b3-4a55-a393-6d451767fc05"), "100", "Case Started");
+        final PIEventMapping piEventMapping2 = new PIEventMapping(fromString("50fb4a64-943d-4a2a-afe6-4b5c9e99e043"), "200", "Appellant case open");
+        final PIEventMapping piEventMapping3 = new PIEventMapping(fromString("2ae725a8-b605-4427-aa1d-b587d5c2d71"), "300", "Appellant submissions");
+        final PIEventMapping piEventMapping4 = new PIEventMapping(fromString("aebfe8d9-74b4-442b-885f-702c818bf6b5"), "500", "Appellant case closed");
+
+        cpPIHearingEventMappings.add(piEventMapping1);
+        cpPIHearingEventMappings.add(piEventMapping2);
+        cpPIHearingEventMappings.add(piEventMapping3);
+        cpPIHearingEventMappings.add(piEventMapping4);
+
+        PIEventMappingsList piEventMappingsList = new PIEventMappingsList(cpPIHearingEventMappings);
+
+        piEventMappingsList.getCpPIHearingEventMappings().forEach(event -> eventMapperCache.put(event.getCpHearingEventId(), event));
+
+        return eventMapperCache.keySet();
+    }
+
 
 }

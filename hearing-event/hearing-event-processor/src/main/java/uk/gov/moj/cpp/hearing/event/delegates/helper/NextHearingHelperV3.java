@@ -27,8 +27,10 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MAGISTRATE_RESULT_DEFINITION_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_A_DAY;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.MINUTES_IN_HOUR;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.SPACE;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.START_OF_DAY_TIME;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.JudicialResultPromptMapper.findJudicialResultPrompt;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.DAYS;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.HOURS;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.DurationElements.MINUTES;
@@ -39,13 +41,25 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.HTYPE;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.bookingReference;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.dateToBeFixed;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.endDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.existingHearingId;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.firstReviewDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.fixedDate;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hCHOUSEOrganisationName;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.hmiSlots;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.isPresent;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.judgeReservesReviewHearing;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedAddress1;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedAddress2;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedAddress3;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedAddress4;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedAddress5;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedOrganisationName;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.probationteamtobenotifiedPostCode;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.reservedJudiciary;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.suspendedPeriod;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.timeOfHearing;
+import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.totalCustodialPeriod;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.valueOf;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.weekCommencing;
 
@@ -58,6 +72,7 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.NextHearing;
+import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.core.courts.RotaSlot;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
@@ -65,6 +80,7 @@ import uk.gov.justice.hearing.courts.referencedata.Courtrooms;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.NextHearingCreateException;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -84,8 +100,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -98,7 +114,18 @@ import org.slf4j.LoggerFactory;
 public class NextHearingHelperV3 {
 
     private static final String FAILED_TO_CREATE_NEXT_HEARING_MESSAGE = "Failed to create next hearing for result definition id=%s";
-    private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelper.class.getName());
+    private static final Logger LOGGER = LoggerFactory.getLogger(NextHearingHelperV3.class.getName());
+    public static final String FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_CO = "1f4146dd-e389-4973-8951-876e3634efd5";
+    public static final String FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_DRNRR = "b3ed14c1-d921-459c-90fd-400a5d8d0076";
+    public static final String FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_SUSPS = "859c7729-93bf-4fda-8345-3e56695dddb5";
+    public static final String SUSPENDED_SENTENCE_ORDER = "8b1cff00-a456-40da-9ce4-f11c20959084";
+    public static final String DRUG_REHABILITATION_RESIDENTIAL_WITH_REVIEW = "61ea03c9-c113-446b-a392-402144fcd9e8";
+    public static final String DRUG_REHABILITATION_NON_RESIDENTIAL_WITH_REVIEW = "cc2cbb94-b75a-4a8c-9840-31c5f8007724";
+    public static final String COMMUNITY_REQUIREMENT = "b2dab2b7-3edd-4223-b1be-3819173ec54d";
+    public static final String COMMUNITY_ORDER = "418b3aa7-65ab-4a4a-bab9-2f96b698118c";
+    public static final String CUSTODIAL_PERIOD_JUDICIAL_RESULT_TYPE_ID = "b65fb5f1-b11d-4a95-a198-3b81333c7cf9";
+    public static final String TOTAL_CUSTODIAL_PERIOD_SHORT_CODE = "STIMP";
+
     @Inject
     private HearingTypeReverseLookup hearingTypeReverseLookup;
     @Inject
@@ -116,17 +143,21 @@ public class NextHearingHelperV3 {
                                                 final ResultDefinition resultDefinition,
                                                 final List<ResultLine2> resultLines,
                                                 final ResultLine2 resultLine,
-                                                final List<JudicialResultPrompt> prompts) {
+                                                final List<JudicialResultPrompt> prompts,
+                                                final ResultsSharedV3 resultSharedV3) {
         final String resultDefinitionId = resultDefinition.getId().toString();
-
-        if (isNextHearingResult(resultDefinitionId) && canCreateNextHearing(prompts)) {
+        if (isNextHearingResult(resultDefinitionId, resultLines) && canCreateNextHearing(prompts)) {
             LOGGER.info("Creating next hearing");
             final NextHearing nextHearing = buildNextHearing(context, resultDefinition, resultLines, resultLine, prompts);
+
             if (isNull(nextHearing)) {
                 final String message = format(FAILED_TO_CREATE_NEXT_HEARING_MESSAGE, resultDefinitionId);
                 LOGGER.error(message);
                 throw new NextHearingCreateException(message);
             } else {
+                if (nonNull(nextHearing.getReservedJudiciary()) && nextHearing.getReservedJudiciary().equals(true)) {
+                     nextHearing.setJudiciary(resultSharedV3.getHearing().getJudiciary());
+                }
                 return Optional.of(nextHearing);
             }
         }
@@ -139,7 +170,6 @@ public class NextHearingHelperV3 {
     private boolean canCreateNextHearing(final List<JudicialResultPrompt> prompts) {
 
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
-
         LOGGER.info("Checking if next hearing can be created using Fixed date: {}, Hearing date: {}, Week commencing: {}, Hearing type: {}, Court centre: {}, Estimated duration: {}",
                 promptsMap.get(fixedDate), promptsMap.get(HDATE), promptsMap.get(weekCommencing), promptsMap.get(HTYPE), promptsMap.get(HCHOUSE), promptsMap.get(HEST));
 
@@ -148,11 +178,16 @@ public class NextHearingHelperV3 {
         final boolean isWeekCommencingPromptsPresent = ofNullable(promptsMap.get(weekCommencing)).isPresent();
 
         final boolean isDateToBeFixed = ofNullable(promptsMap.get(dateToBeFixed)).isPresent();
+        return isNextHearingPresent(promptsMap, isFixedDatePromptsPresent, isWeekCommencingPromptsPresent, isDateToBeFixed);
+    }
 
-        return ofNullable(promptsMap.get(HTYPE)).isPresent()
-                && (ofNullable(promptsMap.get(hCHOUSEOrganisationName)).isPresent() || ofNullable(promptsMap.get(HCHOUSE)).isPresent())
+    private boolean isNextHearingPresent(final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final boolean isFixedDatePromptsPresent, final boolean isWeekCommencingPromptsPresent, final boolean isDateToBeFixed) {
+        final boolean hcHouseAvailable = ofNullable(promptsMap.get(hCHOUSEOrganisationName)).isPresent() || ofNullable(promptsMap.get(HCHOUSE)).isPresent();
+        final boolean isNextHearingDatePromptsPresent = (isFixedDatePromptsPresent || isWeekCommencingPromptsPresent || isDateToBeFixed);
+        return (ofNullable(promptsMap.get(HTYPE)).isPresent()
+                && hcHouseAvailable
                 && ofNullable(promptsMap.get(HEST)).isPresent()
-                && (isFixedDatePromptsPresent || isWeekCommencingPromptsPresent || isDateToBeFixed);
+                && isNextHearingDatePromptsPresent) || ofNullable(promptsMap.get(firstReviewDate)).isPresent();
     }
 
     private NextHearing buildNextHearing(final JsonEnvelope context,
@@ -163,11 +198,25 @@ public class NextHearingHelperV3 {
 
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
         final NextHearing.Builder builder = nextHearing();
-
         final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional = getCourtCentreOrganisationUnit(context, promptsMap);
-
-        populateListedStartDateTime(builder, promptsMap, courtCentreOrgOptional);
-        populateEstimatedDuration(builder, promptsMap);
+        final boolean isFirstReviewCO = resultDefinition.getId().equals(UUID.fromString(FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_CO));
+        final boolean isFirstReviewSUSPS = resultDefinition.getId().equals(UUID.fromString(FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_SUSPS));
+        final boolean isFirstReviewDRNRR = resultDefinition.getId().equals(UUID.fromString(FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_DRNRR));
+        if (isFirstReviewCO  || isFirstReviewSUSPS || isFirstReviewDRNRR) {
+            if (resultLine.getPrompts().isEmpty()) {
+                return null;
+            }
+            populateFirstReviewHearingPrompts(context, resultLines, resultLine, prompts, promptsMap, builder, courtCentreOrgOptional);
+            builder.withApplicationTypeCode(resultDefinition.getTriggeredApplicationCode());
+        }
+        else {
+            populateListedStartDateTime(builder, promptsMap, courtCentreOrgOptional);
+            populateEstimatedDuration(builder, promptsMap);
+            populateHearingType(builder, context, promptsMap);
+            populateAdjournmentReasons(builder, context, resultLines, resultLine);
+            populateWeekCommencingDate(builder, promptsMap);
+            populateDateToBeFixed(builder, promptsMap);
+        }
         populateCourtCentre(builder, context, promptsMap, courtCentreOrgOptional);
         populateAdjournmentReasons(builder, context, resultLines, resultLine);
         populateHearingType(builder, context, promptsMap);
@@ -180,6 +229,125 @@ public class NextHearingHelperV3 {
         populateHmiSlots(builder, promptsMap);
 
         return builder.build();
+    }
+
+    @SuppressWarnings({"squid:S3776", "squid:S1188"})
+    private void populateFirstReviewHearingPrompts(final JsonEnvelope context, final List<ResultLine2> resultLines, final ResultLine2 resultLine, final List<JudicialResultPrompt> prompts, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearing.Builder builder, final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional) {
+        final List<ResultLine2>  allResultLines = new ArrayList<>();
+        getAllResultLines(resultLine, resultLines, allResultLines);
+
+        final List<ResultLine2>  allParentResultLines = new ArrayList<>();
+        getParentResultLines(resultLine, resultLines, allParentResultLines);
+        populateListedStartDateTimeReviewHearing(builder, promptsMap, courtCentreOrgOptional);
+        builder.withEstimatedMinutes(hearingTypeReverseLookup.getDefaultDurationInMin(context, "Review"));
+        builder.withIsFirstReviewHearing(true);
+        builder.withType(hearingTypeReverseLookup.getHearingTypeByName(context, "Review"));
+
+        allResultLines.forEach(lineId -> {
+            final ResultDefinition resultDefinition1 =  this.referenceDataService.getResultDefinitionById(context, lineId.getOrderedDate(), lineId.getResultDefinitionId());
+            if (nonNull(resultDefinition1.getShortCode()) && "STIMP,CO,SUSPS".toLowerCase().contains(resultDefinition1.getShortCode().toLowerCase())) {
+                final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition1, lineId.getPrompts());
+                final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(judicialResultPrompts);
+                populateProbationTeam(builder, parentPromptsMap);
+
+                if(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE.equalsIgnoreCase(resultDefinition1.getShortCode())){
+                    populateTotalCustodialPeriod(builder, parentPromptsMap);
+                    populateSuspendedPeriod(builder, parentPromptsMap);
+                }
+            }
+        });
+        allParentResultLines.forEach(lineId -> {
+            final ResultLine2 resultLine3 = resultLines.stream().filter(resultLine2 -> resultLine2.getResultLineId().equals(lineId.getResultLineId())).findFirst().get();
+            final ResultDefinition parentResultDefinition = this.referenceDataService.getResultDefinitionById(context, resultLine3.getOrderedDate(), resultLine3.getResultDefinitionId());
+            if (parentResultDefinition.getShortCode().equalsIgnoreCase(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE)) {
+                final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(parentResultDefinition, resultLine3.getPrompts());
+                final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(judicialResultPrompts);
+                populateTotalCustodialPeriod(builder, parentPromptsMap);
+                populateSuspendedPeriod(builder, parentPromptsMap);
+            }
+            if (SUSPENDED_SENTENCE_ORDER.equals(parentResultDefinition.getId().toString()) || COMMUNITY_ORDER.equals(parentResultDefinition.getId().toString())) {
+                builder.withOrderName(parentResultDefinition.getLabel());
+                if (COMMUNITY_ORDER.equals(parentResultDefinition.getId().toString())) {
+                    final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(resultLine3.getPrompts().stream()
+                            .map(prompt -> {
+                                        final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptDefinition = parentResultDefinition.getPrompts().stream()
+                                                .filter(promptDef -> promptDef.getId().equals(prompt.getId()) && (isNull(prompt.getPromptRef()) || prompt.getPromptRef().equals(promptDef.getReference())))
+                                                .findFirst().orElseThrow(() -> new RuntimeException(format(NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT, prompt.getId(), prompt.getPromptRef(), prompt.getLabel(), prompt.getValue(), parentResultDefinition.getId())));
+                                        return findJudicialResultPrompt(prompt, promptDefinition);
+                                    }
+                            )
+                            .collect(toList()));
+                    populateEndDate(builder, parentPromptsMap);
+                }
+            }
+        });
+    }
+
+
+    private void getParentResultLines(final ResultLine2 resultLine, final List<ResultLine2> resultLines, final List<ResultLine2> allParentResultLines) {
+        if (nonNull(resultLine) && resultLine.getParentResultLineIds() != null && !resultLine.getParentResultLineIds().isEmpty()) {
+            resultLine.getParentResultLineIds().forEach(lineId -> {
+                LOGGER.info("parent result line id :  {}", lineId);
+                final Optional<ResultLine2> optionalResultLine2 = resultLines.stream().filter(resultLine2 -> resultLine2.getResultLineId().equals(lineId)).findFirst();
+                if (optionalResultLine2.isPresent() &&   optionalResultLine2.get() != null) {
+                    getParentResultLines(optionalResultLine2.get(), resultLines, allParentResultLines);
+                }
+            });
+        }
+        allParentResultLines.add(resultLine);
+    }
+
+    private void getAllResultLines(final ResultLine2 resultLine, final List<ResultLine2> resultLines, final List<ResultLine2> allParentResultLines) {
+        if (nonNull(resultLine)){
+            allParentResultLines.add(resultLine);
+        }
+        allParentResultLines.addAll(resultLines);
+    }
+
+
+    private void populateEndDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
+        final String promptValue = getPromptValue(promptsMap, endDate);
+        if (nonNull(promptValue)) {
+            builder.withEndDate(LocalDate.parse(promptValue, DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+        }
+    }
+
+    private void populateProbationTeam(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap) {
+        final String promptValue = getPromptValue(parentPromptsMap, probationteamtobenotifiedOrganisationName);
+        builder.withProbationTeamName(promptValue);
+        final String teamAddress = Stream.of(getPromptValue(parentPromptsMap, probationteamtobenotifiedAddress1),
+                        getPromptValue(parentPromptsMap, probationteamtobenotifiedAddress2),
+                        getPromptValue(parentPromptsMap, probationteamtobenotifiedAddress3),
+                        getPromptValue(parentPromptsMap, probationteamtobenotifiedAddress4),
+                        getPromptValue(parentPromptsMap, probationteamtobenotifiedAddress5),
+                        getPromptValue(parentPromptsMap, probationteamtobenotifiedPostCode)
+                )
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.joining(", "));
+        builder.withProbationTeamAddress(teamAddress);
+    }
+
+    private void populateSuspendedPeriod(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap) {
+        final String promptValue = getPromptValue(parentPromptsMap, suspendedPeriod);
+        builder.withSuspendedPeriod(promptValue);
+    }
+
+    private void populateTotalCustodialPeriod(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap) {
+        final String promptValue = getPromptValue(parentPromptsMap, totalCustodialPeriod);
+        builder.withTotalCustodialPeriod(promptValue);
+    }
+
+
+    private List<JudicialResultPrompt> buildJudicialResultPrompt(final ResultDefinition resultDefinition, final List<Prompt> prompts) {
+        return prompts.stream()
+                .map(prompt -> {
+                            final uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt promptDefinition = resultDefinition.getPrompts().stream()
+                                    .filter(promptDef -> promptDef.getId().equals(prompt.getId()) && (isNull(prompt.getPromptRef()) || prompt.getPromptRef().equals(promptDef.getReference())))
+                                    .findFirst().orElseThrow(() -> new RuntimeException(format(NO_PROMPT_DEFINITION_FOUND_EXCEPTION_FORMAT, prompt.getId(), prompt.getPromptRef(), prompt.getLabel(), prompt.getValue(), resultDefinition.getId())));
+                            return findJudicialResultPrompt(prompt, promptDefinition);
+                        }
+                )
+                .collect(toList());
     }
 
     private void populateDateToBeFixed(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
@@ -196,6 +364,17 @@ public class NextHearingHelperV3 {
 
     private void populateListedStartDateTime(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final Optional<CourtCentreOrganisationUnit> courtCentreOrganisationUnit) {
         final String hDateValue = getPromptValue(promptsMap, HDATE);
+        final String dateValue = hDateValue != null ? hDateValue : getPromptValue(promptsMap, fixedDate);
+        final String timeValueFromPrompt = getPromptValue(promptsMap, timeOfHearing);
+        final String defaultStartTimeForOrganisationUnit = courtCentreOrganisationUnit.map(CourtCentreOrganisationUnit::getDefaultStartTime).orElse(null);
+
+        final String timeToUse = isNotBlank(timeValueFromPrompt) ? timeValueFromPrompt : defaultStartTimeForOrganisationUnit;
+        LOGGER.info("Populating listed start date time using date: {} and time: {}", dateValue, timeToUse);
+        builder.withListedStartDateTime(convertDateTimeToUTC(dateValue, timeToUse));
+    }
+
+    private void populateListedStartDateTimeReviewHearing(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final Optional<CourtCentreOrganisationUnit> courtCentreOrganisationUnit) {
+        final String hDateValue = getPromptValue(promptsMap, firstReviewDate);
         final String dateValue = hDateValue != null ? hDateValue : getPromptValue(promptsMap, fixedDate);
         final String timeValueFromPrompt = getPromptValue(promptsMap, timeOfHearing);
         final String defaultStartTimeForOrganisationUnit = courtCentreOrganisationUnit.map(CourtCentreOrganisationUnit::getDefaultStartTime).orElse(null);
@@ -248,8 +427,10 @@ public class NextHearingHelperV3 {
 
     private void populateReservedJudiciary(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, reservedJudiciary);
-        LOGGER.info("Populating reserved judiciary: {}", promptValue);
-        builder.withReservedJudiciary(nonNull(promptValue) ? Boolean.valueOf(promptValue) : null);
+        if (nonNull(promptValue)) {
+            final String reservedJuddiciary = getPromptValue(promptsMap, judgeReservesReviewHearing);
+            builder.withReservedJudiciary(nonNull(reservedJuddiciary) ? Boolean.valueOf(promptValue): null);
+        }
     }
 
     private void populateWeekCommencingDate(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
@@ -263,9 +444,11 @@ public class NextHearingHelperV3 {
                                      final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
 
         final JudicialResultPrompt prompt = promptsMap.get(HTYPE);
-        final HearingType hearingType = hearingTypeReverseLookup.getHearingTypeByName(context, prompt.getValue());
-        LOGGER.info("Populating hearing type: {}", hearingType);
-        builder.withType(hearingType);
+        if (nonNull(prompt)) {
+            final HearingType hearingType = hearingTypeReverseLookup.getHearingTypeByName(context, prompt.getValue());
+            LOGGER.info("Populating hearing type: {}", hearingType);
+            builder.withType(hearingType);
+        }
     }
 
     private void populateAdjournmentReasons(final NextHearing.Builder builder,
@@ -392,10 +575,39 @@ public class NextHearingHelperV3 {
         }
     }
 
-    private static boolean isNextHearingResult(final String resultDefinitionId) {
+    private static boolean isNextHearingResult(final String resultDefinitionId, final List<ResultLine2> resultLines) {
+        LOGGER.info("is result should create next hearing");
+        final boolean isFirstReviewHearingCO = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_CO.equals(resultDefinitionId);
+        final boolean isFirstReviewHearingDRNRR = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_DRNRR.equals(resultDefinitionId);
+        final boolean isFirstReviewHearingSUSPS = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_SUSPS.equals(resultDefinitionId);
+        if (isFirstReviewHearingCO || isFirstReviewHearingDRNRR || isFirstReviewHearingSUSPS) {
+            return isFirstReviewApplicable(resultLines, isFirstReviewHearingCO, isFirstReviewHearingDRNRR, isFirstReviewHearingSUSPS);
+        }
+        else {
+            return CROWN_COURT_RESULT_DEFINITION_ID.equals(resultDefinitionId)
+                    || MAGISTRATE_RESULT_DEFINITION_ID.equals(resultDefinitionId);
+        }
+    }
 
-        return CROWN_COURT_RESULT_DEFINITION_ID.equals(resultDefinitionId)
-                || MAGISTRATE_RESULT_DEFINITION_ID.equals(resultDefinitionId);
+    private static boolean isFirstReviewApplicable(final List<ResultLine2> resultLines, final boolean isFirstReviewHearingCO, final boolean isFirstReviewHearingDRNRR, final boolean isFirstReviewHearingSUSPS) {
+        final List<UUID> resultDefinitionIds = resultLines.stream().map(ResultLine2::getResultDefinitionId).collect(toList());
+        final boolean isDrugRehab = isDrugRehab(resultDefinitionIds);
+        final boolean isSuspendedOrder = resultDefinitionIds.contains(UUID.fromString(SUSPENDED_SENTENCE_ORDER)) && (isDrugRehab || resultDefinitionIds.contains(UUID.fromString(CUSTODIAL_PERIOD_JUDICIAL_RESULT_TYPE_ID)));
+        final boolean isCommunityOrder = isCommunityOrder(resultDefinitionIds, isDrugRehab);
+
+        final boolean isFirstHearingCO_SUSPS = isFirstReviewHearingCO || isFirstReviewHearingSUSPS;
+        return  ((isFirstHearingCO_SUSPS || isFirstReviewHearingDRNRR) && (isSuspendedOrder || isCommunityOrder));
+    }
+
+    private static boolean isDrugRehab(final List<UUID> resultDefinitionIds){
+        return resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_NON_RESIDENTIAL_WITH_REVIEW)) ||
+                resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_RESIDENTIAL_WITH_REVIEW));
+    }
+
+    private static boolean isCommunityOrder(final List<UUID> resultDefinitionIds, final boolean isDrugRehab){
+        return resultDefinitionIds.contains(UUID.fromString(COMMUNITY_ORDER)) && (isDrugRehab || (resultDefinitionIds.contains(UUID.fromString(COMMUNITY_REQUIREMENT))
+                && !(resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_NON_RESIDENTIAL_WITH_REVIEW))
+                || resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_RESIDENTIAL_WITH_REVIEW)))));
     }
 
     private static ZonedDateTime convertDateTimeToUTC(final String date, final String time) {

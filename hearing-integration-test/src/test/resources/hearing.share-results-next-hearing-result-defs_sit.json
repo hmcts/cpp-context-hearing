@@ -1,0 +1,525 @@
+{
+  "courtClerk": {
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762",
+    "firstName": "Erica",
+    "lastName": "Wilson"
+  },
+  "resultLines": [
+    {
+      "caseId": "3b6678d6-50e3-47f0-9c10-44d2ec690c15",
+      "childResultLineIds": [
+        "4309fe4c-75f9-46d6-8056-8a57f84008e3"
+      ],
+      "defendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "masterDefendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "offenceId": "351d6152-168c-4a0d-87c2-eb314c33147f",
+      "orderedDate": "SHARED_DATE",
+      "prompts": [
+        {
+          "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+          "label": "End Date",
+          "promptRef": "endDate",
+          "value": "2022-10-10",
+          "welshValue": ""
+        },
+        {
+          "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+          "label": "Responsible officer",
+          "promptRef": "responsibleOfficer",
+          "value": "a probation officer",
+          "welshValue": ""
+        },
+        {
+          "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+          "label": "Supervising Court",
+          "promptRef": "supervisingCourt",
+          "value": "Aberdeen Sheriff Court District",
+          "welshValue": ""
+        },
+        {
+          "id": "5dbfe1ce-0da9-47ab-9677-66c82ff079a7",
+          "label": "Judge reserves breach proceedings",
+          "promptRef": "judgeReservesBreachProceedings",
+          "value": "false",
+          "welshValue": ""
+        },
+        {
+          "id": "e61aa161-8eb6-42c2-ac85-89682ba79b1f",
+          "label": "Direction that a failure to comply be dealt with by magistrates' court",
+          "promptRef": "directionThatAFailureToComplyBeDealtWithByMagistratesCourt",
+          "value": "false",
+          "welshValue": ""
+        },
+        {
+          "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+          "label": "Probation team to be notified organisation name",
+          "promptRef": "probationteamtobenotifiedOrganisationName",
+          "value": "South East and Eastern Division NPS",
+          "welshValue": ""
+        },
+        {
+          "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+          "label": "Probation team to be notified email address 1",
+          "promptRef": "probationteamtobenotifiedEmailAddress1",
+          "value": "seenps.court@justice.gov.uk",
+          "welshValue": ""
+        }
+      ],
+      "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+      "resultLabel": "Community order England / Wales",
+      "resultLineId": "932b296b-088f-4574-9eb9-5af14532f9ba",
+      "shadowListed": false,
+      "sharedDate": "SHARED_DATE",
+      "shortCode": "co",
+      "hearingDay": "SHARED_DATE"
+    },
+    {
+      "caseId": "3b6678d6-50e3-47f0-9c10-44d2ec690c15",
+      "childResultLineIds": [
+        "bfd60f57-422f-4fa7-a959-5432ec856a79"
+      ],
+      "defendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "masterDefendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "offenceId": "351d6152-168c-4a0d-87c2-eb314c33147f",
+      "orderedDate": "SHARED_DATE",
+      "parentResultLineIds": [
+        "932b296b-088f-4574-9eb9-5af14532f9ba"
+      ],
+      "prompts": [
+
+      ],
+      "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+      "resultLabel": "Is electronic monitoring required",
+      "resultLineId": "4309fe4c-75f9-46d6-8056-8a57f84008e3",
+      "shadowListed": false,
+      "sharedDate": "SHARED_DATE",
+      "shortCode": "emreq",
+      "hearingDay": "SHARED_DATE"
+    },
+    {
+      "caseId": "3b6678d6-50e3-47f0-9c10-44d2ec690c15",
+      "childResultLineIds": [
+        "49e4fc45-9017-4dbc-a631-3e92fb85c5f6"
+      ],
+      "defendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "DEFENDANT",
+      "masterDefendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "offenceId": "351d6152-168c-4a0d-87c2-eb314c33147f",
+      "orderedDate": "SHARED_DATE",
+      "prompts": [
+        {
+          "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
+          "label": "Total custodial period",
+          "promptRef": "totalCustodialPeriod",
+          "value": "3 Years",
+          "welshValue": ""
+        },
+        {
+          "id": "95618691-0742-417e-82b9-c4d4bff94585",
+          "label": "Suspended period",
+          "promptRef": "suspendedPeriod",
+          "value": "1 Months",
+          "welshValue": ""
+        },
+        {
+          "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+          "label": "Probation team to be notified organisation name",
+          "promptRef": "probationteamtobenotifiedOrganisationName",
+          "value": "South East and Eastern Division NPS",
+          "welshValue": ""
+        },
+        {
+          "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+          "label": "Probation team to be notified email address 1",
+          "promptRef": "probationteamtobenotifiedEmailAddress1",
+          "value": "seenps.court@justice.gov.uk",
+          "welshValue": ""
+        }
+      ],
+      "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+      "resultLabel": "Total suspended custodial period",
+      "resultLineId": "76a6c909-9731-45a4-8409-a7dc8ec9ae95",
+      "shadowListed": false,
+      "sharedDate": "SHARED_DATE",
+      "shortCode": "stimp",
+      "hearingDay": "SHARED_DATE"
+    },
+    {
+      "caseId": "3b6678d6-50e3-47f0-9c10-44d2ec690c15",
+      "childResultLineIds": [
+
+      ],
+      "defendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "DEFENDANT",
+      "masterDefendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "offenceId": "351d6152-168c-4a0d-87c2-eb314c33147f",
+      "orderedDate": "SHARED_DATE",
+      "parentResultLineIds": [
+        "76a6c909-9731-45a4-8409-a7dc8ec9ae95"
+      ],
+      "prompts": [
+        {
+          "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+          "label": "First review date",
+          "promptRef": "firstReviewDate",
+          "value": "2022-10-10",
+          "welshValue": ""
+        },
+        {
+          "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+          "label": "Time of hearing",
+          "promptRef": "timeOfHearing",
+          "value": "10:10",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse organisation name",
+          "promptRef": "hCHOUSEOrganisationName",
+          "value": "Welshpool Magistrates' Court",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse address line 1",
+          "promptRef": "hCHOUSEAddress1",
+          "value": "Mansion House",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse address line 2",
+          "promptRef": "hCHOUSEAddress2",
+          "value": "24 Severn Street",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse address line 3",
+          "promptRef": "hCHOUSEAddress3",
+          "value": "Welshpool",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse address line 4",
+          "promptRef": "hCHOUSEAddress4",
+          "value": "Powys",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse post code",
+          "promptRef": "hCHOUSEPostCode",
+          "value": "SY21 7UX",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse email address 1",
+          "promptRef": "hCHOUSEEmailAddress1",
+          "value": "NorthWalesCPS@cps.gov.uk.cjsm.net",
+          "welshValue": ""
+        },
+        {
+          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+          "label": "Courthouse email address 2",
+          "promptRef": "hCHOUSEEmailAddress2",
+          "value": "WelshpoolMC@geoamey.co.uk",
+          "welshValue": ""
+        }
+      ],
+      "resultDefinitionId": "b3ed14c1-d921-459c-90fd-400a5d8d0076",
+      "resultLabel": "First review hearing",
+      "resultLineId": "49e4fc45-9017-4dbc-a631-3e92fb85c5f6",
+      "shadowListed": false,
+      "sharedDate": "SHARED_DATE",
+      "shortCode": "frh",
+      "hearingDay": "SHARED_DATE"
+    },
+    {
+      "caseId": "3b6678d6-50e3-47f0-9c10-44d2ec690c15",
+      "childResultLineIds": [
+        "d8d29c4d-1b23-4eca-9b07-5dc4d283ae55"
+      ],
+      "defendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "masterDefendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "offenceId": "351d6152-168c-4a0d-87c2-eb314c33147f",
+      "orderedDate": "SHARED_DATE",
+      "parentResultLineIds": [
+        "4309fe4c-75f9-46d6-8056-8a57f84008e3"
+      ],
+      "prompts": [
+        {
+          "id": "f092fe58-2297-4d10-818a-8b303692ac39",
+          "label": "Under direction of",
+          "promptRef": "underDirectionOf",
+          "value": "test",
+          "welshValue": ""
+        },
+        {
+          "id": "0b74fb53-acb7-42db-b9b6-976ce74b59b5",
+          "label": "Treatment place",
+          "promptRef": "treatmentPlace",
+          "value": "test",
+          "welshValue": ""
+        },
+        {
+          "id": "10028ef8-efc7-4a40-9703-1e121a6fbc84",
+          "label": "Period to provide samples",
+          "promptRef": "periodToProvideSamples",
+          "value": "1 Years",
+          "welshValue": ""
+        },
+        {
+          "id": "dcb90a68-c834-4ec3-a311-125c6400b487",
+          "label": "Review frequency",
+          "promptRef": "reviewFrequency",
+          "value": "1",
+          "welshValue": ""
+        },
+        {
+          "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+          "label": "First review date",
+          "promptRef": "firstReviewDate",
+          "value": "2022-10-10",
+          "welshValue": ""
+        },
+        {
+          "id": "f622f008-f8e7-4f34-a7df-df85a7ed4d47",
+          "label": "First review time",
+          "promptRef": "firstReviewTime",
+          "value": "20:01",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse organisation name",
+          "promptRef": "courthousenameOrganisationName",
+          "value": "St. Albans Magistrates' Court",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 1",
+          "promptRef": "courthousenameAddress1",
+          "value": "The Court House",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 2",
+          "promptRef": "courthousenameAddress2",
+          "value": "Civic Centre",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 3",
+          "promptRef": "courthousenameAddress3",
+          "value": "St. Peter's Street",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 4",
+          "promptRef": "courthousenameAddress4",
+          "value": "St. Albans",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 5",
+          "promptRef": "courthousenameAddress5",
+          "value": "Herts.",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse post code",
+          "promptRef": "courthousenamePostCode",
+          "value": "AL1 3LB",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse email address 1",
+          "promptRef": "courthousenameEmailAddress1",
+          "value": "HertsBedsMCT@cps.gov.uk",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse email address 2",
+          "promptRef": "courthousenameEmailAddress2",
+          "value": "PECSSt.AlbansMags@serco.com",
+          "welshValue": ""
+        },
+        {
+          "id": "005585e7-1442-4114-a542-272c55cd7668",
+          "label": "Attendance",
+          "promptRef": "attendance",
+          "value": "may attend",
+          "welshValue": ""
+        }
+      ],
+      "resultDefinitionId": "61ea03c9-c113-446b-a392-402144fcd9e8",
+      "resultLabel": "Drug rehabilitation residential with review",
+      "resultLineId": "bfd60f57-422f-4fa7-a959-5432ec856a79",
+      "shadowListed": false,
+      "sharedDate": "SHARED_DATE",
+      "shortCode": "drr",
+      "hearingDay": "SHARED_DATE"
+    },
+    {
+      "caseId": "3b6678d6-50e3-47f0-9c10-44d2ec690c15",
+      "childResultLineIds": [
+
+      ],
+      "defendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "isComplete": true,
+      "isDeleted": false,
+      "isModified": true,
+      "level": "OFFENCE",
+      "masterDefendantId": "56b5ec21-0d20-43d5-9352-6b86f71665d7",
+      "offenceId": "351d6152-168c-4a0d-87c2-eb314c33147f",
+      "orderedDate": "SHARED_DATE",
+      "parentResultLineIds": [
+        "bfd60f57-422f-4fa7-a959-5432ec856a79"
+      ],
+      "prompts": [
+        {
+          "id": "f092fe58-2297-4d10-818a-8b303692ac39",
+          "label": "Under direction of",
+          "promptRef": "underDirectionOf",
+          "value": "testdfnr",
+          "welshValue": ""
+        },
+        {
+          "id": "0b74fb53-acb7-42db-b9b6-976ce74b59b5",
+          "label": "Treatment place",
+          "promptRef": "treatmentPlace",
+          "value": "tesa",
+          "welshValue": ""
+        },
+        {
+          "id": "10028ef8-efc7-4a40-9703-1e121a6fbc84",
+          "label": "Period to provide samples",
+          "promptRef": "periodToProvideSamples",
+          "value": "1 Years",
+          "welshValue": ""
+        },
+        {
+          "id": "dcb90a68-c834-4ec3-a311-125c6400b487",
+          "label": "Review frequency",
+          "promptRef": "reviewFrequency",
+          "value": "5",
+          "welshValue": ""
+        },
+        {
+          "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+          "label": "First review date",
+          "promptRef": "firstReviewDate",
+          "value": "2021-01-10",
+          "welshValue": ""
+        },
+        {
+          "id": "f622f008-f8e7-4f34-a7df-df85a7ed4d47",
+          "label": "First review time",
+          "promptRef": "firstReviewTime",
+          "value": "10:30",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse organisation name",
+          "promptRef": "courthousenameOrganisationName",
+          "value": "Welshpool Magistrates' Court",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 1",
+          "promptRef": "courthousenameAddress1",
+          "value": "Mansion House",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 2",
+          "promptRef": "courthousenameAddress2",
+          "value": "24 Severn Street",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 3",
+          "promptRef": "courthousenameAddress3",
+          "value": "Welshpool",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse address line 4",
+          "promptRef": "courthousenameAddress4",
+          "value": "Powys",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse post code",
+          "promptRef": "courthousenamePostCode",
+          "value": "SY21 7UX",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse email address 1",
+          "promptRef": "courthousenameEmailAddress1",
+          "value": "NorthWalesCPS@cps.gov.uk.cjsm.net",
+          "welshValue": ""
+        },
+        {
+          "id": "e498ec52-0adf-41cf-89e2-40955a418393",
+          "label": "Courthouse email address 2",
+          "promptRef": "courthousenameEmailAddress2",
+          "value": "WelshpoolMC@geoamey.co.uk",
+          "welshValue": ""
+        },
+        {
+          "id": "005585e7-1442-4114-a542-272c55cd7668",
+          "label": "Attendance",
+          "promptRef": "attendance",
+          "value": "must attend",
+          "welshValue": ""
+        }
+      ],
+      "resultDefinitionId": "cc2cbb94-b75a-4a8c-9840-31c5f8007724",
+      "resultLabel": "Drug rehabilitation non-residential with review",
+      "resultLineId": "d8d29c4d-1b23-4eca-9b07-5dc4d283ae55",
+      "shadowListed": false,
+      "sharedDate": "SHARED_DATE",
+      "shortCode": "drnrr",
+      "hearingDay": "SHARED_DATE"
+    }
+  ],
+  "hearingDay": "SHARED_DATE"
+}

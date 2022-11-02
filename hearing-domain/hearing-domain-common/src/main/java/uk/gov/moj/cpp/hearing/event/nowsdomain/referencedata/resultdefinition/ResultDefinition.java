@@ -23,6 +23,8 @@ public class ResultDefinition {
 
     private Integer rank;
 
+    private String triggeredApplicationCode;
+
     private List<WordGroups> wordGroups;
 
     private List<String> userGroups = new ArrayList<>();
@@ -455,5 +457,13 @@ public class ResultDefinition {
     public ResultDefinition setDvlaCode(final String dvlaCode) {
         this.dvlaCode = dvlaCode;
         return this;
+    }
+
+    public String getTriggeredApplicationCode() {
+        return triggeredApplicationCode;
+    }
+
+    public void setTriggeredApplicationCode(final String triggeredApplicationCode) {
+        this.triggeredApplicationCode = triggeredApplicationCode;
     }
 }

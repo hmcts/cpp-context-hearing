@@ -1,0 +1,72 @@
+{
+  "modifiedDate": "2019-02-28",
+  "updatedOffences": [
+    {
+      "defendantId": "DEFENDANT_ID",
+      "offences": [
+        {
+          "arrestDate": "2019-01-01",
+          "chargeDate": "2019-01-01",
+          "convictionDate": "2018-02-28",
+          "count": 1,
+          "endDate": "2018-05-09",
+          "id": "OFFENCE_ID",
+          "notifiedPlea": {
+            "notifiedPleaDate": "2018-04-01",
+            "notifiedPleaValue": "NOTIFIED_GUILTY",
+            "offenceId": "b38a938d-af22-47e7-a2fe-ad5f005eff3d"
+          },
+          "offenceCode": "OF61060",
+          "offenceDefinitionId": "9e66380d-91e0-42c2-9f2a-bedc9a53d84c",
+          "offenceFacts": {
+            "alcoholReadingAmount": 111,
+            "vehicleRegistration": "AA12345"
+          },
+          "offenceLegislation": "Contrary to section 23 of the Offences Against the Person Act 1861.",
+          "offenceLegislationWelsh": "Yn groes i adran 23 Deddf Troseddau Corfforol 1861.",
+          "offenceTitle": "Administer poison with intent to endanger life / inflict grievous bodily harm",
+          "offenceTitleWelsh": "Gweinyddu gwenwyn gan fwriadu peryglu bywyd / achosi niwed corfforol difrifol",
+          "orderIndex": 1,
+          "startDate": "2018-05-04",
+          "wording": "On August/2017 at the County public house, unlawfully and maliciously wounded, John Smith",
+          "wordingWelsh": "Gweinyddu gwenwyn gan fwriadu peryglu bywyd / achosi niwed corfforol difrifol"
+        }
+      ],
+      "prosecutionCaseId": "CASE_ID"
+    }
+  ],"addedOffences": [
+  {
+    "defendantId": "DEFENDANT_ID",
+    "offences": [
+      {
+        "arrestDate": "2019-01-01",
+        "chargeDate": "2019-01-01",
+        "convictionDate": "2018-02-28",
+        "count": 1,
+        "endDate": "2018-05-09",
+        "id": "OFFENCE_ID",
+        "notifiedPlea": {
+          "notifiedPleaDate": "2018-04-01",
+          "notifiedPleaValue": "NOTIFIED_GUILTY",
+          "offenceId": "b38a938d-af22-47e7-a2fe-ad5f005eff3d"
+        },
+        "offenceCode": "OF61060",
+        "offenceDefinitionId": "9e66380d-91e0-42c2-9f2a-bedc9a53d84c",
+        "offenceFacts": {
+          "alcoholReadingAmount": 111,
+          "vehicleRegistration": "AA12345"
+        },
+        "offenceLegislation": "Contrary to section 23 of the Offences Against the Person Act 1861.",
+        "offenceLegislationWelsh": "Yn groes i adran 23 Deddf Troseddau Corfforol 1861.",
+        "offenceTitle": "Administer poison with intent to endanger life / inflict grievous bodily harm",
+        "offenceTitleWelsh": "Gweinyddu gwenwyn gan fwriadu peryglu bywyd / achosi niwed corfforol difrifol",
+        "orderIndex": 1,
+        "startDate": "2018-05-04",
+        "wording": "On August/2017 at the County public house, unlawfully and maliciously wounded, John Smith",
+        "wordingWelsh": "Gweinyddu gwenwyn gan fwriadu peryglu bywyd / achosi niwed corfforol difrifol"
+      }
+    ],
+    "prosecutionCaseId": "CASE_ID"
+  }
+]
+}
