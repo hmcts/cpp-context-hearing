@@ -96,23 +96,28 @@ public class HearingEventProcessor {
 
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
 
+       if(LOGGER.isWarnEnabled())  {LOGGER.warn("raising public event hearing.draft-result-saved correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
         this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
+        if(LOGGER.isWarnEnabled()) {LOGGER.warn("raised public event hearing.draft-result-saved correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
     }
 
     @Handles("hearing.draft-result-saved-v2")
     public void publicDraftResultSavedV2PublicEvent(final JsonEnvelope event) {
+        if(LOGGER.isWarnEnabled())  {LOGGER.warn("recieved private  event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.draft-result-saved-v2 event received {}", event.toObfuscatedDebugString());
         }
 
         final UUID hearingId = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSavedV2.class).getHearingId();
+        if(LOGGER.isWarnEnabled())  {LOGGER.warn("first conversion in event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
 
         final PublicHearingDraftResultSaved publicHearingDraftResultSaved = PublicHearingDraftResultSaved.publicHearingDraftResultSaved()
                 .setHearingId(hearingId);
 
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
-
+        if(LOGGER.isWarnEnabled())  {LOGGER.warn("raising public event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
         this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
+        if(LOGGER.isWarnEnabled()) {LOGGER.warn("raised public event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
     }
 
     @Handles("hearing.draft-result-deleted-v2")
