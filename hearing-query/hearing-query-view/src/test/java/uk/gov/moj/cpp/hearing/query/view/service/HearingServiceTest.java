@@ -50,8 +50,13 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Level;
+import uk.gov.justice.core.courts.Organisation;
+import uk.gov.justice.core.courts.Person;
+import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
@@ -70,6 +75,7 @@ import uk.gov.moj.cpp.hearing.mapping.HearingDayJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingTypeJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseIdentifierJPAMapper;
+import uk.gov.moj.cpp.hearing.mapping.ProsecutionCaseJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.ResultLineJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.NowsRepository;
@@ -79,6 +85,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingYouthCourtDefendants;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Nows;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
@@ -93,6 +100,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTar
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ApplicationTargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CaseDetail;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
@@ -110,6 +118,7 @@ import uk.gov.moj.cpp.hearing.repository.NowsMaterialRepository;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -208,6 +217,11 @@ public class HearingServiceTest {
     private TimelineHearingSummaryHelper timelineHearingSummaryHelperMock;
 
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+
+    private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+    @Mock
+    ProsecutionCaseJPAMapper prosecutionCaseJPAMapper;
 
     @Before
     public void setup() {
@@ -1207,6 +1221,22 @@ public class HearingServiceTest {
         assertNull(response.getHearingSummaries());
     }
 
+
+    @Test
+    public void shouldReturnProsecutionCaseResponseByHearingId() {
+        Optional<ProsecutionCaseResponse> prosecutionCaseResponse = getProsecutionCaseResponse();
+        List<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCases = getProsecutionCases();
+
+        when(hearingRepository.findProsecutionCasesByHearingId(any())).thenReturn(prosecutionCases);
+        when(prosecutionCaseJPAMapper.fromJPA(anySet())).thenReturn(prosecutionCaseResponse.get().getProsecutionCases());
+        final ProsecutionCaseResponse targetListResponse = hearingService.getProsecutionCaseForHearings(randomUUID());
+
+        assertThat(targetListResponse, isBean(ProsecutionCaseResponse.class)
+                .with(t -> t.getProsecutionCases().size(), is(1))
+        );
+
+    }
+
     private void assertCurrentCourtStatus(final CurrentCourtStatus actual, final CurrentCourtStatus expected) {
         final Court actualCourt = actual.getCourt();
         final Court expectedCourt = expected.getCourt();
@@ -1289,14 +1319,14 @@ public class HearingServiceTest {
 
     private CrackedIneffectiveVacatedTrialTypes buildCrackedIneffectiveVacatedTrialTypes(final UUID trialTypeId) {
         final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "","fullDescription", null));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(trialTypeId, "code", "InEffective", "", "fullDescription", null));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
 
     private CrackedIneffectiveVacatedTrialTypes buildVacatedTrialTypes(final UUID vacatedTrialReasonId) {
         final List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "","fullDescription", null));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(vacatedTrialReasonId, "code", "Vacated", "", "fullDescription", null));
 
         return new CrackedIneffectiveVacatedTrialTypes().setCrackedIneffectiveVacatedTrialTypes(trialList);
     }
@@ -1379,5 +1409,78 @@ public class HearingServiceTest {
     private HearingDay plusTime(HearingDay hearingDay, long hour) {
         hearingDay.setSittingDay(hearingDay.getSittingDay().plusHours(hour));
         return hearingDay;
+    }
+
+    private Optional<ProsecutionCaseResponse> getProsecutionCaseResponse() {
+        Address address = Address.address().withAddress1("addr1").withAddress2("addr2").withAddress3("addr3").
+                withAddress4("addr4").withPostcode("AA1 1AA").build();
+
+        List<ProsecutionCase> prosecutionCases = new ArrayList<ProsecutionCase>();
+        final ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withDefendants(Arrays.asList(uk.gov.justice.core.courts.Defendant.defendant()
+                        .withId(randomUUID())
+                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                .withArrestSummonsNumber("")
+                                .withPersonDetails(Person.person()
+                                        .withAddress(address)
+                                        .withDateOfBirth(date("12/11/1978"))
+                                        .withFirstName("First Name")
+                                        .withGender(Gender.MALE)
+                                        .withLastName("Last Name").build())
+                                .withEmployerOrganisation(Organisation.organisation()
+                                        .withName("").build()).build()).build())).build();
+
+        prosecutionCases.add(prosecutionCase);
+
+        Optional<ProsecutionCaseResponse> prosecutionCaseResponse = Optional.of(new ProsecutionCaseResponse());
+        prosecutionCaseResponse.get().setProsecutionCases(prosecutionCases);
+        return prosecutionCaseResponse;
+    }
+
+    private List<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> getProsecutionCases() {
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Address address = new uk.gov.moj.cpp.hearing.persist.entity.ha.Address();
+        address.setAddress1("addr1");
+        address.setAddress2("addr2");
+        address.setAddress4("addr3");
+        address.setAddress4("addr4");
+        address.setPostCode("AA1 1AA");
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Person person = new uk.gov.moj.cpp.hearing.persist.entity.ha.Person();
+        person.setAddress(address);
+        person.setDateOfBirth(date("12/11/1978"));
+        person.setFirstName("First Name");
+        person.setGender(Gender.MALE);
+        person.setLastName("Last Name");
+
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation organisation = new uk.gov.moj.cpp.hearing.persist.entity.ha.Organisation();
+        organisation.setId(randomUUID());
+        organisation.setName("");
+
+        uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant personDefendant = new uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant();
+        personDefendant.setArrestSummonsNumber("");
+        personDefendant.setPersonDetails(person);
+        personDefendant.setEmployerOrganisation(organisation);
+
+        uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant defendant = new Defendant();
+        HearingSnapshotKey hearingSnapshotKey = new HearingSnapshotKey();
+        hearingSnapshotKey.setHearingId(randomUUID());
+        hearingSnapshotKey.setId(randomUUID());
+        defendant.setId(hearingSnapshotKey);
+        defendant.setPersonDefendant(personDefendant);
+
+        Set<Defendant> defendants = new HashSet<>();
+        defendants.add(defendant);
+
+        List<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase> prosecutionCases = new ArrayList<uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase>();
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase = new uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(randomUUID(), hearingSnapshotKey.getHearingId()));
+        prosecutionCase.setDefendants(defendants);
+        prosecutionCases.add(prosecutionCase);
+
+        return prosecutionCases;
+    }
+
+    private LocalDate date(String strDate) {
+        return LocalDate.parse(strDate, dateTimeFormatter);
     }
 }

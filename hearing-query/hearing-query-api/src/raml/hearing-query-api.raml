@@ -637,3 +637,23 @@ protocols: [ HTTP, HTTPS ]
                   application/vnd.hearing.get.future-hearings+json:
                      example: !include json/hearing.get.hearings.json
                      schema: !include json/schema/hearing.get.hearings.json
+
+/hearings/{hearingId}/{hearingEventDefinitionId}/prosecution-case:
+  uriParameters:
+        hearingId:
+          description: ID of hearing to get the prosecution case
+          type: string
+  get:
+    description: |
+      ...
+      (mapping):
+          responseType: application/vnd.hearing.prosecution-case-by-hearingid+json
+          name: hearing.prosecution-case-by-hearingid
+       ...
+    responses:
+          200:
+              description: OK
+              body:
+                application/vnd.hearing.prosecution-case-by-hearingid+json:
+                  example:  !include json/hearing.get-prosecutioncase-result.json
+                  schema:  !include  json/schema/hearing.get-prosecutioncase-result.json

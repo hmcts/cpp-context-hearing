@@ -188,6 +188,7 @@ public abstract class AbstractRestructuringTest {
         when(courtHouseReverseLookup.getCourtRoomByRoomName(any(CourtCentreOrganisationUnit.class), anyString())).thenReturn(ofNullable(expectedCourtRooms));
         when(courtRoomOuCodeReverseLookup.getcourtRoomOuCode(any(JsonEnvelope.class), anyInt(), anyString())).thenReturn(COURT_ROOM_OU_CODE);
         when(hearingTypeReverseLookup.getHearingTypeByName(any(JsonEnvelope.class), anyString())).thenReturn(HEARING_TYPE);
+        when(hearingTypeReverseLookup.getDefaultDurationInMin(any(JsonEnvelope.class), anyString())).thenReturn(10);
         when(pleaTypeReferenceDataLoader.retrieveGuiltyPleaTypes()).thenReturn(createGuiltyPleaTypes());
     }
 

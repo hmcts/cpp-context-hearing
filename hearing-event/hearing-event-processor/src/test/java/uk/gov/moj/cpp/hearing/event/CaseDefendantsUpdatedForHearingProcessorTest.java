@@ -1,0 +1,111 @@
+package uk.gov.moj.cpp.hearing.event;
+
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMetadataMatcher.metadata;
+import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePayloadMatcher.payloadIsJson;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+
+import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.sender.Sender;
+import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+
+import junit.framework.TestCase;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
+
+
+@RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("squid:S2187")
+public class CaseDefendantsUpdatedForHearingProcessorTest extends TestCase {
+
+    @Spy
+    private final Enveloper enveloper = createEnveloper();
+
+    @Mock
+    private Sender sender;
+
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Captor
+    private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @InjectMocks
+    private CaseDefendantsUpdatedForHearingProcessor caseDefendantsUpdatedForHearingProcessor;
+
+    @Before
+    public void initMocks() {
+        MockitoAnnotations.initMocks(this);
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+    }
+
+    @Test
+    public void shouldRegisterDefendantsForHearing() {
+        final UUID hearingID = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final Defendant defendant1 = Defendant.defendant().withId(defendantId1).withProsecutionCaseId(caseId).build();
+        final Defendant defendant2 = Defendant.defendant().withId(defendantId2).withProsecutionCaseId(caseId).build();
+        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = CaseDefendantsUpdatedForHearing
+                .caseDefendantsUpdatedForHearing()
+                .withHearingId(hearingID)
+                .withProsecutionCase(ProsecutionCase.prosecutionCase()
+                        .withDefendants(Arrays.asList(defendant1, defendant2))
+                        .build())
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.case-defendants-updated-for-hearing"),
+                objectToJsonObjectConverter.convert(caseDefendantsUpdatedForHearing));
+
+        caseDefendantsUpdatedForHearingProcessor.caseDefendantsUpdatedForHearing(event);
+
+        verify(this.sender, times(2)).send(this.envelopeArgumentCaptor.capture());
+
+        final List<JsonEnvelope> allValues = this.envelopeArgumentCaptor.getAllValues();
+        assertThat(allValues.get(0), jsonEnvelope(
+                metadata().withName("hearing.command.register-hearing-against-defendant"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.defendantId", is(defendantId1.toString())),
+                        withJsonPath("$.hearingId", is(hearingID.toString()))))));
+
+        assertThat(allValues.get(1), jsonEnvelope(
+                metadata().withName("hearing.command.register-hearing-against-defendant"),
+                payloadIsJson(allOf(
+                        withJsonPath("$.defendantId", is(defendantId2.toString())),
+                        withJsonPath("$.hearingId", is(hearingID.toString()))))));
+
+    }
+
+}

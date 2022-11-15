@@ -3,12 +3,16 @@ package uk.gov.moj.cpp.hearing.query.view;
 import static java.time.LocalDate.now;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
+import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
@@ -18,9 +22,13 @@ import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.LocalDates;
 import uk.gov.justice.services.common.converter.ObjectToJsonValueConverter;
+import uk.gov.justice.services.common.util.UtcClock;
+import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
+import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingType;
@@ -34,6 +42,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultRes
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
@@ -85,10 +94,12 @@ public class HearingQueryView {
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
     private static final String FIELD_CASE_IDS = "caseIds";
 
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
 
     @Inject
     private HearingService hearingService;
+
 
     @Inject
     private DefendantRepository defendantRepository;
@@ -108,6 +119,13 @@ public class HearingQueryView {
 
     @Inject
     private CourtListRepository courtListRepository;
+
+    @Inject
+    private UtcClock utcClock;
+
+    @Inject
+    @ServiceComponent(QUERY_VIEW)
+    private Requester requester;
 
     public Envelope<GetHearings> findHearings(final JsonEnvelope envelope,
                                               final List<UUID> accessibleCasesAndApplicationIds,
@@ -138,12 +156,13 @@ public class HearingQueryView {
     public Envelope<GetHearings> findHearingsForFuture(final JsonEnvelope envelope, final HearingTypes hearingTypes) {
         final List<HearingType> hearingTypeList = hearingTypes.getHearingTypes().stream().filter(HearingType::getTrialTypeFlag).collect(Collectors.toList());
         final String defendantId = envelope.payloadAsJsonObject().getString(FIELD_DEFENDANT_ID);
-        final GetHearings hearingListResponse = hearingService.getHearingsForFuture(now(), UUID.fromString(defendantId),hearingTypeList);
+        final GetHearings hearingListResponse = hearingService.getHearingsForFuture(now(), UUID.fromString(defendantId), hearingTypeList);
 
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings-for-future")
                 .withMetadataFrom(envelope);
     }
+
     public Envelope<HearingDetailsResponse> findHearing(final JsonEnvelope envelope,
                                                         final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes,
                                                         final List<UUID> accessibleCaseAndApplicationIds,
@@ -165,6 +184,8 @@ public class HearingQueryView {
                 .withName("hearing.get-draft-result")
                 .withMetadataFrom(envelope);
     }
+
+
 
     public JsonEnvelope getDraftResultV2(final JsonEnvelope envelope) {
         final UUID hearingId = fromString(envelope.payloadAsJsonObject().getString(FIELD_HEARING_ID));
@@ -249,6 +270,7 @@ public class HearingQueryView {
         final Optional<UUID> caseId = getUUID(envelope.payloadAsJsonObject(), FIELD_ID);
 
         final Timeline timeline = hearingService.getTimeLineByCaseId(caseId.get(), crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+
 
         return envelop(timeline)
                 .withName("hearing.timeline")
@@ -422,6 +444,17 @@ public class HearingQueryView {
 
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
+                .withMetadataFrom(envelope);
+    }
+
+    public Envelope<ProsecutionCaseResponse> getProsecutionCaseForHearing(final JsonEnvelope envelope) {
+
+        final Optional<UUID> hearingId = getUUID(envelope.payloadAsJsonObject(), FIELD_HEARING_ID);
+
+        final ProsecutionCaseResponse prosecutionCaseResponse = hearingService.getProsecutionCaseForHearings(hearingId.get());
+
+        return envelop(prosecutionCaseResponse)
+                .withName("hearing.get-prosecutioncase-result")
                 .withMetadataFrom(envelope);
     }
 }
