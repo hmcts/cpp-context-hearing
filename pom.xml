@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
@@ -19,6 +20,14 @@
         </sonar.jacoco.itReportPath>
         <sonar.report.export.path>sonar-report.json</sonar.report.export.path>
         <sonar.scm.provider>git</sonar.scm.provider>
+        <sonar.exclusions>
+            **/uk/gov/moj/cpp/hearing/test/*.java,
+            **/uk/gov/moj/cpp/hearing/test/matchers/*.java,
+            **/uk/gov/moj/cpp/hearing/CreateJsonSampleUtil.java,
+            **/uk/gov/moj/cpp/hearing/query/view/response/nowresponse/*.java,
+            **/uk/gov/moj/cpp/hearing/query/view/response/*.java,
+            **/query/view/service/ctl/model/*.java
+        </sonar.exclusions>
         <mvn.site.url>file://${project.build.directory}/site</mvn.site.url>
         <junit-dataprovider.version>1.13.1</junit-dataprovider.version>
         <datafactory.version>0.8</datafactory.version>
