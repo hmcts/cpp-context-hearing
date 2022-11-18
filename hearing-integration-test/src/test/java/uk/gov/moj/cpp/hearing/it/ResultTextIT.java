@@ -56,14 +56,14 @@ import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 public class ResultTextIT extends AbstractIT {
 
-    public static final String RESULT_PARENT = "co - Community order England / Wales\nEnd Date: 12/10/2024, Responsible officer: a probation officer, Supervising Court: Banbury Magistrates' Court, Probation team to be notified organisation name: London Division NPS, Probation team to be notified email address 1: londonnps.court@justice.gov.uk" + System.lineSeparator() +
+    public static final String RESULT_PARENT = "co - Community order England / Wales\nEnd Date: 12/10/2024, Responsible officer: a probation officer, Supervising Court: Banbury Magistrates' Court, Probation team to be notified organisation name: London Division NPS" + System.lineSeparator() +
             "Number of hours: 100 Hours" + System.lineSeparator() +
             "Offender to comply with any instructions of the responsible officer to attend appointments (with the responsible officer or someone else nominated by them), or to participate in any activity as required by the responsible officer up to a maximum of: 28 Days";
     public static final String RESULT_CHILD_1 = "UPWR - Unpaid work" + System.lineSeparator() +
             "Number of hours: 100 Hours";
     public static final String RESULT_CHILD_2 = "RAR - Rehabilitation activity" + System.lineSeparator() +
             "Offender to comply with any instructions of the responsible officer to attend appointments (with the responsible officer or someone else nominated by them), or to participate in any activity as required by the responsible officer up to a maximum of: 28 Days";
-    private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
 

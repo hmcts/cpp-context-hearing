@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
@@ -8,7 +9,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
 
 
-import java.util.Arrays;
+import java.util.UUID;
 import org.hamcrest.CoreMatchers;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
@@ -17,6 +18,7 @@ import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import java.util.List;
 
 import org.junit.Test;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 public class ResultTextHelperTest {
@@ -44,7 +46,7 @@ public class ResultTextHelperTest {
     private void getTreeNode(final List<TreeNode<ResultLine>> treeNodeList) {
         treeNodeList.get(0).setJudicialResult(JudicialResult.judicialResult()
                         .withLabel("Label-Result")
-                .withJudicialResultPrompts(Arrays.asList(judicialResultPrompt()
+                .withJudicialResultPrompts(asList(judicialResultPrompt()
                         .withPromptReference("placeArea")
                         .withValue("area1")
                         .withType("TXT")
@@ -370,8 +372,8 @@ public class ResultTextHelperTest {
                 .setDependantResultDefinitionGroup("Community Requirement")
                 .setShortCode("RAR")));
 
-        communityOrderEnglandWales.addChildren(Arrays.asList(isElectronicMonitoringRequired,communityRequirements));
-        communityRequirements.addChildren(Arrays.asList(unpaidWork, rehabilitationActivity));
+        communityOrderEnglandWales.addChildren(asList(isElectronicMonitoringRequired,communityRequirements));
+        communityRequirements.addChildren(asList(unpaidWork, rehabilitationActivity));
 
         ResultTextHelper.setResultText(singletonList(communityOrderEnglandWales));
 
@@ -390,7 +392,7 @@ public class ResultTextHelperTest {
         treeNode.setJudicialResult(JudicialResult.judicialResult()
                 .withLabel("Result Label")
                         .withAlwaysPublished(false)
-                .withJudicialResultPrompts(Arrays.asList(judicialResultPrompt()
+                .withJudicialResultPrompts(asList(judicialResultPrompt()
                         .withLabel("Make of vehicle")
                         .withPromptReference("makeOfVehicle")
                         .withValue(makeOfVehicle)
@@ -447,73 +449,103 @@ public class ResultTextHelperTest {
 
     private List<TreeNode<ResultLine>> getTreeNodesForNameAddress(final String organisationName, final String firstName, final String middleName, final String lastName, final String suffix) {
         final TreeNode<ResultLine> treeNode = new TreeNode<>(randomUUID(), null);
+        final UUID promptId1 = randomUUID();
+        final UUID promptId2 = randomUUID();
+        final UUID promptId3 = randomUUID();
+        final UUID promptId4 = randomUUID();
+        final UUID promptId5 = randomUUID();
+        final UUID promptId6 = randomUUID();
+        final UUID promptId7 = randomUUID();
+        final UUID promptId8 = randomUUID();
+        final UUID promptId9 = randomUUID();
+        final UUID promptId10 = randomUUID();
         treeNode.setJudicialResult(JudicialResult.judicialResult()
                 .withLabel("Label-Result")
-                .withJudicialResultPrompts(Arrays.asList(judicialResultPrompt()
+                .withJudicialResultPrompts(asList(judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressOrganisationName")
                                 .withValue(organisationName)
                                 .withType("NAMEADDRESS")
-                                .withPartName("OrganisationName")
+                                .withJudicialResultPromptTypeId(promptId1)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressOrganisationName")
                                 .withValue(firstName)
                                 .withType("NAMEADDRESS")
-                                .withPartName("FirstName")
+                                .withJudicialResultPromptTypeId(promptId2)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressOrganisationName")
                                 .withValue(middleName)
                                 .withType("NAMEADDRESS")
-                                .withPartName("MiddleName")
+                                .withJudicialResultPromptTypeId(promptId3)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressOrganisationName")
                                 .withValue(lastName)
                                 .withType("NAMEADDRESS")
-                                .withPartName("LastName")
+                                .withJudicialResultPromptTypeId(promptId4)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressAddress1")
                                 .withValue("Address 1")
                                 .withType("NAMEADDRESS")
-                                .withPartName("AddressLine1")
+                                .withJudicialResultPromptTypeId(promptId5)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressAddress2")
                                 .withValue("Address 2")
                                 .withType("NAMEADDRESS")
-                                .withPartName("AddressLine2")
+                                .withJudicialResultPromptTypeId(promptId6)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressAddress3")
                                 .withValue("Address 3")
                                 .withType("NAMEADDRESS")
-                                .withPartName("AddressLine3")
+                                .withJudicialResultPromptTypeId(promptId7)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressAddress4")
                                 .withValue("Address 4")
                                 .withType("NAMEADDRESS")
-                                .withPartName("AddressLine4")
+                                .withJudicialResultPromptTypeId(promptId8)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressAddress5")
                                 .withValue("Address 5")
                                 .withType("NAMEADDRESS")
-                                .withPartName("AddressLine5")
+                                .withJudicialResultPromptTypeId(promptId9)
                                 .build(),
                         judicialResultPrompt()
                                 .withPromptReference("minorcreditornameandaddressPostCode")
                                 .withValue("E14 9YZ")
                                 .withType("NAMEADDRESS")
-                                .withPartName("PostCode")
+                                .withJudicialResultPromptTypeId(promptId10)
                                 .build())
                 )
                 .build());
 
         treeNode.setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition()
                 .setResultTextTemplate("To pay costs to {minorCreditorNameAndAddress" + suffix + "}")
+                .setPrompts(asList(Prompt.prompt().setId(promptId1).setPartName("OrganisationName")
+                                .setReference("minorcreditornameandaddressOrganisationName"),
+                        Prompt.prompt().setId(promptId2).setPartName("FirstName")
+                                .setReference("minorcreditornameandaddressOrganisationName"),
+                        Prompt.prompt().setId(promptId3).setPartName("MiddleName")
+                                .setReference("minorcreditornameandaddressOrganisationName"),
+                        Prompt.prompt().setId(promptId4).setPartName("LastName")
+                                .setReference("minorcreditornameandaddressOrganisationName"),
+                        Prompt.prompt().setId(promptId5).setPartName("AddressLine1")
+                                .setReference("minorcreditornameandaddressAddress1"),
+                        Prompt.prompt().setId(promptId6).setPartName("AddressLine2")
+                                .setReference("minorcreditornameandaddressAddress2"),
+                        Prompt.prompt().setId(promptId7).setPartName("AddressLine3")
+                                .setReference("minorcreditornameandaddressAddress3"),
+                        Prompt.prompt().setId(promptId8).setPartName("AddressLine4")
+                                .setReference("minorcreditornameandaddressAddress4"),
+                        Prompt.prompt().setId(promptId9).setPartName("AddressLine5")
+                                .setReference("minorcreditornameandaddressAddress5"),
+                        Prompt.prompt().setId(promptId10).setPartName("PostCode")
+                                .setReference("minorcreditornameandaddressPostCode")))
                 .setShortCode("NEXB")));
         return singletonList(treeNode);
     }
@@ -524,7 +556,7 @@ public class ResultTextHelperTest {
         treeNode.setJudicialResult(JudicialResult.judicialResult()
                 .withLabel("Result Label alwaysPublished")
                 .withAlwaysPublished(true)
-                .withJudicialResultPrompts(Arrays.asList(judicialResultPrompt()
+                .withJudicialResultPrompts(asList(judicialResultPrompt()
                         .withLabel("Make of vehicle")
                         .withPromptReference("makeOfVehicle")
                         .withValue(makeOfVehicle)

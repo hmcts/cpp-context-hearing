@@ -5,6 +5,7 @@ import static java.lang.Boolean.parseBoolean;
 import static java.util.Comparator.comparing;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.nullsLast;
+import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
 @SuppressWarnings("java:S3740")
 public class ResultTextParseRule <T>{
@@ -118,7 +120,7 @@ public class ResultTextParseRule <T>{
                 .getJudicialResultPrompts()
                 .stream()
                 .filter(p -> !"hmiSlots".equals(p.getPromptReference()))
-                .filter(p -> !TRUE.equals(p.getHidden()))
+                .filter(p -> !TRUE.equals(getDefPrompt(p, node.getResultDefinition().getData().getPrompts()).isHidden()))
                 .sorted(comparing(JudicialResultPrompt::getPromptSequence, nullsLast(naturalOrder())))
                 .filter(p -> Objects.nonNull(p.getValue()))
                 .map(p -> (BOOLEAN.equals(p.getType()) ? "" : p.getLabel() + ": ") + getPromptValue(p))
@@ -146,32 +148,36 @@ public class ResultTextParseRule <T>{
         final Map<String,List<JudicialResultPrompt>> promptMap = node.getJudicialResult().getJudicialResultPrompts().stream()
                 .filter(p -> p.getPromptReference().toLowerCase().startsWith(promptName.toLowerCase()))
                 .collect(Collectors.groupingBy(p -> p.getPromptReference().equals(promptName) ? PROMPT : NAMEADDRESS));
+
+        final List<Prompt> defPromptMap =  node.getResultDefinition().getData().getPrompts();
+
         if(promptMap.get(PROMPT) != null){
             final JudicialResultPrompt prompt = promptMap.get(PROMPT).get(0);
             return getPromptValue(prompt);
         }else if (promptMap.get(NAMEADDRESS) != null) {
-            return getNameAddressValue(isOnlyName, promptMap);
+            return getNameAddressValue(isOnlyName, promptMap, defPromptMap);
         }else {
             return "";
         }
     }
 
-    private static String getNameAddressValue(final boolean isOnlyName, final Map<String, List<JudicialResultPrompt>> promptMap) {
+    private static String getNameAddressValue(final boolean isOnlyName, final Map<String, List<JudicialResultPrompt>> promptMap, final List<Prompt> defPromptMap) {
         final List<JudicialResultPrompt> prompts = promptMap.get(NAMEADDRESS);
-        String value = Stream.of(prompts.stream().filter(p -> "OrganisationName".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                prompts.stream().filter(p -> "FirstName".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                prompts.stream().filter(p -> "MiddleName".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                prompts.stream().filter(p -> "LastName".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue))
+        String value = Stream.of(
+                prompts.stream().filter(p -> "OrganisationName".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                prompts.stream().filter(p -> "FirstName".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                prompts.stream().filter(p -> "MiddleName".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                prompts.stream().filter(p -> "LastName".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue))
                 .flatMap(v -> v)
                 .filter(v -> !"".equals(v))
                 .collect(Collectors.joining(" "));
         if(!isOnlyName){
-            value = value +", " + Stream.of(prompts.stream().filter(p -> "AddressLine1".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                    prompts.stream().filter(p -> "AddressLine2".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                    prompts.stream().filter(p -> "AddressLine3".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                    prompts.stream().filter(p -> "AddressLine4".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                    prompts.stream().filter(p -> "AddressLine5".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue),
-                    prompts.stream().filter(p -> "PostCode".equals(p.getPartName())).map(ResultTextParseRule::getPromptValue))
+            value = value +", " + Stream.of(prompts.stream().filter(p -> "AddressLine1".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                    prompts.stream().filter(p -> "AddressLine2".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                    prompts.stream().filter(p -> "AddressLine3".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                    prompts.stream().filter(p -> "AddressLine4".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                    prompts.stream().filter(p -> "AddressLine5".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+                    prompts.stream().filter(p -> "PostCode".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue))
                     .flatMap(v -> v)
                     .filter(v -> !",".equals(v))
                     .collect(Collectors.joining(", "));
@@ -189,5 +195,9 @@ public class ResultTextParseRule <T>{
         }
     }
 
-
+    private static Prompt getDefPrompt(JudicialResultPrompt judicialResultPrompt, List<Prompt> prompts) {
+        return prompts.stream()
+                .filter(promptDef -> promptDef.getId().equals(judicialResultPrompt.getJudicialResultPromptTypeId()) && (isNull(judicialResultPrompt.getPromptReference()) || judicialResultPrompt.getPromptReference().equals(promptDef.getReference())))
+                .findFirst().orElseGet(Prompt::new);
+    }
 }
