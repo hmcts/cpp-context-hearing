@@ -82,6 +82,8 @@ public class HearingEventProcessor {
 
     @Handles("hearing.draft-result-saved")
     public void publicDraftResultSavedPublicEvent(final JsonEnvelope event) {
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: privateeventsavedraft  clienCorrelationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.draft-result-saved event received {}", event.toObfuscatedDebugString());
         }
@@ -103,6 +105,8 @@ public class HearingEventProcessor {
 
     @Handles("hearing.draft-result-saved-v2")
     public void publicDraftResultSavedV2PublicEvent(final JsonEnvelope event) {
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: privateeventsavedraft2  clienCorrelationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
+
         if(LOGGER.isWarnEnabled())  {LOGGER.warn("recieved private  event hearing.draft-result-saved-v2 correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.draft-result-saved-v2 event received {}", event.toObfuscatedDebugString());

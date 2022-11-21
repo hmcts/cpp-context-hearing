@@ -21,8 +21,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HearingCommandApi.class);
+
 
     private static final String DEFENDANT_DETAILS_CHANGED_SHORT_CODE = "DDCH";
 
@@ -67,6 +73,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) {
+        if(LOGGER.isErrorEnabled()){LOGGER.error("INV: handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         sendEnvelopeWithName(envelope, "hearing.command.save-draft-result");
     }
 
@@ -77,6 +84,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.save-draft-result-v2")
     public void saveDraftResultV2(final JsonEnvelope envelope) {
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: V2-handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         sendEnvelopeWithName(envelope, "hearing.command.save-draft-result-v2");
     }
 
@@ -150,12 +158,14 @@ public class HearingCommandApi {
     @Handles("hearing.share-results-v2")
     @FeatureControl("amendReshare")
     public void shareResultsV2(final JsonEnvelope envelope) {
+       if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: sharev2 - handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         sendEnvelopeWithName(envelope, "hearing.command.share-results-v2");
     }
 
     @Handles("hearing.share-days-results")
     @FeatureControl("amendReshare")
     public void shareResultsForHearingDay(final JsonEnvelope envelope) {
+        if(LOGGER.isErrorEnabled()){LOGGER.error("INV: shareday - handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         sendEnvelopeWithName(envelope, "hearing.command.share-days-results");
     }
 
@@ -171,6 +181,7 @@ public class HearingCommandApi {
 
     @Handles("hearing.save-hearing-case-note")
     public void saveHearingCaseNote(final JsonEnvelope envelope) {
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: addcasenote handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         sendEnvelopeWithName(envelope, "hearing.command.save-hearing-case-note");
     }
 
