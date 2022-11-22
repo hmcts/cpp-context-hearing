@@ -43,6 +43,17 @@ public class ResultTextHelper {
                 .filter(node -> isEmpty(node.getParents()))
                 .filter(node ->!ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false))
                 .forEach(node -> updateResultTextTop(node, node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel()));
+
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .forEach(ResultTextHelper::setEmptyResultText);
+    }
+
+    private static void setEmptyResultText(final TreeNode<ResultLine> node) {
+        node.getChildren().forEach(ResultTextHelper::setEmptyResultText);
+        if(! ofNullable(node.getJudicialResult().getResultText()).isPresent()){
+            node.getJudicialResult().setResultText(node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel());
+        }
     }
 
 
