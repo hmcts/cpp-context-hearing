@@ -55,10 +55,14 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         final Optional<String> userId = envelope.metadata().userId();
         final Target target = convertToObject(envelope, Target.class);
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: savedraft command handler conversion clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
+
         if (target != null && userId.isPresent()) {
             aggregate(HearingAggregate.class, target.getHearingId(), envelope,
                     aggregate -> aggregate.saveDraftResults(fromString(userId.get()), target));
         }
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: savedraft command handler ended clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
+
     }
 
     @Handles("hearing.command.save-draft-result-v2")
@@ -70,11 +74,12 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         final Optional<String> userId = envelope.metadata().userId();
         final SaveDraftResultV2Command saveDraftResultV2 = convertToObject(envelope, SaveDraftResultV2Command.class);
         final JsonObject draftResult = convertToObject(envelope, JsonObject.class);
-
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: savedraft command handler conversion clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         if (draftResult != null && userId.isPresent() && saveDraftResultV2.getHearingId() != null) {
             aggregate(HearingAggregate.class, saveDraftResultV2.getHearingId(), envelope,
                     aggregate -> aggregate.saveDraftResultV2(fromString(userId.get()), draftResult, saveDraftResultV2.getHearingId(), saveDraftResultV2.getHearingDay()));
         }
+        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: savedraft command handler ended clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
     }
 
     @Handles("hearing.command.delete-draft-result-v2")
