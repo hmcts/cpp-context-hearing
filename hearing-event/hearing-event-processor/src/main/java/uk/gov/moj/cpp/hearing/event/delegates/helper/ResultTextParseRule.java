@@ -9,6 +9,7 @@ import static java.util.Objects.isNull;
 import static java.util.Optional.ofNullable;
 
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -116,9 +117,7 @@ public class ResultTextParseRule <T>{
     }
 
     private String getAllPrompts(final TreeNode<T> node) {
-        return node.getJudicialResult()
-                .getJudicialResultPrompts()
-                .stream()
+        return ofNullable(node.getJudicialResult().getJudicialResultPrompts()).map(Collection::stream).orElseGet(Stream::empty)
                 .filter(p -> !"hmiSlots".equals(p.getPromptReference()))
                 .filter(p -> !TRUE.equals(getDefPrompt(p, node.getResultDefinition().getData().getPrompts()).isHidden()))
                 .sorted(comparing(JudicialResultPrompt::getPromptSequence, nullsLast(naturalOrder())))
@@ -145,7 +144,7 @@ public class ResultTextParseRule <T>{
         }else{
             promptName = subString.substring(1, subString.length()-1);
         }
-        final Map<String,List<JudicialResultPrompt>> promptMap = node.getJudicialResult().getJudicialResultPrompts().stream()
+        final Map<String,List<JudicialResultPrompt>> promptMap = ofNullable(node.getJudicialResult().getJudicialResultPrompts()).map(Collection::stream).orElseGet(Stream::empty)
                 .filter(p -> p.getPromptReference().toLowerCase().startsWith(promptName.toLowerCase()))
                 .collect(Collectors.groupingBy(p -> p.getPromptReference().equals(promptName) ? PROMPT : NAMEADDRESS));
 
