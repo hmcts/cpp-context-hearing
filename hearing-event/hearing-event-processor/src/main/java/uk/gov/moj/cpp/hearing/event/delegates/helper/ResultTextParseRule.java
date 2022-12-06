@@ -171,7 +171,7 @@ public class ResultTextParseRule <T>{
                 .filter(v -> !"".equals(v))
                 .collect(Collectors.joining(" "));
         if(!isOnlyName){
-            value = value +", " + Stream.of(prompts.stream().filter(p -> "AddressLine1".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
+            final String otherValues = Stream.of(prompts.stream().filter(p -> "AddressLine1".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
                     prompts.stream().filter(p -> "AddressLine2".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
                     prompts.stream().filter(p -> "AddressLine3".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
                     prompts.stream().filter(p -> "AddressLine4".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue),
@@ -179,6 +179,9 @@ public class ResultTextParseRule <T>{
                     prompts.stream().filter(p -> "PostCode".equals(getDefPrompt(p, defPromptMap).getPartName())).map(ResultTextParseRule::getPromptValue))
                     .flatMap(v -> v)
                     .filter(v -> !",".equals(v))
+                    .collect(Collectors.joining(", "));
+            value = Stream.of(value, otherValues)
+                    .filter(v -> !"".equals(v))
                     .collect(Collectors.joining(", "));
         }
         return value;
