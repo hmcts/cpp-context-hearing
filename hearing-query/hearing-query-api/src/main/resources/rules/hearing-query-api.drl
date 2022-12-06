@@ -10,7 +10,7 @@ rule "Query - API - hearing.get.hearings"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearings");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders", "Defence Lawyers"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders", "Defence Lawyers", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -28,7 +28,7 @@ rule "Query - API - hearing.get.hearings-for-future"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearings-for-future");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "CPS", "Non CPS Prosecutors", "Advocates", "Defence Users", "Recorders",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -37,7 +37,7 @@ rule "Query - API - hearing.get.hearing"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.hearing");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -46,7 +46,7 @@ rule "Query - API - hearing.get-hearing-event-definitions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definitions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate", "Recorders"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judge", "Deputies", "DJMC", "Judiciary", "Court Associate", "Recorders",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -55,7 +55,7 @@ rule "Query - API - hearing.get-active-hearings-for-court-room"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-active-hearings-for-court-room");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers","Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers","Court Associate",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -64,7 +64,7 @@ rule "Query - API - hearing.get-hearing-event-definition"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-definition");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -73,7 +73,7 @@ rule "Query - API - hearing.get-hearing-event-log"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-hearing-event-log");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users", "Recorders"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "System Users", "Recorders",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -82,7 +82,7 @@ rule "Query - API - hearing.get-draft-result"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-draft-result");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -91,7 +91,7 @@ rule "Query - API - hearing.get-draft-result-v2"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-draft-result-v2");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -100,7 +100,7 @@ rule "Query - API - hearing.get-share-result-v2"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-share-result-v2");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -109,7 +109,7 @@ rule "Query - API - hearing.get-results"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-results");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -119,7 +119,7 @@ rule "Query - API - hearing.query.reusable-info"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.query.reusable-info");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "System Users", "Court Clerks", "Legal Advisers", "Court Associate","Judiciary"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "System Users", "Court Clerks", "Legal Advisers", "Court Associate","Judiciary", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -137,7 +137,7 @@ rule "Query - API - hearing.retrieve-subscriptions"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.retrieve-subscriptions");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "System Users", "Court Associate",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -155,7 +155,7 @@ rule "Query - API - hearing.get-cracked-ineffective-reason"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get-cracked-ineffective-reason");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -164,7 +164,7 @@ rule "Query - API - hearing.case.timeline"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.case.timeline");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","DJMC","Deputies", "Victims & Witness Care Admin", "Recorders", "System Users"))
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","DJMC","Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Court Administrators"))
   then
     $outcome.setSuccess(true);
 end
@@ -173,7 +173,7 @@ rule "Query - API - hearing.application.timeline"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.application.timeline");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","DJMC","Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Advocates", "Defence Lawyers"))
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Youth Offending Service Admin", "Probation Admin", "Judiciary", "Listing Officers", "Legal Advisers", "Court Associate", "Court Clerks", "NCES", "CPS", "Court Administrators", "Crown Court Admin", "Judge","Police Admin","DJMC","Deputies", "Victims & Witness Care Admin", "Recorders", "System Users", "Advocates", "Defence Lawyers", "Court Administrators"))
   then
     $outcome.setSuccess(true);
 end
@@ -182,7 +182,7 @@ rule "Query - API - hearing.court.list.publish.status"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.court.list.publish.status");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers","System Users","Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers","Court Clerks", "Legal Advisers","System Users","Court Associate",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -209,7 +209,7 @@ rule "Query - API - hearing.defendant.outstanding-fines"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.defendant.outstanding-fines");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Court Associate",  "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -219,7 +219,7 @@ rule "Query - API - hearing.query.session-time"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.query.session-time");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -246,7 +246,7 @@ rule "Query - API - hearing.custody-time-limit"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.custody-time-limit");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
@@ -255,7 +255,7 @@ rule "Query - API - hearing.get.future-hearings"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.get.future-hearings");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"));
   then
     $outcome.setSuccess(true);
 end
