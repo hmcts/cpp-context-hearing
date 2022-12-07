@@ -49,7 +49,6 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.save-draft-result")
     public void saveDraftResult(final JsonEnvelope envelope) throws EventStreamException {
-        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: savedraft command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.save-draft-result command received {}", envelope.toObfuscatedDebugString());
         }
@@ -63,7 +62,6 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.save-draft-result-v2")
     public void saveDraftResultV2(final JsonEnvelope envelope) throws EventStreamException {
-        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: savedraft2 command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.save-draft-result-v2 command received {}", envelope.toObfuscatedDebugString());
         }
@@ -150,7 +148,6 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
      */
     @Handles("hearing.command.share-results-v2")
     public void shareResultV2(final JsonEnvelope envelope) throws EventStreamException {
-        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: shareresults2  clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.share-results-v2 command received {}", envelope.toObfuscatedDebugString());
         }
@@ -161,7 +158,6 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
 
     @Handles("hearing.command.share-days-results")
     public void shareResultForDay(final JsonEnvelope envelope) throws EventStreamException {
-        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: dayresultsevent clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.share-days-results command received {}", envelope.toObfuscatedDebugString());
         }
