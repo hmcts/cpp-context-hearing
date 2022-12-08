@@ -84,8 +84,18 @@ public class HearingCommandApi {
 
     @Handles("hearing.save-draft-result-v2")
     public void saveDraftResultV2(final JsonEnvelope envelope) {
-        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: V2-handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: V2-handling to command handler clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.command.save-draft-result-v2");
+    }
+
+    @Handles("hearing.update-draft-result")
+    public void updateDraftResult(final JsonEnvelope envelope) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: update-draft-result clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
+        sendEnvelopeWithName(envelope, "hearing.command.update-draft-result");
     }
 
     @Handles("hearing.delete-draft-result-v2")

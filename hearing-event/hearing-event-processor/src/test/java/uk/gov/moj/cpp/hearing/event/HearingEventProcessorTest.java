@@ -254,6 +254,26 @@ public class HearingEventProcessorTest {
     }
 
     @Test
+    public void shouldPublishUpdateDraftResultSuccessPublicEvent() {
+        final String draftResult = "some random text";
+        final Target target = CoreTestTemplates.target(HEARING_ID, USER_ID, randomUUID(), randomUUID()).build();
+        final JsonEnvelope eventIn = createDraftResultSavedPrivateEvent(target);
+        final InOrder inOrder = inOrder(sender);
+        this.hearingEventProcessor.publicDraftResultSavedPublicEvent(eventIn);
+
+        inOrder.verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(PUBLIC_HEARING_DRAFT_RESULT_SAVED));
+
+        final RequestApprovalCommand requestApprovalCommand = jsonObjectToObjectConverter
+                .convert(envelopeOut.payloadAsJsonObject(), RequestApprovalCommand.class);
+
+        assertThat(requestApprovalCommand.getHearingId(), is(HEARING_ID));
+
+    }
+
+    @Test
     public void shouldHearingAmendedPublicEvent() {
 
         UUID userId = UUID.randomUUID();

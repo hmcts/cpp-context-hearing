@@ -69,6 +69,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
+import uk.gov.moj.cpp.hearing.domain.event.result.UpdateDraftResultSaved;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -780,7 +781,7 @@ public class HearingEventListenerTest {
         final JsonObject someJsonObject = new StringToJsonObjectConverter().convert("{}");
         final DraftResultSavedV2 draftResultSavedV2 = new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, amendedByUser);
 
-        when(draftResultRepository.findBy(hearingId.toString() + hearingDay.toString())).thenReturn(null);
+        when(draftResultRepository.findBy(hearingId.toString() + hearingDay)).thenReturn(null);
 
         hearingEventListener.draftResultSavedV2(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved-v2"),
                 objectToJsonObjectConverter.convert(draftResultSavedV2)
@@ -794,6 +795,40 @@ public class HearingEventListenerTest {
                 .with(DraftResult::getAmendedByUserId, is(amendedByUser))
                 .with(DraftResult::getDraftResultPayload, is(objectMapper.convertValue(someJsonObject, JsonNode.class)))
         );
+    }
+
+    @Test
+    public void shouldPatchWhenUpdateDraftResultRecieved() throws IOException {
+        final UUID hearingId = randomUUID();
+        final UUID amendedByUser = randomUUID();
+        final LocalDate hearingDay = LocalDate.now();
+        final UUID resultId = randomUUID();
+        final DraftResult initialDraft = new DraftResult();
+        initialDraft.setHearingId(hearingId);
+        initialDraft.setHearingDay(hearingDay.toString());
+        initialDraft.setAmendedByUserId(amendedByUser);
+
+        final JsonNode initialDraftPayload = toJsonNode(new StringToJsonObjectConverter().convert(getDraftResultFromResource("initial_draft_result.json").replaceAll("HEARING_ID", hearingId.toString()).replaceAll("HEARING_DAY", hearingDay.toString())));
+        initialDraft.setDraftResultPayload(initialDraftPayload);
+        initialDraft.setDraftResultId(resultId.toString());
+
+        final JsonObject someJsonObject = new StringToJsonObjectConverter().convert("{\"operations\": [{\"op\": \"remove\", \"path\": \"/draftResult/resultLines/1b8005ca-47d1-42be-8d06-7d0aa8254221\"}, {\"op\": \"remove\", \"path\": \"/draftResult/relations/0\"} ] }");
+        final UpdateDraftResultSaved updateDraftResultSaved = new UpdateDraftResultSaved(hearingId, hearingDay, someJsonObject, amendedByUser);
+
+        when(draftResultRepository.findBy(hearingId.toString() + hearingDay)).thenReturn((initialDraft));
+
+        hearingEventListener.draftResultUpdated(envelopeFrom(metadataWithRandomUUID("hearing.update-draft-result-saved"),
+                objectToJsonObjectConverter.convert(updateDraftResultSaved)
+        ));
+
+        verify(this.draftResultRepository).save(draftResultCaptor.capture());
+
+        assertThat(draftResultCaptor.getValue(), isBean(DraftResult.class)
+                .with(DraftResult::getHearingId, is(hearingId))
+                .with(DraftResult::getHearingDay, is(hearingDay.toString()))
+                .with(DraftResult::getAmendedByUserId, is(amendedByUser))
+                .with(DraftResult::getDraftResultPayload, is(toJsonNode(new StringToJsonObjectConverter().convert(getDraftResultFromResource("hearing_patch_1_removed.json").replaceAll("HEARING_ID", hearingId.toString()).replaceAll("HEARING_DAY", hearingDay.toString()))))
+                ));
     }
 
     @Test

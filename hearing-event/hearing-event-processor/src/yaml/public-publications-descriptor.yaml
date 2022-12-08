@@ -210,4 +210,7 @@ subscriptions_descriptor:
         - name: public.hearing.live-status-published
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.live-status-published.json
 
+        - name: public.hearing-update-draft-result-success
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.update-draft-result-success.json
+
       event_source_name: public.event.source

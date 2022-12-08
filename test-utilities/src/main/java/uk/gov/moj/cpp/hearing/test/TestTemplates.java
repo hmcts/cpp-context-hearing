@@ -1165,6 +1165,7 @@ public class TestTemplates {
             return new SaveDraftResultCommand(target, null);
         }
 
+
         public static SaveDraftResultCommand saveDraftResultCommandTemplateWithHmiSlots(
                 final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
                 final UUID resultLineId, final Boolean shadowListed, final LocalDate hearingDay) {

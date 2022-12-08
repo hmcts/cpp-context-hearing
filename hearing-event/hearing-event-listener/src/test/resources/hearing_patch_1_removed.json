@@ -1,0 +1,15 @@
+{
+  "hearingId": "HEARING_ID",
+  "hearingDay": "HEARING_DAY",
+  "draftResult": {
+    "hearingId": "HEARING_ID",
+    "hearingDay": "HEARING_DAY",
+    "relations": [],
+    "shadowListedOffenceIds": [],
+    "resultLines": {},
+    "__metadata__": {
+      "version": 1
+    }
+  },
+  "amendedByUserId": "31ec3a16-8721-498c-8da5-f099390ee254"
+}

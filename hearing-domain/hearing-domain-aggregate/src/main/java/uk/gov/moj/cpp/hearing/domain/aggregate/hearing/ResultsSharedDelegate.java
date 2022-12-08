@@ -45,8 +45,8 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
+import uk.gov.moj.cpp.hearing.domain.event.result.UpdateDraftResultSaved;
 
-import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -61,6 +61,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
@@ -233,6 +235,10 @@ public class ResultsSharedDelegate implements Serializable {
 
     public Stream<Object> saveDraftResultV2(final UUID hearingId, LocalDate hearingDay, final JsonObject draftResult, final UUID userId) {
         return Stream.of(new DraftResultSavedV2(hearingId, hearingDay, draftResult, userId));
+    }
+
+    public Stream<Object> updateDraftResult(final UUID hearingId, LocalDate hearingDay, final JsonObject draftResult, final UUID userId) {
+        return Stream.of(new UpdateDraftResultSaved(hearingId, hearingDay, draftResult, userId));
     }
 
     public Stream<Object> deleteDraftResultV2(final UUID hearingId, LocalDate hearingDay, final UUID userId) {

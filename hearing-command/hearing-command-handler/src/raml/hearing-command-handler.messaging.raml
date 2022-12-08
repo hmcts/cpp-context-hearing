@@ -466,15 +466,19 @@ baseUri:  message://command/handler/message/hearing
 
 # Extend Custody Time Limit
         application/vnd.hearing.command.extend-custody-time-limit+json:
-            schema: !include json/schema/hearing.command.extend-custody-time-limit.json
-            example: !include json/hearing.command.extend-custody-time-limit.json
+          schema: !include json/schema/hearing.command.extend-custody-time-limit.json
+          example: !include json/hearing.command.extend-custody-time-limit.json
 
-# Court restrictions
+        # Court restrictions
         application/vnd.hearing.command.restrict-court-list+json:
-            schema: !include json/schema/hearing.command.court-list-restricted.json
-            example: !include json/hearing.command.court-list-restricted.json
+          schema: !include json/schema/hearing.command.court-list-restricted.json
+          example: !include json/hearing.command.court-list-restricted.json
 
-# Welsh defendant translations
+        # Welsh defendant translations
         application/vnd.hearing.command.save-defendants-welsh-translations+json:
-            schema: !include json/schema/hearing.command.save-defendants-welsh-translations.json
-            example: !include json/hearing.command.save-defendants-welsh-translations.json
+          schema: !include json/schema/hearing.command.save-defendants-welsh-translations.json
+          example: !include json/hearing.command.save-defendants-welsh-translations.json
+
+        application/vnd.hearing.command.update-draft-result+json:
+          schema: !include json/schema/hearing.command.update-draft-result.json
+          example: !include json/hearing.command.update-draft-result.json

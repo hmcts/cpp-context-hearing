@@ -1,0 +1,38 @@
+{
+  "hearingId": "HEARING_ID",
+  "hearingDay": "HEARING_DAY",
+  "draftResult": {
+    "hearingId": "HEARING_ID",
+    "hearingDay": "HEARING_DAY",
+    "relations": [
+      {
+        "resultLineId": "1b8005ca-47d1-42be-8d06-7d0aa8254221",
+        "ruleType": "standalone",
+        "childResultLineIds": []
+      }
+    ],
+    "shadowListedOffenceIds": [],
+    "resultLines": {
+      "1b8005ca-47d1-42be-8d06-7d0aa8254221": {
+        "resultLineId": "1b8005ca-47d1-42be-8d06-7d0aa8254221",
+        "originalText": "REWARD",
+        "resultDefinitionId": "da45512e-a8c1-4f2b-b978-ece13b452727",
+        "shortCode": "reward",
+        "resultLevel": "O",
+        "orderedDate": "2022-12-01",
+        "label": "Reward Order",
+        "unresolvedParts": [],
+        "masterDefendantId": "8dde72e3-497c-40eb-9423-3f796804f20d",
+        "caseId": "4aa9b884-3de9-4703-a129-d83eba0dad93",
+        "defendantId": "8dde72e3-497c-40eb-9423-3f796804f20d",
+        "offenceId": "26046019-2008-4fcc-90b5-c6b7059f99d1",
+        "resultPrompts": [],
+        "valid": false
+      }
+    },
+    "__metadata__": {
+      "version": 1
+    }
+  },
+  "amendedByUserId": "31ec3a16-8721-498c-8da5-f099390ee254"
+}
