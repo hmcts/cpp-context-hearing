@@ -99,7 +99,6 @@ public class PublishResultsV2EventProcessor {
 
     @Handles("hearing.events.results-shared-v2")
     public void resultsShared(final JsonEnvelope event) {
-        if(LOGGER.isErrorEnabled()){LOGGER.error("INV: resultsshared2event  clienCorrelationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.events.results-shared-v2 event received {}", event.toObfuscatedDebugString());
         }
