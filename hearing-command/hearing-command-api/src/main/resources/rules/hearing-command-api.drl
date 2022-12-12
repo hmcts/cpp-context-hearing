@@ -70,15 +70,6 @@ rule "Command - API - Action - hearing.save-draft-result-v2"
     $outcome.setSuccess(true);
 end
 
-rule "Command - API - Action - hearing.update-draft-result"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.update-draft-result");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators"));
-  then
-    $outcome.setSuccess(true);
-end
-
 rule "Command - API - Action - hearing.delete-draft-result-v2"
   when
     $outcome: Outcome();

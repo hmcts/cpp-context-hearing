@@ -1,8 +1,0 @@
-{
-  "operations": [
-    {
-      "op": "remove",
-      "path": "/resultLines"
-    }
-  ]
-}

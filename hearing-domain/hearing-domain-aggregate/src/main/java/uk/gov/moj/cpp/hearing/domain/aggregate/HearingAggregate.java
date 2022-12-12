@@ -180,7 +180,7 @@ import javax.json.JsonObject;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748572L;
+    private static final long serialVersionUID = -6059812881894748571L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -604,19 +604,6 @@ public class HearingAggregate implements Aggregate {
         }
 
         return apply(resultsSharedDelegate.saveDraftResultV2(hearingId, hearingDay, draftResult, userId));
-    }
-
-
-    public Stream<Object> updateDraftResult(final UUID userId, final JsonObject draftResult, final UUID hearingId, LocalDate hearingDay) {
-        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
-            return apply(resultsSharedDelegate.hearingLocked(hearingId));
-        }
-
-        if (isSharedHearingBeingAmended() && !isSameUserWhoIsAmendingSharedHearing(userId)) {
-            return apply(resultsSharedDelegate.hearingLockedByOtherUser(hearingId));
-        }
-
-        return apply(resultsSharedDelegate.updateDraftResult(hearingId, hearingDay, draftResult, userId));
     }
 
     public Stream<Object> deleteDraftResultV2(final UUID userId, final UUID hearingId, LocalDate hearingDay) {

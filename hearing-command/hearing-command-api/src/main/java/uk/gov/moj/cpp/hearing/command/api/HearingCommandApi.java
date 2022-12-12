@@ -90,14 +90,6 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.save-draft-result-v2");
     }
 
-    @Handles("hearing.update-draft-result")
-    public void updateDraftResult(final JsonEnvelope envelope) {
-        if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("INV: update-draft-result clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
-        }
-        sendEnvelopeWithName(envelope, "hearing.command.update-draft-result");
-    }
-
     @Handles("hearing.delete-draft-result-v2")
     public void deleteDraftResultV2(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.delete-draft-result-v2");

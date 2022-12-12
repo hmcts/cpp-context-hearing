@@ -330,9 +330,6 @@ subscriptions_descriptor:
         - name: hearing.case-defendants-updated-for-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.case-defendants-updated-for-hearing.json
 
-        - name: hearing.update-draft-result-saved
-          schema_uri: http://justice.gov.uk/hearing/json/schema/event/hearing.update-draft-result-saved.json
-
       event_source_name: hearing
 
     - name: public event subscription
