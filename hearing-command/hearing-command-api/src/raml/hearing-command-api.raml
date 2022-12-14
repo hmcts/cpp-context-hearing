@@ -56,6 +56,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
       (mapping):
           requestType: application/vnd.hearing.delete-draft-result-v2+json
           name: hearing.delete-draft-result-v2
+      (mapping):
+          requestType: application/vnd.hearing.update-draft-result+json
+          name: hearing.update-draft-result
       ...
     body:
       application/vnd.hearing.shared-results+json:
@@ -83,6 +86,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
           !include json/hearing.delete-draft-result-v2.json
         schema:
           !include json/schema/hearing.delete-draft-result-v2.json
+      application/vnd.hearing.update-draft-result+json:
+        example:
+          !include json/hearing.update-draft-result.json
+        schema:
+          !include json/schema/hearing.update-draft-result.json
     responses:
           202:
               description: Accepted

@@ -67,7 +67,7 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
-            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing");
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "updateDraftResult");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -574,6 +574,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.updateResultLineSharedDates(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-resultline-shared-dates");
+    }
+
+    @Test
+    public void shouldPassThroughUpdateDraftResultCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.update-draft-result");
+
+        hearingCommandApi.updateDraftResult(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-draft-result");
     }
 
     private JsonEnvelope buildDummyJsonRequestEnvelopeWithName(final String name) {

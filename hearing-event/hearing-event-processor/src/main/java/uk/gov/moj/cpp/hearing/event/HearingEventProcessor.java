@@ -27,6 +27,7 @@ import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class HearingEventProcessor {
 
     public static final String PUBLIC_HEARING_EVENT_AMENDED = "public.hearing.event-amended";
     public static final String PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2 = "public.hearing.draft-result-deleted-v2";
+    public static final String PUBLIC_HEARING_UPDATE_RESULT_SAVED = "public.hearing-update-draft-result-success";
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
@@ -132,6 +134,20 @@ public class HearingEventProcessor {
         if (LOGGER.isWarnEnabled()) {
             LOGGER.warn("raised public event hearing.draft-result-saved-v2 correlationId: {}", event.metadata().clientCorrelationId().orElse(null));
         }
+    }
+
+    @Handles("hearing.update-draft-result-saved")
+    public void publicDraftResultUpdated(final JsonEnvelope event) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: privateevent update-draft-result  clienCorrelationId: {}", event.metadata().clientCorrelationId().orElse(null));
+        }
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.update-draft-result event received {}", event.toObfuscatedDebugString());
+        }
+        final JsonEnvelope successEvent = envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_UPDATE_RESULT_SAVED), Json.createObjectBuilder().build());
+
+        sender.send(successEvent);
     }
 
     @Handles("hearing.draft-result-deleted-v2")

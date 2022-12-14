@@ -22,6 +22,7 @@ import uk.gov.moj.cpp.hearing.command.result.SaveMultipleResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareResultsCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateDaysResultLinesStatusCommand;
+import uk.gov.moj.cpp.hearing.command.result.UpdateDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
@@ -85,6 +86,30 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         }
         if (LOGGER.isErrorEnabled()) {
             LOGGER.error("INV: savedraft command handler ended clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
+    }
+
+    @Handles("hearing.command.update-draft-result")
+    public void updateDraftResult(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: update-draft-result command handler clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.update-draft-result command received {}", envelope.toObfuscatedDebugString());
+        }
+        final Optional<String> userId = envelope.metadata().userId();
+        final UpdateDraftResultCommand updateDraftResultCommand = convertToObject(envelope, UpdateDraftResultCommand.class);
+        final JsonObject draftResult = convertToObject(envelope, JsonObject.class);
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: update-draft-result command handler conversion clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
+
+        if (draftResult != null && userId.isPresent() && updateDraftResultCommand.getHearingId() != null) {
+            aggregate(HearingAggregate.class, updateDraftResultCommand.getHearingId(), envelope,
+                    aggregate -> aggregate.updateDraftResult(fromString(userId.get()), draftResult, updateDraftResultCommand.getHearingId(), updateDraftResultCommand.getHearingDay()));
+        }
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: update-draft-result command handler ended clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
         }
     }
 

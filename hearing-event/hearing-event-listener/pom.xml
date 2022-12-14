@@ -73,6 +73,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.flipkart.zjsonpatch</groupId>
+            <artifactId>zjsonpatch</artifactId>
+            <version>${jsonpatch.version}</version>
+        </dependency>
+
     </dependencies>
 
 

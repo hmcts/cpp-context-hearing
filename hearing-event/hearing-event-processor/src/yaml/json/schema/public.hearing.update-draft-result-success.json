@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.update-draft-result-success.json",
+  "type": "object",
+  "properties": {
+  },
+  "additionalProperties": true
+}

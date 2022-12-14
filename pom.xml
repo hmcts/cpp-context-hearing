@@ -48,6 +48,7 @@
         <usersgroups.version>8.0.7</usersgroups.version>
         <listing.version>8.0.17</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
+        <jsonpatch.version>0.4.13</jsonpatch.version>
     </properties>
 
     <modules>
