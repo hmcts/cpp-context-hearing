@@ -84,9 +84,7 @@ public class ResultTextParseRule <T>{
                 final int position = text.indexOf(resultTextParseRule.lastControlChar(), i+1);
                 final String subString = text.substring(i, position+1);
                 final String newSubString  = resultTextParseRule.parse(node, subString);
-                if(!"".equals(newSubString)){
-                    isChanged = true;
-                }
+                isChanged = isResultTextChanged(node, isChanged, control, subString, newSubString);
                 newResultText = newResultText.replace(subString, newSubString);
                 nextPosition = position;
             }
@@ -96,6 +94,33 @@ public class ResultTextParseRule <T>{
         }else{
             return "";
         }
+    }
+
+    private boolean isResultTextChanged(final TreeNode<T> node, boolean isChanged, final String control, final String subString, final String newSubString) {
+        if(isPromptDirectiveUnderConditionalDirective(control)){
+            if(!"".equals(newSubString)) {
+                isChanged = true;
+            }
+        } else if(isVariableResultDirectiveUnderConditionalDirective(control)){
+            if(!"".equals(newSubString) || ("".equals(newSubString) && isChildInPayload(node, subString))){
+                isChanged = true;
+            }
+        } else{
+            isChanged = true;
+        }
+        return isChanged;
+    }
+
+    private boolean isPromptDirectiveUnderConditionalDirective(final String control) {
+        return "{".equals(control) && "]".equals(this.lastControlChar());
+    }
+
+    private boolean isVariableResultDirectiveUnderConditionalDirective(final String control){
+        return "%".equals(control) && "]".equals(this.lastControlChar());
+    }
+
+    private boolean isChildInPayload(final TreeNode<T> node, final String subString) {
+        return node.getChildren().stream().anyMatch(child -> child.getResultDefinition().getData().getShortCode().equals(subString.replaceAll("%", "")));
     }
 
     private String parseForVariableResultDirective(final TreeNode<T> node, final String subString){
