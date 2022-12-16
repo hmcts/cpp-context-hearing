@@ -1,0 +1,687 @@
+{
+  "hearingId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f620",
+  "sharedTime": "2019-12-19T12:05:14.647Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+  },
+  "hearing": {
+    "courtCentre": {
+      "address": {
+        "address1": "QEII Law Courts",
+        "address2": "Derby Square",
+        "address3": "Liverpool",
+        "address4": "",
+        "address5": "",
+        "postcode": "L2 1XA"
+      },
+      "id": "9b583616-049b-30f9-a14f-028a53b7cfe8",
+      "name": "Liverpool Crown Court",
+      "roomId": "fbe3ca1a-6be6-3bd5-86e8-fc879aa5e3e7",
+      "roomName": "Crown Court 5-3"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2019-12-20T09:00:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 30,
+        "listingSequence": 0,
+        "sittingDay": "2019-12-21T10:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 30,
+        "listingSequence": 0,
+        "sittingDay": "2019-12-22T10:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 30,
+        "listingSequence": 0,
+        "sittingDay": "2019-12-24T10:30:00.000Z"
+      },
+      {
+        "listedDurationMinutes": 2,
+        "listingSequence": 0,
+        "sittingDay": "2019-12-25T15:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f620",
+    "judiciary": [
+      {
+        "firstName": "Robert Stewart",
+        "judicialId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+        "judicialRoleType": {
+          "judicialRoleTypeId": "0a87257e-5308-397d-b432-30edf4ad1dae",
+          "judiciaryType": "Magistrate"
+        },
+        "lastName": "Horton",
+        "title": "Mr"
+      }
+    ],
+    "jurisdictionType": "CROWN",
+    "prosecutionCases": [
+      {
+        "defendants": [
+          {
+            "associatedPersons": [
+              {
+                "person": {
+                  "address": {
+                    "address1": "56saon",
+                    "address2": "56Police House",
+                    "address3": "StreetDescriptionG",
+                    "address4": "Locality2G",
+                    "address5": "Town2G",
+                    "postcode": "TW14 9XD"
+                  },
+                  "contact": {
+                    "home": "19998021888",
+                    "mobile": "19998021889",
+                    "primaryEmail": "Gvishnu@gmail.com",
+                    "secondaryEmail": "Gilja@gmail.com"
+                  },
+                  "dateOfBirth": "2009-09-09",
+                  "ethnicity": {
+                    "observedEthnicityCode": "4",
+                    "observedEthnicityDescription": "Asian",
+                    "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+                    "selfDefinedEthnicityCode": "W1",
+                    "selfDefinedEthnicityDescription": "British",
+                    "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                  },
+                  "firstName": "GPersonGivenName11",
+                  "gender": "MALE",
+                  "lastName": "GPersonFamilyName2",
+                  "middleName": "GPersonGivenName21 GPersonGivenName31",
+                  "title": "MR"
+                },
+                "role": "ParentGuardian"
+              }
+            ],
+            "id": "7b97b715-33d8-4338-b5fe-588defe0b3cd",
+            "offences": [
+              {
+                "arrestDate": "2006-05-04",
+                "chargeDate": "2006-05-30",
+                "count": 0,
+                "endDate": "2005-05-05",
+                "id": "f824a233-27b8-4986-af92-95b554e96476",
+                "modeOfTrial": "Either Way",
+                "offenceCode": "BD81012",
+                "offenceDefinitionId": "4c0c4767-de11-40b7-a3c5-489efc5ab0d1",
+                "offenceFacts": {
+                  "vehicleRegistration": "TE4654"
+                },
+                "offenceTitle": "Unlawfully provide gaming machine",
+                "orderIndex": 500,
+                "startDate": "1996-05-04",
+                "wording": "Contrary to section 6(1). Has a violent past and fear that he will commit further offences and interfere with witnesse"
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "REF1",
+              "bailConditions": "BailConditions0",
+              "bailStatus": {
+                "code": "B",
+                "description": "Conditional Bail",
+                "id": "dd4073b6-22be-3875-9d63-5da286bb3ece"
+              },
+              "driverNumber": "ABCDE0,0010BCFAA",
+              "perceivedBirthYear": 2006,
+              "personDetails": {
+                "address": {
+                  "address1": "56saonD",
+                  "address2": "56Police HouseD",
+                  "address3": "StreetDescriptionD",
+                  "address4": "LocalityD",
+                  "address5": "TownD",
+                  "postcode": "TW14 9XD"
+                },
+                "contact": {
+                  "home": "09998021888",
+                  "mobile": "09998021889",
+                  "primaryEmail": "robert@gmail.com",
+                  "secondaryEmail": "ormsby@gmail.com",
+                  "work": "0917894278022"
+                },
+                "dateOfBirth": "2008-08-08",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "observedEthnicityCode": "4",
+                  "observedEthnicityDescription": "Asian",
+                  "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "Robert",
+                "gender": "MALE",
+                "interpreterLanguageNeeds": "LanguageNeeds0",
+                "lastName": "Smith",
+                "middleName": "PersonGivenName20A PersonGivenName30A",
+                "nationalityCode": "350",
+                "nationalityDescription": "Pole",
+                "nationalityId": "e3baf6cc-1711-43cd-8aad-80ca6e89c946",
+                "occupation": "Occupation0",
+                "occupationCode": "50",
+                "specificRequirements": "SpecialNeeds0",
+                "title": "MR"
+              }
+            },
+            "prosecutionCaseId": "e1fca2af-4c60-400f-8fb7-a8e187246593"
+          }
+        ],
+        "id": "e1fca2af-4c60-400f-8fb7-a8e187246593",
+        "initiationCode": "C",
+        "originatingOrganisation": "B01BH00",
+        "prosecutionCaseIdentifier": {
+          "prosecutionAuthorityCode": "B01BH00",
+          "prosecutionAuthorityId": "bcdca7df-ab21-45f6-bc19-f883cf3d407e",
+          "caseURN": "18GD6574619"
+        },
+        "statementOfFacts": "Prosecution fact text"
+      }
+    ],
+    "type": {
+      "description": "Sentence",
+      "id": "c6d76309-c912-436b-a21b-a4c4450bc052"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {
+    "be7843e9-772f-4be0-988e-cec150891a7c": {
+      "id": "be7843e9-772f-4be0-988e-cec150891a7c",
+      "lastSharedDateTime": "2019-12-19T11:33:09.204Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    },
+    "b29e51fb-ba64-42d2-9849-b936ea02b642": {
+      "id": "b29e51fb-ba64-42d2-9849-b936ea02b642",
+      "lastSharedDateTime": "2019-12-19T11:33:09.204Z",
+      "courtClerk": {
+        "firstName": "Erica",
+        "lastName": "Wilson",
+        "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+      }
+    }
+  },
+  "targets": [
+    {
+      "hearingId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f620",
+      "resultLines": [
+        {
+          "childResultLineIds": [
+            "12a940e9-bdaa-4a25-ac6f-67970d44d57a",
+            "027e6c0e-9061-4bbf-ab75-dceeb29ca7db",
+            "030bbb54-1ef0-46d8-9db5-9cbbdda478a3",
+            "06439e3a-4aa2-436d-8524-e1e192b191ad"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "prompts": [
+            {
+              "id": "76f15753-1706-42fb-b922-0d56d01e5706",
+              "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
+              "value": "7 Months"
+            },
+            {
+              "id": "746c833a-7d33-4800-a40c-425dbacf7492",
+              "label": "Concurrent",
+              "promptRef": "concurrent",
+              "value": "true"
+            },
+            {
+              "id": "7784b81d-44d2-43c0-a903-a53b0e73683b",
+              "label": "Consecutive to offence",
+              "promptRef": "consecutiveToOffenceNumber",
+              "value": "of2121"
+            },
+            {
+              "id": "da9c91a6-7090-44f3-8644-b4b184533fc4",
+              "label": "which is on case number",
+              "promptRef": "whereConsecutiveToAnOffenceOnAnotherCaseSpecifyThatCaseNumber",
+              "value": "tfl3434"
+            },
+            {
+              "id": "ea957761-0813-4a92-9e7c-b536654325f0",
+              "label": "Imprisonment reasons",
+              "promptRef": "imprisonmentReasons",
+              "value": "failure to express willingness to comply with a proposed requirement for a community order"
+            },
+            {
+              "id": "90d17fe3-8f87-43f2-bd96-a4108e4603ae",
+              "label": "The reasons for this",
+              "promptRef": "theReasonsForThis",
+              "value": "the defendant has a flagrant disregard for court orders###the defendant has a flagrant disregard for people and their property"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "a probation officer"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCountTaggedDays",
+              "value": "20"
+            }
+          ],
+          "resultDefinitionId": "8b1cff00-a456-40da-9ce4-f11c20959084",
+          "resultLabel": "Suspended sentence order - imprisonment",
+          "resultLineId": "f880f16b-3c48-4dee-971b-a451862484a9",
+          "shadowListed": false,
+          "shortCode": "susps",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "f880f16b-3c48-4dee-971b-a451862484a9"
+          ],
+          "prompts": [
+            {
+              "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
+              "label": "Total custodial period",
+              "promptRef": "totalCustodialPeriod",
+              "value": "7 Months"
+            },
+            {
+              "id": "95618691-0742-417e-82b9-c4d4bff94585",
+              "label": "Suspended period",
+              "promptRef": "suspendedPeriod",
+              "value": "5 Months"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "London Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "londonnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "b65fb5f1-b11d-4a95-a198-3b81333c7cf9",
+          "resultLabel": "Total suspended custodial period",
+          "resultLineId": "12a940e9-bdaa-4a25-ac6f-67970d44d57a",
+          "shadowListed": false,
+          "shortCode": "stimp",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [
+            "5b2a3a06-5f92-4c32-ad33-ce320592f08a",
+            "6dea4bc3-5da7-4ff2-aae7-c8745cce4777"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "f880f16b-3c48-4dee-971b-a451862484a9"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "027e6c0e-9061-4bbf-ab75-dceeb29ca7db",
+          "shadowListed": false,
+          "shortCode": "crs",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [
+            "1133f3da-d332-4fec-9b7d-3c5038d6dcf7"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "f880f16b-3c48-4dee-971b-a451862484a9"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "030bbb54-1ef0-46d8-9db5-9cbbdda478a3",
+          "shadowListed": false,
+          "shortCode": "emreq",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "f880f16b-3c48-4dee-971b-a451862484a9"
+          ],
+          "prompts": [
+            {
+              "id": "bc256fd1-dedd-43ab-8882-f9fbb448a62d",
+              "label": "First review date",
+              "promptRef": "firstReviewDate",
+              "value": "2022-12-28"
+            },
+            {
+              "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
+              "label": "Time of hearing",
+              "promptRef": "timeOfHearing",
+              "value": "16:00"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse organisation name",
+              "promptRef": "hCHOUSEOrganisationName",
+              "value": "Wycombe Magistrates' Court"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 1",
+              "promptRef": "hCHOUSEAddress1",
+              "value": "Law Courts"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 2",
+              "promptRef": "hCHOUSEAddress2",
+              "value": "Easton Street"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 3",
+              "promptRef": "hCHOUSEAddress3",
+              "value": "High Wycombe"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse address line 4",
+              "promptRef": "hCHOUSEAddress4",
+              "value": "Bucks."
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse post code",
+              "promptRef": "hCHOUSEPostCode",
+              "value": "HP11 1LR"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 1",
+              "promptRef": "hCHOUSEEmailAddress1",
+              "value": "ThamesChiltern.FirstHearing@cps.gov.uk"
+            },
+            {
+              "id": "66868c04-72c4-46d9-a4fc-860a82107475",
+              "label": "Courthouse email address 2",
+              "promptRef": "hCHOUSEEmailAddress2",
+              "value": "PECSHighWycombeMags@serco.com"
+            },
+            {
+              "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
+              "label": "Courtroom",
+              "promptRef": "HCROOM",
+              "value": "Courtroom 04"
+            },
+            {
+              "id": "978001b1-47d5-4cda-a1b6-b6c3a2e4975d",
+              "label": "Review frequency",
+              "promptRef": "reviewFrequency",
+              "value": "weekly"
+            }
+          ],
+          "resultDefinitionId": "859c7729-93bf-4fda-8345-3e56695dddb5",
+          "resultLabel": "First Review Hearing - Suspended",
+          "resultLineId": "06439e3a-4aa2-436d-8524-e1e192b191ad",
+          "shadowListed": false,
+          "shortCode": "frhs",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "027e6c0e-9061-4bbf-ab75-dceeb29ca7db"
+          ],
+          "prompts": [
+            {
+              "id": "7025bdf4-f438-4b6e-8acf-b7ef38fcbd23",
+              "label": "Address",
+              "promptRef": "address",
+              "value": "test address"
+            },
+            {
+              "id": "b17b7df3-064f-492a-b19d-8e0bde43f7c6",
+              "label": "Period of residence",
+              "promptRef": "periodOfResidence",
+              "value": "7 Months"
+            }
+          ],
+          "resultDefinitionId": "65a59f46-61ae-4dac-a040-a25fca647cb2",
+          "resultLabel": "Residence",
+          "resultLineId": "5b2a3a06-5f92-4c32-ad33-ce320592f08a",
+          "shadowListed": false,
+          "shortCode": "rr",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "027e6c0e-9061-4bbf-ab75-dceeb29ca7db"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "100 Hours"
+            }
+          ],
+          "resultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "resultLabel": "Unpaid work",
+          "resultLineId": "6dea4bc3-5da7-4ff2-aae7-c8745cce4777",
+          "shadowListed": false,
+          "shortCode": "upwr",
+          "orderedDate": "2019-12-20"
+        },
+        {
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "parentResultLineIds": [
+            "030bbb54-1ef0-46d8-9db5-9cbbdda478a3"
+          ],
+          "prompts": [
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor organisation name",
+              "promptRef": "electronicmonitoringcontractorOrganisationName",
+              "value": "G4S Scotland Monitoring Technologies & Services"
+            },
+            {
+              "id": "92566757-ef79-4804-bced-c63ebb0937e7",
+              "label": "Electronic monitoring contractor email address 1",
+              "promptRef": "electronicmonitoringcontractorEmailAddress1",
+              "value": "EM.Scotland.Notifications@uk.g4s.com.cjsm.net"
+            },
+            {
+              "id": "5ce30920-b300-471c-8fd7-67f3a193476a",
+              "label": "First notification of electronic monitoring",
+              "promptRef": "firstNotificationOfElectronicMonitoring",
+              "value": "true"
+            },
+            {
+              "id": "f6ca6307-bdab-42d3-968b-44485824b535",
+              "label": "Are there any additional requirements as well?",
+              "promptRef": "areThereAnyAdditionalRequirementsAsWell",
+              "value": "false"
+            },
+            {
+              "id": "380d5917-d860-4c6a-9fde-d5e7e1923331",
+              "label": "Defendant's mobile number",
+              "promptRef": "defendantsMobileNumber",
+              "value": "07773661234"
+            },
+            {
+              "id": "cdc4f47c-612d-4f81-b321-a2b5861d6e19",
+              "label": "Was an interpreter used?",
+              "promptRef": "wasAnInterpreterUsed",
+              "value": "false"
+            },
+            {
+              "id": "c7d508e9-1ea0-4a41-9961-703a5d164b6f",
+              "label": "Language",
+              "promptRef": "language",
+              "value": "English"
+            },
+            {
+              "id": "5a386999-b2d9-45f4-9b68-57000ba2d6ef",
+              "label": "Does the offender have any special needs?",
+              "promptRef": "doesTheOffenderHaveAnySpecialNeeds",
+              "value": "false"
+            }
+          ],
+          "resultDefinitionId": "dada120c-160a-49a9-b040-e8b6b7128d67",
+          "resultLabel": "Notification of electronic monitoring order (requirement)",
+          "resultLineId": "1133f3da-d332-4fec-9b7d-3c5038d6dcf7",
+          "shadowListed": false,
+          "shortCode": "nordrc",
+          "orderedDate": "2019-12-20"
+        }
+      ]
+    }
+  ],
+  "savedTargets": [
+    {
+      "hearingId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f620",
+      "resultLines": [
+        {
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "DEFENDANT",
+          "orderedDate": "2019-12-20",
+          "parentResultLineIds": [
+            "be7843e9-772f-4be0-988e-cec150891a7c"
+          ],
+          "prompts": [
+            {
+              "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
+              "label": "Total imprisonment period",
+              "promptRef": "totalImprisonmentPeriod",
+              "value": "false Total imprisonment period is life",
+              "welshValue": ""
+            },
+            {
+              "id": "2d6330a2-1f12-45fb-bb72-65f4c1215e9c",
+              "label": "Prison",
+              "promptRef": "prison",
+              "value": "test 1",
+              "welshValue": ""
+            },
+            {
+              "id": "266a2bbe-b6b5-4b24-830d-70ceff3e2cac",
+              "label": "Probation team to be notified",
+              "promptRef": "probationPeriodTobeNotified",
+              "value": "test 2",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "6cb15971-c945-4398-b7c9-3f8b743a4de3",
+          "resultLabel": "Total custodial period",
+          "resultLineId": "b29e51fb-ba64-42d2-9849-b936ea02b642"
+        }
+      ]
+    },
+    {
+      "defendantId": "7b97b715-33d8-4338-b5fe-588defe0b3cd",
+      "hearingId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f620",
+      "offenceId": "f824a233-27b8-4986-af92-95b554e96476",
+      "resultLines": [
+        {
+          "childResultLineIds": [
+            "b29e51fb-ba64-42d2-9849-b936ea02b642"
+          ],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": false,
+          "level": "OFFENCE",
+          "orderedDate": "2019-12-20",
+          "prompts": [
+            {
+              "id": "76f15753-1706-42fb-b922-0d56d01e5706",
+              "label": "Imprisonment Period",
+              "promptRef": "imprisonmentPeriod",
+              "value": "5 Years",
+              "welshValue": ""
+            },
+            {
+              "id": "4d10cd4b-fb39-40dd-88e1-2397832bc914",
+              "label": "Bail remand days to count (tagged days)",
+              "promptRef": "bailRemandDaysToCount",
+              "value": "55",
+              "welshValue": ""
+            }
+          ],
+          "resultDefinitionId": "abb95a52-2a75-40c3-8d3f-a1d75a199c47",
+          "resultLabel": "Imprisonment",
+          "resultLineId": "be7843e9-772f-4be0-988e-cec150891a7c",
+          "sharedDate": "2019-12-19"
+        }
+      ],
+      "targetId": "1fae0670-2253-11ea-ac03-e3a7649bbda0"
+    }
+  ],
+  "newAmendmentResults": [
+  ]
+}

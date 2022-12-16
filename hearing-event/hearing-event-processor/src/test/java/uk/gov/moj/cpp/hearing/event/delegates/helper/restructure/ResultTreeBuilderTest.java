@@ -245,4 +245,37 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
         assertThat(topLevelResultLineParents.get(0).getJudicialResult().getIsNewAmendment(), is(false));
     }
+
+    @Test
+    public void shouldOrderResultsForDependantResultDefinitionGroup() throws IOException {
+        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-for-ordering.json", ResultsSharedV2.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
+
+        assertThat(resultLineTree.get(0).getResultDefinition().getData().getShortCode(), is("SUSPS"));
+        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirement"));
+
+        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("STIMP"));
+        assertThat(resultLineTree.get(1).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirement"));
+
+        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("CRS"));
+        assertThat(resultLineTree.get(2).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+
+        assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("RR"));
+        assertThat(resultLineTree.get(3).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+
+        assertThat(resultLineTree.get(4).getResultDefinition().getData().getShortCode(), is("UPWR"));
+        assertThat(resultLineTree.get(4).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+
+        assertThat(resultLineTree.get(5).getResultDefinition().getData().getShortCode(), is("NORDRC"));
+        assertThat(resultLineTree.get(5).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+
+        assertThat(resultLineTree.get(6).getResultDefinition().getData().getShortCode(), is("EMREQ"));
+        assertThat(resultLineTree.get(6).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+
+        assertThat(resultLineTree.get(7).getResultDefinition().getData().getShortCode(), is("FRHS"));
+        assertThat(resultLineTree.get(7).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+
+
+    }
 }

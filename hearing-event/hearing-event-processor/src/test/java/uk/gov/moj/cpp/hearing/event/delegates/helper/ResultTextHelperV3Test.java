@@ -383,63 +383,6 @@ public class ResultTextHelperV3Test {
     }
 
     @Test
-    public void shouldSetDependantResultDefinitionGroup(){
-        final TreeNode<ResultLine2> communityOrderEnglandWales = new TreeNode<>(fromString("664ba2b9-7e05-4a59-b776-054a99bd5ca3"), null);
-        communityOrderEnglandWales.setJudicialResult(JudicialResult.judicialResult().withLabel("Label").build());
-
-        communityOrderEnglandWales.setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition().setShortCode("S")
-                .setResultTextTemplate("Parent result Text")
-                .setDependantResultDefinitionGroup("Community Requirement")));
-
-        final TreeNode<ResultLine2>  isElectronicMonitoringRequired = new TreeNode<>(fromString("9643720b-c103-4634-a224-c79d2d7eb26e"), null);
-        isElectronicMonitoringRequired.setJudicialResult(JudicialResult.judicialResult()
-                .withLabel("Is electronic monitoring required")
-                .build()
-        );
-        isElectronicMonitoringRequired.setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition()
-                .setResultTextTemplate("Is electronic monitoring required result Text")
-                .setShortCode("HMRCFPP")));
-
-        final TreeNode<ResultLine2> communityRequirements = new TreeNode<>(fromString("0007ee1d-869f-454f-8142-fc43cabd4b44"), null);
-        communityRequirements.setJudicialResult(JudicialResult.judicialResult()
-                .withLabel("Community requirements")
-                .build()
-        );
-
-        communityRequirements.setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition()
-                .setResultTextTemplate("Community requirements result Text")));
-
-        final TreeNode<ResultLine2> unpaidWork = new TreeNode<>(fromString("16b4bb67-5a8c-43cb-9daf-01ffd03da6b3"), null);
-        unpaidWork.setJudicialResult(JudicialResult.judicialResult()
-                .withLabel("Unpaid work")
-                .withAlwaysPublished(true)
-                .build()
-        );
-        unpaidWork.setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition()
-                .setResultTextTemplate("Unpaid work result Text")
-                .setDependantResultDefinitionGroup("Community Requirement")
-                .setShortCode("UPWR")));
-
-        final TreeNode<ResultLine2> rehabilitationActivity = new TreeNode<>(fromString("c835f05e-1780-498a-8802-728f21ba9a6c"), null);
-        rehabilitationActivity.setJudicialResult(JudicialResult.judicialResult()
-                .withLabel("Rehabilitation activity")
-                .withAlwaysPublished(true)
-                .build()
-        );
-        rehabilitationActivity.setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition()
-                .setResultTextTemplate("Rehabilitation activity result Text")
-                .setDependantResultDefinitionGroup("Community Requirement")
-                .setShortCode("RAR")));
-
-        communityOrderEnglandWales.addChildren(Arrays.asList(isElectronicMonitoringRequired,communityRequirements));
-        communityRequirements.addChildren(Arrays.asList(unpaidWork, rehabilitationActivity));
-
-        ResultTextHelperV3.setResultText(singletonList(communityOrderEnglandWales));
-
-        assertThat(communityOrderEnglandWales.getJudicialResult().getResultText(), CoreMatchers.is ("S - Label\nParent result Text"+System.lineSeparator()+"Unpaid work result Text"+System.lineSeparator()+"Rehabilitation activity result Text"));
-    }
-
-    @Test
     public void shouldSetResultTextForNoResultText(){
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
         treeNodeList.get(0).addChildren(getTreeNodesWithoutResultTextTemplate());

@@ -31,11 +31,6 @@ public class ResultTextHelperV3 {
 
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
-                .filter(node -> nonNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
-                .forEach(node -> updateResultTextBottom(node, getGroupResultText(node, node.getResultDefinition().getData().getDependantResultDefinitionGroup())));
-
-        treeNodeList.stream()
-                .filter(node -> isEmpty(node.getParents()))
                 .forEach(ResultTextHelperV3::updateResultTextForAlwaysPublished);
 
         treeNodeList.stream()
@@ -76,13 +71,6 @@ public class ResultTextHelperV3 {
         node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
                 .map(resultText -> ofNullable(prefix).map(s -> s + lineSeparator() + resultText).orElse(resultText))
                 .orElse(prefix)
-        );
-    }
-
-    private static void updateResultTextBottom(final TreeNode<ResultLine2> node, final String text) {
-        node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
-                .map(resultText -> resultText + lineSeparator() + text)
-                .orElse(text)
         );
     }
 

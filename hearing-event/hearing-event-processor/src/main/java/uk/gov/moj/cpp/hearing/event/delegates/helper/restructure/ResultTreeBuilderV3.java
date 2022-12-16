@@ -15,6 +15,8 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.JudicialResultPromptMapper.findJudicialResultPrompt;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
+
+import java.util.Collection;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
@@ -66,7 +68,34 @@ public class ResultTreeBuilderV3 {
 
     public List<TreeNode<ResultLine2>> build(final JsonEnvelope envelope, final ResultsSharedV3 resultsShared) {
         final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared);
-        return new ArrayList<>(mapTreeNodeRelations(resultLinesMap).values());
+        final Map<UUID, TreeNode<ResultLine2>> resultLinesMapWithRelations = mapTreeNodeRelations(resultLinesMap);
+        return new ArrayList<>(orderResult(resultLinesMapWithRelations));
+    }
+
+    private List<TreeNode<ResultLine2>> orderResult(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap){
+        final List<TreeNode<ResultLine2>> parents = resultLinesMap.values().stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList());
+        final List<TreeNode<ResultLine2>> orderedResults = parents.stream()
+                .map(parent -> resultLinesMap.values().stream()
+                        .filter(result -> !result.getId().equals(parent.getId()))
+                        .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                        .collect(Collectors.collectingAndThen(toList(), list -> {
+                            list.add(0, parent);
+                            return list;
+                        })))
+                .flatMap(Collection::stream).collect(toList());
+
+        resultLinesMap.values().stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList())
+                .forEach(orderedResults::add);
+
+        resultLinesMap.values().stream()
+                .filter(result -> orderedResults.stream().noneMatch(res -> res.getId().equals(result.getId())))
+                .forEach(orderedResults::add);
+
+        return orderedResults;
     }
 
     private Map<UUID, TreeNode<ResultLine2>> mapTreeNodeRelations(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap) {

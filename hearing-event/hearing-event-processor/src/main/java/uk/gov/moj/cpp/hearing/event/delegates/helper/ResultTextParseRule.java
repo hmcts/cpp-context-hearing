@@ -25,6 +25,9 @@ public class ResultTextParseRule <T>{
     public static final String PROMPT = "PROMPT";
     public static final String NAMEADDRESS = "NAMEADDRESS";
     public static final String BOOLEAN = "BOOLEAN";
+    public static final String PROMPT_DIRECTIVE = "{";
+    public static final String CONDITIONAL_DIRECTIVE = "]";
+    public static final String VARIABLE_RESULT_DIRECTIVE = "%";
 
 
     private final String lastChar;
@@ -48,17 +51,17 @@ public class ResultTextParseRule <T>{
     public String parse(final TreeNode<T> node, final String subString){
         switch(lastChar){
             case "}" : return parseForPromptDirective(node, subString);
-            case "%" : return parseForVariableResultDirective(node, subString);
-            case "]" : return parseForConditionalResultDirective(node, subString);
+            case VARIABLE_RESULT_DIRECTIVE: return parseForVariableResultDirective(node, subString);
+            case CONDITIONAL_DIRECTIVE: return parseForConditionalResultDirective(node, subString);
             default: throw new IllegalArgumentException(lastChar);
         }
     }
 
     public static ResultTextParseRule fromValue(String v) {
         switch (v){
-            case "{" : return new ResultTextParseRule("}");
-            case "%" : return new ResultTextParseRule("%");
-            case "[" : return new ResultTextParseRule("]");
+            case PROMPT_DIRECTIVE: return new ResultTextParseRule("}");
+            case VARIABLE_RESULT_DIRECTIVE: return new ResultTextParseRule(VARIABLE_RESULT_DIRECTIVE);
+            case "[" : return new ResultTextParseRule(CONDITIONAL_DIRECTIVE);
             default: throw new IllegalArgumentException(v);
         }
     }
@@ -112,15 +115,15 @@ public class ResultTextParseRule <T>{
     }
 
     private boolean isPromptDirectiveUnderConditionalDirective(final String control) {
-        return "{".equals(control) && "]".equals(this.lastControlChar());
+        return PROMPT_DIRECTIVE.equals(control) && CONDITIONAL_DIRECTIVE.equals(this.lastControlChar());
     }
 
     private boolean isVariableResultDirectiveUnderConditionalDirective(final String control){
-        return "%".equals(control) && "]".equals(this.lastControlChar());
+        return VARIABLE_RESULT_DIRECTIVE.equals(control) && CONDITIONAL_DIRECTIVE.equals(this.lastControlChar());
     }
 
     private boolean isChildInPayload(final TreeNode<T> node, final String subString) {
-        return node.getChildren().stream().anyMatch(child -> child.getResultDefinition().getData().getShortCode().equals(subString.replaceAll("%", "")));
+        return node.getChildren().stream().anyMatch(child -> child.getResultDefinition().getData().getShortCode().equals(subString.replaceAll(VARIABLE_RESULT_DIRECTIVE, "")));
     }
 
     private String parseForVariableResultDirective(final TreeNode<T> node, final String subString){
