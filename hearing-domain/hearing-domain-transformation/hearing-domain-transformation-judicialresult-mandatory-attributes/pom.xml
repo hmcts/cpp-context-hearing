@@ -3,7 +3,7 @@
     <parent>
         <artifactId>hearing-domain-transformation</artifactId>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
-        <version>8.0.43-CCT-1326-SNAPSHOT</version>
+        <version>8.0.44-CCT-1326-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
