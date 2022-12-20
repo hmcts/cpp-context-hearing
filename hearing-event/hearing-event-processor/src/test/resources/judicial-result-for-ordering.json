@@ -216,6 +216,7 @@
   "targets": [
     {
       "hearingId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f620",
+      "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621",
       "resultLines": [
         {
           "childResultLineIds": [
@@ -291,7 +292,8 @@
           "resultLineId": "f880f16b-3c48-4dee-971b-a451862484a9",
           "shadowListed": false,
           "shortCode": "susps",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [],
@@ -335,7 +337,8 @@
           "resultLineId": "12a940e9-bdaa-4a25-ac6f-67970d44d57a",
           "shadowListed": false,
           "shortCode": "stimp",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [
@@ -357,7 +360,8 @@
           "resultLineId": "027e6c0e-9061-4bbf-ab75-dceeb29ca7db",
           "shadowListed": false,
           "shortCode": "crs",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [
@@ -378,7 +382,8 @@
           "resultLineId": "030bbb54-1ef0-46d8-9db5-9cbbdda478a3",
           "shadowListed": false,
           "shortCode": "emreq",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [],
@@ -470,7 +475,8 @@
           "resultLineId": "06439e3a-4aa2-436d-8524-e1e192b191ad",
           "shadowListed": false,
           "shortCode": "frhs",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [],
@@ -502,7 +508,8 @@
           "resultLineId": "5b2a3a06-5f92-4c32-ad33-ce320592f08a",
           "shadowListed": false,
           "shortCode": "rr",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [],
@@ -528,7 +535,8 @@
           "resultLineId": "6dea4bc3-5da7-4ff2-aae7-c8745cce4777",
           "shadowListed": false,
           "shortCode": "upwr",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         },
         {
           "childResultLineIds": [],
@@ -596,7 +604,8 @@
           "resultLineId": "1133f3da-d332-4fec-9b7d-3c5038d6dcf7",
           "shadowListed": false,
           "shortCode": "nordrc",
-          "orderedDate": "2019-12-20"
+          "orderedDate": "2019-12-20",
+          "offenceId": "28c2ef26-a34b-4ec8-9ba6-2cab1d22f621"
         }
       ]
     }

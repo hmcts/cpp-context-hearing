@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
@@ -9,7 +10,6 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAS
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
-import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.CoreTemplateArguments.toMap;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import javax.json.JsonObject;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Spy;
@@ -48,13 +49,6 @@ import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 public class ResultTextIT extends AbstractIT {
 
-    public static final String RESULT_PARENT = "co - Community order England / Wales\nEnd Date: 12/10/2024, Responsible officer: a probation officer, Supervising Court: Banbury Magistrates' Court, Probation team to be notified organisation name: London Division NPS" + System.lineSeparator() +
-            "Number of hours: 100 Hours" + System.lineSeparator() +
-            "Offender to comply with any instructions of the responsible officer to attend appointments (with the responsible officer or someone else nominated by them), or to participate in any activity as required by the responsible officer up to a maximum of: 28 Days";
-    public static final String RESULT_CHILD_1 = "UPWR - Unpaid work" + System.lineSeparator() +
-            "Number of hours: 100 Hours";
-    public static final String RESULT_CHILD_2 = "RAR - Rehabilitation activity" + System.lineSeparator() +
-            "Offender to comply with any instructions of the responsible officer to attend appointments (with the responsible officer or someone else nominated by them), or to participate in any activity as required by the responsible officer up to a maximum of: 28 Days";
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @Spy
     private StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
@@ -203,8 +197,8 @@ public class ResultTextIT extends AbstractIT {
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("HMRCFP - Committal to prison further postponed (civil debt)\nFor a debt and costs of £200 or in default to serve 1 Concurrent consecutive to Bexley Court which is on case number Case 13 further postponed. The term of imprisonment is postponed on condition that Term 2. . Reason for the finding: reason for HMRCFP. Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG. An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC.      "));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
         }
 
 
@@ -239,10 +233,53 @@ public class ResultTextIT extends AbstractIT {
 
             final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
 
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("HMRCFPP - Committal to prison further postponed (civil debt)\nTaking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG., An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
-            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[3].resultText"), is("An application to the High Court or County Court was tried and unsuccessful. Reasons: reasons for AHCC."));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[3].resultText"), is("Taking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCG."));
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("TCGG - Taking control of goods (warrant of control)\nTaking control of goods (warrant of control) was tried and unsuccessful. Reasons: reasons for TCGG."));
+        }
+    }
+
+    @Test
+    public void shouldSetResultTextForTwoOffences() throws IOException {
+
+        final LocalDate hearingDay = LocalDate.now();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        stubCourtRoom(hearing);
+
+        final String eventPayloadString = getStringFromResource("hearing.share-result-with-target-with-two-offences-result.json")
+                .replaceAll("HEARING_ID", hearing.getId().toString())
+                .replaceAll("CASE_ID", hearing.getProsecutionCases().get(0).getId().toString())
+                .replaceAll("ORDERED_DATE", orderedDate.toString())
+                .replaceAll("OFFENCE_ID1", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId().toString())
+                .replaceAll("OFFENCE_ID2", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getId().toString());
+
+        final JsonObject targetObject = stringToJsonObjectConverter.convert(eventPayloadString);
+        final List<Target> targets = targetObject.getJsonArray("targets").stream()
+                .map(target -> (JsonObject) target)
+                .map(target -> jsonObjectToObjectConverter.convert(target, Target.class))
+                .collect(toList());
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("co - Community order England / Wales\nCommunity order made. The defendant must comply with the requirements (shown below) by 12/12/2022. judgeReservesBreachProceedings}. "));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("CURE - Curfew with electronic monitoring\nCurfew Requirement with Electronic Monitoring: Be under a curfew for 3 Weeks with electronic monitoring. Start date 12/12/2022. Start time 19:00. End date 12/12/2024. End time 07:00. Defendant to remain at 102PF,London. Curfew details: Everyday. "));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[2].resultText"), is("UPWR - Unpaid work\nUnpaid Work Requirement: Carry out unpaid work for 100 Hours within the next twelve months. This work will be supervised by the responsible officer. "));
+
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[1].judicialResults[0].resultText"), is("co - Community order England / Wales\nCommunity order made. The defendant must comply with the requirements (shown below) by 12/12/2022. judgeReservesBreachProceedings}. "));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[1].judicialResults[1].resultText"), is("CURE - Curfew with electronic monitoring\nCurfew Requirement with Electronic Monitoring: Be under a curfew for 3 Weeks with electronic monitoring. Start date 12/12/2022. Start time 19:00. End date 12/12/2024. End time 07:00. Defendant to remain at 102PF,London. Curfew details: Everyday. "));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[1].judicialResults[2].resultText"), is("UPWR - Unpaid work\nUnpaid Work Requirement: Carry out unpaid work for 100 Hours within the next twelve months. This work will be supervised by the responsible officer. "));
+
         }
     }
 
@@ -262,10 +299,8 @@ public class ResultTextIT extends AbstractIT {
         HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
         Map<UUID, List<UUID>> value = new HashMap<>();
         value.put(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID()));
-        value.put(randomUUID(), TestUtilities.asList(randomUUID()));
+        value.put(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID()));
         caseStructure.put(randomUUID(), value);
-        caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID())));
-        caseStructure.put(randomUUID(), toMap(randomUUID(), TestUtilities.asList(randomUUID())));
         return caseStructure;
     }
 

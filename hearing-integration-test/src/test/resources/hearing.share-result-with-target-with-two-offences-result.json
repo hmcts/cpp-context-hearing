@@ -1,0 +1,418 @@
+{
+  "targets": [
+    {
+      "caseId": "CASE_ID",
+      "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+      "draftResult": "{}",
+      "hearingDay": "2022-12-19",
+      "hearingId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+      "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+      "offenceId": "OFFENCE_ID1",
+      "resultLines": [
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [
+            "da4afb90-1e0d-42d5-ba47-f0bd9aebbddc",
+            "208fd7c4-b832-4681-b777-1d7fcd841b47"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID1",
+          "orderedDate": "ORDERED_DATE",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2022-12-12"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "a probation officer"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "London Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "londonnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "1f8fb993-858d-4944-8b9e-394231b5ed69",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "co"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [
+            "8a4eeb5a-d6d4-48f2-8c37-f6ec34e868f0",
+            "1809d5fe-a175-4902-a1fc-0cc5b23fbae6"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID1",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "1f8fb993-858d-4944-8b9e-394231b5ed69"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "da4afb90-1e0d-42d5-ba47-f0bd9aebbddc",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "crs"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID1",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "da4afb90-1e0d-42d5-ba47-f0bd9aebbddc"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "100 Hours"
+            }
+          ],
+          "resultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "resultLabel": "Unpaid work",
+          "resultLineId": "8a4eeb5a-d6d4-48f2-8c37-f6ec34e868f0",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "upwr"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID1",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "da4afb90-1e0d-42d5-ba47-f0bd9aebbddc"
+          ],
+          "prompts": [
+            {
+              "id": "501abaf7-c617-4aca-97a3-64718e246a69",
+              "label": "Curfew and Electronic Monitoring period",
+              "promptRef": "curfewAndElectronicMonitoringPeriod",
+              "value": "3 Weeks"
+            },
+            {
+              "id": "523a9298-a261-483d-9453-680060b88b1c",
+              "label": "Start date of tagging",
+              "promptRef": "startDateOfTagging",
+              "value": "2022-12-12"
+            },
+            {
+              "id": "f18d4d90-954d-4b27-9e70-f4be9c487b0e",
+              "label": "Start time of tagging",
+              "promptRef": "startTime",
+              "value": "19:00"
+            },
+            {
+              "id": "bfc71c63-fc4f-492d-948b-6f67c25e17bf",
+              "label": "End date of tagging",
+              "promptRef": "endDateOfTagging",
+              "value": "2024-12-12"
+            },
+            {
+              "id": "fd6186a4-d928-47f1-abee-2466b9b80ebf",
+              "label": "End time of tagging",
+              "promptRef": "endTime",
+              "value": "07:00"
+            },
+            {
+              "id": "51f96065-e622-4f72-b7dc-0c11c17d1983",
+              "label": "Defendant to remain at",
+              "promptRef": "curfewAddressDetailsAndTimings",
+              "value": "102PF,London"
+            },
+            {
+              "id": "e5b96ed6-7ec0-464d-a698-62bc94a7f52f",
+              "label": "Details and timings",
+              "promptRef": "detailsAndTimings",
+              "value": "Everyday"
+            }
+          ],
+          "resultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+          "resultLabel": "Curfew with electronic monitoring",
+          "resultLineId": "1809d5fe-a175-4902-a1fc-0cc5b23fbae6",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "cure"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID1",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "1f8fb993-858d-4944-8b9e-394231b5ed69"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "208fd7c4-b832-4681-b777-1d7fcd841b47",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "emreq"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "90a766e2-44cc-4379-99cc-380576fe79d1"
+    },
+    {
+      "caseId": "CASE_ID",
+      "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+      "draftResult": "{}",
+      "hearingDay": "2022-12-19",
+      "hearingId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+      "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+      "offenceId": "OFFENCE_ID2",
+      "resultLines": [
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [
+            "c5955e64-16f9-45e8-93a9-fb82b2a49424",
+            "e04ff884-c943-4b34-be87-8c484a338aea"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID2",
+          "orderedDate": "ORDERED_DATE",
+          "prompts": [
+            {
+              "id": "d6caa3c4-ec9d-41ec-8f86-2c617ef0d5d9",
+              "label": "End Date",
+              "promptRef": "endDate",
+              "value": "2022-12-12"
+            },
+            {
+              "id": "29f5b3c7-8d15-4606-9dcf-23f32a21b5ef",
+              "label": "Responsible officer",
+              "promptRef": "responsibleOfficer",
+              "value": "a probation officer"
+            },
+            {
+              "id": "f4a4f159-779e-4f35-822a-b559a2415ecb",
+              "label": "Supervising Court",
+              "promptRef": "supervisingCourt",
+              "value": "Lavender Hill Magistrates' Court"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified organisation name",
+              "promptRef": "probationteamtobenotifiedOrganisationName",
+              "value": "London Division NPS"
+            },
+            {
+              "id": "68c92035-27fd-4ee6-b03c-fe18ea6dbcb0",
+              "label": "Probation team to be notified email address 1",
+              "promptRef": "probationteamtobenotifiedEmailAddress1",
+              "value": "londonnps.court@justice.gov.uk"
+            }
+          ],
+          "resultDefinitionId": "418b3aa7-65ab-4a4a-bab9-2f96b698118c",
+          "resultLabel": "Community order England / Wales",
+          "resultLineId": "f86d0755-d53b-4eba-a76e-655dca203e93",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "co"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [
+            "004f15dc-fe26-468e-8c07-4e99965702d9",
+            "18c60178-b985-433f-b5b8-2b9d7470a66d"
+          ],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID2",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "f86d0755-d53b-4eba-a76e-655dca203e93"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
+          "resultLabel": "Community requirements",
+          "resultLineId": "c5955e64-16f9-45e8-93a9-fb82b2a49424",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "crs"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID2",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "f86d0755-d53b-4eba-a76e-655dca203e93"
+          ],
+          "prompts": [],
+          "resultDefinitionId": "d38d9766-c141-4d6b-bb4a-249a9bb88636",
+          "resultLabel": "Is electronic monitoring required",
+          "resultLineId": "e04ff884-c943-4b34-be87-8c484a338aea",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "emreq"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID2",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "c5955e64-16f9-45e8-93a9-fb82b2a49424"
+          ],
+          "prompts": [
+            {
+              "id": "72413aef-ecb9-4e9b-a143-31d1e9c11584",
+              "label": "Number of hours",
+              "promptRef": "numberOfHours",
+              "value": "100 Hours"
+            }
+          ],
+          "resultDefinitionId": "9bec5977-1796-4645-9b9e-687d4f23d37d",
+          "resultLabel": "Unpaid work",
+          "resultLineId": "004f15dc-fe26-468e-8c07-4e99965702d9",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "upwr"
+        },
+        {
+          "caseId": "CASE_ID",
+          "childResultLineIds": [],
+          "defendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "23f5d81a-cda0-489a-b3e0-3ab1c517fbab",
+          "offenceId": "OFFENCE_ID2",
+          "orderedDate": "ORDERED_DATE",
+          "parentResultLineIds": [
+            "c5955e64-16f9-45e8-93a9-fb82b2a49424"
+          ],
+          "prompts": [
+            {
+              "id": "501abaf7-c617-4aca-97a3-64718e246a69",
+              "label": "Curfew and Electronic Monitoring period",
+              "promptRef": "curfewAndElectronicMonitoringPeriod",
+              "value": "3 Weeks"
+            },
+            {
+              "id": "523a9298-a261-483d-9453-680060b88b1c",
+              "label": "Start date of tagging",
+              "promptRef": "startDateOfTagging",
+              "value": "2022-12-12"
+            },
+            {
+              "id": "f18d4d90-954d-4b27-9e70-f4be9c487b0e",
+              "label": "Start time of tagging",
+              "promptRef": "startTime",
+              "value": "19:00"
+            },
+            {
+              "id": "bfc71c63-fc4f-492d-948b-6f67c25e17bf",
+              "label": "End date of tagging",
+              "promptRef": "endDateOfTagging",
+              "value": "2024-12-12"
+            },
+            {
+              "id": "fd6186a4-d928-47f1-abee-2466b9b80ebf",
+              "label": "End time of tagging",
+              "promptRef": "endTime",
+              "value": "07:00"
+            },
+            {
+              "id": "51f96065-e622-4f72-b7dc-0c11c17d1983",
+              "label": "Defendant to remain at",
+              "promptRef": "curfewAddressDetailsAndTimings",
+              "value": "102PF,London"
+            },
+            {
+              "id": "e5b96ed6-7ec0-464d-a698-62bc94a7f52f",
+              "label": "Details and timings",
+              "promptRef": "detailsAndTimings",
+              "value": "Everyday"
+            }
+          ],
+          "resultDefinitionId": "06b4c31d-1b3d-4850-b64c-4cad870b3a25",
+          "resultLabel": "Curfew with electronic monitoring",
+          "resultLineId": "18c60178-b985-433f-b5b8-2b9d7470a66d",
+          "shadowListed": false,
+          "sharedDate": "ORDERED_DATE",
+          "shortCode": "cure"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "d6baddce-dcc4-429e-a4da-cc1615e3d0e6"
+    }
+  ]
+}

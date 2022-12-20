@@ -261,19 +261,19 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("CRS"));
         assertThat(resultLineTree.get(2).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
 
-        assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("RR"));
+        assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("EMREQ"));
         assertThat(resultLineTree.get(3).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
 
-        assertThat(resultLineTree.get(4).getResultDefinition().getData().getShortCode(), is("UPWR"));
+        assertThat(resultLineTree.get(4).getResultDefinition().getData().getShortCode(), is("FRHS"));
         assertThat(resultLineTree.get(4).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
 
         assertThat(resultLineTree.get(5).getResultDefinition().getData().getShortCode(), is("NORDRC"));
         assertThat(resultLineTree.get(5).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
 
-        assertThat(resultLineTree.get(6).getResultDefinition().getData().getShortCode(), is("EMREQ"));
+        assertThat(resultLineTree.get(6).getResultDefinition().getData().getShortCode(), is("RR"));
         assertThat(resultLineTree.get(6).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
 
-        assertThat(resultLineTree.get(7).getResultDefinition().getData().getShortCode(), is("FRHS"));
+        assertThat(resultLineTree.get(7).getResultDefinition().getData().getShortCode(), is("UPWR"));
         assertThat(resultLineTree.get(7).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
 
 
