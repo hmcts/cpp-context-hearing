@@ -26,7 +26,7 @@ public class HearingNotepadParsingServiceAccessControlTest extends BaseDroolsAcc
     @Test
     public void shouldAllowAuthorisedUserToParseResultDefinition() {
         final Action action = createActionFor(HEARING_NOTEPAD_PARSE_RESULT_DEFINITION);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks","Legal Advisers", "Court Associate"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Listing Officers", "Court Clerks","Legal Advisers", "Court Associate", "Court Administrators"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);
@@ -45,7 +45,7 @@ public class HearingNotepadParsingServiceAccessControlTest extends BaseDroolsAcc
     @Test
     public void shouldAllowAuthorisedUserToParseResultPrompt() {
         final Action action = createActionFor(HEARING_NOTEPAD_PARSE_RESULT_PROMPT);
-        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks","Legal Advisers"))
+        given(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks","Legal Advisers", "Court Administrators"))
                 .willReturn(true);
 
         final ExecutionResults results = executeRulesWith(action);

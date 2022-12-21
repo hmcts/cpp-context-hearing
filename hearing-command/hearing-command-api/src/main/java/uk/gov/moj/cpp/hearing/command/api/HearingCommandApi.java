@@ -21,9 +21,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+
 @ServiceComponent(COMMAND_API)
 public class HearingCommandApi {
-
     private static final String DEFENDANT_DETAILS_CHANGED_SHORT_CODE = "DDCH";
 
     private final Sender sender;
