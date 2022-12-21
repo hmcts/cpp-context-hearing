@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
@@ -86,8 +87,9 @@ public class ResultTreeBuilder {
                 .collect(toList());
         final List<TreeNode<ResultLine>> orderedResults = parents.stream()
                 .map(parent -> orderedInputList.stream()
-                        .filter(result -> result.getOffenceId().equals(parent.getOffenceId()))
                         .filter(result -> !result.getId().equals(parent.getId()))
+                        .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
+                        .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
                         .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
                         .collect(Collectors.collectingAndThen(toList(), list -> {
                             list.add(0, parent);
