@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
@@ -19,7 +20,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
@@ -84,7 +84,9 @@ public class HearingEventProcessor {
 
     @Handles("hearing.draft-result-saved")
     public void publicDraftResultSavedPublicEvent(final JsonEnvelope event) {
-        if(LOGGER.isErrorEnabled()){ LOGGER.error("INV: privateeventsavedraft  clienCorrelationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: privateeventsavedraft  clienCorrelationId: {}", event.metadata().clientCorrelationId().orElse(null));
+        }
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.draft-result-saved event received {}", event.toObfuscatedDebugString());
@@ -100,9 +102,13 @@ public class HearingEventProcessor {
 
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultSaved);
 
-       if(LOGGER.isWarnEnabled())  {LOGGER.warn("raising public event hearing.draft-result-saved correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
+        if (LOGGER.isWarnEnabled()) {
+            LOGGER.warn("raising public event hearing.draft-result-saved correlationId: {}", event.metadata().clientCorrelationId().orElse(null));
+        }
         this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_SAVED), publicEventPayload));
-        if(LOGGER.isWarnEnabled()) {LOGGER.warn("raised public event hearing.draft-result-saved correlationId: {}" , event.metadata().clientCorrelationId().orElse(null));}
+        if (LOGGER.isWarnEnabled()) {
+            LOGGER.warn("raised public event hearing.draft-result-saved correlationId: {}", event.metadata().clientCorrelationId().orElse(null));
+        }
     }
 
     @Handles("hearing.draft-result-saved-v2")
@@ -118,7 +124,7 @@ public class HearingEventProcessor {
             LOGGER.debug("hearing.draft-result-saved-v2 event received {}", event.toObfuscatedDebugString());
         }
 
-        final UUID hearingId = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSavedV2.class).getHearingId();
+        final UUID hearingId = fromString(event.payloadAsJsonObject().getString("hearingId"));
         if (LOGGER.isWarnEnabled()) {
             LOGGER.warn("first conversion in event hearing.draft-result-saved-v2 correlationId: {}", event.metadata().clientCorrelationId().orElse(null));
         }

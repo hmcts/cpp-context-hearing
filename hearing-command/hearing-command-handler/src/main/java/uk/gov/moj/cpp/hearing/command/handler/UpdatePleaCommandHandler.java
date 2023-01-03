@@ -14,6 +14,7 @@ import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 
+import java.util.Set;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -35,10 +36,11 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.toObfuscatedDebugString());
         }
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
         final UpdatePleaCommand command = convertToObject(envelope, UpdatePleaCommand.class);
         for (final PleaModel plea : command.getPleas()) {
             aggregate(HearingAggregate.class, command.getHearingId(), envelope,
-                    hearingAggregate -> hearingAggregate.updatePlea(command.getHearingId(), plea, referenceDataService.retrieveGuiltyPleaTypes()));
+                    hearingAggregate -> hearingAggregate.updatePlea(command.getHearingId(), plea, guiltyPleaTypes));
         }
     }
 
