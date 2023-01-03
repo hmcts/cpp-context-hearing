@@ -12,6 +12,8 @@ import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
@@ -49,6 +51,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Subscription;
+import uk.gov.moj.cpp.hearing.query.CaseByDefendant;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
@@ -63,6 +66,7 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCas
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ResultLine;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
+import uk.gov.moj.cpp.hearing.repository.CaseByDefendantRepository;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
@@ -113,6 +117,10 @@ public class HearingService {
     private static final DateTimeFormatter FORMATTER = ofPattern("ddMMyyyy");
     private static final ZoneId ZONE_ID = ZoneId.of(ZoneOffset.UTC.getId());
     private static final UtcClock UTC_CLOCK = new UtcClock();
+    private static final String CASE_ID = "caseId";
+    private static final String CASE_URN = "urn";
+    private static final String PROSECUTION_CASES= "prosecutionCases";
+
     @Inject
     private HearingRepository hearingRepository;
     @Inject
@@ -153,6 +161,8 @@ public class HearingService {
     private DraftResultRepository draftResultRepository;
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    @Inject
+    private CaseByDefendantRepository caseByDefendantRepository;
 
     @Transactional
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
@@ -812,6 +822,34 @@ public class HearingService {
                 .build();
     }
 
+    @Transactional
+    public JsonObject getCasesByPersonDefendant(final String firstName, final String lastName, final LocalDate dateOfBirth,
+                                                                  final LocalDate hearingDate, final Set<UUID> caseIds){
+
+        final List<CaseByDefendant> casesByPersonDefendant = caseByDefendantRepository.getCasesByPersonDefendant(firstName, lastName, dateOfBirth,hearingDate, caseIds);
+        return createCasesByDefendatResponse(casesByPersonDefendant);
+
+    }
+
+    @Transactional
+    public JsonObject getCasesByOrganisationDefendant(final String organisationName, final LocalDate hearingDate,
+                                                                              final Set<UUID> caseIds){
+        final List<CaseByDefendant> casesByOrganisationDefendant = caseByDefendantRepository.getCasesByOrganisationDefendant(organisationName,hearingDate, caseIds);
+        return createCasesByDefendatResponse(casesByOrganisationDefendant);
+    }
+
+    private JsonObject createCasesByDefendatResponse(final List<CaseByDefendant> caseList){
+        final JsonArrayBuilder arrayBuilder = createArrayBuilder();
+        caseList.forEach(prosecutionCase->{
+            final JsonObjectBuilder objectBuilder = createObjectBuilder();
+            objectBuilder.add(CASE_ID, prosecutionCase.getCaseId().toString());
+            if (nonNull(prosecutionCase.getUrn())) {
+                objectBuilder.add(CASE_URN, prosecutionCase.getUrn());
+            }
+            arrayBuilder.add(objectBuilder.build());
+        });
+        return createObjectBuilder().add(PROSECUTION_CASES, arrayBuilder.build()).build();
+    }
 
     @Transactional
     public ProsecutionCaseResponse getProsecutionCaseForHearings(final UUID hearingId) {
