@@ -20,8 +20,13 @@ import uk.gov.moj.cpp.hearing.domain.event.RemoveOffencesFromExistingHearing;
 import java.util.List;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @ServiceComponent(COMMAND_HANDLER)
 public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpdateOffencesForDefendantCommandHandler.class);
+
 
     @Handles("hearing.command.update-offences-for-defendant")
     public void updateOffencesForDefendant(final JsonEnvelope envelope) throws EventStreamException {
@@ -39,6 +44,9 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
 
         for (final DefendantCaseOffences updateOffence : command.getUpdatedOffences()) {
             for (final uk.gov.justice.core.courts.Offence offence : updateOffence.getOffences()) {
+                if (LOGGER.isErrorEnabled()) {
+                    LOGGER.error("INV: will cause event hearing.events.offence-updated clientcorrelation : {}", envelope.metadata().clientCorrelationId().orElse(null));
+                }
                 aggregate(OffenceAggregate.class,
                         offence.getId(),
                         envelope,

@@ -33,6 +33,8 @@ public class UpdateDefendantLegalAidStatusCommandHandler extends AbstractCommand
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.command.update-defendant-legalaid-status event received {}", envelope.toObfuscatedDebugString());
         }
+
+
         final JsonObject payload = envelope.payloadAsJsonObject();
         final UUID defendantId = fromString(payload.getString(DEFENDANT_ID));
         final String legalAidStatus = payload.getString(LEGAL_AID_STATUS);

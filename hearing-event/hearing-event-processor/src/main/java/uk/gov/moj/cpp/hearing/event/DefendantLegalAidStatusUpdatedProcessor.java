@@ -40,6 +40,10 @@ public class DefendantLegalAidStatusUpdatedProcessor {
             LOGGER.debug("progression.defendant-legalaid-status-updated event received {}", envelop.toObfuscatedDebugString());
         }
 
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.defendant-legalaid-status-updated-for-hearing clienCorrelationId: {}", envelop.metadata().clientCorrelationId().orElse(null));
+        }
+
         this.sender.send(this.enveloper
                 .withMetadataFrom(envelop, "hearing.command.update-defendant-legalaid-status")
                 .apply(envelop.payloadAsJsonObject()));

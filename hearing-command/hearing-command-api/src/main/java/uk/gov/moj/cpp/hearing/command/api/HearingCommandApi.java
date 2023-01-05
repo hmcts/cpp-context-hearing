@@ -127,6 +127,9 @@ public class HearingCommandApi {
 
     @Handles("hearing.update-prosecution-counsel")
     public void updateProsecutionCounsel(final JsonEnvelope envelope) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.prosecution-counsel-added clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.command.update-prosecution-counsel");
     }
 
@@ -147,6 +150,9 @@ public class HearingCommandApi {
 
     @Handles("hearing.update-plea")
     public void updatePlea(final JsonEnvelope envelope) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.hearing-offence-plea-updated clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.hearing-offence-plea-update");
     }
 
@@ -176,6 +182,9 @@ public class HearingCommandApi {
     @FeatureControl("amendReshare")
     public void shareResultsForHearingDay(final JsonEnvelope envelope) {
         if(LOGGER.isErrorEnabled()){LOGGER.error("INV: shareday - handling to command handler clienCorrelationId: {}" , envelope.metadata().clientCorrelationId().orElse(null));}
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.events.results-shared-v3 clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.command.share-days-results");
     }
 
@@ -186,6 +195,9 @@ public class HearingCommandApi {
 
     @Handles("hearing.update-defendant-attendance-on-hearing-day")
     public void updateDefendantAttendance(final JsonEnvelope envelope) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.defendant-attendance-updated clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.update-defendant-attendance-on-hearing-day");
     }
 
@@ -242,6 +254,9 @@ public class HearingCommandApi {
 
     @Handles("hearing.set-trial-type")
     public void setTrialType(final JsonEnvelope envelope) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.hearing-effective-trial-set clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.command.set-trial-type");
     }
 
@@ -277,6 +292,9 @@ public class HearingCommandApi {
 
     @Handles("hearing.book-provisional-hearing-slots")
     public void bookProvisionalHearingSlots(final JsonEnvelope envelope) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.event.book-provisional-hearing-slots clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         sendEnvelopeWithName(envelope, "hearing.command.book-provisional-hearing-slots");
     }
 

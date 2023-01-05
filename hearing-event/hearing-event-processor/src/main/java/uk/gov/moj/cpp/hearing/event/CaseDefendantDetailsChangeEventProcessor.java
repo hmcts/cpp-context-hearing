@@ -43,6 +43,7 @@ public class CaseDefendantDetailsChangeEventProcessor {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.update-case-defendant-details-enriched-with-hearing-ids event received {}", event.toObfuscatedDebugString());
         }
-        sender.send(enveloper.withMetadataFrom(event, "hearing.update-case-defendant-details-against-hearing-aggregate").apply(event.payloadAsJsonObject()));
+        sender.send(enveloper.withMetadataFrom(event, "" +
+                "hearing.update-case-defendant-details-against-hearing-aggregate").apply(event.payloadAsJsonObject()));
     }
 }

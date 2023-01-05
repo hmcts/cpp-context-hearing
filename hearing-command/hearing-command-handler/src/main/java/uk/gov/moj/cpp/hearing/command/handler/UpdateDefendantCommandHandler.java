@@ -35,6 +35,9 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
         final CaseDefendantDetails caseDefendantDetails = convertToObject(envelope, CaseDefendantDetails.class);
 
         for (final Defendant defendant : caseDefendantDetails.getDefendants()) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("INV: will cause hearing.defendant-details-updated clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+            }
 
             final CaseDefendantDetailsCommand caseDefendantDetailsCommand =
                     CaseDefendantDetailsCommand.caseDefendantDetailsCommand().setDefendant(defendant);
@@ -55,6 +58,9 @@ public class UpdateDefendantCommandHandler extends AbstractCommandHandler {
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings = convertToObject(envelope, CaseDefendantDetailsWithHearings.class);
 
         for (final UUID hearingId : caseDefendantDetailsWithHearings.getHearingIds()) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error("INV: command handler will cause hearing.defendant-details-updated clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+            }
 
             final CaseDefendantDetailsWithHearingCommand defendantWithHearingCommand =
                     CaseDefendantDetailsWithHearingCommand.caseDefendantDetailsWithHearingCommand()

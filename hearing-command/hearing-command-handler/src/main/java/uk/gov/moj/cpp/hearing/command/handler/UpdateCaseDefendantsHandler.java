@@ -34,6 +34,9 @@ public class UpdateCaseDefendantsHandler  extends  AbstractCommandHandler {
         final ProsecutionCase prosecutionCase = convertToObject(prosecutionCaseJsonObject, ProsecutionCase.class);
 
         final UUID caseId = fromString(prosecutionCaseJsonObject.getString("id"));
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: will cause hearing.case-defendants-updated-for-hearing clienCorrelationId: {}", envelope.metadata().clientCorrelationId().orElse(null));
+        }
         aggregate(CaseAggregate.class, caseId, envelope,
                 caseAggregate -> caseAggregate.caseDefendantsUpdated(prosecutionCase));
     }
