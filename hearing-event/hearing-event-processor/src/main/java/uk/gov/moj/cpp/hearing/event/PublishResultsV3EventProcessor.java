@@ -100,6 +100,10 @@ public class PublishResultsV3EventProcessor {
 
     @Handles("hearing.events.results-shared-v3")
     public void resultsShared(final JsonEnvelope event) {
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("INV: privateEventResultsSharedV3  clientCorrelationId: {}", event.metadata().clientCorrelationId().orElse(null));
+        }
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.events.results-shared-v3 event received {}", event.toObfuscatedDebugString());
         }
