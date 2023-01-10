@@ -67,6 +67,7 @@ import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,6 +121,9 @@ public class PublishResultsDelegateV3 {
 
     public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared) {
 
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         final List<TreeNode<ResultLine2>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared);
 
         mapApplicationLevelJudicialResults(resultsShared, restructuredResults);
@@ -164,6 +168,12 @@ public class PublishResultsDelegateV3 {
             LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
         }
         sender.send(jsonEnvelope);
+
+        stopWatch.stop();
+
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("shareResults method in the delegateV3 took {} milliseconds", stopWatch.getTime());
+        }
 
     }
 

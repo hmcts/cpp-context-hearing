@@ -60,6 +60,7 @@ import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,12 +109,13 @@ public class PublishResultsV3EventProcessor {
             LOGGER.debug("hearing.events.results-shared-v3 event received {}", event.toObfuscatedDebugString());
         }
 
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
         final ResultsSharedV3 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
 
 
         resultsShared.setTargets(newTargetToLegacyTargetConverter.convert(resultsShared.getTargets()));
-
-
 
 
         final Hearing hearing = resultsShared.getHearing();
@@ -155,6 +157,12 @@ public class PublishResultsV3EventProcessor {
         publishResultsDelegate.shareResults(event, sender, resultsShared);
 
         updateResultLineStatusDelegate.updateDaysResultLineStatus(sender, event, resultsShared);
+
+        stopWatch.stop();
+
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("resultShared method in the processor took {} milliseconds", stopWatch.getTime());
+        }
 
     }
 
@@ -329,6 +337,8 @@ public class PublishResultsV3EventProcessor {
     }
 
     private void setProsecutorInformation(final JsonEnvelope context, final List<CourtApplication> courtApplications, final List<ProsecutionCase> prosecutionCases) {
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         courtApplications.stream()
                 .map(courtApplication -> ofNullable(courtApplication.getCourtApplicationCases()).map(Collection::stream).orElseGet(Stream::empty))
                 .flatMap(courtApplicationCaseStream -> courtApplicationCaseStream.map(CourtApplicationCase::getProsecutionCaseIdentifier))
@@ -344,6 +354,10 @@ public class PublishResultsV3EventProcessor {
         courtApplications.forEach(courtApplication -> populateProsecutingAuthorityInformation(context, courtApplication));
 
         prosecutionCases.forEach(prosecutionCase -> populateProsecutorInformation(context, prosecutionCase.getProsecutionCaseIdentifier()));
+        stopWatch.stop();
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("setProsecutorInformation method took {} milliseconds", stopWatch.getTime());
+        }
     }
 
     private void populateProsecutingAuthorityInformation(final JsonEnvelope context, final CourtApplication courtApplication) {

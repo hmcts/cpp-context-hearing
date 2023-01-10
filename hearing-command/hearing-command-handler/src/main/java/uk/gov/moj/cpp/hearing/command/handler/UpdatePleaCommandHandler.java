@@ -36,6 +36,10 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("hearing.hearing-offence-plea-update event received {}", envelope.toObfuscatedDebugString());
         }
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("hearing.hearing-offence-plea-update event received {}", envelope.payloadAsJsonString());
+        }
+
         final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
         final UpdatePleaCommand command = convertToObject(envelope, UpdatePleaCommand.class);
         for (final PleaModel plea : command.getPleas()) {
