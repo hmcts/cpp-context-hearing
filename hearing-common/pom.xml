@@ -3,7 +3,7 @@
     <parent>
         <artifactId>hearing-parent</artifactId>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
-        <version>8.0.50-NFT-SNAPSHOT</version>
+        <version>8.0.51-NFT-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
