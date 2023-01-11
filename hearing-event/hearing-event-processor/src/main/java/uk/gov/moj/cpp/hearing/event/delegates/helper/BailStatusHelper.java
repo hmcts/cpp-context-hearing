@@ -3,8 +3,8 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
-import static java.util.stream.Collectors.toList;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
@@ -29,9 +29,15 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BailStatusHelper {
 
     private final ReferenceDataService referenceDataService;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BailStatusHelper.class.getName());
 
     @Inject
     public BailStatusHelper(final ReferenceDataService referenceDataService) {
@@ -39,7 +45,8 @@ public class BailStatusHelper {
     }
 
     public void mapBailStatuses(final JsonEnvelope context, final Hearing hearing) {
-
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         final List<BailStatus> bailStatusesFromRefData = referenceDataService.getBailStatuses(context);
 
         ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
@@ -54,6 +61,11 @@ public class BailStatusHelper {
                     final List<Offence> offences = getOffencesFromApplication(ca);
                     updateDefendantWithBailStatus(ca.getSubject().getMasterDefendant(), bailStatusesFromRefData, offences);
                 });
+
+        stopWatch.stop();
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("id is {} mapBailStatuses took {} milliseconds", nonNull(context.metadata()) ? context.metadata().id() : "", stopWatch.getTime());
+        }
 
     }
 
@@ -80,7 +92,7 @@ public class BailStatusHelper {
         bailStatusOptional.ifPresent(bailStatusResult ->
                 defendant.getPersonDefendant().setBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus()
                         .withCode(bailStatusResult.getStatusCode()).
-                                withDescription(bailStatusResult.getStatusDescription())
+                        withDescription(bailStatusResult.getStatusDescription())
                         .withId(bailStatusResult.getId())
                         .build())
         );

@@ -22,6 +22,7 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
+import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegateV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
@@ -30,19 +31,27 @@ import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class RestructuringHelperV3 {
 
     public static final Predicate<JudicialResultPrompt> JUDICIAL_RESULT_PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptReference());
 
     private final ResultTreeBuilderV3 resultTreeBuilder;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestructuringHelperV3.class.getName());
+
     @Inject
     public RestructuringHelperV3(final ResultTreeBuilderV3 resultTreeBuilder) {
         this.resultTreeBuilder = resultTreeBuilder;
     }
 
-
     public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared) {
+
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         final List<TreeNode<ResultLine2>> treeNodes = resultTreeBuilder.build(context, resultsShared);
 
         final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
@@ -68,6 +77,11 @@ public class RestructuringHelperV3 {
                 .collect(toList());
         removeNextHearingObject(publishedForNowsNodesNotInRollup);
         treeNodes.addAll(publishedForNowsNodesNotInRollup);
+
+        stopWatch.stop();
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("id is {} and restructure method took {} milliseconds", context.metadata().id(),stopWatch.getTime());
+        }
         return treeNodes;
     }
 

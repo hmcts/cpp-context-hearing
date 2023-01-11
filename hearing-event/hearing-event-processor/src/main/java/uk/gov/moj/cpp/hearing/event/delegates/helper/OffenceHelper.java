@@ -22,6 +22,7 @@ import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
+import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegateV3;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
@@ -36,12 +37,17 @@ import java.util.stream.Stream;
 import javax.inject.Inject;
 
 import com.google.common.collect.Maps;
+import org.apache.commons.lang3.time.StopWatch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OffenceHelper {
 
     private final ReferenceDataService referenceDataService;
 
     private final ReferenceDataLoader referenceDataLoader;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OffenceHelper.class.getName());
 
     @Inject
     public OffenceHelper(final ReferenceDataService referenceDataService,
@@ -51,6 +57,8 @@ public class OffenceHelper {
     }
 
     public void enrichOffence(final JsonEnvelope context, final Hearing hearing) {
+        final StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
 
         final List<VerdictType> verdictTypes = referenceDataService.getVerdictTypes(context);
         final List<AlcoholLevelMethod> alcoholLevelMethods = referenceDataService.getAlcoholLevelMethods(context);
@@ -71,6 +79,11 @@ public class OffenceHelper {
                 .flatMap(o -> o.getCourtOrderOffences().stream())
                 .map(CourtOrderOffence::getOffence)
                 .forEach(offence -> enrichOffence(offence, verdictTypes, alcoholLevelMethods, hearing));
+
+        stopWatch.stop();
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("id is {} and enrichOffence method took {} milliseconds", nonNull(context.metadata()) ? context.metadata().id() : "",stopWatch.getTime());
+        }
     }
 
     private void enrichOffence(final Offence offence, final List<VerdictType> verdictTypes, final List<AlcoholLevelMethod> alcoholLevelMethods, final Hearing hearing) {

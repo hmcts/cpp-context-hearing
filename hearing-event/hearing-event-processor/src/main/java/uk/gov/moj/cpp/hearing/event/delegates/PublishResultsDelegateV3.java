@@ -160,19 +160,32 @@ public class PublishResultsDelegateV3 {
                 .setHearingDay(resultsShared.getHearingDay())
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
-        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
+        final StopWatch stopWatchSuccessEvent=new StopWatch();
+        stopWatchSuccessEvent.start();
         final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), Json.createObjectBuilder().build());
         sender.send(successEvent);
+        stopWatchSuccessEvent.stop();
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("id is {} and publishing successEvent for Notification took {} milliseconds", context.metadata().id(),stopWatchSuccessEvent.getTime());
+        }
+
+        final StopWatch stopWatchResultedPublicEvent=new StopWatch();
+        stopWatchResultedPublicEvent.start();
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
         }
         sender.send(jsonEnvelope);
+        stopWatchResultedPublicEvent.stop();
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.error("id is {} and publishing resultedPublicEvent took {} milliseconds", context.metadata().id(),stopWatchResultedPublicEvent.getTime());
+        }
 
         stopWatch.stop();
 
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("shareResults method in the delegateV3 took {} milliseconds", stopWatch.getTime());
+            LOGGER.error("id is {} and shareResults method in the delegateV3 took {} milliseconds", context.metadata().id(),stopWatch.getTime());
         }
 
     }

@@ -161,7 +161,7 @@ public class PublishResultsV3EventProcessor {
         stopWatch.stop();
 
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("resultShared method in the processor took {} milliseconds", stopWatch.getTime());
+            LOGGER.error("id is {} and resultShared method in the processor took {} milliseconds", event.metadata().id(),stopWatch.getTime());
         }
 
     }
@@ -356,7 +356,7 @@ public class PublishResultsV3EventProcessor {
         prosecutionCases.forEach(prosecutionCase -> populateProsecutorInformation(context, prosecutionCase.getProsecutionCaseIdentifier()));
         stopWatch.stop();
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("setProsecutorInformation method took {} milliseconds", stopWatch.getTime());
+            LOGGER.error("id is {} and setProsecutorInformation method took {} milliseconds", context.metadata().id(),stopWatch.getTime());
         }
     }
 
