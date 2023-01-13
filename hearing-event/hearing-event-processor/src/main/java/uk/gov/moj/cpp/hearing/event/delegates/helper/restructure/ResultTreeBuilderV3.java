@@ -90,12 +90,12 @@ public class ResultTreeBuilderV3 {
 
     private Map<UUID, TreeNode<ResultLine2>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV3 resultsShared) {
         final Map<UUID, TreeNode<ResultLine2>> result = new HashMap<>();
-        final List<ResultLine2>  allResultLines = resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
+        final List<ResultLine2> allResultLines = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
                 .collect(toList());
         resultsShared.getTargets().forEach(target -> {
             final List<ResultLine2> resultLines = target.getResultLines();
-        resultLines
+            resultLines
                     .stream()
                     .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .forEach(resultLine -> {
@@ -106,7 +106,8 @@ public class ResultTreeBuilderV3 {
                                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
                         }
 
-                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, allResultLines, resultsShared);
+                        final ResultDefinition resultDefinition = resultDefinitionNode.getData();
+                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, allResultLines, resultsShared, resultDefinition);
                         final TreeNode<ResultLine2> treeNode = resultLineHelper.getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
                         result.put(treeNode.getId(), treeNode);
                     });
@@ -114,12 +115,11 @@ public class ResultTreeBuilderV3 {
         return result;
     }
 
-    @SuppressWarnings({"squid:S3776","squid:MethodCyclomaticComplexity"})
-    private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultsSharedV3 resultsShared) {
+    @SuppressWarnings({"squid:S3776", "squid:MethodCyclomaticComplexity"})
+    private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultsSharedV3 resultsShared, final ResultDefinition resultDefinition) {
         final Hearing hearing = resultsShared.getHearing();
         final DelegatedPowers courtClerk = resultsShared.getCourtClerk();
         final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = resultsShared.getCompletedResultLinesStatus();
-        final ResultDefinition resultDefinition = this.referenceDataService.getResultDefinitionById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
         final Set<UUID> newAmendmentResultIds = resultsShared.getNewAmendmentResults().stream().map(NewAmendmentResult::getId).collect(Collectors.toSet());
         checkResultDefinition(resultLine, hearing, resultDefinition);
 
@@ -146,6 +146,7 @@ public class ResultTreeBuilderV3 {
         builder.withIsNewAmendment(newAmendmentResultIds.contains(resultLine.getResultLineId()));
 
     }
+
     @SuppressWarnings("squid:S3776")
 
 
@@ -153,7 +154,7 @@ public class ResultTreeBuilderV3 {
         return judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
-                .withAmendmentDate(nonNull(resultLine.getAmendmentDate())?resultLine.getAmendmentDate().toLocalDate():null)
+                .withAmendmentDate(nonNull(resultLine.getAmendmentDate()) ? resultLine.getAmendmentDate().toLocalDate() : null)
                 .withAmendmentReason(resultLine.getAmendmentReason())
                 .withAmendmentReasonId(resultLine.getAmendmentReasonId())
                 .withApprovedDate(resultLine.getApprovedDate())
@@ -235,10 +236,10 @@ public class ResultTreeBuilderV3 {
         if (!isEmpty(resultDefinition.getSecondaryCJSCodes())) {
             builder.withSecondaryCJSCodes(getSecondaryCjsCodeList(resultDefinition.getSecondaryCJSCodes()));
         }
-        if(!isNull(resultDefinition.getDrivingTestStipulation())){
+        if (!isNull(resultDefinition.getDrivingTestStipulation())) {
             builder.withDrivingTestStipulation(resultDefinition.getDrivingTestStipulation());
         }
-        if(!isNull(resultDefinition.getPointsDisqualificationCode())){
+        if (!isNull(resultDefinition.getPointsDisqualificationCode())) {
             builder.withPointsDisqualificationCode(resultDefinition.getPointsDisqualificationCode());
         }
     }
@@ -303,9 +304,9 @@ public class ResultTreeBuilderV3 {
                 .collect(toList());
     }
 
-    private List<uk.gov.justice.core.courts.SecondaryCJSCode> getSecondaryCjsCodeList(final List<SecondaryCJSCode> secondaryCJSCodes){
+    private List<uk.gov.justice.core.courts.SecondaryCJSCode> getSecondaryCjsCodeList(final List<SecondaryCJSCode> secondaryCJSCodes) {
         final List<uk.gov.justice.core.courts.SecondaryCJSCode> secondaryCJSCodeList = new ArrayList<>();
-        for (final SecondaryCJSCode secondaryCJSCode: secondaryCJSCodes) {
+        for (final SecondaryCJSCode secondaryCJSCode : secondaryCJSCodes) {
             secondaryCJSCodeList.add(secondaryCJSCode()
                     .withCjsCode(secondaryCJSCode.getCjsCode())
                     .withText(secondaryCJSCode.getText())

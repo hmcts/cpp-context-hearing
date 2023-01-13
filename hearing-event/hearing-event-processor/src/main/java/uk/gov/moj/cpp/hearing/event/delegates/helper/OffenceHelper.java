@@ -22,7 +22,6 @@ import uk.gov.justice.hearing.courts.referencedata.OrganisationalUnit;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.common.ReferenceDataLoader;
 import uk.gov.moj.cpp.hearing.event.delegates.PublishResultUtil;
-import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegateV3;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.alcohollevel.AlcoholLevelMethod;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
@@ -114,13 +113,12 @@ public class OffenceHelper {
                 .map(hd -> Maps.immutableEntry(hd.getCourtCentreId(), hd.getCourtRoomId()))
                 .orElse(Maps.immutableEntry(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId()));
 
-        hearing.getHearingDays().stream().forEach(hearingDay -> {
+        final UUID centreId = courtCentreInfo.getKey();
+        final UUID roomId = courtCentreInfo.getValue();
+        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(centreId);
+
+        hearing.getHearingDays().forEach(hearingDay -> {
             if (nonNull(offence.getConvictionDate()) && isNull(offence.getConvictingCourt())) {
-
-                final UUID centreId = courtCentreInfo.getKey();
-                final UUID roomId = courtCentreInfo.getValue();
-
-                final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(centreId);
 
                 final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
                         .withId(centreId)
@@ -129,7 +127,7 @@ public class OffenceHelper {
                         .withName(organisationalUnit.getOucodeL3Name());
 
                 if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
-                    final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(centreId);
+                    final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(organisationalUnit);
                     courtCentreBuilder.withLja(ljaDetails);
                 } else {
                     courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());

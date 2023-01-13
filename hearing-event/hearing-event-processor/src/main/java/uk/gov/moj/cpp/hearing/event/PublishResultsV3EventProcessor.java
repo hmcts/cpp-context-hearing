@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -114,9 +115,7 @@ public class PublishResultsV3EventProcessor {
 
         final ResultsSharedV3 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
 
-
         resultsShared.setTargets(newTargetToLegacyTargetConverter.convert(resultsShared.getTargets()));
-
 
         final Hearing hearing = resultsShared.getHearing();
 
@@ -312,7 +311,7 @@ public class PublishResultsV3EventProcessor {
 
         courtCentre.setCode(organisationalUnit.getOucode());
         courtCentre.setCourtLocationCode(organisationalUnit.getCourtLocationCode());
-        if (nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh()) {
+        if (nonNull(organisationalUnit.getIsWelsh()) && TRUE.equals(organisationalUnit.getIsWelsh())) {
             courtCentre.setWelshName(organisationalUnit.getOucodeL3WelshName());
             courtCentre.setWelshCourtCentre(organisationalUnit.getIsWelsh());
             courtCentre.setWelshAddress(address()

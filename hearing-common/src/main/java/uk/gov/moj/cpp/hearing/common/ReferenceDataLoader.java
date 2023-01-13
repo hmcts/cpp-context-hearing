@@ -82,8 +82,7 @@ public class ReferenceDataLoader {
         return responseEnvelope.payload();
     }
 
-    public LjaDetails getLjaDetails(final UUID courtCentreId) {
-        final OrganisationalUnit organisationUnit = getOrganisationUnitById(courtCentreId);
+    public LjaDetails getLjaDetails(final OrganisationalUnit organisationUnit) {
         final EnforcementArea enforcementArea = getEnforcementAreaByLjaCode(organisationUnit.getLja(), organisationUnit.getId());
 
         return LjaDetails.ljaDetails()
