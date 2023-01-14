@@ -202,7 +202,7 @@ public class PublishResultsV3EventProcessor {
 
         final Map<UUID, OffenceResult> offenceResultMap = new HashMap<>();
 
-        offences.stream().forEach(offence -> {
+        offences.forEach(offence -> {
             final List<ResultLine2> completedResultLinesForThisOffence = resultsShared.getTargets().stream()
                     .filter(target -> offence.getId().equals(target.getOffenceId()))
                     .flatMap(target -> target.getResultLines().stream())

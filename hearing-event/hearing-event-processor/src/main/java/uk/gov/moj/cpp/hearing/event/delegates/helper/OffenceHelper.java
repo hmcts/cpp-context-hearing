@@ -117,23 +117,22 @@ public class OffenceHelper {
         final UUID roomId = courtCentreInfo.getValue();
         final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(centreId);
 
+        final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
+                .withId(centreId)
+                .withRoomId(roomId)
+                .withCode(organisationalUnit.getOucode())
+                .withName(organisationalUnit.getOucodeL3Name());
+
+        if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
+            final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(organisationalUnit);
+            courtCentreBuilder.withLja(ljaDetails);
+        } else {
+            courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
+        }
+
         hearing.getHearingDays().forEach(hearingDay -> {
             if (nonNull(offence.getConvictionDate()) && isNull(offence.getConvictingCourt())) {
-
-                final CourtCentre.Builder courtCentreBuilder = CourtCentre.courtCentre()
-                        .withId(centreId)
-                        .withRoomId(roomId)
-                        .withCode(organisationalUnit.getOucode())
-                        .withName(organisationalUnit.getOucodeL3Name());
-
-                if (JurisdictionType.MAGISTRATES.equals(hearing.getJurisdictionType())) {
-                    final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(organisationalUnit);
-                    courtCentreBuilder.withLja(ljaDetails);
-                } else {
-                    courtCentreBuilder.withCourtLocationCode(organisationalUnit.getCourtLocationCode());
-                }
                 offence.setConvictingCourt(courtCentreBuilder.build());
-
             }
         });
     }
