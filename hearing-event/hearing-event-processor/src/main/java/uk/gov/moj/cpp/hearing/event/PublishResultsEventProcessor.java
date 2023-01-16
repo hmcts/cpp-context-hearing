@@ -116,7 +116,7 @@ public class PublishResultsEventProcessor {
 
         setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre(),organisationalUnit);
 
-        setLJADetails(event, resultsShared.getHearing().getCourtCentre(), organisationalUnit);
+        setLJADetails(event, resultsShared.getHearing().getCourtCentre());
 
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
@@ -286,9 +286,9 @@ public class PublishResultsEventProcessor {
                 .build();
     }
 
-    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre, final OrganisationalUnit organisationalUnit) {
+    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre) {
         final UUID courtCentreId = courtCentre.getId();
-        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId, organisationalUnit);
+        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId);
         courtCentre.setLja(ljaDetails);
     }
 

@@ -123,9 +123,9 @@ public class NowsReferenceDataServiceImplTest {
 
         final LjaDetails ljaDetails = new LjaDetails(organisationalUnit.getLja(), organisationalUnit.getOucodeL3Name(), organisationalUnit.getOucodeL3WelshName());
 
-        when(ljaReferenceDataLoader.getLjaDetails(jsonEnvelope, courtCentreId,organisationalUnit)).thenReturn(ljaDetails);
+        when(ljaReferenceDataLoader.getLjaDetails(jsonEnvelope, courtCentreId)).thenReturn(ljaDetails);
 
-        final LjaDetails actualLjaDetails = nowsReferenceDataService.getLjaDetails(jsonEnvelope, courtCentreId, organisationalUnit);
+        final LjaDetails actualLjaDetails = nowsReferenceDataService.getLjaDetails(jsonEnvelope, courtCentreId);
 
         assertThat(actualLjaDetails, is(ljaDetails));
     }
