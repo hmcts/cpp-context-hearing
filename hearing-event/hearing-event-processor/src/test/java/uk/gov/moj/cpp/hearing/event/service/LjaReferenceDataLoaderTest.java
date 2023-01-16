@@ -51,19 +51,15 @@ public class LjaReferenceDataLoaderTest extends ReferenceDataClientTestBase {
 
         final UUID courtCentreId = randomUUID();
 
-        mockQuery(orgUnitQueryEnvelopeCaptor, organisationalUnit);
         mockAdminQuery(enforcementAreaQueryEnvelopeCaptor, enforcementArea);
 
-        target.getLjaDetails(context, courtCentreId);
+        final LjaDetails ljaDetails=target.getLjaDetails(context, courtCentreId, organisationalUnit);
 
-        verify(requester).request(orgUnitQueryEnvelopeCaptor.capture());
-        verify(requester).requestAsAdmin(enforcementAreaQueryEnvelopeCaptor.capture());
-
+        assertThat(ljaDetails.getLjaName(),is(enforcementArea.getLocalJusticeArea().getName()));
+        assertThat(ljaDetails.getLjaCode(),is(enforcementArea.getLocalJusticeArea().getNationalCourtCode()));
         assertThat(enforcementAreaQueryEnvelopeCaptor.getValue(), jsonEnvelope()
                 .withMetadataOf(metadata().withName(ENFORCEMENT_AREA_QUERY_NAME)));
 
-        assertThat(orgUnitQueryEnvelopeCaptor.getValue().metadata(), metadata().withName(GET_ORGANISATION_UNIT_BY_ID_ID));
-        assertThat(orgUnitQueryEnvelopeCaptor.getValue().payload(), payload().isJson(withJsonPath("$.id", is(courtCentreId.toString()))));
     }
 
 }

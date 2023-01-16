@@ -63,8 +63,8 @@ public class NowsReferenceDataServiceImpl implements ReferenceDataService {
     }
 
     @Override
-    public LjaDetails getLjaDetails(final JsonEnvelope context, final UUID courtCentreId) {
-        return ljaReferenceDataLoader.getLjaDetails(context, courtCentreId);
+    public LjaDetails getLjaDetails(final JsonEnvelope context, final UUID courtCentreId, final OrganisationalUnit organisationalUnit) {
+        return ljaReferenceDataLoader.getLjaDetails(context, courtCentreId, organisationalUnit);
     }
 
     @Override

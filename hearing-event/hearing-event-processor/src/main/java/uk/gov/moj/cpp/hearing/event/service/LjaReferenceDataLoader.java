@@ -40,20 +40,6 @@ public class LjaReferenceDataLoader {
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
-    private OrganisationalUnit organisationalUnitById(final JsonEnvelope context, final UUID id) {
-        final JsonObject payload = createObjectBuilder()
-                .add(COURT_CENTRE_ID_PATH_PARAM, id.toString())
-                .build();
-        final Envelope<JsonObject> requestEnvelope = envelop(payload)
-                .withName(GET_ORGANISATION_UNIT_BY_ID_ID)
-                .withMetadataFrom(context);
-        final JsonEnvelope jsonResultEnvelope = requester.request(requestEnvelope);
-
-        final JsonObject organisationalUnitJson = jsonResultEnvelope.payloadAsJsonObject();
-        return jsonObjectToObjectConverter.convert(organisationalUnitJson, OrganisationalUnit.class);
-
-    }
-
     private EnforcementArea enforcementAreaByLjaCode(final JsonEnvelope context, final String ljaCode) {
         final Envelope<JsonObject> request = envelop(createObjectBuilder().add(COURT_CODE_QUERY_PARAMETER, ljaCode)
                 .build())
@@ -82,8 +68,7 @@ public class LjaReferenceDataLoader {
         return lja.orElseGet(() -> null);
     }
 
-    public LjaDetails getLjaDetails(JsonEnvelope context, final UUID courtCentreId) {
-        final OrganisationalUnit organisationUnit = organisationalUnitById(context, courtCentreId);
+    public LjaDetails getLjaDetails(JsonEnvelope context, final UUID courtCentreId, final OrganisationalUnit organisationUnit) {
         final EnforcementAreaBacs enforcementAreaBACS = organisationUnit.getEnforcementArea();
         if (isNull(enforcementAreaBACS)) {
             throw new BacsNotFoundException(String.format("No BACS details found for court centreId %s", courtCentreId));

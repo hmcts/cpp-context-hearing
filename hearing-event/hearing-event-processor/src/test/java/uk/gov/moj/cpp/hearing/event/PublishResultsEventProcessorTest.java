@@ -632,7 +632,7 @@ public class PublishResultsEventProcessorTest {
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
                 .thenReturn(organisationalUnit);
 
-        when(referenceDataService.getLjaDetails(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataService.getLjaDetails(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId()),eq(organisationalUnit)))
                 .thenReturn(LjaDetails.ljaDetails()
                         .withWelshLjaName("Welsh LJA Name")
                         .build());

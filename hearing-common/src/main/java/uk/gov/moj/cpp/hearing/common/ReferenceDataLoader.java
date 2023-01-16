@@ -38,7 +38,7 @@ public class ReferenceDataLoader {
     private static final String REFERENCEDATA_QUERY_ORGANISATION_UNITS = "referencedata.query.organisationunits";
     private static final String ENFORCEMENT_AREA_QUERY_NAME = "referencedata.query.enforcement-area";
     private static final String COURT_CODE_QUERY_PARAMETER = "localJusticeAreaNationalCourtCode";
-    private static final String REFERENCEDATA_QUERY_ORGANISATION_UNIT = "referencedata.query.organisation-unit";
+    private static final String REFERENCEDATA_QUERY_ORGANISATION_UNIT = "referencedata.query.organisation-unit.v2";
 
     @ServiceComponent(EVENT_PROCESSOR)
     @Inject

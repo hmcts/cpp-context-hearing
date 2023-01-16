@@ -128,7 +128,7 @@ public class PublishResultsV3EventProcessor {
 
         setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre(), organisationalUnit);
 
-        setLJADetails(event, resultsShared.getHearing().getCourtCentre());
+        setLJADetails(event, resultsShared.getHearing().getCourtCentre(), organisationalUnit);
 
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
@@ -302,9 +302,9 @@ public class PublishResultsV3EventProcessor {
                 .build();
     }
 
-    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre) {
+    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre, final OrganisationalUnit organisationalUnit) {
         final UUID courtCentreId = courtCentre.getId();
-        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId);
+        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId, organisationalUnit);
         courtCentre.setLja(ljaDetails);
     }
 
