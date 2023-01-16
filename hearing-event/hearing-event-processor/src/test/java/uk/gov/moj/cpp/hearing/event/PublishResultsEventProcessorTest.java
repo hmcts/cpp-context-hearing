@@ -615,22 +615,24 @@ public class PublishResultsEventProcessorTest {
         final ResultsShared resultsShared = resultsSharedTemplate();
         final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared));
+
+        final OrganisationalUnit organisationalUnit=OrganisationalUnit.organisationalUnit()
+                .withOucode("123ABCD")
+                .withIsWelsh(true)
+                .withOucodeL3WelshName("Welsh Court Centre")
+                .withWelshAddress1("Welsh 1")
+                .withWelshAddress2("Welsh 2")
+                .withWelshAddress3("Welsh 3")
+                .withWelshAddress4("Welsh 4")
+                .withWelshAddress5("Welsh 5")
+                .withPostcode("LL55 2DF")
+                .build();
         when(referenceDataService.getProsecutorById(eq(event), eq(resultsShared.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityId())))
                 .thenReturn(prosecutorTemplate());
         when(referenceDataLoader.getOrganisationUnitById(eq(resultsShared.getHearing().getCourtCentre().getId())))
-                .thenReturn(OrganisationalUnit.organisationalUnit()
-                        .withOucode("123ABCD")
-                        .withIsWelsh(true)
-                        .withOucodeL3WelshName("Welsh Court Centre")
-                        .withWelshAddress1("Welsh 1")
-                        .withWelshAddress2("Welsh 2")
-                        .withWelshAddress3("Welsh 3")
-                        .withWelshAddress4("Welsh 4")
-                        .withWelshAddress5("Welsh 5")
-                        .withPostcode("LL55 2DF")
-                        .build());
+                .thenReturn(organisationalUnit);
 
-        when(referenceDataService.getLjaDetails(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId())))
+        when(referenceDataService.getLjaDetails(eq(event), eq(resultsShared.getHearing().getCourtCentre().getId()),eq(organisationalUnit)))
                 .thenReturn(LjaDetails.ljaDetails()
                         .withWelshLjaName("Welsh LJA Name")
                         .build());
