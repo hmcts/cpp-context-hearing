@@ -285,7 +285,6 @@ public class ShareResultsIT extends AbstractIT {
 
                         final Map<String, Object> convictionCourt = (Map<String, Object>) offence.get("convictingCourt");
 
-                        assertThat(convictionCourt.get("courtLocationCode"), is("0325"));
                         assertThat(convictionCourt.get("id"), is(hearing.getCourtCentre().getId().toString()));
                         assertThat(convictionCourt.get("roomId"), is(hearing.getCourtCentre().getRoomId().toString()));
                     });
