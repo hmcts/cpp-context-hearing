@@ -81,9 +81,10 @@ public class ResultTreeBuilderV3 {
         final List<TreeNode<ResultLine2>> parents = orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
                 .filter(node -> !isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
                 .collect(toList());
+        final Set<UUID> parentIds = parents.stream().map(TreeNode::getId).collect(Collectors.toSet());
         final List<TreeNode<ResultLine2>> orderedResults = parents.stream()
                 .map(parent -> orderedInputList.stream()
-                        .filter(result -> !result.getId().equals(parent.getId()))
+                        .filter(result -> !parentIds.contains(result.getId()))
                         .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
                         .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
                         .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
