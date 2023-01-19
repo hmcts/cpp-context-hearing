@@ -12,6 +12,9 @@ import org.mockito.Spy;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import javax.json.Json;
 import javax.json.JsonObject;
@@ -21,8 +24,10 @@ import java.util.UUID;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
@@ -37,8 +42,13 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
     private final Enveloper enveloper = createEnveloper();
     @Mock
     private Sender sender;
+
+    @Mock
+    private DefendantRepository defendantRepository;
+
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
     @InjectMocks
     private DefendantLegalAidStatusUpdatedProcessor defendantLegalAidStatusUpdatedProcessor;
 
@@ -93,6 +103,7 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
         final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.defendant-legalaid-status-updated"),
                 eventPayload);
 
+        when(defendantRepository.findBy(any(HearingSnapshotKey.class))).thenReturn(new Defendant());
         defendantLegalAidStatusUpdatedProcessor.handleDefendantLegalStatusUpdateForHearings(event);
 
         verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
@@ -104,7 +115,6 @@ public class DefendantLegalAidStatusUpdatedProcessorTest {
         MatcherAssert.assertThat(events.get(0).payloadAsJsonObject().getString(DEFENDANT_ID), is(defendantId.toString()));
 
         MatcherAssert.assertThat(events.get(0).payloadAsJsonObject().getString(HEARING_ID), is(hearingId.toString()));
-
 
         MatcherAssert.assertThat(events.get(0).payloadAsJsonObject().getString(LEGAL_AID_STATUS), is("Granted"));
 
