@@ -57,7 +57,7 @@ public class CaseDefendantDetailsUpdatedEventListener {
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(defendantIn.getId(), hearingId));
 
-        if (defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
+        if (defendant !=  null && defendant.getProsecutionCase().getId().getId().equals(defendantIn.getProsecutionCaseId())) {
             if(defendantIn.getMasterDefendantId() != null) {
                 defendant.setMasterDefendantId(defendantIn.getMasterDefendantId());
             }

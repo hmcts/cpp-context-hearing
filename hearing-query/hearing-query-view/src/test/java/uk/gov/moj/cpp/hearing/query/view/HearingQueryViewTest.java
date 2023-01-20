@@ -9,12 +9,14 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
+import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyList;
@@ -51,6 +53,7 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
@@ -789,10 +792,45 @@ public class HearingQueryViewTest {
         final Envelope<GetHearings> results = target.getFutureHearingsByCaseIds(query);
 
         verify(hearingService).getFutureHearingsByCaseIds(caseIdList);
-        MatcherAssert.assertThat(results.metadata().name(), is("hearing.get.hearings"));
-        MatcherAssert.assertThat(results.payload().getHearingSummaries().size(), is(2));
+        assertThat(results.metadata().name(), is("hearing.get.hearings"));
+        assertThat(results.payload().getHearingSummaries().size(), is(2));
     }
 
+    @Test
+    public void shouldGetCasesByPersonDefendant(){
+        final UUID caseId = randomUUID();
+        final String urn = randomAlphabetic(5);
+        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-person-defendant", createObjectBuilder()
+                        .add("firstName", randomAlphabetic(5))
+                        .add("lastName", randomAlphabetic(5))
+                        .add("dateOfBirth", LocalDate.now().minusYears(25).toString())
+                        .add("hearingDate", LocalDate.now().toString())
+                        .add("caseIds", caseId.toString())
+                        .build());
+
+        when(hearingService.getCasesByPersonDefendant(any(), any(), any(), any(), any())).thenReturn(createCaseByDefendant(caseId, urn));
+        final JsonEnvelope response = target.getCasesByPersonDefendant(envelope);
+        final JsonArray prosecutionCases = response.payloadAsJsonObject().getJsonArray("prosecutionCases");
+        assertThat(prosecutionCases.getJsonObject(0).getString("caseId"), is(caseId.toString()));
+        assertThat(prosecutionCases.getJsonObject(0).getString("urn"), is(urn));
+    }
+
+    @Test
+    public void shouldGetCasesByOrganisationDefendant(){
+        final UUID caseId = randomUUID();
+        final String urn = randomAlphabetic(5);
+        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-person-defendant", createObjectBuilder()
+                .add("organisationName", randomAlphabetic(5))
+                .add("hearingDate", LocalDate.now().toString())
+                .add("caseIds", caseId.toString())
+                .build());
+
+        when(hearingService.getCasesByOrganisationDefendant(any(), any(), any())).thenReturn(createCaseByDefendant(caseId, urn));
+        final JsonEnvelope response = target.getCasesByOrganisationDefendant(envelope);
+        final JsonArray prosecutionCases = response.payloadAsJsonObject().getJsonArray("prosecutionCases");
+        assertThat(prosecutionCases.getJsonObject(0).getString("caseId"), is(caseId.toString()));
+        assertThat(prosecutionCases.getJsonObject(0).getString("urn"), is(urn));
+    }
 
     @Test
     public void shouldGetProsecutionCaseByHearingId() {
@@ -894,5 +932,17 @@ public class HearingQueryViewTest {
 
     private DraftResultResponse buildDraftResultResponse(boolean target) {
         return new DraftResultResponse(draftResult, target);
+    }
+
+    private JsonObject createCaseByDefendant(final UUID caseId, final String urn){
+        return createObjectBuilder()
+                .add("prosecutionCases", createArrayBuilder()
+                        .add(createObjectBuilder()
+                                .add("caseId",caseId.toString())
+                                .add("urn", urn)
+                                .build())
+                        .build())
+                .build();
+
     }
 }

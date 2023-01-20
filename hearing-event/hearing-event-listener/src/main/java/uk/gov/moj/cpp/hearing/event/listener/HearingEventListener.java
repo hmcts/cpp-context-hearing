@@ -669,6 +669,7 @@ public class HearingEventListener {
                     t.setMasterDefendantId(targetReq.getMasterDefendantId());
                     t.setApplicationId(targetReq.getApplicationId());
                     t.setShadowListed(targetReq.getShadowListed());
+                    t.setResultLinesJson(targetReq.getResultLinesJson());
                     addOrReplaceResultLine(targetReq, t);
                 });
     }

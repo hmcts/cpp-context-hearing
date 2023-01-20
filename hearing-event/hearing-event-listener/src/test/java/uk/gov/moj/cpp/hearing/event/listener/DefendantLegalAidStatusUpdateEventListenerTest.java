@@ -1,6 +1,17 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,15 +29,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.util.UUID;
-
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefendantLegalAidStatusUpdateEventListenerTest {
@@ -50,7 +52,7 @@ public class DefendantLegalAidStatusUpdateEventListenerTest {
     }
 
     @Test
-    public void testUpdateDefendantLegalAidStatus() {
+    public void updateDefendantLegalAidStatusGranted() {
         final UUID hearingId = randomUUID();
         final UUID defendantId = randomUUID();
         final String legalAidStatus = "Granted";
@@ -76,7 +78,52 @@ public class DefendantLegalAidStatusUpdateEventListenerTest {
         assertThat(defendant.getId(), is(defendantOut.getId()));
 
         assertThat(defendant.getLegalaidStatus(), is("Granted"));
+    }
 
+    @Test
+    public void updateDefendantLegalAidStatusNoValue() {
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final String legalAidStatus = "NO_VALUE";
+        final DefendantLegalAidStatusUpdatedForHearing defendantLegalAidStatusUpdatedForHearing = DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withLegalAidStatus(legalAidStatus)
+                .build();
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(defendant);
+
+        defendantLegalAidStatusUpdateEventListener.updateDefendantLegalAidStatusForHearing(envelopeFrom(metadataWithRandomUUID("hearing.defendant-legalaid-status-updated-for-hearing"),
+                objectToJsonObjectConverter.convert(defendantLegalAidStatusUpdatedForHearing)));
+
+
+        final ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+
+        verify(defendantRepository).save(defendantexArgumentCaptor.capture());
+
+        final Defendant defendantOut = defendantexArgumentCaptor.getValue();
+
+        assertThat(defendant.getId(), is(defendantOut.getId()));
+
+        assertThat(defendant.getLegalaidStatus(), is(CoreMatchers.nullValue()));
+    }
+
+    @Test
+    public void shouldNotUpdateDefendantWhenThereIsNoDefendantAssociatedWithHearing(){
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final String legalAidStatus = "NO_VALUE";
+        final DefendantLegalAidStatusUpdatedForHearing defendantLegalAidStatusUpdatedForHearing = DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withLegalAidStatus(legalAidStatus)
+                .build();
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(null);
+        final ArgumentCaptor<Defendant> defendantexArgumentCaptor = ArgumentCaptor.forClass(Defendant.class);
+        verify(defendantRepository, never()).save(defendantexArgumentCaptor.capture());
     }
 
 }

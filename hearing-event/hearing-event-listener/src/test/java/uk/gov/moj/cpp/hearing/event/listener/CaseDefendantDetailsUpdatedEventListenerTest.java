@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -12,6 +13,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.defendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.FundingType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -161,6 +163,58 @@ public class CaseDefendantDetailsUpdatedEventListenerTest {
         );
         assertAssociatedDefenceOrganisation(defendant, defendantexArgumentCaptor);
     }
+
+    @Test
+    public void shouldNotUpdateDefendant() {
+
+        final UUID hearingId = randomUUID();
+
+        final DefendantDetailsUpdated defendantDetailsUpdated = DefendantDetailsUpdated.defendantDetailsUpdated()
+                .setHearingId(hearingId)
+                .setDefendant(defendantTemplate());
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
+        final JsonEnvelope envelope = createJsonEnvelope(defendantDetailsUpdated);
+
+        final Defendant defendant = getDefendant(hearingId, defendantDetailsUpdated);
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(null);
+
+        caseDefendantDetailsUpdatedEventListener.defendantDetailsUpdated(envelope);
+
+        verify(defendantRepository, never()).save(any());
+
+    }
+
+    @Test
+    public void shouldUpdateDefendantWhenDefendantIsNotPresentForCombinationOfHearingIdAndDefendantId() {
+
+        final UUID hearingId = randomUUID();
+
+        final DefendantDetailsUpdated defendantDetailsUpdated = DefendantDetailsUpdated.defendantDetailsUpdated()
+                .setHearingId(hearingId)
+                .setDefendant(defendantTemplate());
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
+        final JsonEnvelope envelope = createJsonEnvelope(defendantDetailsUpdated);
+
+        final Defendant defendant = getDefendant(hearingId, defendantDetailsUpdated);
+
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(null);
+
+
+        caseDefendantDetailsUpdatedEventListener.defendantDetailsUpdated(envelope);
+
+
+        verify(this.defendantRepository, never()).save(Mockito.any());
+
+
+    }
+
 
     @Test
     public void shouldUpdateDefendantWithoutMasterDefendantId() {

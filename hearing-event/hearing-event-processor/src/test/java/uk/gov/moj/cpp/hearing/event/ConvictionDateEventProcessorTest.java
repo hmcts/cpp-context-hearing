@@ -18,7 +18,6 @@ import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.core.sender.Sender;
@@ -27,9 +26,21 @@ import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFact
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 
+import java.io.IOException;
+import java.util.Set;
+
+import javax.json.Json;
+
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.networknt.schema.JsonSchema;
+import com.networknt.schema.JsonSchemaFactory;
+import com.networknt.schema.SpecVersion;
+import com.networknt.schema.ValidationMessage;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -58,6 +69,9 @@ public class ConvictionDateEventProcessorTest {
     private JsonEnvelope responseEnvelope;
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void initMocks() {
@@ -193,4 +207,68 @@ public class ConvictionDateEventProcessorTest {
                         allOf(hasNoJsonPath("$.offenceId"),
                                 withJsonPath("$.courtApplicationId", is(convictionDateRemoved.getCourtApplicationId().toString()))))));
     }
+
+    @Test
+    public void shouldPassSchemaValidationForValidPayloadOfConvictionDateAdded() {
+        //given
+        JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-added"),
+                Json.createObjectBuilder()
+                        .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
+                        .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
+                        .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")
+                        .add("courtApplicationId", "a806495a-75c1-455a-9788-f069be3124d9")
+                        .add("convictionDate", "2022-11-17")
+                        .build());
+
+        //then
+        assertThat(envelope, jsonEnvelope().thatMatchesSchema());
+    }
+
+    @Test
+    public void shouldPassSchemaValidationForValidPayloadOfConvictionDateRemoved() {
+        //given
+        JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.conviction-date-removed"),
+                Json.createObjectBuilder()
+                        .add("caseId", "30dd24a6-e383-48f6-afa0-e4b174ecb89c")
+                        .add("hearingId", "c76ead4b-5ac8-48e0-b744-f4ade56c8198")
+                        .add("offenceId", "0683dfed-f9a4-4661-aaa9-d43fda9ef93d")
+                        .add("courtApplicationId", "a806495a-75c1-455a-9788-f069be3124d9")
+                        .add("convictionDate", "2022-11-17")
+                        .build());
+
+        //then
+        assertThat(envelope, jsonEnvelope().thatMatchesSchema());
+    }
+
+
+    @Test
+    public void shouldFailSchemaValidationForInValidPayloadOfConvictionDateAdded() throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
+        JsonSchema jsonSchema = factory.getSchema(
+                ConvictionDateEventProcessorTest.class.getResourceAsStream("/yaml/json/schema/hearing.conviction-date-added.json"));
+        JsonNode jsonNode = mapper.readTree(
+                ConvictionDateEventProcessorTest.class.getResourceAsStream("/hearing.conviction-date-added-invalid.json"));
+        Set<ValidationMessage> errors = jsonSchema.validate(jsonNode);
+        assertThat(errors.size(), is(1));
+        assertThat(errors.iterator().next().getMessage(), is("$.convictionDate: is missing but it is required"));
+
+    }
+
+    @Test
+    public void shouldFailSchemaValidationForInValidPayloadOfConvictionDateRemoved() throws IOException {
+        final ObjectMapper mapper = new ObjectMapper();
+
+        JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V4);
+        JsonSchema jsonSchema = factory.getSchema(
+                ConvictionDateEventProcessorTest.class.getResourceAsStream("/yaml/json/schema/hearing.conviction-date-removed.json"));
+        JsonNode jsonNode = mapper.readTree(
+                ConvictionDateEventProcessorTest.class.getResourceAsStream("/hearing.conviction-date-removed-invalid.json"));
+        Set<ValidationMessage> errors = jsonSchema.validate(jsonNode);
+        assertThat(errors.size(), is(2));
+        assertThat(errors.iterator().next().getMessage(), is("$.offenceId: is missing but it is required"));
+
+    }
+
 }

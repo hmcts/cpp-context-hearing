@@ -29,8 +29,10 @@ import uk.gov.moj.cpp.hearing.nces.UpdateDefendantWithApplicationDetails;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -40,9 +42,9 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings({"squid:S00107", "squid:S1948"})
 public class DefendantAggregate implements Aggregate {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefendantAggregate.class);
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
-    private List<UUID> hearingIds = new ArrayList<>();
+    private final Set<UUID> hearingIds = new HashSet<>();
 
     private DefendantAggregateMomento momento = new DefendantAggregateMomento();
 
@@ -91,7 +93,7 @@ public class DefendantAggregate implements Aggregate {
         final CaseDefendantDetailsWithHearings caseDefendantDetailsWithHearings =
                 CaseDefendantDetailsWithHearings.caseDefendantDetailsWithHearings()
                         .setDefendant(defendant)
-                        .setHearingIds(hearingIds);
+                        .setHearingIds(new ArrayList<>(hearingIds));
 
         return apply(Stream.of(caseDefendantDetailsWithHearings));
     }
@@ -101,7 +103,7 @@ public class DefendantAggregate implements Aggregate {
                 .withDefendantId(defendantId)
                 .withProsecutionCaseId(prosecutionCaseId)
                 .withOffence(offence)
-                .withHearingIds(hearingIds)
+                .withHearingIds(new ArrayList<>(hearingIds))
         ));
     }
 
@@ -110,7 +112,7 @@ public class DefendantAggregate implements Aggregate {
             return apply(Stream.of(DefendantLegalAidStatusUpdated.defendantLegalAidStatusUpdatedBuilder()
                     .withDefendantId(defendantId)
                     .withLegalAidStatus(legalAidStatus)
-                    .withHearingIds(hearingIds)
+                    .withHearingIds(new ArrayList<>(hearingIds))
                     .build()
 
             ));

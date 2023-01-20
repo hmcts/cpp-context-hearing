@@ -100,6 +100,12 @@
             <artifactId>framework-api-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>uk.gov.moj.cpp.access-control</groupId>
+            <artifactId>access-control-hearing-providers</artifactId>
+            <version>${cpp.platform-libraries.version}</version>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>uk.gov.justice.services</groupId>

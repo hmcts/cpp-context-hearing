@@ -16,9 +16,10 @@
       "$ref": "#/definitions/uuid"
     }
   },
-  "oneOf": [{
+  "anyOf": [{
     "required": [
       "caseId",
+      "hearingId",
       "offenceId"
     ]},{
     "required": [
