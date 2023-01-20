@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-query</artifactId>
-        <version>8.0.47-CCT-1326-SNAPSHOT</version>
+        <version>8.0.48-CCT-1326-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-query-view</artifactId>
     <packaging>jar</packaging>
