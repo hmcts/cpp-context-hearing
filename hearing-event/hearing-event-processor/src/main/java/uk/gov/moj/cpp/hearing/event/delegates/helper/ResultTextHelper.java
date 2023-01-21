@@ -1,80 +1,93 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
-import static java.lang.Boolean.TRUE;
-import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsLast;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toList;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
-import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isEmpty;
 
 import uk.gov.justice.core.courts.ResultLine;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
-import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
 
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelper {
 
-    public static final Predicate<uk.gov.justice.core.courts.Prompt> PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptRef());
+    public static final String CHAR_DASH = " - ";
+    public static final String CHAR_EMPTY = "";
 
     private ResultTextHelper(){
         //required by sonar
     }
 
-    public static String getResultText(final ResultDefinition resultDefinition, final ResultLine resultLine) {
+    public static void setResultText(final List<TreeNode<ResultLine>> treeNodeList){
 
-        final List<Prompt> referencePromptList = resultDefinition
-                .getPrompts()
-                .stream()
-                .filter(p -> !TRUE.equals(p.isHidden()))
-                .sorted(comparing(Prompt::getSequence, nullsLast(naturalOrder())))
-                .filter(Objects::nonNull)
-                .collect(toList());
 
-        final List<UUID> referenceList = referencePromptList
-                .stream()
-                .map(Prompt::getId)
-                .collect(toList());
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .forEach(ResultTextHelper::setResultText);
 
-        final List<uk.gov.justice.core.courts.Prompt> sortedPromptList = resultLine
-                .getPrompts()
-                .stream()
-                .filter(p -> referenceList.contains(p.getId()))
-                .sorted(new UUIDComparator(referenceList))
-                .collect(toList());
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .forEach(ResultTextHelper::updateResultTextForAlwaysPublished);
 
-        final String sortedPrompts = sortedPromptList
-                .stream()
-                .filter(PROMPT_PREDICATE)
-                .map(p -> format("%s %s", p.getLabel(), getPromptValue(p, referencePromptList)))
-                .collect(joining(lineSeparator()));
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .filter(node ->!ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false))
+                .forEach(node -> updateResultTextTop(node, node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel()));
 
-        final String res = getResultText(resultDefinition.getLabel(), sortedPrompts);
-
-        return res;
+        treeNodeList.stream()
+                .filter(node -> isEmpty(node.getParents()))
+                .forEach(ResultTextHelper::setEmptyResultText);
     }
 
-    public static String getResultText(final String label, final String sortedPrompts){
-        return format("%s%s%s", label, lineSeparator(), sortedPrompts);
-    }
-
-    private static String getPromptValue(final uk.gov.justice.core.courts.Prompt prompt, final List<Prompt> referencePromptList) {
-        final Optional<Prompt> optionalPrompt = referencePromptList.stream().filter(p -> p.getId().equals(prompt.getId())).findFirst();
-        final String originalValue = prompt.getValue();
-
-        if (optionalPrompt.isPresent() && "BOOLEAN".equalsIgnoreCase(optionalPrompt.get().getType())) {
-            return convertBooleanPromptValue(originalValue);
+    private static void setEmptyResultText(final TreeNode<ResultLine> node) {
+        node.getChildren().forEach(ResultTextHelper::setEmptyResultText);
+        if(! ofNullable(node.getJudicialResult().getResultText()).isPresent()){
+            node.getJudicialResult().setResultText(node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel());
         }
-        return originalValue;
     }
 
+    @SuppressWarnings("PMD.NullAssignment")
+    private static void setResultText(final TreeNode<ResultLine> node) {
+        node.getChildren().forEach(ResultTextHelper::setResultText);
+        final String resultTemplate = node.getResultDefinition().getData().getResultTextTemplate();
+        if (nonNull(resultTemplate)) {
+            final ResultTextParseRule<ResultLine> resultTextParseRule = new ResultTextParseRule<>();
+            final String newResultText = resultTextParseRule.getNewResultText(node, resultTemplate);
+            node.getJudicialResult().setResultText(CHAR_EMPTY.equals(newResultText) ? null : newResultText);
+        }
+    }
+
+    private static void updateResultTextForAlwaysPublished(final TreeNode<ResultLine> node) {
+        node.getChildren().forEach(ResultTextHelper::updateResultTextForAlwaysPublished);
+        if(ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false)){
+            updateResultTextTop(node, node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel());
+        }
+
+    }
+
+    private static void updateResultTextTop(final TreeNode<ResultLine> node, final String prefix) {
+        node.getJudicialResult().setResultText(ofNullable(node.getJudicialResult().getResultText())
+                .map(resultText -> ofNullable(prefix).map(s -> s + lineSeparator() + resultText).orElse(resultText))
+                .orElse(prefix)
+        );
+    }
+
+    private static String getGroupResultText(final TreeNode<ResultLine> node, final String dependantResultDefinitionGroup){
+        if(isEmpty(node.getChildren())){
+            if(dependantResultDefinitionGroup.equals(node.getResultDefinition().getData().getDependantResultDefinitionGroup())){
+                return node.getJudicialResult().getResultText();
+            }else{
+                return "";
+            }
+        }else{
+            return node.getChildren().stream().map( n -> ResultTextHelper.getGroupResultText(n, dependantResultDefinitionGroup))
+                    .filter(StringUtils::isNoneEmpty)
+                    .collect(Collectors.joining(lineSeparator()));
+        }
+    }
 }

@@ -26,6 +26,8 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -60,6 +62,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -121,7 +124,7 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
 
         final DefendantAggregate defendantAggregate = new DefendantAggregate();
         final UUID hearingId = randomUUID();
-        setField(defendantAggregate, "hearingIds", ImmutableList.of(hearingId));
+        setField(defendantAggregate, "hearingIds", ImmutableSet.of(hearingId));
         setupMockedEventStream(defendantId, this.eventStream, defendantAggregate);
 
         updateOffencesForDefendantCommandHandler.updateOffencesForDefendant(envelope);

@@ -412,6 +412,9 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> updateExistingHearing(final UUID hearingId, final List<ProsecutionCase> prosecutionCases, final List<UUID> shadowListedOffences) {
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        }
         return apply(Stream.of(new ExistingHearingUpdated(hearingId, prosecutionCases, shadowListedOffences)));
     }
 

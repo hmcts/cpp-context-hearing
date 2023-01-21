@@ -657,3 +657,65 @@ protocols: [ HTTP, HTTPS ]
                 application/vnd.hearing.prosecution-case-by-hearingid+json:
                   example:  !include json/hearing.get-prosecutioncase-result.json
                   schema:  !include  json/schema/hearing.get-prosecutioncase-result.json
+
+/hearings/cases-by-person-defendant:
+   get:
+      description: |
+        Get all cases for the given person defendant details and hearing date
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.cases-by-person-defendant+json
+            name: hearing.get.cases-by-person-defendant
+        ...
+      queryParameters:
+        firstName:
+          type: string
+          required: true
+        lastName:
+          type: string
+          required: true
+        dateOfBirth:
+          type: string
+          required: true
+        hearingDate:
+          type: string
+          required: true
+        caseIds:
+          type: string
+          required: false
+          description: comma separated case ids
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.cases-by-person-defendant+json:
+                    example: !include json/hearing.get.cases-by-person-defendant.json
+                    schema: !include json/schema/hearing.get.cases-by-person-defendant.json
+
+/hearings/cases-by-organisation-defendant:
+   get:
+      description: |
+        Get all cases for the given organisation defendant details and hearing date
+        ...
+        (mapping):
+            responseType: application/vnd.hearing.get.cases-by-organisation-defendant+json
+            name: hearing.get.cases-by-organisation-defendant
+        ...
+      queryParameters:
+        organisationName:
+          type: string
+          required: true
+        hearingDate:
+          type: string
+          required: true
+        caseIds:
+          type: string
+          required: false
+          description: comma separated case ids
+      responses:
+            200:
+                description: OK
+                body:
+                  application/vnd.hearing.get.cases-by-organisation-defendant+json:
+                    example: !include json/hearing.get.cases-by-organisation-defendant.json
+                    schema: !include json/schema/hearing.get.cases-by-organisation-defendant.json

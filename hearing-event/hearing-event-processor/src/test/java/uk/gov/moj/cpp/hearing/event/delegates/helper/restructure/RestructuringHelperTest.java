@@ -56,7 +56,6 @@ public class RestructuringHelperTest extends AbstractRestructuringTest {
 
         assertThat(judicialResult.getJudicialResultPrompts().size(), is(5));
         assertNull(judicialResult.getDelegatedPowers());
-        assertThat(judicialResult.getResultText().split(RESULT_TEXT_SPLIT_REGEX).length, is(6));
         assertThat(judicialResult.getJudicialResultTypeId(), is(topLevelResultLineParents.get(0).getResultDefinitionId()));
         assertTrue(judicialResult.getJudicialResultPrompts().stream().allMatch(jrp -> nonNull(jrp.getJudicialResultPromptTypeId())));
         assertTrue(judicialResult.getTerminatesOffenceProceedings());

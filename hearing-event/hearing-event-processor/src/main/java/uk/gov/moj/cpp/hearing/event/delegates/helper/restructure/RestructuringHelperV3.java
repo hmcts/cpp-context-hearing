@@ -2,11 +2,9 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
 import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
-import static java.lang.System.lineSeparator;
 import static java.util.Objects.nonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AlwaysPublishHelperV3.processAlwaysPublishResults;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.DeDupeNextHearingHelperV3.deDupNextHearing;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.DurationElementHelperV3.setDurationElements;
@@ -22,8 +20,7 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
-import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegateV3;
-import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelperV3;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
@@ -56,20 +53,23 @@ public class RestructuringHelperV3 {
 
         final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 
-        updateResultText(
-                removeNonPublishableResults(
-                        restructureNextHearing(
-                                processAlwaysPublishResults(
-                                        deDupNextHearing(
-                                                filterNodesWithRollUpPrompts(
-                                                        processPublishAsPrompt(
-                                                                removeExcludedResults(treeNodes))
+
+        removeNonPublishableResults(
+                restructureNextHearing(
+                        processAlwaysPublishResults(
+                                deDupNextHearing(
+                                        filterNodesWithRollUpPrompts(
+                                                processPublishAsPrompt(
+                                                        removeExcludedResults(
+                                                                updateResultText(treeNodes)
+                                                        )
                                                 )
                                         )
                                 )
                         )
                 )
         );
+
         setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine2>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
@@ -93,19 +93,9 @@ public class RestructuringHelperV3 {
         treeNodes.stream().filter(treeNode -> nonNull(treeNode.getJudicialResult().getNextHearing())).forEach(node -> node.getJudicialResult().setNextHearing(null));
     }
 
-    private void updateResultText(final List<TreeNode<ResultLine2>> treeNodeList) {
-        treeNodeList.forEach(treeNode -> {
-            if (nonNull(treeNode.getJudicialResult()) && isNotEmpty(treeNode.getJudicialResult().getJudicialResultPrompts())) {
-                final String sortedPrompts = treeNode.getJudicialResult().getJudicialResultPrompts()
-                        .stream()
-                        .filter(JUDICIAL_RESULT_PROMPT_PREDICATE)
-                        .map(p -> format("%s %s", p.getLabel(), p.getValue()))
-                        .collect(joining(lineSeparator()));
+    private  List<TreeNode<ResultLine2>>  updateResultText(final List<TreeNode<ResultLine2>> treeNodeList) {
 
-                final String resultText = ResultTextHelper.getResultText(treeNode.getJudicialResult().getLabel(), sortedPrompts);
-
-                treeNode.getJudicialResult().setResultText(resultText);
-            }
-        });
+        ResultTextHelperV3.setResultText(treeNodeList);
+        return treeNodeList;
     }
 }

@@ -47,6 +47,8 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Prompt;
+import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -78,6 +80,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.DraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
@@ -108,6 +111,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.io.Resources;
 import org.junit.Before;
 import org.junit.Test;
@@ -834,9 +838,17 @@ public class HearingEventListenerTest {
     @Test
     public void resultsShared_shouldPersist_with_hasSharedResults_true() {
         final ResultsShared resultsShared = resultsSharedTemplate();
+
+        UUID resultLine = randomUUID();
+        UUID promptUUID = randomUUID();
         final List<uk.gov.justice.core.courts.Target> targets = asList(targetTemplate());
+        targets.stream().findFirst().get().setResultLines(Lists.newArrayList(uk.gov.justice.core.courts.ResultLine.resultLine().withResultLineId(resultLine)
+                .withPrompts(Lists.newArrayList(uk.gov.justice.core.courts.Prompt.prompt().withId(promptUUID).withValue("200").build())).build()));
         final Target target = new Target()
-                .setId(randomUUID());
+                .setId(randomUUID())
+                .setResultLines(Sets.newHashSet(uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine.resultLine().setId(resultLine)
+                        .setPrompts(Sets.newHashSet(uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt.prompt().setId(promptUUID).setValue("400")))));
+        resultsShared.setTargets(targets);
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
         final Defendant defendant = new Defendant();
         final Set<Defendant> defendants = asSet(defendant);
@@ -853,6 +865,7 @@ public class HearingEventListenerTest {
         when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target));
         when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
                 .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
+        when(targetJPAMapper.toJPA(any(Hearing.class), any(uk.gov.justice.core.courts.Target.class))).thenReturn(target);
         when(targetJPAMapper.fromJPA(asSet(target), asSet(prosecutionCase))).thenReturn(targets);
         hearingEventListener.resultsShared(envelopeFrom(metadataWithRandomUUID("hearing.results-shared"),
                 objectToJsonObjectConverter.convert(resultsShared)
@@ -866,6 +879,15 @@ public class HearingEventListenerTest {
                 .with(Hearing::getTargets, hasSize(1))
                 .with(Hearing::getId, is(resultsShared.getHearingId()))
         );
+
+        Hearing hearingSaved = saveHearingCaptor.getValue();
+        //SNI-1450 - make sure the value is getting updated
+        assertThat(hearingSaved.getTargets().stream()
+                .findFirst().get().getResultLines()
+                .stream().findFirst()
+                .get().getPrompts()
+                .stream().findFirst()
+                .get().getValue(), is("400"));
 
         verifyNoMoreInteractions(offenceRepository);
     }

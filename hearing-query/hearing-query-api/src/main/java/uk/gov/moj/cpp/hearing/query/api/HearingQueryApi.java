@@ -372,6 +372,17 @@ public class HearingQueryApi {
         return getJsonEnvelope(envelope);
     }
 
+    @Handles("hearing.get.cases-by-person-defendant")
+    public JsonEnvelope getCasesByPersonDefendant(final JsonEnvelope query) {
+        return  this.hearingQueryView.getCasesByPersonDefendant(query);
+    }
+
+
+    @Handles("hearing.get.cases-by-organisation-defendant")
+    public JsonEnvelope getCasesByOrganisationDefendant(final JsonEnvelope query) {
+        return this.hearingQueryView.getCasesByOrganisationDefendant(query);
+    }
+
     @Handles("hearing.prosecution-case-by-hearingid")
     public JsonEnvelope getProsecutionCaseForHearing(final JsonEnvelope query) {
 

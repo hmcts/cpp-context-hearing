@@ -48,13 +48,14 @@ public class DefendantLegalAidStatusUpdateEventListener {
             LOGGER.debug("hearing.defendant-legalaid-status-updated-for-hearing event received for hearingId {}", hearingId);
         }
 
-
-        if ("NO_VALUE".equals(legalAidStatus)) {
-            defendant.setLegalaidStatus(null);
-        } else {
-            defendant.setLegalaidStatus(legalAidStatus);
+        if(defendant != null){
+            if ("NO_VALUE".equals(legalAidStatus)) {
+                defendant.setLegalaidStatus(null);
+            } else {
+                defendant.setLegalaidStatus(legalAidStatus);
+            }
+            defendantRepository.save(defendant);
         }
-        defendantRepository.save(defendant);
 
     }
 

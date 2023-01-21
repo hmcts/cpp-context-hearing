@@ -1752,4 +1752,18 @@ public class HearingAggregateTest {
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
 
     }
+
+    @Test
+    public void shouldRaiseHearingIgnoredForUpdateExistingHearingIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = UUID.randomUUID();
+        final List<UUID> shadowListedOffences = Arrays.asList(randomUUID(),  randomUUID());
+
+        final Stream<Object> stream = hearingAggregate.updateExistingHearing(hearingId, null, shadowListedOffences);
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+
+    }
 }
