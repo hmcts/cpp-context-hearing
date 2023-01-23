@@ -56,13 +56,8 @@ public class NowsReferenceCache {
         try {
             this.context.set(context);
             final Map<UUID, TreeNode<ResultDefinition>> allResultDefinitions = (Map<UUID, TreeNode<ResultDefinition>>) cache.get(new CacheKey(Type.RESULT_DEFINITIONS, referenceDate));
-            TreeNode<ResultDefinition> resultDefinitionTreeNode = allResultDefinitions.get(resultDefinitionId);
-            if (nonNull(resultDefinitionTreeNode)) {
-                LOGGER.error("resultDefinitionId: {} found in the cache for date {}", resultDefinitionTreeNode.getId(), referenceDate);
-            } else {
-                LOGGER.error("resultDefinitionId: {} NOT found in the cache for date {}", resultDefinitionId, referenceDate);
-            }
-            return resultDefinitionTreeNode;
+
+            return allResultDefinitions.get(resultDefinitionId);
         } catch (final ExecutionException executionException) {
             LOGGER.error("getResultDefinitionById reference data service not available", executionException);
             throw new RuntimeException(UNRECOVERABLE_SYSTEM_ERROR, executionException);

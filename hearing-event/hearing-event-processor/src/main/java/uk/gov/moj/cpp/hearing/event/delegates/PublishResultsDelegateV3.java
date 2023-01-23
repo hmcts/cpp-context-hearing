@@ -119,12 +119,12 @@ public class PublishResultsDelegateV3 {
     }
 
 
-    public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared) {
+    public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodes) {
 
         final StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
-        final List<TreeNode<ResultLine2>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared);
+        final List<TreeNode<ResultLine2>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared, treeNodes);
 
         mapApplicationLevelJudicialResults(resultsShared, restructuredResults);
 
@@ -160,32 +160,20 @@ public class PublishResultsDelegateV3 {
                 .setHearingDay(resultsShared.getHearingDay())
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
-        final StopWatch stopWatchSuccessEvent=new StopWatch();
-        stopWatchSuccessEvent.start();
         final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), Json.createObjectBuilder().build());
         sender.send(successEvent);
-        stopWatchSuccessEvent.stop();
-        if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("id is {} and publishing successEvent for Notification took {} milliseconds", context.metadata().id(),stopWatchSuccessEvent.getTime());
-        }
 
-        final StopWatch stopWatchResultedPublicEvent=new StopWatch();
-        stopWatchResultedPublicEvent.start();
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
         }
         sender.send(jsonEnvelope);
-        stopWatchResultedPublicEvent.stop();
-        if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("id is {} and publishing resultedPublicEvent took {} milliseconds", context.metadata().id(),stopWatchResultedPublicEvent.getTime());
-        }
 
         stopWatch.stop();
 
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("id is {} and shareResults method in the delegateV3 took {} milliseconds", context.metadata().id(),stopWatch.getTime());
+            LOGGER.error("id is {} and shareResults method in the delegateV3 took {} milliseconds", context.metadata().id(), stopWatch.getTime());
         }
 
     }
@@ -201,18 +189,16 @@ public class PublishResultsDelegateV3 {
 
 
     private String getResultValueFromPrompt(Hearing hearing, JudicialResult judicialResult, String promptRef) {
-        final Optional<JudicialResultPrompt> promptFromJudicialResult =  judicialResult.getJudicialResultPrompts().stream().filter(jrPrompt -> promptRef.equals(jrPrompt.getPromptReference()) || jrPrompt.getLabel().equals(promptRef)).findFirst();
+        final Optional<JudicialResultPrompt> promptFromJudicialResult = judicialResult.getJudicialResultPrompts().stream().filter(jrPrompt -> promptRef.equals(jrPrompt.getPromptReference()) || jrPrompt.getLabel().equals(promptRef)).findFirst();
         if (promptFromJudicialResult.isPresent()) {
             return promptFromJudicialResult.get().getValue();
-        }
-        else {
+        } else {
             final JudicialResult parentJudicialResult = getRootParentResult(hearing.getProsecutionCases(), judicialResult);
             if (parentJudicialResult != null) {
-                final Optional<JudicialResultPrompt> judicialResultPrompt =  parentJudicialResult.getJudicialResultPrompts().stream().filter(jrPrompt -> promptRef.equals(jrPrompt.getPromptReference()) || jrPrompt.getLabel().equals(promptRef)).findFirst();
+                final Optional<JudicialResultPrompt> judicialResultPrompt = parentJudicialResult.getJudicialResultPrompts().stream().filter(jrPrompt -> promptRef.equals(jrPrompt.getPromptReference()) || jrPrompt.getLabel().equals(promptRef)).findFirst();
                 if (judicialResultPrompt.isPresent()) {
                     return judicialResultPrompt.get().getValue();
-                }
-                else if (!parentJudicialResult.getJudicialResultId().equals(parentJudicialResult.getRootJudicialResultId())) {
+                } else if (!parentJudicialResult.getJudicialResultId().equals(parentJudicialResult.getRootJudicialResultId())) {
                     getResultValueFromPrompt(hearing, parentJudicialResult, promptRef);
                 }
             }
@@ -224,8 +210,7 @@ public class PublishResultsDelegateV3 {
     private JudicialResult getRootParentResult(List<ProsecutionCase> prosecutionCases, JudicialResult judicialResult) {
         if (judicialResult == null) {
             return null;
-        }
-        else {
+        } else {
             if (judicialResult.getJudicialResultId().equals(judicialResult.getRootJudicialResultId())) {
                 return judicialResult;
             }
@@ -271,7 +256,6 @@ public class PublishResultsDelegateV3 {
                     }
                 });
     }
-
 
 
     private JudicialResult createDDCHJudicialResult(final UUID hearingId, final ResultDefinition resultDefinition, Optional<LocalDate> orderedDate) {
@@ -337,7 +321,6 @@ public class PublishResultsDelegateV3 {
     }
 
 
-
     private void updateApplicationOffenceJudicialResults(List<TreeNode<ResultLine2>> results, CourtApplication courtApplication, Offence offence) {
         final List<JudicialResult> applicationOffenceJudicialResults = getApplicationOffenceJudicialResults(results, courtApplication.getId(), offence.getId());
         if (isNotEmpty(applicationOffenceJudicialResults)) {
@@ -382,17 +365,16 @@ public class PublishResultsDelegateV3 {
     }
 
 
-
     private void mapDefendantLevelJudicialResults(final ResultsSharedV3 resultsShared, final List<TreeNode<ResultLine2>> results) {
         final Stream<ProsecutionCase> prosecutionCaseStream = ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty);
         final List<DefendantJudicialResult> defendantJudicialResults = prosecutionCaseStream.flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).map(defendant -> {
-            final List<JudicialResult> judicialResults = getDefendantJudicialResults(results, defendant.getId());
-            if (isNotEmpty(judicialResults)) { //so that judicialResults doesn't have empty tag
-                setPromptsAsNullIfEmpty(judicialResults);
-                return buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults);
-            }
-            return null;
-        })
+                    final List<JudicialResult> judicialResults = getDefendantJudicialResults(results, defendant.getId());
+                    if (isNotEmpty(judicialResults)) { //so that judicialResults doesn't have empty tag
+                        setPromptsAsNullIfEmpty(judicialResults);
+                        return buildDefendantJudicialResults(defendant.getMasterDefendantId(), judicialResults);
+                    }
+                    return null;
+                })
                 .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .collect(toList());
@@ -484,7 +466,7 @@ public class PublishResultsDelegateV3 {
             for (final JudicialResult judicialResult : judicialResults) {
                 if (isEmpty(judicialResult.getJudicialResultPrompts())) {
                     judicialResult.setJudicialResultPrompts(null);
-                }else {
+                } else {
                     removeParentGuardianPromptIfFalse(judicialResult);
                 }
             }
@@ -520,7 +502,6 @@ public class PublishResultsDelegateV3 {
     }
 
 
-
     private boolean isValidToSetAcquittalDate(final Offence offence, final Set<String> guiltyPleaTypes) {
         return isNull(offence.getAquittalDate()) &&
                 isNotGuiltyPlea(offence, guiltyPleaTypes) &&
@@ -544,13 +525,13 @@ public class PublishResultsDelegateV3 {
     }
 
     private Optional<LocalDate> getMaxOrderedDate(final List<Target2> targets) {
-        if(nonNull(targets)) {
+        if (nonNull(targets)) {
             return targets.stream().filter(target -> nonNull(target.getResultLines()))
                     .flatMap(target -> target.getResultLines().stream())
                     .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .map(ResultLine2::getOrderedDate)
                     .max(Comparator.naturalOrder());
-        }else{
+        } else {
             return Optional.empty();
         }
     }

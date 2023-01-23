@@ -22,6 +22,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelperV3;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -45,11 +46,12 @@ public class RestructuringHelperV3 {
         this.resultTreeBuilder = resultTreeBuilder;
     }
 
-    public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared) {
+    public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodesResultDefinition) {
 
         final StopWatch stopWatch = new StopWatch();
+
         stopWatch.start();
-        final List<TreeNode<ResultLine2>> treeNodes = resultTreeBuilder.build(context, resultsShared);
+        final List<TreeNode<ResultLine2>> treeNodes = resultTreeBuilder.build(context, resultsShared, treeNodesResultDefinition);
 
         final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 
@@ -80,13 +82,14 @@ public class RestructuringHelperV3 {
 
         stopWatch.stop();
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("id is {} and restructure method took {} milliseconds", context.metadata().id(),stopWatch.getTime());
+            LOGGER.error("id is {} and restructure method took {} milliseconds", context.metadata().id(), stopWatch.getTime());
         }
         return treeNodes;
     }
 
     /**
      * If the results is publish for NOWs then no nextHearing object should be set
+     *
      * @param treeNodes
      */
     private void removeNextHearingObject(List<TreeNode<ResultLine2>> treeNodes) {

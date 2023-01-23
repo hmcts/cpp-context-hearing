@@ -12,7 +12,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.event.PublishResultsV3EventProcessor;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllResultDefinitions;
@@ -29,16 +28,11 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.json.JsonObject;
 
-import org.apache.commons.lang3.time.StopWatch;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @SuppressWarnings({"squid:S3358", "squid:S1612"})
 public class NowsReferenceDataLoader {
     private static final String GET_ALL_RESULT_DEFINITIONS_REQUEST_ID = "referencedata.get-all-result-definitions";
     private static final String GET_ALL_FIXED_LIST = "referencedata.get-all-fixed-list";
     private static final String ON_QUERY_PARAMETER = "on";
-    private static final Logger LOGGER = LoggerFactory.getLogger(NowsReferenceDataLoader.class.getName());
 
     @Inject
     @ServiceComponent(Component.EVENT_PROCESSOR)
@@ -61,15 +55,11 @@ public class NowsReferenceDataLoader {
 
     public Map<UUID, TreeNode<ResultDefinition>> loadAllResultDefinitionAsTree(final JsonEnvelope context, final LocalDate localDate) {
 
-        final StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
         final AllResultDefinitions allResultDefinition = getAllResultDefinition(context, localDate);
 
         final Map<UUID, TreeNode<ResultDefinition>> treeNodeMap = initialiseTree(allResultDefinition.getResultDefinitions());
-
         mapChildren(treeNodeMap);
-        stopWatch.stop();
-        LOGGER.error("loadAllResultDefinitionAsTree took {}", stopWatch.getTime());
+
         return treeNodeMap;
     }
 
@@ -111,15 +101,12 @@ public class NowsReferenceDataLoader {
     }
 
     public AllFixedList loadAllFixedList(final JsonEnvelope context, final LocalDate localDate) {
-        final StopWatch stopWatch=new StopWatch();
-        stopWatch.start();
         final String strLocalDate = localDate.toString();
         final Envelope<JsonObject> requestEnvelope = envelop(createObjectBuilder().add(ON_QUERY_PARAMETER, strLocalDate)
                 .build())
                 .withName(GET_ALL_FIXED_LIST)
                 .withMetadataFrom(context);
-        stopWatch.stop();
-        LOGGER.error("loadAllFixedList took {}",stopWatch.getTime());
+
         return requester.request(requestEnvelope, AllFixedList.class).payload();
     }
 }
