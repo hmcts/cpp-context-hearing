@@ -56,7 +56,7 @@ public class ResultTextHelperV3 {
         }
 
     }
-
+    @SuppressWarnings("PMD.NullAssignment")
     private static void setResultText(final TreeNode<ResultLine2> node) {
         node.getChildren().forEach(ResultTextHelperV3::setResultText);
         final String resultTemplate = node.getResultDefinition().getData().getResultTextTemplate();
