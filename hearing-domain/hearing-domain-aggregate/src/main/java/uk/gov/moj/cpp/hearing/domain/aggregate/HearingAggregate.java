@@ -609,19 +609,6 @@ public class HearingAggregate implements Aggregate {
         return apply(resultsSharedDelegate.saveDraftResultV2(hearingId, hearingDay, draftResult, userId));
     }
 
-
-    public Stream<Object> updateDraftResult(final UUID userId, final JsonObject draftResult, final UUID hearingId, LocalDate hearingDay) {
-        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
-            return apply(resultsSharedDelegate.hearingLocked(hearingId));
-        }
-
-        if (isSharedHearingBeingAmended() && !isSameUserWhoIsAmendingSharedHearing(userId)) {
-            return apply(resultsSharedDelegate.hearingLockedByOtherUser(hearingId));
-        }
-
-        return apply(resultsSharedDelegate.updateDraftResult(hearingId, hearingDay, draftResult, userId));
-    }
-
     public Stream<Object> deleteDraftResultV2(final UUID userId, final UUID hearingId, LocalDate hearingDay) {
 
         if (!INITIALISED.equals(this.hearingState)) {

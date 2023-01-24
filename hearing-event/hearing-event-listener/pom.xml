@@ -79,15 +79,8 @@
             <version>1.0.74</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>com.flipkart.zjsonpatch</groupId>
-            <artifactId>zjsonpatch</artifactId>
-            <version>${jsonpatch.version}</version>
-        </dependency>
 
     </dependencies>
-
-
     <build>
         <plugins>
             <!-- MI schema contract validation tests jar dependency-->

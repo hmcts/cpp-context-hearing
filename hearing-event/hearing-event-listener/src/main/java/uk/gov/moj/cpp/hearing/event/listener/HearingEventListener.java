@@ -40,7 +40,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsRejectedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
-import uk.gov.moj.cpp.hearing.domain.event.result.UpdateDraftResultSaved;
 import uk.gov.moj.cpp.hearing.mapping.ApplicationDraftResultJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.TargetJPAMapper;
@@ -78,7 +77,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.flipkart.zjsonpatch.JsonPatch;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -252,30 +250,6 @@ public class HearingEventListener {
         draftResult.setDraftResultPayload(objectMapper.valueToTree(draftResultSavedV2.getDraftResult()));
         draftResult.setAmendedByUserId(draftResultSavedV2.getAmendedByUserId());
         draftResultRepository.save(draftResult);
-    }
-
-    @Handles("hearing.update-draft-result-saved")
-    public void draftResultUpdated(final JsonEnvelope event) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.update-draft-result-saved event received {}", event.toObfuscatedDebugString());
-        }
-        final UpdateDraftResultSaved draftResultUpdated = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), UpdateDraftResultSaved.class);
-
-        final String draftResultPK = draftResultUpdated.getHearingId().toString() + draftResultUpdated.getHearingDay().toString();
-        DraftResult draftResult = draftResultRepository.findBy(draftResultPK);
-        if (nonNull(draftResult)) {
-            DraftResult newDraftResult = new DraftResult();
-            final JsonNode patchedDraftResult = JsonPatch.apply(objectMapper.valueToTree(draftResultUpdated.getDraftResult().getJsonArray("operations")), draftResult.getDraftResultPayload());
-            newDraftResult.setDraftResultId(draftResultPK);
-            newDraftResult.setHearingId(draftResultUpdated.getHearingId());
-            newDraftResult.setHearingDay(draftResultUpdated.getHearingDay().toString());
-            draftResult.setDraftResultPayload(patchedDraftResult);
-            newDraftResult.setAmendedByUserId(draftResultUpdated.getAmendedByUserId());
-            draftResultRepository.save(draftResult);
-        } else {
-            LOGGER.error("patch request failed, draftResult not found PK : {} ", draftResultPK);
-        }
-
     }
 
     @Handles("hearing.draft-result-deleted-v2")

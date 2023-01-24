@@ -38,7 +38,7 @@
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>7.0.26</stagingenforcement.version>
-        <progression.version>8.0.88</progression.version>
+        <progression.version>8.0.89</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
@@ -48,7 +48,6 @@
         <usersgroups.version>8.0.7</usersgroups.version>
         <listing.version>8.0.31</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
-        <jsonpatch.version>0.4.13</jsonpatch.version>
     </properties>
 
     <modules>
