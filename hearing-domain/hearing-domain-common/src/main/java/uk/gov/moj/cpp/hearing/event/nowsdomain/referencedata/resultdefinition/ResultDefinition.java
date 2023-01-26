@@ -95,10 +95,6 @@ public class ResultDefinition {
 
     private String dvlaCode;
 
-    private String resultTextTemplate;
-
-    private String dependantResultDefinitionGroup;
-
     public static ResultDefinition resultDefinition() {
         return new ResultDefinition();
     }
@@ -469,23 +465,5 @@ public class ResultDefinition {
 
     public void setTriggeredApplicationCode(final String triggeredApplicationCode) {
         this.triggeredApplicationCode = triggeredApplicationCode;
-    }
-
-    public String getResultTextTemplate() {
-        return resultTextTemplate;
-    }
-
-    public ResultDefinition setResultTextTemplate(final String resultTextTemplate) {
-        this.resultTextTemplate = resultTextTemplate;
-        return this;
-    }
-
-    public String getDependantResultDefinitionGroup() {
-        return dependantResultDefinitionGroup;
-    }
-
-    public ResultDefinition setDependantResultDefinitionGroup(final String dependantResultDefinitionGroup) {
-        this.dependantResultDefinitionGroup = dependantResultDefinitionGroup;
-        return this;
     }
 }
