@@ -210,10 +210,6 @@ public class ReferenceDataStub {
         stubGetReferenceDataResultDefinitionsKeywords(LocalDate.now(), "referencedata.result-word-synonyms.json");
     }
 
-    public static void stubGetReferenceDataResultDefinitionsWithResultTexts(final LocalDate orderedDate) {
-        stubGetReferenceDataResultDefinitions(orderedDate, "stub-data/result-definitions-for-resultText.json");
-    }
-
     public static void stubRelistReferenceDataResults() {
         stubGetReferenceDataResultDefinitionsWithdrawn();
         stubGetReferenceDataResultDefinitionsNextHearing();

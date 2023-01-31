@@ -79,8 +79,9 @@
             <version>1.0.74</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
+
+
     <build>
         <plugins>
             <!-- MI schema contract validation tests jar dependency-->
