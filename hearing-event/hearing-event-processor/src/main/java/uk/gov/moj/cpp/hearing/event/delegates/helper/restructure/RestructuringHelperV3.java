@@ -24,6 +24,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -41,9 +42,9 @@ public class RestructuringHelperV3 {
         this.resultTreeBuilder = resultTreeBuilder;
     }
 
+    public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodesResultDefinition) {
 
-    public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared) {
-        final List<TreeNode<ResultLine2>> treeNodes = resultTreeBuilder.build(context, resultsShared);
+        final List<TreeNode<ResultLine2>> treeNodes = resultTreeBuilder.build(context, resultsShared, treeNodesResultDefinition);
 
         final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 

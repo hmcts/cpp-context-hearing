@@ -19,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasL
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataCourtRooms;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationalUnit;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsUserRoles;
 
 import uk.gov.justice.services.test.utils.core.rest.RestClient;
@@ -60,6 +61,7 @@ public class PublishLatestCourtCentreHearingEventsViaSystemSchedulingIT extends 
         eventTime = now().withZoneSameLocal(ZoneId.of("UTC"));
         hearing = h(UseCases.initiateHearing(getRequestSpec(), initiateHearingTemplateWithParam(fromString(courtCentreId), fromString(courtRoom1Id), "CourtRoom 1", eventTime.toLocalDate(), randomUUID(), caseId, of(hearingTypeId))));
         stubGetReferenceDataCourtRooms(hearing.getHearing().getCourtCentre(), ENGLISH, ouId3, ouId4);
+        stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");
     }
 
     @Test

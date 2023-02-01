@@ -28,6 +28,7 @@ import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.START_HEA
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateWithParam;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubOrganisationalUnit;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WebDavStub.getFileForPath;
@@ -75,7 +76,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRequestToPublishCourtListOpenCaseProsecution() throws NoSuchAlgorithmException {
-
+        stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");
         createHearingEvent(randomUUID(), courtRoom2Id, randomUUID().toString(), OPEN_CASE_PROSECUTION_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId, "26");
@@ -114,6 +115,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     @Test
     public void shouldRequestToPublishCourtListDefenceCouncilOpensCase() throws NoSuchAlgorithmException {
         UUID hearingEventId = randomUUID();
+        stubOrganisationalUnit(fromString(courtCentreId_1), "OUCODE");
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom3Id, randomUUID().toString(), DEFENCE_COUNCIL_NAME_OPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_1);
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_1, "21");
 
@@ -129,6 +131,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRequestToPublishCourtList() throws NoSuchAlgorithmException {
+        stubOrganisationalUnit(fromString(courtCentreId_2), "OUCODE");
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, randomUUID().toString(), START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_2);
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_2, "28");
 
@@ -141,6 +144,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldRecordFailureIfSchemaValidationFails() throws NoSuchAlgorithmException {
+        stubOrganisationalUnit(fromString(courtCentreId_3), "OUCODE");
         createHearingEvent(randomUUID(), courtRoom5Id, randomUUID().toString(), START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_3);
 
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_3, "28");
@@ -155,6 +159,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
     @Test
     public void shouldRequestToPublishCourtListAppellantOpens() throws NoSuchAlgorithmException {
         UUID hearingEventId = randomUUID();
+        stubOrganisationalUnit(fromString(courtCentreId_4), "OUCODE");
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(hearingEventId, courtRoom4Id, randomUUID().toString(), APPELLANT_OPPENS_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId_4);
         final JsonObject publishCourtListJsonObject = buildPublishCourtListJsonString(courtCentreId_4, "20");
 
@@ -170,6 +175,7 @@ public class PublishLatestCourtCentreHearingEventsIT extends AbstractPublishLate
 
     @Test
     public void shouldGetLatestHearingEvents() throws NoSuchAlgorithmException {
+        stubOrganisationalUnit(fromString(courtCentreId), "OUCODE");
         final CommandHelpers.InitiateHearingCommandHelper hearing = createHearingEvent(randomUUID(), courtRoom1Id, randomUUID().toString(), START_HEARING_EVENT_DEFINITION_ID, eventTime, of(hearingTypeId), courtCentreId);
         final UUID expectedHearingEventId = randomUUID();
         final UUID hearingEventId = randomUUID();

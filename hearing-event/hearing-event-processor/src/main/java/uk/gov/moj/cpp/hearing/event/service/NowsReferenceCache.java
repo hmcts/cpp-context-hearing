@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.service;
 
 
+import static java.util.Objects.nonNull;
+
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.AllFixedList;
@@ -35,9 +37,9 @@ public class NowsReferenceCache {
     private NowsReferenceDataLoader nowsReferenceDataLoader;
     private final LoadingCache<CacheKey, Object> cache = CacheBuilder.newBuilder()
             .refreshAfterWrite(1, TimeUnit.DAYS)
-            .expireAfterAccess(4, TimeUnit.HOURS)
+            .expireAfterAccess(18, TimeUnit.HOURS)
             .concurrencyLevel(20)
-            .maximumSize(100)
+            .maximumSize(1000)
             .build(new CacheLoader<CacheKey, Object>() {
                 @Override
                 public Object load(final CacheKey key) {

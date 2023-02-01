@@ -63,9 +63,6 @@ import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptRefe
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.valueOf;
 import static uk.gov.moj.cpp.hearing.event.relist.metadata.NextHearingPromptReference.weekCommencing;
 
-
-import java.util.ArrayList;
-import javax.json.JsonObject;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.HearingType;
@@ -96,6 +93,7 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -105,12 +103,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings({"squid:CallToDeprecatedMethod","pmd:NullAssignment"})
+@SuppressWarnings({"squid:CallToDeprecatedMethod", "pmd:NullAssignment"})
 public class NextHearingHelperV3 {
 
     private static final String FAILED_TO_CREATE_NEXT_HEARING_MESSAGE = "Failed to create next hearing for result definition id=%s";
@@ -144,11 +143,12 @@ public class NextHearingHelperV3 {
                                                 final List<ResultLine2> resultLines,
                                                 final ResultLine2 resultLine,
                                                 final List<JudicialResultPrompt> prompts,
-                                                final ResultsSharedV3 resultSharedV3) {
+                                                final ResultsSharedV3 resultSharedV3,
+                                                final List<ResultDefinition> resultDefinitions) {
         final String resultDefinitionId = resultDefinition.getId().toString();
         if (isNextHearingResult(resultDefinitionId, resultLines) && canCreateNextHearing(prompts)) {
             LOGGER.info("Creating next hearing");
-            final NextHearing nextHearing = buildNextHearing(context, resultDefinition, resultLines, resultLine, prompts);
+            final NextHearing nextHearing = buildNextHearing(context, resultDefinition, resultLines, resultLine, prompts, resultDefinitions);
 
             if (isNull(nextHearing)) {
                 final String message = format(FAILED_TO_CREATE_NEXT_HEARING_MESSAGE, resultDefinitionId);
@@ -156,7 +156,7 @@ public class NextHearingHelperV3 {
                 throw new NextHearingCreateException(message);
             } else {
                 if (nonNull(nextHearing.getReservedJudiciary()) && nextHearing.getReservedJudiciary().equals(true)) {
-                     nextHearing.setJudiciary(resultSharedV3.getHearing().getJudiciary());
+                    nextHearing.setJudiciary(resultSharedV3.getHearing().getJudiciary());
                 }
                 return Optional.of(nextHearing);
             }
@@ -194,7 +194,8 @@ public class NextHearingHelperV3 {
                                          final ResultDefinition resultDefinition,
                                          final List<ResultLine2> resultLines,
                                          final ResultLine2 resultLine,
-                                         final List<JudicialResultPrompt> prompts) {
+                                         final List<JudicialResultPrompt> prompts,
+                                         final List<ResultDefinition> resultDefinitions) {
 
         final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap = getPromptsMap(prompts);
         final NextHearing.Builder builder = nextHearing();
@@ -202,14 +203,13 @@ public class NextHearingHelperV3 {
         final boolean isFirstReviewCO = resultDefinition.getId().equals(UUID.fromString(FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_CO));
         final boolean isFirstReviewSUSPS = resultDefinition.getId().equals(UUID.fromString(FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_SUSPS));
         final boolean isFirstReviewDRNRR = resultDefinition.getId().equals(UUID.fromString(FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_DRNRR));
-        if (isFirstReviewCO  || isFirstReviewSUSPS || isFirstReviewDRNRR) {
+        if (isFirstReviewCO || isFirstReviewSUSPS || isFirstReviewDRNRR) {
             if (resultLine.getPrompts().isEmpty()) {
                 return null;
             }
-            populateFirstReviewHearingPrompts(context, resultLines, resultLine, prompts, promptsMap, builder, courtCentreOrgOptional);
+            populateFirstReviewHearingPrompts(context, resultLines, resultLine, prompts, promptsMap, builder, courtCentreOrgOptional, resultDefinitions);
             builder.withApplicationTypeCode(resultDefinition.getTriggeredApplicationCode());
-        }
-        else {
+        } else {
             populateListedStartDateTime(builder, promptsMap, courtCentreOrgOptional);
             populateEstimatedDuration(builder, promptsMap);
             populateHearingType(builder, context, promptsMap);
@@ -232,11 +232,14 @@ public class NextHearingHelperV3 {
     }
 
     @SuppressWarnings({"squid:S3776", "squid:S1188"})
-    private void populateFirstReviewHearingPrompts(final JsonEnvelope context, final List<ResultLine2> resultLines, final ResultLine2 resultLine, final List<JudicialResultPrompt> prompts, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearing.Builder builder, final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional) {
-        final List<ResultLine2>  allResultLines = new ArrayList<>();
+    private void populateFirstReviewHearingPrompts(final JsonEnvelope context, final List<ResultLine2> resultLines, final ResultLine2 resultLine, final List<JudicialResultPrompt> prompts, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap, final NextHearing.Builder builder,
+                                                   final Optional<CourtCentreOrganisationUnit> courtCentreOrgOptional,
+                                                   final List<ResultDefinition> resultDefinitions) {
+
+        final List<ResultLine2> allResultLines = new ArrayList<>();
         getAllResultLines(resultLine, resultLines, allResultLines);
 
-        final List<ResultLine2>  allParentResultLines = new ArrayList<>();
+        final List<ResultLine2> allParentResultLines = new ArrayList<>();
         getParentResultLines(resultLine, resultLines, allParentResultLines);
         populateListedStartDateTimeReviewHearing(builder, promptsMap, courtCentreOrgOptional);
         builder.withEstimatedMinutes(hearingTypeReverseLookup.getDefaultDurationInMin(context, "Review"));
@@ -244,13 +247,17 @@ public class NextHearingHelperV3 {
         builder.withType(hearingTypeReverseLookup.getHearingTypeByName(context, "Review"));
 
         allResultLines.forEach(lineId -> {
-            final ResultDefinition resultDefinition1 =  this.referenceDataService.getResultDefinitionById(context, lineId.getOrderedDate(), lineId.getResultDefinitionId());
-            if (nonNull(resultDefinition1.getShortCode()) && "STIMP,CO,SUSPS".toLowerCase().contains(resultDefinition1.getShortCode().toLowerCase())) {
+            final ResultDefinition resultDefinition1 = resultDefinitions.stream()
+                    .filter(rd -> rd.getId().equals(lineId.getResultDefinitionId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (nonNull(resultDefinition1) && nonNull(resultDefinition1.getShortCode()) && "STIMP,CO,SUSPS".toLowerCase().contains(resultDefinition1.getShortCode().toLowerCase())) {
                 final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition1, lineId.getPrompts());
                 final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(judicialResultPrompts);
                 populateProbationTeam(builder, parentPromptsMap);
 
-                if(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE.equalsIgnoreCase(resultDefinition1.getShortCode())){
+                if (TOTAL_CUSTODIAL_PERIOD_SHORT_CODE.equalsIgnoreCase(resultDefinition1.getShortCode())) {
                     populateTotalCustodialPeriod(builder, parentPromptsMap);
                     populateSuspendedPeriod(builder, parentPromptsMap);
                 }
@@ -258,8 +265,13 @@ public class NextHearingHelperV3 {
         });
         allParentResultLines.forEach(lineId -> {
             final ResultLine2 resultLine3 = resultLines.stream().filter(resultLine2 -> resultLine2.getResultLineId().equals(lineId.getResultLineId())).findFirst().get();
-            final ResultDefinition parentResultDefinition = this.referenceDataService.getResultDefinitionById(context, resultLine3.getOrderedDate(), resultLine3.getResultDefinitionId());
-            if (parentResultDefinition.getShortCode().equalsIgnoreCase(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE)) {
+            final ResultDefinition parentResultDefinition = resultDefinitions.stream()
+                    .filter(rd -> rd.getId().equals(lineId.getResultDefinitionId()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (nonNull(parentResultDefinition) && nonNull(parentResultDefinition.getShortCode()) && (parentResultDefinition.getShortCode().equalsIgnoreCase(TOTAL_CUSTODIAL_PERIOD_SHORT_CODE)))
+            {
                 final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(parentResultDefinition, resultLine3.getPrompts());
                 final Map<NextHearingPromptReference, JudicialResultPrompt> parentPromptsMap = getPromptsMap(judicialResultPrompts);
                 populateTotalCustodialPeriod(builder, parentPromptsMap);
@@ -289,7 +301,7 @@ public class NextHearingHelperV3 {
             resultLine.getParentResultLineIds().forEach(lineId -> {
                 LOGGER.info("parent result line id :  {}", lineId);
                 final Optional<ResultLine2> optionalResultLine2 = resultLines.stream().filter(resultLine2 -> resultLine2.getResultLineId().equals(lineId)).findFirst();
-                if (optionalResultLine2.isPresent() &&   optionalResultLine2.get() != null) {
+                if (optionalResultLine2.isPresent() && optionalResultLine2.get() != null) {
                     getParentResultLines(optionalResultLine2.get(), resultLines, allParentResultLines);
                 }
             });
@@ -298,7 +310,7 @@ public class NextHearingHelperV3 {
     }
 
     private void getAllResultLines(final ResultLine2 resultLine, final List<ResultLine2> resultLines, final List<ResultLine2> allParentResultLines) {
-        if (nonNull(resultLine)){
+        if (nonNull(resultLine)) {
             allParentResultLines.add(resultLine);
         }
         allParentResultLines.addAll(resultLines);
@@ -395,7 +407,7 @@ public class NextHearingHelperV3 {
         LOGGER.info("Populating estimated duration minutes: {}", estimatedMinutes);
         builder.withEstimatedMinutes(estimatedMinutes);
 
-        if(firstEstimatedDuration.isPresent()){
+        if (firstEstimatedDuration.isPresent()) {
             final String estimatedDuration = firstEstimatedDuration.get();
             LOGGER.info("Populating estimated duration: {}", estimatedDuration);
             builder.withEstimatedDuration(estimatedDuration);
@@ -411,7 +423,7 @@ public class NextHearingHelperV3 {
     private void populateHmiSlots(final NextHearing.Builder builder, final Map<NextHearingPromptReference, JudicialResultPrompt> promptsMap) {
         final String promptValue = getPromptValue(promptsMap, hmiSlots);
         LOGGER.info("Populating booking reference: {}", promptValue);
-        if(nonNull(promptValue)) {
+        if (nonNull(promptValue)) {
             final JsonObject jsonObject = stringToJsonObjectConverter.convert(promptValue);
             final List<RotaSlot> hmiSlots = new ArrayList<>();
             jsonObject.getJsonArray("hmiSlots").forEach(jsonValue -> hmiSlots.add(jsonObjectToObjectConverter.convert(((JsonObject) jsonValue), RotaSlot.class)));
@@ -429,7 +441,7 @@ public class NextHearingHelperV3 {
         final String promptValue = getPromptValue(promptsMap, reservedJudiciary);
         if (nonNull(promptValue)) {
             final String reservedJuddiciary = getPromptValue(promptsMap, judgeReservesReviewHearing);
-            builder.withReservedJudiciary(nonNull(reservedJuddiciary) ? Boolean.valueOf(promptValue): null);
+            builder.withReservedJudiciary(nonNull(reservedJuddiciary) ? Boolean.valueOf(promptValue) : null);
         }
     }
 
@@ -582,8 +594,7 @@ public class NextHearingHelperV3 {
         final boolean isFirstReviewHearingSUSPS = FIRST_REVIEW_HEARING_RESULT_DEFINITION_ID_SUSPS.equals(resultDefinitionId);
         if (isFirstReviewHearingCO || isFirstReviewHearingDRNRR || isFirstReviewHearingSUSPS) {
             return isFirstReviewApplicable(resultLines, isFirstReviewHearingCO, isFirstReviewHearingDRNRR, isFirstReviewHearingSUSPS);
-        }
-        else {
+        } else {
             return CROWN_COURT_RESULT_DEFINITION_ID.equals(resultDefinitionId)
                     || MAGISTRATE_RESULT_DEFINITION_ID.equals(resultDefinitionId);
         }
@@ -596,15 +607,15 @@ public class NextHearingHelperV3 {
         final boolean isCommunityOrder = isCommunityOrder(resultDefinitionIds, isDrugRehab);
 
         final boolean isFirstHearingCO_SUSPS = isFirstReviewHearingCO || isFirstReviewHearingSUSPS;
-        return  ((isFirstHearingCO_SUSPS || isFirstReviewHearingDRNRR) && (isSuspendedOrder || isCommunityOrder));
+        return ((isFirstHearingCO_SUSPS || isFirstReviewHearingDRNRR) && (isSuspendedOrder || isCommunityOrder));
     }
 
-    private static boolean isDrugRehab(final List<UUID> resultDefinitionIds){
+    private static boolean isDrugRehab(final List<UUID> resultDefinitionIds) {
         return resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_NON_RESIDENTIAL_WITH_REVIEW)) ||
                 resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_RESIDENTIAL_WITH_REVIEW));
     }
 
-    private static boolean isCommunityOrder(final List<UUID> resultDefinitionIds, final boolean isDrugRehab){
+    private static boolean isCommunityOrder(final List<UUID> resultDefinitionIds, final boolean isDrugRehab) {
         return resultDefinitionIds.contains(UUID.fromString(COMMUNITY_ORDER)) && (isDrugRehab || (resultDefinitionIds.contains(UUID.fromString(COMMUNITY_REQUIREMENT))
                 && !(resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_NON_RESIDENTIAL_WITH_REVIEW))
                 || resultDefinitionIds.contains(UUID.fromString(DRUG_REHABILITATION_RESIDENTIAL_WITH_REVIEW)))));

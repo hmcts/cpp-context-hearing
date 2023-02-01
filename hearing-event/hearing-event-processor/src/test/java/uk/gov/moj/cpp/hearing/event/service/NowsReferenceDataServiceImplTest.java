@@ -109,10 +109,23 @@ public class NowsReferenceDataServiceImplTest {
     @Test
     public void shouldGetLocalJusticeAreaDetails() {
         final UUID courtCentreId = randomUUID();
-        final LjaDetails ljaDetails = new LjaDetails("ljaCode", "ljaName", "welshLjaName");
-        when(ljaReferenceDataLoader.getLjaDetails(jsonEnvelope, courtCentreId)).thenReturn(ljaDetails);
+        final OrganisationalUnit organisationalUnit=OrganisationalUnit.organisationalUnit()
+                .withOucode("123ABCD")
+                .withIsWelsh(true)
+                .withOucodeL3WelshName("Welsh Court Centre")
+                .withWelshAddress1("Welsh 1")
+                .withWelshAddress2("Welsh 2")
+                .withWelshAddress3("Welsh 3")
+                .withWelshAddress4("Welsh 4")
+                .withWelshAddress5("Welsh 5")
+                .withPostcode("LL55 2DF")
+                .build();
 
-        final LjaDetails actualLjaDetails = nowsReferenceDataService.getLjaDetails(jsonEnvelope, courtCentreId);
+        final LjaDetails ljaDetails = new LjaDetails(organisationalUnit.getLja(), organisationalUnit.getOucodeL3Name(), organisationalUnit.getOucodeL3WelshName());
+
+        when(ljaReferenceDataLoader.getLjaDetails(jsonEnvelope, courtCentreId,organisationalUnit)).thenReturn(ljaDetails);
+
+        final LjaDetails actualLjaDetails = nowsReferenceDataService.getLjaDetails(jsonEnvelope, courtCentreId, organisationalUnit);
 
         assertThat(actualLjaDetails, is(ljaDetails));
     }
