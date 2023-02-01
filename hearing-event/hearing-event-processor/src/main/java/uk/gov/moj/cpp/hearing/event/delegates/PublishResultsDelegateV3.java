@@ -64,7 +64,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
-import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.apache.commons.lang3.time.StopWatch;
@@ -118,7 +117,6 @@ public class PublishResultsDelegateV3 {
         this.offenceHelper = offenceHelper;
     }
 
-
     public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodes) {
 
         final StopWatch stopWatch = new StopWatch();
@@ -159,9 +157,6 @@ public class PublishResultsDelegateV3 {
                 .setSharedTime(resultsShared.getSharedTime())
                 .setHearingDay(resultsShared.getHearingDay())
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
-
-        final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), Json.createObjectBuilder().build());
-        sender.send(successEvent);
 
         final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);

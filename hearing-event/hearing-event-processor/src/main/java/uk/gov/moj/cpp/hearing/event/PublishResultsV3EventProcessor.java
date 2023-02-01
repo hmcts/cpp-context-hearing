@@ -6,10 +6,13 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
+import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.Address.address;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
@@ -173,12 +176,18 @@ public class PublishResultsV3EventProcessor {
         if (LOGGER.isErrorEnabled()) {
             LOGGER.error("id is {} and resultShared method in the processor took {} milliseconds", event.metadata().id(), stopWatch.getTime());
         }
+    }
 
+    @Handles("hearing.events.results-shared-success")
+    public void resultsSharedSuccess(final JsonEnvelope event) {
+        final JsonEnvelope successEvent = envelopeFrom(metadataFrom(event.metadata()).withName("public.events.hearing.hearing-resulted-success"),
+                event.payloadAsJsonObject());
+        sender.send(successEvent);
     }
 
     public void updateTheDefendantsCase(final JsonEnvelope event, final UUID hearingId, final UUID caseId, final UUID defendantId, final List<UUID> offenceIds, final Map<UUID, OffenceResult> offenceResultMap) {
 
-        final JsonObject payload = Json.createObjectBuilder()
+        final JsonObject payload = createObjectBuilder()
                 .add("hearingId", hearingId.toString())
                 .add("caseId", caseId.toString())
                 .add("defendantId", defendantId.toString())
@@ -200,7 +209,7 @@ public class PublishResultsV3EventProcessor {
     private JsonArrayBuilder convertOffenceResultMapToJsonArray(final Map<UUID, OffenceResult> offenceResultMap) {
         final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
         offenceResultMap.entrySet().stream().forEach(offenceResult -> {
-            final JsonObject offenceResultObject = Json.createObjectBuilder()
+            final JsonObject offenceResultObject = createObjectBuilder()
                     .add("offenceId", offenceResult.getKey().toString())
                     .add("offenceResult", offenceResult.getValue().name())
                     .build();
