@@ -1,7 +1,9 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
+import java.time.LocalDate;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
@@ -15,6 +17,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.NEXT_HEARING_IN_CROWN_COURT_ID;
@@ -26,8 +30,10 @@ public class DeDupeNextHearingHelperTest extends AbstractRestructuringTest {
 
     @Before
     public void setUp() throws IOException {
+        ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
+        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
         super.setUp();
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
     }
 
     @Test

@@ -37,6 +37,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.JudicialResultPromptDuratio
 import uk.gov.moj.cpp.hearing.event.delegates.helper.NextHearingHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultLineHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.SecondaryCJSCode;
@@ -59,12 +60,14 @@ public class ResultTreeBuilder {
     private final ReferenceDataService referenceDataService;
     private final NextHearingHelper nextHearingHelper;
     private final ResultLineHelper resultLineHelper;
+    private ResultTextConfHelper resultTextConfHelper;
 
     @Inject
-    public ResultTreeBuilder(final ReferenceDataService referenceDataService, final NextHearingHelper nextHearingHelper, final ResultLineHelper resultLineHelper) {
+    public ResultTreeBuilder(final ReferenceDataService referenceDataService, final NextHearingHelper nextHearingHelper, final ResultLineHelper resultLineHelper, final ResultTextConfHelper resultTextConfHelper) {
         this.referenceDataService = referenceDataService;
         this.nextHearingHelper = nextHearingHelper;
         this.resultLineHelper = resultLineHelper;
+        this.resultTextConfHelper = resultTextConfHelper;
     }
 
     public List<TreeNode<ResultLine>> build(final JsonEnvelope envelope, final ResultsShared resultsShared) {
@@ -80,6 +83,13 @@ public class ResultTreeBuilder {
 
     private List<TreeNode<ResultLine>> orderResult(final Map<UUID, TreeNode<ResultLine>> resultLinesMap) {
         final List<TreeNode<ResultLine>> orderedInputList =  new ArrayList(resultLinesMap.values());
+        if(orderedInputList.stream()
+                .map(TreeNode::getJudicialResult)
+                .map(JudicialResult::getOrderedDate)
+                .anyMatch(resultTextConfHelper::isOldResultDefinition)){
+            return orderedInputList;
+        }
+
         orderedInputList.sort(Comparator.comparing(o -> o.getResultDefinition().getData().getShortCode()));
 
         final List<TreeNode<ResultLine>> parents = orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
@@ -232,7 +242,7 @@ public class ResultTreeBuilder {
     }
 
     private Builder getJudicialBuilder(final ResultLine resultLine, final Hearing hearing, final DelegatedPowers courtClerk, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus, final ResultDefinition resultDefinition) {
-        return judicialResult()
+        final JudicialResult.Builder judicialResult = judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
                 .withAmendmentDate(resultLine.getAmendmentDate())
@@ -274,6 +284,10 @@ public class ResultTreeBuilder {
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel());
+        if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
+            judicialResult.withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine));
+        }
+        return judicialResult;
     }
 
     private void checkResultDefinition(final ResultLine resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {

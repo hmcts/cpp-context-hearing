@@ -1,21 +1,37 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static java.lang.Boolean.TRUE;
+import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsLast;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.convertBooleanPromptValue;
 
+
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Predicate;
+import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 @SuppressWarnings({"squid:S1612"})
 public class ResultTextHelper {
 
+    public static final Predicate<Prompt> PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptRef());
     public static final String CHAR_DASH = " - ";
     public static final String CHAR_EMPTY = "";
 
@@ -23,24 +39,28 @@ public class ResultTextHelper {
         //required by sonar
     }
 
-    public static void setResultText(final List<TreeNode<ResultLine>> treeNodeList){
+    public static void setResultText(final List<TreeNode<ResultLine>> treeNodeList, final ResultTextConfHelper resultTextConfHelper){
 
 
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !resultTextConfHelper.isOldResultDefinition(node.getJudicialResult().getOrderedDate()))
                 .forEach(ResultTextHelper::setResultText);
 
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !resultTextConfHelper.isOldResultDefinition(node.getJudicialResult().getOrderedDate()))
                 .forEach(ResultTextHelper::updateResultTextForAlwaysPublished);
 
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
                 .filter(node ->!ofNullable(node.getJudicialResult().getAlwaysPublished()).orElse(false))
+                .filter(node -> !resultTextConfHelper.isOldResultDefinition(node.getJudicialResult().getOrderedDate()))
                 .forEach(node -> updateResultTextTop(node, node.getResultDefinition().getData().getShortCode() + CHAR_DASH + node.getJudicialResult().getLabel()));
 
         treeNodeList.stream()
                 .filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !resultTextConfHelper.isOldResultDefinition(node.getJudicialResult().getOrderedDate()))
                 .forEach(ResultTextHelper::setEmptyResultText);
     }
 
@@ -77,17 +97,49 @@ public class ResultTextHelper {
         );
     }
 
-    private static String getGroupResultText(final TreeNode<ResultLine> node, final String dependantResultDefinitionGroup){
-        if(isEmpty(node.getChildren())){
-            if(dependantResultDefinitionGroup.equals(node.getResultDefinition().getData().getDependantResultDefinitionGroup())){
-                return node.getJudicialResult().getResultText();
-            }else{
-                return "";
-            }
-        }else{
-            return node.getChildren().stream().map( n -> ResultTextHelper.getGroupResultText(n, dependantResultDefinitionGroup))
-                    .filter(StringUtils::isNoneEmpty)
-                    .collect(Collectors.joining(lineSeparator()));
-        }
+    public static String getResultText(final ResultDefinition resultDefinition, final ResultLine resultLine) {
+
+        final List<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> referencePromptList = resultDefinition
+                .getPrompts()
+                .stream()
+                .filter(p -> !TRUE.equals(p.isHidden()))
+                .sorted(comparing(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt::getSequence, nullsLast(naturalOrder())))
+                .filter(Objects::nonNull)
+                .collect(toList());
+
+        final List<UUID> referenceList = referencePromptList
+                .stream()
+                .map(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt::getId)
+                .collect(toList());
+
+        final List<uk.gov.justice.core.courts.Prompt> sortedPromptList = resultLine
+                .getPrompts()
+                .stream()
+                .filter(p -> referenceList.contains(p.getId()))
+                .sorted(new UUIDComparator(referenceList))
+                .collect(toList());
+
+        final String sortedPrompts = sortedPromptList
+                .stream()
+                .filter(PROMPT_PREDICATE)
+                .map(p -> format("%s %s", p.getLabel(), getPromptValue(p, referencePromptList)))
+                .collect(joining(lineSeparator()));
+
+        return getResultText(resultDefinition.getLabel(), sortedPrompts);
     }
+
+    public static String getResultText(final String label, final String sortedPrompts){
+        return format("%s%s%s", label, lineSeparator(), sortedPrompts);
+    }
+
+    private static String getPromptValue(final uk.gov.justice.core.courts.Prompt prompt, final List<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> referencePromptList) {
+        final Optional<uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt> optionalPrompt = referencePromptList.stream().filter(p -> p.getId().equals(prompt.getId())).findFirst();
+        final String originalValue = prompt.getValue();
+
+        if (optionalPrompt.isPresent() && "BOOLEAN".equalsIgnoreCase(optionalPrompt.get().getType())) {
+            return convertBooleanPromptValue(originalValue);
+        }
+        return originalValue;
+    }
+
 }

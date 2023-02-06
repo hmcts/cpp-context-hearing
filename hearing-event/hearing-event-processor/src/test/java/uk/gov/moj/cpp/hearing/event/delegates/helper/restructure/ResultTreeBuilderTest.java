@@ -9,6 +9,8 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
@@ -21,6 +23,9 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
 
+
+import java.time.LocalDate;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.SecondaryCJSCode;
@@ -43,8 +48,10 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Before
     public void setUp() throws IOException {
+        ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
+        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
         super.setUp();
-        target = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
+        target = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
         resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
                 REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
                         REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||

@@ -2,9 +2,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
-import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.core.courts.JudicialResultPrompt.judicialResultPrompt;
 
@@ -15,9 +13,11 @@ import java.util.UUID;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine2;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -33,6 +33,9 @@ public class ResultTextHelperV3Test {
     public static final String TEXT_FOR_RESULT_LABEL = "Vehicle {makeOfVehicle} %ResultLabel%.";
     public static final String TEXT_FOR_ALL_PROMPTS = "Vehicle  %Prompts%.";
 
+
+    @Mock
+    private ResultTextConfHelper resultTextConfHelper;
 
     @Test
     public void shouldNotSetResultTextPrefixWhenResultTextDoesNotExist(){
@@ -65,7 +68,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).setResultDefinition(new TreeNode<>(randomUUID(), ResultDefinition.resultDefinition().setShortCode("NEXT")));
 
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXT - Label"));
 
@@ -105,7 +108,7 @@ public class ResultTextHelperV3Test {
                 .setResultTextTemplate("Exclusion Requirement: Not to enter {placeArea} between {fromDate} and {untilDate}. This exclusion requirement lasts until {endDateOfExclusion}. {additionalInformation}")));
 
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXT - LABEL\nExclusion Requirement: Not to enter area1 between 01-01-2012 and 01-01-2013. This exclusion requirement lasts until 01-01-2014. text prompt"));
     }
@@ -115,7 +118,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForPromptDirectiveWithBooleanValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null, null);
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nVehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
     }
@@ -125,7 +128,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForPromptDirectiveWithEmptySomeValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", null, null, null, null);
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nVehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
     }
@@ -134,7 +137,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForPromptDirectiveWithEmptyValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null, null);
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nVehicle  for which clamping order made on not to be sold. ."));
     }
@@ -143,7 +146,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForNameAddressForOrganisation(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForNameAddress("Organisation Name", null, null, null, "");
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXB - Label\nTo pay costs to Organisation Name, Address 1, Address 2, Address 3, Address 4, Address 5, E14 9YZ"));
     }
@@ -152,7 +155,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForNameAddressForIndividual(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForNameAddress(null, "first name", "middle name", "last name", "");
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXB - Label\nTo pay costs to first name middle name last name, Address 1, Address 2, Address 3, Address 4, Address 5, E14 9YZ"));
     }
@@ -161,7 +164,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForNameAddressWithEmptyValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForNameAddress(null, null, null, null, "~Name");
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXB - Label\nTo pay costs to "));
     }
@@ -170,7 +173,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForNameAddressForOrganisationWithOnlyName(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name");
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXB - Label\nTo pay costs to Organisation Name"));
     }
@@ -180,7 +183,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForNameAddressForIndividualWithOnlyName(){
         final List<TreeNode<ResultLine2>> treeNodeList = getTreeNodesForNameAddress(null, "first name", "middle name", "last name", "~Name");
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXB - Label\nTo pay costs to first name middle name last name"));
     }
@@ -193,7 +196,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to Organisation Name"));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
@@ -208,7 +211,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress(null, null, null, null, "~Name"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, "No", null, null,  null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to "));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle  for which clamping order made on not to be sold. ."));
@@ -222,7 +225,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
 
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nClamping order made for vehicle make Of Vehicle vehicle Registration Value and vehicle make Of Second Vehicle vehicle Registration Of Second Vehicle to take effect on. Reasons: guilty."));
     }
@@ -231,7 +234,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextForConditionalPromptsWithoutValues(){
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", null, null, "guilty"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nClamping order made for vehicle make Of Vehicle vehicle Registration Value  to take effect on. Reasons: guilty."));
     }
@@ -242,7 +245,7 @@ public class ResultTextHelperV3Test {
 
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("SCode - Label\nresult Text with Clamping order made for vehicle make Of Vehicle vehicle Registration Value and vehicle make Of Second Vehicle vehicle Registration Of Second Vehicle to take effect on. Reasons: guilty. get"));
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("Clamping order made for vehicle make Of Vehicle vehicle Registration Value and vehicle make Of Second Vehicle vehicle Registration Of Second Vehicle to take effect on. Reasons: guilty."));
@@ -254,7 +257,7 @@ public class ResultTextHelperV3Test {
 
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(null, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("SCode - Label\nresult Text with  get"));
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label"));
@@ -266,7 +269,7 @@ public class ResultTextHelperV3Test {
 
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(null, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("SCode - Label\nresult Text  get"));
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label"));
@@ -278,7 +281,7 @@ public class ResultTextHelperV3Test {
 
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_CONDITIONAL_WITH_ALL_EMPTY, null, null, null, null, null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("Clamping order made for vehicle   to take effect on. "));
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("SCode - Label\nresult Text with Clamping order made for vehicle   to take effect on.  get"));
@@ -292,7 +295,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to Organisation Name"));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
@@ -307,7 +310,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress("Organisation Name", null, null, null, "~Name"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to Organisation Name"));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle  for which clamping order made on not to be sold. ."));
@@ -322,7 +325,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForNameAddress(null, null, null, null, "~Name"));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to "));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle  for which clamping order made on not to be sold. ."));
@@ -338,7 +341,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS, "make Of Vehicle", "No", null, null,  null));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirectiveWithAlwaysPublished(TEXT_FOR_PROMPTS, "make Of Vehicle", "No"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to Organisation Name"));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle make Of Vehicle vehicle Registration Value for which clamping order made on 01-01-2012 not to be sold.  Vehicle to be released forthwith, without payment of any charges due."));
@@ -355,7 +358,7 @@ public class ResultTextHelperV3Test {
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirective(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null, null, null,  null));
         treeNodeList.get(0).addChildren(getTreeNodesForPromptDirectiveWithAlwaysPublished(TEXT_FOR_PROMPTS_WITH_ALL_EMPTY, null, null));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("To pay costs to "));
         assertThat(treeNodeList.get(0).getChildren().get(1).getJudicialResult().getResultText(), CoreMatchers.is ("Vehicle  for which clamping order made on not to be sold. ."));
@@ -368,7 +371,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextWithResultLabel(){
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_RESULT_LABEL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nVehicle make Of Vehicle Result Label."));
     }
@@ -377,7 +380,7 @@ public class ResultTextHelperV3Test {
     public void shouldSetResultTextWithAllNoneNullPrompts(){
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_ALL_PROMPTS, "value1", "No", null, null, "guilty"));
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nVehicle  Make of vehicle: value1, Vehicle registration: vehicle Registration Value, Clamping order made on: 01-01-2012, Vehicle to be released forthwith, without payment of any charges due, Additional information: text prompt, Reasons: guilty."));
     }
@@ -387,7 +390,7 @@ public class ResultTextHelperV3Test {
         final List<TreeNode<ResultLine2>> treeNodeList = singletonList(getTreeNode(TEXT_FOR_CONDITIONAL, "make Of Vehicle", "No", "make Of Second Vehicle", "vehicle Registration Of Second Vehicle", "guilty"));
         treeNodeList.get(0).addChildren(getTreeNodesWithoutResultTextTemplate());
 
-        ResultTextHelperV3.setResultText(treeNodeList);
+        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
 
         assertThat(treeNodeList.get(0).getChildren().get(0).getJudicialResult().getResultText(), CoreMatchers.is ("SCode - Label"));
         assertThat(treeNodeList.get(0).getJudicialResult().getResultText(), CoreMatchers.is ("NEXH - Result Label\nClamping order made for vehicle make Of Vehicle vehicle Registration Value and vehicle make Of Second Vehicle vehicle Registration Of Second Vehicle to take effect on. Reasons: guilty."));

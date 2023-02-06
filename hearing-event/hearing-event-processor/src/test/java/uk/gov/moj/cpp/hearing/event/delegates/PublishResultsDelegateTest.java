@@ -34,6 +34,8 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 
+import java.time.LocalDate;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.CourtCentre;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantJudicialResult;
@@ -55,6 +57,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilder;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
@@ -97,11 +100,14 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Captor
     private ArgumentCaptor<Hearing> custodyLimitCalculatorHearingIn;
 
-    @Spy
-    private ResultTreeBuilder resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
+    @Mock
+    protected ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
 
     @Spy
-    private RestructuringHelper restructringHelper = new RestructuringHelper(resultTreeBuilder);
+    private ResultTreeBuilder resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
+
+    @Spy
+    private RestructuringHelper restructringHelper = new RestructuringHelper(resultTreeBuilder, resultTextConfHelper);
 
     @Mock
     private OffenceHelper offenceHelper;
@@ -111,6 +117,7 @@ public class PublishResultsDelegateTest extends AbstractRestructuringTest {
     @Before
     public void setUp() throws IOException {
         super.setUp();
+        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
 
         target = new PublishResultsDelegate(enveloper,
                 objectToJsonObjectConverter,
