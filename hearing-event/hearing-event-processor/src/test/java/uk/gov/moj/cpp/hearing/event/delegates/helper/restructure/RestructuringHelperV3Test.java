@@ -8,6 +8,9 @@ import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
+
+import java.time.LocalDate;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -34,9 +37,11 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
 
     @Before
     public void setUp() throws IOException {
+        ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
+        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
         super.setUp();
-        resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3);
-        target = new RestructuringHelperV3(resultTreeBuilder);
+        resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3, resultTextConfHelper);
+        target = new RestructuringHelperV3(resultTreeBuilder, resultTextConfHelper);
     }
 
 

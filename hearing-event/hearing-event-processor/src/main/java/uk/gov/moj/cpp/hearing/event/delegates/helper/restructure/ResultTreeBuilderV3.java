@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
@@ -59,20 +60,24 @@ public class ResultTreeBuilderV3 {
     private final ReferenceDataService referenceDataService;
     private final NextHearingHelperV3 nextHearingHelper;
     private final ResultLineHelperV3 resultLineHelper;
+    private ResultTextConfHelper resultTextConfHelper;
+
 
     @Inject
-    public ResultTreeBuilderV3(final ReferenceDataService referenceDataService, final NextHearingHelperV3 nextHearingHelper, final ResultLineHelperV3 resultLineHelper) {
+    public ResultTreeBuilderV3(final ReferenceDataService referenceDataService, final NextHearingHelperV3 nextHearingHelper, final ResultLineHelperV3 resultLineHelper, final ResultTextConfHelper resultTextConfHelper) {
         this.referenceDataService = referenceDataService;
         this.nextHearingHelper = nextHearingHelper;
         this.resultLineHelper = resultLineHelper;
+        this.resultTextConfHelper = resultTextConfHelper;
     }
 
     public List<TreeNode<ResultLine2>> build(final JsonEnvelope envelope, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> resultDefinitionTreeNods ) {
         final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared,resultDefinitionTreeNods);
-        return new ArrayList<>(mapTreeNodeRelations(resultLinesMap).values());
+        final Map<UUID, TreeNode<ResultLine2>> resultLinesMapWithRelations = mapTreeNodeRelations(resultLinesMap);
+        return new ArrayList<>(orderResult(resultLinesMapWithRelations));
     }
 
-       private Map<UUID, TreeNode<ResultLine2>> mapTreeNodeRelations(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap) {
+    private Map<UUID, TreeNode<ResultLine2>> mapTreeNodeRelations(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap) {
         resultLinesMap.values().forEach(treeNode -> {
             final ResultLine2 resultLine = treeNode.getData();
             final TreeNode<ResultLine2> parentTreeNode = resultLinesMap.get(treeNode.getId());
@@ -158,7 +163,7 @@ public class ResultTreeBuilderV3 {
 
 
     private Builder getJudicialBuilder(final ResultLine2 resultLine, final Hearing hearing, final DelegatedPowers courtClerk, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus, final ResultDefinition resultDefinition) {
-        return judicialResult()
+        final JudicialResult.Builder judicialResult =  judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
                 .withAmendmentDate(nonNull(resultLine.getAmendmentDate())?resultLine.getAmendmentDate().toLocalDate():null)
@@ -184,7 +189,6 @@ public class ResultTreeBuilderV3 {
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withPostHearingCustodyStatus(resultDefinition.getPostHearingCustodyStatus())
-                .withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine))
                 .withLifeDuration(getBooleanValue(resultDefinition.getLifeDuration(), false))
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
                 .withTerminatesOffenceProceedings(getBooleanValue(resultDefinition.getTerminatesOffenceProceedings(), false))
@@ -201,6 +205,10 @@ public class ResultTreeBuilderV3 {
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel());
+        if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
+            judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
+        }
+        return judicialResult;
     }
 
     private void checkResultDefinition(final ResultLine2 resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {
@@ -321,4 +329,40 @@ public class ResultTreeBuilderV3 {
         }
         return secondaryCJSCodeList;
     }
+
+    private List<TreeNode<ResultLine2>> orderResult(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap){
+        final List<TreeNode<ResultLine2>> orderedInputList = new ArrayList(resultLinesMap.values());
+        if(resultTextConfHelper.isOldResultDefinitionV2(orderedInputList)){
+            return orderedInputList;
+        }
+        orderedInputList.sort(Comparator.comparing(o -> o.getResultDefinition().getData().getShortCode()));
+
+        final List<TreeNode<ResultLine2>> parents = orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList());
+        final Set<UUID> parentIds = parents.stream().map(TreeNode::getId).collect(Collectors.toSet());
+        final List<TreeNode<ResultLine2>> orderedResults = parents.stream()
+                .map(parent -> orderedInputList.stream()
+                        .filter(result -> !parentIds.contains(result.getId()))
+                        .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
+                        .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
+                        .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                        .collect(Collectors.collectingAndThen(toList(), list -> {
+                            list.add(0, parent);
+                            return list;
+                        })))
+                .flatMap(Collection::stream).collect(toList());
+
+        orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList())
+                .forEach(orderedResults::add);
+
+        orderedInputList.stream()
+                .filter(result -> orderedResults.stream().noneMatch(res -> res.getId().equals(result.getId())))
+                .forEach(orderedResults::add);
+
+        return orderedResults;
+    }
+
 }
