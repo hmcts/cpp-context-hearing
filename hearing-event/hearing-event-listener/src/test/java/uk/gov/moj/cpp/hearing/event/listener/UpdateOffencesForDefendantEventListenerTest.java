@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
@@ -16,6 +17,7 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -239,6 +241,33 @@ public class UpdateOffencesForDefendantEventListenerTest {
         assertThat(offenceUpdated.getOffence().getProceedingsConcluded(), nullValue());
         assertThat(offenceUpdated.getOffence().getIntroducedAfterInitialProceedings(), is(nullValue()));
         assertThat(offenceUpdated.getOffence().getIsDiscontinued(), is(nullValue()));
+    }
+
+    @Test
+    public void testUpdateOffenceWhenDefendantNotPresentForCombinationOfHearingIdAndDefendantId() {
+
+        final OffenceUpdated offenceUpdated = OffenceUpdated.offenceUpdated()
+                .withHearingId(randomUUID())
+                .withDefendantId(randomUUID())
+                .withOffence(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(randomUUID())
+                        .build());
+
+        final Hearing hearing = new Hearing() {{
+            setId(offenceUpdated.getHearingId());
+        }};
+
+        when(hearingRepository.findBy(hearing.getId())).thenReturn(hearing);
+
+        final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offenceUpdated));
+
+        when(defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()))).thenReturn(null);
+
+        updateOffencesForDefendantEventListener.updateOffence(envelope);
+
+
+        verify(defendantRepository, never()).saveAndFlush(Mockito.any());
+
     }
 
 

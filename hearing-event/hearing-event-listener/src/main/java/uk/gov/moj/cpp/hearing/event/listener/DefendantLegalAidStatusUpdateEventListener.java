@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -48,7 +49,8 @@ public class DefendantLegalAidStatusUpdateEventListener {
             LOGGER.debug("hearing.defendant-legalaid-status-updated-for-hearing event received for hearingId {}", hearingId);
         }
 
-        if(defendant != null){
+        if(nonNull(defendant)) {
+
             if ("NO_VALUE".equals(legalAidStatus)) {
                 defendant.setLegalaidStatus(null);
             } else {

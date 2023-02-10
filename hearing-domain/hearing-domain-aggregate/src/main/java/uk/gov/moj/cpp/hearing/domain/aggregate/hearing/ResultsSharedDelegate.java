@@ -1,17 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static java.util.UUID.randomUUID;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.justice.core.courts.Target.target;
-import static uk.gov.justice.core.courts.Target2.target2;
-import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
-
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -62,12 +50,24 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static java.util.UUID.randomUUID;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.justice.core.courts.Target.target;
+import static uk.gov.justice.core.courts.Target2.target2;
+import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
+
 import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID =2L;
     private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
 
     public static final String REASON_FOR_VACATING_TRIAL = "reasonForVacatingTrial";
@@ -89,6 +89,7 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.getIsHearingDayPreviouslyShared().put(hearingDay, true);
         this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), hearingDay);
+        this.momento.getHearing().setHasSharedResults(true);
     }
 
     public void handleResultsSharedV2(final ResultsSharedV2 resultsShared) {
@@ -105,6 +106,7 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.setLastSharedTime(resultsShared.getSharedTime());
         this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), resultsShared.getHearingDay());
+        this.momento.getHearing().setHasSharedResults(true);
     }
 
     public void handleResultsSharedV3(final ResultsSharedV3 resultsShared) {
@@ -120,6 +122,7 @@ public class ResultsSharedDelegate implements Serializable {
         this.momento.setLastSharedTime(resultsShared.getSharedTime());
         this.momento.getHearing().setYouthCourt(resultsShared.getHearing().getYouthCourt());
         new HearingDaySharedResults().setHasSharedResults(momento.getHearing(), resultsShared.getHearingDay());
+        this.momento.getHearing().setHasSharedResults(true);
     }
 
 

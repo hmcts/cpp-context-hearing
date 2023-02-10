@@ -11,6 +11,8 @@ import static uk.gov.justice.core.courts.ProsecutionCase.prosecutionCase;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AssociatedDefenceOrganisation;
+import uk.gov.justice.core.courts.AttendanceDay;
+import uk.gov.justice.core.courts.AttendanceType;
 import uk.gov.justice.core.courts.DefenceOrganisation;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
@@ -20,11 +22,14 @@ import uk.gov.justice.core.courts.Organisation;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.domain.event.DefendantAttendanceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,6 +37,7 @@ import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
+import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 
 @RunWith(Theories.class)
@@ -346,6 +352,30 @@ public class DefendantDelegateTest {
         defendantDelegate.handleDefendantDetailsUpdated(createDefendantDetailsUpdated(hearingId, updatedDefendantDetails));
 
         assertThat(defendantDelegate.getMomento().getHearing().getProsecutionCases().get(0).getDefendants().get(0).getMasterDefendantId(), is(updatedDefendantDetails.getMasterDefendantId()));
+
+    }
+
+
+    @Test
+    public void shouldUpdateDefendantAttendance() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID defendantId = UUID.randomUUID();
+        final AttendanceDay attendanceDay = AttendanceDay.attendanceDay().withAttendanceType(AttendanceType.IN_PERSON).withDay(LocalDate.now()).build();
+
+        HearingAggregateMomento memento = new HearingAggregateMomento();
+        memento.setPublished(true);
+
+        DefendantDelegate defendantDelegate = new DefendantDelegate(memento);
+
+        final Stream<Object> events = defendantDelegate.updateDefendantAttendance(hearingId, defendantId, attendanceDay);
+
+        final DefendantAttendanceUpdated attendanceUpdated = events.filter(event -> event.getClass().equals(DefendantAttendanceUpdated.class)).findFirst().map(DefendantAttendanceUpdated.class::cast).orElse(null);
+
+        assertThat(attendanceUpdated, is(notNullValue()));
+        assertThat(attendanceUpdated.getHearingId(), is(hearingId));
+        assertThat(attendanceUpdated.getDefendantId(), is(defendantId));
+        assertThat(attendanceUpdated.getAttendanceDay().getAttendanceType(), is(AttendanceType.IN_PERSON));
 
     }
 
