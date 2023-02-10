@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class DefendantDelegate implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private HearingAggregateMomento momento;
 
@@ -109,18 +109,14 @@ public class DefendantDelegate implements Serializable {
     }
 
     public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDayP) {
-
-        if (!this.momento.isPublished()) {
-            final AttendanceDay attendanceDay = AttendanceDay.attendanceDay()
-                    .withDay(attendanceDayP.getDay())
-                    .withAttendanceType(attendanceDayP.getAttendanceType())
-                    .build();
-            return Stream.of(DefendantAttendanceUpdated.defendantAttendanceUpdated()
-                    .setHearingId(hearingId)
-                    .setDefendantId(defendantId)
-                    .setAttendanceDay(attendanceDay));
-        }
-        return Stream.empty();
+        final AttendanceDay attendanceDay = AttendanceDay.attendanceDay()
+                .withDay(attendanceDayP.getDay())
+                .withAttendanceType(attendanceDayP.getAttendanceType())
+                .build();
+        return Stream.of(DefendantAttendanceUpdated.defendantAttendanceUpdated()
+                .setHearingId(hearingId)
+                .setDefendantId(defendantId)
+                .setAttendanceDay(attendanceDay));
     }
 
     private boolean matchDefendant(final Defendant defendant, final uk.gov.moj.cpp.hearing.command.defendant.Defendant updatedDefendant) {

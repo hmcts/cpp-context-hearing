@@ -26,6 +26,7 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
+import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
@@ -160,6 +161,30 @@ public class HearingQueryApiTest {
         final Timeline expectedTimeline = new Timeline(timelineHearingSummaries);
 
         when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(null);
+        when(hearingQueryView.getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockCaseTimelineEnvelope);
+        when(mockCaseTimelineEnvelope.payload()).thenReturn(expectedTimeline);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.case.timeline", createObjectBuilder()
+                .add("id", CASE_ID.toString())
+                .build());
+
+        hearingQueryApi.getCaseTimeline(query);
+
+        verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
+        verify(referenceDataService, times(1)).getAllCourtRooms(any(JsonEnvelope.class));
+        verify(hearingQueryView, times(1)).getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+        verify(hearingQueryView, times(0)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+    }
+
+    @Test
+    public void shouldReturnTimelineForCaseWhenApplicationSummaryIsNull() {
+        final List<TimelineHearingSummary> timelineHearingSummaries = new ArrayList<>();
+        final TimelineHearingSummary timelineHearingSummary = new TimelineHearingSummary.TimelineHearingSummaryBuilder().withHearingType("Review").withHearingId(randomUUID()).build();
+        timelineHearingSummaries.add(timelineHearingSummary);
+
+        final Timeline expectedTimeline = new Timeline(timelineHearingSummaries);
+
+        when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(ProsecutionCase.prosecutionCase().build());
         when(hearingQueryView.getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockCaseTimelineEnvelope);
         when(mockCaseTimelineEnvelope.payload()).thenReturn(expectedTimeline);
 

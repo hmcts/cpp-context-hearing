@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -66,11 +67,14 @@ public class UpdateOffencesForDefendantEventListener {
         final Offence offence = offenceJPAMapper.toJPA(hearing, offenceUpdated.getDefendantId(), offenceUpdated.getOffence());
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
-        if (defendant.getOffences().removeIf(o -> o.getId().getId().equals(offenceUpdated.getOffence().getId()))) {
-            defendant.getOffences().add(offence);
-        }
 
-        defendantRepository.saveAndFlush(defendant);
+        if(nonNull(defendant)) {
+            if (defendant.getOffences().removeIf(o -> o.getId().getId().equals(offenceUpdated.getOffence().getId()))) {
+                defendant.getOffences().add(offence);
+            }
+
+            defendantRepository.saveAndFlush(defendant);
+        }
     }
 
     @Transactional

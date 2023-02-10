@@ -18,6 +18,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -29,6 +30,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.util.UUID;
+
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefendantLegalAidStatusUpdateEventListenerTest {
@@ -80,6 +82,8 @@ public class DefendantLegalAidStatusUpdateEventListenerTest {
         assertThat(defendant.getLegalaidStatus(), is("Granted"));
     }
 
+
+
     @Test
     public void updateDefendantLegalAidStatusNoValue() {
         final UUID hearingId = randomUUID();
@@ -105,6 +109,31 @@ public class DefendantLegalAidStatusUpdateEventListenerTest {
         final Defendant defendantOut = defendantexArgumentCaptor.getValue();
 
         assertThat(defendant.getId(), is(defendantOut.getId()));
+
+        assertThat(defendant.getLegalaidStatus(), is(CoreMatchers.nullValue()));
+    }
+
+
+
+    @Test
+    public void testUpdateDefendantLegalAidStatusWhenDefendantIsNotFoundForCombinationOfHearingIdAndDefendantId() {
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final String legalAidStatus = "Granted";
+        final DefendantLegalAidStatusUpdatedForHearing defendantLegalAidStatusUpdatedForHearing = DefendantLegalAidStatusUpdatedForHearing.defendantLegalaidStatusUpdatedForHearing()
+                .withDefendantId(defendantId)
+                .withHearingId(hearingId)
+                .withLegalAidStatus(legalAidStatus)
+                .build();
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        when(defendantRepository.findBy(defendant.getId())).thenReturn(null);
+
+        defendantLegalAidStatusUpdateEventListener.updateDefendantLegalAidStatusForHearing(envelopeFrom(metadataWithRandomUUID("hearing.defendant-legalaid-status-updated-for-hearing"),
+                objectToJsonObjectConverter.convert(defendantLegalAidStatusUpdatedForHearing)));
+
+
+        verify(this.defendantRepository, never()).save(Mockito.any());
 
         assertThat(defendant.getLegalaidStatus(), is(CoreMatchers.nullValue()));
     }

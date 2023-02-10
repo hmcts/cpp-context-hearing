@@ -19,6 +19,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
@@ -245,7 +246,8 @@ public class HearingQueryApi {
 
         final List<TimelineHearingSummary> summaryToRemove = new ArrayList<>();
         timelineForCase.payload().getHearingSummaries().stream().filter(timelineHearingSummary -> "Review".equals(timelineHearingSummary.getHearingType())).findFirst().ifPresent(rev -> {
-            if (!progressionService.getProsecutionCaseDetails(caseId.get()).getLinkedApplicationsSummary().isEmpty()) {
+            final ProsecutionCase prosecutionCaseDetails = progressionService.getProsecutionCaseDetails(caseId.get());
+            if (prosecutionCaseDetails.getLinkedApplicationsSummary() != null && !prosecutionCaseDetails.getLinkedApplicationsSummary().isEmpty()) {
                 summaryToRemove.add(rev);
             }
         });

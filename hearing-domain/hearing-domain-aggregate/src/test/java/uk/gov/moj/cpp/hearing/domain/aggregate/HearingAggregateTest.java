@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.UpdateHearingWithInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
+import uk.gov.moj.cpp.hearing.command.result.NewAmendmentResult;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
@@ -79,6 +80,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.time.LocalDate;
@@ -773,17 +775,64 @@ public class HearingAggregateTest {
 
     @Test
     public void shouldNotRaiseEventWhenHearingResultHasAlreadyShared() {
+
+
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
-        final HearingAggregate hearingAggregate = new HearingAggregate();
+
         final Hearing hearing = initiateHearingCommand.getHearing();
-        hearing.setHasSharedResults(Boolean.TRUE);
+        hearing.setHasSharedResults(false);
+
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
         hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+
+
+
+        hearingAggregate.apply(ResultsSharedV3.builder()
+                .withNewAmendmentResults(asList(new NewAmendmentResult(randomUUID(), ZonedDateTime.now())))
+                .withHearingDay(hearingDay)
+                .withHearing(Hearing.hearing()
+                        .withHasSharedResults(true)
+                        .withId(hearing.getId())
+                        .build()
+                )
+                .build()
+        );
+
         final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
-                hearingAggregate.updateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
+                hearingAggregate.updateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
                         .findFirst()
                         .orElse(null);
         assertThat(caseDefendantsUpdatedForHearing, nullValue());
     }
+
+    @Test
+    public void shouldNotRaiseEventWhenHearingIsUnAllocated() {
+
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final Hearing hearing = initiateHearingCommand.getHearing();
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        hearingAggregate.apply(new HearingUnallocated(asList(randomUUID()), asList(randomUUID()), asList(randomUUID()), hearing.getId()));
+
+        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
+                hearingAggregate.updateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
+                        .findFirst()
+                        .orElse(null);
+        assertThat(caseDefendantsUpdatedForHearing, nullValue());
+    }
+
+
 
     @Test
     public void shouldRaiseEventWhenHearingResultHasNotAlreadyShared() {
@@ -800,6 +849,8 @@ public class HearingAggregateTest {
                         .orElse(null);
         assertThat(caseDefendantsUpdatedForHearing.getHearingId(), is(hearing.getId()));
     }
+
+
 
     private void assertHearingEventLogged(final HearingEventLogged hearingEventLogged, final LogEventCommand logEventCommand, final InitiateHearingCommand initiateHearingCommand) {
         assertThat(hearingEventLogged.getHearingEventId(), is(logEventCommand.getHearingEventId()));
