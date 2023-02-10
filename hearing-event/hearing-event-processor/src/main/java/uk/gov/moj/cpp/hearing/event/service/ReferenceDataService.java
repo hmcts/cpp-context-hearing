@@ -22,7 +22,7 @@ public interface ReferenceDataService {
 
     ResultDefinition getResultDefinitionById(JsonEnvelope context, LocalDate referenceDate, UUID id);
 
-    LjaDetails getLjaDetails(JsonEnvelope context, UUID courtCentreId);
+    LjaDetails getLjaDetails(JsonEnvelope context, UUID courtCentreId, OrganisationalUnit organisationalUnit);
 
     LocalJusticeAreas getLJAByNationalCourtCode(JsonEnvelope context, final String nationalCourtCode);
 

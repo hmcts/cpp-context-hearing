@@ -110,11 +110,13 @@ public class PublishResultsEventProcessor {
         final List<CourtApplication> courtApplications = ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty).collect(toList());
         final List<ProsecutionCase> prosecutionCaseList = ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty).collect(toList());
 
+        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(resultsShared.getHearing().getCourtCentre().getId());
+
         setProsecutorInformation(event, courtApplications, prosecutionCaseList);
 
-        setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre());
+        setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre(), organisationalUnit);
 
-        setLJADetails(event, resultsShared.getHearing().getCourtCentre());
+        setLJADetails(event, resultsShared.getHearing().getCourtCentre(), organisationalUnit);
 
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
@@ -284,15 +286,13 @@ public class PublishResultsEventProcessor {
                 .build();
     }
 
-    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre) {
+    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre, final OrganisationalUnit organisationalUnit) {
         final UUID courtCentreId = courtCentre.getId();
-        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId);
+        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId, organisationalUnit);
         courtCentre.setLja(ljaDetails);
     }
 
-    private void setCourtCentreOrganisationalUnitInfo(final CourtCentre courtCentre) {
-        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(courtCentre.getId());
-
+    private void setCourtCentreOrganisationalUnitInfo(final CourtCentre courtCentre, final OrganisationalUnit organisationalUnit) {
         courtCentre.setCode(organisationalUnit.getOucode());
         courtCentre.setCourtLocationCode(organisationalUnit.getCourtLocationCode());
         if (nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh()) {

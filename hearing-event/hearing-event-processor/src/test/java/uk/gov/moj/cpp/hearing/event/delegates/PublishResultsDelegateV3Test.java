@@ -13,6 +13,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.NextHearing;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.hearing.courts.referencedata.CourtCentreOrganisationUnit;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.Envelope;
@@ -24,10 +25,13 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestruc
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelperV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilderV3;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -96,10 +100,22 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
     @Test
     public void shouldCreateNextHearing() throws Exception {
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_JSON, ResultsSharedV3.class);
-
         final JsonEnvelope envelope = getEnvelope(resultsShared);
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for(UUID resulDefinitionId:resultDefinitionIds){
+            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
         when(courtHouseReverseLookup.getCourtCentreByName(envelope, "Aberdeen JP Court")).thenReturn(Optional.of(CourtCentreOrganisationUnit.courtCentreOrganisationUnit().withOucode("oucode2").withLja("2500").withId(UUID.randomUUID().toString()).build()));
-        target.shareResults(envelope, sender, resultsShared);
+        target.shareResults(envelope, sender, resultsShared,treeNodes);
         final List<Offence> offences = resultsShared.getHearing().getProsecutionCases().stream()
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()
                         .flatMap(defendant -> defendant.getOffences().stream())).collect(Collectors.toList());

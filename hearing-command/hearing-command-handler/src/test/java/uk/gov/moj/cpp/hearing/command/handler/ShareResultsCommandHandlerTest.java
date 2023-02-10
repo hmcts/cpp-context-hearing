@@ -401,7 +401,6 @@ public class ShareResultsCommandHandlerTest {
         assertThat(resultsShared.getDefendantDetailsChanged().get(0), is(initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
     }
 
-
     private Target getNewTarget(final Target targetToCopyFrom) {
         return Target.target()
                 .withHearingId(targetToCopyFrom.getHearingId())

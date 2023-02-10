@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -9,6 +10,8 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.justice.core.courts.Address.address;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
@@ -41,9 +44,11 @@ import uk.gov.moj.cpp.hearing.event.delegates.PublishResultsDelegateV3;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateDefendantWithApplicationDetailsDelegateV3;
 import uk.gov.moj.cpp.hearing.event.delegates.UpdateResultLineStatusDelegateV3;
 import uk.gov.moj.cpp.hearing.event.delegates.exception.ResultDefinitionNotFoundException;
+import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -119,9 +124,16 @@ public class PublishResultsV3EventProcessor {
 
         setProsecutorInformation(event, courtApplications, prosecutionCaseList);
 
-        setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre());
+        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(resultsShared.getHearing().getCourtCentre().getId());
 
-        setLJADetails(event, resultsShared.getHearing().getCourtCentre());
+        setCourtCentreOrganisationalUnitInfo(resultsShared.getHearing().getCourtCentre(), organisationalUnit);
+
+        setLJADetails(event, resultsShared.getHearing().getCourtCentre(), organisationalUnit);
+
+        final List<TreeNode<ResultDefinition>> resultTreeNodes = getTreeNodes(event, resultsShared);
+
+        final List<ResultDefinition> resultDefinitions = resultTreeNodes.stream()
+                .map(TreeNode::getData).collect(toList());
 
         ofNullable(resultsShared.getHearing().getProsecutionCases()).ifPresent(
                 prosecutionCases ->
@@ -133,7 +145,7 @@ public class PublishResultsV3EventProcessor {
                                                         final UUID caseId = prosecutionCase.getId();
                                                         final UUID defendantId = defendant.getId();
                                                         final List<UUID> offenceIds = defendant.getOffences().stream().map(Offence::getId).collect(toList());
-                                                        final Map<UUID, OffenceResult> offenceResultMap = mapOffenceWithOffenceResult(event, defendant.getOffences(), resultsShared);
+                                                        final Map<UUID, OffenceResult> offenceResultMap = mapOffenceWithOffenceResult(defendant.getOffences(), resultsShared, resultDefinitions);
                                                         updateTheDefendantsCase(event, resultsShared.getHearing().getId(), caseId, defendantId, offenceIds, offenceResultMap);
                                                     }
                                             );
@@ -148,7 +160,7 @@ public class PublishResultsV3EventProcessor {
 
         LOGGER.info("requested target size {}, saved target size {}", resultsShared.getTargets().size(), resultsShared.getSavedTargets().size());
         LOGGER.info("combined target size {}", resultsShared.getTargets().size());
-        publishResultsDelegate.shareResults(event, sender, resultsShared);
+        publishResultsDelegate.shareResults(event, sender, resultsShared, resultTreeNodes);
 
         updateResultLineStatusDelegate.updateDaysResultLineStatus(sender, event, resultsShared);
 
@@ -187,11 +199,11 @@ public class PublishResultsV3EventProcessor {
         return arrayBuilder;
     }
 
-    private Map<UUID, OffenceResult> mapOffenceWithOffenceResult(JsonEnvelope event, List<Offence> offences, ResultsSharedV3 resultsShared) {
+    private Map<UUID, OffenceResult> mapOffenceWithOffenceResult(final List<Offence> offences, final ResultsSharedV3 resultsShared, final List<ResultDefinition> resultDefinitions) {
 
         final Map<UUID, OffenceResult> offenceResultMap = new HashMap<>();
 
-        offences.stream().forEach(offence -> {
+        offences.forEach(offence -> {
             final List<ResultLine2> completedResultLinesForThisOffence = resultsShared.getTargets().stream()
                     .filter(target -> offence.getId().equals(target.getOffenceId()))
                     .flatMap(target -> target.getResultLines().stream())
@@ -201,7 +213,10 @@ public class PublishResultsV3EventProcessor {
                     .collect(toList());
 
             completedResultLinesForThisOffence.forEach(resultLine -> {
-                final ResultDefinition resultDefinition = this.referenceDataService.getResultDefinitionById(event, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
+               final ResultDefinition resultDefinition = resultDefinitions.stream()
+                        .filter(rd -> rd.getId().equals(resultLine.getResultDefinitionId()))
+                        .findFirst().orElse(null);
+
                 if (isNull(resultDefinition)) {
                     throw new ResultDefinitionNotFoundException(format(
                             "resultDefinition not found for resultLineId: %s, resultDefinitionId: %s, hearingId: %s orderedDate: %s",
@@ -289,18 +304,17 @@ public class PublishResultsV3EventProcessor {
                 .build();
     }
 
-    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre) {
+    private void setLJADetails(final JsonEnvelope context, final CourtCentre courtCentre, final OrganisationalUnit organisationalUnit) {
         final UUID courtCentreId = courtCentre.getId();
-        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId);
+        final LjaDetails ljaDetails = referenceDataService.getLjaDetails(context, courtCentreId, organisationalUnit);
         courtCentre.setLja(ljaDetails);
     }
 
-    private void setCourtCentreOrganisationalUnitInfo(final CourtCentre courtCentre) {
-        final OrganisationalUnit organisationalUnit = referenceDataLoader.getOrganisationUnitById(courtCentre.getId());
+    private void setCourtCentreOrganisationalUnitInfo(final CourtCentre courtCentre, final OrganisationalUnit organisationalUnit) {
 
         courtCentre.setCode(organisationalUnit.getOucode());
         courtCentre.setCourtLocationCode(organisationalUnit.getCourtLocationCode());
-        if (nonNull(organisationalUnit.getIsWelsh()) && organisationalUnit.getIsWelsh()) {
+        if (nonNull(organisationalUnit.getIsWelsh()) && TRUE.equals(organisationalUnit.getIsWelsh())) {
             courtCentre.setWelshName(organisationalUnit.getOucodeL3WelshName());
             courtCentre.setWelshCourtCentre(organisationalUnit.getIsWelsh());
             courtCentre.setWelshAddress(address()
@@ -379,5 +393,27 @@ public class PublishResultsV3EventProcessor {
 
     private Optional<Prosecutor> fetchProsecutorInformationById(final JsonEnvelope context, final UUID prosecutorId) {
         return Optional.ofNullable(referenceDataService.getProsecutorById(context, prosecutorId));
+    }
+
+    private List<TreeNode<ResultDefinition>> getTreeNodes(final JsonEnvelope context, final ResultsSharedV3 resultsSharedV3) {
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+        final List<ResultLine2> allResultLines = resultsSharedV3.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .collect(toList());
+
+        for (final ResultLine2 resultLine : allResultLines) {
+            if (Boolean.FALSE.equals(getBooleanValue(resultLine.getIsDeleted(), false))) {
+                final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
+
+                if (isNull(resultDefinitionNode)) {
+                    throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
+                            resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsSharedV3.getHearingId(), resultLine.getOrderedDate()));
+                }
+
+                treeNodes.add(resultDefinitionNode);
+            }
+        }
+        return treeNodes;
     }
 }

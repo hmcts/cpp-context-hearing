@@ -16,9 +16,6 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.JudicialResultPromptMapper.findJudicialResultPrompt;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
-
-import java.util.Collection;
-import java.util.Comparator;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
@@ -46,6 +43,8 @@ import uk.gov.moj.cpp.hearing.event.service.ReferenceDataService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -72,45 +71,10 @@ public class ResultTreeBuilderV3 {
         this.resultTextConfHelper = resultTextConfHelper;
     }
 
-    public List<TreeNode<ResultLine2>> build(final JsonEnvelope envelope, final ResultsSharedV3 resultsShared) {
-        final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared);
+    public List<TreeNode<ResultLine2>> build(final JsonEnvelope envelope, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> resultDefinitionTreeNods ) {
+        final Map<UUID, TreeNode<ResultLine2>> resultLinesMap = getTreeNodeMap(envelope, resultsShared,resultDefinitionTreeNods);
         final Map<UUID, TreeNode<ResultLine2>> resultLinesMapWithRelations = mapTreeNodeRelations(resultLinesMap);
         return new ArrayList<>(orderResult(resultLinesMapWithRelations));
-    }
-
-    private List<TreeNode<ResultLine2>> orderResult(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap){
-        final List<TreeNode<ResultLine2>> orderedInputList = new ArrayList(resultLinesMap.values());
-        if(resultTextConfHelper.isOldResultDefinitionV2(orderedInputList)){
-            return orderedInputList;
-        }
-        orderedInputList.sort(Comparator.comparing(o -> o.getResultDefinition().getData().getShortCode()));
-
-        final List<TreeNode<ResultLine2>> parents = orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
-                .filter(node -> !isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
-                .collect(toList());
-        final Set<UUID> parentIds = parents.stream().map(TreeNode::getId).collect(Collectors.toSet());
-        final List<TreeNode<ResultLine2>> orderedResults = parents.stream()
-                .map(parent -> orderedInputList.stream()
-                        .filter(result -> !parentIds.contains(result.getId()))
-                        .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
-                        .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
-                        .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
-                        .collect(Collectors.collectingAndThen(toList(), list -> {
-                            list.add(0, parent);
-                            return list;
-                        })))
-                .flatMap(Collection::stream).collect(toList());
-
-        orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
-                .filter(node -> isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
-                .collect(toList())
-                .forEach(orderedResults::add);
-
-        orderedInputList.stream()
-                .filter(result -> orderedResults.stream().noneMatch(res -> res.getId().equals(result.getId())))
-                .forEach(orderedResults::add);
-
-        return orderedResults;
     }
 
     private Map<UUID, TreeNode<ResultLine2>> mapTreeNodeRelations(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap) {
@@ -130,26 +94,33 @@ public class ResultTreeBuilderV3 {
         return resultLinesMap;
     }
 
-
-    private Map<UUID, TreeNode<ResultLine2>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV3 resultsShared) {
+    private Map<UUID, TreeNode<ResultLine2>> getTreeNodeMap(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> resultDefinitionNodes) {
         final Map<UUID, TreeNode<ResultLine2>> result = new HashMap<>();
-        final List<ResultLine2>  allResultLines = resultsShared.getTargets().stream()
-                .flatMap(t->t.getResultLines().stream())
+        final List<ResultLine2> allResultLines = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .collect(toList());
+
+       final List<ResultDefinition> resultDefinitions = resultDefinitionNodes.stream()
+                .map(TreeNode::getData)
                 .collect(toList());
         resultsShared.getTargets().forEach(target -> {
             final List<ResultLine2> resultLines = target.getResultLines();
-        resultLines
+            resultLines
                     .stream()
                     .filter(resultLine -> !getBooleanValue(resultLine.getIsDeleted(), false))
                     .forEach(resultLine -> {
-                        final TreeNode<ResultDefinition> resultDefinitionNode = referenceDataService.getResultDefinitionTreeNodeById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
+                        final TreeNode<ResultDefinition> resultDefinitionNode = resultDefinitionNodes.stream()
+                                .filter(rdt -> rdt.getData().getId().equals(resultLine.getResultDefinitionId()))
+                                .findFirst()
+                                .orElse(null);
 
                         if (isNull(resultDefinitionNode)) {
                             throw new ResultDefinitionNotFoundException(format(RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT,
                                     resultLine.getResultLineId(), resultLine.getResultDefinitionId(), resultsShared.getHearingId(), resultLine.getOrderedDate()));
                         }
 
-                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, allResultLines, resultsShared);
+                        final ResultDefinition resultDefinition = resultDefinitionNode.getData();
+                        final JudicialResult judicialResult = getResultLineJudicialResult(context, resultLine, allResultLines, resultsShared, resultDefinition, resultDefinitions);
                         final TreeNode<ResultLine2> treeNode = resultLineHelper.getResultLineTreeNode(target, resultLine, resultDefinitionNode, judicialResult);
                         result.put(treeNode.getId(), treeNode);
                     });
@@ -157,12 +128,11 @@ public class ResultTreeBuilderV3 {
         return result;
     }
 
-    @SuppressWarnings({"squid:S3776","squid:MethodCyclomaticComplexity"})
-    private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultsSharedV3 resultsShared) {
+    @SuppressWarnings({"squid:S3776", "squid:MethodCyclomaticComplexity"})
+    private JudicialResult getResultLineJudicialResult(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultsSharedV3 resultsShared, final ResultDefinition resultDefinition, final List<ResultDefinition> resultDefinitions) {
         final Hearing hearing = resultsShared.getHearing();
         final DelegatedPowers courtClerk = resultsShared.getCourtClerk();
         final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus = resultsShared.getCompletedResultLinesStatus();
-        final ResultDefinition resultDefinition = this.referenceDataService.getResultDefinitionById(context, resultLine.getOrderedDate(), resultLine.getResultDefinitionId());
         final Set<UUID> newAmendmentResultIds = resultsShared.getNewAmendmentResults().stream().map(NewAmendmentResult::getId).collect(Collectors.toSet());
         checkResultDefinition(resultLine, hearing, resultDefinition);
 
@@ -180,7 +150,7 @@ public class ResultTreeBuilderV3 {
 
         setRootJudicialResult(resultLine, resultLines, builder);
 
-        setJudicialResultPrompts(context, resultLine, resultLines, resultDefinition, builder, resultsShared);
+        setJudicialResultPrompts(context, resultLine, resultLines, resultDefinition, builder, resultsShared, resultDefinitions);
 
         return builder.build();
     }
@@ -249,11 +219,11 @@ public class ResultTreeBuilderV3 {
         }
     }
 
-    private void setJudicialResultPrompts(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultDefinition resultDefinition, final Builder builder, final ResultsSharedV3 resultsSharedV3) {
+    private void setJudicialResultPrompts(final JsonEnvelope context, final ResultLine2 resultLine, final List<ResultLine2> resultLines, final ResultDefinition resultDefinition, final Builder builder, final ResultsSharedV3 resultsSharedV3, final List<ResultDefinition> resultDefinitions) {
         final List<JudicialResultPrompt> judicialResultPrompts = buildJudicialResultPrompt(resultDefinition, resultLine.getPrompts());
 
         if (nonNull(judicialResultPrompts) && !judicialResultPrompts.isEmpty()) {
-            final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, resultLine, judicialResultPrompts, resultsSharedV3);
+            final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, resultLine, judicialResultPrompts, resultsSharedV3, resultDefinitions);
             final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, resultDefinition);
             final Optional<String> qualifier = new ResultQualifier().populate(resultDefinition.getQualifier(), judicialResultPrompts, this.referenceDataService, context, resultLine.getOrderedDate());
 
@@ -359,4 +329,40 @@ public class ResultTreeBuilderV3 {
         }
         return secondaryCJSCodeList;
     }
+
+    private List<TreeNode<ResultLine2>> orderResult(final Map<UUID, TreeNode<ResultLine2>> resultLinesMap){
+        final List<TreeNode<ResultLine2>> orderedInputList = new ArrayList(resultLinesMap.values());
+        if(resultTextConfHelper.isOldResultDefinitionV2(orderedInputList)){
+            return orderedInputList;
+        }
+        orderedInputList.sort(Comparator.comparing(o -> o.getResultDefinition().getData().getShortCode()));
+
+        final List<TreeNode<ResultLine2>> parents = orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList());
+        final Set<UUID> parentIds = parents.stream().map(TreeNode::getId).collect(Collectors.toSet());
+        final List<TreeNode<ResultLine2>> orderedResults = parents.stream()
+                .map(parent -> orderedInputList.stream()
+                        .filter(result -> !parentIds.contains(result.getId()))
+                        .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
+                        .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
+                        .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                        .collect(Collectors.collectingAndThen(toList(), list -> {
+                            list.add(0, parent);
+                            return list;
+                        })))
+                .flatMap(Collection::stream).collect(toList());
+
+        orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList())
+                .forEach(orderedResults::add);
+
+        orderedInputList.stream()
+                .filter(result -> orderedResults.stream().noneMatch(res -> res.getId().equals(result.getId())))
+                .forEach(orderedResults::add);
+
+        return orderedResults;
+    }
+
 }

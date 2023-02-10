@@ -112,7 +112,7 @@ public class ReferenceDataLoaderTest {
 
         when(requester.requestAsAdmin(any(), eq(EnforcementArea.class)).payload()).thenReturn(expectedEnforcementArea);
 
-        final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(courtCentreId);
+        final LjaDetails ljaDetails = referenceDataLoader.getLjaDetails(organisationUnit);
 
         assertNotNull(ljaDetails);
         assertThat(ljaDetails.getLjaCode(), is(expectedEnforcementArea.getLocalJusticeArea().getNationalCourtCode()));
@@ -127,7 +127,7 @@ public class ReferenceDataLoaderTest {
         when(requester.requestAsAdmin(any(), eq(OrganisationalUnit.class)).payload()).thenReturn(organisationUnit);
         when(requester.requestAsAdmin(any(), eq(EnforcementArea.class)).payload()).thenReturn(null);
 
-        referenceDataLoader.getLjaDetails(randomUUID());
+        referenceDataLoader.getLjaDetails(organisationUnit);
     }
 
     private OrganisationalUnit getOrganisationUnit() {

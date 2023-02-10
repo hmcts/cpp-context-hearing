@@ -46,7 +46,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
-import javax.json.JsonObject;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -61,6 +60,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.json.JsonObject;
 
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
@@ -123,7 +124,7 @@ public class ResultsSharedDelegate implements Serializable {
 
     private void recordTargetsSharedAndResetTransientTargets() {
         final Collection<Target2> transientValues = this.momento.getTransientTargets().values();
-        transientValues.stream().forEach(t -> {
+        transientValues.forEach(t -> {
             final Target2 target = this.momento.getSharedTargets().getOrDefault(t.getTargetId(), t);
             target.setDraftResult(t.getDraftResult());
             this.momento.getSharedTargets().put(t.getTargetId(), target);
@@ -546,7 +547,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .findFirst()
                                 .map(Prompt::getValue)
                                 .get();
-                        if (nonNull(hearingIdToBeVacated) && hearingIdToBeVacated.isPresent() && nonNull(vacatedTrialReasonShortDesc)) {
+                        if (hearingIdToBeVacated.isPresent()) {
                             final HearingVacatedRequested hearingVacatedRequested = HearingVacatedRequested.builder()
                                     .withHearingIdToBeVacated(hearingIdToBeVacated.get())
                                     .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc)
@@ -562,12 +563,12 @@ public class ResultsSharedDelegate implements Serializable {
     private void addParenetResultLineIds(final List<SharedResultsCommandResultLineV2> resultLineV2s) {
         final Map<UUID, UUID> childParentMap = new HashMap();
         resultLineV2s.stream().filter(rl -> nonNull(rl.getChildResultLineIds()) && !rl.getChildResultLineIds().isEmpty()).forEach(rl ->
-                rl.getChildResultLineIds().stream().forEach(childResultLineId ->
+                rl.getChildResultLineIds().forEach(childResultLineId ->
                         childParentMap.put(childResultLineId, rl.getResultLineId())
                 )
         );
 
-        resultLineV2s.stream().forEach(rl -> {
+        resultLineV2s.forEach(rl -> {
             if (childParentMap.containsKey(rl.getResultLineId())) {
                 if (rl.getParentResultLineIds() == null) {
                     rl.setParentResultLineIds(new ArrayList());

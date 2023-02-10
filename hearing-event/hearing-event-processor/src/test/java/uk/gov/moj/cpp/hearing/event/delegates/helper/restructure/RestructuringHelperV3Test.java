@@ -18,9 +18,13 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultQualifier;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
@@ -45,7 +49,21 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
     public void shouldPublishWhenAlwaysPublishedIsALeafNode() throws IOException {
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON, ResultsSharedV3.class);
         final JsonEnvelope envelope = getEnvelope(resultsShared);
-        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared);
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+          for(UUID resulDefinitionId:resultDefinitionIds){
+              TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+              resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+              resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+              treeNodes.add(resultDefinitionTreeNode);
+          }
+
+        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
 
         assertThat(restructuredTree.size(), is(3));
 
@@ -72,12 +90,26 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
         final ResultLine2 firstReviewResultLint = resultsShared.getTargets().get(0).getResultLines().stream().filter(rl3 -> rl3.getResultLabel().equalsIgnoreCase("First Review Hearing – Drug Rehab")).findFirst().get();
         assertThat(rl2.getPrompts().size(), is(3));
         assertThat(firstReviewResultLint.getPrompts().size(), is(12));
+
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for(UUID resulDefinitionId:resultDefinitionIds){
+            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
         when(hearingTypeReverseLookup.getHearingTypeByName(any(), any())).thenReturn(HearingType.hearingType().withDescription("REV").build());
-        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared);
+        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
         assertThat(restructuredTree.size(), is(2));
-        assertThat(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j->j.getLabel().equals("Drug rehabilitation residential with review")).findFirst().get().getJudicialResultPrompts().size(), is(firstReviewResultLint.getPrompts().size()+ rl2.getPrompts().size()));
-        assertTrue(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j->j.getLabel().equals("Drug rehabilitation residential with review")).findFirst().isPresent());
-        assertTrue(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j->j.getLabel().equals("Community order England / Wales")).findFirst().isPresent());
+        assertThat(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j -> j.getLabel().equals("Drug rehabilitation residential with review")).findFirst().get().getJudicialResultPrompts().size(), is(firstReviewResultLint.getPrompts().size() + rl2.getPrompts().size()));
+        assertTrue(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j -> j.getLabel().equals("Drug rehabilitation residential with review")).findFirst().isPresent());
+        assertTrue(restructuredTree.stream().map(r -> r.getJudicialResult()).filter(j -> j.getLabel().equals("Community order England / Wales")).findFirst().isPresent());
         final List<TreeNode<ResultLine2>> topLevelResultLineRestructuredParents = filterV3ResultsBy(restructuredTree, r -> r.getParents().isEmpty() && r.getChildren().size() > 0);
 
         assertThat((int) restructuredTree.stream().filter(TreeNode::isStandalone).count(), is(2));

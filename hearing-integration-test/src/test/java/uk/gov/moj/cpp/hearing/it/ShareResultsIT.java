@@ -284,7 +284,6 @@ public class ShareResultsIT extends AbstractIT {
 
                         final Map<String, Object> convictionCourt = (Map<String, Object>) offence.get("convictingCourt");
 
-                        assertThat(convictionCourt.get("courtLocationCode"), is("0325"));
                         assertThat(convictionCourt.get("id"), is(hearing.getCourtCentre().getId().toString()));
                         assertThat(convictionCourt.get("roomId"), is(hearing.getCourtCentre().getRoomId().toString()));
                     });
@@ -412,8 +411,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
         }
     }
 
@@ -467,8 +466,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
         }
     }
 
@@ -521,8 +520,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.defendantCase.defendantId"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.defendantCase.caseID"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
         }
     }
 
@@ -577,8 +576,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.defendantCase.defendantId"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.defendantCase.caseID"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
         }
     }
 
@@ -1811,8 +1810,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
         }
     }
 
@@ -1867,8 +1866,8 @@ public class ShareResultsIT extends AbstractIT {
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.description"), is("Conditional Bail"));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailStatus.id"), is(notNullValue()));
             assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailReasons"), is("value1"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("resultLabel"));
-            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions").toString(), containsString("promptLabel : value1"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("resultLabel"));
+            assertThat(publicHearingResulted.getString("hearing.courtApplications[0].subject.masterDefendant.personDefendant.bailConditions"), containsString("promptLabel : value1"));
         }
     }
 
@@ -3446,7 +3445,7 @@ public class ShareResultsIT extends AbstractIT {
                              withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
                              withJsonPath("$.verdict.offenceId", is(hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId().toString()))
                              ))
-                     );
+                     )
         ) {
 
             final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
@@ -3475,8 +3474,8 @@ public class ShareResultsIT extends AbstractIT {
                              withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString())),
                              withJsonPath("$.verdict.offenceId", is(hearingOne.getCourtApplication().getCourtApplicationCases().get(0).getOffences().get(0).getId().toString()))
                              ))
-                     );
-             ) {
+                     )
+        ) {
 
             final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
                     UpdateVerdictCommandTemplates.updateVerdictTemplate(

@@ -118,9 +118,9 @@ public class PublishResultsDelegateV3 {
     }
 
 
-    public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared) {
+    public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodes) {
 
-        final List<TreeNode<ResultLine2>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared);
+        final List<TreeNode<ResultLine2>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared, treeNodes);
 
         mapApplicationLevelJudicialResults(resultsShared, restructuredResults);
 
@@ -156,9 +156,10 @@ public class PublishResultsDelegateV3 {
                 .setHearingDay(resultsShared.getHearingDay())
                 .setShadowListedOffences(getOffenceShadowListedForMagistratesNextHearing(resultsShared));
 
-        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope successEvent = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted-success"), Json.createObjectBuilder().build());
         sender.send(successEvent);
+
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingResulted);
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(context.metadata()).withName("public.events.hearing.hearing-resulted"), jsonObject);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Payload for event 'public.events.hearing.hearing-resulted': \n{}", jsonEnvelope.payloadAsJsonObject());
