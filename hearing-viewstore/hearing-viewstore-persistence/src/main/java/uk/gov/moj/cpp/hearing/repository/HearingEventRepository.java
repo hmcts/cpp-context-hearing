@@ -75,7 +75,7 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
                     "hearingEvent.eventTime = (select max(hearingEvent2.eventTime) " +
                     "from uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent2, " +
                     "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing2 " +
-                    "WHERE hearing2.id = hearingEvent2.hearingId and " +
+                    "WHERE hearingEvent2.eventDate = :eventDate and  hearing2.id = hearingEvent2.hearingId and " +
                     "hearing2.courtCentre.roomId = hearing.courtCentre.roomId and " +
                     "hearingEvent2.hearingEventDefinitionId IN (:cppHearingEventIds) " +
                     "group by hearing2.courtCentre.roomId) and  " +
