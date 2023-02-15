@@ -32,50 +32,31 @@ import javax.inject.Inject;
 public class RestructuringHelper {
 
     private final ResultTreeBuilder resultTreeBuilder;
-    private final ResultTextConfHelper resultTextConfHelper;
 
     @Inject
-    public RestructuringHelper(final ResultTreeBuilder resultTreeBuilder, final ResultTextConfHelper resultTextConfHelper) {
+    public RestructuringHelper(final ResultTreeBuilder resultTreeBuilder) {
         this.resultTreeBuilder = resultTreeBuilder;
-        this.resultTextConfHelper = resultTextConfHelper;
     }
 
     public List<TreeNode<ResultLine>> restructure(final JsonEnvelope context, final ResultsShared resultsShared) {
         final List<TreeNode<ResultLine>> treeNodes = resultTreeBuilder.build(context, resultsShared);
 
         final List<TreeNode<ResultLine>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
-        if(resultTextConfHelper.isOldResultDefinition(treeNodes)) {
-            updateResultText(
-                    removeNonPublishableResults(
-                            restructureNextHearing(
-                                    processAlwaysPublishResults(
-                                            deDupNextHearing(
-                                                    filterNodesWithRollUpPrompts(
-                                                            processPublishAsPrompt(
-                                                                    removeExcludedResults(treeNodes))
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-            );
-        } else {
-            removeNonPublishableResults(
-                    restructureNextHearing(
-                            processAlwaysPublishResults(
-                                    deDupNextHearing(
-                                            filterNodesWithRollUpPrompts(
-                                                    processPublishAsPrompt(
-                                                            removeExcludedResults(
-                                                                    updateResultTextWithNewLogic(treeNodes)
-                                                            )
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-            );
-        }
+
+        updateResultText(
+                removeNonPublishableResults(
+                        restructureNextHearing(
+                                processAlwaysPublishResults(
+                                        deDupNextHearing(
+                                                filterNodesWithRollUpPrompts(
+                                                        processPublishAsPrompt(
+                                                                removeExcludedResults(treeNodes))
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
         setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
@@ -91,38 +72,20 @@ public class RestructuringHelper {
 
         final List<TreeNode<ResultLine>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 
-        if(resultTextConfHelper.isOldResultDefinition(treeNodes)){
-            updateResultText(
-                    removeNonPublishableResults(
-                            restructureNextHearing(
-                                    processAlwaysPublishResults(
-                                            deDupNextHearing(
-                                                    filterNodesWithRollUpPrompts(
-                                                            processPublishAsPrompt(
-                                                                    removeExcludedResults(treeNodes))
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-            );
-        }else {
-            removeNonPublishableResults(
-                    restructureNextHearing(
-                            processAlwaysPublishResults(
-                                    deDupNextHearing(
-                                            filterNodesWithRollUpPrompts(
-                                                    processPublishAsPrompt(
-                                                            removeExcludedResults(
-                                                                    updateResultTextWithNewLogic(treeNodes)
-                                                            )
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-            );
-        }
+        updateResultText(
+                removeNonPublishableResults(
+                        restructureNextHearing(
+                                processAlwaysPublishResults(
+                                        deDupNextHearing(
+                                                filterNodesWithRollUpPrompts(
+                                                        processPublishAsPrompt(
+                                                                removeExcludedResults(treeNodes))
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
         setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
@@ -156,10 +119,5 @@ public class RestructuringHelper {
                 treeNode.getJudicialResult().setResultText(resultText);
             }
         });
-    }
-
-    private List<TreeNode<ResultLine>> updateResultTextWithNewLogic(final List<TreeNode<ResultLine>> treeNodeList) {
-        ResultTextHelper.setResultText(treeNodeList, resultTextConfHelper);
-        return treeNodeList;
     }
 }

@@ -8,16 +8,12 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.CO_HEARING_EVENT_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.DIRS_HEARING_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.RESULT_TEXT_SPLIT_REGEX;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
 
-
-import java.time.LocalDate;
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -41,11 +37,9 @@ public class RestructuringHelperTest extends AbstractRestructuringTest {
 
     @Before
     public void setUp() throws IOException {
-        ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
-        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
         super.setUp();
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
-        target = new RestructuringHelper(resultTreeBuilder, resultTextConfHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
+        target = new RestructuringHelper(resultTreeBuilder);
     }
 
     @Test
@@ -62,6 +56,7 @@ public class RestructuringHelperTest extends AbstractRestructuringTest {
 
         assertThat(judicialResult.getJudicialResultPrompts().size(), is(5));
         assertNull(judicialResult.getDelegatedPowers());
+        assertThat(judicialResult.getResultText().split(RESULT_TEXT_SPLIT_REGEX).length, is(6));
         assertThat(judicialResult.getJudicialResultTypeId(), is(topLevelResultLineParents.get(0).getResultDefinitionId()));
         assertTrue(judicialResult.getJudicialResultPrompts().stream().allMatch(jrp -> nonNull(jrp.getJudicialResultPromptTypeId())));
         assertTrue(judicialResult.getTerminatesOffenceProceedings());
