@@ -346,7 +346,7 @@ public class ResultTreeBuilderV3 {
                         .filter(result -> !parentIds.contains(result.getId()))
                         .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
                         .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
-                        .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                        .filter(result -> parent.getResultDefinition().getData().getDependantResultDefinitionGroup().equals(result.getResultDefinition().getData().getResultDefinitionGroup()))
                         .collect(Collectors.collectingAndThen(toList(), list -> {
                             list.add(0, parent);
                             return list;

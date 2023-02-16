@@ -260,13 +260,14 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
 
         assertThat(resultLineTree.get(0).getResultDefinition().getData().getShortCode(), is("SUSPS"));
-        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirement"));
+        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirements"));
 
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("STIMP"));
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirement"));
+        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("CRS"));
+        assertThat(resultLineTree.get(1).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
 
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("CRS"));
+        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("STIMP"));
         assertThat(resultLineTree.get(2).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+        assertThat(resultLineTree.get(2).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
 
         assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("EMREQ"));
         assertThat(resultLineTree.get(3).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
@@ -293,13 +294,14 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
 
         assertThat(resultLineTree.get(0).getResultDefinition().getData().getShortCode(), is("SUSPS"));
-        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirement"));
+        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirements"));
 
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("STIMP"));
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirement"));
+        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("CRS"));
+        assertThat(resultLineTree.get(1).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
 
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("CRS"));
+        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("STIMP"));
         assertThat(resultLineTree.get(2).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
+        assertThat(resultLineTree.get(2).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
 
         assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("EMREQ"));
         assertThat(resultLineTree.get(3).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));

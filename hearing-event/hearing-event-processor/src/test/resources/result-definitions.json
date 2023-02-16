@@ -64933,7 +64933,7 @@
       "canBeSubjectOfBreach": true,
       "canBeSubjectOfVariation": true,
       "resultTextTemplate": "Committed to prison for {imprisonmentPeriod}[ {concurrent}][ consecutive to offence {consecutiveToOffenceNumber}][ which is on case number {whereConsecutiveToAnOffenceOnAnotherCaseSpecifyThatCaseNumber}] suspended. Reason: {imprisonmentReasons}.[ Reason for custody: {theReasonsForThis}.] [The defendant must comply with the requirements (shown below) within the supervision period.%CRS%] %FRHS% In the event of activation of sentence: {bailRemandDaysToCountTaggedDays} bail remand days to count. %STIMP%",
-      "dependantResultDefinitionGroup": "Community Requirement",
+      "dependantResultDefinitionGroup": "Community Requirements",
       "isAvailableForCourtExtract": true,
       "isBooleanResult": false
     },
@@ -65491,7 +65491,7 @@
       "resultTextTemplate": "Total custodial period {totalCustodialPeriod} suspended for {suspendedPeriod} [Total sentence consecutive to {totalSentenceConsecutiveTo}][ which was imposed by {whichWasImpBy}]. [Supervision period {supervisionPeriod}.][ The custodial sentence has been suspended because {theCustodialSentenceHasBeenSuspendedBecause}.][ Reason for sentence without PSR {reasonForSentenceWithoutPSR}.]",
       "isAvailableForCourtExtract": true,
       "isBooleanResult": false,
-      "dependantResultDefinitionGroup":"Community Requirement"
+      "resultDefinitionGroup":"Community Requirements"
     },
     {
       "id": "b2dab2b7-3edd-4223-b1be-3819173ec54d",
@@ -65510,7 +65510,7 @@
       "urgent": false,
       "convicted": "N",
       "d20": false,
-      "resultDefinitionGroup": "Community requirements",
+      "resultDefinitionGroup": "Community Requirements",
       "postHearingCustodyStatus": "A",
       "terminatesOffenceProceedings": false,
       "lifeDuration": false,
@@ -65683,7 +65683,6 @@
       "urgent": false,
       "convicted": "N",
       "d20": false,
-      "resultDefinitionGroup": "",
       "postHearingCustodyStatus": "A",
       "terminatesOffenceProceedings": false,
       "lifeDuration": false,
