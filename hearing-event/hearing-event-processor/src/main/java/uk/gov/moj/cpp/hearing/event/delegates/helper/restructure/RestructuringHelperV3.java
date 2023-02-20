@@ -23,7 +23,6 @@ import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelper;
-import uk.gov.moj.cpp.hearing.event.delegates.helper.ResultTextHelperV3;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
@@ -41,14 +40,11 @@ public class RestructuringHelperV3 {
     public static final Predicate<JudicialResultPrompt> JUDICIAL_RESULT_PROMPT_PREDICATE = p -> !EXCLUDED_PROMPT_REFERENCE.equals(p.getPromptReference());
 
     private final ResultTreeBuilderV3 resultTreeBuilder;
-    private final ResultTextConfHelper resultTextConfHelper;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RestructuringHelperV3.class.getName());
 
     @Inject
-    public RestructuringHelperV3(final ResultTreeBuilderV3 resultTreeBuilder, final ResultTextConfHelper resultTextConfHelper) {
+    public RestructuringHelperV3(final ResultTreeBuilderV3 resultTreeBuilder) {
         this.resultTreeBuilder = resultTreeBuilder;
-        this.resultTextConfHelper = resultTextConfHelper;
     }
 
     public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodesResultDefinition) {
@@ -60,39 +56,20 @@ public class RestructuringHelperV3 {
 
         final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
 
-        if(resultTextConfHelper.isOldResultDefinitionV2(treeNodes)){
-            updateResultText(
-                    removeNonPublishableResults(
-                            restructureNextHearing(
-                                    processAlwaysPublishResults(
-                                            deDupNextHearing(
-                                                    filterNodesWithRollUpPrompts(
-                                                            processPublishAsPrompt(
-                                                                    removeExcludedResults(treeNodes))
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-            );
-        } else {
-            removeNonPublishableResults(
-                    restructureNextHearing(
-                            processAlwaysPublishResults(
-                                    deDupNextHearing(
-                                            filterNodesWithRollUpPrompts(
-                                                    processPublishAsPrompt(
-                                                            removeExcludedResults(
-                                                                    updateResultTextWithNewLogic(treeNodes)
-                                                            )
-                                                    )
-                                            )
-                                    )
-                            )
-                    )
-            );
-        }
-
+        updateResultText(
+                removeNonPublishableResults(
+                        restructureNextHearing(
+                                processAlwaysPublishResults(
+                                        deDupNextHearing(
+                                                filterNodesWithRollUpPrompts(
+                                                        processPublishAsPrompt(
+                                                                removeExcludedResults(treeNodes))
+                                                )
+                                        )
+                                )
+                        )
+                )
+        );
         setDurationElements(treeNodes);
         treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
         final List<TreeNode<ResultLine2>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
@@ -110,7 +87,6 @@ public class RestructuringHelperV3 {
 
     /**
      * If the results is publish for NOWs then no nextHearing object should be set
-     *
      * @param treeNodes
      */
     private void removeNextHearingObject(List<TreeNode<ResultLine2>> treeNodes) {
@@ -131,11 +107,5 @@ public class RestructuringHelperV3 {
                 treeNode.getJudicialResult().setResultText(resultText);
             }
         });
-    }
-
-    private  List<TreeNode<ResultLine2>>  updateResultTextWithNewLogic(final List<TreeNode<ResultLine2>> treeNodeList) {
-
-        ResultTextHelperV3.setResultText(treeNodeList, resultTextConfHelper);
-        return treeNodeList;
     }
 }

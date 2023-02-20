@@ -9,8 +9,6 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.IMP_TIMP_HEARING_RESULTS_SHARED_JSON;
@@ -23,9 +21,6 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SCENARIO_1_SHORT_CODE_SEND_TO_CCON_CB_JSON;
 
-
-import java.time.LocalDate;
-import org.mockito.Mockito;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.SecondaryCJSCode;
@@ -48,10 +43,8 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
 
     @Before
     public void setUp() throws IOException {
-        ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
-        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
         super.setUp();
-        target = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
+        target = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
         resultDefinitionList = resultDefinitions.stream().filter(resultDefinition ->
                 REMAND_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
                         REMANDED_IN_CUSTODY_ID.equals(resultDefinition.getId().toString()) ||
@@ -251,73 +244,5 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(topLevelResultLineParents.size(), is(1));
         assertThat(topLevelResultLineParents.get(0).getChildren().size(), is(1));
         assertThat(topLevelResultLineParents.get(0).getJudicialResult().getIsNewAmendment(), is(false));
-    }
-
-    @Test
-    public void shouldOrderResultsForDependantResultDefinitionGroup() throws IOException {
-        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-for-ordering.json", ResultsSharedV2.class);
-        final JsonEnvelope envelope = getEnvelope(resultsShared);
-        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
-
-        assertThat(resultLineTree.get(0).getResultDefinition().getData().getShortCode(), is("SUSPS"));
-        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirements"));
-
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("CRS"));
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
-
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("STIMP"));
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
-
-        assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("EMREQ"));
-        assertThat(resultLineTree.get(3).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(4).getResultDefinition().getData().getShortCode(), is("FRHS"));
-        assertThat(resultLineTree.get(4).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(5).getResultDefinition().getData().getShortCode(), is("NORDRC"));
-        assertThat(resultLineTree.get(5).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(6).getResultDefinition().getData().getShortCode(), is("RR"));
-        assertThat(resultLineTree.get(6).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(7).getResultDefinition().getData().getShortCode(), is("UPWR"));
-        assertThat(resultLineTree.get(7).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-
-    }
-
-    @Test
-    public void shouldOrderResultsForDependantResultDefinitionGroupForApplication() throws IOException {
-        final ResultsSharedV2 resultsShared = fileResourceObjectMapper.convertFromFile("judicial-result-for-ordering-for-application.json", ResultsSharedV2.class);
-        final JsonEnvelope envelope = getEnvelope(resultsShared);
-        final List<TreeNode<ResultLine>> resultLineTree = target.build(envelope, resultsShared);
-
-        assertThat(resultLineTree.get(0).getResultDefinition().getData().getShortCode(), is("SUSPS"));
-        assertThat(resultLineTree.get(0).getResultDefinition().getData().getDependantResultDefinitionGroup(), is("Community Requirements"));
-
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getShortCode(), is("CRS"));
-        assertThat(resultLineTree.get(1).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
-
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getShortCode(), is("STIMP"));
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-        assertThat(resultLineTree.get(2).getResultDefinition().getData().getResultDefinitionGroup(), is("Community Requirements"));
-
-        assertThat(resultLineTree.get(3).getResultDefinition().getData().getShortCode(), is("EMREQ"));
-        assertThat(resultLineTree.get(3).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(4).getResultDefinition().getData().getShortCode(), is("FRHS"));
-        assertThat(resultLineTree.get(4).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(5).getResultDefinition().getData().getShortCode(), is("NORDRC"));
-        assertThat(resultLineTree.get(5).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(6).getResultDefinition().getData().getShortCode(), is("RR"));
-        assertThat(resultLineTree.get(6).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-        assertThat(resultLineTree.get(7).getResultDefinition().getData().getShortCode(), is("UPWR"));
-        assertThat(resultLineTree.get(7).getResultDefinition().getData().getDependantResultDefinitionGroup(), is(nullValue()));
-
-
     }
 }
