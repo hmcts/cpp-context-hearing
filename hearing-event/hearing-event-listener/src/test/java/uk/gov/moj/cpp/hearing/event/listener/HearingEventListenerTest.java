@@ -18,8 +18,6 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.Prompt;
-import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -52,7 +50,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
-import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
@@ -802,7 +799,7 @@ public class HearingEventListenerTest {
         final JsonObject someJsonObject = new StringToJsonObjectConverter().convert("{}");
         final DraftResultSavedV2 draftResultSavedV2 = new DraftResultSavedV2(hearingId, hearingDay, someJsonObject, amendedByUser);
 
-        when(draftResultRepository.findBy(hearingId.toString() + hearingDay.toString())).thenReturn(null);
+        when(draftResultRepository.findBy(hearingId.toString() + hearingDay)).thenReturn(null);
 
         hearingEventListener.draftResultSavedV2(envelopeFrom(metadataWithRandomUUID("hearing.draft-result-saved-v2"),
                 objectToJsonObjectConverter.convert(draftResultSavedV2)

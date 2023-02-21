@@ -19,16 +19,17 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -171,6 +172,44 @@ public class NowsTemplates {
                 .withHearingDay(LocalDate.now())
                 .build();
     }
+
+    public static ResultsSharedV3 resultsSharedV3Template() {
+
+        InitiateHearingCommandHelper hearingOne = h(standardInitiateHearingTemplate());
+
+        UUID completedResultLineId = randomUUID();
+
+        final List<Target2> targets = new ArrayList<>(asList(
+                CoreTestTemplates.target2(hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId(), hearingOne.getFirstOffenceIdForFirstDefendant(), completedResultLineId).build()
+        ));
+
+        return ResultsSharedV3.builder()
+                .withHearingId(hearingOne.getHearingId())
+                .withTargets(targets)
+                .withSharedTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                .withHearing(hearingOne.getHearing())
+                .withCourtClerk(DelegatedPowers.delegatedPowers()
+                        .withUserId(randomUUID())
+                        .withFirstName(STRING.next())
+                        .withLastName(STRING.next())
+                        .build())
+                .withCompletedResultLinesStatus(ImmutableMap.of(completedResultLineId, CompletedResultLineStatus.builder()
+                        .withCourtClerk(DelegatedPowers.delegatedPowers()
+                                .withUserId(randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .withId(completedResultLineId)
+                        .withLastSharedDateTime(PAST_ZONED_DATE_TIME.next().withZoneSameInstant(ZoneId.of("UTC")))
+                        .build()
+                ))
+                .withVariantDirectory(singletonList(
+                        standardVariantTemplate(randomUUID(), hearingOne.getHearingId(), hearingOne.getFirstDefendantForFirstCase().getId())
+                ))
+                .withHearingDay(LocalDate.now())
+                .build();
+    }
+
 
     public static ResultsShared resultsSharedTemplateForDocumentIsDeleted() {
 

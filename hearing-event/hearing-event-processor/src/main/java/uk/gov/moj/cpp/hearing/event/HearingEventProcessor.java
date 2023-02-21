@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event;
 
+import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
@@ -19,7 +20,6 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
-import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
@@ -106,8 +106,7 @@ public class HearingEventProcessor {
             LOGGER.debug("hearing.draft-result-saved-v2 event received {}", event.toObfuscatedDebugString());
         }
 
-        final UUID hearingId = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), DraftResultSavedV2.class).getHearingId();
-
+        final UUID hearingId = fromString(event.payloadAsJsonObject().getString("hearingId"));
         final PublicHearingDraftResultSaved publicHearingDraftResultSaved = PublicHearingDraftResultSaved.publicHearingDraftResultSaved()
                 .setHearingId(hearingId);
 
@@ -130,7 +129,6 @@ public class HearingEventProcessor {
         final JsonObject publicEventPayload = this.objectToJsonObjectConverter.convert(publicHearingDraftResultDeleted);
         this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName(PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2), publicEventPayload));
     }
-
 
     @Handles("hearing.save-draft-result-failed")
     public void handleSaveDraftResultFailedEvent(final JsonEnvelope event) {

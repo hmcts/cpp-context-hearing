@@ -107,6 +107,7 @@ public class NowsReferenceDataLoader {
                 .build())
                 .withName(GET_ALL_FIXED_LIST)
                 .withMetadataFrom(context);
+
         return requester.request(requestEnvelope, AllFixedList.class).payload();
     }
 }

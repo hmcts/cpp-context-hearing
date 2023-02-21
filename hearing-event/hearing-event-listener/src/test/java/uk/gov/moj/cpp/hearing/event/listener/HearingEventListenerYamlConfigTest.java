@@ -70,6 +70,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedSuccess;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ShareResultsFailed;
 import uk.gov.moj.cpp.hearing.event.listener.util.SubscriptionsDescriptorLoader;
@@ -163,6 +164,7 @@ public class HearingEventListenerYamlConfigTest {
             DaysResultLinesStatusUpdated.class.getAnnotation(Event.class).value(),
             DefendantsWelshInformationRecorded.class.getAnnotation(Event.class).value(),
             HearingVacatedRequested.class.getAnnotation(Event.class).value(),
+            ResultsSharedSuccess.class.getAnnotation(Event.class).value(),
             PublicSelectedOffencesRemovedFromExistingHearing.class.getAnnotation(Event.class).value()
 
     );

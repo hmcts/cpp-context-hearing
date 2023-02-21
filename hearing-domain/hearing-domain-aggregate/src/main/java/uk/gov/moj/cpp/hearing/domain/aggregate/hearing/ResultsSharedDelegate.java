@@ -30,6 +30,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedSuccess;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
@@ -472,6 +473,13 @@ public class ResultsSharedDelegate implements Serializable {
         return Stream.concat(streams, CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, resultLines));
     }
 
+    /**
+     * Two different private events are being published in this method
+     * hearing.events.results-shared-success is listened to in the PublishResultsV3EventProcessor
+     * and triggered to publish a light public success event.
+     * Target is to reduce the response time
+     * This feature has been developed by the NFT team in the scope of the performance improvement
+     */
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final List<UUID> defendantDetailsChanged, final YouthCourt youthCourt, final LocalDate hearingDay) {
 
         addParenetResultLineIds(resultLines);
@@ -499,7 +507,7 @@ public class ResultsSharedDelegate implements Serializable {
         hearing.setYouthCourt(youthCourt);
         hearing.setHasSharedResults(true);
 
-        final ResultsSharedV3.Builder resultsSharedV2Builder = ResultsSharedV3.builder()
+        final ResultsSharedV3.Builder resultsSharedV3Builder = ResultsSharedV3.builder()
                 .withIsReshare(previouslyShared)
                 .withHearingId(hearingId)
                 .withHearingDay(hearingDay)
@@ -511,13 +519,18 @@ public class ResultsSharedDelegate implements Serializable {
                 .withSavedTargets(getSavedTargetsForHearingDay3(momento.getMultiDaySavedTargets(), hearingDay))
                 .withCompletedResultLinesStatus(getCompletedResultLineStatusForHearingDay(this.momento.getMultiDayCompletedResultLinesStatus(), hearingDay))
                 .withNewAmendmentResults(newAmendmentResults);
+
+        final ResultsSharedSuccess resultsSharedSuccess = ResultsSharedSuccess.builder()
+                        .withHearingId(hearingId).build();
+
         if (!defendantDetailsChanged.isEmpty()) {
-            resultsSharedV2Builder.withDefendantDetailsChanged(defendantDetailsChanged);
+            resultsSharedV3Builder.withDefendantDetailsChanged(defendantDetailsChanged);
         }
 
-
-        final ResultsSharedV3 resultsSharedV3 = resultsSharedV2Builder.build();
+        final ResultsSharedV3 resultsSharedV3 = resultsSharedV3Builder.build();
+        streamBuilder.add(resultsSharedSuccess);
         streamBuilder.add(resultsSharedV3);
+
         isHearingVacatedRequired(hearing, resultsSharedV3, streamBuilder);
 
         if (!this.momento.getNextHearingStartDates().isEmpty()) {
@@ -550,7 +563,7 @@ public class ResultsSharedDelegate implements Serializable {
                                 .findFirst()
                                 .map(Prompt::getValue)
                                 .get();
-                        if (nonNull(hearingIdToBeVacated) && hearingIdToBeVacated.isPresent() && nonNull(vacatedTrialReasonShortDesc)) {
+                        if (hearingIdToBeVacated.isPresent()) {
                             final HearingVacatedRequested hearingVacatedRequested = HearingVacatedRequested.builder()
                                     .withHearingIdToBeVacated(hearingIdToBeVacated.get())
                                     .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc)

@@ -58,9 +58,7 @@ public class ResultTextHelper {
                 .map(p -> format("%s %s", p.getLabel(), getPromptValue(p, referencePromptList)))
                 .collect(joining(lineSeparator()));
 
-        final String res = getResultText(resultDefinition.getLabel(), sortedPrompts);
-
-        return res;
+        return getResultText(resultDefinition.getLabel(), sortedPrompts);
     }
 
     public static String getResultText(final String label, final String sortedPrompts){

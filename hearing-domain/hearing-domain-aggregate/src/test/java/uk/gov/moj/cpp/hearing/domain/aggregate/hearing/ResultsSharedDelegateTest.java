@@ -2,11 +2,15 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -27,6 +31,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
+import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedSuccess;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 
@@ -361,8 +366,6 @@ public class ResultsSharedDelegateTest {
                 .withYouthCourtId(randomUUID())
                 .build();
 
-        final UUID target1Id = randomUUID();
-        final UUID target2Id = randomUUID();
         final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
 
@@ -392,13 +395,15 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccess= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getTargets().size(), is(1));
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
+        assertNotNull(resultsSharedSuccess);
 
     }
 
@@ -412,8 +417,6 @@ public class ResultsSharedDelegateTest {
                 .withYouthCourtId(randomUUID())
                 .build();
 
-        final UUID target1Id = randomUUID();
-        final UUID target2Id = randomUUID();
         final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
 
@@ -444,9 +447,9 @@ public class ResultsSharedDelegateTest {
         Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
 
         List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
 
         assertThat(resultsSharedV3.getTargets().size(), is(1));
@@ -469,9 +472,9 @@ public class ResultsSharedDelegateTest {
 
         eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
         eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
 
         assertThat(resultsSharedV3.getTargets().size(), is(1));
@@ -531,7 +534,7 @@ public class ResultsSharedDelegateTest {
                 .withYouthCourtId(randomUUID())
                 .build();
 
-               final UUID resultLine1Id = randomUUID();
+        final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
@@ -560,14 +563,16 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccess= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearing().getCourtApplications().size(), is(1));
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getTargets().size(), is(1));
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
+        assertNotNull(resultsSharedSuccess);
     }
 
     @Test
@@ -620,9 +625,10 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccessV3= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearing().getCourtApplications().size(), is(2));
         assertThat(resultsSharedV3.getHearing().getCourtApplications().get(0).getId(), is(duplicatedApplicationId));
         assertThat(resultsSharedV3.getHearing().getCourtApplications().get(1).getId(), is(uniqueApplicationId));
@@ -630,6 +636,7 @@ public class ResultsSharedDelegateTest {
         assertThat(resultsSharedV3.getTargets().size(), is(1));
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
+        assertNotNull(resultsSharedSuccessV3);
     }
 
     @Test
@@ -658,13 +665,13 @@ public class ResultsSharedDelegateTest {
 
 
         final String REASON = "random reason";
-        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID),null,null, REASON,null,null,"reasonForVacatingTrial");
+        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID), null, null, REASON, null, null, "reasonForVacatingTrial");
 
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
                 .withLevel("OFFENCE")
-                .withPrompts(Arrays.asList(prompt))
+                .withPrompts(singletonList(prompt))
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.fromString(HEARING_VACATED_RESULT_DEFINITION_ID))
                 .withApplicationIds(APPLICATION_ID)
@@ -688,17 +695,19 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(2));
+        assertThat(eventCollection.size(), is(3));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccessV3= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getTargets().size(), is(2));
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
 
-        final HearingVacatedRequested hearingVacatedRequested = (HearingVacatedRequested) eventCollection.get(1);
+        final HearingVacatedRequested hearingVacatedRequested = (HearingVacatedRequested) eventCollection.get(2);
         assertThat(hearingVacatedRequested.getHearingIdToBeVacated(), is(HEARING_ID_TO_BE_VACATED));
         assertThat(hearingVacatedRequested.getVacatedTrialReasonShortDesc(), is(REASON));
+        assertNotNull(resultsSharedSuccessV3);
 
 
     }
@@ -729,7 +738,7 @@ public class ResultsSharedDelegateTest {
 
 
         final String REASON = "random reason";
-        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID),null,null, REASON,null,null,"reasonForVacatingTrial");
+        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID), null, null, REASON, null, null, "reasonForVacatingTrial");
 
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
@@ -759,14 +768,15 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccessV3 = (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getTargets().size(), is(2));
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getIsReshare(), is(false));
-
+        assertNotNull(resultsSharedSuccessV3);
 
     }
 
@@ -786,12 +796,14 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), getYouthCourt(), hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccessV3 = (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getHearing().getHearingDays().get(0).getHasSharedResults(), is(true));
         assertThat(resultsSharedV3.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+        assertNotNull(resultsSharedSuccessV3);
     }
 
     @Test
@@ -810,12 +822,14 @@ public class ResultsSharedDelegateTest {
         final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, getDelegatedPowers(), sharedTime, getSharedResultsCommandResultLineV2s(sharedTime), emptyList(), getYouthCourt(), hearingDay);
 
         final List<Object> eventCollection = eventStreams.collect(toList());
-        assertThat(eventCollection.size(), is(1));
+        assertThat(eventCollection.size(), is(2));
 
-        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(0);
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
         assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV3.getHearing().getHearingDays().get(0).getHasSharedResults(), is(false));
         assertThat(resultsSharedV3.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+        assertNotNull(resultsSharedSuccess);
     }
 
     @Test
