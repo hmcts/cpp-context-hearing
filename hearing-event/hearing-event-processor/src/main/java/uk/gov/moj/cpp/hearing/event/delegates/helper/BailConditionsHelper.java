@@ -8,7 +8,6 @@ import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.split;
-import static org.apache.commons.lang3.StringUtils.strip;
 import static uk.gov.moj.cpp.hearing.event.helper.HearingHelper.getOffencesFromApplication;
 
 import uk.gov.justice.core.courts.Defendant;
@@ -104,13 +103,13 @@ public class BailConditionsHelper {
         while (resultIterator.hasNext()) {
             final JudicialResultsLabelAndResultPrompts judicialResultsLabelAndResultPrompt = resultIterator.next();
             final String label = judicialResultsLabelAndResultPrompt.getLabel();
-            if (!bailConditionsBuilder.toString().contains(label)) {
-                final Iterator<JudicialResultPrompt> promptsIterator = judicialResultsLabelAndResultPrompt.getJudicialResultPrompts().iterator();
-                addLabelToBailCondition(bailConditionsBuilder, resultIterator, label, promptsIterator);
-                while (promptsIterator.hasNext()) {
-                    final JudicialResultPrompt judicialResultPrompt = promptsIterator.next();
-                    addPromptToBailConditions(bailConditionsBuilder, resultIterator, promptsIterator, judicialResultPrompt);
-                }
+
+            final Iterator<JudicialResultPrompt> promptsIterator = judicialResultsLabelAndResultPrompt.getJudicialResultPrompts().iterator();
+            addLabelToBailCondition(bailConditionsBuilder, resultIterator, label, promptsIterator);
+            while (promptsIterator.hasNext()) {
+                final JudicialResultPrompt judicialResultPrompt = promptsIterator.next();
+                addPromptToBailConditions(bailConditionsBuilder, resultIterator, promptsIterator, judicialResultPrompt);
+
             }
         }
         return bailConditionsBuilder;

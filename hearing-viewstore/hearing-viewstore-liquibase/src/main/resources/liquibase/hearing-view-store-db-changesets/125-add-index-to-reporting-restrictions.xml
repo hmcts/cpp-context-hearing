@@ -4,7 +4,7 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
-    <changeSet id="123" author="hearing" logicalFilePath="125-add-index-to-reporting-restrictions.xml">
+    <changeSet id="125" author="hearing" logicalFilePath="125-add-index-to-reporting-restrictions.xml">
 
         <sql>
             CREATE INDEX IF NOT EXISTS reporting_restriction_idx ON ha_reporting_restriction (hearing_id, offence_id);

@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
+import static com.google.common.io.Resources.getResource;
 import static java.lang.System.lineSeparator;
+import static java.nio.charset.Charset.defaultCharset;
 import static java.time.ZoneId.systemDefault;
 import static java.time.ZonedDateTime.of;
 import static java.util.Arrays.asList;
@@ -27,19 +29,23 @@ import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.CourtOrderOffence;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.io.Resources;
 import org.junit.Test;
 
 public class BailConditionsHelperTest {
@@ -55,6 +61,22 @@ public class BailConditionsHelperTest {
 
         final String bailConditionsResult = resultsSharedTemplate.getHearing()
                 .getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailConditions();
+        assertNotNull(bailConditionsResult);
+        assertThat(bailConditionsResult, is(bailCondition));
+    }
+
+    @Test
+    public void testCurfewBailConditions() throws IOException {
+        final String bailCondition = "Curfew condition is to be electronically monitored ;Curfew\nBetween : 19:00\nAnd : 06:00\nFrequency : Daily\nAdditional information : At AddressX";
+
+        final String hearingJsonString = Resources.toString(getResource("hearing.results-shared-with-curfew-bail-condition.json"), defaultCharset());
+        final Hearing hearing = new ObjectMapperProducer().objectMapper().readValue(hearingJsonString, Hearing.class);
+
+
+        bailConditionsHelper.setBailConditions(hearing);
+
+        final String bailConditionsResult = hearing
+                .getProsecutionCases().get(0).getDefendants().get(1).getPersonDefendant().getBailConditions();
         assertNotNull(bailConditionsResult);
         assertThat(bailConditionsResult, is(bailCondition));
     }

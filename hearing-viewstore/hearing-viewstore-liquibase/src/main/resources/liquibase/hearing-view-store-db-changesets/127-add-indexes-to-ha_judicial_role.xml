@@ -4,10 +4,10 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
 
-    <changeSet id="126" author="hearing" logicalFilePath="126-add-index-to-ha_target.xml">
+    <changeSet id="127" author="hearing" logicalFilePath="127-add-indexes-to-ha_judicial_role.xml">
 
         <sql>
-            CREATE INDEX IF NOT EXISTS ha_target_id ON ha_target (hearing_id);
+            CREATE INDEX IF NOT EXISTS ha_judicial_role_hearing_id_idx ON ha_judicial_role (hearing_id);
         </sql>
 
     </changeSet>
