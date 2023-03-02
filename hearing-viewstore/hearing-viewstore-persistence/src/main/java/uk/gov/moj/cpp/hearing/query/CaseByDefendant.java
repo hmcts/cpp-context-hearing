@@ -42,7 +42,7 @@ public class CaseByDefendant implements Serializable {
     public static final String FIND_CASE_BY_ORGANISATION_DEFENDANT_WITH_CASE_ID = "findCaseByOrganisationDefendantWithCaseId";
     public static final String FIND_CASE_BY_ORGANISATION_DEFENDANT_WITHOUT_CASE_ID = "findCaseByOrganisationDefendantWithoutCaseId";
 
-    public static final String QUERY = "SELECT c.id as caseId, c.caseurn as urn " +
+    public static final String QUERY = "SELECT DISTINCT c.id as caseId, c.caseurn as urn " +
             "FROM ha_case c, ha_defendant d, ha_hearing h, ha_hearing_day hd " +
             "WHERE c.id = d.prosecution_case_id " +
             "AND c.hearing_id = h.id " +
