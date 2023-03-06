@@ -198,6 +198,7 @@ public class HearingEventListenerYamlConfigTest {
                 CompanyRepresentativeEventListener.class,
                 DefendantLegalAidStatusUpdateEventListener.class,
                 CaseDefendantsUpdateListener.class,
+                AddCaseDefendantsEventListener.class,
                 PublishCourtListEventListener.class,
                 CaseMarkerEventListener.class,
                 SessionTimeEventListener.class,

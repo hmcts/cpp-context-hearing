@@ -48,6 +48,7 @@ import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.DefenceCounsel;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
@@ -74,6 +75,7 @@ import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
+import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
@@ -106,6 +108,7 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -824,7 +827,7 @@ public class HearingAggregateTest {
         );
 
         final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
-                hearingAggregate.updateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
+                hearingAggregate.addOrUpdateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
                         .findFirst()
                         .orElse(null);
         assertThat(caseDefendantsUpdatedForHearing, nullValue());
@@ -846,7 +849,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingUnallocated(asList(randomUUID()), asList(randomUUID()), asList(randomUUID()), hearing.getId()));
 
         final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
-                hearingAggregate.updateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
+                hearingAggregate.addOrUpdateCaseDefendantsForHearing(initiateHearingCommand.getHearing().getId(), ProsecutionCase.prosecutionCase().build())
                         .findFirst()
                         .orElse(null);
         assertThat(caseDefendantsUpdatedForHearing, nullValue());
@@ -864,10 +867,49 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(hearing));
 
         final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing)
-                hearingAggregate.updateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
+                hearingAggregate.addOrUpdateCaseDefendantsForHearing(hearing.getId(), ProsecutionCase.prosecutionCase().build())
                         .findFirst()
                         .orElse(null);
+
         assertThat(caseDefendantsUpdatedForHearing.getHearingId(), is(hearing.getId()));
+    }
+
+    @Test
+    public void shouldRaiseEventWhenNewDefendantAddedToHearing() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearing.setHasSharedResults(Boolean.FALSE);
+
+        UUID prosecutionCaseId = randomUUID();
+        UUID defendantId = randomUUID();
+        UUID offenceId = randomUUID();
+        Offence offence = Offence.offence().withId(offenceId).build();
+        Defendant defendant = Defendant.defendant().withId(defendantId).withOffences(singletonList(offence)).build();
+        ProsecutionCase prosecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(singletonList(defendant))
+                .build();
+        hearing.setProsecutionCases(singletonList(prosecutionCase));
+
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        UUID newDefendantId = randomUUID();
+        Defendant newDefendant = Defendant.defendant().withId(newDefendantId).withOffences(singletonList(offence)).build();
+        ProsecutionCase updatedProsecutionCase = ProsecutionCase.prosecutionCase()
+                .withId(prosecutionCaseId)
+                .withDefendants(singletonList(newDefendant))
+                .build();
+
+        final Stream<Object> stream = hearingAggregate.addOrUpdateCaseDefendantsForHearing(hearing.getId(), updatedProsecutionCase);
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(2));
+
+        CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing) objectList.get(0);
+        assertThat(caseDefendantsUpdatedForHearing.getHearingId(), is(hearing.getId()));
+
+        AddCaseDefendantsForHearing addCaseDefendantsForHearing = (AddCaseDefendantsForHearing) objectList.get(1);
+        assertThat(addCaseDefendantsForHearing.getHearingId(), is(hearing.getId()));
     }
 
 

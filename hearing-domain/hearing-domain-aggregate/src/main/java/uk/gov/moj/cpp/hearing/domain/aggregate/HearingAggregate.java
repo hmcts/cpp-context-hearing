@@ -73,6 +73,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.ResultsSharedDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VariantDirectoryDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.VerdictDelegate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.CustodyTimeLimitUtil;
+import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
@@ -180,7 +181,7 @@ import javax.json.JsonObject;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748574L;
+    private static final long serialVersionUID = -6059812881894748582L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
@@ -307,6 +308,7 @@ public class HearingAggregate implements Aggregate {
                 when(CpsProsecutorUpdated.class).apply(prosecutionCaseDelegate::handleProsecutorUpdated),
                 when(DefendantLegalAidStatusUpdatedForHearing.class).apply(prosecutionCaseDelegate::onDefendantLegalaidStatusTobeUpdatedForHearing),
                 when(CaseDefendantsUpdatedForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantUpdatedForHearing),
+                when(AddCaseDefendantsForHearing.class).apply(prosecutionCaseDelegate::onCaseDefendantsAddedForHearing),
                 when(HearingEventVacatedTrialCleared.class).apply(hearingEventVacatedTrialCleared -> hearingDelegate.handleVacatedTrialCleared()),
                 when(TargetRemoved.class).apply(targetRemoved -> hearingDelegate.handleTargetRemoved(targetRemoved.getTargetId())),
                 when(PendingNowsRequested.class).apply(nowDelegate::handlePendingNowsRequested),
@@ -806,14 +808,31 @@ public class HearingAggregate implements Aggregate {
 
     }
 
-    public Stream<Object> updateCaseDefendantsForHearing(final UUID hearingId, final ProsecutionCase prosecutionCase) {
+    public Stream<Object> addOrUpdateCaseDefendantsForHearing(final UUID hearingId, final ProsecutionCase prosecutionCase) {
         if (SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
             return Stream.empty();
         }
-        return apply(Stream.of(CaseDefendantsUpdatedForHearing.caseDefendantsUpdatedForHearing()
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
+        streamBuilder.add(CaseDefendantsUpdatedForHearing.caseDefendantsUpdatedForHearing()
                 .withHearingId(hearingId)
                 .withProsecutionCase(prosecutionCase)
-                .build()));
+                .build());
+
+        //check if there are new defendants added
+        final ProsecutionCase matchedProsecutionCase = this.momento.getHearing().getProsecutionCases().stream().filter(pc -> pc.getId().equals(prosecutionCase.getId())).findFirst().orElse(null);
+        if (nonNull(matchedProsecutionCase)) {
+            final List<uk.gov.justice.core.courts.Defendant> newDefendants =
+                    prosecutionCase.getDefendants().stream().filter(def -> matchedProsecutionCase.getDefendants().stream().noneMatch(persistentDef -> def.getId().equals(persistentDef.getId()))).collect(Collectors.toList());
+            if (!newDefendants.isEmpty()) {
+                streamBuilder.add(AddCaseDefendantsForHearing.addCaseDefendantsForHearing()
+                        .withCaseId(prosecutionCase.getId())
+                        .withHearingId(hearingId)
+                        .withDefendants(newDefendants)
+                        .build());
+            }
+        }
+
+        return apply(streamBuilder.build());
     }
 
     public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements) {
