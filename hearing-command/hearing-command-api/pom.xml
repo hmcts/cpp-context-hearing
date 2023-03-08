@@ -122,6 +122,12 @@
             <artifactId>test-utils-enveloper-provider</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.hearing</groupId>
+            <artifactId>hearing-common</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
 </project>

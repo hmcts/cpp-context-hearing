@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.accesscontrol;
 import uk.gov.moj.cpp.accesscontrol.drools.Outcome;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
 import java.util.Arrays;
+import uk.gov.moj.cpp.hearing.command.api.accescontrol.RuleConstants;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
 global uk.gov.moj.cpp.accesscontrol.hearing.providers.HearingProvider hearingProvider;
@@ -11,7 +12,8 @@ rule "Command - API - Action - hearing.initiate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.initiate");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate"));
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate"))
+   || eval(userAndGroupProvider.hasPermission($action, RuleConstants.expectedPermissionsForCase()));
   then
     $outcome.setSuccess(true);
 end
