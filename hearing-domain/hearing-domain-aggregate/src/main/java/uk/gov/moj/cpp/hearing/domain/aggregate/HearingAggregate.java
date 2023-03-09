@@ -946,6 +946,15 @@ public class HearingAggregate implements Aggregate {
                 .build()));
     }
 
+    public Stream<Object> stopCustodyTimeLimitClock() {
+
+        if (!SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
+            return Stream.empty();
+        }
+       return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s());
+
+    }
+
     public Hearing getHearing() {
         return this.momento.getHearing();
     }

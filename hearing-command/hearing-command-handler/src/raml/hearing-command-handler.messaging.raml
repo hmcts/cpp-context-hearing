@@ -141,6 +141,9 @@ baseUri:  message://command/handler/message/hearing
             schema:  !include json/schema/hearing.command.update-days-result-lines-status.json
 
 
+
+
+
 #Update Plea
         application/vnd.hearing.hearing-offence-plea-update+json:
             example: !include json/hearing.hearing-offence-plea-update.json
@@ -468,6 +471,13 @@ baseUri:  message://command/handler/message/hearing
         application/vnd.hearing.command.extend-custody-time-limit+json:
             schema: !include json/schema/hearing.command.extend-custody-time-limit.json
             example: !include json/hearing.command.extend-custody-time-limit.json
+
+# Stop Custody Time Limit
+        application/vnd.hearing.command.stop-custody-time-limit-clock+json:
+             schema: !include json/schema/hearing.command.stop-custody-time-limit-clock.json
+             example: !include json/hearing.command.stop-custody-time-limit-clock.json
+
+
 
 # Court restrictions
         application/vnd.hearing.command.restrict-court-list+json:

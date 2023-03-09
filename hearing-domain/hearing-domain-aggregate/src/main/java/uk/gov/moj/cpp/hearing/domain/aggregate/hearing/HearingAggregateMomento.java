@@ -14,6 +14,7 @@ import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
+import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -32,7 +33,7 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRe
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569228L;
+    private static final long serialVersionUID = -561416825201569229L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -61,6 +62,11 @@ public class HearingAggregateMomento implements Serializable {
     private Map<LocalDate, Map<UUID, Target2>> multiDaySavedTargets = new HashMap<>();
     private Map<LocalDate, Map<UUID, CompletedResultLineStatus>> multiDayCompletedResultLinesStatus = new HashMap<>();
     private Map<LocalDate, Boolean> isHearingDayPreviouslyShared = new HashMap<>();
+
+
+
+    private List<SharedResultsCommandResultLineV2> sharedResultsCommandResultLineV2s = new ArrayList<>();
+
 
     public Map<UUID, HearingEventDelegate.HearingEvent> getHearingEvents() {
         return hearingEvents;
@@ -161,6 +167,10 @@ public class HearingAggregateMomento implements Serializable {
         this.transientTargets = transientTargets;
     }
 
+    public void setSharedResultsCommandResultLineV2s(List<SharedResultsCommandResultLineV2> sharedResultsCommandResultLineV2s) {
+        this.sharedResultsCommandResultLineV2s = sharedResultsCommandResultLineV2s;
+    }
+
     public ZonedDateTime getLastSharedTime() {
         return this.lastSharedTime;
     }
@@ -200,5 +210,11 @@ public class HearingAggregateMomento implements Serializable {
     public Map<LocalDate, Map<UUID, Target2>> getMultiDayTargets() {
         return multiDayTargets;
     }
+
+    public List<SharedResultsCommandResultLineV2> getSharedResultsCommandResultLineV2s() {
+        return sharedResultsCommandResultLineV2s;
+    }
+
+
 
 }

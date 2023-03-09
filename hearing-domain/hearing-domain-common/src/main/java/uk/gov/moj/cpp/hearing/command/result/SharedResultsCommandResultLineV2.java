@@ -6,12 +6,13 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@SuppressWarnings({"squid:S2384"})
+@SuppressWarnings({"squid:S2384", "squid:S1067"})
 public class SharedResultsCommandResultLineV2 implements Serializable {
     private String shortCode;
     private DelegatedPowers delegatedPowers;
@@ -41,7 +42,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
     private boolean shadowListed;
     private String draftResult;
 
-    @SuppressWarnings({"squid:S2384"})
+    @SuppressWarnings({"squid:S2384", "squid:S1067"})
     @JsonCreator
     public SharedResultsCommandResultLineV2(
             @JsonProperty("shortCode") final String shortCode,
@@ -470,6 +471,49 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
             return this;
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            final Builder builder = (Builder) o;
+            return isModified == builder.isModified &&
+                    isComplete == builder.isComplete &&
+                    isDeleted == builder.isDeleted &&
+                    shadowListed == builder.shadowListed &&
+                    Objects.equals(shortCode, builder.shortCode) &&
+                    Objects.equals(delegatedPowers, builder.delegatedPowers) &&
+                    Objects.equals(orderedDate, builder.orderedDate) &&
+                    Objects.equals(sharedDate, builder.sharedDate) &&
+                    Objects.equals(resultLineId, builder.resultLineId) &&
+                    Objects.equals(offenceId, builder.offenceId) &&
+                    Objects.equals(defendantId, builder.defendantId) &&
+                    Objects.equals(masterDefendantId, builder.masterDefendantId) &&
+                    Objects.equals(resultDefinitionId, builder.resultDefinitionId) &&
+                    Objects.equals(prompts, builder.prompts) &&
+                    Objects.equals(resultLabel, builder.resultLabel) &&
+                    Objects.equals(level, builder.level) &&
+                    Objects.equals(applicationId, builder.applicationId) &&
+                    Objects.equals(caseId, builder.caseId) &&
+                    Objects.equals(amendmentDate, builder.amendmentDate) &&
+                    Objects.equals(amendmentReasonId, builder.amendmentReasonId) &&
+                    Objects.equals(amendmentReason, builder.amendmentReason) &&
+                    Objects.equals(fourEyesApproval, builder.fourEyesApproval) &&
+                    Objects.equals(approvedDate, builder.approvedDate) &&
+                    Objects.equals(childResultLineIds, builder.childResultLineIds) &&
+                    Objects.equals(parentResultLineIds, builder.parentResultLineIds) &&
+                    Objects.equals(draftResult, builder.draftResult);
+        }
+
+        @Override
+        public int hashCode() {
+
+            return Objects.hash(shortCode, delegatedPowers, orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId, resultDefinitionId, prompts, resultLabel, level, isModified, isComplete, applicationId, caseId, amendmentDate, amendmentReasonId, amendmentReason, fourEyesApproval, approvedDate, isDeleted, childResultLineIds, parentResultLineIds, shadowListed, draftResult);
+        }
+
         public SharedResultsCommandResultLineV2 build() {
             return new SharedResultsCommandResultLineV2(
                     shortCode,
@@ -497,6 +541,7 @@ public class SharedResultsCommandResultLineV2 implements Serializable {
                     childResultLineIds,
                     parentResultLineIds,
                     shadowListed,
+
                     draftResult
             );
         }
