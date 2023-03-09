@@ -55,6 +55,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+import static java.util.Optional.of;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
@@ -415,7 +417,7 @@ public class ResultsSharedDelegate implements Serializable {
 
         final LocalDate hearingDay = getHearingDay();
         final Map<UUID, Target> targetsInAggregate =
-                momento.getMultiDayTargets().containsKey(hearingDay) ? Optional.of(momento.getMultiDayTargets().get(hearingDay)).map(e -> {
+                momento.getMultiDayTargets().containsKey(hearingDay) ? of(momento.getMultiDayTargets().get(hearingDay)).map(e -> {
                     final Map<UUID, Target> map = new HashMap<>();
                     e.entrySet().stream().map(b -> map.put(b.getKey(), convertToTarget(b.getValue())));
                     return map;
@@ -468,7 +470,7 @@ public class ResultsSharedDelegate implements Serializable {
         final Map<UUID, Target> finalTargets = new HashMap<>();
         final List<NewAmendmentResult> newAmendmentResults = new ArrayList<>();
         final Map<UUID, Target> targetsInAggregate =
-                momento.getMultiDayTargets().containsKey(hearingDay) ? Optional.of(momento.getMultiDayTargets().get(hearingDay)).map(e -> {
+                momento.getMultiDayTargets().containsKey(hearingDay) ? of(momento.getMultiDayTargets().get(hearingDay)).map(e -> {
                     final Map<UUID, Target> map = new HashMap<>();
                     e.entrySet().stream().map(b -> map.put(b.getKey(), convertToTarget(b.getValue())));
                     return map;
@@ -592,7 +594,7 @@ public class ResultsSharedDelegate implements Serializable {
                 target.getResultLines().forEach(resultLine -> {
                     if (HEARING_VACATED_RESULT_DEFINITION_ID.equals(resultLine.getResultDefinitionId().toString())) {
 
-                        final Optional<UUID> hearingIdToBeVacated = hearing.getCourtApplications().stream()
+                        final Optional<UUID> hearingIdToBeVacated = ofNullable(hearing.getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
                                 .filter(courtApplication -> courtApplication.getId().equals(resultLine.getApplicationId()))
                                 .filter(courtApplication -> nonNull(courtApplication.getHearingIdToBeVacated()))
                                 .findFirst()

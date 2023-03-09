@@ -7,6 +7,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITIONS_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.BAIL_CONDITION_ASSESSMENTS_REPORTS_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_SHARED_JSON;
@@ -20,12 +21,16 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.Restructuring
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.REMAND_IN_CUSTODY_ID;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.SEND_TO_CROWN_COURT_ON_CONDITIONAL_BAIL_ID;
 
+
+import java.time.LocalDate;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilder;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -52,9 +57,11 @@ public class PublishResultsDelegateTreeMapTest extends AbstractRestructuringTest
 
     @Before
     public void setUp() throws IOException {
+        ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
+        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
         super.setUp();
         doReturn(Optional.empty()).when(nextHearingHelper).getNextHearing(any(), any(), any(), any());
-        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper);
+        resultTreeBuilder = new ResultTreeBuilder(referenceDataService, nextHearingHelper, resultLineHelper, resultTextConfHelper);
     }
 
     @Test
