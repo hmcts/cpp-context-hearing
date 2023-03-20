@@ -46,7 +46,6 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     private static final String ACTION_NAME_COURT_LIST_PUBLISH_STATUS = "hearing.publish-court-list";
     private static final String ACTION_NAME_PUBLISH_HEARING_LISTS_FOR_CROWN_COURTS = "hearing.publish-hearing-lists-for-crown-courts";
     private static final String ACTION_NAME_COMPUTE_OUTSTANDING_FINES = "hearing.compute-outstanding-fines";
-    private static final String ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES = "hearing.add-request-for-outstanding-fines";
 
     private static final String ACTION_NAME_RECORD_SESSION_TIME = "hearing.record-session-time";
     private static final String ACTION_NAME_BOOK_PROVISIONAL_HEARING_SLOTS = "hearing.book-provisional-hearing-slots";
@@ -621,26 +620,6 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
     }
 
     @Test
-    public void shouldAllowAuthorisedUserToInitiateAccountQuery() {
-        final Action action = createActionFor(ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "System Users"))
-                .willReturn(true);
-
-        final ExecutionResults results = executeRulesWith(action);
-        assertSuccessfulOutcome(results);
-    }
-
-    @Test
-    public void shouldNotAllowUnauthorisedUserToInitiateAccountQuery() {
-        final Action action = createActionFor(ACTION_NAME_ADD_REQUEST_FOR_OUTSTANDING_FINES);
-        given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate", "NCES", "Court Administrators"))
-                .willReturn(false);
-
-        final ExecutionResults results = executeRulesWith(action);
-        assertFailureOutcome(results);
-    }
-
-    @Test
     public void shouldAllowAuthorisedUserToRecordSessionTime() {
         final Action action = createActionFor(ACTION_NAME_RECORD_SESSION_TIME);
         given(this.userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups(action, "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin"))
@@ -763,6 +742,5 @@ public class HearingCommandApiAccessControlTest extends BaseDroolsAccessControlT
         final ExecutionResults results = executeRulesWith(action);
         assertFailureOutcome(results);
     }
-
 
 }

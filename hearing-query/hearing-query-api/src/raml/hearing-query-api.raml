@@ -536,28 +536,7 @@ protocols: [ HTTP, HTTPS ]
                     example:  !include json/hearing.defendant.info.json
                     schema:  !include  json/schema/hearing.defendant.info.json
 
-/defendant-outstanding-fine-requests:
-   get:
-      description: |
-        ...
-        (mapping):
-            responseType: application/vnd.hearing.defendant.outstanding-fine-requests+json
-            name: hearing.defendant.outstanding-fine-requests
-        ...
-      queryParameters:
-        hearingDate:
-          description: date of hearing
-          type: string
-          required: true
-          pattern: ^(19|20)\d\d[-](0[1-9]|1[012])[-](0[1-9]|[12][0-9]|3[01])$
 
-      responses:
-            200:
-                description: OK
-                body:
-                  application/vnd.hearing.defendant.outstanding-fine-requests+json:
-                    example:  !include json/hearing.defendant.outstanding-fine-requests.json
-                    schema:  !include  json/schema/hearing.defendant.outstanding-fine-requests.json
 
 /reusable-info/{hearingId}:
   get:

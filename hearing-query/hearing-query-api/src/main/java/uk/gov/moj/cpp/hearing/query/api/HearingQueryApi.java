@@ -35,7 +35,6 @@ import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataServi
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
-import uk.gov.moj.cpp.hearing.query.view.OutstandingFineRequestsQueryView;
 import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
@@ -88,9 +87,6 @@ public class HearingQueryApi {
 
     @Inject
     private SessionTimeQueryView sessionTimeQueryView;
-
-    @Inject
-    private OutstandingFineRequestsQueryView outstandingFineRequestsQueryView;
 
     @Inject
     private ReferenceDataService referenceDataService;
@@ -295,7 +291,7 @@ public class HearingQueryApi {
 
     @Handles("hearing.defendant.outstanding-fines")
     public JsonEnvelope getDefendantOutstandingFines(final JsonEnvelope query) {
-        final JsonEnvelope viewResponseEnvelope = this.hearingQueryView.getOutstandingFromDefendantId(query);
+        final JsonEnvelope viewResponseEnvelope = this.hearingQueryView.getOutstandingFinesQueryFromDefendantId(query);
         final JsonObject viewResponseEnvelopePayload = viewResponseEnvelope.payloadAsJsonObject();
         if (!viewResponseEnvelopePayload.isEmpty()) {
             return requestStagingEnforcementToGetOutstandingFines(query, viewResponseEnvelopePayload);
@@ -311,10 +307,7 @@ public class HearingQueryApi {
         return this.hearingQueryView.getDefendantInfoFromCourtHouseId(query);
     }
 
-    @Handles("hearing.defendant.outstanding-fine-requests")
-    public JsonEnvelope getDefendantOutstandingFineRequests(final JsonEnvelope query) {
-        return this.outstandingFineRequestsQueryView.getDefendantOutstandingFineRequests(query);
-    }
+
 
     @Handles("hearing.query.reusable-info")
     @FeatureControl(REUSE_OF_INFORMATION)
