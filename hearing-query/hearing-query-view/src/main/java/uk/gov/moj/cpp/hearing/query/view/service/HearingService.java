@@ -169,7 +169,8 @@ public class HearingService {
                                                               final LocalDate localDate,
                                                               final Set<UUID> cppHearingEventIds) {
 
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEventPojo> hearingEventPojos = generateHearingEventPojo(hearingEvents);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
@@ -185,13 +186,26 @@ public class HearingService {
         return empty();
     }
 
+    private List<HearingEventPojo> generateHearingEventPojo(final List<HearingEvent> hearingEvents) {
+        return hearingEvents.stream().map(hearingEvent -> new HearingEventPojo(hearingEvent.getDefenceCounselId(),
+                hearingEvent.isDeleted(),
+                hearingEvent.getEventDate(),
+                hearingEvent.getEventTime(),
+                hearingEvent.getHearingEventDefinitionId(),
+                hearingEvent.getHearingId(),
+                hearingEvent.getId(),
+                hearingEvent.getLastModifiedTime(),
+                hearingEvent.getRecordedLabel())).collect(Collectors.toList());
+    }
+
 
     @Transactional
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList,
                                                           final LocalDate localDate,
                                                           final Set<UUID> cppHearingEventIds) {
 
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEventPojo> hearingEventPojos = generateHearingEventPojo(hearingEvents);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
 
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
