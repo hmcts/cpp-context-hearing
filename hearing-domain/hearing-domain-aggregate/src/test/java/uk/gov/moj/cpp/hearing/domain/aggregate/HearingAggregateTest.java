@@ -18,7 +18,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.Target.target;
@@ -29,24 +28,15 @@ import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STR
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.INITIALISED;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
-import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
-import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingWithApplicationTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.VerdictCategoryType.GUILTY;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
-import com.google.common.collect.Lists;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationCase;
-import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
@@ -108,7 +98,6 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,6 +106,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.SerializationException;
 import org.apache.commons.lang3.SerializationUtils;
 import org.hamcrest.Matchers;
@@ -124,7 +114,6 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 public class HearingAggregateTest {
 
@@ -2007,5 +1996,32 @@ public class HearingAggregateTest {
 
     }
 
+    @Test
+    public void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = UUID.randomUUID();
 
+        final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+
+    }
+
+    @Test
+    public void shouldIgnoreHearingEventForAddOffenceIfNoHearingExist() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+        final UUID hearingId = hearing.getId();
+        hearingAggregate.deleteHearing(hearingId);
+
+        final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(0));
+
+    }
 }

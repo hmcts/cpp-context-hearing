@@ -688,6 +688,13 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId, final Offence offence) {
+        if(momento.isDeleted()){
+            return Stream.empty();
+        }
+        if (this.momento.getHearing() == null) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'addOffence' event as hearing not found", hearingId));
+        }
+
         return apply(this.offenceDelegate.addOffence(hearingId, defendantId, prosecutionCaseId, offence));
     }
 
