@@ -14,6 +14,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @SuppressWarnings({"squid:S2384", "squid:S1067"})
 public class SharedResultsCommandResultLineV2 implements Serializable {
+
+    private static final long serialVersionUID = 2942565459149667125L;
+
     private String shortCode;
     private DelegatedPowers delegatedPowers;
     private LocalDate orderedDate;
