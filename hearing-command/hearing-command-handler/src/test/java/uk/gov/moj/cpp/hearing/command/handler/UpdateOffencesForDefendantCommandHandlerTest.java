@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.command.handler;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.ofNullable;
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -23,12 +24,15 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesCha
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.CaseDefendantOffencesChangedCommandTemplates.updateOffencesForDefendantTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -60,6 +64,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -326,14 +331,18 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
     public void shouldRaiseOffencesRemovedFromExistingHearingEvent() throws EventStreamException {
 
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing =initiateHearingCommand.getHearing();
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
-        final List<UUID> offenceIds = initiateHearingCommand.getHearing().getProsecutionCases().stream()
-                .flatMap(ps -> ps.getDefendants().stream())
-                .flatMap(defendant -> defendant.getOffences().stream())
-                .map(offence -> offence.getId())
-                .collect(Collectors.toList());
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 =Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence2);
+                    });
+                });
 
-        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,offenceIds);
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,asList(offence2Id));
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.remove-offences-from-existing-hearing"),
                 objectToJsonObjectConverter.convert(removeOffencesFromExistingHearing));
