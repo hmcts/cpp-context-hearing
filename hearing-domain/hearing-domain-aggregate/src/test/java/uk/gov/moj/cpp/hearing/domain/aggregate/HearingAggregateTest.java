@@ -37,16 +37,20 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommand
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
+import uk.gov.justice.core.courts.CourtCentre;
+import uk.gov.justice.core.courts.CustodyTimeLimit;
 import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.hearing.courts.CourtListRestricted;
@@ -68,6 +72,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
 import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
+import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.DefenceCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantDetailsUpdated;
@@ -95,6 +100,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.SaveDraftResultFailed;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -114,6 +120,7 @@ import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
 public class HearingAggregateTest {
 
@@ -438,6 +445,185 @@ public class HearingAggregateTest {
         assertThat(hearingEventLogged.getHearingType().getDescription(), is(initiateHearingCommand.getHearing().getType().getDescription()));
         assertThat(hearingEventLogged.getDefenceCounselId(), is(correctLogEventCommand.getDefenceCounselId()));
     }
+
+    @Test
+    public void shouldRaiseStopCustodyTimeLimitEventAfterResultIsShared () {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final ZonedDateTime sittingDay = ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) ;
+
+        final CourtCentre courtCentre = CoreTestTemplates.courtCentre().build();
+
+
+        final UUID defendantId1 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+        final UUID caseId = randomUUID();
+
+
+        final Defendant defendant1 = Defendant.defendant()
+                .withId(defendantId1)
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId1)
+                        .withPlea(Plea.plea()
+                                .withOffenceId(offenceId1)
+                                .withPleaValue("GUILTY")
+                                .build())
+                        .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
+                                .withTimeLimit(LocalDate.now())
+                                .withDaysSpent(10)
+                                .build())
+                        .build()))
+                .build();
+
+        final Defendant defendant2 = Defendant.defendant()
+                .withId(defendantId2)
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId2).build()))
+                .build();
+        final Hearing hearing =  Hearing.hearing()
+                .withHasSharedResults(true)
+                .withId(initiateHearingCommand.getHearing().getId())
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(defendant1,defendant2)
+
+                        ).build()))
+                .withHearingDays(asList(CoreTestTemplates.hearingDay(sittingDay, courtCentre).build()))
+                .build();
+
+        hearing.setHasSharedResults(false);
+
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+
+
+        final Target2 target1 = target2().withTargetId(randomUUID())
+                .withDefendantId(defendantId1)
+                .withOffenceId(offenceId1)
+                .withCaseId(caseId)
+                .withHearingId(hearing.getId())
+                .withResultLines(asList(ResultLine2.resultLine2()
+                        .withResultLineId(randomUUID())
+                        .withDefendantId(defendantId1)
+                        .withCaseId(caseId)
+                        .withLevel(Level.OFFENCE)
+                        .withOffenceId(offenceId1)
+                        .build()))
+                .withHearingDay(hearingDay)
+                .build();
+        final Target2 target2 = target2().withTargetId(randomUUID())
+                .withDefendantId(defendantId2)
+                .withOffenceId(offenceId2)
+                .withCaseId(caseId)
+                .withHearingId(hearing.getId())
+                .withHearingDay(hearingDay)
+                .withResultLines(asList(ResultLine2.resultLine2()
+                        .withResultLineId(randomUUID())
+                        .withDefendantId(defendantId2)
+                        .withCaseId(caseId)
+                        .withLevel(Level.OFFENCE)
+                        .withOffenceId(offenceId2)
+                        .build()))
+                .build();
+
+
+
+
+
+        hearingAggregate.apply(ResultsSharedV3.builder()
+                .withNewAmendmentResults(asList(new NewAmendmentResult(randomUUID(), ZonedDateTime.now())))
+                .withTargets(asList(target1, target2))
+                .withHearingDay(hearingDay)
+                .withHearing(hearing)
+                .build()
+
+        );
+
+        final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock();
+
+        final List<Object> events = stream.collect(Collectors.toList());
+        assertThat(events.size(), Matchers.is(1));
+
+        final CustodyTimeLimitClockStopped custodyTimeLimitClockStopped = (CustodyTimeLimitClockStopped) events.get(0);
+        assertThat(custodyTimeLimitClockStopped.getHearingId(), Matchers.is(hearing.getId()));
+        assertThat(custodyTimeLimitClockStopped.getOffenceIds().size(), Matchers.is(1));
+        assertThat(custodyTimeLimitClockStopped.getOffenceIds().containsAll(Arrays.asList(offenceId1)), Matchers.is(true));
+
+    }
+
+
+    @Test
+    public void shouldNotRaiseStopCustodyTimeLimitEventWhenResultISNotShared () {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+
+        final ZonedDateTime sittingDay = ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) ;
+
+        final CourtCentre courtCentre = CoreTestTemplates.courtCentre().build();
+
+
+        final UUID defendantId1 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+
+        final Defendant defendant1 = Defendant.defendant()
+                .withId(defendantId1)
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId1)
+                        .withPlea(Plea.plea()
+                                .withOffenceId(offenceId1)
+                                .withPleaValue("GUILTY")
+                                .build())
+                        .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
+                                .withTimeLimit(LocalDate.now())
+                                .withDaysSpent(10)
+                                .build())
+                        .build()))
+                .build();
+
+        final Defendant defendant2 = Defendant.defendant()
+                .withId(defendantId2)
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId2).build()))
+                .build();
+        final Hearing hearing =  Hearing.hearing()
+                .withHasSharedResults(true)
+                .withId(initiateHearingCommand.getHearing().getId())
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(defendant1,defendant2)
+
+                        ).build()))
+                .withHearingDays(asList(CoreTestTemplates.hearingDay(sittingDay, courtCentre).build()))
+                .build();
+
+        hearing.setHasSharedResults(false);
+
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+
+
+        final Stream<Object> stream = hearingAggregate.stopCustodyTimeLimitClock();
+
+        final List<Object> events = stream.collect(Collectors.toList());
+        assertThat(events.size(), Matchers.is(0));
+
+
+    }
+
 
     @Test
     public void shouldNotRaiseCTLClockStoppedEventForNewtonHearing() {

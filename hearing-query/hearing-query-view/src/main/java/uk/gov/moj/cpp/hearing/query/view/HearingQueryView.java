@@ -10,6 +10,7 @@ import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
@@ -334,13 +335,14 @@ public class HearingQueryView {
 
     @SuppressWarnings("squid:S1166")
 
-    public JsonEnvelope getOutstandingFromDefendantId(final JsonEnvelope envelope) {
+    public JsonEnvelope getOutstandingFinesQueryFromDefendantId(final JsonEnvelope envelope) {
         final Optional<UUID> defendantId = getUUID(envelope.payloadAsJsonObject(), FIELD_DEFENDANT_ID);
         final JsonEnvelope jsonEnvelopeWithoutPayload = envelopeFrom(envelope.metadata(), Json.createObjectBuilder().build());
         if (defendantId.isPresent()) {
             try {
                 final DefendantSearch defendantSearch = defendantRepository.getDefendantDetailsForSearching(defendantId.get());
-                return envelopeFrom(envelope.metadata(), objectToJsonValueConverter.convert(defendantSearch));
+                final JsonObject build = convertToOutstandingFinesQuery(defendantSearch);
+                return envelopeFrom(envelope.metadata(), build);
             } catch (final NoResultException ex) {
                 LOGGER.error(String.format("No defendant found with defendantId  ='%s'", defendantId.get()), ex);
                 return jsonEnvelopeWithoutPayload;
@@ -350,6 +352,25 @@ public class HearingQueryView {
             LOGGER.info("No defendant id found in the payload");
         }
         return jsonEnvelopeWithoutPayload;
+    }
+
+    private JsonObject convertToOutstandingFinesQuery(final DefendantSearch defendantSearch) {
+        final JsonObjectBuilder objectBuilder = createObjectBuilder();
+        objectBuilder.add("defendantId", defendantSearch.getDefendantId().toString());
+        if (isEmpty(defendantSearch.getLegalEntityOrganizationName())) {
+            objectBuilder.add("firstname", defendantSearch.getForename());
+            objectBuilder.add("lastname", defendantSearch.getSurname());
+            if (defendantSearch.getDateOfBirth() != null) {
+                objectBuilder.add("dob", defendantSearch.getDateOfBirth().toString());
+            }
+            if (!isEmpty(defendantSearch.getNationalInsuranceNumber())) {
+                objectBuilder.add("ninumber", defendantSearch.getNationalInsuranceNumber());
+            }
+        } else {
+            objectBuilder.add("organization", defendantSearch.getLegalEntityOrganizationName());
+        }
+        final JsonObject build = objectBuilder.build();
+        return build;
     }
 
     @SuppressWarnings("squid:S1166")

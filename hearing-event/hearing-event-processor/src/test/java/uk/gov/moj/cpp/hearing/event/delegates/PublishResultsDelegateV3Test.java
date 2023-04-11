@@ -2,9 +2,13 @@ package uk.gov.moj.cpp.hearing.event.delegates;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
+
+import java.time.LocalDate;
+import org.mockito.Mockito;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.NextHearing;
@@ -19,6 +23,7 @@ import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.AbstractRestructuringTest;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructuringHelperV3;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTextConfHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.ResultTreeBuilderV3;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
@@ -60,11 +65,14 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
     @Captor
     private ArgumentCaptor<Hearing> custodyLimitCalculatorHearingIn;
 
-    @Spy
-    private ResultTreeBuilderV3 resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3);
+    @Mock
+    protected ResultTextConfHelper resultTextConfHelper = Mockito.mock(ResultTextConfHelper.class);
 
     @Spy
-    private RestructuringHelperV3 restructringHelper = new RestructuringHelperV3(resultTreeBuilder);
+    private ResultTreeBuilderV3 resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3, resultTextConfHelper);
+
+    @Spy
+    private RestructuringHelperV3 restructringHelper = new RestructuringHelperV3(resultTreeBuilder, resultTextConfHelper);
 
     @Mock
     private OffenceHelper offenceHelper;
@@ -76,6 +84,7 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
     @Before
     public void setUp() throws IOException {
         super.setUp();
+        when(resultTextConfHelper.isOldResultDefinition(any(LocalDate.class))).thenReturn(false);
 
         target = new PublishResultsDelegateV3(enveloper,
                 objectToJsonObjectConverter,

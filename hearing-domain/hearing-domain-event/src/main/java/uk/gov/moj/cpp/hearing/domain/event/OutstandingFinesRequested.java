@@ -7,6 +7,10 @@ import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * @deprecated (GPE-15454, add-request-for-outstanding-fines command removed with Real-Time Updates feature)
+ */
+@Deprecated
 @Event("hearing.outstanding-fines-requested")
 public class OutstandingFinesRequested {
 

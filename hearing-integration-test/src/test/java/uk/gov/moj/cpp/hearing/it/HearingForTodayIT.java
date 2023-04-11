@@ -43,6 +43,7 @@ import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.Jurisdiction;
 import uk.gov.justice.core.courts.LinkType;
 import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.OffenceActiveOrder;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.SummonsTemplateType;
@@ -110,6 +111,57 @@ public class HearingForTodayIT extends AbstractIT {
         );
     }
 
+    @Test
+    public void shouldNotRetrieveOffenceForHearingForTodayForLoggedOnUserWhenShadowListed() {
+        final UUID userId = randomUUID();
+        setupAsMagistrateUser(userId);
+        stubUsersAndGroupsUserRoles(getLoggedInUser());
+
+        final UUID hearingId = randomUUID();
+        final UUID courtCentreId = randomUUID();
+        final UUID roomId = randomUUID();
+        final InitiateHearingCommand initiateHearingCommand = createHearingForToday(hearingId, courtCentreId, roomId, userId, null);
+        final Offence shadowListedOffence = initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        final UUID shadowListedOffenceId = shadowListedOffence.getId();
+        final Offence offence = offence()
+                .withId(randomUUID())
+                .withOffenceDefinitionId(randomUUID())
+                .withOffenceCode("code")
+                .withStartDate(now().plusDays(10))
+                .withOffenceTitle(OFFENCE_TITLE)
+                .withWording(OFFENCE_WORDING)
+                .withReportingRestrictions(asList(ReportingRestriction.reportingRestriction().withId(randomUUID()).withLabel("Yes")
+                        .withJudicialResultId(randomUUID()).build()))
+                .build();
+
+
+        List<Offence> offenceList = Arrays.asList(offence, shadowListedOffence);
+        initiateHearingCommand.getHearing().getProsecutionCases().get(0).getDefendants().get(0).setOffences(offenceList);
+        initiateHearingCommand.getHearing().setShadowListedOffences(Arrays.asList(shadowListedOffenceId));
+
+        initiateHearing(getRequestSpec(), initiateHearingCommand);
+
+        getHearingForTodayPollForMatch(userId, 30, isBean(GetHearings.class)
+                .with(GetHearings::getHearingSummaries, hasSize(greaterThanOrEqualTo(1)))
+                .with(GetHearings::getHearingSummaries, hasItem(isBean(HearingSummaries.class)
+                        .with(HearingSummaries::getId, is(hearingId))
+                        .with(HearingSummaries::getHearingDays, hasSize(2))
+                        .with(HearingSummaries::getHearingDays, hasItem(isBean(HearingDay.class)
+                                .with(hearingDay -> hearingDay.getSittingDay().toLocalDate(), is(now()))))
+                        .with(HearingSummaries::getHearingDays, hasItem(isBean(HearingDay.class)
+                                .with(hearingDay -> hearingDay.getSittingDay().toLocalDate(), is(now()))))
+                        .with(HearingSummaries::getCourtCentreId, is(courtCentreId))
+                        .with(HearingSummaries::getRoomId, is(roomId))
+                        .with(this::getDateOfBirth, is(DEFENDANT_DOB))
+                        .with(this::getFirstName, is(DEFENDANT_FIRST_NAME))
+                        .with(this::getLastName, is(DEFENDANT_LAST_NAME))
+                        .with(this::getOffenceTitle, is(OFFENCE_TITLE))
+                        .with(this::getOffenceWording, is(OFFENCE_WORDING))
+                        .with(this::getNumberOfOffences, is(1))
+                ))
+        );
+
+    }
 
     @Test
     public void shouldRetrieveApplicationWithCaseHearingForTodayForLoggedOnUser() {
@@ -208,6 +260,7 @@ public class HearingForTodayIT extends AbstractIT {
                 ))
         );
     }
+
 
     private InitiateHearingCommand createHearingForToday(final UUID hearingId, final UUID courtCentreId, final UUID roomId, final UUID userId, List<CourtApplication> courtApplicationList) {
         final UUID prosecutionCaseId = randomUUID();
@@ -429,6 +482,9 @@ public class HearingForTodayIT extends AbstractIT {
         return hearingSummaries.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getOffences().get(0).getOffenceTitle();
     }
 
+    private int getNumberOfOffences(final  HearingSummaries hearingSummaries) {
+        return hearingSummaries.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getOffences().size();
+    }
     private String getOffenceWording(final HearingSummaries hearingSummaries) {
         return hearingSummaries.getProsecutionCaseSummaries().get(0).getDefendants().get(0).getOffences().get(0).getWording();
     }

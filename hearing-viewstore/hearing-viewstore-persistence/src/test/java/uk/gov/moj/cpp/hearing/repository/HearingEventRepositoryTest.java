@@ -266,7 +266,7 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_1);
         hearingEventRequiredDefinitionsIds.add(HEARING_EVENT_DEFINITION_ID_2);
 
-        final List<HearingEventPojo> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, EVENT_TIME.toLocalDate(),hearingEventRequiredDefinitionsIds);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, EVENT_TIME.toLocalDate(),hearingEventRequiredDefinitionsIds);
         assertThat(hearingEvents.size(), is(1));
 
         assertThat(hearingEvents.get(0).getHearingId(), is(HEARING_ID_1));

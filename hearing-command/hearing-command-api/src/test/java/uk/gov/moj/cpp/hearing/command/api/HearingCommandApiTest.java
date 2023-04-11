@@ -65,7 +65,7 @@ public class HearingCommandApiTest {
             "addRespondentCounsel", "updateRespondentCounsel", "removeRespondentCounsel", "addCompanyRepresentative", "updateCompanyRepresentative", "removeCompanyRepresentative",
             "addApplicantCounsel", "updateApplicantCounsel", "removeApplicantCounsel", "addInterpreterIntermediary",
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
-            "computeOutstandingFines", "addRequestForOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
+            "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
             "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing");
 
@@ -80,7 +80,6 @@ public class HearingCommandApiTest {
     private Map<String, String> apiMethodsToHandlerNames;
     private Map<String, String> eventApiMethodsToHandlerNames;
     private Map<String, String> notificationApiMethodsToHandlerNames;
-    private Map<String, String> outstandingFinesCommandApiMethodsToHandlerNames;
     private Map<String, String> sessionTimeApiMethodsToHandlerNames;
     private Map<String, String> reusableInfoApiMethodsToHandlerNames;
     private Map<String, String> youthCourtDefendantsApiMethodsToHandlerNames;
@@ -112,7 +111,6 @@ public class HearingCommandApiTest {
         apiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingCommandApi.class);
         eventApiMethodsToHandlerNames = apiMethodsToHandlerNames(HearingEventCommandApi.class);
         notificationApiMethodsToHandlerNames = apiMethodsToHandlerNames(NotificationCommandApi.class);
-        outstandingFinesCommandApiMethodsToHandlerNames = apiMethodsToHandlerNames(OutstandingFinesCommandApi.class);
         sessionTimeApiMethodsToHandlerNames = apiMethodsToHandlerNames(SessionTimeCommandApi.class);
         reusableInfoApiMethodsToHandlerNames = apiMethodsToHandlerNames(ReusableInfoCommandApi.class);
         youthCourtDefendantsApiMethodsToHandlerNames = apiMethodsToHandlerNames(YouthCourtDefendantsCommandApi.class);
@@ -133,7 +131,6 @@ public class HearingCommandApiTest {
                 apiMethodsToHandlerNames.values().stream(),
                 eventApiMethodsToHandlerNames.values().stream(),
                 notificationApiMethodsToHandlerNames.values().stream(),
-                outstandingFinesCommandApiMethodsToHandlerNames.values().stream(),
                 sessionTimeApiMethodsToHandlerNames.values().stream(),
                 reusableInfoApiMethodsToHandlerNames.values().stream(),
                 defendantsWelshTranslationInformationToHandlerNames.values().stream(),
@@ -193,9 +190,6 @@ public class HearingCommandApiTest {
         assertHandlerMethodsArePassThrough(NotificationCommandApi.class, notificationApiMethodsToHandlerNames.keySet().stream()
                 .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
                 .collect(toMap(identity(), notificationApiMethodsToHandlerNames::get)));
-        assertHandlerMethodsArePassThrough(OutstandingFinesCommandApi.class, outstandingFinesCommandApiMethodsToHandlerNames.keySet().stream()
-                .filter(methodName -> !NON_PASS_THROUGH_METHODS.contains(methodName))
-                .collect(toMap(identity(), outstandingFinesCommandApiMethodsToHandlerNames::get)));
     }
 
     @Test

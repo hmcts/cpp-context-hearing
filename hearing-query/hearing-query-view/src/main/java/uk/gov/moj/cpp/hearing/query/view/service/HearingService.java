@@ -164,12 +164,13 @@ public class HearingService {
     @Inject
     private CaseByDefendantRepository caseByDefendantRepository;
 
-    @Transactional
+    @Transactional()
     public Optional<CurrentCourtStatus> getHearingsForWebPage(final List<UUID> courtCentreList,
                                                               final LocalDate localDate,
                                                               final Set<UUID> cppHearingEventIds) {
 
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEventPojo> hearingEventPojos = generateHearingEventPojo(hearingEvents);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
         final List<uk.gov.justice.core.courts.Hearing> hearingList = activeHearingEventList
                 .stream()
@@ -185,13 +186,26 @@ public class HearingService {
         return empty();
     }
 
+    private List<HearingEventPojo> generateHearingEventPojo(final List<HearingEvent> hearingEvents) {
+        return hearingEvents.stream().map(hearingEvent -> new HearingEventPojo(hearingEvent.getDefenceCounselId(),
+                hearingEvent.isDeleted(),
+                hearingEvent.getEventDate(),
+                hearingEvent.getEventTime(),
+                hearingEvent.getHearingEventDefinitionId(),
+                hearingEvent.getHearingId(),
+                hearingEvent.getId(),
+                hearingEvent.getLastModifiedTime(),
+                hearingEvent.getRecordedLabel())).collect(Collectors.toList());
+    }
+
 
     @Transactional
     public Optional<CurrentCourtStatus> getHearingsByDate(final List<UUID> courtCentreList,
                                                           final LocalDate localDate,
                                                           final Set<UUID> cppHearingEventIds) {
 
-        final List<HearingEventPojo> hearingEventPojos = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEvent> hearingEvents = hearingEventRepository.findLatestHearingsForThatDay(courtCentreList, localDate, cppHearingEventIds);
+        final List<HearingEventPojo> hearingEventPojos = generateHearingEventPojo(hearingEvents);
         final List<HearingEvent> activeHearingEventList = getHearingEvents(hearingEventPojos);
 
         final List<Hearing> hearingsForDate = hearingRepository.findHearingsByDateAndCourtCentreList(localDate, courtCentreList);
@@ -256,21 +270,17 @@ public class HearingService {
                 .build();
     }
 
-    @Transactional
-    public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
 
+    public GetHearings getHearingsForToday(final LocalDate date, final UUID userId) {
         if (null == date || null == userId) {
             return new GetHearings(null);
         }
-        final List<Hearing> filteredHearings = hearingRepository.findByUserFilters(date, userId);
+        final  List<Hearing> filteredHearings =  getAndInitializeHearings(date, userId);
         filterForShadowListedOffencesAndCases(filteredHearings);
         if (CollectionUtils.isEmpty(filteredHearings)) {
             return new GetHearings(null);
         }
-
-
         filteredHearings.sort(Comparator.nullsFirst(Comparator.comparing(o -> sortListingSequence(date, o))));
-
         return GetHearings.getHearings()
                 .withHearingSummaries(filteredHearings.stream()
                         .map(ha -> hearingJPAMapper.fromJPA(ha))
@@ -301,7 +311,25 @@ public class HearingService {
                 .build();
     }
 
-    private void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
+    @Transactional
+    private List<Hearing> getAndInitializeHearings(final LocalDate date, final UUID userId) {
+        final List<Hearing> filteredHearings = hearingRepository.findByUserFilters(date, userId);
+        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences());
+        filteredHearings.stream().forEach( x ->  {x.getYouthCourt();
+            x.getApplicantCounsels();
+            x.getHearingApplications();
+            x.getHearingInterpreterIntermediaries();
+            x.getRespondentCounsels();
+            x.getDefenceCounsels();
+            x.getProsecutionCounsels();
+            x.getHearingCaseNotes();
+            x.getJudicialRoles();
+            x.getDefendantReferralReasons();
+        });
+        return filteredHearings;
+    }
+
+    public void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
         filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences().removeIf(Offence::isShadowListed));
         filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
         filteredHearings.forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
@@ -431,7 +459,7 @@ public class HearingService {
 
         Hearing hearing = hearingRepository.findBy(hearingId);
         if (isDDJ) {
-           hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCaseAndApplicationIds).stream().findFirst().orElse(null);
+            hearing = filterHearingsBasedOnPermissions.filterHearings(Arrays.asList(hearing), accessibleCaseAndApplicationIds).stream().findFirst().orElse(null);
         }
 
         if (hearing == null) {
@@ -448,11 +476,11 @@ public class HearingService {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getTrialTypeId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                    trialType.getReasonCode(),
-                    trialType.getDate(),
-                    trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                    trialType.getId(),
-                    trialType.getTrialType()))
+                            trialType.getReasonCode(),
+                            trialType.getDate(),
+                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
+                            trialType.getId(),
+                            trialType.getTrialType()))
                     .ifPresent(trialType -> hearingDetailsResponse
                             .getHearing()
                             .setCrackedIneffectiveTrial(trialType));
@@ -462,11 +490,11 @@ public class HearingService {
 
             final Optional<CrackedIneffectiveVacatedTrialType> crackedIneffectiveTrialType = getCrackedIneffectiveVacatedTrialType(hearing.getVacatedTrialReasonId(), crackedIneffectiveVacatedTrialTypes);
             crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                    trialType.getReasonCode(),
-                    trialType.getDate(),
-                    trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                    trialType.getId(),
-                    trialType.getTrialType()))
+                            trialType.getReasonCode(),
+                            trialType.getDate(),
+                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
+                            trialType.getId(),
+                            trialType.getTrialType()))
                     .ifPresent(trialType -> hearingDetailsResponse
                             .getHearing()
                             .setCrackedIneffectiveTrial(trialType));
@@ -523,11 +551,11 @@ public class HearingService {
                     .findFirst();
 
             return crackedIneffectiveTrialType.map(trialType -> new CrackedIneffectiveTrial(
-                    trialType.getReasonCode(),
-                    trialType.getDate(),
-                    trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
-                    trialType.getId(),
-                    trialType.getTrialType()))
+                            trialType.getReasonCode(),
+                            trialType.getDate(),
+                            trialType.getReasonFullDescription() == null ? "" : trialType.getReasonFullDescription(),
+                            trialType.getId(),
+                            trialType.getTrialType()))
                     .orElse(null);
         }
 
@@ -824,7 +852,7 @@ public class HearingService {
 
     @Transactional
     public JsonObject getCasesByPersonDefendant(final String firstName, final String lastName, final LocalDate dateOfBirth,
-                                                                  final LocalDate hearingDate, final Set<UUID> caseIds){
+                                                final LocalDate hearingDate, final Set<UUID> caseIds){
 
         final List<CaseByDefendant> casesByPersonDefendant = caseByDefendantRepository.getCasesByPersonDefendant(firstName, lastName, dateOfBirth,hearingDate, caseIds);
         return createCasesByDefendatResponse(casesByPersonDefendant);
@@ -833,7 +861,7 @@ public class HearingService {
 
     @Transactional
     public JsonObject getCasesByOrganisationDefendant(final String organisationName, final LocalDate hearingDate,
-                                                                              final Set<UUID> caseIds){
+                                                      final Set<UUID> caseIds){
         final List<CaseByDefendant> casesByOrganisationDefendant = caseByDefendantRepository.getCasesByOrganisationDefendant(organisationName,hearingDate, caseIds);
         return createCasesByDefendatResponse(casesByOrganisationDefendant);
     }

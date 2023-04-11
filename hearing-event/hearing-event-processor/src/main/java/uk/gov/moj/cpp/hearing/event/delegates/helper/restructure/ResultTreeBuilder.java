@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 import static java.lang.String.format;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.JudicialResult.judicialResult;
@@ -15,6 +16,10 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.C
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.JudicialResultPromptMapper.findJudicialResultPrompt;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
 
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
@@ -57,12 +62,14 @@ public class ResultTreeBuilder {
     private final ReferenceDataService referenceDataService;
     private final NextHearingHelper nextHearingHelper;
     private final ResultLineHelper resultLineHelper;
+    private ResultTextConfHelper resultTextConfHelper;
 
     @Inject
-    public ResultTreeBuilder(final ReferenceDataService referenceDataService, final NextHearingHelper nextHearingHelper, final ResultLineHelper resultLineHelper) {
+    public ResultTreeBuilder(final ReferenceDataService referenceDataService, final NextHearingHelper nextHearingHelper, final ResultLineHelper resultLineHelper, final ResultTextConfHelper resultTextConfHelper) {
         this.referenceDataService = referenceDataService;
         this.nextHearingHelper = nextHearingHelper;
         this.resultLineHelper = resultLineHelper;
+        this.resultTextConfHelper = resultTextConfHelper;
     }
 
     public List<TreeNode<ResultLine>> build(final JsonEnvelope envelope, final ResultsShared resultsShared) {
@@ -72,7 +79,50 @@ public class ResultTreeBuilder {
 
     public List<TreeNode<ResultLine>> build(final JsonEnvelope envelope, final ResultsSharedV2 resultsShared) {
         final Map<UUID, TreeNode<ResultLine>> resultLinesMap = getTreeNodeMap(envelope, resultsShared);
-        return new ArrayList<>(mapTreeNodeRelations(resultLinesMap).values());
+        final Map<UUID, TreeNode<ResultLine>> resultLinesMapWithRelations = mapTreeNodeRelations(resultLinesMap);
+        return new ArrayList<>(orderResult(resultLinesMapWithRelations));
+    }
+
+    private List<TreeNode<ResultLine>> orderResult(final Map<UUID, TreeNode<ResultLine>> resultLinesMap) {
+        final List<TreeNode<ResultLine>> orderedInputList =  new ArrayList(resultLinesMap.values());
+        if(orderedInputList.stream()
+                .map(TreeNode::getJudicialResult)
+                .map(JudicialResult::getOrderedDate)
+                .anyMatch(resultTextConfHelper::isOldResultDefinition)){
+            return orderedInputList;
+        }
+
+        orderedInputList.sort(Comparator.comparing(o -> o.getResultDefinition().getData().getShortCode()));
+
+        final List<TreeNode<ResultLine>> parents = orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> !isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList());
+        final Set<UUID> parentIds = parents.stream().map(TreeNode::getId).collect(Collectors.toSet());
+        final List<TreeNode<ResultLine>> orderedResults = parents.stream()
+                .map(parent -> orderedInputList.stream()
+                        .filter(result -> !parentIds.contains(result.getId()))
+                        .filter(result -> ofNullable(result.getOffenceId()).map(offenceId -> offenceId.equals(parent.getOffenceId())).orElse(true))
+                        .filter(result -> ofNullable(result.getApplicationId()).map(applicationId -> applicationId.equals(parent.getApplicationId())).orElse(true))
+                        .filter(result -> ! isNull(result.getResultDefinition().getData().getResultDefinitionGroup()))
+                        .filter(result -> Arrays.stream(result.getResultDefinition().getData().getResultDefinitionGroup().split(","))
+                                .map(String::trim)
+                                .collect(Collectors.toSet()).contains(parent.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                        .collect(Collectors.collectingAndThen(toList(), list -> {
+                            list.add(0, parent);
+                            return list;
+                        })))
+                .flatMap(Collection::stream).collect(toList());
+
+        orderedInputList.stream().filter(node -> isEmpty(node.getParents()))
+                .filter(node -> isNull(node.getResultDefinition().getData().getDependantResultDefinitionGroup()))
+                .collect(toList())
+                .forEach(orderedResults::add);
+
+        orderedInputList.stream()
+                .filter(result -> orderedResults.stream().noneMatch(res -> res.getId().equals(result.getId())))
+                .forEach(orderedResults::add);
+
+        return orderedResults;
     }
 
     private Map<UUID, TreeNode<ResultLine>> mapTreeNodeRelations(final Map<UUID, TreeNode<ResultLine>> resultLinesMap) {
@@ -197,7 +247,7 @@ public class ResultTreeBuilder {
     }
 
     private Builder getJudicialBuilder(final ResultLine resultLine, final Hearing hearing, final DelegatedPowers courtClerk, final Map<UUID, CompletedResultLineStatus> completedResultLinesStatus, final ResultDefinition resultDefinition) {
-        return judicialResult()
+        final JudicialResult.Builder judicialResult = judicialResult()
                 .withJudicialResultId(resultLine.getResultLineId())
                 .withJudicialResultTypeId(resultDefinition.getId())
                 .withAmendmentDate(resultLine.getAmendmentDate())
@@ -223,7 +273,6 @@ public class ResultTreeBuilder {
                 .withWelshLabel(resultDefinition.getWelshLabel())
                 .withIsDeleted(resultLine.getIsDeleted())
                 .withPostHearingCustodyStatus(resultDefinition.getPostHearingCustodyStatus())
-                .withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine))
                 .withLifeDuration(getBooleanValue(resultDefinition.getLifeDuration(), false))
                 .withResultDefinitionGroup(resultDefinition.getResultDefinitionGroup())
                 .withTerminatesOffenceProceedings(getBooleanValue(resultDefinition.getTerminatesOffenceProceedings(), false))
@@ -240,6 +289,10 @@ public class ResultTreeBuilder {
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel());
+        if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
+            judicialResult.withResultText(ResultTextHelper.getResultText(resultDefinition, resultLine));
+        }
+        return judicialResult;
     }
 
     private void checkResultDefinition(final ResultLine resultLine, final Hearing hearing, final ResultDefinition resultDefinition) {

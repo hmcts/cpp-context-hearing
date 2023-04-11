@@ -48,6 +48,7 @@ import org.junit.Test;
 
 public class ResultsSharedDelegateTest {
 
+    public static final String OFFENCE = "OFFENCE";
     private HearingAggregateMomento hearingAggregateMomento;
     private ResultsSharedDelegate resultsSharedDelegate;
     private HearingAggregate hearingAggregate;
@@ -82,12 +83,12 @@ public class ResultsSharedDelegateTest {
         final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -106,13 +107,13 @@ public class ResultsSharedDelegateTest {
         hearingAggregate.apply(resultsSharedV2);
 
         final SharedResultsCommandResultLineV2 resharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(shared2Time)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -138,12 +139,12 @@ public class ResultsSharedDelegateTest {
         final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -159,12 +160,12 @@ public class ResultsSharedDelegateTest {
         hearingAggregate.apply(resultsSharedV2);
 
         final SharedResultsCommandResultLineV2 resharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -190,12 +191,12 @@ public class ResultsSharedDelegateTest {
         final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -214,12 +215,12 @@ public class ResultsSharedDelegateTest {
         hearingAggregate.apply(resultsSharedV2);
 
         final SharedResultsCommandResultLineV2 resharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -234,13 +235,13 @@ public class ResultsSharedDelegateTest {
         assertThat(resharedResultsSharedV2.getNewAmendmentResults().size(), is(0));
 
         final SharedResultsCommandResultLineV2 secondResharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 secondResharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(shared3Time)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -276,12 +277,12 @@ public class ResultsSharedDelegateTest {
         final UUID resultLine1Id = randomUUID();
         final UUID resultLine2Id = randomUUID();
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -302,12 +303,12 @@ public class ResultsSharedDelegateTest {
         hearingAggregate.apply(resultsSharedV2);
 
         final SharedResultsCommandResultLineV2 resharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 resharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -322,13 +323,13 @@ public class ResultsSharedDelegateTest {
         assertThat(resharedResultsSharedV2.getNewAmendmentResults().size(), is(0));
 
         final SharedResultsCommandResultLineV2 secondResharedResultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .build();
         final SharedResultsCommandResultLineV2 secondResharedResultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(shared3Time)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .build();
@@ -371,7 +372,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -379,7 +380,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -422,7 +423,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -430,7 +431,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -539,7 +540,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -547,7 +548,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -601,7 +602,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -609,7 +610,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -670,7 +671,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(singletonList(prompt))
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.fromString(HEARING_VACATED_RESULT_DEFINITION_ID))
@@ -679,7 +680,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -708,6 +709,67 @@ public class ResultsSharedDelegateTest {
         assertThat(hearingVacatedRequested.getHearingIdToBeVacated(), is(HEARING_ID_TO_BE_VACATED));
         assertThat(hearingVacatedRequested.getVacatedTrialReasonShortDesc(), is(REASON));
         assertNotNull(resultsSharedSuccessV3);
+
+
+    }
+
+    @Test
+    public void shouldNotRaiseHearingVacatedRequestedEventWhitOutApplication() {
+
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+        final UUID APPLICATION_ID = randomUUID();
+
+
+        final String REASON = "random reason";
+        final SharedResultsCommandPrompt prompt = new SharedResultsCommandPrompt(UUID.fromString(VACATED_TRIAL_REASON_ID),null,null, REASON,null,null,"reasonForVacatingTrial");
+
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(Arrays.asList(prompt))
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.fromString(HEARING_VACATED_RESULT_DEFINITION_ID))
+                .withApplicationIds(APPLICATION_ID)
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(2));
+
+        final ResultsSharedSuccess resultsSharedSuccess = (ResultsSharedSuccess) eventCollection.get(0);
+        assertThat(resultsSharedSuccess.getHearingId(), is(hearingId));
+
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(2));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
 
 
     }
@@ -743,7 +805,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(Arrays.asList(prompt))
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(UUID.fromString(UUID.randomUUID().toString()))
@@ -752,7 +814,7 @@ public class ResultsSharedDelegateTest {
 
         final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine2Id)
                 .withResultDefinitionId(UUID.randomUUID())
@@ -897,7 +959,7 @@ public class ResultsSharedDelegateTest {
         final UUID resultLine1Id = randomUUID();
         final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
                 .withAmendmentDate(sharedTime)
-                .withLevel("OFFENCE")
+                .withLevel(OFFENCE)
                 .withPrompts(emptyList())
                 .withResultLineId(resultLine1Id)
                 .withResultDefinitionId(randomUUID())

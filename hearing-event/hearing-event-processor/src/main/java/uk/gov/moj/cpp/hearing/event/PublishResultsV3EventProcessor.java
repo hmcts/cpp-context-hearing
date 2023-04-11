@@ -15,6 +15,9 @@ import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.RESULT_DEFINITION_NOT_FOUND_EXCEPTION_FORMAT;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.TypeUtils.getBooleanValue;
+import static javax.json.Json.createObjectBuilder;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
@@ -106,6 +109,9 @@ public class PublishResultsV3EventProcessor {
     @Inject
     private ReferenceDataLoader referenceDataLoader;
 
+    private static final String FIELD_HEARING_ID ="hearingId";
+
+
     @Handles("hearing.events.results-shared-v3")
     public void resultsShared(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
@@ -162,6 +168,8 @@ public class PublishResultsV3EventProcessor {
         publishResultsDelegate.shareResults(event, sender, resultsShared, resultTreeNodes);
 
         updateResultLineStatusDelegate.updateDaysResultLineStatus(sender, event, resultsShared);
+
+        sendCommandToStopCustodyTimeLimitClock(event, resultsShared);
 
     }
 
@@ -421,5 +429,14 @@ public class PublishResultsV3EventProcessor {
             }
         }
         return treeNodes;
+    }
+
+    private void sendCommandToStopCustodyTimeLimitClock(final JsonEnvelope event, final ResultsSharedV3 resultsShared) {
+
+        this.sender.send(envelopeFrom(
+                metadataFrom(event.metadata()).withName("hearing.command.stop-custody-time-limit-clock"),
+                createObjectBuilder().add(FIELD_HEARING_ID, resultsShared.getHearingId().toString())));
+
+
     }
 }

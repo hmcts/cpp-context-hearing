@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.*;
@@ -15,7 +14,6 @@ import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
 import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
 
-import javax.inject.Inject;
 import javax.json.Json;
 import javax.json.JsonObject;
 
@@ -69,7 +67,7 @@ public class DefendantOutstandingFinesQueryApiTest {
 
     @Test
     public void should_return_outstanding_fines_when_defendant_id_is_known() {
-        when(hearingQueryView.getOutstandingFromDefendantId(anyObject())).thenReturn(jsonEnvelopeFromHearing);
+        when(hearingQueryView.getOutstandingFinesQueryFromDefendantId(anyObject())).thenReturn(jsonEnvelopeFromHearing);
         JsonObject responseFromHearingQueryView = getDefendantDetails();
 
         setUp(responseFromHearingQueryView);
@@ -83,7 +81,7 @@ public class DefendantOutstandingFinesQueryApiTest {
 
     @Test
     public void should_return_NO_outstanding_fines_when_defendant_id_is_unknown() {
-        when(hearingQueryView.getOutstandingFromDefendantId(anyObject())).thenReturn(jsonEnvelopeFromHearing);
+        when(hearingQueryView.getOutstandingFinesQueryFromDefendantId(anyObject())).thenReturn(jsonEnvelopeFromHearing);
         JsonObject emptyResponseFromHearingQueryView = Json.createObjectBuilder().build();
 
         setUp(emptyResponseFromHearingQueryView);

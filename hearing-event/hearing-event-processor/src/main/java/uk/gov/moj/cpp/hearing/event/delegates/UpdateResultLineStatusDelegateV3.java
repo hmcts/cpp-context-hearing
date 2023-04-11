@@ -29,6 +29,7 @@ public class UpdateResultLineStatusDelegateV3 {
 
     private final ObjectToJsonObjectConverter objectToJsonObjectConverter;
 
+
     @Inject
     public UpdateResultLineStatusDelegateV3(final Enveloper enveloper, final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
         this.enveloper = enveloper;
@@ -54,6 +55,9 @@ public class UpdateResultLineStatusDelegateV3 {
         final JsonEnvelope jsonEnvelope = envelopeFrom(metadataFrom(event.metadata()).withName("hearing.command.update-days-result-lines-status"), this.objectToJsonObjectConverter.convert(updateDaysResultLinesStatusCommand));
         sender.send(jsonEnvelope);
     }
+
+
+
 
     private List<ResultLine2> getCompletedResultLines(final List<Target2> targets) {
         return targets.stream()

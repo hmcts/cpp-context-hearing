@@ -328,16 +328,16 @@ public class HearingQueryViewTest {
                 createObjectBuilder()
                         .add(FIELD_DEFENDANT_ID, anExistingDefendantId.get().toString())
                         .build());
-        final JsonEnvelope outstandingFromDefendantIdEnvelope = target.getOutstandingFromDefendantId(query);
+        final JsonEnvelope outstandingFromDefendantIdEnvelope = target.getOutstandingFinesQueryFromDefendantId(query);
 
         assertThat(outstandingFromDefendantIdEnvelope.metadata().name(), is("hearing.defendant.outstanding-fines"));
 
-        final DefendantSearch actualDefendantSearch = jsonObjectToObjectConverter.convert(outstandingFromDefendantIdEnvelope.payloadAsJsonObject(), DefendantSearch.class);
         verify(defendantRepository).getDefendantDetailsForSearching(anExistingDefendantId.get());
-        assertThat(actualDefendantSearch.getForename(), is("Tony"));
-        assertThat(actualDefendantSearch.getSurname(), is("Stark"));
-        assertThat(actualDefendantSearch.getNationalInsuranceNumber(), is("12345"));
-        assertThat(actualDefendantSearch.getDateOfBirth(), is(LocalDate.of(1985, 6, 1)));
+        final JsonObject jsonObject = outstandingFromDefendantIdEnvelope.asJsonObject();
+        assertThat(jsonObject.getString("firstname"), is("Tony"));
+        assertThat(jsonObject.getString("lastname"), is("Stark"));
+        assertThat(jsonObject.getString("ninumber"), is("12345"));
+        assertThat(jsonObject.getString("dob"), is("1985-06-01"));
     }
 
 
@@ -351,7 +351,7 @@ public class HearingQueryViewTest {
                 createObjectBuilder()
                         .add(FIELD_DEFENDANT_ID, unknownDefendantId.get().toString())
                         .build());
-        final JsonEnvelope outstandingFromDefendantIdEnvelope = target.getOutstandingFromDefendantId(query);
+        final JsonEnvelope outstandingFromDefendantIdEnvelope = target.getOutstandingFinesQueryFromDefendantId(query);
 
         verify(defendantRepository).getDefendantDetailsForSearching(unknownDefendantId.get());
         assertThat(outstandingFromDefendantIdEnvelope.metadata().name(), is("hearing.defendant.outstanding-fines"));
@@ -861,6 +861,7 @@ public class HearingQueryViewTest {
 
     private DefendantSearch createDefendantSearch() {
         final DefendantSearch defendantSearch = new DefendantSearch();
+        defendantSearch.setDefendantId(randomUUID());
         defendantSearch.setSurname("Stark");
         defendantSearch.setNationalInsuranceNumber("12345");
         defendantSearch.setForename("Tony");

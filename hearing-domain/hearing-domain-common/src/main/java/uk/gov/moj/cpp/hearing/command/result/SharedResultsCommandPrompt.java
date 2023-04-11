@@ -1,11 +1,15 @@
 package uk.gov.moj.cpp.hearing.command.result;
 
+import java.io.Serializable;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class SharedResultsCommandPrompt {
+public class SharedResultsCommandPrompt implements Serializable {
+
+    private static final long serialVersionUID = -1883994086079055885L;
+
     private UUID id;
     private String label;
     private String fixedListCode;
