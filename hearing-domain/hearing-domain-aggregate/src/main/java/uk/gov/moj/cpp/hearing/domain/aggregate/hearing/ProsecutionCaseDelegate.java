@@ -2,10 +2,12 @@ package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Optional.ofNullable;
 
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.Prosecutor;
+import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
@@ -19,7 +21,7 @@ import java.util.stream.Stream;
 
 public class ProsecutionCaseDelegate implements Serializable {
 
-    private static final long serialVersionUID = -6459704029050560450L;
+    private static final long serialVersionUID = -6459704029050560451L;
 
     private final HearingAggregateMomento momento;
 
@@ -97,6 +99,15 @@ public class ProsecutionCaseDelegate implements Serializable {
                                 defendant.setProceedingsConcluded(updatedDefendant.getProceedingsConcluded())
                         ));
 
+    }
+
+    public void onCaseDefendantsAddedForHearing(final AddCaseDefendantsForHearing caseDefendantsAddedForHearing) {
+        final UUID caseId = caseDefendantsAddedForHearing.getCaseId();
+        final List<Defendant> newDefendants = caseDefendantsAddedForHearing.getDefendants();
+        ofNullable(momento.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(prosecutionCase -> prosecutionCase.getId().equals(caseId))
+                .findFirst().ifPresent(prosecutionCase ->
+                            prosecutionCase.getDefendants().addAll(newDefendants));
     }
 
     private void setCaseMarkers(final ProsecutionCase prosecutionCase, final List<Marker> markers) {

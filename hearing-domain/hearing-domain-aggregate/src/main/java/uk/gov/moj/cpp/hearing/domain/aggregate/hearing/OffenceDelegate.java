@@ -13,6 +13,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitExtended;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
@@ -27,7 +28,7 @@ import java.util.stream.Stream;
 
 public class OffenceDelegate implements Serializable {
 
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 3L;
 
     private final HearingAggregateMomento momento;
 
@@ -110,8 +111,8 @@ public class OffenceDelegate implements Serializable {
 
     public void handleOffencesRemovedFromExistingHearing(final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing) {
 
-        final List<UUID> offencesToBeRemoved = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
-        final List<UUID> defendantsToBeRemoved = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
+        final List<UUID> offencesToBeRemoved = offencesRemovedFromExistingHearing.getOffenceIds();
+        final List<UUID> defendantsToBeRemoved = offencesRemovedFromExistingHearing.getDefendantIds();
         final List<UUID> prosecutionCasesToBeRemoved = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
 
         // Remove offences from all defendants
@@ -187,14 +188,14 @@ public class OffenceDelegate implements Serializable {
             return empty();
         }
 
-        final List<UUID> existingOffencIds = ofNullable(momento.getHearing()).map(hearing -> hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+        final List<UUID> existingOffenceIds = ofNullable(momento.getHearing()).map(hearing -> hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
                 .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
                 .flatMap(defendant -> defendant.getOffences().stream())
                 .map(Offence::getId)
                 .filter(offenceIds::contains)
                 .collect(toList());
 
-        if(existingOffencIds.isEmpty()){
+        if(existingOffenceIds.isEmpty()){
             return Stream.empty();
         }
 
@@ -217,6 +218,16 @@ public class OffenceDelegate implements Serializable {
                         .collect(toList()).isEmpty())
                 .map(ProsecutionCase::getId)
                 .collect(Collectors.toList());
+
+        final List<UUID> prosecutionCaseRemainingList = ofNullable(momento.getHearing()).map(hearing -> hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .map(prosecutionCase -> prosecutionCase.getId())
+                .filter(caseId -> !prosecutionCasesToBeRemoved.contains(caseId))
+                .collect(toList());
+
+        if(prosecutionCaseRemainingList.isEmpty()) {
+            return Stream.of(new HearingDeleted(prosecutionCasesToBeRemoved, defendantsToBeRemoved, offenceIds, null, hearingId));
+        }
+
 
         return Stream.of(new OffencesRemovedFromExistingHearing(hearingId, prosecutionCasesToBeRemoved, defendantsToBeRemoved, offenceIds));
 

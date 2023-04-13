@@ -45,7 +45,7 @@ public class CaseDefendantsUpdateListener {
 
             hearingEntity.getProsecutionCases().stream().filter(pc -> pc.getId().getId().equals(prosecutionCase.getId())).findFirst().ifPresent(persistentCase -> {
                 persistentCase.setCaseStatus(prosecutionCase.getCaseStatus());
-                persistentCase.getDefendants().stream().forEach(defendant -> {
+                persistentCase.getDefendants().forEach(defendant -> {
                     final UUID defendantId = defendant.getId().getId();
                     final Optional<Defendant> optionalDefendant = defendantList.stream().filter(def->def.getId().equals(defendantId)).findFirst();
                     if(optionalDefendant.isPresent()) {

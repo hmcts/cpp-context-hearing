@@ -49,6 +49,6 @@ public class UpdateCaseDefendantsHandler  extends  AbstractCommandHandler {
         final UUID hearingId = fromString(payload.getString(HEARING_ID));
 
         aggregate(HearingAggregate.class, hearingId, envelope,
-                hearingAggregate -> hearingAggregate.updateCaseDefendantsForHearing(hearingId, prosecutionCase));
+                hearingAggregate -> hearingAggregate.addOrUpdateCaseDefendantsForHearing(hearingId, prosecutionCase));
     }
 }
