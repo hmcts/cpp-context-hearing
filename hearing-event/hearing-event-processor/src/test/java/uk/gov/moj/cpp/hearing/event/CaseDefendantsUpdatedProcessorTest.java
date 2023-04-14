@@ -8,6 +8,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -87,6 +89,41 @@ public class CaseDefendantsUpdatedProcessorTest {
 
         assertThat(commandPayload.getJsonObject("prosecutionCase")
                 .getJsonArray("defendants").getJsonObject(0).getBoolean("proceedingsConcluded"), is(true));
+
+    }
+
+    @Test
+    public void testHandleApplicationDefendantsUpdateForHearing () {
+        final UUID defendantId = randomUUID();
+        final UUID hearingId = randomUUID();
+
+        final CourtApplication courtApplication = CourtApplication.courtApplication()
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withId(defendantId)
+                        .build())
+                .build();
+
+        final JsonObject eventPayload = Json.createObjectBuilder()
+                .add("hearingIds", Json.createArrayBuilder().add(hearingId.toString()).build())
+                .add("courtApplication",objectToJsonObjectConverter.convert(courtApplication))
+                .build();
+        final JsonEnvelope event = JsonEnvelope.envelopeFrom(metadataWithRandomUUID("hearing.application-defendants-updated"),
+                eventPayload);
+
+        caseDefendantsUpdatedProcessor.handleApplicationDefendantsUpdateForHearing(event);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+
+        assertThat(events.get(0).metadata().name(), is("hearing.command.update-application-defendants-for-hearing"));
+
+        final JsonObject commandPayload = events.get(0).payloadAsJsonObject();
+
+        assertThat(commandPayload.getString(HEARING_ID), is(hearingId.toString()));
+
+        assertThat(commandPayload.getJsonObject("courtApplication")
+                .getJsonObject("applicant").getString("id"), is(defendantId.toString()));
 
     }
 

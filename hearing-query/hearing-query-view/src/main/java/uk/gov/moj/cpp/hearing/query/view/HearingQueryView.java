@@ -412,6 +412,9 @@ public class HearingQueryView {
                 .collect(toMap(Defendant::getMasterDefendantId, defendant -> defendant, (defendant1, defendant2) -> defendant1));
 
         final List<JsonObject> reusableCaseDetailPrompts = reusableInfoService.getCaseDetailReusableInformation(hearing.getProsecutionCases(), prompts, countryCodesMap);
+        if(hearing.getCourtApplications() != null) {
+            reusableCaseDetailPrompts.addAll(reusableInfoService.getApplicationDetailReusableInformation(hearing.getCourtApplications(), prompts));
+        }
         final JsonObject reusableViewStorePrompts = reusableInfoService.getViewStoreReusableInformation(defendants.values(), reusableCaseDetailPrompts);
         return envelopeFrom(envelope.metadata(), reusableViewStorePrompts);
     }

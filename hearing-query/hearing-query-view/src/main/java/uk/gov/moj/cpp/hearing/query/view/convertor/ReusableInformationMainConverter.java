@@ -15,6 +15,7 @@ import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT
 import static uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService.NATIONALITY;
 
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.common.ReusableInformation;
@@ -94,6 +95,25 @@ public class ReusableInformationMainConverter {
 
         return defendantListMap;
     }
+
+    public Map<MasterDefendant, List<JsonObject>> convertMasterDefendant(final Collection<MasterDefendant> defendants, final List<Prompt> prompts) {
+
+        final Map<MasterDefendant, List<JsonObject>> defendantListMap = new HashMap<>();
+
+        defendants.forEach(defendant -> {
+            final List<JsonObject> jsonObjects = new ArrayList<>();
+
+            final JsonObject defendantJsonObject = objectToJsonObjectConverter.convert(defendant);
+            final String defendantJsonObjectString = defendantJsonObject.toString();
+
+            addReusableInformationForNonObjectTypeIfPresent(prompts, DEFENDANT, defendant.getMasterDefendantId(), jsonObjects, defendantJsonObjectString);
+
+            defendantListMap.put(defendant, jsonObjects);
+        });
+
+        return defendantListMap;
+    }
+
 
     public Map<ProsecutionCase, List<JsonObject>> convertCase(final Collection<ProsecutionCase> cases, final List<Prompt> prompts, final Map<String, Map<String, String>> customPromptValues) {
 

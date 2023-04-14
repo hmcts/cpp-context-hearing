@@ -58,11 +58,34 @@ public class HearingResultedCaseUpdatedProcessorTest {
 
     }
 
+    @Test
+    public void testHearingApplication() throws IOException {
+
+        final JsonEnvelope event = getJsonHearingResultedApplicationUpdatedEnvelope();
+
+        hearingResultedCaseUpdatedProcessor.handleApplicationDefendantUpdate(event);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+
+        assertThat(events.get(0).metadata().name(), is("hearing.command.update-application-defendants"));
+
+    }
+
     private JsonEnvelope getJsonHearingResultedCaseUpdatedEnvelope() throws IOException {
         final String hearingCasePleaAddOrUpdate = getStringFromResource("public.hearing-resulted-case-updated.json");
 
         final Metadata metadata = metadataWithDefaults().build();
         return JsonEnvelope.envelopeFrom(metadata, new StringToJsonObjectConverter().convert(hearingCasePleaAddOrUpdate));
+    }
+
+
+    private JsonEnvelope getJsonHearingResultedApplicationUpdatedEnvelope() throws IOException {
+        final String hearingApplicationPleaAddOrUpdate = getStringFromResource("public.hearing-resulted-case-updated.json");
+
+        final Metadata metadata = metadataWithDefaults().build();
+        return JsonEnvelope.envelopeFrom(metadata, new StringToJsonObjectConverter().convert(hearingApplicationPleaAddOrUpdate));
     }
 
     private String getStringFromResource(final String path) throws IOException {

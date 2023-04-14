@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_APPLICATION_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_CASE_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
 
@@ -141,4 +143,52 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
 
     }
 
+    @Test
+    public void shouldUpdateCaseDefendantDrivingLicenseNumber() throws Exception {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_CASE_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for(UUID resulDefinitionId:resultDefinitionIds){
+            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(courtHouseReverseLookup.getCourtCentreByName(envelope, "Aberdeen JP Court")).thenReturn(Optional.of(CourtCentreOrganisationUnit.courtCentreOrganisationUnit().withOucode("oucode2").withLja("2500").withId(UUID.randomUUID().toString()).build()));
+        target.shareResults(envelope, sender, resultsShared,treeNodes);
+
+
+        assertEquals("DVL1234", resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getDriverNumber());
+    }
+
+    @Test
+    public void shouldUpdateApplicationDefendantDrivingLicenseNumber() throws Exception {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_APPLICATION_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        List<UUID> resultDefinitionIds = resultsShared.getTargets().stream()
+                .flatMap(t -> t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for (UUID resulDefinitionId : resultDefinitionIds) {
+            TreeNode<ResultDefinition> resultDefinitionTreeNode = new TreeNode(resulDefinitionId, resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(courtHouseReverseLookup.getCourtCentreByName(envelope, "Aberdeen JP Court")).thenReturn(Optional.of(CourtCentreOrganisationUnit.courtCentreOrganisationUnit().withOucode("oucode2").withLja("2500").withId(UUID.randomUUID().toString()).build()));
+        target.shareResults(envelope, sender, resultsShared, treeNodes);
+
+
+        assertEquals("DVL1234", resultsShared.getHearing().getCourtApplications().get(0).getApplicant().getMasterDefendant().getPersonDefendant().getDriverNumber());
+        assertEquals("DVL1234", resultsShared.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant().getDriverNumber());
+    }
 }

@@ -7,7 +7,12 @@ import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+
+import java.util.Objects;
+import java.util.stream.Stream;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo;
@@ -68,6 +73,20 @@ public class ReusableInfoService {
         defendantList.addAll(caseList);
 
         return defendantList;
+    }
+
+    public List<JsonObject> getApplicationDetailReusableInformation(final Collection<CourtApplication> applications, final List<Prompt> resultPrompts){
+
+        final Map<UUID, MasterDefendant> masterDefendants = applications.stream().flatMap(application -> Stream.of(application.getApplicant().getMasterDefendant(), application.getSubject().getMasterDefendant()))
+                .filter(Objects::nonNull)
+                .collect(toMap(MasterDefendant::getMasterDefendantId, masterDefendant -> masterDefendant, (defendant1, defendant2) -> defendant1));
+
+        final Map<MasterDefendant, List<JsonObject>> reusableInfoMapForDefendant = reusableInformationMainConverter
+                .convertMasterDefendant(masterDefendants.values(), resultPrompts.stream()
+                        .filter(prompt -> isNotBlank(prompt.getCacheDataPath())).collect(toList()));
+
+        return reusableInfoMapForDefendant.values().stream().flatMap(List::stream).collect(toList());
+
     }
 
     public JsonObject getViewStoreReusableInformation(final Collection<Defendant> defendants, final List<JsonObject> reusableCaseDetailPrompts) {

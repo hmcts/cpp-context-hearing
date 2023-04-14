@@ -241,6 +241,10 @@ subscriptions_descriptor:
         - name: hearing.case-defendants-updated
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.case-defendants-updated.json
 
+        # Application Defendants Updated
+        - name: hearing.application-defendants-updated
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.application-defendants-updated.json
+
         # Outstanding Fines Queried
         - name: hearing.compute-outstanding-fines-requested
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.compute-outstanding-fines-requested.json
@@ -381,6 +385,10 @@ subscriptions_descriptor:
         # Progression Hearing Resulted Case Updated
         - name: public.progression.hearing-resulted-case-updated
           schema_uri: http://justice.gov.uk/core/courts/hearing-resulted-case-updated.json
+
+        # Progression Hearing Resulted Application Updated
+        - name: public.progression.hearing-resulted-application-updated
+          schema_uri: http://justice.gov.uk/core/courts/hearing-resulted-application-updated.json
 
         # Listing Hearing Detail Changed
         - name: public.listing.vacated-trial-updated

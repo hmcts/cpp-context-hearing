@@ -29,6 +29,7 @@ import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.JudicialResultCategory;
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ReportingRestriction;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -119,6 +120,8 @@ public class PublishResultsDelegateV3 {
     public void shareResults(final JsonEnvelope context, final Sender sender, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodes) {
 
         final List<TreeNode<ResultLine2>> restructuredResults = this.restructuringHelper.restructure(context, resultsShared, treeNodes);
+
+        setDefendantFromPrompts(resultsShared, restructuredResults);
 
         mapApplicationLevelJudicialResults(resultsShared, restructuredResults);
 
@@ -521,4 +524,61 @@ public class PublishResultsDelegateV3 {
         }
     }
 
+    private void setDefendantFromPrompts(final ResultsSharedV3 resultsShared, final List<TreeNode<ResultLine2>> restructuredResults) {
+
+        final Set<UUID> promptIds = restructuredResults.stream()
+                .map(TreeNode::getResultDefinition)
+                .map(TreeNode::getData)
+                .map(ResultDefinition::getPrompts)
+                .flatMap(Collection::stream)
+                .filter(judicialResultPrompt -> !isNull(judicialResultPrompt.getReference()))
+                .filter(judicialResultPrompt -> "defendantDrivingLicenceNumber".equals(judicialResultPrompt.getReference()))
+                .map(uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt::getId)
+                .collect(Collectors.toSet());
+
+        restructuredResults.stream().map(TreeNode::getData)
+                .forEach(resultLine -> resultLine.getPrompts().stream()
+                        .filter(prompt -> promptIds.contains(prompt.getId()))
+                        .forEach(prompt -> {
+                            updateCaseDefendant(resultsShared, resultLine, prompt);
+                            updateApplicationDefendant(resultsShared, resultLine, prompt);
+                        }));
+
+    }
+
+    private void updateCaseDefendant(final ResultsSharedV3 resultsShared, final ResultLine2 resultLine, final Prompt prompt) {
+        ofNullable(resultsShared.getHearing().getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(prosecutionCase -> prosecutionCase.getId().equals(resultLine.getCaseId()))
+                .forEach(prosecutionCase -> prosecutionCase.getDefendants().stream()
+                        .filter(defendant -> defendant.getMasterDefendantId().equals(resultLine.getMasterDefendantId()))
+                        .forEach(defendant -> defendant.getPersonDefendant().setDriverNumber(prompt.getValue()))
+                );
+    }
+
+    private void updateApplicationDefendant(final ResultsSharedV3 resultsShared, final ResultLine2 resultLine, final Prompt prompt) {
+        ofNullable(resultsShared.getHearing().getCourtApplications()).map(Collection::stream).orElseGet(Stream::empty)
+                .forEach(application -> updateDriverNumbersInApplication(resultLine, prompt, application));
+    }
+
+    private void updateDriverNumbersInApplication(final ResultLine2 resultLine, final Prompt prompt, final CourtApplication application) {
+        if (ofNullable(application.getApplicant().getMasterDefendant())
+                .map(masterDefendant -> masterDefendant.getMasterDefendantId().equals(resultLine.getMasterDefendantId()))
+                .orElse(false)) {
+            application.getApplicant().getMasterDefendant().getPersonDefendant().setDriverNumber(prompt.getValue());
+        }
+        if (ofNullable(application.getSubject().getMasterDefendant())
+                .map(subject -> subject.getMasterDefendantId().equals(resultLine.getMasterDefendantId()))
+                .orElse(false)) {
+            application.getSubject().getMasterDefendant().getPersonDefendant().setDriverNumber(prompt.getValue());
+        }
+        ofNullable(application.getRespondents()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(respondent -> nonNull(respondent.getMasterDefendant()))
+                .filter(respondent -> respondent.getMasterDefendant().getMasterDefendantId().equals(resultLine.getMasterDefendantId()))
+                .forEach(respondent -> respondent.getMasterDefendant().getPersonDefendant().setDriverNumber(prompt.getValue()));
+
+        ofNullable(application.getThirdParties()).map(Collection::stream).orElseGet(Stream::empty)
+                .filter(thirdParty -> nonNull(thirdParty.getMasterDefendant()))
+                .filter(thirdParty -> thirdParty.getMasterDefendant().getMasterDefendantId().equals(resultLine.getMasterDefendantId()))
+                .forEach(thirdParty -> thirdParty.getMasterDefendant().getPersonDefendant().setDriverNumber(prompt.getValue()));
+    }
 }

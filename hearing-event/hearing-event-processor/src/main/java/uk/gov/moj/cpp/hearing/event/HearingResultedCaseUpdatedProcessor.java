@@ -19,6 +19,7 @@ public class HearingResultedCaseUpdatedProcessor {
     private final Enveloper enveloper;
     private final Sender sender;
     private static final String COMMAND_CASE_DEFENDANT_UPDATED= "hearing.command.update-case-defendants";
+    private static final String COMMAND_APPLICATION_DEFENDANT_UPDATED= "hearing.command.update-application-defendants";
 
 
     @Inject
@@ -36,5 +37,15 @@ public class HearingResultedCaseUpdatedProcessor {
         }
 
         this.sender.send(this.enveloper.withMetadataFrom(envelop, COMMAND_CASE_DEFENDANT_UPDATED).apply(envelop.payloadAsJsonObject()));
+    }
+
+    @Handles("public.progression.hearing-resulted-application-updated")
+    public void handleApplicationDefendantUpdate(final JsonEnvelope envelop) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("public.progression.hearing-resulted-application-updated event received {}", envelop.toObfuscatedDebugString());
+        }
+
+        this.sender.send(this.enveloper.withMetadataFrom(envelop, COMMAND_APPLICATION_DEFENDANT_UPDATED).apply(envelop.payloadAsJsonObject()));
     }
 }

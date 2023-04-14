@@ -5,6 +5,7 @@ import static java.time.ZonedDateTime.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.UUID.fromString;
@@ -19,11 +20,13 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyCollection;
 import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
@@ -38,6 +41,7 @@ import static uk.gov.moj.cpp.hearing.publishing.events.PublishStatus.EXPORT_SUCC
 import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus.currentCourtStatus;
 
 import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
@@ -560,6 +564,61 @@ public class HearingQueryViewTest {
         JsonArray reusablePrompts = result.getJsonArray("reusablePrompts");
         JsonArray reusableResults = result.getJsonArray("reusableResults");
 
+        verify(reusableInfoService, never()).getApplicationDetailReusableInformation(anyCollection(),  anyList());
+        assertThat(reusablePrompts.size(), is(2));
+        assertThat(reusableResults.size(), is(1));
+    }
+
+    @Test
+    public void shouldGetViewStoreAndCaseDetailReusableInfoCombinedWithApplication() {
+
+        final UUID promptId = randomUUID();
+        final List<Prompt> resultPrompts = prepareResultPromptsData(promptId);
+
+        final UUID masterDefendantId = UUID.fromString("2e576a1b-2c62-476d-a556-4c24d6bbc1a2");
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = Hearing.hearing().withId(hearingId).withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                .withDefendants(asList(Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build())).build()))
+                .withCourtApplications(singletonList(CourtApplication.courtApplication()
+
+                        .build()))
+                .build();
+        final JsonObject promptData = createObjectBuilder()
+                .add("value", "Brent Borough Council")
+                .add("masterDefendantId", masterDefendantId.toString())
+                .add("promptRef", "designatedLocalAuthority")
+                .build();
+        final JsonObject applicationPromptData = createObjectBuilder()
+                .add("value", "APP Brent Borough Council")
+                .add("masterDefendantId", masterDefendantId.toString())
+                .add("promptRef", "APP designatedLocalAuthority")
+                .build();
+        final JsonEnvelope query = envelopeFrom(
+                metadataBuilder().withId(randomUUID()).withName("hearing.query.reusable-info"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, String.valueOf(hearingId))
+                        .build());
+        final Map<Defendant, List<JsonObject>> caseDetailInfo = new HashMap<>();
+        final Defendant defendant = Defendant.defendant().withId(randomUUID()).withMasterDefendantId(masterDefendantId).build();
+        caseDetailInfo.put(defendant, asList(promptData));
+        JsonObject reusableInfo = null;
+        try {
+            JsonNode payload = objectMapper.readTree(FileUtil.getPayload("reusable-info-singledefendant.json"));
+            reusableInfo = objectMapper.treeToValue(payload, JsonObject.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        when(reusableInfoService.getCaseDetailReusableInformation(anyList(), anyList(), anyMap())).thenReturn(new ArrayList(asList(promptData)));
+        when(reusableInfoService.getApplicationDetailReusableInformation(anyCollection(),  anyList())).thenReturn(asList(applicationPromptData));
+        when(reusableInfoService.getViewStoreReusableInformation(anyList(), anyList())).thenReturn(reusableInfo);
+        when(hearingService.getHearingDomainById(hearingId)).thenReturn(Optional.of(hearing));
+
+        final JsonObject result = target.getReusableInformation(query, resultPrompts, emptyMap()).payloadAsJsonObject();
+        JsonArray reusablePrompts = result.getJsonArray("reusablePrompts");
+        JsonArray reusableResults = result.getJsonArray("reusableResults");
+
+        verify(reusableInfoService).getApplicationDetailReusableInformation(anyCollection(),  anyList());
         assertThat(reusablePrompts.size(), is(2));
         assertThat(reusableResults.size(), is(1));
     }

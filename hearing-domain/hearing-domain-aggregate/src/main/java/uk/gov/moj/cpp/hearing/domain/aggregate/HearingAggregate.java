@@ -77,6 +77,7 @@ import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
@@ -840,6 +841,16 @@ public class HearingAggregate implements Aggregate {
         }
 
         return apply(streamBuilder.build());
+    }
+
+    public Stream<Object> updateApplicationDefendantsForHearing(final UUID hearingId, final CourtApplication courtApplication) {
+        if (SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
+            return Stream.empty();
+        }
+        return apply(Stream.of(ApplicationDefendantsUpdatedForHearing.applicationDefendantsUpdatedForHearing()
+                .withHearingId(hearingId)
+                .withCourtApplication(courtApplication)
+                .build()));
     }
 
     public Stream<Object> bookProvisionalHearingSlots(final UUID hearingId, final List<ProvisionalHearingSlotInfo> slots, final String bookingType, final String priority, final List<String> specialRequirements) {
