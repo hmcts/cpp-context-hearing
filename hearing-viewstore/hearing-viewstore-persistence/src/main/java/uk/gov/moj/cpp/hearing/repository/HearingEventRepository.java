@@ -58,21 +58,30 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
 
 
     private static final String GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST =
-            "SELECT hearingEvent.* " +
-                    "FROM ha_hearing_event hearingEvent, " +
-                    "ha_hearing hearing " +
-                    "WHERE hearing.id = hearingEvent.hearing_id and " +
-                    "hearing.court_centre_id IN (:courtCentreList) and " +
-                    "hearingEvent.event_time = (select max(hearingEvent2.event_time) " +
-                    "from ha_hearing_event hearingEvent2, " +
-                    "ha_hearing hearing2 " +
-                    "WHERE hearingEvent2.event_date = :eventDate and  hearing2.id = hearingEvent2.hearing_id and " +
-                    "hearing2.room_id = hearing.room_id and " +
-                    "hearingEvent2.hearing_event_definition_id IN (:cppHearingEventIds) " +
-                    "group by hearing2.room_id) and  " +
-                    "hearingEvent.event_date = :eventDate and " +
+            "SELECT new uk.gov.moj.cpp.hearing.repository.HearingEventPojo( " +
+                    "hearingEvent.defenceCounselId," +
+                    "hearingEvent.deleted," +
+                    "hearingEvent.eventDate," +
+                    "hearingEvent.eventTime," +
+                    "hearingEvent.hearingEventDefinitionId," +
+                    "hearingEvent.hearingId," +
+                    "hearingEvent.id," +
+                    "hearingEvent.lastModifiedTime," +
+                    "hearingEvent.recordedLabel) " +
+                    "FROM uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent, " +
+                    "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing " +
+                    "WHERE hearing.id = hearingEvent.hearingId and " +
+                    "hearing.courtCentre.id IN (:courtCentreList) and " +
+                    "hearingEvent.eventTime = (select max(hearingEvent2.eventTime) " +
+                    "from uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent hearingEvent2, " +
+                    "uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing hearing2 " +
+                    "WHERE hearingEvent2.eventDate = :eventDate and  hearing2.id = hearingEvent2.hearingId and " +
+                    "hearing2.courtCentre.roomId = hearing.courtCentre.roomId and " +
+                    "hearingEvent2.hearingEventDefinitionId IN (:cppHearingEventIds) " +
+                    "group by hearing2.courtCentre.roomId) and  " +
+                    "hearingEvent.eventDate = :eventDate and " +
                     "hearingEvent.deleted is false " +
-                    " order by hearingEvent.event_time desc";
+                    " order by hearingEvent.eventTime desc";
 
     public Optional<HearingEvent> findOptionalById(final UUID hearingEventId) {
         final HearingEvent hearingEvent = findBy(hearingEventId);
@@ -103,7 +112,7 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     @Query(value = GET_CURRENT_ACTIVE_HEARINGS_FOR_COURT_CENTRE_LIST)
     public abstract List<HearingEvent> findBy(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("lastModifiedTime") final ZonedDateTime lastModifiedTime, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
 
-    @Query(value = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST, isNative = true)
-    public abstract List<HearingEvent> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
+    @Query(value = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST)
+    public abstract List<HearingEventPojo> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
 
 }
