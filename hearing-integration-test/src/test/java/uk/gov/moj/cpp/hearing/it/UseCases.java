@@ -109,7 +109,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetails
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -137,7 +136,6 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
-import org.hamcrest.core.AllOf;
 import org.json.JSONObject;
 
 public class UseCases {
@@ -193,6 +191,7 @@ public class UseCases {
                                     .withLastName(STRING.next())
                                     .withGender(Gender.MALE)
                                     .build())
+                            .withDriverNumber("DVLA12345")
                             .build())
                     .build());
         }
@@ -733,6 +732,39 @@ public class UseCases {
                         target.getDraftResult()));
     }
 
+    private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target, final UUID caseId) {
+        return target.getResultLines().stream().map(resultLineIn ->
+                new SharedResultsCommandResultLineV2(
+                        "SHORT_CODE", //resultLineIn.getShortCode(),
+                        resultLineIn.getDelegatedPowers(),
+                        resultLineIn.getOrderedDate(),
+                        resultLineIn.getSharedDate(),
+                        resultLineIn.getResultLineId(),
+                        target.getOffenceId(),
+                        target.getDefendantId(),
+                        target.getMasterDefendantId(),
+                        resultLineIn.getResultDefinitionId(),
+                        resultLineIn.getPrompts().stream()
+                                .map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(), p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef()))
+                                .collect(toList()),
+                        resultLineIn.getResultLabel(),
+                        resultLineIn.getLevel().name(),
+                        resultLineIn.getIsModified(),
+                        resultLineIn.getIsComplete(),
+                        target.getApplicationId(),
+                        caseId,//target.getCaseId(),
+                        resultLineIn.getAmendmentReasonId(),
+                        resultLineIn.getAmendmentReason(),
+                        ZonedDateTime.now(),
+                        resultLineIn.getFourEyesApproval(),
+                        resultLineIn.getApprovedDate(),
+                        resultLineIn.getIsDeleted(),
+                        resultLineIn.getChildResultLineIds(),
+                        resultLineIn.getParentResultLineIds(),
+                        target.getShadowListed(),
+                        target.getDraftResult()));
+    }
+
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
 
         // TODO GPE-6699
@@ -774,6 +806,23 @@ public class UseCases {
         command.setResultLines(
                 targets.stream()
                         .flatMap(target -> sharedResultsResultLinePerDay(target))
+                        .collect(toList()));
+
+
+        makeCommand(requestSpec, "hearing.share-days-results")
+                .ofType("application/vnd.hearing.shared-results+json")
+                .withArgs(hearingId, command.getHearingDay())
+                .withPayload(command)
+                .executeSuccessfully();
+
+        return command;
+    }
+
+    public static ShareDaysResultsCommand shareResultsPerDay(final RequestSpecification requestSpec, final UUID hearingId, final UUID caseId, final ShareDaysResultsCommand command, final List<Target> targets) {
+
+        command.setResultLines(
+                targets.stream()
+                        .flatMap(target -> sharedResultsResultLinePerDay(target, caseId))
                         .collect(toList()));
 
 

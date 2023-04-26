@@ -50,6 +50,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
+import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
@@ -440,6 +441,32 @@ public class HearingEventProcessorTest {
         assertThat(envelopeOut.metadata().name(), is("public.hearing.hearing-days-cancelled"));
         final HearingDaysCancelled publicEvent = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), HearingDaysCancelled.class);
         assertThat(publicEvent.getHearingId(), is(hearingDaysCancelled.getHearingId()));
+        List<HearingDay> hearingDays = publicEvent.getHearingDays();
+
+        assertThat(hearingDays.size(), is(2));
+        assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(true))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(of("UTC"))))));
+        assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(false))));
+        assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(of("UTC"))))));
+    }
+
+    @Test
+    public void shouldTriggerPublicHearingExtended() {
+        final UUID hearingId = randomUUID();
+        final ZonedDateTime futureSittingDay = FUTURE_ZONED_DATE_TIME.next();
+        final ZonedDateTime pastSittingDay = PAST_ZONED_DATE_TIME.next();
+        final List<HearingDay> hearingDayList = Arrays.asList(new HearingDay.Builder().withIsCancelled(true).withSittingDay(futureSittingDay).build(),
+                new HearingDay.Builder().withIsCancelled(false).withSittingDay(pastSittingDay).build());
+        final HearingExtended hearingExtended = new HearingExtended(hearingId, hearingDayList, null, null, null, null, null);
+        final JsonEnvelope eventIn = createJsonEnvelope(hearingExtended);
+
+        this.hearingEventProcessor.handleHearingExtended(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is("public.hearing.hearing-extended"));
+        final HearingDaysCancelled publicEvent = jsonObjectToObjectConverter.convert(envelopeOut.payloadAsJsonObject(), HearingDaysCancelled.class);
+        assertThat(publicEvent.getHearingId(), is(hearingExtended.getHearingId()));
         List<HearingDay> hearingDays = publicEvent.getHearingDays();
 
         assertThat(hearingDays.size(), is(2));

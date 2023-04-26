@@ -18,6 +18,7 @@ import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.AssociatedPerson;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
@@ -118,6 +119,28 @@ public class ReusableInformationMainConverterTest {
     }
 
     @Test
+    public void shouldConvertForMasterDefendant() {
+        final List<MasterDefendant> defendants = Collections.unmodifiableList(Arrays.asList(prepareMasterDefendant()));
+        final List<Prompt> prompts = new ArrayList<>();
+        prompts.addAll(prepareTxtPromptsWithCommaSeperated());
+        prompts.addAll(prepareTxtPrompts());
+        prompts.addAll(prepareAddressPrompts());
+        prompts.addAll(prepareFixlmPrompts());
+        prompts.addAll(prepareIntPrompts());
+        prompts.addAll(prepareFixlPrompts());
+
+        final Map<MasterDefendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertMasterDefendant(defendants, prompts);
+
+        assertNotNull(defendantListMap);
+
+        assertThat(defendantListMap.size(), is(defendants.size()));
+
+        final List<JsonObject> promptJsonObjects = defendantListMap.get(defendants.get(0));
+
+        assertTxtType(defendants.get(0), prompts, promptJsonObjects);
+    }
+
+    @Test
     public void shouldConvertForCase() {
         final List<ProsecutionCase> cases = singletonList(prepareCase());
         final List<Prompt> prompts = new ArrayList<>();
@@ -193,6 +216,19 @@ public class ReusableInformationMainConverterTest {
     }
 
     private void assertTxtType(final Defendant defendant, final List<Prompt> prompts, final List<JsonObject> promptJsonObjects, final Optional<AssociatedPerson> associatedPerson) {
+        final JsonObject drivingLicenceNumberJsonObject = promptJsonObjects.stream()
+                .filter(jsonObject -> jsonObject.getString(PROMPT_REF).equals("defendantDrivingLicenceNumber"))
+                .findAny().get();
+
+        final Prompt prompt = prompts.stream().filter(promptToFilter -> promptToFilter.getReference().equals("defendantDrivingLicenceNumber")).findAny().get();
+
+        assertThat(prompt.getReference(), is(drivingLicenceNumberJsonObject.getString(PROMPT_REF)));
+        assertThat(prompt.getType(), is(drivingLicenceNumberJsonObject.getString(TYPE)));
+        assertThat(defendant.getMasterDefendantId().toString(), is(drivingLicenceNumberJsonObject.getString("masterDefendantId")));
+        assertThat("MORGA657054SM9BF" , is(drivingLicenceNumberJsonObject.getString("value")));
+    }
+
+    private void assertTxtType(final MasterDefendant defendant, final List<Prompt> prompts, final List<JsonObject> promptJsonObjects) {
         final JsonObject drivingLicenceNumberJsonObject = promptJsonObjects.stream()
                 .filter(jsonObject -> jsonObject.getString(PROMPT_REF).equals("defendantDrivingLicenceNumber"))
                 .findAny().get();
@@ -372,6 +408,51 @@ public class ReusableInformationMainConverterTest {
         final Defendant defendant = Defendant.defendant()
                 .withMasterDefendantId(UUID.randomUUID())
                 .withNumberOfPreviousConvictionsCited(3)
+                .withProsecutionAuthorityReference("REF1").build();
+
+        final Person personDetails = Person.person()
+                .withNationalityCode("350")
+                .withAdditionalNationalityCode("460").build();
+        final PersonDefendant personDefendant = PersonDefendant.personDefendant()
+                .withDriverNumber("MORGA657054SM9BF")
+                .withPersonDetails(personDetails).build();
+
+        final List<AssociatedPerson> associatedPersons = new ArrayList<>();
+
+        final Address address = Address.address()
+                .withAddress1("address 1")
+                .withAddress2("address 2")
+                .withAddress3("address 3")
+                .withAddress4("address 4")
+                .withAddress5("address 5")
+                .withPostcode("post code").build();
+
+
+        final ContactNumber contact = ContactNumber.contactNumber()
+                .withPrimaryEmail("primaryemail@example.com").build();
+
+        final Person person = Person.person()
+                .withAddress(address)
+                .withFirstName("Matthew")
+                .withLastName("Thompson")
+                .withContact(contact).build();
+
+        final AssociatedPerson associatedPerson = AssociatedPerson.associatedPerson()
+                .withRole("ParentGuardian")
+                .withPerson(person).build();
+
+        associatedPersons.add(associatedPerson);
+
+        defendant.setAssociatedPersons(associatedPersons);
+
+        defendant.setPersonDefendant(personDefendant);
+
+        return defendant;
+    }
+
+    public MasterDefendant prepareMasterDefendant() {
+        final MasterDefendant defendant = MasterDefendant.masterDefendant()
+                .withMasterDefendantId(UUID.randomUUID())
                 .withProsecutionAuthorityReference("REF1").build();
 
         final Person personDetails = Person.person()

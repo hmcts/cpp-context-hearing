@@ -21,9 +21,11 @@ public class CaseDefendantsUpdatedProcessor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CaseDefendantsUpdatedProcessor.class);
     public static final String PROSECUTION_CASE = "prosecutionCase";
+    public static final String COURT_APPLICATION = "courtApplication";
     private final Enveloper enveloper;
     private final Sender sender;
     private static final String COMMAND_CASE_DEFENDANTS_UPDATED_FOR_HEARING= "hearing.command.update-case-defendants-for-hearing";
+    private static final String COMMAND_APPLICATION_DEFENDANTS_UPDATED_FOR_HEARING= "hearing.command.update-application-defendants-for-hearing";
 
 
     @Inject
@@ -47,6 +49,24 @@ public class CaseDefendantsUpdatedProcessor {
                     .add(PROSECUTION_CASE, eventPayload.getJsonObject(PROSECUTION_CASE))
                     .build();
             this.sender.send(this.enveloper.withMetadataFrom(envelop, COMMAND_CASE_DEFENDANTS_UPDATED_FOR_HEARING).apply(commandPayload));
+        });
+    }
+
+    @Handles("hearing.application-defendants-updated")
+    public void handleApplicationDefendantsUpdateForHearing(final JsonEnvelope envelop) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.application-defendants-updated event received {}", envelop.toObfuscatedDebugString());
+        }
+
+        final JsonObject eventPayload = envelop.payloadAsJsonObject();
+        final JsonArray hearingIds = eventPayload.getJsonArray("hearingIds");
+        hearingIds.stream().forEach(hearingId -> {
+            final JsonObject commandPayload = Json.createObjectBuilder()
+                    .add(HEARING_ID, hearingId)
+                    .add(COURT_APPLICATION, eventPayload.getJsonObject(COURT_APPLICATION))
+                    .build();
+            this.sender.send(this.enveloper.withMetadataFrom(envelop, COMMAND_APPLICATION_DEFENDANTS_UPDATED_FOR_HEARING).apply(commandPayload));
         });
     }
 }

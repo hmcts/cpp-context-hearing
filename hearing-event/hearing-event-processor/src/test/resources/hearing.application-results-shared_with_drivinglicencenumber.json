@@ -1,0 +1,380 @@
+{
+  "hearingId": "f60fa369-307b-4a5d-8d78-2b1ec903f23e",
+  "sharedTime": "2023-03-03T09:31:54.264Z",
+  "courtClerk": {
+    "firstName": "Erica",
+    "lastName": "Wilson",
+    "userId": "a085e359-6069-4694-8820-7810e7dfe762"
+  },
+  "hearing": {
+    "courtApplications": [
+      {
+        "applicant": {
+          "id": "baba0204-0ae4-4801-a65e-3c3bac029581",
+          "masterDefendant": {
+            "defendantCase": [
+              {
+                "caseId": "99978caa-eaf0-47a5-85e4-e8d4e33624ea",
+                "caseReference": "TFL1423374",
+                "defendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2"
+              }
+            ],
+            "masterDefendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2",
+            "personDefendant": {
+              "arrestSummonsNumber": "arrest/summons",
+              "personDetails": {
+                "address": {
+                  "address1": "FLAT - 25A",
+                  "address2": "71 Burges Road",
+                  "address3": "London",
+                  "address4": "England",
+                  "address5": "UK",
+                  "postcode": "GL5 1BX"
+                },
+                "contact": {
+                  "home": "01231231230",
+                  "mobile": "78231231230",
+                  "primaryEmail": "primaryContact@test.defendant.com"
+                },
+                "dateOfBirth": "1973-05-08",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "EOXXVPZ",
+                "gender": "MALE",
+                "lastName": "EOXXVPZ",
+                "nationalInsuranceNumber": "AB123456C",
+                "occupation": "TA",
+                "occupationCode": "666",
+                "specificRequirements": "no special needs",
+                "title": "MR"
+              }
+            }
+          },
+          "notificationRequired": true,
+          "summonsRequired": false
+        },
+        "applicationReceivedDate": "2023-03-01",
+        "applicationReference": "TFL1423374",
+        "applicationStatus": "UN_ALLOCATED",
+        "commissionerOfOath": false,
+        "courtApplicationCases": [
+          {
+            "caseStatus": "SJP_REFERRAL",
+            "isSJP": false,
+            "prosecutionCaseId": "99978caa-eaf0-47a5-85e4-e8d4e33624ea",
+            "prosecutionCaseIdentifier": {
+              "address": {
+                "address1": "Warwickshire Police",
+                "address2": "PO Box 4",
+                "address3": "Leek Wootton",
+                "address4": "Warwick",
+                "address5": "Warwickshire",
+                "postcode": "CV35 7QB"
+              },
+              "majorCreditorCode": "PO23",
+              "prosecutionAuthorityCode": "WARPF",
+              "prosecutionAuthorityId": "f2bccb8f-47d8-3a3b-8f35-266eea32b2ac",
+              "prosecutionAuthorityName": "Warwickshire Police",
+              "prosecutionAuthorityOUCode": "0230000",
+              "caseURN": "TFL1423374"
+            }
+          }
+        ],
+        "id": "03c4d6a3-8c13-46bf-855c-aaf981bd475f",
+        "subject": {
+          "id": "baba0204-0ae4-4801-a65e-3c3bac029581",
+          "masterDefendant": {
+            "defendantCase": [
+              {
+                "caseId": "99978caa-eaf0-47a5-85e4-e8d4e33624ea",
+                "caseReference": "TFL1423374",
+                "defendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2"
+              }
+            ],
+            "masterDefendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2",
+            "personDefendant": {
+              "arrestSummonsNumber": "arrest/summons",
+              "personDetails": {
+                "address": {
+                  "address1": "FLAT - 25A",
+                  "address2": "71 Burges Road",
+                  "address3": "London",
+                  "address4": "England",
+                  "address5": "UK",
+                  "postcode": "GL5 1BX"
+                },
+                "contact": {
+                  "home": "01231231230",
+                  "mobile": "78231231230",
+                  "primaryEmail": "primaryContact@test.defendant.com"
+                },
+                "dateOfBirth": "1973-05-08",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "EOXXVPZ",
+                "gender": "MALE",
+                "lastName": "EOXXVPZ",
+                "nationalInsuranceNumber": "AB123456C",
+                "occupation": "TA",
+                "occupationCode": "666",
+                "specificRequirements": "no special needs",
+                "title": "MR"
+              }
+            }
+          },
+          "notificationRequired": true,
+          "summonsRequired": false
+        },
+        "thirdParties": [
+          {
+            "id": "62b2ae6d-5d0a-491a-8655-efdce2bd9682",
+            "notificationRequired": true,
+            "prosecutingAuthority": {
+              "address": {
+                "address1": "Warwickshire Police",
+                "address2": "PO Box 4",
+                "address3": "Leek Wootton",
+                "address4": "Warwick",
+                "address5": "Warwickshire",
+                "postcode": "CV35 7QB"
+              },
+              "majorCreditorCode": "PO23",
+              "name": "Warwickshire Police",
+              "prosecutionAuthorityCode": "WARPF",
+              "prosecutionAuthorityId": "f2bccb8f-47d8-3a3b-8f35-266eea32b2ac",
+              "prosecutionAuthorityOUCode": "0230000"
+            },
+            "summonsRequired": true
+          }
+        ],
+        "type": {
+          "appealFlag": false,
+          "applicantAppellantFlag": false,
+          "boxworkNotifTemplate": "NOT_APPLICABLE",
+          "breachType": "NOT_APPLICABLE",
+          "categoryCode": "CO",
+          "code": "MC80524",
+          "commrOfOathFlag": false,
+          "courtExtractAvlFlag": true,
+          "courtOfAppealFlag": false,
+          "hearingCode": "APN",
+          "id": "44c238d9-3bc2-3cf3-a2eb-a7d1437b8383",
+          "jurisdiction": "MAGISTRATES",
+          "legislation": "In accordance with section 142 of the Magistrates' Courts Act 1980.",
+          "legislationWelsh": "Yn unol ag adran 142 Deddf Llysoedd Ynadon 1980.",
+          "linkType": "SJP",
+          "listingNotifTemplate": "POSTAL_NOTIFICATION",
+          "offenceActiveOrder": "OFFENCE",
+          "pleaApplicableFlag": false,
+          "prosecutorThirdPartyFlag": true,
+          "spiOutApplicableFlag": true,
+          "summonsTemplateType": "NOT_APPLICABLE",
+          "type": "Application to reopen case",
+          "typeWelsh": "Cais i ailagor achos"
+        }
+      }
+    ],
+    "courtCentre": {
+      "address": {
+        "address1": "176A Lavender Hill",
+        "address2": "London",
+        "address3": "",
+        "address4": "",
+        "address5": "",
+        "postcode": "SW11 1JU"
+      },
+      "code": "B01LY00",
+      "courtHearingLocation": "B01LY01",
+      "id": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+      "lja": {
+        "ljaCode": "2577",
+        "ljaName": "South West London Magistrates' Court"
+      },
+      "name": "Lavender Hill Magistrates' Court",
+      "roomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+      "roomName": "Courtroom 01"
+    },
+    "hasSharedResults": true,
+    "hearingDays": [
+      {
+        "courtCentreId": "f8254db1-1683-483e-afb3-b87fde5a0a26",
+        "courtRoomId": "9e4932f7-97b2-3010-b942-ddd2624e4dd8",
+        "hasSharedResults": true,
+        "isCancelled": false,
+        "listedDurationMinutes": 1,
+        "listingSequence": 0,
+        "sittingDay": "2023-03-03T10:00:00.000Z"
+      }
+    ],
+    "hearingLanguage": "ENGLISH",
+    "id": "f60fa369-307b-4a5d-8d78-2b1ec903f23e",
+    "jurisdictionType": "MAGISTRATES",
+    "prosecutionCases": [
+      {
+        "caseStatus": "SJP_REFERRAL",
+        "defendants": [
+          {
+            "courtProceedingsInitiated": "2023-03-03T09:25:46.417Z",
+            "id": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2",
+            "isYouth": false,
+            "masterDefendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2",
+            "numberOfPreviousConvictionsCited": 3,
+            "offences": [
+              {
+                "chargeDate": "1977-05-01",
+                "count": 1,
+                "dvlaOffenceCode": "TS30",
+                "endorsableFlag": true,
+                "id": "bfe3f64d-aa44-4141-975c-2934cf4f1449",
+                "listingNumber": 1,
+                "modeOfTrial": "Summary",
+                "notifiedPlea": {
+                  "notifiedPleaDate": "2023-03-03",
+                  "notifiedPleaValue": "NO_NOTIFICATION",
+                  "offenceId": "bfe3f64d-aa44-4141-975c-2934cf4f1449"
+                },
+                "offenceCode": "CA03014",
+                "offenceDateCode": 1,
+                "offenceDefinitionId": "d6bd72ad-37bf-330d-bcc6-215728949d3e",
+                "offenceLegislation": "Contrary to section 366(8)(b) and    (9) of the Communications Act 2003.",
+                "offenceLegislationWelsh": "",
+                "offenceTitle": "Fail    / refuse give assistance to person executing Communications Act search warrant",
+                "offenceTitleWelsh": "",
+                "orderIndex": 1,
+                "startDate": "2022-07-01",
+                "wording": "A fine not exceeding level five on the standard scale.Time limit for prosecutions:6 monthsOn the 12th March 2015 the limit on fines imposed by a Magistrates' court was removed – as such, the potential fine on summary conviction in relation to an offence committed after this date is unlimited.",
+                "wordingWelsh": "Teipiwch neu copïwch y testun iw gyfieithu ymaDi ddirwy nad ywn uwch na lefel pump ar y raddfa safonol. Terfyn amser ar gyfer erlyniadau:6 misA gafodd y terfyn ar ddirwyon a osodwyd gan lys Ynadon ei ddileu ar 12 Mawrth 2015 – fel y cyfryw, maer ddirwy bosibl ar gollfarn ddiannod mewn perthynas â throsedd a gyflawnwyd ar ôl y dyddiad hwn yn ddiderfyn."
+              }
+            ],
+            "personDefendant": {
+              "arrestSummonsNumber": "arrest/summons",
+              "personDetails": {
+                "address": {
+                  "address1": "FLAT - 25A",
+                  "address2": "71 Burges Road",
+                  "address3": "London",
+                  "address4": "England",
+                  "address5": "UK",
+                  "postcode": "GL5 1BX"
+                },
+                "contact": {
+                  "home": "01231231230",
+                  "mobile": "78231231230",
+                  "primaryEmail": "primaryContact@test.defendant.com"
+                },
+                "dateOfBirth": "1973-05-08",
+                "documentationLanguageNeeds": "ENGLISH",
+                "ethnicity": {
+                  "selfDefinedEthnicityCode": "W1",
+                  "selfDefinedEthnicityDescription": "British",
+                  "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+                },
+                "firstName": "EOXXVPZ",
+                "gender": "MALE",
+                "lastName": "EOXXVPZ",
+                "nationalInsuranceNumber": "AB123456C",
+                "occupation": "TA",
+                "occupationCode": "666",
+                "specificRequirements": "no special needs",
+                "title": "MR"
+              }
+            },
+            "prosecutionCaseId": "99978caa-eaf0-47a5-85e4-e8d4e33624ea"
+          }
+        ],
+        "id": "99978caa-eaf0-47a5-85e4-e8d4e33624ea",
+        "initiationCode": "J",
+        "originatingOrganisation": "0230000",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Warwickshire Police",
+            "address2": "PO Box 4",
+            "address3": "Leek Wootton",
+            "address4": "Warwick",
+            "address5": "Warwickshire",
+            "postcode": "CV35 7QB"
+          },
+          "majorCreditorCode": "PO23",
+          "prosecutionAuthorityCode": "WARPF",
+          "prosecutionAuthorityId": "f2bccb8f-47d8-3a3b-8f35-266eea32b2ac",
+          "prosecutionAuthorityName": "Warwickshire Police",
+          "prosecutionAuthorityOUCode": "0230000",
+          "caseURN": "TFL1423374"
+        },
+        "statementOfFacts": "Prosecution Facts"
+      }
+    ],
+    "shadowListedOffences": [],
+    "type": {
+      "description": "Application",
+      "id": "3449743b-95d6-4836-8941-57f588b52068"
+    }
+  },
+  "variantDirectory": [],
+  "completedResultLinesStatus": {},
+  "targets": [
+    {
+      "applicationId": "03c4d6a3-8c13-46bf-855c-aaf981bd475f",
+      "caseId": "99978caa-eaf0-47a5-85e4-e8d4e33624ea",
+      "draftResult": "{}",
+      "hearingDay": "2023-03-03",
+      "hearingId": "f60fa369-307b-4a5d-8d78-2b1ec903f23e",
+      "masterDefendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2",
+      "resultLines": [
+        {
+          "applicationId": "03c4d6a3-8c13-46bf-855c-aaf981bd475f",
+          "caseId": "99978caa-eaf0-47a5-85e4-e8d4e33624ea",
+          "childResultLineIds": [
+          ],
+          "isComplete": true,
+          "isDeleted": false,
+          "isModified": true,
+          "level": "OFFENCE",
+          "masterDefendantId": "b5ff1b38-aa8a-4e85-b444-992aa27e08e2",
+          "orderedDate": "2023-03-03",
+          "prompts": [
+            {
+              "id": "a593ae4a-9d69-45b9-9585-c11aeed28404",
+              "label": "Defendant driving licence number",
+              "value": "DVL1234"
+            }
+          ],
+          "resultDefinitionId": "b2d06bbc-e90e-4df8-8851-6e4a70894828",
+          "resultLabel": "Obligatory disqualification",
+          "resultLineId": "077eb62e-ca37-4f67-b955-03c59776bc83",
+          "shadowListed": false,
+          "sharedDate": "2023-03-03",
+          "shortCode": "ddo"
+        }
+      ],
+      "shadowListed": false,
+      "targetId": "03c4d6a3-8c13-46bf-855c-aaf981bd475f"
+    }
+  ],
+  "savedTargets": [],
+  "defendantDetailsChanged": [],
+  "isReshare": false,
+  "newAmendmentResults": [
+    {
+      "id": "077eb62e-ca37-4f67-b955-03c59776bc83"
+    },
+    {
+      "id": "2e7d92d6-bc8e-4998-a52a-4becf73c9a8b"
+    },
+    {
+      "id": "55e0e02a-aef8-4551-8c0a-103d3299dcfc"
+    },
+    {
+      "id": "db3b516d-55e4-46a8-ba6f-4aa6a229bcad"
+    }
+  ],
+  "hearingDay": "2023-03-03"
+}

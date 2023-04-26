@@ -8,6 +8,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import uk.gov.justice.domain.annotation.Event;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicantCounselChangeIgnored;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantDetailsWithHearings;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdated;
@@ -131,6 +132,7 @@ public class HearingEventListenerYamlConfigTest {
             CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value(),
             DefendantLegalAidStatusUpdated.class.getAnnotation(Event.class).value(),
             CaseDefendantsUpdated.class.getAnnotation(Event.class).value(),
+            ApplicationDefendantsUpdated.class.getAnnotation(Event.class).value(),
             CaseMarkersEnrichedWithAssociatedHearings.class.getAnnotation(Event.class).value(),
             OutstandingFinesQueried.class.getAnnotation(Event.class).value(),
             OutstandingFinesRequested.class.getAnnotation(Event.class).value(),

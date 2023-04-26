@@ -1,0 +1,265 @@
+{
+  "courtApplication": {
+    "applicant": {
+      "id": "b104cd92-2d4b-4b43-a894-2a6b6ff153b8",
+      "masterDefendant": {
+        "associatedPersons": [
+          {
+            "person": {
+              "address": {
+                "address1": "Hmx01dRwZn",
+                "address2": "56Police House",
+                "address3": "StreetDescriptionG",
+                "address4": "Locality2G",
+                "address5": "Town2G",
+                "postcode": "TW14 9XD"
+              },
+              "contact": {
+                "home": "19998021888",
+                "mobile": "19998021889",
+                "primaryEmail": "Gvishnu@gmail.com",
+                "secondaryEmail": "Gilja@gmail.com"
+              },
+              "dateOfBirth": "1942-06-28",
+              "ethnicity": {
+                "observedEthnicityCode": "4",
+                "observedEthnicityDescription": "Asian",
+                "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+                "selfDefinedEthnicityCode": "W1",
+                "selfDefinedEthnicityDescription": "British",
+                "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+              },
+              "firstName": "GPersonGivenName11",
+              "gender": "MALE",
+              "lastName": "GPersonFamilyName2",
+              "middleName": "GPersonGivenName21 GPersonGivenName31",
+              "title": "GPersonTitle1"
+            },
+            "role": "ParentGuardian"
+          }
+        ],
+        "defendantCase": [
+          {
+            "caseId": "c1b8ed80-ce34-4c23-bfb6-125b4e683a74",
+            "caseReference": "13GD5751323",
+            "defendantId": "496b9308-4724-4e7d-8a9a-459338602ffa"
+          }
+        ],
+        "masterDefendantId": "DEFENDANT_ID",
+        "personDefendant": {
+          "arrestSummonsNumber": "REF1",
+          "bailConditions": "BailConditions0",
+          "bailStatus": {
+            "code": "B",
+            "description": "Conditional bail",
+            "id": "dd4073b6-22be-3875-9d63-5da286bb3ece"
+          },
+          "driverNumber": "ALI123",
+          "perceivedBirthYear": 2006,
+          "personDetails": {
+            "address": {
+              "address1": "Hmx01dRwZn",
+              "address2": "56Police HouseD",
+              "address3": "StreetDescriptionD",
+              "address4": "LocalityD",
+              "address5": "TownD",
+              "postcode": "TW14 9XD"
+            },
+            "contact": {
+              "home": "09998021888",
+              "mobile": "09998021889",
+              "primaryEmail": "robert@gmail.com",
+              "secondaryEmail": "ormsby@gmail.com",
+              "work": "0917894278022"
+            },
+            "dateOfBirth": "1942-06-28",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "4",
+              "observedEthnicityDescription": "Asian",
+              "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+              "selfDefinedEthnicityCode": "W1",
+              "selfDefinedEthnicityDescription": "British",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Robert",
+            "gender": "MALE",
+            "hearingLanguageNeeds": "ENGLISH",
+            "interpreterLanguageNeeds": "LanguageNeeds0",
+            "lastName": "Smith",
+            "middleName": "PersonGivenName20A PersonGivenName30A",
+            "occupation": "Occupation0",
+            "occupationCode": "50",
+            "specificRequirements": "SpecialNeeds0",
+            "title": "YR"
+          },
+          "policeBailConditions": "BailConditions0",
+          "policeBailStatus": {
+            "code": "B",
+            "description": "Conditional bail",
+            "id": "dd4073b6-22be-3875-9d63-5da286bb3ece"
+          }
+        }
+      },
+      "notificationRequired": true,
+      "summonsRequired": false
+    },
+    "applicationReceivedDate": "2023-04-05",
+    "applicationReference": "13GD5751323",
+    "applicationStatus": "FINALISED",
+    "commissionerOfOath": false,
+    "courtApplicationCases": [
+      {
+        "caseStatus": "ACTIVE",
+        "isSJP": false,
+        "prosecutionCaseId": "c1b8ed80-ce34-4c23-bfb6-125b4e683a74",
+        "prosecutionCaseIdentifier": {
+          "address": {
+            "address1": "Surrey Police",
+            "address2": "Mount Browne",
+            "address3": "Sandy Lane",
+            "address4": "Guildford",
+            "postcode": "GU3 1HG"
+          },
+          "contact": {
+            "primaryEmail": "mail_data_bureau_res@surrey.pnn.police.uk"
+          },
+          "majorCreditorCode": "PO45",
+          "prosecutionAuthorityCode": "SURRPF",
+          "prosecutionAuthorityId": "764bff92-a135-34cb-b858-8bb6b4b66301",
+          "prosecutionAuthorityName": "Surrey Police",
+          "prosecutionAuthorityOUCode": "0450000",
+          "caseURN": "13GD5751323"
+        }
+      }
+    ],
+    "id": "APPLICATION_ID",
+    "subject": {
+      "id": "b104cd92-2d4b-4b43-a894-2a6b6ff153b8",
+      "masterDefendant": {
+        "associatedPersons": [
+          {
+            "person": {
+              "address": {
+                "address1": "Hmx01dRwZn",
+                "address2": "56Police House",
+                "address3": "StreetDescriptionG",
+                "address4": "Locality2G",
+                "address5": "Town2G",
+                "postcode": "TW14 9XD"
+              },
+              "contact": {
+                "home": "19998021888",
+                "mobile": "19998021889",
+                "primaryEmail": "Gvishnu@gmail.com",
+                "secondaryEmail": "Gilja@gmail.com"
+              },
+              "dateOfBirth": "1942-06-28",
+              "ethnicity": {
+                "observedEthnicityCode": "4",
+                "observedEthnicityDescription": "Asian",
+                "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+                "selfDefinedEthnicityCode": "W1",
+                "selfDefinedEthnicityDescription": "British",
+                "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+              },
+              "firstName": "GPersonGivenName11",
+              "gender": "MALE",
+              "lastName": "GPersonFamilyName2",
+              "middleName": "GPersonGivenName21 GPersonGivenName31",
+              "title": "GPersonTitle1"
+            },
+            "role": "ParentGuardian"
+          }
+        ],
+        "defendantCase": [
+          {
+            "caseId": "c1b8ed80-ce34-4c23-bfb6-125b4e683a74",
+            "caseReference": "13GD5751323",
+            "defendantId": "496b9308-4724-4e7d-8a9a-459338602ffa"
+          }
+        ],
+        "masterDefendantId": "DEFENDANT_ID",
+        "personDefendant": {
+          "arrestSummonsNumber": "REF1",
+          "bailConditions": "",
+          "bailStatus": {
+            "code": "B",
+            "description": "Conditional bail",
+            "id": "dd4073b6-22be-3875-9d63-5da286bb3ece"
+          },
+          "driverNumber": "ALI123",
+          "perceivedBirthYear": 2006,
+          "personDetails": {
+            "address": {
+              "address1": "Hmx01dRwZn",
+              "address2": "56Police HouseD",
+              "address3": "StreetDescriptionD",
+              "address4": "LocalityD",
+              "address5": "TownD",
+              "postcode": "TW14 9XD"
+            },
+            "contact": {
+              "home": "09998021888",
+              "mobile": "09998021889",
+              "primaryEmail": "robert@gmail.com",
+              "secondaryEmail": "ormsby@gmail.com",
+              "work": "0917894278022"
+            },
+            "dateOfBirth": "1942-06-28",
+            "documentationLanguageNeeds": "ENGLISH",
+            "ethnicity": {
+              "observedEthnicityCode": "4",
+              "observedEthnicityDescription": "Asian",
+              "observedEthnicityId": "a87ff679-a2f3-371d-9181-a67b7542122c",
+              "selfDefinedEthnicityCode": "W1",
+              "selfDefinedEthnicityDescription": "British",
+              "selfDefinedEthnicityId": "c4ca4238-a0b9-3382-8dcc-509a6f75849b"
+            },
+            "firstName": "Robert",
+            "gender": "MALE",
+            "hearingLanguageNeeds": "ENGLISH",
+            "interpreterLanguageNeeds": "LanguageNeeds0",
+            "lastName": "Smith",
+            "middleName": "PersonGivenName20A PersonGivenName30A",
+            "occupation": "Occupation0",
+            "occupationCode": "50",
+            "specificRequirements": "SpecialNeeds0",
+            "title": "YR"
+          },
+          "policeBailConditions": "BailConditions0",
+          "policeBailStatus": {
+            "code": "B",
+            "description": "Conditional bail",
+            "id": "dd4073b6-22be-3875-9d63-5da286bb3ece"
+          }
+        }
+      },
+      "notificationRequired": true,
+      "summonsRequired": false
+    },
+    "type": {
+      "appealFlag": false,
+      "applicantAppellantFlag": true,
+      "boxworkNotifTemplate": "NOT_APPLICABLE",
+      "breachType": "NOT_APPLICABLE",
+      "categoryCode": "CO",
+      "code": "RO88504",
+      "commrOfOathFlag": false,
+      "courtExtractAvlFlag": true,
+      "courtOfAppealFlag": false,
+      "hearingCode": "APN",
+      "id": "32dad4d4-cd29-31ca-aeea-c7d8bc956cc6",
+      "jurisdiction": "EITHER",
+      "legislation": "In accordance with section 39 of the Road Traffic Offenders Act 1988.",
+      "linkType": "LINKED",
+      "listingNotifTemplate": "POSTAL_NOTIFICATION",
+      "offenceActiveOrder": "OFFENCE",
+      "pleaApplicableFlag": false,
+      "prosecutorThirdPartyFlag": false,
+      "spiOutApplicableFlag": true,
+      "summonsTemplateType": "NOT_APPLICABLE",
+      "type": "Application to suspend disqualification pending appeal"
+    }
+  }
+}

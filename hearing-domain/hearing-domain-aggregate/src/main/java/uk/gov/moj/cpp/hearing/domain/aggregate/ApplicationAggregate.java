@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.domain.aggregate.Aggregate;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
@@ -55,6 +57,15 @@ public class ApplicationAggregate implements Aggregate {
         }
 
     }
+
+    public Stream<Object> applicationDefendantsUpdated(final CourtApplication courtApplication) {
+        if (!this.hearingIds.isEmpty()) {
+            return apply(Stream.of(ApplicationDefendantsUpdated.applicationDefendantsUpdatd().withHearingIds(hearingIds).withCourtApplication(courtApplication).build()));
+        } else {
+            return apply(Stream.empty());
+        }
+    }
+
     public List<UUID> getHearingIds() {
         return hearingIds;
     }

@@ -223,6 +223,10 @@ subscriptions_descriptor:
         - name: hearing.add-case-defendants-for-hearing
           schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.add-case-defendants-for-hearing.json
 
+        # Application Defendants Updated For Hearing
+        - name: hearing.application-defendants-updated-for-hearing
+          schema_uri: http://justice.gov.uk/json/schemas/hearing/hearing.application-defendants-updated-for-hearing.json
+
         # Publish court list
         - name: hearing.event.publish-court-list-export-failed
           schema_uri: http://justice.gov.uk/hearing/event/listing.event.publish-court-list-export-failed.json

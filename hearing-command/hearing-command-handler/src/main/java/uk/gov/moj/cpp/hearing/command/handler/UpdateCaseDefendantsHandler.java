@@ -2,11 +2,13 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
@@ -50,5 +52,32 @@ public class UpdateCaseDefendantsHandler  extends  AbstractCommandHandler {
 
         aggregate(HearingAggregate.class, hearingId, envelope,
                 hearingAggregate -> hearingAggregate.addOrUpdateCaseDefendantsForHearing(hearingId, prosecutionCase));
+    }
+
+    @Handles("hearing.command.update-application-defendants")
+    public void updateApplicationDefendants(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-application-defendants event received {}", envelope.toObfuscatedDebugString());
+        }
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final JsonObject courtApplicationJsonObject = payload.getJsonObject("courtApplication");
+        final CourtApplication courtApplication = convertToObject(courtApplicationJsonObject, CourtApplication.class);
+
+        aggregate(ApplicationAggregate.class, courtApplication.getId(), envelope,
+                applicationAggregate -> applicationAggregate.applicationDefendantsUpdated(courtApplication));
+    }
+
+    @Handles("hearing.command.update-application-defendants-for-hearing")
+    public void updateApplicationDefendantsForHearing(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.update-application-defendants-for-hearing event received {}", envelope.toObfuscatedDebugString());
+        }
+        final JsonObject payload = envelope.payloadAsJsonObject();
+        final CourtApplication courtApplication = convertToObject(payload.getJsonObject("courtApplication"), CourtApplication.class);
+
+        final UUID hearingId = fromString(payload.getString(HEARING_ID));
+
+        aggregate(HearingAggregate.class, hearingId, envelope,
+                hearingAggregate -> hearingAggregate.updateApplicationDefendantsForHearing(hearingId, courtApplication));
     }
 }

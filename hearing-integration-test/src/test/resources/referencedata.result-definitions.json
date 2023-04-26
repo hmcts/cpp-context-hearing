@@ -7435,7 +7435,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -7507,7 +7508,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -7716,7 +7718,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -7905,7 +7908,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -7961,7 +7965,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -8150,7 +8155,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -8340,7 +8346,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -8415,7 +8422,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -8626,7 +8634,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -8817,7 +8826,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -8931,7 +8941,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         },
         {
           "id": "7326f05d-54b3-450e-92dd-a5bc0710f8f7",
@@ -9276,7 +9287,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         },
         {
           "id": "7326f05d-54b3-450e-92dd-a5bc0710f8f7",
@@ -9622,7 +9634,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         },
         {
           "id": "7326f05d-54b3-450e-92dd-a5bc0710f8f7",
@@ -9966,7 +9979,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -10136,7 +10150,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -10232,7 +10247,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -10287,7 +10303,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -10362,7 +10379,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -10417,7 +10435,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         },
         {
           "id": "a541edb8-fead-4a88-8665-79b5a59c183c",
@@ -10493,7 +10512,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         },
         {
           "id": "dcaf502b-44d2-4be0-acfc-2f7d29142da6",
@@ -11115,7 +11135,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -11286,7 +11307,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -11341,7 +11363,8 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "reference": "defendantDrivingLicenceNumber"
         }
       ],
       "startDate": "2019-10-25"
@@ -15000,7 +15023,10 @@
           "financial": "N",
           "jurisdiction": "B",
           "min": "0",
-          "max": "16"
+          "max": "16",
+          "cacheable": 2,
+          "reference": "defendantDrivingLicenceNumber",
+          "cacheDataPath" : "personDefendant.driverNumber"
         }
       ],
       "startDate": "2019-10-25"
