@@ -34,6 +34,7 @@ import uk.gov.justice.core.courts.HearingType;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ReferralReason;
@@ -289,11 +290,11 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final Plea plea =  Plea.plea()
+        final PleaModel plea = PleaModel.pleaModel().withPlea(Plea.plea()
                 .withApplicationId(courtAppId)
                 .withPleaDate(LocalDate.now())
                 .withPleaValue("GUILTY")
-                .withOffenceId(offenceId).build();
+                .withOffenceId(offenceId).build()).build();
 
         final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  plea );
 
@@ -345,13 +346,13 @@ public class HearingJPAMapperTest {
 
         when(courtApplicationsSerializer.courtApplications(any(String.class))).thenReturn(courtApplications);
         when(courtApplicationsSerializer.json(any())).thenReturn("EFG");
-        final Plea plea =  Plea.plea()
+        final PleaModel pleaModel =  PleaModel.pleaModel().withPlea(Plea.plea()
                 .withApplicationId(courtAppId)
                 .withPleaDate(LocalDate.now())
                 .withPleaValue("GUILTY")
-                .withOffenceId(offenceId).build();
+                .withOffenceId(offenceId).build()).build();
 
-        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  plea );
+        final String strResult = hearingJPAMapper.updatePleaOnOffencesInCourtApplication("",  pleaModel );
 
         verify(courtApplicationsSerializer, times(1)).json(courtApplicationCaptor.capture());
         List<CourtApplication> applicationList = courtApplicationCaptor.getValue();
