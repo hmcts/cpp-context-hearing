@@ -1,12 +1,14 @@
 package uk.gov.moj.cpp.hearing.mapping;
 
 import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 import static org.apache.deltaspike.core.util.CollectionUtils.isEmpty;
 import static uk.gov.justice.core.courts.ApplicationStatus.EJECTED;
 
+import org.apache.commons.collections.CollectionUtils;
 import uk.gov.justice.core.courts.ApplicationStatus;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationCase;
@@ -14,19 +16,18 @@ import uk.gov.justice.core.courts.CourtOrder;
 import uk.gov.justice.core.courts.CourtOrderOffence;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.Offence;
-import uk.gov.justice.core.courts.Plea;
+import uk.gov.justice.core.courts.PleaModel;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.hearing.courts.ApplicationCourtListRestriction;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.repository.HearingYouthCourtDefendantsRepository;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
 
 @SuppressWarnings({"squid:S00107", "squid:S3655", "squid:CommentedOutCodeLine", "squid:S1172"})
 @ApplicationScoped
@@ -297,41 +298,55 @@ public class HearingJPAMapper {
                 .build();
     }
 
-    public String updatePleaOnOffencesInCourtApplication(final String courtApplicationsJson, final Plea plea) {
+    public String updatePleaOnOffencesInCourtApplication(final String courtApplicationsJson, final PleaModel pleaModel) {
         final List<CourtApplication> courtApplications = courtApplicationsSerializer.courtApplications(courtApplicationsJson);
-        final CourtApplication courtApplication = getCourtApplication(courtApplications, plea.getOffenceId());
+        final CourtApplication courtApplication = pleaModel.getPlea() != null ? getCourtApplication(courtApplications, pleaModel.getPlea().getOffenceId()) :
+                getCourtApplication(courtApplications, pleaModel.getIndicatedPlea().getOffenceId());
         final int index = courtApplications.indexOf(courtApplication);
 
         final CourtApplication updatedCourtApplication = CourtApplication.courtApplication().withValuesFrom(courtApplication)
                                 .withCourtApplicationCases(courtApplication.getCourtApplicationCases() == null ? null : courtApplication.getCourtApplicationCases().stream()
                                         .map(applicationCase -> CourtApplicationCase.courtApplicationCase().withValuesFrom(applicationCase)
-                                                .withOffences(applicationCase.getOffences().stream()
-                                                        .map(courtApplicationOffence -> getCourtApplicationOffenceWithPlea(plea, courtApplicationOffence))
+                                                .withOffences(ofNullable(applicationCase.getOffences()).orElse(emptyList()).stream()
+                                                        .map(courtApplicationOffence -> getCourtApplicationOffenceWithPlea(pleaModel, courtApplicationOffence))
                                                         .collect(toList()))
                                                 .build())
                                         .collect(toList()))
                                 .withCourtOrder(courtApplication.getCourtOrder() == null ? null : of(courtApplication.getCourtOrder())
                                         .map(co -> CourtOrder.courtOrder().withValuesFrom(co)
                                                 .withCourtOrderOffences(co.getCourtOrderOffences().stream()
-                                                        .map(o -> getCourtOrderOffenceWithPlea(plea, o)).collect(toList())).build()).orElse(null))
+                                                        .map(o -> getCourtOrderOffenceWithPlea(pleaModel, o)).collect(toList())).build()).orElse(null))
                                 .build();
 
         courtApplications.set(index, updatedCourtApplication);
         return courtApplicationsSerializer.json(courtApplications);
     }
 
-    private CourtOrderOffence getCourtOrderOffenceWithPlea(final Plea plea, final CourtOrderOffence o) {
-        return !o.getOffence().getId().equals(plea.getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+    private CourtOrderOffence getCourtOrderOffenceWithPlea(final PleaModel pleaModel, final CourtOrderOffence o) {
+        if(pleaModel.getPlea()!=null){
+            return !o.getOffence().getId().equals(pleaModel.getPlea().getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
+                    .withOffence(Offence.offence().withValuesFrom(o.getOffence())
+                            .withPlea(pleaModel.getPlea())
+                            .build())
+                    .build();
+        }
+        return !o.getOffence().getId().equals(pleaModel.getIndicatedPlea().getOffenceId()) ? o : CourtOrderOffence.courtOrderOffence().withValuesFrom(o)
                 .withOffence(Offence.offence().withValuesFrom(o.getOffence())
-                        .withPlea(plea)
+                        .withIndicatedPlea(pleaModel.getIndicatedPlea())
                         .build())
                 .build();
     }
 
-    private Offence getCourtApplicationOffenceWithPlea(final Plea plea, final Offence offence) {
-        return !offence.getId().equals(plea.getOffenceId()) ? offence :
+    private Offence getCourtApplicationOffenceWithPlea(final PleaModel pleaModel, final Offence offence) {
+        if (pleaModel.getPlea() != null) {
+            return !offence.getId().equals(pleaModel.getPlea().getOffenceId()) ? offence :
+                    Offence.offence().withValuesFrom(offence)
+                            .withPlea(pleaModel.getPlea())
+                            .build();
+        }
+        return !offence.getId().equals(pleaModel.getIndicatedPlea().getOffenceId()) ? offence :
                 Offence.offence().withValuesFrom(offence)
-                        .withPlea(plea)
+                        .withIndicatedPlea(pleaModel.getIndicatedPlea())
                         .build();
     }
 
@@ -376,6 +391,7 @@ public class HearingJPAMapper {
     private CourtApplication getCourtApplication(final List<CourtApplication> courtApplications, UUID offenceID){
         return courtApplications.stream()
                 .filter(ca -> ofNullable(ca.getCourtApplicationCases()).orElse(emptyList()).stream()
+                        .filter(cac -> CollectionUtils.isNotEmpty(cac.getOffences()))
                         .flatMap(cac -> cac.getOffences().stream())
                         .anyMatch(o -> o.getId().equals(offenceID)) ||
                         (ca.getCourtOrder() != null &&

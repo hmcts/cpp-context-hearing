@@ -99,7 +99,7 @@ public class PleaUpdateEventListener {
 
     private void updateOffenceUnderCourtApplication(final PleaUpsert event) {
         final Hearing hearingEntity = hearingRepository.findBy(event.getHearingId());
-        final String updatedCourtApplicationJson = hearingJPAMapper.updatePleaOnOffencesInCourtApplication(hearingEntity.getCourtApplicationsJson(), event.getPleaModel().getPlea());
+        final String updatedCourtApplicationJson = hearingJPAMapper.updatePleaOnOffencesInCourtApplication(hearingEntity.getCourtApplicationsJson(), event.getPleaModel());
         hearingEntity.setCourtApplicationsJson(updatedCourtApplicationJson);
         hearingRepository.save(hearingEntity);
     }
