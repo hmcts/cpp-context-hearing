@@ -1429,6 +1429,7 @@ public class TestTemplates {
                                     .withArrestDate(PAST_LOCAL_DATE.next())
                                     .withChargeDate(PAST_LOCAL_DATE.next())
                                     .withCount(INTEGER.next())
+                                    .withIndictmentParticular(STRING.next())
                                     .withEndDate(PAST_LOCAL_DATE.next())
                                     .withId(offenceId)
                                     .withIndicatedPlea(uk.gov.justice.core.courts.IndicatedPlea.indicatedPlea()
