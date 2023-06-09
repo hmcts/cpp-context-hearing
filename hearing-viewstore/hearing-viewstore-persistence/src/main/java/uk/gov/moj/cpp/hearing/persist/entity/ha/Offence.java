@@ -77,6 +77,9 @@ public class Offence {
     @Column(name = "count")
     private Integer count;
 
+    @Column(name = "indictment_particular")
+    private String indictmentParticular;
+
     @Column(name = "conviction_date")
     private LocalDate convictionDate;
 
@@ -290,6 +293,14 @@ public class Offence {
 
     public void setCount(Integer count) {
         this.count = count;
+    }
+
+    public String getIndictmentParticular() {
+        return indictmentParticular;
+    }
+
+    public void setIndictmentParticular(final String indictmentParticular) {
+        this.indictmentParticular = indictmentParticular;
     }
 
     public LocalDate getConvictionDate() {
