@@ -1,8 +1,1 @@
-package uk.gov.moj.cpp;
-
-public class FeatureToggle {
-
-    public static final String REUSE_OF_INFORMATION = "reuseOfInformation";
-
-    private FeatureToggle() {}
-}
+package uk.gov.moj.cpp;public class FeatureToggle {    public static final String REUSE_OF_INFORMATION = "reuseOfInformation";    private FeatureToggle() {}}

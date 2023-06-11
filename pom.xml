@@ -38,7 +38,7 @@
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>8.0.2</stagingenforcement.version>
-        <progression.version>8.0.110</progression.version>
+        <progression.version>8.0.111</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
