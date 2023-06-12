@@ -61,6 +61,8 @@ public class ResultDefinition {
 
     private Boolean unscheduled;
 
+    private Boolean preserveActiveOrder;
+
     private Boolean lifeDuration;
 
     private Boolean publishedAsAPrompt;
@@ -274,6 +276,8 @@ public class ResultDefinition {
         return this;
     }
 
+
+
     public boolean isConvicted() {
         return convicted != null && convicted.equalsIgnoreCase(YES);
     }
@@ -484,8 +488,14 @@ public class ResultDefinition {
         return dependantResultDefinitionGroup;
     }
 
-    public ResultDefinition setDependantResultDefinitionGroup(final String dependantResultDefinitionGroup) {
-        this.dependantResultDefinitionGroup = dependantResultDefinitionGroup;
+
+    public Boolean getPreserveActiveOrder() {
+        return preserveActiveOrder;
+    }
+
+    public ResultDefinition setPreserveActiveOrder(final Boolean preserveActiveOrder) {
+        this.preserveActiveOrder = preserveActiveOrder;
         return this;
     }
+
 }

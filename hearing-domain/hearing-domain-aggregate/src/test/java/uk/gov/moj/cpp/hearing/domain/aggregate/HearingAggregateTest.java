@@ -2028,6 +2028,7 @@ public class HearingAggregateTest {
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
     }
 
+
     @Test
     public void shouldRaiseHearingIgnoredForUpdateHearingVacateTrialDetailsIfNoHearingExist() {
         final HearingAggregate hearingAggregate = new HearingAggregate();

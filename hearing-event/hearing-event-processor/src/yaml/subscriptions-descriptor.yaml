@@ -333,6 +333,9 @@ subscriptions_descriptor:
         - name: hearing.case-defendants-updated-for-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.case-defendants-updated-for-hearing.json
 
+        - name: hearing.events.hearing-extended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-extended.json
+
       event_source_name: hearing
 
     - name: public event subscription
