@@ -17,7 +17,7 @@
 #
 ##################################################################################################
 
-FRAMEWORK_VERSION=8.0.4
+FRAMEWORK_VERSION=8.0.5
 CONTEXT_NAME="hearing"
 USER_NAME="admin"
 PASSWORD="admin"

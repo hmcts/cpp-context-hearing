@@ -2055,21 +2055,6 @@ public class HearingAggregateTest {
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
 
     }
-
-    @Test
-    public void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
-        final HearingAggregate hearingAggregate = new HearingAggregate();
-        final UUID hearingId = UUID.randomUUID();
-
-        final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
-        final List<Object> objectList = stream.collect(Collectors.toList());
-        assertThat(objectList, hasSize(1));
-        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
-        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
-
-    }
-
-
     @Test
     public void shouldRaiseOffencesRemovedFromExistingHearingWhenNotAllOffencesPassedForHearing() {
 
@@ -2100,6 +2085,116 @@ public class HearingAggregateTest {
 
     }
 
+    @Test
+    public void shouldRaiseHearingDeletedWhenAllOffencesPassedForHearing() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 =Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence2);
+                    });
+                });
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        final List<UUID> offenceIds = ofNullable( hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream())
+                .flatMap(defendant -> defendant.getOffences().stream())
+                .map(Offence::getId)
+                .collect(toList());
+
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), offenceIds);
+
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingDeleted hearingDeleted = (HearingDeleted) objectList.get(0);
+        assertThat(hearingDeleted.getHearingId(), is(hearing.getId()));
+        assertThat(hearingDeleted.getOffenceIds().size(), is(2));
+        assertThat(hearingDeleted.getProsecutionCaseIds().size(), is(1));
+        assertThat(hearingDeleted.getDefendantIds().size(), is(1));
+
+
+    }
+
+    @Test
+    public void shouldCheckOffencesOfHearingWhenOneofItisDeletedInOffencesRemovedFromHearing() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 =Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence2);
+                    });
+                });
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLine sharedResultsCommandResultLine = new SharedResultsCommandResultLine(resultLineIn.getDelegatedPowers(),
+                resultLineIn.getOrderedDate(),
+                resultLineIn.getSharedDate(),
+                resultLineIn.getResultLineId(),
+                targetDraft.getOffenceId(),
+                targetDraft.getDefendantId(),
+                resultLineIn.getResultDefinitionId(),
+                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                resultLineIn.getResultLabel(),
+                resultLineIn.getLevel().name(),
+                resultLineIn.getIsModified(),
+                resultLineIn.getIsComplete(),
+                targetDraft.getApplicationId(),
+                resultLineIn.getAmendmentReasonId(),
+                resultLineIn.getAmendmentReason(),
+                resultLineIn.getAmendmentDate(),
+                resultLineIn.getFourEyesApproval(),
+                resultLineIn.getApprovedDate(),
+                resultLineIn.getIsDeleted(),
+                null,
+                null,
+                targetDraft.getShadowListed(),
+                targetDraft.getDraftResult()
+        );
+        final ResultsShared resultsShared = (ResultsShared) hearingAggregate.shareResults(hearing.getId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null)
+                .collect(Collectors.toList()).get(0);
+
+        assertEquals(1, resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().size());
+        assertEquals(1, resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().size());
+        assertEquals(1, resultsShared.getHearing().getProsecutionCases().size());
+        assertEquals(hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId(), resultsShared.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId());
+
+    }
+
+    @Test
+    public void shouldRaiseHearingIgnoredForAddOffenceIfNoHearingExist() {
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = UUID.randomUUID();
+
+        final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
+        final List<Object> objectList = stream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(1));
+        final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
+        assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
+
+    }
 
     @Test
     public void shouldIgnoreHearingEventForAddOffenceIfNoHearingExist() {

@@ -1,16 +1,21 @@
 package uk.gov.moj.cpp.hearing.event.delegates;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_APPLICATION_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_CASE_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_HEARING_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_APPLICATION_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_CASE_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
 
-import java.time.LocalDate;
-import org.mockito.Mockito;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.core.courts.NextHearing;
@@ -33,6 +38,7 @@ import uk.gov.moj.cpp.hearing.event.relist.RelistReferenceDataService;
 import uk.gov.moj.cpp.hearing.test.FileResourceObjectMapper;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -44,6 +50,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
 
 public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
@@ -139,10 +146,74 @@ public class PublishResultsDelegateV3Test  extends AbstractRestructuringTest {
         assertNotNull(nextHearing.getCourtCentre());
         assertNotNull(nextHearing.getListedStartDateTime());
         assertEquals("2022-02-05T11:30Z", nextHearing.getListedStartDateTime().toString());
-
-
     }
 
+    @Test
+    public void shouldCreateNextHearingWithBailConditions() throws Exception {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_HEARING_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for(UUID resulDefinitionId:resultDefinitionIds){
+            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(courtHouseReverseLookup.getCourtCentreByName(envelope, "Aberdeen JP Court")).thenReturn(Optional.of(CourtCentreOrganisationUnit.courtCentreOrganisationUnit().withOucode("oucode2").withLja("2500").withId(UUID.randomUUID().toString()).build()));
+        target.shareResults(envelope, sender, resultsShared,treeNodes);
+
+        final List<Defendant> defendants = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).collect(Collectors.toList());
+
+        final List<Defendant> defendantWithPersonDefendants = defendants.stream().filter(defendant -> defendant.getPersonDefendant() != null).collect(Collectors.toList());
+        final Defendant defendant = defendantWithPersonDefendants.stream().filter(defendant1 -> defendant1.getPersonDefendant().getBailStatus() != null).findFirst().get();
+
+        assertTrue(isNoneEmpty(defendant.getPersonDefendant().getBailConditions()));
+    }
+
+    @Test
+    public void shouldCreateNextHearingWithNoBailConditions() throws Exception {
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_NEW_REVIEW_HEARING_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for(UUID resulDefinitionId:resultDefinitionIds){
+            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(courtHouseReverseLookup.getCourtCentreByName(envelope, "Aberdeen JP Court")).thenReturn(Optional.of(CourtCentreOrganisationUnit.courtCentreOrganisationUnit().withOucode("oucode2").withLja("2500").withId(UUID.randomUUID().toString()).build()));
+        target.shareResults(envelope, sender, resultsShared,treeNodes);
+
+        final List<Offence> offences = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()
+                        .flatMap(defendant -> defendant.getOffences().stream())).collect(Collectors.toList());
+        final List<Offence> offencesWithJudicialResults = offences.stream().filter(offence -> offence.getJudicialResults()!=null).collect(Collectors.toList());
+        final JudicialResult judicialResult = offencesWithJudicialResults.stream()
+                .flatMap(offence -> offence.getJudicialResults().stream()
+                        .filter(judicialResult1 -> judicialResult1.getNextHearing() != null)).findFirst().get();
+
+        final List<Defendant> defendants = resultsShared.getHearing().getProsecutionCases().stream()
+                .flatMap(prosecutionCase -> prosecutionCase.getDefendants().stream()).collect(Collectors.toList());
+
+        final List<Defendant> defendantWithPersonDefendants = defendants.stream().filter(defendant -> defendant.getPersonDefendant() != null).collect(Collectors.toList());
+        final Defendant defendant = defendantWithPersonDefendants.stream().findFirst().get();
+
+        assertTrue(isEmpty(defendant.getPersonDefendant().getBailConditions()));
+
+    }
     @Test
     public void shouldUpdateCaseDefendantDrivingLicenseNumber() throws Exception {
         final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_CASE_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON, ResultsSharedV3.class);

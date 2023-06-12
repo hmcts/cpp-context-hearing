@@ -189,6 +189,9 @@ public class UpdateCaseDefendantsHandlerTest {
 
     }
 
+
+  
+
     @Test
     public void testApplicationDefendantsForHearingUpdated() throws EventStreamException{
         final UUID applicationId = randomUUID();

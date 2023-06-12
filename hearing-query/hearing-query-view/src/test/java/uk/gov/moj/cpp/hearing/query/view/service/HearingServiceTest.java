@@ -1023,17 +1023,9 @@ public class HearingServiceTest {
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID());
 
-        final List<HearingEvent> hearingEventList = asList(HearingEvent.hearingEvent()
-                .setDefenceCounselId(randomUUID())
-                .setDeleted(false)
-                .setEventDate(LocalDate.now())
-                .setEventTime(ZonedDateTime.now())
-                .setHearingEventDefinitionId(randomUUID())
-                .setHearingId(randomUUID())
-                .setId(randomUUID())
-                .setLastModifiedTime(ZonedDateTime.now())
-                .setRecordedLabel(""));
+        final HearingEventPojo hearingEvent = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
 
+        final List<HearingEventPojo> hearingEventList = asList(hearingEvent);
         final Hearing hearing = buildHearing();
 
         final uk.gov.justice.core.courts.Hearing hearinPojo = mock(uk.gov.justice.core.courts.Hearing.class);
@@ -1060,17 +1052,8 @@ public class HearingServiceTest {
         final List<UUID> courtCentreIds = new ArrayList();
         courtCentreIds.add(randomUUID());
 
-        final List<HearingEvent> hearingEventList = asList(HearingEvent.hearingEvent()
-                .setDefenceCounselId(randomUUID())
-                .setDeleted(false)
-                .setEventDate(LocalDate.now())
-                .setEventTime(ZonedDateTime.now())
-                .setHearingEventDefinitionId(randomUUID())
-                .setHearingId(randomUUID())
-                .setId(randomUUID())
-                .setLastModifiedTime(ZonedDateTime.now())
-                .setRecordedLabel(""));
-
+        final HearingEventPojo hearingEventPojo = new HearingEventPojo(randomUUID(), false, LocalDate.now(), ZonedDateTime.now(), randomUUID(), randomUUID(), randomUUID(), ZonedDateTime.now(), "");
+        final List<HearingEventPojo> hearingEventList = asList(hearingEventPojo);
         final Hearing hearing = buildHearing();
 
         final uk.gov.justice.core.courts.Hearing hearingPojo = mock(uk.gov.justice.core.courts.Hearing.class);
@@ -1085,7 +1068,7 @@ public class HearingServiceTest {
 
         when(hearingRepository.findHearingsByDateAndCourtCentreList(now, courtCentreIds)).thenReturn(hearings);
         when(hearingEventRepository.findLatestHearingsForThatDay(courtCentreIds, now, hearingEventRequiredDefinitionsIds)).thenReturn(hearingEventList);
-        when(hearingRepository.findBy(hearingEventList.get(0).getHearingId())).thenReturn(hearing);
+        when(hearingRepository.findBy(hearingEventPojo.getHearingId())).thenReturn(hearing);
         when(hearingJPAMapper.fromJPA(hearing)).thenReturn(hearingPojo);
 
         final CurrentCourtStatus expectedCurrentCourtStatus = getCurrentCourtStatusWithMultipleCases(hearingEvent);
