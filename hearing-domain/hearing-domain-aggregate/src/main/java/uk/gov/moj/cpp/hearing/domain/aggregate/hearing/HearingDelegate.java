@@ -25,6 +25,7 @@ import uk.gov.justice.core.courts.Target2;
 import uk.gov.moj.cpp.hearing.domain.event.ApplicationDetailChanged;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantAdded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
@@ -160,7 +161,7 @@ public class HearingDelegate implements Serializable {
                             .collect(Collectors.toList());
 
             newCourtApplications.add(hearingExtended.getCourtApplication());
-
+            //Adding hearingExtended as we need to reCreate Data again with court details for multiple breach applications
             this.momento.getHearing().setCourtApplications(newCourtApplications);
         }
     }
@@ -211,11 +212,22 @@ public class HearingDelegate implements Serializable {
                                  final List<HearingDay> hearingDays, final CourtCentre courtCentre, final JurisdictionType jurisdictionType,
                                  final CourtApplication courtApplication, final List<ProsecutionCase> prosecutionCases,
                                  final List<UUID> shadowListedOffences) {
+        final Stream.Builder<Object> streamBuilder = Stream.builder();
         if (this.momento.getHearing() == null) {
-            return Stream.of(generateHearingIgnoredMessage("Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet",hearingId));
+            return streamBuilder.add(generateHearingIgnoredMessage("Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet",hearingId)).build();
         }
-
-        return Stream.of(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences));
+        if(courtApplication != null &&  this.momento.getBreachApplicationsToBeAdded() != null && !this.momento.getBreachApplicationsToBeAdded().isEmpty()) {
+            final List<UUID> courtApplicationsInHearing =  this.momento.getHearing().getCourtApplications() != null ?
+                    this.momento.getHearing().getCourtApplications().stream().map(a -> a.getId()).collect(toList()) : new ArrayList<>();
+            courtApplicationsInHearing.add(courtApplication.getId());
+            final boolean allBreachApplicationsAdded = this.momento.getBreachApplicationsToBeAdded().stream().allMatch(a -> courtApplicationsInHearing.contains(a));
+            if(allBreachApplicationsAdded) {
+                final List<CourtApplication> courtApplicationListAlreadyInHearing =  this.momento.getHearing().getCourtApplications().stream().filter(ap -> this.momento.getBreachApplicationsToBeAdded().contains(ap.getId())).collect(toList());
+                courtApplicationListAlreadyInHearing.add(courtApplication);
+                streamBuilder.add(new HearingBreachApplicationsAdded(courtApplicationListAlreadyInHearing));
+            }
+        }
+        return streamBuilder.add(new HearingExtended(hearingId, hearingDays, courtCentre, jurisdictionType, courtApplication, prosecutionCases, shadowListedOffences)).build();
     }
 
     public Stream<Object> updateHearingDetails(final UUID id,

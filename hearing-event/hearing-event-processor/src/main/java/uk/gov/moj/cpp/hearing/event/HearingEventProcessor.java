@@ -42,7 +42,9 @@ public class HearingEventProcessor {
     public static final String PUBLIC_HEARING_SHARE_RESULTS_FAILED = "public.hearing.share-results-failed";
     public static final String PUBLIC_HEARING_TRIAL_VACATED = "public.hearing.trial-vacated";
     public static final String PUBLIC_LISTING_HEARING_RESCHEDULED = "public.listing.hearing-rescheduled";
+    public static final String PUBLIC_PROGRESSION_EVENTS_BREACH_APPLICATIONS_TO_BE_ADDED_TO_HEARING = "public.progression.breach-applications-to-be-added-to-hearing";
     public static final String COMMAND_LISTING_HEARING_RESCHEDULED = "hearing.command.clear-vacated-trial";
+    public static final String COMMAND_BREACH_APPLICATIONS_TO_BE_ADDED = "hearing.command.breach-applications-to-be-added";
 
     public static final String PUBLIC_HEARING_EVENT_AMENDED = "public.hearing.event-amended";
     public static final String PUBLIC_HEARING_DRAFT_RESULT_DELETED_V2 = "public.hearing.draft-result-deleted-v2";
@@ -247,6 +249,29 @@ public class HearingEventProcessor {
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(COMMAND_LISTING_HEARING_RESCHEDULED),
                 envelope.payloadAsJsonObject()));
     }
+
+
+    @Handles(PUBLIC_PROGRESSION_EVENTS_BREACH_APPLICATIONS_TO_BE_ADDED_TO_HEARING)
+    public void handlePublicBreachApplicationsToBeAddedToHearing(final JsonEnvelope envelope) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.debug("public.progression.breach-applications-to-be-added-to-hearing event received {}", envelope.payloadAsJsonObject());
+        }
+
+        this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(COMMAND_BREACH_APPLICATIONS_TO_BE_ADDED),
+                envelope.payloadAsJsonObject()));
+    }
+
+
+    @Handles("hearing.events.hearing-breach-applications-added")
+    public void handleBreachApplicationsAddedToHearing(final JsonEnvelope envelope) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.debug("hearing.events.hearing-breach-applications-added {}", envelope.payloadAsJsonObject());
+        }
+
+        this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName("public.hearing.hearing-breach-applications-added"),
+                envelope.payloadAsJsonObject()));
+    }
+
 
     @Handles("hearing.hearing-days-cancelled")
     public void handleHearingDaysCancelled(final JsonEnvelope envelope) {

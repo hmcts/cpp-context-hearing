@@ -103,6 +103,8 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantsWelshInformationRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateCleared;
 import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingAmended;
+import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
+import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsToBeAddedReceived;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDaysWithoutCourtCentreCorrected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDetailChanged;
@@ -230,6 +232,8 @@ public class HearingAggregate implements Aggregate {
 
     private List<DefendantWelshInfo> defendantsWelshInformationList;
 
+
+
     @Override
     public Object apply(final Object event) {
         return match(event).with(
@@ -356,9 +360,19 @@ public class HearingAggregate implements Aggregate {
                 when(CustodyTimeLimitClockStopped.class).apply(offenceDelegate::handleCustodyTimeLimitClockStopped),
                 when(CustodyTimeLimitExtended.class).apply(offenceDelegate::handleCustodyTimeLimitExtended),
                 when(DefendantsWelshInformationRecorded.class).apply(this::handleDefendantsWelshTranslation),
+                when(HearingBreachApplicationsAdded.class).apply(this::handleBreachApplicationsAdded),
+                when(HearingBreachApplicationsToBeAddedReceived.class).apply(this::handleBreachApplicationsToBeAddedReceived),
                 otherwiseDoNothing()
         );
 
+    }
+    @SuppressWarnings("squid:S1172")
+    private void handleBreachApplicationsAdded(final HearingBreachApplicationsAdded hearingBreachApplicationsAdded) {
+        this.momento.setBreachApplicationsToBeAdded(null);
+    }
+
+    private void handleBreachApplicationsToBeAddedReceived(final HearingBreachApplicationsToBeAddedReceived hearingBreachApplicationsToBeAddedReceived) {
+        this.momento.setBreachApplicationsToBeAdded(hearingBreachApplicationsToBeAddedReceived.getCourtApplications());
     }
 
     public Stream<Object> addProsecutionCounsel(final ProsecutionCounsel prosecutionCounsel, final UUID hearingId) {
@@ -546,6 +560,20 @@ public class HearingAggregate implements Aggregate {
             return apply(Stream.of(new ResultAmendmentsCancelledV2(hearingId, userId, new ArrayList<>(this.momento.getSharedTargets().values()), this.momento.getLastSharedTime())));
         }
         return apply(Stream.of(new ResultAmendmentsCancellationFailed("Either user is not same or hearing was not being amended")));
+    }
+
+    public Stream<Object> receiveBreachApplicationToBeAdded(final List<UUID> breachApplicationsList) {
+             final Stream.Builder<Object> streamBuilder = Stream.builder();
+            if(this.momento.getHearing().getCourtApplications() != null) {
+                final List<UUID> applicationsAlreadyPartOfHearing = this.momento.getHearing().getCourtApplications().stream().map(ap -> ap.getId()).collect(toList());
+                final boolean allApplicationsReceived =  breachApplicationsList.stream().allMatch(ba -> applicationsAlreadyPartOfHearing.contains(ba));
+                if(allApplicationsReceived) {
+                    final List<CourtApplication> breachApplicationsAdded = this.momento.getHearing().getCourtApplications().stream().filter(x -> breachApplicationsList.contains(x.getId())).collect(toList());
+                    streamBuilder.add(new HearingBreachApplicationsAdded(breachApplicationsAdded));
+                }
+            }
+            streamBuilder.add(new HearingBreachApplicationsToBeAddedReceived(breachApplicationsList));
+            return apply(streamBuilder.build());
     }
 
     private boolean isSharedHearingBeingAmended() {

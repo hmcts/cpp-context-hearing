@@ -395,6 +395,21 @@ public class HearingEventProcessorTest {
     }
 
     @Test
+    public void shouldTriggerCommandBreachApplicationsToBeAdded() {
+        final UUID hearingId = randomUUID();
+        final HearingEventVacatedTrialCleared hearingEventRescheduled = new HearingEventVacatedTrialCleared(hearingId);
+        final JsonObject jsonObject = this.objectToJsonObjectConverter.convert(hearingEventRescheduled);
+        final Metadata metadata = metadataWithDefaults().build();
+        this.hearingEventProcessor.handlePublicBreachApplicationsToBeAddedToHearing(envelopeFrom(metadata, jsonObject));
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is(HearingEventProcessor.COMMAND_BREACH_APPLICATIONS_TO_BE_ADDED));
+    }
+
+
+
+    @Test
     public void shouldTriggerPublicHearingTrialVacatedEventForVacatedTrial() {
         this.hearingEventProcessor.publicHearingEventVacateTrialTypeSetPublicEvent(buildJsonEnvelopeToVacateHearing());
 

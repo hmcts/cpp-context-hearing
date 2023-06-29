@@ -333,8 +333,9 @@ subscriptions_descriptor:
         - name: hearing.case-defendants-updated-for-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.case-defendants-updated-for-hearing.json
 
-        - name: hearing.events.hearing-extended
-          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-extended.json
+        # breach-applications-added For Hearing
+        - name: hearing.events.hearing-breach-applications-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-breach-applications-added.json
 
       event_source_name: hearing
 
@@ -432,5 +433,9 @@ subscriptions_descriptor:
 
         - name: public.staginghmi.hearing-deleted-from-hmi
           schema_uri: http://justice.gov.uk/staginghmi/courts/public.staginghmi.hearing-deleted-from-hmi.json
+
+        - name: public.progression.breach-applications-to-be-added-to-hearing
+          schema_uri: http://justice.gov.uk/progression/courts/public.progression.breach-applications-to-be-added-to-hearing.json
+
 
       event_source_name: public.event.source

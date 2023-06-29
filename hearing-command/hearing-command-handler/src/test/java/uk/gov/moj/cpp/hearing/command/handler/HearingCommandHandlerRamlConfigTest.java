@@ -83,7 +83,8 @@ public class HearingCommandHandlerRamlConfigTest {
                 ExtendCustodyTimeLimitCommandHandler.class,
                 RestrictCourtListCommandHandler.class,
                 DefendantsWelshTranslationsCommandHandler.class,
-                CustodyTimeLimitClockHandler.class
+                CustodyTimeLimitClockHandler.class,
+                HearingApplicationsUpdatesCommandHandler.class
         );
 
         assertThat(allHandlerNames, containsInAnyOrder(ramlActionNames));
