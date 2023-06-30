@@ -257,16 +257,4 @@ public class HearingEventProcessor {
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName("public.hearing.hearing-days-cancelled"),
                 envelope.payloadAsJsonObject()));
     }
-
-    @Handles("hearing.events.hearing-extended")
-    public void handleHearingExtended(final JsonEnvelope envelope) {
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.events.hearing-extended {}", envelope.toObfuscatedDebugString());
-        }
-
-        this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName("public.hearing.hearing-extended"),
-                envelope.payloadAsJsonObject()));
-    }
-
-
 }

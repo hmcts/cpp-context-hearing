@@ -182,7 +182,7 @@ import javax.json.JsonObject;
 @SuppressWarnings({"squid:S00107", "squid:S1602", "squid:S1188", "squid:S1612", "PMD.BeanMembersShouldSerialize", "squid:CommentedOutCodeLine","squid:CallToDeprecatedMethod"})
 public class HearingAggregate implements Aggregate {
 
-    private static final long serialVersionUID = -6059812881894748583L;
+    private static final long serialVersionUID = -6059812881894748582L;
 
     private static final String RECORDED_LABEL_HEARING_END = "Hearing ended";
 
