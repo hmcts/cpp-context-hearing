@@ -88,7 +88,6 @@ public class OffenceJPAMapper {
 
         offence.setOrderIndex(pojo.getOrderIndex());
         offence.setCount(pojo.getCount());
-        offence.setIndictmentParticular(pojo.getIndictmentParticular());
         offence.setConvictionDate(pojo.getConvictionDate());
 
         offence.setNotifiedPlea(notifiedPleaJPAMapper.toJPA(pojo.getNotifiedPlea()));
@@ -170,7 +169,6 @@ public class OffenceJPAMapper {
 
                 .withOrderIndex(entity.getOrderIndex())
                 .withCount(entity.getCount())
-                .withIndictmentParticular(entity.getIndictmentParticular())
                 .withConvictionDate(entity.getConvictionDate())
                 .withCustodyTimeLimit(extractCustodyTimeLimit(entity))
                 .withNotifiedPlea(notifiedPleaJPAMapper.fromJPA(offenceId, entity.getNotifiedPlea()))

@@ -16255,74 +16255,49 @@
       "urgent" : false,
       "d20" : false,
       "resultDefinitionRules" : [ ]
-    },
-    {
-      "id": "ef8ca749-d5c7-4a33-8b72-1c643f38aaa8",
-      "label": "Pre-release bail condition: Passport - surrender identity card to police station during football control period",
-      "shortCode": "PRBCP8",
-      "level": "O",
-      "rank": 83800,
-      "isBooleanResult": false,
-      "isAvailableForCourtExtract": true,
-      "financial": "N",
-      "unscheduled": false,
-      "canBeSubjectOfBreach": false,
-      "canBeSubjectOfVariation": false,
-      "publishedAsAPrompt": true,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "rollUpPrompts": false,
-      "publishedForNows": true,
-      "lifeDuration": false,
-      "wordGroups": [
-        {
-          "wordGroup": [
-            "PRBCP8"
-          ]
-        },
-        {
-          "wordGroup": [
-            "pre-release",
-            "travel",
-            "document",
-            "European",
-            "police",
-            "football"
-          ]
-        }
-      ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "resultDefinitionGroup": "Pre-release bail conditions",
-      "qualifier": "JM",
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "resultTextTemplate": "Passport - surrender identity card to {policeStationName} police station during football control period",
-      "terminatesOffenceProceedings": false,
-      "prompts": [
-        {
-          "id": "b87444ea-3dd6-4cf6-83ae-d4eb83821185",
-          "label": "Police Station Name",
-          "resultPromptRule": "mandatory",
-          "type": "TXT",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 100,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "70",
-          "reference": "policeStationName"
-        }
-      ]
-    },
-    {
+    }, {
+      "id" : "ef8ca749-d5c7-4a33-8b72-1c643f38aaa8",
+      "label" : "Pre-release bail condition: Passport - surrender identity card to police station during football control period",
+      "shortCode" : "PRBCP8",
+      "level" : "O",
+      "rank" : 27600,
+      "wordGroups" : [ {
+        "wordGroup" : [ "pre-release", "travel", "document", "European", "police", "football" ]
+      } ],
+      "userGroups" : [ ],
+      "prompts" : [ {
+        "id" : "b87444ea-3dd6-4cf6-83ae-d4eb83821185",
+        "label" : "Police Station Name",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "TXT",
+        "sequence" : 100,
+        "duration" : null,
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : null,
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      } ],
+      "isAvailableForCourtExtract" : true,
+      "financial" : false,
+      "category" : "A",
+      "adjournment" : false,
+      "convicted" : false,
+      "qualifier" : "JM",
+      "postHearingCustodyStatus" : "A",
+      "resultDefinitionGroup" : "Pre-release bail conditions",
+      "terminatesOffenceProceedings" : false,
+      "lifeDuration" : false,
+      "publishedAsAPrompt" : true,
+      "excludedFromResults" : false,
+      "alwaysPublished" : false,
+      "urgent" : false,
+      "d20" : false,
+      "resultDefinitionRules" : [ ]
+    }, {
       "id" : "5a7fc626-56ec-4ccc-ae1b-fe508265c44b",
       "label" : "Pre-release bail condition: Surety - find a surety",
       "shortCode" : "PRBCS1",
@@ -18518,8 +18493,34 @@
       "urgent" : false,
       "d20" : false,
       "resultDefinitionRules" : [ ]
-    },
-    {
+    }, {
+      "id" : "3c98b287-fd01-471a-ac34-e0a56d9e95c2",
+      "label" : "Bail condition: Exclusion - not to sit in the front seat of any motor vehicle",
+      "shortCode" : "PORE10",
+      "level" : "O",
+      "rank" : 31000,
+      "wordGroups" : [ {
+        "wordGroup" : [ "bail", "front", "seat" ]
+      } ],
+      "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+      "prompts" : [ ],
+      "isAvailableForCourtExtract" : true,
+      "financial" : false,
+      "category" : "A",
+      "adjournment" : false,
+      "convicted" : false,
+      "qualifier" : "RD",
+      "postHearingCustodyStatus" : "A",
+      "resultDefinitionGroup" : "Bail conditions",
+      "terminatesOffenceProceedings" : false,
+      "lifeDuration" : false,
+      "publishedAsAPrompt" : true,
+      "excludedFromResults" : false,
+      "alwaysPublished" : false,
+      "urgent" : false,
+      "d20" : false,
+      "resultDefinitionRules" : [ ]
+    }, {
       "id" : "99586f43-5b18-45da-87f7-1764ad149985",
       "label" : "Community requirement: Alcohol treatment residential",
       "shortCode" : "ATRR",
@@ -35289,7 +35290,6 @@
         "wordGroup" : [ "adjournment", "magistrates" ]
       } ],
       "userGroups" : [ ],
-      "resultTextTemplate": "hearing on {HDATE}[ at {timeOfHearing}][ in {HCROOM},] {HCHOUSE~Name}",
       "prompts" : [ {
         "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
         "label" : "Estimated duration",
@@ -35305,340 +35305,127 @@
         "reference" : "HEST",
         "courtExtract" : "Y",
         "durationSequence" : null
-      },{
-        "id": "e73e6ab8-9bfe-4135-9fe6-f526544584d6",
-        "label": "Booking reference",
-        "resultPromptRule": "optional",
-        "type": "TXT",
-        "nameEmail": false,
-        "hidden": true,
-        "associateToReferenceData": false,
-        "sequence": 700,
-        "userGroups": [],
-        "courtExtract": "N",
-        "financial": "N",
-        "jurisdiction": "M",
-        "min": "1",
-        "max": "50",
-        "reference": "bookingReference"
+      }, {
+        "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+        "label" : "Estimated duration",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "INT",
+        "sequence" : 600,
+        "duration" : "Days",
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HEST",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+        "label" : "Estimated duration",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "INT",
+        "sequence" : 600,
+        "duration" : "Hours",
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HEST",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
+        "label" : "Estimated duration",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "INT",
+        "sequence" : 600,
+        "duration" : "Minutes",
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HEST",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
+        "label" : "Date of hearig",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "DATE",
+        "sequence" : 100,
+        "duration" : null,
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HDATE",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "dfac671c-5b85-42a1-bb66-9aeee388a08d",
+        "label" : "Time of hearing",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "TIME",
+        "sequence" : 200,
+        "duration" : null,
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HTIME",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "5f507153-6dc9-4ec0-94db-c821eff333f1",
+        "label" : "Courtroom",
+        "welshLabel" : null,
+        "resultPromptRule" : "optional",
+        "type" : "TXT",
+        "sequence" : 300,
+        "duration" : null,
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HCROOM",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "66868c04-72c4-46d9-a4fc-860a82107475",
+        "label" : "Courthouse name",
+        "welshLabel" : "Enw’r adeilad llys",
+        "resultPromptRule" : "mandatory",
+        "type" : "TXT",
+        "sequence" : 400,
+        "duration" : null,
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HCHOUSE",
+        "courtExtract" : "Y",
+        "durationSequence" : null
+      }, {
+        "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
+        "label" : "Hearing type",
+        "welshLabel" : null,
+        "resultPromptRule" : "mandatory",
+        "type" : "TXT",
+        "sequence" : 500,
+        "duration" : null,
+        "wordGroup" : null,
+        "userGroups" : [ "Court Clerks", "Legal Advisers" ],
+        "fixedListId" : null,
+        "qual" : null,
+        "reference" : "HTYPE",
+        "courtExtract" : "Y",
+        "durationSequence" : null
       },
-        {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse address line 1",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEAddress1",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "AddressLine1",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        }, {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse address line 2",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEAddress2",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "AddressLine2",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-        {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse address line 3",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEAddress3",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "AddressLine3",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-        {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse address line 4",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEAddress4",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "AddressLine4",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-        {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse address line 5",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEAddress5",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "AddressLine5",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-        {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse post code",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEPostCode",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "PostCode",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-        {
-          "id": "49ec9b26-dd63-4637-b2e9-55ba9948a90f",
-          "label": "Courtroom",
-          "welshLabel": "Ystafell Llys",
-          "resultPromptRule": "optional",
-          "type": "INT",
-          "sequence": 400,
-          "financial": "N",
-          "reference": "HCROOM",
-          "userGroups": [
-          ],
-          "min": "1",
-          "max": "99",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "referenceDataKey": "HCROOM",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-
-        {
-          "id": "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label": "Courthouse organisation name",
-          "resultPromptRule": "optional",
-          "type": "NAMEADDRESS",
-          "sequence": 300,
-          "financial": "N",
-          "reference": "hCHOUSEOrganisationName",
-          "userGroups": [
-          ],
-          "min": "",
-          "max": "",
-          "courtExtract": "Y",
-          "jurisdiction": "B",
-          "hidden": false,
-          "nameAddressType": "Organisation",
-          "componentLabel": "Courthouse",
-          "fixListLabel": "Select Courthouse",
-          "referenceDataKey": "hCHOUSE",
-          "partName": "OrganisationName",
-          "nameEmail": false,
-          "associatedWithReferenceData": true
-        },
-        {
-          "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
-          "label" : "Estimated duration",
-          "welshLabel" : null,
-          "resultPromptRule" : "mandatory",
-          "type" : "INT",
-          "sequence" : 600,
-          "duration" : "Days",
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HEST",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        }, {
-          "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
-          "label" : "Estimated duration",
-          "welshLabel" : null,
-          "resultPromptRule" : "mandatory",
-          "type" : "INT",
-          "sequence" : 600,
-          "duration" : "Hours",
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HEST",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        }, {
-          "id" : "d85cc2d7-66c8-471e-b6ff-c1bc60c6cdac",
-          "label" : "Estimated duration",
-          "welshLabel" : null,
-          "resultPromptRule" : "mandatory",
-          "type" : "INT",
-          "sequence" : 600,
-          "duration" : "Minutes",
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HEST",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        }, {
-          "id" : "d27a5d86-d51f-4c6e-914b-cb4b0abc4283",
-          "label" : "Date of hearig",
-          "welshLabel" : null,
-          "resultPromptRule" : "mandatory",
-          "type" : "DATE",
-          "sequence" : 100,
-          "duration" : null,
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HDATE",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        }, {
-          "id" : "dfac671c-5b85-42a1-bb66-9aeee388a08d",
-          "label" : "Time of hearing",
-          "welshLabel" : null,
-          "resultPromptRule" : "mandatory",
-          "type" : "TIME",
-          "sequence" : 200,
-          "duration" : null,
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HTIME",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        },{
-          "id": "4d125a5a-acbc-461d-a657-ba5643af85a6",
-          "label": "Time of hearing",
-          "resultPromptRule": "optional",
-          "type": "TIME",
-          "sequence": 200,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "reference": "timeOfHearing"
-        },
-        {
-          "id" : "5f507153-6dc9-4ec0-94db-c821eff333f1",
-          "label" : "Courtroom",
-          "welshLabel" : null,
-          "resultPromptRule" : "optional",
-          "type" : "TXT",
-          "sequence" : 300,
-          "duration" : null,
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HCROOM",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        }, {
-          "id" : "66868c04-72c4-46d9-a4fc-860a82107475",
-          "label" : "Courthouse name",
-          "welshLabel" : "Enw’r adeilad llys",
-          "resultPromptRule" : "mandatory",
-          "type" : "TXT",
-          "sequence" : 400,
-          "duration" : null,
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HCHOUSE",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        }, {
-          "id" : "c1116d12-dd35-4171-807a-2cb845357d22",
-          "label" : "Hearing type",
-          "welshLabel" : null,
-          "resultPromptRule" : "mandatory",
-          "type" : "TXT",
-          "sequence" : 500,
-          "duration" : null,
-          "wordGroup" : null,
-          "userGroups" : [ "Court Clerks", "Legal Advisers" ],
-          "fixedListId" : null,
-          "qual" : null,
-          "reference" : "HTYPE",
-          "courtExtract" : "Y",
-          "durationSequence" : null
-        },
         {
           "id": "b2cf5a1e-8539-45a1-a287-4be5094a0e73",
           "label": "Total custodial period",
@@ -40147,17 +39934,7 @@
       }, {
         "childResultDefinitionId" : "c51e3522-5363-4af0-b5af-97a5f9eb5462",
         "ruleType" : "atleastOneOf"
-      } ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "userGroups": [],
-      "resultTextTemplate": "%AllChildText%",
-      "terminatesOffenceProceedings": false
+      } ]
     }, {
       "id" : "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
       "rollUpPrompts": true,
@@ -40313,19 +40090,7 @@
       }, {
         "childResultDefinitionId" : "1e30f5c0-b1bc-4fb4-9d35-813915cd228d",
         "ruleType" : "atleastOneOf"
-      } ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "cacheable": 1,
-      "userGroups": [],
-      "resultTextTemplate": "%AllChildText%",
-      "welshLabel": "Amodau mechnïaeth",
-      "terminatesOffenceProceedings": false
+      } ]
     }, {
       "id" : "f00359b5-7303-403b-b59e-0b1a1daa89bc",
       "rollUpPrompts": true,
@@ -52770,721 +52535,6 @@
           "welshLabel": "Cyfnod estyniad adran 35A (dedfryd o garchar ar unwaith)"
         }
       ]
-    },
-    {
-      "id": "f666fd58-36c5-493f-aa11-89714faee6e6",
-      "label": "Remand in care of Local Authority with bail direction",
-      "shortCode": "RILAB",
-      "level": "O",
-      "rank": 116200,
-      "isBooleanResult": false,
-      "isAvailableForCourtExtract": true,
-      "financial": "N",
-      "unscheduled": false,
-      "canBeSubjectOfBreach": false,
-      "canBeSubjectOfVariation": false,
-      "publishedAsAPrompt": false,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "rollUpPrompts": true,
-      "publishedForNows": true,
-      "lifeDuration": false,
-      "resultDefinitionRules": [
-        {
-          "childResultDefinitionId": "5dc70e17-6095-4bd8-8597-36186e7eaba1",
-          "ruleType": "optional"
-        },
-        {
-          "childResultDefinitionId": "7fc17a01-2f5a-4433-aae9-28e0c959f73b",
-          "ruleType": "optional"
-        },
-        {
-          "childResultDefinitionId": "8cf3b54b-bec8-4bcf-aac4-62561dcc8080",
-          "ruleType": "optional"
-        },
-        {
-          "childResultDefinitionId": "874911d0-acf2-4b6f-bcca-cacbb6bb2862",
-          "ruleType": "mandatory"
-        },
-        {
-          "childResultDefinitionId": "f00359b5-7303-403b-b59e-0b1a1daa89bc",
-          "ruleType": "mandatory"
-        },
-        {
-          "childResultDefinitionId": "3ec4f7a9-50e8-4e9f-90ad-fd8c411b7ed2",
-          "ruleType": "mandatory"
-        },
-        {
-          "childResultDefinitionId": "66105417-41c8-420d-820f-40b61b507442",
-          "ruleType": "optional"
-        }
-      ],
-      "wordGroups": [
-        {
-          "wordGroup": [
-            "RILAB"
-          ]
-        },
-        {
-          "wordGroup": [
-            "authority",
-            "bail",
-            "care",
-            "direction",
-            "LA",
-            "local",
-            "remand"
-          ]
-        }
-      ],
-      "adjournment": "Y",
-      "category": "I",
-      "urgent": true,
-      "convicted": "N",
-      "d20": false,
-      "cjsCode": "4029",
-      "postHearingCustodyStatus": "L",
-      "jurisdiction": "B",
-      "libraCode": "RILAB",
-      "resultTextTemplate": "Remanded until %NEXH% in accommodation provided by the local authority for {nameOfLocalAuthority}[ subject to the following requirements: {requirementsImposedOnLocalAuthority}].[ Further requirements: {furtherReq}.] Basis: {remandBasis}.[ Adjournment reason: %ADJR%.] Directed to be bailed to {bailDate} at {bailTime} upon satisfying the following conditions: %PREBC%[ and subject to the following conditions: %BAIC%].[ Conditions imposed on the defendant: %LACOND%]",
-      "terminatesOffenceProceedings": false,
-      "prompts": [
-        {
-          "id": "49f9ee68-3dee-4ed1-8020-377818c3697f",
-          "label": "Remand basis",
-          "resultPromptRule": "mandatory",
-          "type": "FIXL",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 100,
-          "fixedListId": "4954dd1c-f218-11e8-8eb2-f2801f1b9fd1",
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "cacheable": 1,
-          "jurisdiction": "B",
-          "reference": "remandBasis",
-          "welshLabel": "Sail remand"
-        },
-        {
-          "id": "15f8330b-9554-4ea6-b75b-7e192724ca06",
-          "label": "Further requirements",
-          "resultPromptRule": "optional",
-          "type": "TXT",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 700,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "1000",
-          "reference": "furtherReq",
-          "welshLabel": "Gofynion pellach"
-        },
-        {
-          "id": "f63f692f-3bfc-4d0f-8e45-acd99b06431c",
-          "label": "Local Authority",
-          "resultPromptRule": "mandatory",
-          "type": "FIXL",
-          "nameEmail": false,
-          "referenceDataKey": "nameOfLocalAuthority",
-          "hidden": false,
-          "associateToReferenceData": true,
-          "sequence": 200,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "cacheable": 2,
-          "jurisdiction": "B",
-          "min": "",
-          "max": "",
-          "reference": "nameOfLocalAuthority",
-          "welshLabel": "Awdurdod Lleol"
-        },
-        {
-          "id": "b275cca5-58a6-415c-9b67-b4277c7f7e6e",
-          "label": "Requirements imposed on Local Authority",
-          "resultPromptRule": "optional",
-          "type": "TXT",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 600,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "1000",
-          "reference": "requirementsImposedOnLocalAuthority",
-          "welshLabel": "Gofynion a osodir ar Awdurdod Lleol"
-        },
-        {
-          "id": "9ecac6aa-a205-481f-b67d-e2425ad074cf",
-          "label": "Bail date",
-          "resultPromptRule": "mandatory",
-          "type": "DATE",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 400,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "reference": "bailDate"
-        },
-        {
-          "id": "e200e964-628a-4284-bd4e-fab9c819f7f1",
-          "label": "Bail time",
-          "resultPromptRule": "mandatory",
-          "type": "TIME",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 500,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "reference": "bailTime"
-        }
-      ]
-    },
-    {
-      "id": "5dc70e17-6095-4bd8-8597-36186e7eaba1",
-      "label": "Remand to care conditions imposed on the defendant",
-      "shortCode": "LACOND",
-      "level": "O",
-      "rank": 700,
-      "isBooleanResult": false,
-      "isAvailableForCourtExtract": true,
-      "financial": "N",
-      "unscheduled": false,
-      "canBeSubjectOfBreach": false,
-      "canBeSubjectOfVariation": false,
-      "publishedAsAPrompt": true,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "rollUpPrompts": false,
-      "publishedForNows": true,
-      "lifeDuration": false,
-      "resultDefinitionRules": [
-        {
-          "childResultDefinitionId": "671c65dc-8406-4923-bff2-e193a7fbd489",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "7c54ceff-9b16-448e-995a-053c6d47854c",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "6f2e2861-0ad4-4721-b0d2-65b1d5f16895",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "3b06d7a2-03e7-460d-8ce9-c8a48bc96040",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "d4bc7ce5-ad94-43dc-a3d6-558049380a6c",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "e101f583-9ead-4c87-a1a4-d631d43517d3",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "c34f6cd8-60b2-4ca8-a150-c1aa88fb0bfa",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "db5e2bc8-13b4-4dd2-b1a0-aa130e62b4f0",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "6a84ebbd-d1e9-43cc-a3c3-a3b459d8cb5a",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "8bc69b99-359e-48a2-a353-66fe009b5507",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "bd77f0bc-11a5-4e08-abe5-697e27c9201e",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "4dcb9901-6539-4a4f-b894-f62b3ff51862",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "f68c277a-4f7d-4da5-bd8a-396e6671e05c",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "dffdac97-7b67-4ca7-b72b-7ea417e931c8",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "a65e4db1-e02a-489f-9f4e-2e38f77807c6",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "eb0260f2-c923-48c9-91e9-f4c97c9d37fe",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "5c7db83b-bfb4-4d0d-8c63-aa2513e756bb",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "30ff00bf-583d-48e4-ab13-34e4445443fb",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "35f46562-ebb6-423a-99e2-1dd65c2e5f97",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "f2cab905-935b-49e5-9f82-badcfb6c6c60",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "b1c731d5-a54c-4b9a-9c76-ad3dec4240ac",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "e363cb46-0e5c-479a-956f-c29acbb5b6ca",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "66017606-d552-4e06-a835-c0a1af03467a",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "6f8051e0-02fd-4c12-a229-a74e8a15076c",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "2751bd8f-897a-4aa0-b26d-b7bf7b18acff",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "241746c2-1565-4de9-9915-bd65deda1453",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "6656b25a-de49-4722-b21f-acebe07d4d1c",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "b258561d-ec34-42a6-9c8d-93ab64b59589",
-          "ruleType": "atleastOneOf"
-        },
-        {
-          "childResultDefinitionId": "47fe1304-9772-43c2-bc3c-90a73b55a2d0",
-          "ruleType": "atleastOneOf"
-        }
-      ],
-      "wordGroups": [
-        {
-          "wordGroup": [
-            "LACOND"
-          ]
-        },
-        {
-          "wordGroup": [
-            "conditions",
-            "imposed"
-          ]
-        }
-      ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "resultTextTemplate": "%AllChildText%.[ Reasons for Conditions: {reasonsForTheConditionsImposedOnTheDefendant}.]",
-      "welshLabel": "Remand i amodau gofal a osodir ar y diffynnydd",
-      "terminatesOffenceProceedings": false,
-      "prompts": [
-        {
-          "id": "46026657-e495-4b4c-a47e-466fe49dfe2e",
-          "label": "Reasons for the conditions imposed on the defendant",
-          "resultPromptRule": "mandatory",
-          "type": "FIXLM",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 100,
-          "fixedListId": "8faf795a-5f70-418f-8104-f62e7b7f8e52",
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "reference": "reasonsForTheConditionsImposedOnTheDefendant",
-          "welshLabel": "Rhesymau dros yr amodau a osodwyd ar y diffynnydd"
-        }
-      ]
-    },
-    {
-      "id": "3ec4f7a9-50e8-4e9f-90ad-fd8c411b7ed2",
-      "label": "Electronic monitoring details",
-      "shortCode": "ELMONDET",
-      "level": "O",
-      "rank": 48800,
-      "isAvailableForCourtExtract": false,
-      "financial": "N",
-      "publishedAsAPrompt": false,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "lifeDuration": false,
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "terminatesOffenceProceedings": false,
-      "prompts": [
-        {
-          "id": "2d56a2cf-6159-40e6-b6c2-13b8192bcf62",
-          "label": "Defendant's mobile number",
-          "resultPromptRule": "optional",
-          "type": "TXT",
-          "sequence": 200,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "6",
-          "max": "15"
-        },
-        {
-          "id": "a5711a6c-18d0-4339-a37e-4796ab9f304d",
-          "label": "Electronic Monitoring Contractor responsible officer",
-          "resultPromptRule": "mandatory",
-          "type": "FIXL",
-          "sequence": 100,
-          "fixedListId": "b1d843c0-3737-11e8-b467-0ed5f89f718b",
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B"
-        },
-        {
-          "id": "52056247-a158-4b8b-b2d7-0f92bab219e0",
-          "label": "Interpreter used - language",
-          "resultPromptRule": "oneOf",
-          "type": "TXT",
-          "sequence": 300,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "60"
-        },
-        {
-          "id": "6bc228a4-7e28-4b93-a1e9-96432137c696",
-          "label": "Interpreter not used",
-          "resultPromptRule": "oneOf",
-          "type": "BOOLEAN",
-          "sequence": 400,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B"
-        },
-        {
-          "id": "4415f5e3-35bc-49ee-8ce4-acb36b91667c",
-          "label": "Does the offender have any special needs?",
-          "resultPromptRule": "mandatory",
-          "type": "BOOLEAN",
-          "sequence": 500,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B"
-        },
-        {
-          "id": "8e29f329-28d3-442c-8470-2a215521b60a",
-          "label": "Description of special needs",
-          "resultPromptRule": "optional",
-          "type": "TXT",
-          "sequence": 600,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "1000"
-        },
-        {
-          "id": "13058f22-0324-415a-8cdf-f11b64488167",
-          "label": "Where electronic monitoring in this matter relates to youth or community requirements - There are addtional requirements as well",
-          "resultPromptRule": "optional",
-          "type": "BOOLEAN",
-          "sequence": 700,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B"
-        },
-        {
-          "id": "c024016d-b79e-4bbe-8c15-b7a2acadca9e",
-          "label": "Where electronic monitoring in this matter relates to youth or community requirements - There are NO addtional requirements",
-          "resultPromptRule": "optional",
-          "type": "BOOLEAN",
-          "sequence": 800,
-          "userGroups": [
-            "Court Clerks",
-            "Legal Advisers"
-          ],
-          "courtExtract": "N",
-          "financial": "N",
-          "jurisdiction": "B"
-        }
-      ]
-    },
-    {
-      "id": "7c54ceff-9b16-448e-995a-053c6d47854c",
-      "label": "Must stay indoors at home address (or at any other address allowed by the court) between the times specified and present him/herself to a police officer between these times",
-      "shortCode": "STAYDS",
-      "level": "O",
-      "rank": 118200,
-      "isBooleanResult": false,
-      "isAvailableForCourtExtract": true,
-      "financial": "N",
-      "unscheduled": false,
-      "canBeSubjectOfBreach": false,
-      "canBeSubjectOfVariation": false,
-      "publishedAsAPrompt": true,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "rollUpPrompts": false,
-      "publishedForNows": true,
-      "lifeDuration": false,
-      "wordGroups": [
-        {
-          "wordGroup": [
-            "STAYDS"
-          ]
-        },
-        {
-          "wordGroup": [
-            "address",
-            "home",
-            "indoors",
-            "police",
-            "present",
-            "stay"
-          ]
-        }
-      ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "resultDefinitionGroup": "ConditionsImposedOnDefendant",
-      "qualifier": "JE",
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "resultTextTemplate": "Must stay indoors at home address (or at any other address allowed by the court) between {excusedTimeFrom} and {and} {frequencyOfCurfew}[. Additional Information: {additionalInformation}]",
-      "welshLabel": "Rhaid aros y tu fewn yn y cyfeiriad cartref (neu mewn unrhyw gyfeiriad arall a ganiateir gan y llys) rhwng yr amseroedd a nodwyd a'i gyflwyno ei hun i swyddog heddlu rhwng yr amseroedd hyn",
-      "terminatesOffenceProceedings": false,
-      "prompts": [
-        {
-          "id": "fa04992d-70df-4368-aee7-4ba865a22cd0",
-          "label": "And",
-          "resultPromptRule": "mandatory",
-          "type": "TIME",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 200,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "reference": "and",
-          "welshLabel": "Ac"
-        },
-        {
-          "id": "6e27fcf9-1bf0-4e27-9ed5-6cdd1bf1ca68",
-          "label": "Frequency of curfew",
-          "resultPromptRule": "mandatory",
-          "type": "TXT",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 300,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "30",
-          "reference": "frequencyOfCurfew",
-          "welshLabel": "Amledd cyrffyw"
-        },
-        {
-          "id": "b5bc67e2-6bdc-4ea0-9426-d0d6d23e58f6",
-          "label": "Between",
-          "resultPromptRule": "mandatory",
-          "type": "TIME",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 100,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "reference": "excusedTimeFrom",
-          "welshLabel": "Rhwng"
-        },
-        {
-          "id": "4a976a0b-1c2a-4e79-adc2-0314d2b476d7",
-          "label": "Additional information",
-          "resultPromptRule": "optional",
-          "type": "TXT",
-          "nameEmail": false,
-          "hidden": false,
-          "associateToReferenceData": false,
-          "sequence": 400,
-          "userGroups": [],
-          "courtExtract": "Y",
-          "financial": "N",
-          "jurisdiction": "B",
-          "min": "1",
-          "max": "1000",
-          "reference": "additionalInformation",
-          "welshLabel": "Gwybodaeth ychwanegol"
-        }
-      ]
-    },
-    {
-      "id": "69ff04d5-84e8-4a61-8478-82c2999c1969",
-      "label": "To attend or a warrant to issue",
-      "shortCode": "AWI",
-      "level": "O",
-      "rank": 22600,
-      "isBooleanResult": false,
-      "isAvailableForCourtExtract": true,
-      "financial": "N",
-      "unscheduled": false,
-      "canBeSubjectOfBreach": false,
-      "canBeSubjectOfVariation": false,
-      "publishedAsAPrompt": true,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "rollUpPrompts": false,
-      "publishedForNows": true,
-      "lifeDuration": false,
-      "wordGroups": [
-        {
-          "wordGroup": [
-            "AWI"
-          ]
-        },
-        {
-          "wordGroup": [
-            "warrant",
-            "attend"
-          ]
-        }
-      ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "resultDefinitionGroup": "Adjournment reasons",
-      "qualifier": "GE",
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "userGroups": [],
-      "resultTextTemplate": "%ResultLabel%",
-      "resultWording": "",
-      "welshLabel": "Codi neu gyhoeddi gwarant",
-      "terminatesOffenceProceedings": false
-    },
-    {
-      "id": "3c98b287-fd01-471a-ac34-e0a56d9e95c2",
-      "label": "Exclusion - not to sit in the front seat of any motor vehicle",
-      "shortCode": "PORE10",
-      "level": "O",
-      "rank": 88300,
-      "isBooleanResult": false,
-      "isAvailableForCourtExtract": true,
-      "financial": "N",
-      "unscheduled": false,
-      "canBeSubjectOfBreach": false,
-      "canBeSubjectOfVariation": false,
-      "publishedAsAPrompt": true,
-      "excludedFromResults": false,
-      "alwaysPublished": false,
-      "rollUpPrompts": false,
-      "publishedForNows": true,
-      "lifeDuration": false,
-      "wordGroups": [
-        {
-          "wordGroup": [
-            "PORE10"
-          ]
-        },
-        {
-          "wordGroup": [
-            "front",
-            "seat",
-            "Exclusion"
-          ]
-        }
-      ],
-      "adjournment": "N",
-      "category": "A",
-      "urgent": false,
-      "convicted": "N",
-      "d20": false,
-      "resultDefinitionGroup": "Bail conditions",
-      "qualifier": "RD",
-      "postHearingCustodyStatus": "A",
-      "jurisdiction": "B",
-      "userGroups": [],
-      "resultTextTemplate": "%ResultLabel%",
-      "welshLabel": "Gwahardd - i beidio ag eistedd yn sedd flaen unrhyw gerbyd modur",
-      "terminatesOffenceProceedings": false
     }
   ]
 }
