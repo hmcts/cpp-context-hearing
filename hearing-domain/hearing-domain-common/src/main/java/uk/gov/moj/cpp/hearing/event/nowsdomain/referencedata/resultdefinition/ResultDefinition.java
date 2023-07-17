@@ -49,6 +49,8 @@ public class ResultDefinition {
 
     private String adjournment;
 
+    private String policeSubjectLineTitle;
+
     private String convicted;
 
     private String qualifier;
@@ -487,5 +489,13 @@ public class ResultDefinition {
     public ResultDefinition setDependantResultDefinitionGroup(final String dependantResultDefinitionGroup) {
         this.dependantResultDefinitionGroup = dependantResultDefinitionGroup;
         return this;
+    }
+
+    public String getPoliceSubjectLineTitle() {
+        return policeSubjectLineTitle;
+    }
+
+    public void setPoliceSubjectLineTitle(final String policeSubjectLineTitle) {
+        this.policeSubjectLineTitle = policeSubjectLineTitle;
     }
 }
