@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.delegates.helper.restructure;
 
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_DATEORDERS_HEARING_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_ALWAYS_PUBLISHED_LEAF_NODE_JSON;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.shared.RestructuringConstants.HEARING_RESULTS_NEW_REVIEW_HEARING_JSON;
 
@@ -123,5 +126,37 @@ public class RestructuringHelperV3Test extends AbstractRestructuringTest {
                         .noneMatch(jrp -> jrp.getValue().contains(ResultQualifier.SEPARATOR)));
             }
         });
+    }
+
+    @Test
+    public void ShouldReturnResultTextForEachOrderedDateCorrectly() throws IOException {
+
+        final ResultsSharedV3 resultsShared = fileResourceObjectMapper.convertFromFile(HEARING_RESULTS_DATEORDERS_HEARING_JSON, ResultsSharedV3.class);
+        final JsonEnvelope envelope = getEnvelope(resultsShared);
+
+        List<UUID> resultDefinitionIds=resultsShared.getTargets().stream()
+                .flatMap(t->t.getResultLines().stream())
+                .map(ResultLine2::getResultDefinitionId)
+                .collect(Collectors.toList());
+
+        final List<TreeNode<ResultDefinition>> treeNodes = new ArrayList<>();
+
+        for(UUID resulDefinitionId:resultDefinitionIds){
+            TreeNode<ResultDefinition> resultDefinitionTreeNode=new TreeNode(resulDefinitionId,resultDefinitions);
+            resultDefinitionTreeNode.setResultDefinitionId(resulDefinitionId);
+            resultDefinitionTreeNode.setData(resultDefinitions.stream().filter(resultDefinition -> resultDefinition.getId().equals(resulDefinitionId)).findFirst().get());
+            treeNodes.add(resultDefinitionTreeNode);
+        }
+        when(hearingTypeReverseLookup.getHearingTypeByName(any(), any())).thenReturn(HearingType.hearingType().withDescription("REV").build());
+        ResultTextConfHelper resultTextConfHelper = new ResultTextConfHelper();
+        setField(resultTextConfHelper, "liveDateOfResultTextTemplateConf", "01042023");
+        resultTextConfHelper.setDate();
+        resultTreeBuilder = new ResultTreeBuilderV3(referenceDataService, nextHearingHelperV3, resultLineHelperV3, resultTextConfHelper);
+        target = new RestructuringHelperV3(resultTreeBuilder, resultTextConfHelper);
+        final List<TreeNode<ResultLine2>> restructuredTree = target.restructure(envelope, resultsShared, treeNodes);
+
+        restructuredTree.forEach(resultLine2TreeNode ->
+                assertNotNull(resultLine2TreeNode.getJudicialResult().getResultText()));
+
     }
 }

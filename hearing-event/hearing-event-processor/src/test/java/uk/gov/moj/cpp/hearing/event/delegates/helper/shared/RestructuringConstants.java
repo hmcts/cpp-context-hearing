@@ -27,6 +27,7 @@ public class RestructuringConstants {
     public static final String HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_JSON = "hearing.results-shared_multiple_defendant.json";
     public static final String HEARING_RESULTS_SHARED_MULTIPLE_DEFENDANT_MULTIPLE_CASE_JSON = "hearing.results-shared_multiple_defendant_multiple_case.json";
     public static final String HEARING_RESULTS_NEW_REVIEW_HEARING_JSON = "hearing.results-shared_new_review_hearing.json";
+    public static final String HEARING_RESULTS_DATEORDERS_HEARING_JSON = "hearing.results-shared_with_orderedDates_hearing.json";
     public static final String HEARING_RESULTS_HEARING_JSON = "hearing.events.results-shared-v3.json";
     public static final String HEARING_CASE_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON = "hearing.case-results-shared_with_drivinglicencenumber.json";
     public static final String HEARING_APPLICATION_RESULTS_SHARED_WITH_DRIVINGLICENCENUMBER_JSON = "hearing.application-results-shared_with_drivinglicencenumber.json";

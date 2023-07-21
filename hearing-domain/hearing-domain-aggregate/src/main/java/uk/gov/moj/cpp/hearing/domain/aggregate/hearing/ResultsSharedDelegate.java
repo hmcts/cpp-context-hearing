@@ -70,7 +70,7 @@ import javax.json.JsonObject;
 @SuppressWarnings({"squid:S3776", "squid:S1188", "PMD.BeanMembersShouldSerialize", "pmd:NullAssignment"})
 public class ResultsSharedDelegate implements Serializable {
 
-    private static final long serialVersionUID =2L;
+    private static final long serialVersionUID =3L;
     private static final String HEARING_VACATED_RESULT_DEFINITION_ID = "8cdc7be1-fc94-485b-83ee-410e710f6665";
 
     public static final String REASON_FOR_VACATING_TRIAL = "reasonForVacatingTrial";
@@ -384,7 +384,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withApplicationId(resultLineIn.getApplicationId())
                 .withOffenceId(resultLineIn.getOffenceId())
                 .withCaseId(resultLineIn.getCaseId())
-                .withShadowListed(resultLineIn.isShadowListed())
+                .withShadowListed(isNull(resultLineIn.getApplicationId()) && resultLineIn.isShadowListed())
                 .withDefendantId(resultLineIn.getDefendantId())
                 .withMasterDefendantId(resultLineIn.getMasterDefendantId())
                 .withResultLabel(resultLineIn.getResultLabel())
@@ -678,7 +678,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withResultLines(new ArrayList<>())
                 .withTargetId(taregetId)
                 .withHearingDay(hearingDay)
-                .withShadowListed(rl.isShadowListed())
+                .withShadowListed(isNull(rl.getApplicationId()) && rl.isShadowListed())
                 .withDraftResult(rl.getDraftResult())
                 .build();
 

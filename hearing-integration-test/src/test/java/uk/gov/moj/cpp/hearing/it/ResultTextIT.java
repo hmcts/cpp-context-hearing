@@ -6,7 +6,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
-import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -54,11 +53,13 @@ public class ResultTextIT extends AbstractIT {
     @Spy
     private JsonObjectToObjectConverter jsonObjectToObjectConverter = new JsonObjectToObjectConverter(objectMapper);
 
-    private final static LocalDate orderedDate = PAST_LOCAL_DATE.next();
+    private final static LocalDate orderedDate = LocalDate.of(2000, 04, 02);
+    private final static LocalDate orderedDate2 = LocalDate.of(2000, 02, 02);
 
     @BeforeClass
     public static void setupBeforeClass() {
         stubGetReferenceDataResultDefinitionsWithResultTexts(orderedDate);
+        stubGetReferenceDataResultDefinitionsWithResultTexts(orderedDate2);
     }
 
     @Test
@@ -278,6 +279,57 @@ public class ResultTextIT extends AbstractIT {
         }
     }
 
+    @Test
+    public void shouldSetResultTextForEachOrderedDate() throws IOException {
+
+        final LocalDate hearingDay = LocalDate.now();
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingCommand = getHearingCommand(getUuidMapForMultipleCaseStructure());
+        final Hearing hearing = hearingCommand.getHearing();
+
+        stubCourtRoom(hearing);
+
+        final String eventPayloadString = getStringFromResource("hearing.share-result-with-target-with-multiple-targets.json")
+                .replaceAll("HEARING_ID", hearing.getId().toString())
+                .replaceAll("CASE_ID", hearing.getProsecutionCases().get(0).getId().toString())
+                .replaceAll("ORDERED_DATE1", orderedDate.toString())
+                .replaceAll("ORDERED_DATE2", orderedDate2.toString())
+                .replaceAll("OFFENCE_ID1", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId().toString())
+                .replaceAll("OFFENCE_ID2", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(1).getId().toString())
+                .replaceAll("OFFENCE_ID3", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(2).getId().toString())
+                .replaceAll("OFFENCE_ID4", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(3).getId().toString())
+                .replaceAll("OFFENCE_ID5", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(4).getId().toString())
+                .replaceAll("OFFENCE_ID6", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(5).getId().toString())
+                .replaceAll("OFFENCE_ID7", hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(6).getId().toString());
+
+        JsonObject jsonTargets = stringToJsonObjectConverter.convert(eventPayloadString);
+        final List<Target> targets = jsonTargets.getJsonArray("targets").stream().map(jsonTarget -> jsonObjectToObjectConverter.convert(stringToJsonObjectConverter.convert(jsonTarget.toString()), Target.class))
+                .collect(toList());
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(hearing.getId())))))) {
+
+            shareDaysResultWithCourtClerk(hearing, targets, hearingDay);
+
+            final JsonPath publicHearingResulted = publicEventResultedListener.waitFor();
+
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].resultText"), is("CCSU - Committed to Crown Court for sentence on unconditional bail\nCommitted for sentence (Section 14 of the Sentencing Act 2020) for hearing on 18/05/2023 at 10:30, Chester Crown Court. Bail remand days to count (tagged days): 0. No indication given re victim personal statement. PSR ordered"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[1].resultText"), is("hearing on 18/05/2023 at 10:30, Chester Crown Court"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[1].judicialResults[0].resultText"), is("CCSU - Committed to Crown Court for sentence on unconditional bail\nCommitted for sentence (Section 14 of the Sentencing Act 2020) for hearing on 18/05/2023 at 10:30, Chester Crown Court. Bail remand days to count (tagged days): 0. No indication given re victim personal statement. PSR ordered"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[1].judicialResults[1].resultText"), is("hearing on 18/05/2023 at 10:30, Chester Crown Court"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[2].judicialResults[0].resultText"), is("CCSU - Committed to Crown Court for sentence on unconditional bail\nCommitted for sentence (Section 14 of the Sentencing Act 2020) for hearing on 18/05/2023 at 10:30, Chester Crown Court. Bail remand days to count (tagged days): 0. No indication given re victim personal statement. PSR ordered"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[2].judicialResults[1].resultText"), is("hearing on 18/05/2023 at 10:30, Chester Crown Court"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[3].judicialResults[0].resultText"), is("Entered in error\n"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[4].judicialResults[0].resultText"), is("CCSU - Committed to Crown Court for sentence on unconditional bail\nCommitted for sentence (Section 14 of the Sentencing Act 2020) for hearing on 18/05/2023 at 10:30, Chester Crown Court. Bail remand days to count (tagged days): 0. No indication given re victim personal statement. PSR ordered"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[4].judicialResults[1].resultText"), is("hearing on 18/05/2023 at 10:30, Chester Crown Court"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[5].judicialResults[0].resultText"), is("Entered in error\n"));
+            assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[6].judicialResults[0].resultText"), is("Entered in error\n"));
+
+        }
+    }
+
 
     private CommandHelpers.InitiateHearingCommandHelper getHearingCommand(final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure) {
         return h(UseCases.initiateHearing(getRequestSpec(),
@@ -293,8 +345,8 @@ public class ResultTextIT extends AbstractIT {
     private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForMultipleCaseStructure() {
         HashMap<UUID, Map<UUID, List<UUID>>> caseStructure = new HashMap<>();
         Map<UUID, List<UUID>> value = new HashMap<>();
-        value.put(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID()));
-        value.put(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID()));
+        value.put(randomUUID(), TestUtilities.asList(randomUUID(), randomUUID(),randomUUID(), randomUUID(),randomUUID(), randomUUID(),randomUUID()));
+
         caseStructure.put(randomUUID(), value);
         return caseStructure;
     }

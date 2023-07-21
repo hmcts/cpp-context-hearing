@@ -4,6 +4,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -17,6 +18,7 @@ import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RemoveNo
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RestructureNextHearingHelperV3.restructureNextHearing;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.RollUpPromptsHelperV3.filterNodesWithRollUpPrompts;
 import static uk.gov.moj.cpp.hearing.event.delegates.helper.restructure.shared.Constants.EXCLUDED_PROMPT_REFERENCE;
+
 
 import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.ResultLine2;
@@ -47,10 +49,27 @@ public class RestructuringHelperV3 {
 
     public List<TreeNode<ResultLine2>> restructure(final JsonEnvelope context, final ResultsSharedV3 resultsShared, final List<TreeNode<ResultDefinition>> treeNodesResultDefinition) {
 
-        final List<TreeNode<ResultLine2>> treeNodes = resultTreeBuilder.build(context, resultsShared, treeNodesResultDefinition);
+        final List<TreeNode<ResultLine2>> treeNodesOrg = resultTreeBuilder.build(context, resultsShared, treeNodesResultDefinition);
 
-        final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodes);
+        final List<TreeNode<ResultLine2>> publishedForNowsNodes = getNodesWithPublishedForNows(treeNodesOrg);
 
+        final List<TreeNode<ResultLine2>> treeNodes = treeNodesOrg.stream().collect(groupingBy(resultLine2TreeNode -> resultTextConfHelper.isOldResultDefinition(resultLine2TreeNode.getJudicialResult().getOrderedDate())))
+                .values().stream()
+                .map(this::prepareTreeNodes)
+                .flatMap(List::stream)
+                .collect(toList());
+
+        setDurationElements(treeNodes);
+        treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
+        final List<TreeNode<ResultLine2>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
+                .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))
+                .collect(toList());
+        removeNextHearingObject(publishedForNowsNodesNotInRollup);
+        treeNodes.addAll(publishedForNowsNodesNotInRollup);
+        return treeNodes;
+    }
+
+    private List<TreeNode<ResultLine2>> prepareTreeNodes(final List<TreeNode<ResultLine2>> treeNodes) {
         if(resultTextConfHelper.isOldResultDefinitionV2(treeNodes)){
             updateResultText(
                     removeNonPublishableResults(
@@ -83,14 +102,6 @@ public class RestructuringHelperV3 {
                     )
             );
         }
-
-        setDurationElements(treeNodes);
-        treeNodes.forEach(treeNode -> treeNode.getJudicialResult().setPublishedForNows(FALSE));
-        final List<TreeNode<ResultLine2>> publishedForNowsNodesNotInRollup = publishedForNowsNodes.stream()
-                .filter(node -> treeNodes.stream().noneMatch(tn -> tn.getId().equals(node.getId())))
-                .collect(toList());
-        removeNextHearingObject(publishedForNowsNodesNotInRollup);
-        treeNodes.addAll(publishedForNowsNodesNotInRollup);
         return treeNodes;
     }
 
