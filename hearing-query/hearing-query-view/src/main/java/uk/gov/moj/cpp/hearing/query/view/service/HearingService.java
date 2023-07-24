@@ -676,7 +676,9 @@ public class HearingService {
                 .withParentResultLineIds(resultLine.getParentResultLineIds())
                 .withFourEyesApproval(resultLine.getFourEyesApproval())
                 .withApprovedDate(resultLine.getApprovedDate())
+                .withAmendmentsLog(resultLine.getAmendmentsLog())
                 .withIsDeleted(resultLine.getIsDeleted());
+
 
         extractedResultLines.add(builder.build());
     }

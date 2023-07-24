@@ -102,6 +102,9 @@
       "items": {
         "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
       }
+    },
+    "amendmentsLog": {
+      "type": "string"
     }
   },
   "required": [

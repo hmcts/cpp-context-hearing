@@ -1060,7 +1060,6 @@ public class ShareResultsIT extends AbstractIT {
                 getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
         ));
         saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
-        saveDraftResultCommand2.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
         targets.add(saveDraftResultCommand2.getTarget());
 
         testSaveDraftResult(saveDraftResultCommand2);
@@ -1208,7 +1207,6 @@ public class ShareResultsIT extends AbstractIT {
                 getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
         ));
         saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
-        saveDraftResultCommand2.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
         targets.add(saveDraftResultCommand2.getTarget());
 
         testSaveDraftResult(saveDraftResultCommand2);
@@ -1695,7 +1693,6 @@ public class ShareResultsIT extends AbstractIT {
                     getAmendedResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
             ));
             saveDraftResultCommand2.getTarget().setTargetId(targets.get(0).getTargetId());
-            saveDraftResultCommand2.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
             targets.add(saveDraftResultCommand2.getTarget());
 
             testSaveDraftResult(saveDraftResultCommand2);
@@ -2849,7 +2846,6 @@ public class ShareResultsIT extends AbstractIT {
                 getResultLine(secondNowPrimaryResultDefinitionId, findPrompt(resultDefHelper, secondNowPrimaryResultDefinitionId), orderDate)
         ));
         saveDraftResultCommand.getTarget().setTargetId(targets.get(0).getTargetId());
-        saveDraftResultCommand.getTarget().setReasonsList(asList("9b5c2fbc-7622-11eb-9439-0242ac130002"));
 
 
         targets.add(saveDraftResultCommand.getTarget());

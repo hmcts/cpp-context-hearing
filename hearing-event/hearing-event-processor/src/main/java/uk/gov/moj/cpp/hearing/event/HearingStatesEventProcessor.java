@@ -1,6 +1,5 @@
 package uk.gov.moj.cpp.hearing.event;
 
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
@@ -26,12 +25,19 @@ public class HearingStatesEventProcessor {
     public static final String HEARING_HEARING_LOCKED_BY_OTHER_USER = "hearing.event.hearing-locked-by-other-user";
     public static final String HEARING_EVENT_APPROVAL_REQUESTED = "hearing.event.approval-requested";
     public static final String HEARING_EVENT_RESULT_AMENDMENTS_VALIDATION_FAILED = "hearing.event.result-amendments-validation-failed";
+    public static final String HEARING_EVENT_HEARING_UNLOCK_FAILED = "hearing.events.hearing-unlock-failed";
+    public static final String HEARING_EVENT_HEARING_UNLOCKED = "hearing.events.hearing-unlocked";
+
 
     public static final String PUBLIC_HEARING_HEARING_LOCKED_BY_OTHER_USER = "public.hearing.hearing-locked-by-other-user";
     public static final String PUBLIC_HEARING_HEARING_LOCKED = "public.hearing.hearing-locked";
     public static final String PUBLIC_HEARING_EVENT_APPROVAL_REJECTED = "public.hearing.approval-rejected";
     public static final String PUBLIC_HEARING_APPROVAL_REQUESTED = "public.hearing.approval-requested";
     public static final String PUBLIC_HEARING_EVENT_RESULT_AMENDMENTS_VALIDATION_FAILED = "public.hearing.result-amendments-validation-failed";
+
+    public static final String PUBLIC_HEARING_EVENT_HEARING_UNLOCK_FAILED = "public.hearing.hearing-unlock-failed";
+    public static final String PUBLIC_HEARING_EVENT_HEARING_UNLOCKED = "public.hearing.hearing-unlocked";
+
 
     @Inject
     private Sender sender;
@@ -81,6 +87,22 @@ public class HearingStatesEventProcessor {
         log(HEARING_EVENT_APPROVAL_REQUESTED, envelope);
         this.sender.send(envelopeFrom(
                 metadataFrom(envelope.metadata()).withName(PUBLIC_HEARING_EVENT_RESULT_AMENDMENTS_VALIDATION_FAILED),
+                envelope.payloadAsJsonObject()));
+    }
+
+    @Handles(HEARING_EVENT_HEARING_UNLOCK_FAILED)
+    public void processHearingUnlockFailed(final JsonEnvelope envelope) {
+        log(HEARING_EVENT_HEARING_UNLOCK_FAILED, envelope);
+        this.sender.send(envelopeFrom(
+                metadataFrom(envelope.metadata()).withName(PUBLIC_HEARING_EVENT_HEARING_UNLOCK_FAILED),
+                envelope.payloadAsJsonObject()));
+    }
+
+    @Handles(HEARING_EVENT_HEARING_UNLOCKED)
+    public void processHearingUnlocked(final JsonEnvelope envelope) {
+        log(HEARING_EVENT_HEARING_UNLOCK_FAILED, envelope);
+        this.sender.send(envelopeFrom(
+                metadataFrom(envelope.metadata()).withName(PUBLIC_HEARING_EVENT_HEARING_UNLOCKED),
                 envelope.payloadAsJsonObject()));
     }
 

@@ -314,6 +314,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.remove-offences-from-existing-hearing");
     }
 
+    @Handles("hearing.unlock-hearing")
+    public void unlockHearing(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.unlock-hearing");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *

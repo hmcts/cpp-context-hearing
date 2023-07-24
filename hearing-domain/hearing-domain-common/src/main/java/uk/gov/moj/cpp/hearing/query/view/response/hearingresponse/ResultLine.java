@@ -42,6 +42,7 @@ public class ResultLine {
     private final List<UUID> childResultLineIds;
     private final List<UUID> parentResultLineIds;
     private final String amendmentReason;
+    private final String amendmentsLog;
 
     public ResultLine(final LocalDate orderedDate, final LocalDate sharedDate, final UUID resultLineId, final UUID offenceId,
                       final UUID defendantId, final UUID masterDefendantId, final UUID resultDefinitionId, final List<Prompt> prompts, final Level level,
@@ -49,7 +50,7 @@ public class ResultLine {
                       final Boolean shadowListed, final String draftResult, final UUID applicationId, final UUID caseId, final ZonedDateTime amendmentDate,
                       final UUID amendmentReasonId, final String shortCode, final DelegatedPowers fourEyesApproval,
                       final LocalDate approvedDate, final Boolean isDeleted, final List<UUID> childResultLineIds,
-                      final List<UUID> parentResultLineIds, final String amendmentReason) {
+                      final List<UUID> parentResultLineIds, final String amendmentReason, final String amendmentsLog) {
         this.orderedDate = orderedDate;
         this.sharedDate = sharedDate;
         this.resultLineId = resultLineId;
@@ -76,6 +77,7 @@ public class ResultLine {
         this.childResultLineIds = childResultLineIds;
         this.parentResultLineIds = parentResultLineIds;
         this.amendmentReason = amendmentReason;
+        this.amendmentsLog = amendmentsLog;
     }
 
     public LocalDate getOrderedDate() {
@@ -182,6 +184,10 @@ public class ResultLine {
         return caseId;
     }
 
+    public String getAmendmentsLog() {
+        return amendmentsLog;
+    }
+
     public static class Builder {
 
         private LocalDate orderedDate;
@@ -210,12 +216,13 @@ public class ResultLine {
         private Boolean isDeleted;
         private List<UUID> childResultLineIds;
         private List<UUID> parentResultLineIds;
+        private String amendmentsLog;
 
         public ResultLine build() {
             return new ResultLine(orderedDate, sharedDate, resultLineId, offenceId, defendantId, masterDefendantId,resultDefinitionId,
                     prompts, level, delegatedPowers, resultLabel, isModified, isComplete, shadowListed, draftResult,
                     applicationId, caseId, amendmentDate, amendmentReasonId, shortCode, fourEyesApproval, approvedDate,
-                    isDeleted, childResultLineIds, parentResultLineIds, amendmentReason);
+                    isDeleted, childResultLineIds, parentResultLineIds, amendmentReason, amendmentsLog);
         }
 
         public ResultLine.Builder withOrderedDate(final LocalDate orderedDate) {
@@ -347,5 +354,11 @@ public class ResultLine {
             this.parentResultLineIds = parentResultLineIds;
             return this;
         }
+
+        public Builder withAmendmentsLog(final String amendmentsLog) {
+            this.amendmentsLog = amendmentsLog;
+            return this;
+        }
+
     }
 }

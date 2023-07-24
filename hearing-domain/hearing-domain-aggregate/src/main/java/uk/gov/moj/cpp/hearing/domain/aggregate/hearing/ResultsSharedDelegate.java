@@ -367,6 +367,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .map(prompt -> new SharedResultsCommandPrompt(prompt.getId(), prompt.getLabel(),
                         prompt.getFixedListCode(), prompt.getValue(), prompt.getWelshValue(), prompt.getWelshLabel(), prompt.getPromptRef())).collect(Collectors.toList()))
                 .withDraftResult(target2.getDraftResult())
+                .withamendmentsLog(resultLine2.getAmendmentsLog())
 
                 .build();
     }
@@ -410,6 +411,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withIsDeleted(resultLineIn.getIsDeleted())
                 .withChildResultLineIds(resultLineIn.getChildResultLineIds())
                 .withParentResultLineIds(resultLineIn.getParentResultLineIds())
+                .withAmendmentsLog(resultLineIn.getAmendmentsLog())
                 .build();
     }
 

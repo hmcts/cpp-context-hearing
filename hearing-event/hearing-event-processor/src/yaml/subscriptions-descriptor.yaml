@@ -305,6 +305,12 @@ subscriptions_descriptor:
         - name: hearing.event.approval-requested
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.event.approval-requested.json
 
+        - name: hearing.events.hearing-unlocked
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.hearing-unlocked.json
+
+        - name: hearing.events.hearing-unlock-failed
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.hearing-unlock-failed.json
+
 
         # Hearing Deleted
         - name: hearing.events.hearing-deleted
