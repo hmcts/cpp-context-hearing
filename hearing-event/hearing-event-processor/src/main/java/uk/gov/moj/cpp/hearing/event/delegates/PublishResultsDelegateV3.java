@@ -40,7 +40,7 @@ import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
-import uk.gov.moj.cpp.hearing.event.delegates.helper.BailConditionsHelper;
+import uk.gov.moj.cpp.hearing.event.delegates.helper.BailConditionsHelperV2;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.BailStatusReasonHelper;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.OffenceHelper;
@@ -143,7 +143,7 @@ public class PublishResultsDelegateV3 {
 
         new ResultsSharedHelperV3().setIsDisposedFlagOnOffence(resultsShared);
         new BailStatusReasonHelper().setReason(resultsShared.getHearing());
-        new BailConditionsHelper().setBailConditions(resultsShared.getHearing());
+        new BailConditionsHelperV2().setBailConditions(resultsShared.getHearing());
         new ResultsSharedHelperV3().cancelFutureHearingDays(context, sender, resultsShared, objectToJsonObjectConverter);
         if (!isEmpty(resultsShared.getDefendantDetailsChanged())) {
             final Optional<LocalDate> orderedDate = getMaxOrderedDate(resultsShared.getTargets());
