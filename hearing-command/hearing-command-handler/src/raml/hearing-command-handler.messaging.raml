@@ -496,6 +496,11 @@ baseUri:  message://command/handler/message/hearing
             schema: !include json/schema/hearing.command.save-defendants-welsh-translations.json
             example: !include json/hearing.command.save-defendants-welsh-translations.json
 
+# Unlock Hearing
+        application/vnd.hearing.command.unlock-hearing+json:
+          schema: !include json/schema/hearing.command.unlock-hearing.json
+          example: !include json/hearing.command.unlock-hearing.json
+
 # Breach Applications to be added
         application/vnd.hearing.command.breach-applications-to-be-added+json:
             schema: !include json/schema/hearing.command.breach-applications-to-be-added.json

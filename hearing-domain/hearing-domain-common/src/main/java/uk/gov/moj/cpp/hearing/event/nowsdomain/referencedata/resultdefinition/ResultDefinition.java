@@ -49,6 +49,8 @@ public class ResultDefinition {
 
     private String adjournment;
 
+    private String policeSubjectLineTitle;
+
     private String convicted;
 
     private String qualifier;
@@ -276,8 +278,6 @@ public class ResultDefinition {
         return this;
     }
 
-
-
     public boolean isConvicted() {
         return convicted != null && convicted.equalsIgnoreCase(YES);
     }
@@ -496,6 +496,14 @@ public class ResultDefinition {
     public ResultDefinition setPreserveActiveOrder(final Boolean preserveActiveOrder) {
         this.preserveActiveOrder = preserveActiveOrder;
         return this;
+    }
+
+    public String getPoliceSubjectLineTitle() {
+        return policeSubjectLineTitle;
+    }
+
+    public void setPoliceSubjectLineTitle(final String policeSubjectLineTitle) {
+        this.policeSubjectLineTitle = policeSubjectLineTitle;
     }
 
 }

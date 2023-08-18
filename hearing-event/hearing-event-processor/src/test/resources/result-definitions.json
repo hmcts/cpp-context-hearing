@@ -1855,7 +1855,8 @@
       "urgent" : false,
       "d20" : false,
       "resultDefinitionRules" : [ ]
-    }, {
+    },
+    {
       "id" : "9fd6a4ef-1055-4e54-b035-f1130a524388",
       "label" : "Adjournment reason: Non-standard reason",
       "shortCode" : "NSR",
@@ -1899,7 +1900,8 @@
       "urgent" : false,
       "d20" : false,
       "resultDefinitionRules" : [ ]
-    }, {
+    },
+    {
       "id" : "29e02fa1-42ce-4eec-914e-e62508397a16",
       "label" : "No compensation reason",
       "shortCode" : "NCR",
@@ -1940,7 +1942,8 @@
       "urgent" : false,
       "d20" : false,
       "resultDefinitionRules" : [ ]
-    }, {
+    },
+    {
       "id" : "baf94928-04ae-4609-8e96-efc9f081b2be",
       "label" : "No order for costs",
       "shortCode" : "NCOSTS",
@@ -20161,6 +20164,7 @@
       "convicted" : false,
       "postHearingCustodyStatus" : "C",
       "resultDefinitionGroup" : "Remand in custody",
+      "policeSubjectLineTitle" : "Final Sentence",
       "terminatesOffenceProceedings" : false,
       "lifeDuration" : false,
       "publishedAsAPrompt" : false,

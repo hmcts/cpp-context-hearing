@@ -116,4 +116,48 @@ public class HearingStatesEventProcessorTest {
 
 
     }
+
+    @Test
+    public void processPublicHearingUnlockFailed() {
+
+        final String HEARING_ID = UUID.randomUUID().toString();
+        final String USER_ID = UUID.randomUUID().toString();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_HEARING_UNLOCK_FAILED),
+                Json.createObjectBuilder()
+                        .add("hearingId", HEARING_ID)
+                        .build());
+
+        processor.processHearingUnlockFailed(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName(PUBLIC_HEARING_EVENT_HEARING_UNLOCK_FAILED), payloadIsJson(allOf(
+                        withJsonPath("$.hearingId", is(HEARING_ID))
+                ))));
+    }
+
+    @Test
+    public void processPublicHearingUnlocked() {
+
+        final String HEARING_ID = UUID.randomUUID().toString();
+        final String USER_ID = UUID.randomUUID().toString();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID(HEARING_EVENT_HEARING_UNLOCKED),
+                Json.createObjectBuilder()
+                        .add("hearingId", HEARING_ID)
+                        .add("userId", USER_ID)
+                        .build());
+
+        processor.processHearingUnlocked(event);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+
+        assertThat(envelopeArgumentCaptor.getValue(),
+                jsonEnvelope(metadata().withName(PUBLIC_HEARING_EVENT_HEARING_UNLOCKED), payloadIsJson(allOf(
+                        withJsonPath("$.hearingId", is(HEARING_ID)),
+                        withJsonPath("$.userId", is(USER_ID))
+                ))));
+    }
 }

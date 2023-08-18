@@ -78,6 +78,7 @@ public class ResultTreeBuilderTest extends AbstractRestructuringTest {
         assertThat(judicialResult.getDrivingTestStipulation(),notNullValue());
         assertThat(judicialResult.getPointsDisqualificationCode(),notNullValue());
         assertThat(judicialResult.getDvlaCode(), notNullValue());
+        assertThat(judicialResult.getPoliceSubjectLineTitle(),notNullValue());
     }
 
     @Test

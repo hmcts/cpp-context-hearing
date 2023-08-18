@@ -67,7 +67,7 @@ public class HearingCommandApiTest {
             "removeInterpreterIntermediary", "updateInterpreterIntermediary", "setTrialType", "publishCourtList", "publishHearingListsForCrownCourts",
             "computeOutstandingFines", "recordSessionTime", "bookProvisionalHearingSlots", "removeTargets", "updateHearingDetails", "addMasterDefendantIdToDefendant", "cancelAmendments",
             "correctHearingDaysWithoutCourtCentre", "requestApproval", "validateResultAmendments", "markAsDuplicateHearing", "saveMultipleDraftResult", "updateResultLineSharedDates", "reusableInfo", "hearing.youth-court-defendants",
-            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing");
+            "updateRelatedHearing", "shareResultsForHearingDay", "saveDraftResultForHearingDay", "saveDraftResultsForHearingDay", "removeOffences", "saveDraftResultV2", "deleteDraftResultV2", "amendHearing", "unlockHearing");
 
     private static final String JSON_HEARING_INITIATE_DDCH = "json/hearing-initiate-ddch.json";
     private static final String JSON_HEARING_INITIATE = "json/hearing-initiate.json";
@@ -568,6 +568,15 @@ public class HearingCommandApiTest {
         hearingCommandApi.updateResultLineSharedDates(jsonRequestEnvelope);
 
         assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.update-resultline-shared-dates");
+    }
+
+    @Test
+    public void shouldPassThroughUnlockHearingCommandHandler() {
+        final JsonEnvelope jsonRequestEnvelope = buildDummyJsonRequestEnvelopeWithName("hearing.unlock-hearing");
+
+        hearingCommandApi.unlockHearing(jsonRequestEnvelope);
+
+        assertEnvelopeIsPassedThroughWithName(jsonRequestEnvelope.payloadAsJsonObject(), "hearing.command.unlock-hearing");
     }
 
     private JsonEnvelope buildDummyJsonRequestEnvelopeWithName(final String name) {

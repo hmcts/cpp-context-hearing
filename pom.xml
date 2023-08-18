@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>10.8.17</version>
+        <version>10.9.3</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
@@ -32,13 +32,13 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>1.0.203</coredomain.version>
-        <referencedata.version>8.0.34</referencedata.version>
+        <coredomain.version>1.0.206</coredomain.version>
+        <referencedata.version>8.0.41</referencedata.version>
         <material.version>8.0.9</material.version>
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>8.0.2</stagingenforcement.version>
-        <progression.version>8.0.115</progression.version>
+        <progression.version>8.0.125</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>

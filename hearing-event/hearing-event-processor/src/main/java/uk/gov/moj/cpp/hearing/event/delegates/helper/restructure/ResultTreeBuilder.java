@@ -260,6 +260,7 @@ public class ResultTreeBuilder {
                 .withDelegatedPowers(resultLine.getDelegatedPowers())
                 .withFourEyesApproval(resultLine.getFourEyesApproval())
                 .withIsAdjournmentResult(resultDefinition.isAdjournment())
+                .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
                 .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
                 .withIsConvictedResult(resultDefinition.isConvicted())
                 .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))

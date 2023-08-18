@@ -84,6 +84,7 @@ public class HearingCommandHandlerRamlConfigTest {
                 RestrictCourtListCommandHandler.class,
                 DefendantsWelshTranslationsCommandHandler.class,
                 CustodyTimeLimitClockHandler.class,
+                UnlockHearingCommandHandler.class,
                 HearingApplicationsUpdatesCommandHandler.class
         );
 

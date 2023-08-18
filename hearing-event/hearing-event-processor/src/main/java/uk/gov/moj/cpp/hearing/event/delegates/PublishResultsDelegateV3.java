@@ -253,6 +253,7 @@ public class PublishResultsDelegateV3 {
                 .withCategory(getCategory(resultDefinition.getCategory()))
                 .withCjsCode(resultDefinition.getCjsCode())
                 .withIsAdjournmentResult(resultDefinition.isAdjournment())
+                .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
                 .withIsAvailableForCourtExtract(resultDefinition.getIsAvailableForCourtExtract())
                 .withIsConvictedResult(resultDefinition.isConvicted())
                 .withIsFinancialResult(ResultDefinition.YES.equalsIgnoreCase(resultDefinition.getFinancial()))

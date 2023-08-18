@@ -568,3 +568,12 @@ rule "Command - API - Action - hearing.remove-offences-from-existing-hearing"
   then
     $outcome.setSuccess(true);
 end
+
+rule "Command - API - Action - hearing.unlock-hearing"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.unlock-hearing");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action,"Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "Court Administrators", "Crown Court Admin"));
+  then
+    $outcome.setSuccess(true);
+end

@@ -120,6 +120,8 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUnlockFailed;
+import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryAdded;
@@ -231,8 +233,6 @@ public class HearingAggregate implements Aggregate {
     private UUID amendingSharedHearingUserId;
 
     private List<DefendantWelshInfo> defendantsWelshInformationList;
-
-
 
     @Override
     public Object apply(final Object event) {
@@ -504,7 +504,7 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final HearingState newHearingState, final YouthCourt youthCourt) {
         if (
-                (Arrays.asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
+                (Arrays.asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, HearingState.SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
                         || (INITIALISED == newHearingState && SHARED == this.hearingState)
         ) {
 
@@ -522,7 +522,7 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> shareResultForDay(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final HearingState newHearingState, final YouthCourt youthCourt, final LocalDate hearingDay) {
         if (
-                (Arrays.asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
+                (Arrays.asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, HearingState.SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
                         || (INITIALISED == newHearingState && SHARED == this.hearingState)
         ) {
 
@@ -562,6 +562,26 @@ public class HearingAggregate implements Aggregate {
         return apply(Stream.of(new ResultAmendmentsCancellationFailed("Either user is not same or hearing was not being amended")));
     }
 
+    public Stream<Object> unlockHearing(final UUID hearingId, final UUID userId) {
+        if (!isSameUserWhoIsAmendingSharedHearing(userId) && isSharedHearingBeingAmended()) {
+
+            final Stream.Builder<Object> streamBuilder = Stream.builder();
+            streamBuilder.add(HearingUnlocked.hearingUnlockedBuilder()
+                    .withHearingId(hearingId)
+                    .withUserId(userId)
+                    .build());
+
+            streamBuilder.add(new ResultAmendmentsCancelledV2(hearingId, userId, new ArrayList<>(this.momento.getSharedTargets().values()), this.momento.getLastSharedTime()));
+            return apply(streamBuilder.build());
+
+        } else {
+            return apply(Stream.of(HearingUnlockFailed.hearingUnlockedFailedBuilder()
+                    .withHearingId(hearingId)
+                    .withReason("Either user is same or hearing was not being amended")
+                    .build()));
+        }
+    }
+
     public Stream<Object> receiveBreachApplicationToBeAdded(final List<UUID> breachApplicationsList) {
              final Stream.Builder<Object> streamBuilder = Stream.builder();
             if(this.momento.getHearing().getCourtApplications() != null) {
@@ -588,7 +608,7 @@ public class HearingAggregate implements Aggregate {
     public Stream<Object> saveDraftResults(final UUID userId, final Target target) {
 
 
-        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
+        if ((VALIDATED.equals(this.hearingState) && isSameUserWhoIsAmendingSharedHearing(userId)) || APPROVAL_REQUESTED.equals(this.hearingState)) {
             return apply(resultsSharedDelegate.hearingLocked(target.getHearingId()));
         }
 
@@ -629,7 +649,8 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> saveDraftResultV2(final UUID userId, final JsonObject draftResult, final UUID hearingId, LocalDate hearingDay) {
-        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
+        if ((VALIDATED.equals(this.hearingState) && isSameUserWhoIsAmendingSharedHearing(userId))
+                || APPROVAL_REQUESTED.equals(this.hearingState)) {
             return apply(resultsSharedDelegate.hearingLocked(hearingId));
         }
 
@@ -661,10 +682,10 @@ public class HearingAggregate implements Aggregate {
 
     @SuppressWarnings("squid:S3358")
     private HearingState getHearingState(final List<String> hearingStates) {
-        if (this.hearingState != INITIALISED) {
+        if (this.hearingState != INITIALISED && this.hearingState != VALIDATED) {
             return hearingStates != null && (!hearingStates.isEmpty()) ? hearingStates.contains("ca8b8285-5fc7-3b36-aa78-ecdf5ac6dad0") ? SHARED_AMEND_LOCKED_ADMIN_ERROR : SHARED_AMEND_LOCKED_USER_ERROR : this.hearingState;
         }
-        return INITIALISED;
+        return this.hearingState;
     }
 
     private boolean isValidTarget(final Target target) {
@@ -895,7 +916,7 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> approvalRequest(final UUID hearingId, final UUID userId) {
 
-        if (userId.equals(this.amendingSharedHearingUserId) && SHARED_AMEND_LOCKED_ADMIN_ERROR.equals(this.hearingState)) {
+        if (userId.equals(this.amendingSharedHearingUserId) && isSharedHearingBeingAmended()) {
             final Stream.Builder<Object> streamBuilder = Stream.builder();
             streamBuilder.add(ApprovalRequestedV2.approvalRequestedBuilder()
                     .withHearingId(hearingId)
@@ -1074,7 +1095,8 @@ public class HearingAggregate implements Aggregate {
 
     private Stream<Object> saveDraftResultForHearingDay(final UUID userId, final Target target, final LocalDate hearingDay) {
 
-        if (VALIDATED.equals(this.hearingState) || APPROVAL_REQUESTED.equals(this.hearingState)) {
+        if ((VALIDATED.equals(this.hearingState) && isSameUserWhoIsAmendingSharedHearing(userId))
+                || APPROVAL_REQUESTED.equals(this.hearingState)) {
             return apply(resultsSharedDelegate.hearingLocked(target.getHearingId()));
         }
 

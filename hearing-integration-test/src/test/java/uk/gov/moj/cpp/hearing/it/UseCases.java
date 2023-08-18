@@ -729,7 +729,8 @@ public class UseCases {
                         resultLineIn.getChildResultLineIds(),
                         resultLineIn.getParentResultLineIds(),
                         target.getShadowListed(),
-                        target.getDraftResult()));
+                        target.getDraftResult(),
+                        "AMENDMENTS_LOG"));
     }
 
     private static Stream<SharedResultsCommandResultLineV2> sharedResultsResultLinePerDay(final Target target, final UUID caseId) {
@@ -762,7 +763,9 @@ public class UseCases {
                         resultLineIn.getChildResultLineIds(),
                         resultLineIn.getParentResultLineIds(),
                         target.getShadowListed(),
-                        target.getDraftResult()));
+                        target.getDraftResult(),
+                        "AMENDMENTS_LOG"));
+
     }
 
     public static ShareResultsCommand shareResults(final RequestSpecification requestSpec, final UUID hearingId, final ShareResultsCommand shareResultsCommand, final List<Target> targets) {
