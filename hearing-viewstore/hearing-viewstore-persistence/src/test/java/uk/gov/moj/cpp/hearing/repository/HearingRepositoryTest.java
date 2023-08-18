@@ -85,7 +85,7 @@ public class HearingRepositoryTest {
             // because h2 incorrectly maps column type TEXT to VARCHAR(255)
             hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
             hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
-            hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(randomUUID()).setHearing(hearingEntity)));
+            hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(new HearingSnapshotKey(randomUUID(), hearingEntity.getId())).setHearing(hearingEntity)));
             hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
             hearingRepository.save(hearingEntity);
         });
@@ -95,7 +95,7 @@ public class HearingRepositoryTest {
             // because h2 incorrectly maps column type TEXT to VARCHAR(255)
             hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
             hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
-            hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(randomUUID()).setHearing(hearingEntity).setHearingDay("2021-03-01")));
+            hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(new HearingSnapshotKey(randomUUID(), hearingEntity.getId())).setHearing(hearingEntity).setHearingDay("2021-03-01")));
             hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
             hearingRepository.save(hearingEntity);
         });
@@ -351,7 +351,7 @@ public class HearingRepositoryTest {
     public void shouldRemoveTargetsFromHearing() {
         final UUID firstHearingId = hearings.get(0).getId();
         final Hearing firstHearing = hearingRepository.findBy(firstHearingId);
-        final UUID firstTargetId = firstHearing.getTargets().stream().findFirst().get().getId();
+        final UUID firstTargetId = firstHearing.getTargets().stream().findFirst().get().getId().getId();
 
         firstHearing.getTargets().removeIf(t -> t.getId().equals(firstTargetId));
 

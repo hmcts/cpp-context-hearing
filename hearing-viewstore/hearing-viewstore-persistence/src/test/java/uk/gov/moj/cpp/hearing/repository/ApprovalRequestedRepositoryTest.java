@@ -14,6 +14,7 @@ import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
 import java.time.ZonedDateTime;
@@ -63,7 +64,7 @@ public class ApprovalRequestedRepositoryTest extends BaseTransactionalTest {
         final Hearing hearingEntity = hearingJPAMapper.toJPA(hearing);
         hearingEntity.setCourtApplicationsJson(hearingEntity.getCourtApplicationsJson().substring(0, 255));
         hearingEntity.getProsecutionCases().iterator().next().setMarkers(null);
-        hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(randomUUID()).setHearing(hearingEntity)));
+        hearingEntity.setTargets(Sets.newHashSet(Target.target().setId(new HearingSnapshotKey(randomUUID(), hearingEntity.getId())).setHearing(hearingEntity)));
         hearingEntity.setApplicationDraftResults(Sets.newHashSet(ApplicationDraftResult.applicationDraftResult().setId(randomUUID()).setHearing(hearingEntity)));
         hearingRepository.save(hearingEntity);
     }

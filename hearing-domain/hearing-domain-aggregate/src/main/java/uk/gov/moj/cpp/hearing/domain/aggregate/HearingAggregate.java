@@ -990,7 +990,10 @@ public class HearingAggregate implements Aggregate {
         if(momento.isDeleted()){
             return Stream.empty();
         }
-        if (this.momento.getHearing() == null) {
+        if (this.momento.getHearing() == null || this.hearingState == SHARED) {
+            if(this.hearingState == SHARED) {
+                return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing already shared", hearingId));
+            }
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing not found", hearingId));
         }
         return apply(this.hearingDelegate.deleteHearing(hearingId));
@@ -998,6 +1001,9 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> unAllocateHearing(final UUID hearingId, final List<UUID> removedOffenceIds) {
         if (this.momento.getHearing() == null) {
+            if(this.hearingState == SHARED) {
+                return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));
+            }
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
         }
 
@@ -1037,7 +1043,7 @@ public class HearingAggregate implements Aggregate {
         if (!SHARED.equals(this.hearingState) || this.momento.isDeleted()) {
             return Stream.empty();
         }
-       return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s());
+        return  CustodyTimeLimitUtil.stopCTLExpiryForV2(this.momento, this.momento.getSharedResultsCommandResultLineV2s());
 
     }
 

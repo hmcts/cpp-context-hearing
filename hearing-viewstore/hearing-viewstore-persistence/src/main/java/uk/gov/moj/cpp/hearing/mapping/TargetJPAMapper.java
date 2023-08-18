@@ -53,7 +53,8 @@ public class TargetJPAMapper {
             return null;
         }
         final Target target = new Target();
-        target.setId(pojo.getTargetId());
+        final HearingSnapshotKey hearingSnapshotKey = new HearingSnapshotKey(pojo.getTargetId(), hearing.getId());
+        target.setId(hearingSnapshotKey);
         target.setHearing(hearing);
         target.setDefendantId(pojo.getDefendantId());
         target.setDraftResult(pojo.getDraftResult());
@@ -72,7 +73,8 @@ public class TargetJPAMapper {
             return null;
         }
         final Target target = new Target();
-        target.setId(pojo.getTargetId());
+        final HearingSnapshotKey hearingSnapshotKey = new HearingSnapshotKey(pojo.getTargetId(), hearing.getId());
+        target.setId(hearingSnapshotKey);
         target.setHearing(hearing);
         target.setDefendantId(pojo.getDefendantId());
         target.setMasterDefendantId(pojo.getMasterDefendantId());
@@ -133,7 +135,7 @@ public class TargetJPAMapper {
                 .withHearingId(entity.getHearing().getId())
                 .withOffenceId(entity.getOffenceId())
                 .withApplicationId(entity.getApplicationId())
-                .withTargetId(entity.getId())
+                .withTargetId(entity.getId().getId())
                 .withResultLines(resultLineJPAMapper.fromJPA(entity.getResultLines()))
                 .withShadowListed(entity.getShadowListed());
         if (Objects.nonNull(entity.getHearingDay())) {
