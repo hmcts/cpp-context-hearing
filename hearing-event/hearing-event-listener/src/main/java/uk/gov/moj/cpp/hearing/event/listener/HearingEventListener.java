@@ -143,7 +143,7 @@ public class HearingEventListener {
             hearing.setHasSharedResults(false);
         }
         hearing.getTargets().stream()
-                .filter(t -> t.getId().equals(targetIn.getTargetId()))
+                .filter(t -> t.getId().getId().equals(targetIn.getTargetId()))
                 .findFirst()
                 .ifPresent(previousTarget -> hearing.getTargets().remove(previousTarget));
 
@@ -279,7 +279,7 @@ public class HearingEventListener {
         final Hearing hearing = this.hearingRepository.findBy(targetRemoved.getHearingId());
 
         hearing.getTargets().stream()
-                .filter(t -> t.getId().equals(targetRemoved.getTargetId()))
+                .filter(t -> t.getId().getId().equals(targetRemoved.getTargetId()))
                 .findFirst()
                 .ifPresent(targetToRemove -> {
                             hearing.getTargets().remove(targetToRemove);
@@ -650,7 +650,7 @@ public class HearingEventListener {
     private void updateDraftResultV2(Hearing hearing, Target2 targetIn) {
         final uk.gov.moj.cpp.hearing.persist.entity.ha.Target targetReq = targetJPAMapper.toJPA2(hearing, targetIn);
 
-        hearing.getTargets().stream().filter(t -> t.getId().equals(targetIn.getTargetId())).findFirst().ifPresent(t -> t.getResultLines().removeIf(not(ResultLine::getDeleted)));
+        hearing.getTargets().stream().filter(t -> t.getId().getId().equals(targetIn.getTargetId())).findFirst().ifPresent(t -> t.getResultLines().removeIf(not(ResultLine::getDeleted)));
 
 
         if (hearing.getTargets().isEmpty() || !hearing.getTargets().contains(targetReq)) {

@@ -646,7 +646,10 @@ public class HearingServiceTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(createProsecutionCases());
         hearing.setId(randomUUID());
-        hearing.setTargets(asSet(new Target()));
+
+        final Target target = new Target();
+        target.setId(new HearingSnapshotKey(randomUUID(), hearing.getId()));
+        hearing.setTargets(asSet(target));
 
         final List<uk.gov.justice.core.courts.Target> targets = asList(
                 targetTemplate(),
@@ -711,7 +714,9 @@ public class HearingServiceTest {
         final Hearing hearing = new Hearing();
         hearing.setProsecutionCases(createProsecutionCases());
         hearing.setId(randomUUID());
-        hearing.setTargets(asSet(new Target()));
+        final Target target = new Target();
+        target.setId(new HearingSnapshotKey(randomUUID(), hearing.getId()));
+        hearing.setTargets(asSet(target));
         final String HEARING_DAY = "2021-03-01";
 
         final List<uk.gov.justice.core.courts.Target> targets = asList(

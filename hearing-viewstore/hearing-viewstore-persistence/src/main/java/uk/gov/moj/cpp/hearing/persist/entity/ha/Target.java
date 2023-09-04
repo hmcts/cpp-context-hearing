@@ -5,25 +5,24 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "ha_target")
 public class Target {
 
-    @Id
-    private UUID id;
+    @EmbeddedId
+    private HearingSnapshotKey id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hearing_id")
+    @JoinColumn(name = "hearing_id", insertable = false, updatable = false)
     private Hearing hearing;
 
     @Column(name = "defendant_id")
@@ -47,7 +46,7 @@ public class Target {
     @Column(name = "case_id")
     private UUID caseId;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "target", orphanRemoval = true)
+    @Transient
     private Set<ResultLine> resultLines = new HashSet<>();
 
     @Column(name = "result_lines")
@@ -64,11 +63,11 @@ public class Target {
         return new Target();
     }
 
-    public UUID getId() {
+    public HearingSnapshotKey getId() {
         return id;
     }
 
-    public Target setId(UUID id) {
+    public Target setId(HearingSnapshotKey id) {
         this.id = id;
         return this;
     }
@@ -186,6 +185,13 @@ public class Target {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id.hashCode());
+    }
+
+    public UUID getTargetId() {
+        if(this.id != null ) {
+            return this.id.getId();
+        }
+        return null;
     }
 }

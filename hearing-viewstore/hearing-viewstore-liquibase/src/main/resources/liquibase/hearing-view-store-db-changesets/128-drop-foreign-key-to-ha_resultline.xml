@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+
+    <changeSet id="128" author="hearing" logicalFilePath="128-drop-foreign-key-to-ha_resultline.xml">
+
+        <preConditions onFail="MARK_RAN">
+            <foreignKeyConstraintExists foreignKeyName="fk_result_line_target"/>
+        </preConditions>
+        <dropForeignKeyConstraint  baseTableName="ha_result_line"
+                                   constraintName="fk_result_line_target"/>
+
+
+    </changeSet>
+
+</databaseChangeLog>

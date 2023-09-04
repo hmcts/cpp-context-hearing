@@ -6,9 +6,9 @@ import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 @Entity
 @Table(name = "ha_prompt")
@@ -27,8 +27,7 @@ public class Prompt  {
 
 
 
-    @ManyToOne
-    @JoinColumn(name = "result_line_id")
+@Transient
     private ResultLine resultLine;
 
     @Column(name = "fixed_list_code")

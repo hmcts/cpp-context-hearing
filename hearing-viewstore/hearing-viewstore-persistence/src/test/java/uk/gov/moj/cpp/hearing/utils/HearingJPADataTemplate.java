@@ -203,7 +203,7 @@ public final class HearingJPADataTemplate {
         target.setMasterDefendantId(randomUUID());
         target.setOffenceId(randomUUID());
         target.setDefendantId(randomUUID());
-        target.setId(randomUUID());
+        target.setId(new HearingSnapshotKey(randomUUID(), randomUUID()));
 
         return target;
 

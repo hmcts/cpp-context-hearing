@@ -14,6 +14,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 
 import uk.gov.justice.services.test.utils.core.random.RandomGenerator;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 
@@ -45,7 +46,7 @@ public class TargetJPAMapperTest {
         when(hearing.getId()).thenReturn(hearingId);
 
         Target target = new Target();
-        target.setId(UUID.randomUUID());
+        target.setId(new HearingSnapshotKey(randomUUID(), randomUUID()));
         target.setHearing(hearing);
         target.setDefendantId(UUID.randomUUID());
         target.setOffenceId(UUID.randomUUID());
@@ -56,7 +57,7 @@ public class TargetJPAMapperTest {
         when(resultLineJPAMapper.fromJPA(target.getResultLines())).thenReturn(asList(resultLineMock));
 
         assertThat(targetJPAMapper.fromJPA(target, masterDefendantId), isBean(uk.gov.justice.core.courts.Target.class)
-                .with(uk.gov.justice.core.courts.Target::getTargetId, is(target.getId()))
+                .with(uk.gov.justice.core.courts.Target::getTargetId, is(target.getId().getId()))
                 .with(uk.gov.justice.core.courts.Target::getDefendantId, is(target.getDefendantId()))
                 .with(uk.gov.justice.core.courts.Target::getMasterDefendantId, is(masterDefendantId))
                 .with(uk.gov.justice.core.courts.Target::getOffenceId, is(target.getOffenceId()))
@@ -76,7 +77,7 @@ public class TargetJPAMapperTest {
         when(hearing.getId()).thenReturn(hearingId);
 
         Target target = new Target();
-        target.setId(UUID.randomUUID());
+        target.setId(new HearingSnapshotKey(randomUUID(), randomUUID()));
         target.setHearing(hearing);
         target.setHearingDay(hearingDay.toString());
         target.setDefendantId(UUID.randomUUID());
@@ -88,7 +89,7 @@ public class TargetJPAMapperTest {
         when(resultLineJPAMapper.fromJPA(target.getResultLines())).thenReturn(asList(resultLineMock));
 
         assertThat(targetJPAMapper.fromJPA(target, masterDefendantId), isBean(uk.gov.justice.core.courts.Target.class)
-                .with(uk.gov.justice.core.courts.Target::getTargetId, is(target.getId()))
+                .with(uk.gov.justice.core.courts.Target::getTargetId, is(target.getId().getId()))
                 .with(uk.gov.justice.core.courts.Target::getDefendantId, is(target.getDefendantId()))
                 .with(uk.gov.justice.core.courts.Target::getMasterDefendantId, is(masterDefendantId))
                 .with(uk.gov.justice.core.courts.Target::getOffenceId, is(target.getOffenceId()))
@@ -117,7 +118,7 @@ public class TargetJPAMapperTest {
         when(resultLineJPAMapper.toJPA(any(), eq(target.getResultLines()))).thenReturn(asSet(resultLineMock));
 
         assertThat(targetJPAMapper.toJPA(hearing, target), isBean(Target.class)
-                .with(Target::getId, is(target.getTargetId()))
+                .with(Target::getTargetId, is(target.getTargetId()))
                 .with(Target::getDefendantId, is(target.getDefendantId()))
                 .with(Target::getOffenceId, is(target.getOffenceId()))
                 .with(Target::getHearing, is(hearing))
@@ -147,7 +148,7 @@ public class TargetJPAMapperTest {
         when(resultLineJPAMapper.toJPA(any(), eq(target.getResultLines()))).thenReturn(asSet(resultLineMock));
 
         assertThat(targetJPAMapper.toJPA(hearing, target), isBean(Target.class)
-                .with(Target::getId, is(target.getTargetId()))
+                .with(Target::getTargetId, is(target.getTargetId()))
                 .with(Target::getDefendantId, is(target.getDefendantId()))
                 .with(Target::getOffenceId, is(target.getOffenceId()))
                 .with(Target::getHearing, is(hearing))

@@ -249,8 +249,10 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -297,9 +299,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
 
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
         final UUID offenceId = draftResultSaved.getTarget().getOffenceId();
@@ -348,9 +352,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
 
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
         final Offence offence = new Offence();
@@ -400,8 +406,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -449,8 +458,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -498,8 +510,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -547,8 +562,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -596,8 +614,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -650,8 +671,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -696,8 +720,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -732,8 +759,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -768,9 +798,11 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(false)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId ))
+
                 ));
 
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
 
@@ -825,7 +857,7 @@ public class HearingEventListenerTest {
         targets.stream().findFirst().get().setResultLines(Lists.newArrayList(uk.gov.justice.core.courts.ResultLine.resultLine().withResultLineId(resultLine)
                 .withPrompts(Lists.newArrayList(uk.gov.justice.core.courts.Prompt.prompt().withId(promptUUID).withValue("200").build())).build()));
         final Target target = new Target()
-                .setId(randomUUID())
+                .setId(new HearingSnapshotKey(randomUUID(), resultsShared.getHearingId()))
                 .setResultLines(Sets.newHashSet(uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine.resultLine().setId(resultLine)
                         .setPrompts(Sets.newHashSet(uk.gov.moj.cpp.hearing.persist.entity.ha.Prompt.prompt().setId(promptUUID).setValue("400")))));
         resultsShared.setTargets(targets);
@@ -883,10 +915,10 @@ public class HearingEventListenerTest {
         final uk.gov.justice.core.courts.Target resultForTomorrow = targetTemplate(tomorrow);
         final List<uk.gov.justice.core.courts.Target> targets = asList(resultForToday, resultForTomorrow);
         final Target target = new Target()
-                .setId(randomUUID())
+                .setId(new HearingSnapshotKey(randomUUID(), resultForToday.getHearingId()))
                 .setHearingDay(today.toString());
         final Target target2 = new Target()
-                .setId(randomUUID())
+                .setId(new HearingSnapshotKey(randomUUID(), resultForTomorrow.getHearingId()))
                 .setHearingDay(tomorrow.toString());
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
@@ -945,10 +977,10 @@ public class HearingEventListenerTest {
         final uk.gov.justice.core.courts.Target resultForTomorrow = targetTemplate(tomorrow);
         final List<uk.gov.justice.core.courts.Target> targets = asList(resultForToday, resultForTomorrow);
         final Target target = new Target()
-                .setId(randomUUID())
+                .setId(new HearingSnapshotKey(randomUUID(), randomUUID()))
                 .setHearingDay(today.toString());
         final Target target2 = new Target()
-                .setId(randomUUID())
+        .setId(new HearingSnapshotKey(randomUUID(), randomUUID()))
                 .setHearingDay(tomorrow.toString());
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
@@ -1021,10 +1053,10 @@ public class HearingEventListenerTest {
         final uk.gov.justice.core.courts.Target resultForTomorrow = targetTemplate(tomorrow);
         final List<uk.gov.justice.core.courts.Target> targets = asList(resultForToday, resultForTomorrow);
         final Target target = new Target()
-                .setId(randomUUID())
+                .setId(new HearingSnapshotKey(randomUUID(), resultsShared.getHearingId()))
                 .setHearingDay(today.toString());
         final Target target2 = new Target()
-                .setId(randomUUID())
+                .setId(new HearingSnapshotKey(randomUUID(), resultsShared.getHearingId()))
                 .setHearingDay(tomorrow.toString());
 
         final ProsecutionCase prosecutionCase = new ProsecutionCase();
@@ -1396,8 +1428,10 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);
@@ -1425,7 +1459,7 @@ public class HearingEventListenerTest {
         final Hearing dbHearing = new Hearing()
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(targetId)
+                        .setId(new HearingSnapshotKey(targetId, hearingId))
                 ));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
@@ -1451,7 +1485,8 @@ public class HearingEventListenerTest {
         final Hearing dbHearing = new Hearing()
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(randomUUID())
+                        .setId(new HearingSnapshotKey(randomUUID(), hearingId))
+
                 ));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
@@ -1597,8 +1632,10 @@ public class HearingEventListenerTest {
                 .setHasSharedResults(true)
                 .setId(hearingId)
                 .setTargets(asSet(new Target()
-                        .setId(draftResultSaved.getTarget().getTargetId())
+                        .setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId))
                 ));
+
+        targetOut.setId(new HearingSnapshotKey(draftResultSaved.getTarget().getTargetId(), hearingId));
 
         when(hearingRepository.findBy(hearingId)).thenReturn(dbHearing);
         when(targetJPAMapper.toJPA(dbHearing, draftResultSaved.getTarget())).thenReturn(targetOut);

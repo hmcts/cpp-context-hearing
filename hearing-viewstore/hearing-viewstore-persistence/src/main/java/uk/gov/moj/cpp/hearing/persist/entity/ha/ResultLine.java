@@ -8,97 +8,66 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
+
 import javax.persistence.Embedded;
-import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
 
-@Entity
-@Table(name = "ha_result_line")
+
+
 
 public class ResultLine {
 
-    @Id
     private UUID id;
 
-    @ManyToOne
-    @JoinColumn(name = "target_id")
+
     private Target target;
 
-    @Column(name = "short_code")
     private String shortCode;
 
-    @Column(name = "amendment_date")
     private ZonedDateTime amendmentDate;
 
-    @Column(name = "amendment_reason_id")
     private UUID amendmentReasonId;
 
-    @Column(name = "amendment_reason")
     private String amendmentReason;
 
-    @Column(name = "child_result_line_ids")
     private String childResultLineIds;
 
-    @Column(name = "parent_result_line_ids")
     private String parentResultLineIds;
 
-    @Column(name = "offence_id")
     private UUID offenceId;
 
-    @Column(name = "application_id")
     private UUID applicationId;
 
-    @Column(name = "case_id")
     private UUID caseId;
 
-    @Column(name = "defendant_id")
     private UUID defendantId;
 
-    @Column(name = "master_defendant_id")
     private UUID masterDefendantId;
 
-    @Column(name = "shadow_listed")
     private Boolean shadowListed;
 
     @Embedded
     private DelegatedPowers delegatedPowers;
 
-    @Column(name = "is_complete")
     private Boolean isComplete;
 
-    @Column(name = "is_modified")
     private Boolean isModified;
 
 
-    @Column(name = "is_deleted")
     private Boolean isDeleted;
 
-    @Column(name = "level")
     @Enumerated(EnumType.STRING)
     private Level level;
 
-    @Column(name = "ordered_date")
     private LocalDate orderedDate;
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "resultLine", orphanRemoval = true)
     private Set<Prompt> prompts;
 
-    @Column(name = "result_definition_id")
     private UUID resultDefinitionId;
 
-    @Column(name = "result_label")
     private String resultLabel;
 
-    @Column(name = "last_shared_date_time")
     private LocalDate sharedDate;
 
     public ResultLine() {
