@@ -45,7 +45,7 @@ public class AddCaseDefendantsEventListener {
         final List<Defendant> defendantList = addCaseDefendantsForHearing.getDefendants();
         final Hearing hearingEntity = hearingRepository.findBy(hearingId);
         if (isNull(hearingEntity)) {
-            LOGGER.info("Hearing not found for hearing id {} ", hearingId);
+            LOGGER.info("Hearing not  found for hearing id {} ", hearingId);
         } else {
 
             hearingEntity.getProsecutionCases().stream().filter(pc -> pc.getId().getId().equals(caseId)).findFirst().ifPresent(persistentCase -> {
