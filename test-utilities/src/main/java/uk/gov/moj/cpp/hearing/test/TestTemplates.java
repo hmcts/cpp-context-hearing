@@ -870,6 +870,10 @@ public class TestTemplates {
             return saveDraftResultCommandTemplateWithHmiSlots(initiateHearingCommand, orderedDate, UUID.randomUUID(), Boolean.FALSE, hearingDay);
         }
 
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithHmiSlotsAndNullShadowListed(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate, final LocalDate hearingDay) {
+            return saveDraftResultCommandTemplateWithHmiSlotsAndNullShadowListed(initiateHearingCommand, orderedDate, UUID.randomUUID(), hearingDay);
+        }
+
         public static SaveDraftResultCommand saveDraftResultCommandTemplateWithApplication(final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate) {
             return saveDraftResultCommandTemplateWithApplication(initiateHearingCommand, orderedDate, UUID.randomUUID(), UUID.randomUUID(), Boolean.FALSE);
         }
@@ -1180,6 +1184,22 @@ public class TestTemplates {
                     //.withTargetId(offence0.getId())
                     .withResultLines(Collections.singletonList(standardResultLineTemplateWithHmiSlots(resultLineId, orderedDate).build()))
                     .withShadowListed(shadowListed)
+                    .withHearingDay(hearingDay)
+                    .build();
+            return new SaveDraftResultCommand(target, null);
+        }
+
+        public static SaveDraftResultCommand saveDraftResultCommandTemplateWithHmiSlotsAndNullShadowListed(
+                final InitiateHearingCommand initiateHearingCommand, final LocalDate orderedDate,
+                final UUID resultLineId, final LocalDate hearingDay) {
+            final Hearing hearing = initiateHearingCommand.getHearing();
+            final Target target = Target.target()
+                    .withHearingId(hearing.getId())
+                    .withTargetId(UUID.randomUUID())
+                    .withDraftResult(DRAFT_RESULTS_CONTENT)
+                    .withApplicationId(hearing.getCourtApplications().get(0).getId())
+                    .withResultLines(Collections.singletonList(standardResultLineTemplateWithHmiSlots(resultLineId, orderedDate).build()))
+                    .withShadowListed(true)
                     .withHearingDay(hearingDay)
                     .build();
             return new SaveDraftResultCommand(target, null);

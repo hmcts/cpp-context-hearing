@@ -63,6 +63,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandT
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplateWithApplication;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplateWithApplicationAndOffence;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplateWithHmiSlots;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplateWithHmiSlotsAndNullShadowListed;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardAmendedResultLineTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardInitiateHearingTemplateWithDefendantJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.standardResultLineTemplate;
@@ -778,6 +779,49 @@ public class ShareResultsIT extends AbstractIT {
 
             assertThat(publicHearingResulted.getString("hearing.prosecutionCases[0].defendants[0].offences[0].judicialResults[0].nextHearing.hmiSlots[0].startTime"), is("2020-08-25T10:00:00.000Z"));
 
+        }
+    }
+
+    @Test
+    public void shouldShareResultsPerDayWithHmiSlotsWhenNullValuesInShadowListedOffences() {
+
+        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
+        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
+
+        LocalDate orderDate = LocalDate.now();
+
+        final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
+
+        final InitiateHearingCommandHelper initiateHearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final CommandHelpers.UpdateVerdictCommandHelper updateVerdictCommandHelper = updateDefendantAndChangeVerdict(initiateHearingCommandHelper);
+
+        SaveDraftResultCommand saveDraftResultCommandWithNullShadowList = saveDraftResultCommandTemplateWithHmiSlotsAndNullShadowListed(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
+
+        final uk.gov.justice.core.courts.Hearing hearing = initiateHearingCommandHelper.getHearing();
+
+        hearing.getProsecutionCases().forEach(prosecutionCase -> stubLjaDetails(hearing.getCourtCentre(), prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        hearing.getCourtApplications().get(0).getCourtApplicationCases().forEach(prosecutionCase -> stubLjaDetails(hearing.getCourtCentre(), prosecutionCase.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+        hearing.getCourtApplications().get(0).getCourtOrder().getCourtOrderOffences().forEach(offence -> stubLjaDetails(hearing.getCourtCentre(), offence.getProsecutionCaseIdentifier().getProsecutionAuthorityId()));
+
+        stubCourtRoom(hearing);
+
+        final LocalDate convictionDateBasedOnVerdict = updateVerdictCommandHelper.getFirstVerdict().getVerdictDate();
+
+        try (final EventListener publicEventResulted = listenFor("public.events.hearing.hearing-resulted")
+                .withFilter(convertStringTo(PublicHearingResultedV2.class, isBean(PublicHearingResultedV2.class)
+                        .with(PublicHearingResultedV2::getHearing, isBean(Hearing.class)
+                                .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
+                                .with(Hearing::getCourtCentre, isBean(CourtCentre.class)
+                                        .with(CourtCentre::getId, is(hearing.getCourtCentre().getId()))))))) {
+
+            completeSetupAndShareResultsPerDayWithHmi(allNows, initiateHearingCommandHelper, saveDraftResultCommandWithNullShadowList, orderDate);
+
+            final JsonPath publicHearingResulted = publicEventResulted.waitFor();
+
+            assertThat(publicHearingResulted.getBoolean("isReshare"), is(false));
+
+            assertThat(publicHearingResulted.getInt("shadowListedOffences.size"), is(0));
         }
     }
 

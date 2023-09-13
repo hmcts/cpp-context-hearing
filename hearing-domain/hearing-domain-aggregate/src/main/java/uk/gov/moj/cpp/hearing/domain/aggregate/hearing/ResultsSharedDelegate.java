@@ -384,7 +384,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withApplicationId(resultLineIn.getApplicationId())
                 .withOffenceId(resultLineIn.getOffenceId())
                 .withCaseId(resultLineIn.getCaseId())
-                .withShadowListed(resultLineIn.isShadowListed())
+                .withShadowListed(isNull(resultLineIn.getApplicationId()) && resultLineIn.isShadowListed())
                 .withDefendantId(resultLineIn.getDefendantId())
                 .withMasterDefendantId(resultLineIn.getMasterDefendantId())
                 .withResultLabel(resultLineIn.getResultLabel())
@@ -678,7 +678,7 @@ public class ResultsSharedDelegate implements Serializable {
                 .withResultLines(new ArrayList<>())
                 .withTargetId(taregetId)
                 .withHearingDay(hearingDay)
-                .withShadowListed(rl.isShadowListed())
+                .withShadowListed(isNull(rl.getApplicationId()) && rl.isShadowListed())
                 .withDraftResult(rl.getDraftResult())
                 .build();
 

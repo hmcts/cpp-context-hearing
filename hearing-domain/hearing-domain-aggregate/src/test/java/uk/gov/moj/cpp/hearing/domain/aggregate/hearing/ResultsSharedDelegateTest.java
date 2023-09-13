@@ -8,13 +8,13 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+
+import java.util.Objects;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
@@ -940,6 +940,74 @@ public class ResultsSharedDelegateTest {
         assertThat(resultsSharedV2.getHearingDay(), is(hearingDay));
         assertThat(resultsSharedV2.getHearing().getHearingDays().get(0).getHasSharedResults(), is(false));
         assertThat(resultsSharedV2.getHearing().getHearingDays().get(1).getHasSharedResults(), is(false));
+    }
+
+    @Test
+    public void shouldSetShadowOffenceFlagWhenTargetBelongsApplication() {
+
+        final UUID hearingId = randomUUID();
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withOffenceId(randomUUID())
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .withShadowListed(true)
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withApplicationIds(randomUUID())
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .withShadowListed(true)
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = resultsSharedDelegate.shareResultForDay(hearingId, courtClerk, sharedTime, resultLines, emptyList(), youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), is(2));
+
+        final ResultsSharedSuccess resultsSharedSuccess= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+        assertThat(resultsSharedV3.getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), is(2));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), is(false));
+        int applicationResultIndex;
+        int caseResulIndex;
+        if(Objects.nonNull(resultsSharedV3.getTargets().get(1).getApplicationId())){
+            applicationResultIndex = 1;
+            caseResulIndex = 0;
+        } else{
+            applicationResultIndex = 0;
+            caseResulIndex = 1;
+        }
+        assertThat(resultsSharedV3.getTargets().get(applicationResultIndex).getShadowListed(), is(false));
+        assertThat(resultsSharedV3.getTargets().get(applicationResultIndex).getResultLines().get(0).getShadowListed(), is(false));
+        assertThat(resultsSharedV3.getTargets().get(caseResulIndex).getShadowListed(), is(true));
+        assertThat(resultsSharedV3.getTargets().get(caseResulIndex).getResultLines().get(0).getShadowListed(), is(true));
+        assertNotNull(resultsSharedSuccess);
+
     }
 
     private YouthCourt getYouthCourt() {
