@@ -319,6 +319,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.unlock-hearing");
     }
 
+    @Handles("hearing.replicate-shared-results")
+    public void replicateHearingResults(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.replicate-shared-results");
+    }
+
     /**
      * Updates the original envelope with the new name and sends.
      *

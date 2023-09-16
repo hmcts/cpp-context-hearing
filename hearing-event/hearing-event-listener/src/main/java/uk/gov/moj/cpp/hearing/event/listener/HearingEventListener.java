@@ -363,6 +363,18 @@ public class HearingEventListener {
         updateDraftResultV2(resultsShared);
     }
 
+
+    @Handles("hearing.events.replicate.results-shared-v3")
+    public void replicateResultsSharedV3(final JsonEnvelope event) {
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("hearing.events.replicate.results-shared-v3 {}", event);
+        }
+        final ResultsSharedV3 resultsShared = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ResultsSharedV3.class);
+
+        saveSharedResults(resultsShared);
+        updateDraftResultV2(resultsShared);
+    }
+
     /**
      * This method is used to update DraftResultV2 object with sharedDateTime informationinside
      * __metadata__ object when Results are shared to keep DraftResult and SharedResults in sync.

@@ -95,6 +95,7 @@ import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultDeletedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ReplicateResultsSharedV3;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsSharedV3;
@@ -2411,6 +2412,103 @@ public class HearingAggregateTest {
         final Stream<Object> stream = hearingAggregate.addOffence(hearingId, randomUUID(), randomUUID(), Offence.offence().build());
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(0));
+
+    }
+
+    @Test
+    public void shouldRaiseReplicateResultsSharedWhenHearingiSAlreadyShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final ZonedDateTime sittingDay = ZonedDateTime.now(ZoneOffset.UTC).minusDays(2) ;
+        final CourtCentre courtCentre = CoreTestTemplates.courtCentre().build();
+        final UUID defendantId1 = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+        final UUID caseId = randomUUID();
+        final Defendant defendant1 = Defendant.defendant()
+                .withId(defendantId1)
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId1)
+                        .withPlea(Plea.plea()
+                                .withOffenceId(offenceId1)
+                                .withPleaValue("GUILTY")
+                                .build())
+                        .withCustodyTimeLimit(CustodyTimeLimit.custodyTimeLimit()
+                                .withTimeLimit(LocalDate.now())
+                                .withDaysSpent(10)
+                                .build())
+                        .build()))
+                .build();
+
+        final Defendant defendant2 = Defendant.defendant()
+                .withId(defendantId2)
+                .withOffences(asList(uk.gov.justice.core.courts.Offence.offence()
+                        .withId(offenceId2).build()))
+                .build();
+        final Hearing hearing =  Hearing.hearing()
+                .withHasSharedResults(true)
+                .withId(initiateHearingCommand.getHearing().getId())
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withDefendants(asList(defendant1,defendant2)
+
+                        ).build()))
+                .withHearingDays(asList(CoreTestTemplates.hearingDay(sittingDay, courtCentre).build()))
+                .build();
+
+        hearing.setHasSharedResults(false);
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final Target2 target1 = target2().withTargetId(randomUUID())
+                .withDefendantId(defendantId1)
+                .withOffenceId(offenceId1)
+                .withCaseId(caseId)
+                .withHearingId(hearing.getId())
+                .withResultLines(asList(ResultLine2.resultLine2()
+                        .withResultLineId(randomUUID())
+                        .withDefendantId(defendantId1)
+                        .withCaseId(caseId)
+                        .withLevel(Level.OFFENCE)
+                        .withOffenceId(offenceId1)
+                        .build()))
+                .withHearingDay(hearingDay)
+                .build();
+        final Target2 target2 = target2().withTargetId(randomUUID())
+                .withDefendantId(defendantId2)
+                .withOffenceId(offenceId2)
+                .withCaseId(caseId)
+                .withHearingId(hearing.getId())
+                .withHearingDay(hearingDay)
+                .withResultLines(asList(ResultLine2.resultLine2()
+                        .withResultLineId(randomUUID())
+                        .withDefendantId(defendantId2)
+                        .withCaseId(caseId)
+                        .withLevel(Level.OFFENCE)
+                        .withOffenceId(offenceId2)
+                        .build()))
+                .build();
+
+
+
+
+
+        hearingAggregate.apply(ResultsSharedV3.builder()
+                .withNewAmendmentResults(asList(new NewAmendmentResult(randomUUID(), ZonedDateTime.now())))
+                .withTargets(asList(target1, target2))
+                .withHearingDay(hearingDay)
+                .withHearing(hearing)
+                .build()
+
+        );
+
+        final List<Object> replicateResultsSharedV3List=  hearingAggregate.replicateSharedResultsForHearing(hearing.getId()).collect(toList());
+
+
+        assertThat(replicateResultsSharedV3List.size(), Matchers.is(1));
+
+        final ReplicateResultsSharedV3 replicateResultsSharedV3 = (ReplicateResultsSharedV3) replicateResultsSharedV3List.get(0);
+        assertThat(replicateResultsSharedV3.getHearingId(), Matchers.is(hearing.getId()));
+        assertThat(replicateResultsSharedV3.getTargets().size(), Matchers.is(2));
 
     }
 }

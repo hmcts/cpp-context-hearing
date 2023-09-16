@@ -26,6 +26,7 @@ import uk.gov.moj.cpp.hearing.command.result.UpdateResultLinesStatusCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -192,6 +193,13 @@ public class ShareResultsCommandHandler extends AbstractCommandHandler {
         aggregate(HearingAggregate.class, command.getHearingId(), envelope,
                 aggregate -> aggregate.updateDaysResultLinesStatus(command.getHearingId(), command.getCourtClerk(), command.getLastSharedDateTime(), command.getSharedResultLines(), command.getHearingDay()));
 
+    }
+
+    @Handles("hearing.command.replicate-results")
+    public void replicateAllSharedResultsForHearing(final JsonEnvelope envelope) throws EventStreamException {
+        final UUID hearingId = UUID.fromString(envelope.payloadAsJsonObject().getString("hearingId"));
+        aggregate(HearingAggregate.class, hearingId, envelope,
+                aggregate -> aggregate.replicateSharedResultsForHearing(hearingId));
     }
 
     private Stream<Object> shareResultsEnrichedWithYouthCourt(final HearingAggregate hearingAggregate, final ShareResultsCommand command ) {
