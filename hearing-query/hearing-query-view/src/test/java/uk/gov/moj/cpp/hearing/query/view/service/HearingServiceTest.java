@@ -15,6 +15,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.iterableWithSize;
+import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +34,7 @@ import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.START_DATE_1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildDefendant1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildDefendant2;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing;
-import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearing1;
+import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.populateHearing;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildHearingAndHearingDays;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildLegalCase1;
 import static uk.gov.moj.cpp.hearing.query.view.HearingTestUtils.buildRandomDefendant;
@@ -53,6 +55,7 @@ import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
+import com.google.common.collect.ImmutableList;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Gender;
@@ -63,6 +66,7 @@ import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ResultLine;
+import uk.gov.justice.hearing.courts.CourtApplicationSummaries;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
@@ -819,7 +823,7 @@ public class HearingServiceTest {
         final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
 
         final Hearing hearingEntity = HearingTestUtils.buildHearing();
-        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(ImmutableList.of(ProsecutionCase.prosecutionCase().build())).build();
         final UUID hearingSummaryId = randomUUID();
         final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries().withId(hearingSummaryId);
 
@@ -833,7 +837,7 @@ public class HearingServiceTest {
         final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
                 hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
 
-        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
+        assertFalse("response is empty", response.getHearingSummaries().isEmpty());
         assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
     }
 
@@ -845,9 +849,9 @@ public class HearingServiceTest {
         final Defendant defendant2 = buildDefendant2(hearingId2);
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId1, asSet(defendant1));
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase2 = buildLegalCase1(hearingId2, asSet(defendant2));
-        final Hearing hearing1 = buildHearing1(hearingId1, START_DATE_1, END_DATE_1, asSet(prosecutionCase1, prosecutionCase2));
+        final Hearing hearing1 = populateHearing(hearingId1, START_DATE_1, END_DATE_1, asSet(prosecutionCase1, prosecutionCase2));
         final List<UUID> accessibleCasesId = Arrays.asList(prosecutionCase1.getId().getId());
-        final Hearing hearing2 = buildHearing1(hearingId2, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
+        final Hearing hearing2 = populateHearing(hearingId2, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
 
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(singletonList(
                 ProsecutionCase.prosecutionCase()
@@ -1309,6 +1313,160 @@ public class HearingServiceTest {
         assertThat(targetListResponse, isBean(ProsecutionCaseResponse.class)
                 .with(t -> t.getProsecutionCases().size(), is(1))
         );
+
+    }
+
+    @Test
+    public void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithProsecutionCaseAndCourtApplication() {
+
+        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+        final UUID hearingSummaryId = randomUUID();
+        final UUID secondHearingSummaryId = randomUUID();
+        final UUID CourtApplicationSummaryId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final Hearing hearingEntityWithCourtApplication = HearingTestUtils.buildHearingWithProsecutionCaseAndApplication(objectToJsonObjectConverter);
+
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries()
+                .withId(hearingSummaryId);
+
+        final HearingSummaries.Builder hearingSummariesBuilderWithCourtApplication = HearingSummaries.hearingSummaries()
+                .withId(secondHearingSummaryId)
+                .withCourtApplicationSummaries(asList(CourtApplicationSummaries.courtApplicationSummaries().withId(CourtApplicationSummaryId).build()));
+
+        final List<Hearing> hearingList = new ArrayList<>();
+        hearingList.add(hearingEntity);
+        hearingList.add(hearingEntityWithCourtApplication);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(hearingList);
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder).thenReturn(hearingSummariesBuilderWithCourtApplication);
+
+        final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
+                hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
+
+        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
+        assertThat(response.getHearingSummaries().size(), is(2));
+        assertThat(response.getHearingSummaries().get(0).getId(), is(hearingSummaryId));
+
+        assertThat(response.getHearingSummaries().get(1).getId(), is(secondHearingSummaryId));
+        assertThat(response.getHearingSummaries().get(1).getCourtApplicationSummaries().get(0).getId(), is(CourtApplicationSummaryId));
+    }
+
+    @Test
+    public void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithProsecutionCaseAndWithoutCourtApplication () {
+
+        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+        final UUID firstHearingSummaryId = randomUUID();
+        final UUID secondHearingSummaryId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final Hearing hearingEntityWithCourtApplication = HearingTestUtils.buildHearingWithProsecutionCaseAndNoCourtApplication();
+
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries()
+                .withId(firstHearingSummaryId);
+
+        final HearingSummaries.Builder hearingSummariesBuilderWithNoCourtApplication = HearingSummaries.hearingSummaries()
+                .withId(secondHearingSummaryId)
+                .withCourtApplicationSummaries(null);
+
+        final List<Hearing> hearingList = new ArrayList<>();
+        hearingList.add(hearingEntity);
+        hearingList.add(hearingEntityWithCourtApplication);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(hearingList);
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder).thenReturn(hearingSummariesBuilderWithNoCourtApplication);
+
+
+        final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
+                hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
+
+        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
+        assertThat(response.getHearingSummaries().size(), is(2));
+        assertThat(response.getHearingSummaries().get(0).getId(), is(firstHearingSummaryId));
+
+        assertThat(response.getHearingSummaries().get(1).getId(), is(secondHearingSummaryId));
+        assertThat(response.getHearingSummaries().get(1).getCourtApplicationSummaries(), is(nullValue()));
+    }
+
+    @Test
+    public void shouldReturnBothHearings_whenFirstHearingWithProsecutionCase_andSecondHearingWithoutProsecutionCaseAndWithCourtApplication () {
+
+        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+
+        final UUID firstHearingSummaryId = randomUUID();
+        final UUID secondHearingSummaryId = randomUUID();
+        final UUID CourtApplicationSummaryId = randomUUID();
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final Hearing hearingEntityWithCourtApplication = HearingTestUtils.buildHearingWithApplication(objectToJsonObjectConverter);
+
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries()
+                .withId(firstHearingSummaryId);
+
+        final HearingSummaries.Builder hearingSummariesBuilderWithCourtApplication = HearingSummaries.hearingSummaries()
+                .withId(secondHearingSummaryId)
+                .withCourtApplicationSummaries(asList(CourtApplicationSummaries.courtApplicationSummaries().withId(CourtApplicationSummaryId).build()));
+
+        final List<Hearing> hearingList = new ArrayList<>();
+        hearingList.add(hearingEntity);
+        hearingList.add(hearingEntityWithCourtApplication);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(hearingList);
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder).thenReturn(hearingSummariesBuilderWithCourtApplication);
+
+        final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
+                hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
+
+        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
+        assertThat(response.getHearingSummaries().size(), is(2));
+        assertThat(response.getHearingSummaries().get(0).getId(), is(firstHearingSummaryId));
+
+        assertThat(response.getHearingSummaries().get(1).getId(), is(secondHearingSummaryId));
+        assertThat(response.getHearingSummaries().get(1).getCourtApplicationSummaries().get(0).getId(), is(CourtApplicationSummaryId));
+    }
+
+    @Test
+    public void shouldReturnOneHearing_whenFirstHearingWithProsecutionCase_andSecondHearingWithoutProsecutionCaseAndWithoutCourtApplication () {
+
+        final LocalDate startDateStartOfDay = LocalDate.of(2019, 7, 4);
+
+        final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(Collections.singletonList(ProsecutionCase.prosecutionCase().build())).build();
+        final UUID firstHearingSummaryId = randomUUID();
+        final UUID secondHearingSummaryId = randomUUID();
+
+        final Hearing hearingEntity = HearingTestUtils.buildHearing();
+        final Hearing hearingEntityWithCourtApplication = HearingTestUtils.buildHearingWithoutProsecutionCaseAndCourtApplication();
+
+        final HearingSummaries.Builder hearingSummariesBuilder = HearingSummaries.hearingSummaries()
+                .withId(firstHearingSummaryId);
+
+        final HearingSummaries.Builder hearingSummariesBuilderWithNoProsecutionCaseAndNoCourtApplication = HearingSummaries.hearingSummaries()
+                .withId(secondHearingSummaryId)
+                .withCourtApplicationSummaries(null);
+
+        final List<Hearing> hearingList = new ArrayList<>();
+        hearingList.add(hearingEntity);
+        hearingList.add(hearingEntityWithCourtApplication);
+
+        when(hearingRepository.findByUserFilters(startDateStartOfDay, hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId())).thenReturn(hearingList);
+        when(hearingJPAMapper.fromJPA(Mockito.any(Hearing.class))).thenReturn(hearingPojo);
+        when(getHearingsTransformer.summaryForHearingsForToday(hearingPojo)).thenReturn(hearingSummariesBuilder).thenReturn(hearingSummariesBuilderWithNoProsecutionCaseAndNoCourtApplication);
+
+        final GetHearings response = hearingService.getHearingsForToday(startDateStartOfDay,
+                hearingEntity.getJudicialRoles().stream().findFirst().get().getUserId());
+
+        assertTrue("response is empty", !response.getHearingSummaries().isEmpty());
+        assertThat(response.getHearingSummaries().size(), is(1));
+        assertThat(response.getHearingSummaries().get(0).getId(), is(firstHearingSummaryId));
 
     }
 

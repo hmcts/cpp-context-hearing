@@ -299,27 +299,15 @@ public class HearingService {
 
     @Transactional
     private List<Hearing> getAndInitializeHearings(final LocalDate date, final UUID userId) {
-        final List<Hearing> filteredHearings = hearingRepository.findByUserFilters(date, userId);
-        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences());
-        filteredHearings.stream().forEach( x ->  {x.getYouthCourt();
-            x.getApplicantCounsels();
-            x.getHearingApplications();
-            x.getHearingInterpreterIntermediaries();
-            x.getRespondentCounsels();
-            x.getDefenceCounsels();
-            x.getProsecutionCounsels();
-            x.getHearingCaseNotes();
-            x.getJudicialRoles();
-            x.getDefendantReferralReasons();
-        });
-        return filteredHearings;
+        return hearingRepository.findByUserFilters(date, userId);
     }
 
     public void filterForShadowListedOffencesAndCases(final List<Hearing> filteredHearings) {
-        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences().removeIf(Offence::isShadowListed));
-        filteredHearings.stream().flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
-        filteredHearings.forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
-        filteredHearings.removeIf(x -> x.getProsecutionCases().isEmpty());
+        filteredHearings.stream().filter(x -> nonNull(x.getProsecutionCases())).flatMap(x -> x.getProsecutionCases().stream()).flatMap(c -> c.getDefendants().stream()).forEach(d -> d.getOffences().removeIf(Offence::isShadowListed));
+        filteredHearings.stream().filter(x -> nonNull(x.getProsecutionCases())).flatMap(x -> x.getProsecutionCases().stream()).forEach(c -> c.getDefendants().removeIf(d -> d.getOffences().isEmpty()));
+        filteredHearings.stream().filter(x -> nonNull(x.getProsecutionCases())).forEach(x -> x.getProsecutionCases().removeIf(c -> c.getDefendants().isEmpty()));
+        filteredHearings.removeIf(x -> (isNull(x.getCourtApplicationsJson()) || x.getCourtApplicationsJson().isEmpty())
+                && (isNull(x.getProsecutionCases()) || x.getProsecutionCases().isEmpty()));
     }
 
     private List<Hearing> filterForTrial(final List<Hearing> filteredHearings, final List<HearingType> hearingTypeList) {
