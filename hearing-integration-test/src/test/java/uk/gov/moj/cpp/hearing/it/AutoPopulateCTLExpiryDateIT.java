@@ -72,7 +72,6 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -89,10 +88,8 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.path.json.JsonPath;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
@@ -128,13 +125,6 @@ public class AutoPopulateCTLExpiryDateIT extends AbstractIT {
     @Before
     public void setup() {
         stubPublicHolidays();
-    }
-
-
-    @BeforeClass
-    public static void setupBeforeClass() {
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
     }
 
     @Test

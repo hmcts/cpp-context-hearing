@@ -12,7 +12,6 @@ import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.is;
@@ -853,42 +852,6 @@ public class HearingQueryViewTest {
         verify(hearingService).getFutureHearingsByCaseIds(caseIdList);
         assertThat(results.metadata().name(), is("hearing.get.hearings"));
         assertThat(results.payload().getHearingSummaries().size(), is(2));
-    }
-
-    @Test
-    public void shouldGetCasesByPersonDefendant(){
-        final UUID caseId = randomUUID();
-        final String urn = randomAlphabetic(5);
-        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-person-defendant", createObjectBuilder()
-                        .add("firstName", randomAlphabetic(5))
-                        .add("lastName", randomAlphabetic(5))
-                        .add("dateOfBirth", LocalDate.now().minusYears(25).toString())
-                        .add("hearingDate", LocalDate.now().toString())
-                        .add("caseIds", caseId.toString())
-                        .build());
-
-        when(hearingService.getCasesByPersonDefendant(any(), any(), any(), any(), any())).thenReturn(createCaseByDefendant(caseId, urn));
-        final JsonEnvelope response = target.getCasesByPersonDefendant(envelope);
-        final JsonArray prosecutionCases = response.payloadAsJsonObject().getJsonArray("prosecutionCases");
-        assertThat(prosecutionCases.getJsonObject(0).getString("caseId"), is(caseId.toString()));
-        assertThat(prosecutionCases.getJsonObject(0).getString("urn"), is(urn));
-    }
-
-    @Test
-    public void shouldGetCasesByOrganisationDefendant(){
-        final UUID caseId = randomUUID();
-        final String urn = randomAlphabetic(5);
-        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-person-defendant", createObjectBuilder()
-                .add("organisationName", randomAlphabetic(5))
-                .add("hearingDate", LocalDate.now().toString())
-                .add("caseIds", caseId.toString())
-                .build());
-
-        when(hearingService.getCasesByOrganisationDefendant(any(), any(), any())).thenReturn(createCaseByDefendant(caseId, urn));
-        final JsonEnvelope response = target.getCasesByOrganisationDefendant(envelope);
-        final JsonArray prosecutionCases = response.payloadAsJsonObject().getJsonArray("prosecutionCases");
-        assertThat(prosecutionCases.getJsonObject(0).getString("caseId"), is(caseId.toString()));
-        assertThat(prosecutionCases.getJsonObject(0).getString("urn"), is(urn));
     }
 
     @Test

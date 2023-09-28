@@ -2,9 +2,7 @@ package uk.gov.moj.cpp.hearing.command.api;
 
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
-import static uk.gov.moj.cpp.FeatureToggle.REUSE_OF_INFORMATION;
 
-import uk.gov.justice.services.core.annotation.FeatureControl;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.sender.Sender;
@@ -23,7 +21,6 @@ public class ReusableInfoCommandApi {
     }
 
     @Handles("hearing.reusable-info")
-    @FeatureControl(REUSE_OF_INFORMATION)
     public void reusableInfo(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.reusable-info");
     }

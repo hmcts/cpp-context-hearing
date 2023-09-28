@@ -15,16 +15,12 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
-
 import java.util.UUID;
 
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class ReusableInfoIT extends AbstractIT{
@@ -37,12 +33,6 @@ public class ReusableInfoIT extends AbstractIT{
     final UUID offenceId = randomUUID();
     final UUID defendantId1 = fromString("3d27da1d-3878-4499-8cdc-0ff3d4e3f2d8");
     final UUID offenceId1 = randomUUID();
-
-    @BeforeClass
-    public static void setupBeforeClass() {
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("reuseOfInformation", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-    }
 
     @Test
     public void shouldUpdateReusableInfoForCache() throws Exception {

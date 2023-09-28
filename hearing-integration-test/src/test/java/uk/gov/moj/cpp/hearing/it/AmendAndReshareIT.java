@@ -39,7 +39,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -49,8 +48,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -60,12 +57,6 @@ public class AmendAndReshareIT extends AbstractIT {
 
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
     private static final String PUBLIC_HEARING_MULTIPLE_DRAFT_RESULTS_SAVED = "public.hearing.multiple-draft-results-saved";
-
-    @Before
-    public void init() {
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-    }
 
     @Test
     public void testEmptyDraftResultWhenNoDraftResultSavedForSingleDayHearing() {

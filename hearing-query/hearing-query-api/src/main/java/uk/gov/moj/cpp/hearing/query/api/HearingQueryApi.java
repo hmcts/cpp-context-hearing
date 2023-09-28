@@ -5,12 +5,10 @@ import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-import static uk.gov.moj.cpp.FeatureToggle.REUSE_OF_INFORMATION;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.annotation.Component;
-import uk.gov.justice.services.core.annotation.FeatureControl;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
@@ -197,7 +195,6 @@ public class HearingQueryApi {
         return getJsonEnvelope(envelope);
     }
 
-    @FeatureControl("amendReshare")
     @Handles("hearing.get-results")
     public JsonEnvelope getResults(final JsonEnvelope query) {
         final Envelope<TargetListResponse> envelope = this.hearingQueryView.getResults(query);
@@ -310,7 +307,6 @@ public class HearingQueryApi {
 
 
     @Handles("hearing.query.reusable-info")
-    @FeatureControl(REUSE_OF_INFORMATION)
     public JsonEnvelope getReusableInfo(final JsonEnvelope query) {
         final JsonObject payload = query.payloadAsJsonObject();
         final Map<String, String> countryCodesMap = referenceDataService.getCountryCodesMap();
@@ -365,17 +361,6 @@ public class HearingQueryApi {
     public JsonEnvelope getFutureHearingsByCaseIds(final JsonEnvelope query) {
         final Envelope<GetHearings> envelope = this.hearingQueryView.getFutureHearingsByCaseIds(query);
         return getJsonEnvelope(envelope);
-    }
-
-    @Handles("hearing.get.cases-by-person-defendant")
-    public JsonEnvelope getCasesByPersonDefendant(final JsonEnvelope query) {
-        return  this.hearingQueryView.getCasesByPersonDefendant(query);
-    }
-
-
-    @Handles("hearing.get.cases-by-organisation-defendant")
-    public JsonEnvelope getCasesByOrganisationDefendant(final JsonEnvelope query) {
-        return this.hearingQueryView.getCasesByOrganisationDefendant(query);
     }
 
     @Handles("hearing.prosecution-case-by-hearingid")

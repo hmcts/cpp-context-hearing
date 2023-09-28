@@ -156,7 +156,6 @@ import uk.gov.moj.cpp.hearing.test.HearingFactory;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
 import uk.gov.moj.cpp.hearing.utils.ReferenceDataStub;
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -178,13 +177,11 @@ import java.util.stream.IntStream;
 import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
-import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.path.json.JsonPath;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -205,12 +202,6 @@ public class ShareResultsIT extends AbstractIT {
     @Before
     public void setup() {
         setupNowsReferenceData(now());
-    }
-
-    @BeforeClass
-    public static void setupBeforeClass() {
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
     }
 
     @Test
@@ -696,9 +687,6 @@ public class ShareResultsIT extends AbstractIT {
     @Ignore("Temporarily disabled as Feature Toggle tests are not working on Jenkins master pipeline")
     public void shouldShareResultsPerDay() {
 
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-
         LocalDate orderDate = PAST_LOCAL_DATE.next();
 
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);
@@ -739,10 +727,6 @@ public class ShareResultsIT extends AbstractIT {
 
     @Test
     public void shouldShareResultsPerDayWithHmiSlots() {
-
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-
         LocalDate orderDate = LocalDate.now();
 
         final AllNowsReferenceDataHelper allNows = setupNowsReferenceData(orderDate);

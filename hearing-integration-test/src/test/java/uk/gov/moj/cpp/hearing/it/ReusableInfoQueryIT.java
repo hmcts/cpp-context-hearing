@@ -17,7 +17,6 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
-import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAzure;
 
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
@@ -34,7 +33,6 @@ public class ReusableInfoQueryIT extends AbstractIT{
     public static void setupPerClass() {
         UUID userId = randomUUID();
         setupAsAuthorisedUser(userId);
-        stubAzure();
     }
 
     @Test

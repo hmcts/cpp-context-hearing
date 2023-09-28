@@ -31,7 +31,6 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsU
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.path.json.JsonPath;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -63,7 +62,6 @@ import java.util.concurrent.TimeUnit;
 import org.hamcrest.CoreMatchers;
 import org.junit.Ignore;
 import org.junit.Test;
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
 
@@ -158,9 +156,6 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
 
     @Test
     public void shouldUpdateDefendantWhenPromptHasDrivingNumber() throws IOException {
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-
         final LocalDate hearingDay = LocalDate.now();
         stubUsersAndGroupsUserRoles(getLoggedInUser());
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
@@ -198,9 +193,6 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
 
     @Test
     public void shouldUpdateDefendantWhenPromptHasDrivingNumberForApplication() throws IOException {
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-
         final LocalDate hearingDay = LocalDate.now();
         stubUsersAndGroupsUserRoles(getLoggedInUser());
         final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate(), true, false, false, true, false));
