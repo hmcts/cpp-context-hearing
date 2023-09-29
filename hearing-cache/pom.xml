@@ -5,7 +5,7 @@
   <parent>
     <artifactId>hearing-parent</artifactId>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
-    <version>8.0.93-SNAPSHOT</version>
+    <version>8.0.92</version>
   </parent>
   <artifactId>hearing-cache</artifactId>
 
