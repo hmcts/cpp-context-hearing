@@ -6,14 +6,9 @@ import static java.util.UUID.randomUUID;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.at;
 
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtApplicationParty;
-import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.MasterDefendant;
-import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Address;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Contact;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
@@ -38,7 +33,6 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +53,7 @@ public class HearingTestUtils {
         final Defendant defendant1 = buildDefendant1(hearingId);
         final Defendant defendant2 = buildDefendant2(hearingId);
         final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
-        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
+        final Hearing hearing = buildHearing1(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
         final Offence offence1 = buildOffence1(hearing, defendant1);
         offence1.setReportingRestrictions(asSet(buildReportingRestriction(hearing, offence1)));
         defendant1.getOffences().add(offence1);
@@ -68,93 +62,6 @@ public class HearingTestUtils {
         judicialRole.setHearing(hearing);
         return hearing;
     }
-
-    public static Hearing buildHearingWithProsecutionCaseAndNoCourtApplication() {
-        final UUID hearingId = randomUUID();
-        final Defendant defendant1 = buildDefendant1(hearingId);
-        final Defendant defendant2 = buildDefendant2(hearingId);
-        final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
-        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
-        final Offence offence1 = buildOffence1(hearing, defendant1);
-        offence1.setReportingRestrictions(asSet(buildReportingRestriction(hearing, offence1)));
-        defendant1.getOffences().add(offence1);
-        final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
-        hearing.setJudicialRoles(asSet(judicialRole));
-        judicialRole.setHearing(hearing);
-        hearing.setCourtApplicationsJson(null);
-        return hearing;
-    }
-
-    public static Hearing buildHearingWithApplication(final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
-        final UUID hearingId = randomUUID();
-        final UUID defendantId = randomUUID();
-        final UUID applicationId = randomUUID();
-
-        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, null);
-        final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
-        hearing.setJudicialRoles(asSet(judicialRole));
-        judicialRole.setHearing(hearing);
-
-        final CourtApplication courtApplication = getCourtApplication(applicationId, defendantId);
-        hearing.setCourtApplicationsJson("{\"courtApplications\" : [" + objectToJsonObjectConverter.convert(courtApplication).toString() + "]}");
-
-        return hearing;
-    }
-
-    public static Hearing buildHearingWithoutProsecutionCaseAndCourtApplication() {
-        final UUID hearingId = randomUUID();
-        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, null);
-        final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
-
-        hearing.setJudicialRoles(asSet(judicialRole));
-        judicialRole.setHearing(hearing);
-        hearing.setCourtApplicationsJson(null);
-
-        return hearing;
-    }
-
-    //hearing with prosecution case and application done
-    public static Hearing buildHearingWithProsecutionCaseAndApplication(final ObjectToJsonObjectConverter objectToJsonObjectConverter) {
-        final UUID hearingId = randomUUID();
-        final UUID applicationId = randomUUID();
-        final UUID defendantId = randomUUID();
-
-        final Defendant defendant1 = buildDefendant1(hearingId);
-        final Defendant defendant2 = buildDefendant2(hearingId);
-        final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
-        final Hearing hearing = populateHearing(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
-        final Offence offence1 = buildOffence1(hearing, defendant1);
-        offence1.setReportingRestrictions(asSet(buildReportingRestriction(hearing, offence1)));
-        defendant1.getOffences().add(offence1);
-        final JudicialRole judicialRole = buildJudgeJudicialRole(hearing.getId());
-        hearing.setJudicialRoles(asSet(judicialRole));
-        judicialRole.setHearing(hearing);
-
-        final CourtApplication courtApplication = getCourtApplication(applicationId, defendantId);
-        hearing.setCourtApplicationsJson("{\"courtApplications\" : [" + objectToJsonObjectConverter.convert(courtApplication).toString() + "]}");
-        return hearing;
-    }
-
-    private static CourtApplication getCourtApplication(UUID applicationId, UUID defendantId) {
-        return CourtApplication.courtApplication()
-                .withId(applicationId)
-                .withApplicant(CourtApplicationParty.courtApplicationParty()
-                        .withMasterDefendant(MasterDefendant.masterDefendant()
-                                .withDefendantCase(Collections.singletonList(DefendantCase.defendantCase().build()))
-                                .withMasterDefendantId(defendantId)
-                                .withPersonDefendant(uk.gov.justice.core.courts.PersonDefendant.personDefendant().build())
-                                .build())
-                        .build())
-                .withSubject(CourtApplicationParty.courtApplicationParty()
-                        .withMasterDefendant(MasterDefendant.masterDefendant()
-                                .withDefendantCase(Collections.singletonList(DefendantCase.defendantCase().build()))
-                                .withMasterDefendantId(defendantId)
-                                .withPersonDefendant(uk.gov.justice.core.courts.PersonDefendant.personDefendant().build())
-                                .build())
-                        .build())
-                .build();
-    }
-
 
     public static Hearing buildHearingWithRandomDefendants(final Defendant... defendants) {
         final UUID hearingId = randomUUID();
@@ -189,8 +96,8 @@ public class HearingTestUtils {
         return judicialRole;
     }
 
-    public static Hearing populateHearing(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
-                                          final Set<ProsecutionCase> cases) {
+    public static Hearing buildHearing1(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
+                                        final Set<ProsecutionCase> cases) {
         final Hearing hearing = new Hearing();
         hearing.setId(hearingId);
         hearing.setProsecutionCases(cases);
@@ -217,7 +124,7 @@ public class HearingTestUtils {
 
     public static Hearing buildHearingWithRandomRoom(final UUID hearingId, final ZonedDateTime startDateTime, final ZonedDateTime endDateTime,
                                                      final Set<ProsecutionCase> cases) {
-        final Hearing hearing = populateHearing(hearingId, startDateTime, endDateTime, cases);
+        final Hearing hearing = buildHearing1(hearingId, startDateTime, endDateTime, cases);
         hearing.getCourtCentre().setRoomId(randomUUID());
         hearing.getCourtCentre().setRoomName(randomIdentifier(3));
         return hearing;
@@ -390,7 +297,7 @@ public class HearingTestUtils {
 
     private static ReportingRestriction buildReportingRestriction(final Hearing hearing, final Offence offence) {
         ReportingRestriction reportingRestriction = new ReportingRestriction();
-        reportingRestriction.setId(new HearingOffenceReportingRestrictionKey(randomUUID(), hearing.getId(), randomUUID()));
+        reportingRestriction.setId(new HearingOffenceReportingRestrictionKey(randomUUID(), hearing.getId(),randomUUID()));
         reportingRestriction.setJudicialResultId(new HearingSnapshotKey(randomUUID(), hearing.getId()).getId());
         reportingRestriction.setLabel("The result label provided from reference data during the resulting process");
         reportingRestriction.setOffence(offence);
@@ -513,6 +420,6 @@ public class HearingTestUtils {
         defendant1.setCourtListRestricted(true);
         final Defendant defendant2 = buildDefendant2(hearingId);
         final ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId, asSet(defendant1, defendant2));
-        return populateHearing(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
+        return buildHearing1(hearingId, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
     }
 }
