@@ -72,6 +72,7 @@ import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.HearingVacatedRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ReplicationOfShareResultsFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsValidationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultLinesStatusUpdated;
@@ -119,6 +120,7 @@ public class HearingEventListenerYamlConfigTest {
             RegisteredHearingAgainstCase.class.getAnnotation(Event.class).value(),
             NowsVariantsSavedEvent.class.getAnnotation(Event.class).value(),
             HearingAdjourned.class.getAnnotation(Event.class).value(),
+            ReplicationOfShareResultsFailed.class.getAnnotation(Event.class).value(),
             ProsecutionCounselChangeIgnored.class.getAnnotation(Event.class).value(),
             DefenceCounselChangeIgnored.class.getAnnotation(Event.class).value(),
             ResultLinesStatusUpdated.class.getAnnotation(Event.class).value(),

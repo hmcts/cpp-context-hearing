@@ -14,9 +14,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
-import static java.time.LocalDate.now;
 
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -233,30 +230,6 @@ public class HearingQueryApiTest {
 
         verify(hearingQueryView).getFutureHearingsByCaseIds(any(JsonEnvelope.class));
         assertThat(result, is(mockJsonEnvelope));
-    }
-
-    @Test
-    public void shouldGetCasesByPersonDefendant(){
-        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-person-defendant", createObjectBuilder()
-                .add("firstName", randomAlphabetic(5))
-                .add("lastName", randomAlphabetic(5))
-                .add("dateOfBirth", now().minusYears(25).toString())
-                .add("hearingDate", now().toString())
-                .add("caseIds", randomUUID().toString() +","+ randomUUID().toString())
-                .build());
-        hearingQueryApi.getCasesByPersonDefendant(envelope);
-        verify(hearingQueryView).getCasesByPersonDefendant(envelope);
-    }
-
-    @Test
-    public void shouldGetCasesByOrganisationDefendant(){
-        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-organisation-defendant", createObjectBuilder()
-                .add("organisationName", randomAlphabetic(5))
-                .add("hearingDate", now().toString())
-                .add("caseIds", randomUUID().toString() +","+ randomUUID().toString())
-                .build());
-        hearingQueryApi.getCasesByOrganisationDefendant(envelope);
-        verify(hearingQueryView).getCasesByOrganisationDefendant(envelope);
     }
 
     @Test

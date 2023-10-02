@@ -33,6 +33,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -68,6 +69,21 @@ public class BailStatusHelperTest {
         assertThat(bailStatus.getId().toString(), is("fab947a3-c50c-4dbb-accf-b2758b1d2d6d"));
         assertThat(bailStatus.getCode(), is("C"));
         assertThat(bailStatus.getDescription(), is("Remanded into Custody"));
+
+    }
+
+    @Test
+    public void testMapBailStatusesWithPostHearingStatusForNEXH() {
+
+        final List<BailStatus> bailStatusList = buildListOfBailStatuses();
+        final ResultsShared resultsSharedTemplate = buildResultsSharedTemplate("U", Lists.newArrayList("A", "A", "A"),"70c98fa6-804d-11e8-adc0-fa7ae01bbebc");
+        when(referenceDataService.getBailStatuses(context)).thenReturn(bailStatusList);
+
+        bailStatusHelper.mapBailStatuses(context, resultsSharedTemplate.getHearing());
+
+        uk.gov.justice.core.courts.BailStatus bailStatus = resultsSharedTemplate.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailStatus();
+        assertNotNull(bailStatus);
+        assertThat(bailStatus.getCode(), is("U"));
 
     }
 
@@ -191,6 +207,34 @@ public class BailStatusHelperTest {
         PersonDefendant personDefendant = resultsSharedTemplate.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getPersonDefendant();
         assertNull(personDefendant);
 
+    }
+    private ResultsShared buildResultsSharedTemplate(final String defendantBailStatusCode, final List<String> postHearingCustodyStatuses, final String judicialResultTypeId) {
+        final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s,judicialResultTypeId)).collect(Collectors.toList());
+
+        final PersonDefendant personDefendant = PersonDefendant
+                .personDefendant().withBailStatus(uk.gov.justice.core.courts.BailStatus.bailStatus().withCode(defendantBailStatusCode).build())
+                .build();
+
+        return ResultsShared.builder()
+                .withHearing(Hearing.hearing()
+                        .withHearingDays(Arrays.asList(HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 5, 2), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build(), HearingDay.hearingDay()
+                                .withSittingDay(ZonedDateTime.of(LocalDate.of(2018, 6, 4), LocalTime.of(12, 1, 1), ZoneId.systemDefault()))
+                                .build()))
+                        .withProsecutionCases(Arrays.asList(ProsecutionCase.prosecutionCase()
+                                .withDefendants(Arrays.asList(Defendant.defendant()
+                                        .withOffences(Arrays.asList(Offence.offence()
+                                                .withJudicialResults(offenceJudicialResults)
+                                                .build(), Offence.offence()
+                                                .withJudicialResults(offenceJudicialResults)
+                                                .build()))
+                                        .withPersonDefendant(personDefendant)
+                                        .build())
+                                )
+                                .build()))
+                        .build())
+                .build();
     }
     private ResultsShared buildResultsSharedTemplate(final String defendantBailStatusCode, final List<String> postHearingCustodyStatuses) {
         final List<JudicialResult> offenceJudicialResults = postHearingCustodyStatuses.stream().map(s -> getJudicialResult(s)).collect(Collectors.toList());
@@ -358,6 +402,10 @@ public class BailStatusHelperTest {
 
     private JudicialResult getJudicialResult(final String postHearingCustodyStatus) {
         return JudicialResult.judicialResult().withPostHearingCustodyStatus(postHearingCustodyStatus).build();
+    }
+
+    private JudicialResult getJudicialResult(final String postHearingCustodyStatus,final  String judicialResultTypeId) {
+        return JudicialResult.judicialResult().withPostHearingCustodyStatus(postHearingCustodyStatus).withJudicialResultTypeId(UUID.fromString(judicialResultTypeId)).build();
     }
 
     private List<BailStatus> buildListOfBailStatuses() {

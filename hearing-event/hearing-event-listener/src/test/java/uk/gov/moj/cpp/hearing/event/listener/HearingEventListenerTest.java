@@ -1042,6 +1042,8 @@ public class HearingEventListenerTest {
         verifyNoMoreInteractions(offenceRepository);
     }
 
+
+
     @Test
     public void resultsSharedV3_shouldPersist_with_hasSharedResults_true() throws IOException {
         final LocalDate today = now();
@@ -1097,6 +1099,83 @@ public class HearingEventListenerTest {
         when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
 
         hearingEventListener.resultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
+                objectToJsonObjectConverter.convert(resultsShared)
+        ));
+
+        verify(this.hearingRepository).save(saveHearingCaptor.capture());
+        verify(this.approvalRequestedRepository).removeAllRequestApprovals(resultsShared.getHearingId());
+
+        assertThat(saveHearingCaptor.getValue(), isBean(Hearing.class)
+                .with(Hearing::getHasSharedResults, is(true))
+                .with(Hearing::getId, is(resultsShared.getHearingId()))
+                .with(Hearing::getTargets, hasSize(1))
+                .with(Hearing::getHearingDays, first(isBean(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay.class)
+                                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay::getHasSharedResults, is(true)
+                                )
+                        )
+                )
+        );
+
+        assertThat(draftResult.getDraftResultPayload().get("__metadata__").get("lastSharedTime").textValue(), not(isEmptyOrNullString()));
+        verify(this.draftResultRepository, times(1)).save(any());
+        verifyNoMoreInteractions(offenceRepository);
+    }
+
+    @Test
+    public void replicateResultsSharedV3_shouldPersist_with_hasSharedResults_true() throws IOException {
+        final LocalDate today = now();
+        final LocalDate tomorrow = now().plusDays(1);
+
+        final ResultsSharedV3 resultsShared = resultsSharedV3Template(today);
+
+        final uk.gov.justice.core.courts.Target resultForToday = targetTemplate(today);
+        final uk.gov.justice.core.courts.Target resultForTomorrow = targetTemplate(tomorrow);
+        final List<uk.gov.justice.core.courts.Target> targets = asList(resultForToday, resultForTomorrow);
+        final Target target = new Target()
+                .setId(new HearingSnapshotKey(randomUUID(), resultsShared.getHearingId()))
+                .setHearingDay(today.toString());
+        final Target target2 = new Target()
+                .setId(new HearingSnapshotKey(randomUUID(), resultsShared.getHearingId()))
+                .setHearingDay(tomorrow.toString());
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        final Defendant defendant = new Defendant();
+        final Set<Defendant> defendants = asSet(defendant);
+        prosecutionCase.setDefendants(defendants);
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay hearingDay = new uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay();
+        hearingDay.setDate(today);
+
+        final Hearing dbHearing = new Hearing()
+                .setHasSharedResults(false)
+                .setHearingDays(asSet(hearingDay))
+                .setTargets(asSet(target, target2))
+                .setProsecutionCases(asSet(prosecutionCase))
+                .setId(resultsShared.getHearingId()
+                );
+
+        DraftResult draftResult = mock(DraftResult.class);
+        JsonObject draftResultJsonObject = Json.createObjectBuilder()
+                .add("__metadata__", Json.createObjectBuilder()
+                        .add("version", "1")
+                        .build())
+                .build();
+
+        JsonNode draftResultPayload = toJsonNode(draftResultJsonObject);
+
+        when(draftResult.getDraftResultPayload()).thenReturn(draftResultPayload);
+
+        final String draftResultPK = resultsShared.getHearingId().toString() + resultsShared.getHearingDay().toString();
+        when(draftResultRepository.findBy(draftResultPK)).thenReturn(draftResult);
+        when(hearingRepository.findBy(resultsShared.getHearingId())).thenReturn(dbHearing);
+        when(hearingRepository.findTargetsByHearingId(resultsShared.getHearingId())).thenReturn(asList(target, target2));
+        when(hearingRepository.findProsecutionCasesByHearingId(dbHearing.getId()))
+                .thenReturn(Lists.newArrayList(dbHearing.getProsecutionCases()));
+        when(targetJPAMapper.setMasterDefandantId(anyObject(), anyObject())).thenReturn(targets);
+        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForToday))).thenReturn(target);
+        when(targetJPAMapper.toJPA(Mockito.eq(dbHearing), Mockito.eq(resultForTomorrow))).thenReturn(target2);
+
+        hearingEventListener.replicateResultsSharedV3(envelopeFrom(metadataWithRandomUUID("hearing.results-shared-v3"),
                 objectToJsonObjectConverter.convert(resultsShared)
         ));
 

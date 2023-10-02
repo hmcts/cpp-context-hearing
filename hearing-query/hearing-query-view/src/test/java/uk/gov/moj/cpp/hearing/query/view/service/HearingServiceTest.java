@@ -53,7 +53,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asSet;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.ElementAtListMatcher.first;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 
 import com.google.common.collect.ImmutableList;
 import uk.gov.justice.core.courts.Address;
@@ -99,7 +98,6 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.NowsMaterial;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Target;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.persist.entity.not.Document;
-import uk.gov.moj.cpp.hearing.query.CaseByDefendant;
 import uk.gov.moj.cpp.hearing.query.view.HearingTestUtils;
 import uk.gov.moj.cpp.hearing.query.view.helper.TimelineHearingSummaryHelper;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
@@ -115,7 +113,6 @@ import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.Court;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtRoom;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CourtSite;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.CurrentCourtStatus;
-import uk.gov.moj.cpp.hearing.repository.CaseByDefendantRepository;
 import uk.gov.moj.cpp.hearing.repository.DocumentRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventDefinitionRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingEventPojo;
@@ -213,9 +210,6 @@ public class HearingServiceTest {
 
     @Mock
     private HearingListXhibitResponseTransformer hearingListXhibitResponseTransformer;
-
-    @Mock
-    private CaseByDefendantRepository caseByDefendantRepository;
 
     @InjectMocks
     private HearingService hearingService;
@@ -1237,60 +1231,6 @@ public class HearingServiceTest {
         final GetHearings response = hearingService.getFutureHearingsByCaseIds(caseIdList);
 
         assertNull(response.getHearingSummaries());
-    }
-
-
-    @Test
-    public void ShouldReturnCasesByPersonDefendant() {
-        final UUID caseId1 = randomUUID();
-        final UUID caseId2 = randomUUID();
-        final CaseByDefendant caseByDefendant = new CaseByDefendant.Builder().withCaseId(caseId1).withUrn(randomAlphabetic(5)).build();
-        final CaseByDefendant caseByDefendant2 = new CaseByDefendant.Builder().withCaseId(caseId2).build();
-
-        when(caseByDefendantRepository.getCasesByPersonDefendant(any(), any(), any(), any(), any())).thenReturn(Arrays.asList(caseByDefendant, caseByDefendant2));
-
-        final JsonObject payload = hearingService.getCasesByPersonDefendant(randomAlphabetic(5),randomAlphabetic(5), LocalDate.now(), LocalDate.now(), new HashSet<>(Arrays.asList(UUID.randomUUID())));
-        assertCasesByDefendant(payload.getJsonArray("prosecutionCases"), caseId1, caseId2);
-    }
-
-    @Test
-    public void ShouldReturnCasesByPersonDefendantWithEmptyCaseIdSet() {
-        final UUID caseId1 = randomUUID();
-        final UUID caseId2 = randomUUID();
-        final CaseByDefendant caseByDefendant = new CaseByDefendant.Builder().withCaseId(caseId1).withUrn(randomAlphabetic(5)).build();
-        final CaseByDefendant caseByDefendant2 = new CaseByDefendant.Builder().withCaseId(caseId2).build();
-
-        when(caseByDefendantRepository.getCasesByPersonDefendant(any(), any(), any(), any(), any())).thenReturn(Arrays.asList(caseByDefendant, caseByDefendant2));
-
-        final JsonObject payload = hearingService.getCasesByPersonDefendant(randomAlphabetic(5), randomAlphabetic(5), LocalDate.now(), LocalDate.now(), new HashSet<>());
-        assertCasesByDefendant(payload.getJsonArray("prosecutionCases"), caseId1, caseId2);
-    }
-
-
-    @Test
-    public void ShouldReturnCasesByOrganisationDefendant() {
-        final UUID caseId1 = randomUUID();
-        final UUID caseId2 = randomUUID();
-        final CaseByDefendant caseByDefendant = new CaseByDefendant.Builder().withCaseId(caseId1).withUrn(randomAlphabetic(5)).build();
-        final CaseByDefendant caseByDefendant2 = new CaseByDefendant.Builder().withCaseId(caseId2).build();
-
-        when(caseByDefendantRepository.getCasesByOrganisationDefendant(any(), any(), any())).thenReturn(Arrays.asList(caseByDefendant, caseByDefendant2));
-
-        final JsonObject payload = hearingService.getCasesByOrganisationDefendant(randomAlphabetic(5), LocalDate.now(), new HashSet<>(Arrays.asList(UUID.randomUUID())));
-        assertCasesByDefendant(payload.getJsonArray("prosecutionCases"), caseId1, caseId2);
-    }
-
-    @Test
-    public void ShouldReturnCasesByOrganisationDefendantWithEmptyCaseIdSet() {
-        final UUID caseId1 = randomUUID();
-        final UUID caseId2 = randomUUID();
-        final CaseByDefendant caseByDefendant = new CaseByDefendant.Builder().withCaseId(caseId1).withUrn(randomAlphabetic(5)).build();
-        final CaseByDefendant caseByDefendant2 = new CaseByDefendant.Builder().withCaseId(caseId2).build();
-
-        when(caseByDefendantRepository.getCasesByOrganisationDefendant(any(), any(), any())).thenReturn(Arrays.asList(caseByDefendant, caseByDefendant2));
-
-        final JsonObject payload = hearingService.getCasesByOrganisationDefendant(randomAlphabetic(5), LocalDate.now(), new HashSet<>());
-        assertCasesByDefendant(payload.getJsonArray("prosecutionCases"), caseId1, caseId2);
     }
 
     private void assertCasesByDefendant(final JsonArray prosecutionCases, final UUID caseId1, final UUID caseId2){

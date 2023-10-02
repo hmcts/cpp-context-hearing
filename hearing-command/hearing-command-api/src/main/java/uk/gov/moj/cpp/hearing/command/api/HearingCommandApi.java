@@ -6,7 +6,6 @@ import static uk.gov.justice.services.core.annotation.Component.COMMAND_API;
 import uk.gov.justice.core.courts.JudicialResult;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
-import uk.gov.justice.services.core.annotation.FeatureControl;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -85,13 +84,11 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.delete-draft-result-v2");
     }
 
-    @FeatureControl("amendReshare")
     @Handles("hearing.save-days-draft-result")
     public void saveDraftResultForHearingDay(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.save-days-draft-result");
     }
 
-    @FeatureControl("amendReshare")
     @Handles("hearing.save-days-draft-results")
     public void saveDraftResultsForHearingDay(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.save-days-draft-results");
@@ -148,13 +145,11 @@ public class HearingCommandApi {
     }
 
     @Handles("hearing.share-results-v2")
-    @FeatureControl("amendReshare")
     public void shareResultsV2(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.share-results-v2");
     }
 
     @Handles("hearing.share-days-results")
-    @FeatureControl("amendReshare")
     public void shareResultsForHearingDay(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.share-days-results");
     }
@@ -317,6 +312,11 @@ public class HearingCommandApi {
     @Handles("hearing.unlock-hearing")
     public void unlockHearing(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.unlock-hearing");
+    }
+
+    @Handles("hearing.replicate-shared-results")
+    public void replicateHearingResults(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.replicate-shared-results");
     }
 
     /**

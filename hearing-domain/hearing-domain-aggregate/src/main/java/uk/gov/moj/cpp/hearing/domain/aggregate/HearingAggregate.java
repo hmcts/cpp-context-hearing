@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
 import static java.time.ZonedDateTime.now;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyMap;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -40,6 +41,7 @@ import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.RespondentCounsel;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.domain.aggregate.Aggregate;
@@ -150,6 +152,8 @@ import uk.gov.moj.cpp.hearing.domain.event.result.DaysResultLinesStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSaved;
 import uk.gov.moj.cpp.hearing.domain.event.result.DraftResultSavedV2;
 import uk.gov.moj.cpp.hearing.domain.event.result.MultipleDraftResultsSaved;
+import uk.gov.moj.cpp.hearing.domain.event.result.ReplicateResultsSharedV3;
+import uk.gov.moj.cpp.hearing.domain.event.result.ReplicationOfShareResultsFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancellationFailed;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancelled;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultAmendmentsCancelledV2;
@@ -504,7 +508,7 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> shareResults(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLine> resultLines, final HearingState newHearingState, final YouthCourt youthCourt) {
         if (
-                (Arrays.asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, HearingState.SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
+                (asList(HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR, HearingState.SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED).contains(this.hearingState))
                         || (INITIALISED == newHearingState && SHARED == this.hearingState)
         ) {
 
@@ -514,6 +518,30 @@ public class HearingAggregate implements Aggregate {
                     .withHearingState(this.hearingState).build());
         }
         return apply(resultsSharedDelegate.shareResults(hearingId, courtClerk, sharedTime, resultLines, this.defendantDelegate.getDefendantDetailsChanged(), youthCourt));
+    }
+
+    /**
+     * This method has been introduced to be used as part of the BDF run and solely for that purpose.
+     * @param hearingId
+     * @return
+     */
+    public Stream<Object> replicateSharedResultsForHearing(final UUID hearingId) {
+        if (!asList(SHARED_AMEND_LOCKED_ADMIN_ERROR, SHARED,  SHARED_AMEND_LOCKED_USER_ERROR, APPROVAL_REQUESTED, VALIDATED).contains(this.hearingState)) {
+
+            return apply(Stream.of(new ReplicationOfShareResultsFailed.Builder()
+                    .withHearingId(hearingId)
+                    .withHearingState(this.hearingState).build()));
+        }
+       return  apply(this.momento.getMultiDaySavedTargets().entrySet().stream().map(e -> createReplicatedResults(e.getKey(), e.getValue())).flatMap(event -> Stream.of(event)));
+    }
+
+
+    private ReplicateResultsSharedV3 createReplicatedResults(final LocalDate hearingDay, final Map<UUID, Target2> targetList) {
+        return ReplicateResultsSharedV3.builder().withHearingDay(hearingDay)
+                .withTargets(new ArrayList<>(targetList.values()))
+                .withHearingId(this.getHearing().getId())
+                .build();
+
     }
 
     public Stream<Object> shareResultsV2(final UUID hearingId, final DelegatedPowers courtClerk, final ZonedDateTime sharedTime, final List<SharedResultsCommandResultLineV2> resultLines, final LocalDate hearingDay) {
@@ -995,6 +1023,8 @@ public class HearingAggregate implements Aggregate {
                 return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing already shared", hearingId));
             }
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing not found", hearingId));
+        } else if(this.hearingState == SHARED) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'deleteHearing' event as hearing already shared", hearingId));
         }
         return apply(this.hearingDelegate.deleteHearing(hearingId));
     }
@@ -1005,8 +1035,9 @@ public class HearingAggregate implements Aggregate {
                 return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));
             }
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing not found", hearingId));
+        } else if(this.hearingState == SHARED) {
+            return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));
         }
-
         return apply(this.hearingDelegate.unAllocateHearing(hearingId, removedOffenceIds));
     }
 

@@ -2,7 +2,6 @@ package uk.gov.moj.cpp.accesscontrol;
 
 import uk.gov.moj.cpp.accesscontrol.drools.Outcome;
 import uk.gov.moj.cpp.accesscontrol.drools.Action;
-import uk.gov.moj.cpp.hearing.query.api.accescontrol.RuleConstants;
 import java.util.Arrays;
 
 global uk.gov.moj.cpp.accesscontrol.common.providers.UserAndGroupProvider userAndGroupProvider;
@@ -265,24 +264,6 @@ rule "Query - API - hearing.prosecution-case-by-hearingid"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.prosecution-case-by-hearingid");
-  then
-    $outcome.setSuccess(true);
-end
-
-rule "Query - API - hearing.get.cases-by-person-defendant"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.get.cases-by-person-defendant");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, RuleConstants.getQueryForCaseByDefendantUsersGroup()));
-  then
-    $outcome.setSuccess(true);
-end
-
-rule "Query - API - hearing.get.cases-by-organisation-defendant"
-  when
-    $outcome: Outcome();
-    $action: Action(name == "hearing.get.cases-by-organisation-defendant");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, RuleConstants.getQueryForCaseByDefendantUsersGroup()));
   then
     $outcome.setSuccess(true);
 end

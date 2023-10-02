@@ -280,20 +280,6 @@ public class WireMockStubUtils {
         waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
     }
 
-    public static void setupAsAuthorizedUserToQueryCaseByDefendant(final UUID userId) {
-        stubPingFor("usersgroups-service");
-
-        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId)))
-                .willReturn(aResponse().withStatus(OK.getStatusCode())
-                        .withHeader(ID, randomUUID().toString())
-                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
-                        .withBody(getPayload("stub-data/usergroups-get-for-cases-by-defendant.json"))));
-
-        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/users/{0}/groups", userId), CONTENT_TYPE_QUERY_GROUPS);
-    }
-
-
-
     public static void stubStagingEnforcementOutstandingFines() {
 
         stubPingFor("stagingenforcement-query-api");
@@ -356,15 +342,6 @@ public class WireMockStubUtils {
                 .withHeader(CONTENT_TYPE, equalTo("application/vnd.stagingenforcement.request-outstanding-fine+json"))
                 .willReturn(aResponse().withStatus(SC_ACCEPTED)));
 
-    }
-
-    public static void stubAzure() {
-        stubFor(get(urlPathMatching("/azure/featuremanager/*"))
-                .willReturn(aResponse().withStatus(SC_OK)
-                        .withBody("{\"items\" : [{ \"content_type\" : \"temp\" , \"key\" : \"reuseOfInformation\", \"value\" : \"{\\\"enabled\\\": true}\"}]}")
-                ));
-
-        waitForStubToBeReady("/azure/featuremanager/reuseOfInformation", "");
     }
 
     public static final void mockMaterialUpload() {

@@ -1,7 +1,6 @@
 package uk.gov.moj.cpp.hearing.it;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
-import static java.time.LocalDate.now;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.UUID.fromString;
@@ -11,8 +10,6 @@ import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
 import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
@@ -45,12 +42,10 @@ import static uk.gov.moj.cpp.hearing.utils.ResultDefinitionUtil.getCategoryForRe
 
 import com.jayway.restassured.path.json.JsonPath;
 import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.DefendantJudicialResult;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingType;
-import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
@@ -59,7 +54,6 @@ import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.SaveDraftResultCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
-import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResulted;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.event.PublicHearingDraftResultSaved;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.AllNows;
@@ -77,7 +71,6 @@ import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
 import uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher;
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -89,10 +82,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import com.google.common.collect.ImmutableMap;
-import org.junit.Before;
 import org.junit.Test;
 
 
@@ -103,14 +93,6 @@ public class ShareResultsV2IT extends AbstractIT {
     private static final UUID ATTACHMENT_OF_EARNINGS_NOW_DEFINITION_ID = fromString("10115268-8efc-49fe-b8e8-feee216a03da");
     private static final UUID RD_FINE = fromString("969f150c-cd05-46b0-9dd9-30891efcc766");
     private static final String PUBLIC_HEARING_DRAFT_RESULT_SAVED = "public.hearing.draft-result-saved";
-
-    @Before
-    public void setup() {
-        setupNowsReferenceData(now());
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
-    }
-
 
     @Test
     public void shouldShareResultsForHearingWithMultipleCasesWithApplication() {

@@ -3,17 +3,14 @@ package uk.gov.moj.cpp.hearing.query.view;
 import static java.time.LocalDate.now;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
-import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static javax.json.Json.createObjectBuilder;
 import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
-import static uk.gov.justice.services.core.annotation.Component.QUERY_API;
 import static uk.gov.justice.services.core.annotation.Component.QUERY_VIEW;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.messaging.JsonEnvelope.metadataBuilder;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
 
@@ -29,7 +26,6 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.OutstandingFinesQuery;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingType;
@@ -54,7 +50,6 @@ import uk.gov.moj.cpp.hearing.repository.CourtListRepository;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,10 +90,6 @@ public class HearingQueryView {
     private static final String FIELD_OFFENCE_ID = "offenceId";
     private static final String FIELD_CUSTODY_TIME_LIMIT = "custodyTimeLimit";
     private static final String FIELD_CASE_IDS = "caseIds";
-    private static final String FIELD_FIRST_NAME = "firstName";
-    private static final String FIELD_LAST_NAME = "lastName";
-    private static final String FIELD_ORGANISATION_NAME = "organisationName";
-    private static final String FIELD_DATE_OF_BIRTH = "dateOfBirth";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryView.class);
 
     @Inject
@@ -472,36 +463,6 @@ public class HearingQueryView {
         return envelop(hearingListResponse)
                 .withName("hearing.get.hearings")
                 .withMetadataFrom(envelope);
-    }
-
-    public JsonEnvelope getCasesByPersonDefendant(final JsonEnvelope envelope) {
-        final JsonObject payload = envelope.payloadAsJsonObject();
-        final String firstName = getString(payload, FIELD_FIRST_NAME).get();
-        final String lastName = getString(payload, FIELD_LAST_NAME).get();
-        final String dateOfBirth = getString(payload, FIELD_DATE_OF_BIRTH).get();
-        final String hearingDate = getString(payload, FIELD_HEARING_DATE).get();
-        final Set<UUID> caseIds = getCaseIds(getString(payload, FIELD_CASE_IDS));
-
-        final JsonObject responsePayload = hearingService.getCasesByPersonDefendant(firstName, lastName, LocalDate.parse(dateOfBirth), LocalDate.parse(hearingDate), caseIds);
-        return envelopeFrom(envelope.metadata(), responsePayload);
-    }
-
-    public JsonEnvelope getCasesByOrganisationDefendant(final JsonEnvelope envelope) {
-        final JsonObject payload = envelope.payloadAsJsonObject();
-        final String organisationName = getString(payload, FIELD_ORGANISATION_NAME).get();
-        final String hearingDate = getString(payload, FIELD_HEARING_DATE).get();
-        final Set<UUID> caseIds = getCaseIds(getString(payload, FIELD_CASE_IDS));
-
-        final JsonObject responsePayload = hearingService.getCasesByOrganisationDefendant(organisationName, LocalDate.parse(hearingDate), caseIds);
-        return envelopeFrom(envelope.metadata(), responsePayload);
-    }
-
-    private Set<UUID> getCaseIds(Optional<String> caseIds){
-        Set<UUID> caseSet = new HashSet<>();
-        if (caseIds.isPresent()) {
-            caseSet = Stream.of(caseIds.get().split(",")).map(UUID::fromString).collect(Collectors.toSet());
-        }
-        return caseSet;
     }
 
     public Envelope<ProsecutionCaseResponse> getProsecutionCaseForHearing(final JsonEnvelope envelope) {

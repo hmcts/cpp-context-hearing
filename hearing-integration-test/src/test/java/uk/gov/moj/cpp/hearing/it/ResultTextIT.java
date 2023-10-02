@@ -19,7 +19,6 @@ import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDat
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.jayway.restassured.path.json.JsonPath;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -44,7 +43,6 @@ import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 import uk.gov.moj.cpp.hearing.test.TestUtilities;
-import uk.gov.moj.cpp.platform.test.feature.toggle.FeatureStubber;
 
 public class ResultTextIT extends AbstractIT {
 
@@ -62,9 +60,6 @@ public class ResultTextIT extends AbstractIT {
     public static void setupBeforeClass() {
         stubGetReferenceDataResultDefinitionsWithResultTexts(orderedDate);
         stubGetReferenceDataResultDefinitionsWithResultTexts(orderedDate2);
-
-        final ImmutableMap<String, Boolean> features = ImmutableMap.of("amendReshare", true);
-        FeatureStubber.stubFeaturesFor(HEARING_CONTEXT, features);
     }
 
     @Test
