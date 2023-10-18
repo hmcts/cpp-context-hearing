@@ -10,6 +10,7 @@ import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.domain.aggregate.Aggregate;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForEditOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
@@ -75,6 +76,10 @@ public class OffenceAggregate implements Aggregate {
 
         if (!connectedHearingIds.isEmpty() && pleaModel.getPlea() != null && StringUtils.isNotEmpty(pleaModel.getPlea().getPleaValue())) {
             streamBuilder.add(new EnrichUpdatePleaWithAssociatedHearings(connectedHearingIds, pleaModel.getPlea()));
+        }
+
+        if (!connectedHearingIds.isEmpty() && pleaModel.getIndicatedPlea() != null && pleaModel.getIndicatedPlea().getIndicatedPleaValue() != null) {
+            streamBuilder.add(new EnrichAssociatedHearingsWithIndicatedPlea(connectedHearingIds, pleaModel.getIndicatedPlea()));
         }
 
         return apply(streamBuilder.build());

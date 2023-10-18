@@ -48,6 +48,8 @@ import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Level;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
@@ -97,6 +99,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingLockedByOtherUser;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
@@ -2784,6 +2787,20 @@ public class HearingAggregateTest {
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(0));
 
+    }
+
+    @Test
+    public void updateHearingWithIndicatedPlea() {
+
+        final UUID hearingId = UUID.randomUUID();
+        final IndicatedPlea indicatedPlea = IndicatedPlea.indicatedPlea()
+                .withOriginatingHearingId(hearingId)
+                .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY).build();
+
+        final IndicatedPleaUpdated event = (IndicatedPleaUpdated) HEARING_AGGREGATE.updateHearingWithIndicatedPlea(indicatedPlea.getOriginatingHearingId(), indicatedPlea).collect(Collectors.toList()).get(0);
+
+        assertThat(event.getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
+        assertThat(event.getHearingId(), is(indicatedPlea.getOriginatingHearingId()));
     }
 
     @Test

@@ -24,12 +24,15 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated.builder;
 
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.IndicatedPlea;
+import uk.gov.justice.core.courts.IndicatedPleaValue;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
@@ -290,6 +293,28 @@ public class OffenceAggregateTest {
         assertNotNull(events.get(0));
         assertThat(events.size(), is(1));
         assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+    }
+
+
+    @Test
+    public void updateIndicatedPlea_shouldEnrichIndicatedPleaWithAssociatedHearings_WhenPleaValueIsPresent() {
+
+        final UUID hearingId = randomUUID();
+
+        final OffencePleaUpdated offencePleaUpdated = builder()
+                .withHearingId(hearingId)
+                .withPleaModel(pleaModel().withIndicatedPlea(IndicatedPlea.indicatedPlea().withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY)
+                        .build()).build())
+                .build();
+
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+
+        final List<Object> events = offenceAggregate.updatePlea(offencePleaUpdated.getHearingId(), offencePleaUpdated.getPleaModel()).collect(Collectors.toList());
+
+        assertNotNull(events.get(0));
+        assertThat(events.size(), is(2));
+        assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+        assertThat(events.get(1), is(instanceOf(EnrichAssociatedHearingsWithIndicatedPlea.class)));
     }
 
     @Test

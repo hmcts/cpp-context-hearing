@@ -43,6 +43,7 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTestData;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.time.LocalDate;
@@ -616,6 +617,23 @@ public class PleaDelegateTest {
                 shouldRemoveConvictionDateWhenPleaChangedFromGuiltyToNotGuilty(pleaValue);
             }
         }
+    }
+
+
+    @Test
+    public void shouldRaiseIndicatedPleaUpdated() {
+
+        final Hearing hearing = getHearing(OFFENCE_ID, DEFENDANT_ID, CASE_ID, HEARING_ID);
+
+        this.hearingAggregateMomento.setHearing(hearing);
+
+        final List<Object> events = pleaDelegate.indicatedPlea(HEARING_ID, IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_GUILTY).build()).collect(Collectors.toList());
+
+        assertThat(events.size(), is(1));
+        final IndicatedPleaUpdated indicatedPleaUpdated = (IndicatedPleaUpdated) events.get(0);
+        assertThat(indicatedPleaUpdated, is(notNullValue()));
+        assertThat(indicatedPleaUpdated.getIndicatedPlea().getIndicatedPleaValue(), is(INDICATED_GUILTY));
+        assertThat(indicatedPleaUpdated.getHearingId(), is(HEARING_ID));
     }
 
     private void shouldAddConvictionDateAddedWhenPleaIsGuiltyType(String guiltyPleaValue) {

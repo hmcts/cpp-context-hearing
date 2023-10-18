@@ -19,6 +19,7 @@ import static uk.gov.moj.cpp.hearing.event.Framework5Fix.toJsonEnvelope;
 import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import com.google.common.collect.Lists;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.IndicatedPleaValue;
@@ -30,6 +31,7 @@ import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.framework.api.JsonObjectConvertersFactory;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 
 import java.util.List;
@@ -275,5 +277,31 @@ public class PleaUpdateEventProcessorTest {
                         .with(PleaModel::getOffenceId, is(pleaUpsert.getPleaModel().getOffenceId()))
                         .with(PleaModel::getAllocationDecision, isBean(AllocationDecision.class)
                                 .with(AllocationDecision::getOffenceId, is(offenceId)))));
+    }
+
+
+    @Test
+    public void updateOffenceIndicatedPleaToAllAssociatedHearings() {
+        final UUID hearingId = randomUUID();
+        final EnrichAssociatedHearingsWithIndicatedPlea enrichAssociatedHearingsWithIndicatedPlea = new EnrichAssociatedHearingsWithIndicatedPlea(Lists.newArrayList(hearingId),
+                IndicatedPlea.indicatedPlea().withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY).build());
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.enrich-associated-hearings-with-indicated-plea"),
+                objectToJsonObjectConverter.convert(enrichAssociatedHearingsWithIndicatedPlea));
+
+        this.pleaUpdateEventProcessor.enrichAssociatedHearingsWithIndicatedPlea(event);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptor.capture());
+
+        List<JsonEnvelope> events = this.envelopeArgumentCaptor.getAllValues();
+
+        assertThat(toJsonEnvelope(events.get(0)).metadata().name(), is("hearing.command.enrich-associated-hearings-with-indicated-plea"));
+
+        final EnrichAssociatedHearingsWithIndicatedPlea associatedHearingsWithIndicatedPlea = asPojo(toJsonEnvelope(events.get(0)), EnrichAssociatedHearingsWithIndicatedPlea.class);
+
+        assertThat(associatedHearingsWithIndicatedPlea.getHearingIds().get(0), is(hearingId));
+        assertThat(associatedHearingsWithIndicatedPlea.getIndicatedPlea(), isBean(IndicatedPlea.class));
+        assertThat(associatedHearingsWithIndicatedPlea.getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_GUILTY));
+
     }
 }

@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.enrich-update-plea-with-associated-hearings.json",
+  "id": "http://cpp.moj.gov.uk/hearing/json/schema/event/enrich-associated-hearings-with-indicated-plea.json",
   "type": "object",
   "properties": {
     "hearingIds": {
@@ -10,13 +10,13 @@
         "$ref": "http://justice.gov.uk/core/courts/courtsDefinitions.json#/definitions/uuid"
       }
     },
-    "plea": {
-      "$ref": "http://justice.gov.uk/core/courts/plea.json"
+    "indicatedPlea": {
+      "$ref": "http://justice.gov.uk/core/courts/indicatedPlea.json"
     }
   },
   "required": [
     "hearingIds",
-    "plea"
+    "indicatedPlea"
   ],
   "additionalProperties": false
 }

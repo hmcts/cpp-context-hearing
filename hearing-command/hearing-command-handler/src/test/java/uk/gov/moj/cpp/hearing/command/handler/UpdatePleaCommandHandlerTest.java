@@ -23,6 +23,17 @@ import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.AllocationDecision;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.IndicatedPlea;
@@ -45,8 +56,10 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
 
@@ -56,17 +69,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdatePleaCommandHandlerTest {
@@ -80,7 +82,8 @@ public class UpdatePleaCommandHandlerTest {
             PleaUpsert.class,
             OffencePleaUpdated.class,
             ConvictionDateAdded.class,
-            ConvictionDateRemoved.class);
+            ConvictionDateRemoved.class,
+            IndicatedPleaUpdated.class);
     private ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
     @InjectMocks
     private UpdatePleaCommandHandler hearingCommandHandler;
@@ -493,6 +496,37 @@ public class UpdatePleaCommandHandlerTest {
 
         assertThat(pleaUpsert.getPleaModel().getIndicatedPlea(), is(nullValue()));
         assertThat(pleaUpsert.getPleaModel().getAllocationDecision(), is(nullValue()));
+
+    }
+
+    @Test
+    public void enrichAssociatedHearingsWithIndicatedPleaInformation() throws Throwable {
+
+        final LocalDate pleaDate = PAST_LOCAL_DATE.next();
+
+        when(this.eventSource.getStreamById(hearing.getHearingId())).thenReturn(this.hearingAggregateEventStream);
+
+        when(this.aggregateService.get(this.hearingAggregateEventStream, HearingAggregate.class)).thenReturn(new HearingAggregate());
+
+        final UpdateAssociatedHearingsWithIndicatedPlea updateAssociatedHearingsWithIndicatedPlea = new UpdateAssociatedHearingsWithIndicatedPlea();
+        updateAssociatedHearingsWithIndicatedPlea.setIndicatedPlea(IndicatedPlea.indicatedPlea().withIndicatedPleaValue(INDICATED_GUILTY).withIndicatedPleaDate(pleaDate).build());
+        updateAssociatedHearingsWithIndicatedPlea.setHearingIds(Lists.newArrayList(hearing.getHearingId()));
+
+        final JsonEnvelope jsonEnvelop = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-associated-hearings-with-indicated-plea"),
+                objectToJsonObjectConverter.convert(updateAssociatedHearingsWithIndicatedPlea));
+
+        this.hearingCommandHandler.updateIndicatedPleaForAllAssociatedHearings(jsonEnvelop);
+
+        final List<JsonEnvelope> events = verifyAppendAndGetArgumentFrom(this.hearingAggregateEventStream).collect(Collectors.toList());
+
+        IndicatedPleaUpdated indicatedPleaUpdatedEvent = asPojo(events.get(0), IndicatedPleaUpdated.class);
+
+        assertThat(indicatedPleaUpdatedEvent, isBean(IndicatedPleaUpdated.class)
+                .with(IndicatedPleaUpdated::getHearingId, is(hearing.getHearingId())));
+
+        assertThat(indicatedPleaUpdatedEvent.getIndicatedPlea(), isBean(IndicatedPlea.class)
+                .with(IndicatedPlea::getIndicatedPleaValue, is(INDICATED_GUILTY))
+                .with(IndicatedPlea::getIndicatedPleaDate, is(pleaDate)));
 
     }
 

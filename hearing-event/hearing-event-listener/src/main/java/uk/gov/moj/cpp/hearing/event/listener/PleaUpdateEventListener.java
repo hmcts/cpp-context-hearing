@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
@@ -9,6 +10,8 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;
@@ -74,6 +77,29 @@ public class PleaUpdateEventListener {
                 updateOffence(event, offence);
             }else {
                 updateOffenceUnderCourtApplication(event);
+            }
+        }
+    }
+
+    @Transactional
+    @Handles("hearing.event.indicated-plea-updated")
+    public void indicatedPleaUpdated(final JsonEnvelope envelop) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.event.indicated-plea-updated event received {}", envelop.toObfuscatedDebugString());
+        }
+
+        final IndicatedPleaUpdated event = jsonObjectToObjectConverter.convert(envelop.payloadAsJsonObject(), IndicatedPleaUpdated.class);
+
+        final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(event.getIndicatedPlea().getOffenceId(), event.getHearingId()));
+
+        if (nonNull(offence)) {
+
+            final boolean shouldSetPlea = isNull(offence.getIndicatedPlea());
+
+            if (shouldSetPlea) {
+                offence.setIndicatedPlea(indicatedPleaJPAMapper.toJPA(event.getIndicatedPlea()));
+                offenceRepository.save(offence);
             }
         }
     }

@@ -40,6 +40,7 @@ import uk.gov.justice.services.common.converter.ListToJsonArrayConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
@@ -664,5 +665,55 @@ public class PleaUpdateEventListenerTest {
         assertThat(actualCourtApplicationList.get(0).getCourtOrder().getCourtOrderOffences().size(), is(1));
         assertThat(actualCourtApplicationList.get(0).getCourtOrder().getCourtOrderOffences().stream().filter(o -> o.getOffence().getId().equals(offenceId)).findFirst().get().getOffence().getIndicatedPlea().getIndicatedPleaValue(), is(IndicatedPleaValue.INDICATED_NOT_GUILTY));
 
+    }
+
+
+    @Test
+    public void shouldUpdateIndicatedPleaOnAllAssociatedHearings() {
+
+        final UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final IndicatedPlea indicatedPleaPojo = indicatedPlea()
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(hearingId)
+                .withIndicatedPleaDate(LocalDate.now())
+                .withSource(Source.IN_COURT)
+                .withIndicatedPleaValue(IndicatedPleaValue.INDICATED_GUILTY).build();
+        final IndicatedPleaUpdated indicatedPleaUpdated = IndicatedPleaUpdated.updateHearingWithIndicatedPlea().setIndicatedPlea(indicatedPleaPojo)
+                .setHearingId(hearingId);
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+
+        final Offence offence = new Offence();
+        offence.setId(new HearingSnapshotKey(offenceId, hearingId));
+
+        final Defendant defendant = new Defendant();
+        defendant.setOffences(asSet(offence));
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setDefendants(asSet(defendant));
+
+        hearing.setProsecutionCases(asSet(prosecutionCase));
+
+        final uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea indicatedPlea = new uk.gov.moj.cpp.hearing.persist.entity.ha.IndicatedPlea();
+        indicatedPlea.setIndicatedPleaDate(indicatedPleaPojo.getIndicatedPleaDate());
+        indicatedPlea.setIndicatedPleaValue(indicatedPleaPojo.getIndicatedPleaValue());
+        indicatedPlea.setIndicatedPleaSource(indicatedPleaPojo.getSource());
+        when(indicatedPleaJPAMapper.toJPA(Mockito.any())).thenReturn(indicatedPlea);
+
+        when(this.offenceRepository.findBy(offence.getId())).thenReturn(offence);
+
+        pleaUpdateEventListener.indicatedPleaUpdated(envelopeFrom(metadataWithRandomUUID("hearing.event.indicated-plea-updated"),
+                objectToJsonObjectConverter.convert(indicatedPleaUpdated)));
+
+        verify(this.offenceRepository).save(offence);
+
+        final IndicatedPlea offenceIndicatedPlea = indicatedPleaUpdated.getIndicatedPlea();
+
+        assertThat(offence.getId().getId(), is(offenceIndicatedPlea.getOffenceId()));
+        assertThat(offence.getId().getHearingId(), is(offenceIndicatedPlea.getOriginatingHearingId()));
+        assertThat(offence.getIndicatedPlea().getIndicatedPleaDate(), is(offenceIndicatedPlea.getIndicatedPleaDate()));
+        assertThat(offence.getIndicatedPlea().getIndicatedPleaValue(), is(offenceIndicatedPlea.getIndicatedPleaValue()));
     }
 }

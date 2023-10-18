@@ -20,6 +20,7 @@ import uk.gov.moj.cpp.hearing.domain.event.DefendantCaseWithdrawnOrDismissed;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantOffenceResultsUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantsWelshInformationRecorded;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
 import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
@@ -49,6 +50,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingResultLineSharedDatesUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlockFailed;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
 import uk.gov.moj.cpp.hearing.domain.event.HearingVerdictUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InterpreterIntermediaryChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.MagsCourtHearingRecorded;
 import uk.gov.moj.cpp.hearing.domain.event.MasterDefendantIdAdded;
@@ -176,6 +178,8 @@ public class HearingEventListenerYamlConfigTest {
             HearingVacatedRequested.class.getAnnotation(Event.class).value(),
             ResultsSharedSuccess.class.getAnnotation(Event.class).value(),
             PublicSelectedOffencesRemovedFromExistingHearing.class.getAnnotation(Event.class).value(),
+            EnrichAssociatedHearingsWithIndicatedPlea.class.getAnnotation(Event.class).value(),
+            PublicSelectedOffencesRemovedFromExistingHearing.class.getAnnotation(Event.class).value(),
             HearingBreachApplicationsAdded.class.getAnnotation(Event.class).value(),
             HearingBreachApplicationsToBeAddedReceived.class.getAnnotation(Event.class).value()
 
@@ -225,7 +229,8 @@ public class HearingEventListenerYamlConfigTest {
                 HearingUnallocatedEventListener.class,
                 ReusableInfoEventListener.class,
                 CourtListRestrictionEventListener.class,
-                CustodyTimeLimitEventListener.class));
+                CustodyTimeLimitEventListener.class,
+                IndicatedPleaUpdated.class));
 
         yamlEventNames = new SubscriptionsDescriptorLoader(PATH_TO_YAML).eventNames();
     }

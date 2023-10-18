@@ -68,6 +68,10 @@ subscriptions_descriptor:
         - name: hearing.events.enrich-update-plea-with-associated-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/enrich-update-plea-with-associated-hearings.json
 
+        #enrich Indicated Plea
+        - name: hearing.events.enrich-associated-hearings-with-indicated-plea
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/enrich-associated-hearings-with-indicated-plea.json
+
         #enrich Verdict
         - name: hearing.events.enrich-update-verdict-with-associated-hearings
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/enrich-update-verdict-with-associated-hearings.json

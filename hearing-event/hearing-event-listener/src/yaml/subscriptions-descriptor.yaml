@@ -29,7 +29,6 @@ subscriptions_descriptor:
         - name: hearing.hearing-offence-verdict-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-verdict-updated.json
 
-        # Update Plea
         - name: hearing.hearing-offence-plea-updated
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-offence-plea-updated.json
 
@@ -325,6 +324,10 @@ subscriptions_descriptor:
 
         - name: hearing.event.court-list-restricted
           schema_uri: http://justice.gov.uk/hearing/json/schema/event/court-list-restricted.json
+
+        # Update Plea
+        - name: hearing.event.indicated-plea-updated
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/indicated-plea-updated.json
 
         - name: hearing.events.replicate.results-shared-v3
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.replicate.results-shared-v3.json
