@@ -124,6 +124,7 @@ public class DefendantJPAMapperTest {
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getProsecutionCaseId, is(pojo.getProsecutionCaseId()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getWitnessStatement, is(pojo.getWitnessStatement()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getPncId, is(pojo.getPncId()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getCourtListRestricted, is(true))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant::getWitnessStatementWelsh, is(pojo.getWitnessStatementWelsh()));
     }
 
