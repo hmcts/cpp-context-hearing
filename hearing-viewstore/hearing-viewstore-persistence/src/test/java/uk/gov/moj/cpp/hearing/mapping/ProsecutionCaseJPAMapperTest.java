@@ -64,6 +64,7 @@ public class ProsecutionCaseJPAMapperTest {
                         .with(HearingSnapshotKey::getId, is(pojo.getId())))
 
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getInitiationCode, is(pojo.getInitiationCode()))
+                .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getCourtListRestricted, is(true))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getOriginatingOrganisation, is(pojo.getOriginatingOrganisation()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getStatementOfFacts, is(pojo.getStatementOfFacts()))
                 .with(uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase::getStatementOfFactsWelsh, is(pojo.getStatementOfFactsWelsh()))

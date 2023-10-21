@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.mapping;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
@@ -10,6 +11,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,6 +63,11 @@ public class ProsecutionCaseJPAMapper {
         prosecutionCase.setStatementOfFactsWelsh(pojo.getStatementOfFactsWelsh());
         prosecutionCase.setDefendants(defendantJPAMapper.toJPA(hearing, prosecutionCase, pojo.getDefendants()));
         prosecutionCase.setTrialReceiptType(pojo.getTrialReceiptType());
+        if(Objects.nonNull(hearing.getProsecutionCases())) {
+            final Optional<ProsecutionCase> matchingProsecutionCaseEntity = hearing.getProsecutionCases().stream().filter(caze -> caze.getId().getId().equals(prosecutionCase.getId().getId()))
+                    .findFirst();
+            matchingProsecutionCaseEntity.ifPresent(caseEntity -> prosecutionCase.setCourtListRestricted(caseEntity.getCourtListRestricted()));
+        }
         return prosecutionCase;
     }
 

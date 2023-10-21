@@ -59,6 +59,7 @@ public final class HearingJPADataTemplate {
                 .forEach(prosecutionCase -> {
                     prosecutionCase.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
                     prosecutionCase.setHearing(hearingEntity);
+                    prosecutionCase.setCourtListRestricted(true);
                     hearingEntity.getProsecutionCases().add(prosecutionCase);
                 });
         //
