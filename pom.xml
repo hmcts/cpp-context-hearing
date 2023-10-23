@@ -25,7 +25,7 @@
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.209</coredomain.version>
-        <referencedata.version>8.0.42</referencedata.version>
+        <referencedata.version>8.0.44</referencedata.version>
         <material.version>8.0.9</material.version>
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
