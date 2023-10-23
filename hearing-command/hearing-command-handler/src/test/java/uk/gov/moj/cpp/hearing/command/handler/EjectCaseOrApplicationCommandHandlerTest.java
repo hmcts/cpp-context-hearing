@@ -26,11 +26,13 @@ import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.hearing.domain.aggregate.ApplicationAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.CaseAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -121,6 +123,26 @@ public class EjectCaseOrApplicationCommandHandlerTest {
         verify(applicationEventStream, times(1)).append(streamArgumentCaptor.capture());
         final List<JsonEnvelope> jsonEnvelopeList = convertStreamToEventList(streamArgumentCaptor.getAllValues());
         assertThat("Empty Stream returned",jsonEnvelopeList.size(), is(0));
+
+    }
+
+    @Test
+    public void shouldRaiseCourtApplicationEjectedWhenProsecutionCaseIdIsNullButHearingIdsIsNotNull() throws EventStreamException {
+        final UUID applicationId = randomUUID();
+        JsonObject payload = Json.createObjectBuilder()
+                .add("applicationId", applicationId.toString())
+                .build();
+        final JsonEnvelope envelope =
+                envelopeFrom(metadataWithRandomUUID("hearing.command.eject-case-or-application"), payload);
+        when(this.eventSource.getStreamById(applicationId)).thenReturn(this.applicationEventStream);
+        final ApplicationAggregate applicationAggregate = new ApplicationAggregate();
+        ReflectionUtil.setField(applicationAggregate, "hearingIds", Arrays.asList(randomUUID(), randomUUID()));
+        when(this.aggregateService.get(this.applicationEventStream, ApplicationAggregate.class)).thenReturn(applicationAggregate);
+        handler.ejectCaseOrApplication(envelope);
+        verify(applicationEventStream, times(1)).append(streamArgumentCaptor.capture());
+        final List<JsonEnvelope> jsonEnvelopeList = convertStreamToEventList(streamArgumentCaptor.getAllValues());
+        assertThat(jsonEnvelopeList.size(), is(1));
+        //assertThat(jsonEnvelopeList.get(0).payloadAsJsonObject().getString("applicationId"), is(applicationId));
 
     }
 

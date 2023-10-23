@@ -12,6 +12,7 @@ import static org.junit.Assert.assertNotNull;
 import static uk.gov.justice.core.courts.Target.target;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.VariantDirectoryTemplates.standardVariantTemplate;
 
 
 import java.util.Objects;
@@ -20,7 +21,9 @@ import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.Target;
+import uk.gov.justice.core.courts.Target2;
 import uk.gov.justice.core.courts.YouthCourt;
+import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.NewAmendmentResult;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultLineId;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandPrompt;
@@ -39,7 +42,9 @@ import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -554,6 +559,19 @@ public class ResultsSharedDelegateTest {
                 .withResultDefinitionId(UUID.randomUUID())
                 .build();
 
+        final Target2 target = Target2.target2().withTargetId(randomUUID())
+                .withApplicationId(randomUUID())
+                .withHearingId(hearingId)
+                .withResultLines(new ArrayList<>())
+                .withHearingDay(hearingDay)
+                .build();
+        final Map<LocalDate, Map<UUID, Target2>> multiDayTargets = new HashMap<>();
+        final Map<UUID, Target2> variantTarget = new HashMap<>();
+        variantTarget.put(randomUUID(),target);
+        multiDayTargets.put(hearingDay, variantTarget);
+        final List<Variant> variantDirectory = singletonList(
+                standardVariantTemplate(randomUUID(), hearingId, randomUUID()));
+        hearingAggregateMomento.setVariantDirectory(variantDirectory);
         final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
 
         final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())

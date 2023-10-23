@@ -155,7 +155,6 @@ public class HearingQueryApi {
         final boolean ddJorRecorder = isDDJorRecorder(permissions);
 
         final List<UUID> accessibleCasesAndApplications = getAccessibleCasesAndApplications(userId, ddJorRecorder, permissions);
-
         final Envelope<HearingDetailsResponse> envelope = this.hearingQueryView.findHearing(query, crackedIneffectiveVacatedTrialTypes, accessibleCasesAndApplications, ddJorRecorder);
         return getJsonEnvelope(envelope);
     }

@@ -342,7 +342,6 @@ public class HearingDelegate implements Serializable {
         final List<UUID> defendantIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().map(Defendant::getId)).collect(Collectors.toList());
         final List<UUID> offenceIds = momento.getHearing().getProsecutionCases().stream().flatMap(c -> c.getDefendants().stream().flatMap(d -> d.getOffences().stream().map(Offence::getId))).collect(Collectors.toList());
         final UUID courtCentreId = momento.getHearing().getCourtCentre().getId();
-
         return Stream.of(new HearingMarkedAsDuplicate(prosecutionCaseIds, defendantIds, offenceIds, hearingId, courtCentreId));
     }
 

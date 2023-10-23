@@ -5,7 +5,9 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.progression.events.SendingSheetCompleted;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Address;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.CrownCourtHearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Defendant;
@@ -13,6 +15,7 @@ import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Hearing;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Interpreter;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Offence;
 import uk.gov.moj.cpp.external.domain.progression.sendingsheetcompleted.Plea;
+import uk.gov.moj.cpp.hearing.domain.event.CaseEjected;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedPreviouslyRecorded;
@@ -20,6 +23,8 @@ import uk.gov.moj.cpp.hearing.domain.event.SendingSheetCompletedRecorded;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -153,4 +158,29 @@ public class CaseAggregateTest {
         assertThat(hearingDeleted.getProsecutionCaseId(), is(prosecutionCaseId));
     }
 
+    @Test
+    public void shouldRaiseCaseEjectedEventWhenHearingIdsPassedIsEmpty(){
+        final UUID prosecutionCaseId = UUID.randomUUID();
+        ReflectionUtil.setField(caseAggregate, "hearingIds", Arrays.asList(UUID.randomUUID(), UUID.randomUUID()));
+        final List<Object> eventStream = caseAggregate.ejectCase(prosecutionCaseId, Collections.emptyList()).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final CaseEjected caseEjected = (CaseEjected) eventStream.get(0);
+        assertThat(caseEjected.getProsecutionCaseId(), is(prosecutionCaseId));
+    }
+
+    @Test
+    public void shouldReturnEmptyEventWhenHearingIdsIsEmpty(){
+        final UUID prosecutionCaseId = UUID.randomUUID();
+        ReflectionUtil.setField(caseAggregate, "hearingIds", Collections.emptyList());
+        final List<Object> eventStream = caseAggregate.caseDefendantsUpdated(new ProsecutionCase.Builder().withId(prosecutionCaseId).build()).collect(toList());
+        assertThat(eventStream.size(), is(0));
+    }
+
+    @Test
+    public void shouldReturnEmptyEventInEnrichUpdateCaseMarkersWhenHearingIdsIsEmpty(){
+        final UUID prosecutionCaseId = UUID.randomUUID();
+        ReflectionUtil.setField(caseAggregate, "hearingIds", Collections.emptyList());
+        final List<Object> eventStream = caseAggregate.enrichUpdateCaseMarkersWithHearingIds(prosecutionCaseId, Collections.emptyList()).collect(toList());
+        assertThat(eventStream.size(), is(0));
+    }
 }

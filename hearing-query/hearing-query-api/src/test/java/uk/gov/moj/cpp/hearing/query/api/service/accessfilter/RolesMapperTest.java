@@ -85,6 +85,17 @@ public class RolesMapperTest {
     }
 
     @Test
+    public void shouldReturnEmptyListWhenEmptySwitchableRolesPresentInEnvelope() {
+        final String userId = randomUUID().toString();
+        final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
+                .withId(randomUUID()).withUserId(userId).build();
+
+        final Envelope envelope = Envelope.envelopeFrom(metadata,  Json.createObjectBuilder().build());
+        final List<UserRole> switchableRoles = rolesMapper.switchableRoles(envelope);
+        assertThat(switchableRoles.size(), is(0));
+    }
+
+    @Test
     public void shouldReturnRoles() {
         final String userId = randomUUID().toString();
         final Metadata metadata = metadataBuilder().withName("usersgroups.roles")
@@ -115,6 +126,17 @@ public class RolesMapperTest {
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissions.build());
         final List<UserRole> roles = rolesMapper.mapRoles(envelope);
         assertRoles(roles);
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenEmptyRolesPresentInEnvelope() {
+        final String userId = randomUUID().toString();
+        final Metadata metadata = metadataBuilder().withName("usersgroups.roles")
+                .withId(randomUUID()).withUserId(userId).build();
+
+        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final List<UserRole> roles = rolesMapper.mapRoles(envelope);
+        assertThat(roles.size(),is(0));
     }
 
 

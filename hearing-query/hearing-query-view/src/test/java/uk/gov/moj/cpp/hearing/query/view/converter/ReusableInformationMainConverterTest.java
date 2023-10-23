@@ -10,6 +10,7 @@ import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.ADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXL;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLM;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLOM;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INT;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.NAMEADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -94,8 +96,15 @@ public class ReusableInformationMainConverterTest {
         prompts.addAll(prepareFixlmPrompts());
         prompts.addAll(prepareIntPrompts());
         prompts.addAll(prepareFixlPrompts());
+        prompts.addAll(prepareFixlomPrompts());
 
-        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(defendants, prompts, Collections.emptyMap());
+        final Map<String, Map<String, String>> customPromptValues = new HashMap<>();
+        final Map<String,String> customCodesMap = new HashMap<>();
+        customCodesMap.put("350","350");
+        customCodesMap.put("460","460");
+        customPromptValues.put("nationality", customCodesMap);
+
+        final Map<Defendant, List<JsonObject>> defendantListMap = reusableInformationMainConverter.convertDefendant(defendants, prompts, customPromptValues);
 
         assertNotNull(defendantListMap);
 
@@ -304,6 +313,15 @@ public class ReusableInformationMainConverterTest {
                 .setCacheable(2)
                 .setCacheDataPath("prosecutionAuthorityReference")
                 .setReference("prosecutionAuthorityReference")));
+    }
+
+    private List<Prompt> prepareFixlomPrompts() {
+        return Collections.unmodifiableList(Arrays.asList(new Prompt()
+                .setId(UUID.randomUUID())
+                .setType(FIXLOM.name())
+                .setCacheable(2)
+                .setCacheDataPath("prosecutionAuthorityReference")
+                .setReference("nationality")));
     }
 
     private List<Prompt> prepareAddressPrompts() {

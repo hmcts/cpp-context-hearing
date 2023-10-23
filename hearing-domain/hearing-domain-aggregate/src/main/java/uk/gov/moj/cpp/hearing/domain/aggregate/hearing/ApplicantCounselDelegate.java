@@ -46,10 +46,10 @@ public class ApplicantCounselDelegate implements Serializable {
 
     public Stream<Object> updateApplicantCounsel(final ApplicantCounsel applicantCounsel, final UUID hearingId) {
 
-        final Map<UUID, ApplicantCounsel> ApplicantCounsels = this.momento.getApplicantCounsels();
-        if (!(ApplicantCounsels.containsKey(applicantCounsel.getId()))) {
+        final Map<UUID, ApplicantCounsel> applicantCounsels = this.momento.getApplicantCounsels();
+        if (!(applicantCounsels.containsKey(applicantCounsel.getId()))) {
             return Stream.of(new ApplicantCounselChangeIgnored(String.format("Provided applicantCounsel does not exists, payload [%s]", applicantCounsel.toString())));
-        } else if (ApplicantCounsels.get(applicantCounsel.getId()).equals(applicantCounsel)) {
+        } else if (applicantCounsels.get(applicantCounsel.getId()).equals(applicantCounsel)) {
             return Stream.of(new ApplicantCounselChangeIgnored(String.format("No change in provided applicantCounsel, payload [%s]", applicantCounsel.toString())));
         }
         return Stream.of(new ApplicantCounselUpdated(applicantCounsel, hearingId));

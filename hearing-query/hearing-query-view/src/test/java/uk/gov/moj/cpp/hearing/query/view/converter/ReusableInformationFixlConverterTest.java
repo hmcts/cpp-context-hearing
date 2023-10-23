@@ -3,6 +3,7 @@ package uk.gov.moj.cpp.hearing.query.view.converter;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformation.IdType.DEFENDANT;
 
@@ -49,6 +50,13 @@ public class ReusableInformationFixlConverterTest {
         assertThat(jsonObject.getString("masterDefendantId"), is(reusableInformation.getMasterDefendantId().toString()));
         assertThat(jsonObject.getString("value"), is(reusableInformation.getValue()));
         assertThat(jsonObject.getString("type"), is(ReusableInformationConverterType.FIXL.name()));
+
+    }
+
+    @Test
+    public void shouldReturnNullObjectWhenInputIsNull() {
+        final JsonObject jsonObject = cacheableInformationFixlConverter.toJsonObject(null);
+        assertNull(jsonObject);
 
     }
 }

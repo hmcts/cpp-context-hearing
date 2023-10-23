@@ -28,4 +28,6 @@ public class ReusableInformationFixlomConverter extends ReusableInformationBaseC
                 .add(VALUE_LABEL, fixlomValue)
                 .build();
     }
+
+
 }

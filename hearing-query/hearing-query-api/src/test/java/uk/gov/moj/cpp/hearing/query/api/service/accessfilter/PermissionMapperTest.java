@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.query.api.service.accessfilter;
 
 import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static uk.gov.justice.services.messaging.Envelope.metadataBuilder;
 
@@ -71,6 +72,40 @@ public class PermissionMapperTest{
         final Envelope envelope = Envelope.envelopeFrom(metadata, permissionsJson.build());
         final List<Permission> permissions = permissionsMapper.mapPermissions(envelope);
         assertPermissions(permissions);
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenPermissionNotExists() {
+        final String userId = randomUUID().toString();
+        final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
+                .withId(randomUUID()).withUserId(userId).build();
+
+        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final List<Permission> permissions = permissionsMapper.mapPermissions(envelope);
+        assertThat(permissions.size(), is(0));
+    }
+
+    @Test
+    public void shouldReturnGroupsWithNullSource() {
+        final String userId = randomUUID().toString();
+        final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
+                .withId(randomUUID()).withUserId(userId).build();
+
+        final JsonObjectBuilder permission1Json = Json.createObjectBuilder();
+        permission1Json.add(OBJECT, OBJECT1);
+        permission1Json.add(ACTION, ACTION1);
+
+        final JsonArrayBuilder arrayBuilder = Json.createArrayBuilder();
+        arrayBuilder.add(permission1Json);
+
+        final JsonObjectBuilder permissionsJson = Json.createObjectBuilder();
+        permissionsJson.add(PERMISSIONS, arrayBuilder.build());
+
+        final Envelope envelope = Envelope.envelopeFrom(metadata, permissionsJson.build());
+        final List<Permission> permissions = permissionsMapper.mapPermissions(envelope);
+        assertThat(permissions.size(), is(1));
+        assertThat(permissions.get(0).getSource(), is(nullValue()));
+        assertThat(permissions.get(0).getTarget(), is(nullValue()));
     }
 
     private void assertPermissions(final List<Permission> permissions) {

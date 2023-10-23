@@ -39,6 +39,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.YouthCourt;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 
 import java.io.IOException;
@@ -141,6 +142,12 @@ public class TimelineHearingSummaryHelperTest {
         prosecutionCaseIdentifier = new ProsecutionCaseIdentifier();
         prosecutionCaseIdentifier.setProsecutionAuthorityCode(STRING.next());
         prosecutionCaseIdentifier.setProsecutorAuthorityName(STRING.next());
+        YouthCourt youthCourt = new YouthCourt();
+        youthCourt.setCourtCode(1);
+        youthCourt.setId(randomUUID());
+        youthCourt.setName("Youth Court");
+        youthCourt.setWelshName("Youth Court Welsh");
+        hearing.setYouthCourt(youthCourt);
     }
 
     @Test

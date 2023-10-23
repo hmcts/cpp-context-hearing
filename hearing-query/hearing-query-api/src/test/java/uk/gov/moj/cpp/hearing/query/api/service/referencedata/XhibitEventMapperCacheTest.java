@@ -3,13 +3,16 @@ package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
 import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -48,5 +51,22 @@ public class XhibitEventMapperCacheTest {
         xhibitEventMapperCache.init();
 
         assertThat(xhibitEventMapperCache.getCppHearingEventIds(), is(hearingEventIds));
+    }
+
+    @Test
+    public void shouldNotPopulateCacheWhenHearingEventMappingIsEmpty() {
+        final UUID cpHearingEventId_1 = randomUUID();
+        final UUID cpHearingEventId_2 = randomUUID();
+        final Set<UUID> hearingEventIds = new HashSet();
+        hearingEventIds.add(cpHearingEventId_1);
+        hearingEventIds.add(cpHearingEventId_2);
+
+        final XhibitEventMappingsList mappings = new XhibitEventMappingsList(new ArrayList<>());
+
+        when(referenceDataService.listAllEventMappings()).thenReturn(mappings);
+
+        xhibitEventMapperCache.init();
+
+        assertThat(xhibitEventMapperCache.getCppHearingEventIds(), is(empty()));
     }
 }

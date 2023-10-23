@@ -342,6 +342,34 @@ public class CTLExpiryDateCalculatorServiceTest extends TestCase {
     }
 
     @Test
+    public void shouldAvoidCTLCalculationWhenCTLClockIsNotStopped() {
+        final UUID hearingId = randomUUID();
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final UUID offenceId = randomUUID();
+
+        final Offence offence = new Offence();
+        offence.setId(new HearingSnapshotKey(offenceId, hearingId));
+        offence.setCtlClockStopped(true);
+
+        final Defendant defendant = new Defendant();
+        defendant.setId(new HearingSnapshotKey(defendantId, hearingId));
+        defendant.setOffences(singleton(offence));
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setId(new HearingSnapshotKey(prosecutionCaseId, hearingId));
+        prosecutionCase.setDefendants(singleton(defendant));
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        hearing.setProsecutionCases(new HashSet<>(Arrays.asList(prosecutionCase)));
+
+        final boolean isAvoid = ctlExpiryDateCalculatorService.avoidCalculation(hearing, offenceId);
+
+        assertThat(isAvoid, is(true));
+    }
+
+    @Test
     public void shouldReturnCTLExpiryDateWhenTimeSpentIsNotZero() {
         final LocalDate ctlExpiryDate = LocalDate.now().plusDays(182);
         final int timeSpent = 2;

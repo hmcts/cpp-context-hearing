@@ -151,4 +151,11 @@ public class ReusableInformationObjectTypeConverterTest {
         assertNull(addressJsonObject.get("parentguardiansaddressAddress5"));
         assertNull(addressJsonObject.get("parentguardiansaddressEmailAddress2"));
     }
+
+    @Test
+    public void shouldReturnNullObjectWhenInputIsNull() {
+        final JsonObject jsonObject = reusableInformationObjectTypeConverter.toJsonObject(null, null);
+        assertNull(jsonObject);
+
+    }
 }
