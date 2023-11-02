@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
 import static java.util.Objects.nonNull;
+import static javax.json.Json.createObjectBuilder;
 import static org.slf4j.LoggerFactory.getLogger;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.inject.Inject;
+import javax.json.JsonObject;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
@@ -54,6 +56,7 @@ public class UpdateOffencesForDefendantEventListener {
     @Inject
     private UpdateOffencesForDefendantService updateOffencesForDefendantService;
 
+    private static final Logger LOGGER = getLogger(UpdateOffencesForDefendantEventListener.class);
 
     @Transactional
     @Handles("hearing.events.offence-added")
@@ -92,8 +95,18 @@ public class UpdateOffencesForDefendantEventListener {
         final OffenceDeleted offenceDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeleted.class);
 
         final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
+
+        if (nonNull(offence.getDefendant())) {
+            LOGGER.info("Some ids of defendant object {}", convertDefendantToJsonObject(offence.getDefendant()));
+            if (nonNull(offence.getDefendant().getOffences())) {
+                LOGGER.info("Defendant has {} offences before removing", offence.getDefendant().getOffences().size());
+            }
+        }
         offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
 
+        if (nonNull(offence.getDefendant()) && nonNull(offence.getDefendant().getOffences())) {
+            LOGGER.info("Defendant has {} offences before saving", offence.getDefendant().getOffences().size());
+        }
         defendantRepository.save(offence.getDefendant());
     }
 
@@ -111,6 +124,16 @@ public class UpdateOffencesForDefendantEventListener {
         final Hearing hearing = updateOffencesForDefendantService.removeOffencesFromExistingHearing(hearingRepository.findBy(hearingId), prosecutionCaseIds, defendantIds, offenceIds);
 
         hearingRepository.save(hearing);
+
+    }
+
+    private JsonObject convertDefendantToJsonObject(final Defendant defendant) {
+        return createObjectBuilder()
+                .add("id", defendant.getId().getId().toString())
+                .add("masterDefendantId",defendant.getMasterDefendantId().toString())
+                .add("hearingId", defendant.getId().getHearingId().toString())
+                .add("prosecutionCaseId", nonNull(defendant.getProsecutionCaseId()) ? defendant.getProsecutionCaseId().toString() : "null")
+                .build();
 
     }
 
