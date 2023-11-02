@@ -54,7 +54,6 @@ public class UpdateOffencesForDefendantEventListener {
     @Inject
     private UpdateOffencesForDefendantService updateOffencesForDefendantService;
 
-    private static final Logger LOGGER = getLogger(UpdateOffencesForDefendantEventListener.class);
 
     @Transactional
     @Handles("hearing.events.offence-added")
@@ -93,11 +92,8 @@ public class UpdateOffencesForDefendantEventListener {
         final OffenceDeleted offenceDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeleted.class);
 
         final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
-        LOGGER.info("offence.getDefendant {}", nonNull(offence.getDefendant()) ? objectToJsonObjectConverter.convert(offence.getDefendant()) : "null");
-        LOGGER.info("offence.getDefendant.getOffences {}", nonNull(offence.getDefendant().getOffences()) && (!offence.getDefendant().getOffences().isEmpty()) ? objectToJsonObjectConverter.convert(offence.getDefendant().getOffences()) : "null");
         offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
 
-        LOGGER.info("offence.getDefendant before saving defendant {}", nonNull(offence.getDefendant()) ? objectToJsonObjectConverter.convert(offence.getDefendant()) : "null");
         defendantRepository.save(offence.getDefendant());
     }
 
