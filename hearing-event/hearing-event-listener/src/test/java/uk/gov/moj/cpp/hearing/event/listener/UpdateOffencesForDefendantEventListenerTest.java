@@ -280,7 +280,6 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
         final Defendant defendant = new Defendant();
         defendant.setId(new HearingSnapshotKey(randomUUID(), offenceDeleted.getHearingId()));
-        defendant.setMasterDefendantId(randomUUID());
         defendant.setOffences(Collections.emptySet());
 
         final Offence offence = new Offence();
