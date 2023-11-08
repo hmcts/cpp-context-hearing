@@ -5,9 +5,12 @@ import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.toList;
 import static junit.framework.TestCase.assertTrue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static uk.gov.justice.core.courts.Plea.plea;
@@ -28,7 +31,11 @@ import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdatePleaWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.EnrichUpdateVerdictWithAssociatedHearings;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForDeleteOffence;
 import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingMarkedAsDuplicateForOffence;
+import uk.gov.moj.cpp.hearing.domain.event.HearingRemovedForOffence;
 import uk.gov.moj.cpp.hearing.domain.event.OffencePleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstOffence;
@@ -191,6 +198,19 @@ public class OffenceAggregateTest {
     }
 
     @Test
+    public void shouldReturn_stream_whenDeleteOffence_hearingIds_found() {
+        final UUID offenceId = randomUUID();
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
+        final Stream<Object> objectStream = offenceAggregate.lookupHearingsForDeleteOffenceOnOffence(offenceId);
+        final List<Object> event = objectStream.collect(toList());
+        assertThat(event, is(notNullValue()));
+        assertThat(event.size(), is(1));
+        final FoundHearingsForDeleteOffence foundHearingsForDeleteOffence = (FoundHearingsForDeleteOffence) event.get(0);
+        assertThat(foundHearingsForDeleteOffence, is(notNullValue()));
+        assertThat(foundHearingsForDeleteOffence.getId(), is(offenceId));
+    }
+
+    @Test
     public void shouldReturn_stream_whenDeleteOffence_hearingIds_areFound() {
         ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(randomUUID()));
         Stream<Object> objectStream = offenceAggregate.lookupHearingsForEditOffenceOnOffence(randomUUID(), Offence.offence().build());
@@ -270,6 +290,74 @@ public class OffenceAggregateTest {
         assertNotNull(events.get(0));
         assertThat(events.size(), is(1));
         assertThat(events.get(0), is(instanceOf(OffencePleaUpdated.class)));
+    }
+
+    @Test
+    public void shouldUpdateVerdict(){
+        final boolean unanimous = BOOLEAN.next();
+        final int numberOfSplitJurors = unanimous ? 0 : integer(1, 3).next();
+        final UUID offenceId = randomUUID();
+        final UUID hearingId = randomUUID();
+        final UUID connectedHearingId = randomUUID();
+        ReflectionUtil.setField(offenceAggregate, "hearingIds", Collections.singletonList(connectedHearingId));
+        final Verdict verdict = Verdict.verdict()
+                .withVerdictDate(PAST_LOCAL_DATE.next())
+                .withVerdictType(VerdictType.verdictType()
+                        .withId(randomUUID())
+                        .withCategory(STRING.next())
+                        .withCategoryType(TestTemplates.VerdictCategoryType.GUILTY.name())
+                        .withDescription(STRING.next())
+                        .withSequence(INTEGER.next())
+                        .build())
+                .withLesserOrAlternativeOffence(LesserOrAlternativeOffence.lesserOrAlternativeOffence()
+                        .withOffenceDefinitionId(randomUUID())
+                        .withOffenceCode(STRING.next())
+                        .withOffenceTitle(STRING.next())
+                        .withOffenceTitleWelsh(STRING.next())
+                        .withOffenceLegislation(STRING.next())
+                        .withOffenceLegislationWelsh(STRING.next())
+                        .build())
+                .withJurors(Jurors.jurors()
+                        .withNumberOfJurors(integer(9, 12).next())
+                        .withNumberOfSplitJurors(numberOfSplitJurors)
+                        .withUnanimous(unanimous)
+                        .build())
+                .withOffenceId(offenceId)
+                .withOriginatingHearingId(hearingId)
+                .build();
+        final Stream<Object> objectStream = offenceAggregate.updateVerdict(hearingId, verdict);
+        final List<Object> verdictStream = objectStream.collect(toList());
+        assertThat(verdictStream.size(), is(2));
+
+        OffenceVerdictUpdated offenceVerdictUpdated = (OffenceVerdictUpdated) verdictStream.get(0);
+        EnrichUpdateVerdictWithAssociatedHearings enrichUpdateVerdictWithAssociatedHearings =
+                (EnrichUpdateVerdictWithAssociatedHearings) verdictStream.get(1);
+        assertThat(offenceVerdictUpdated.getHearingId(), is(hearingId));
+        assertThat(enrichUpdateVerdictWithAssociatedHearings.getHearingIds().contains(connectedHearingId), is(true));
+    }
+
+    @Test
+    public void shouldMarkHearingAsDuplicate(){
+        final UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final Stream<Object> objectStream = offenceAggregate.markHearingAsDuplicate(offenceId, hearingId);
+        final List<Object> events = objectStream.collect(toList());
+        assertThat(events.size(), is(1));
+        HearingMarkedAsDuplicateForOffence hearingMarkedAsDuplicateForOffence = (HearingMarkedAsDuplicateForOffence) events.get(0);
+        assertThat(hearingMarkedAsDuplicateForOffence.getHearingId(), is(hearingId));
+        assertThat(hearingMarkedAsDuplicateForOffence.getOffenceId(), is(offenceId));
+    }
+
+    @Test
+    public void shouldRemoveHearingForOffence(){
+        final UUID hearingId = randomUUID();
+        final UUID offenceId = randomUUID();
+        final Stream<Object> objectStream = offenceAggregate.removeHearingForOffence(offenceId, hearingId);
+        final List<Object> events = objectStream.collect(toList());
+        assertThat(events.size(), is(1));
+        HearingRemovedForOffence removedForOffence = (HearingRemovedForOffence) events.get(0);
+        assertThat(removedForOffence.getHearingId(), is(hearingId));
+        assertThat(removedForOffence.getOffenceId(), is(offenceId));
     }
 
 }

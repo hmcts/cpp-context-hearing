@@ -529,6 +529,20 @@ public class DefendantAggregateTest {
     }
 
     @Test
+    public void shouldRemoveGrantedApplicationDetailsForDefendant() {
+        Set<UUID> hearingIds = new HashSet<>();
+        hearingIds.add(randomUUID());
+        setField(defendantAggregate, "hearingIds", hearingIds);
+        final UUID hearingId = randomUUID();
+        final UUID defendantId = randomUUID();
+        final List<Object> eventStream = defendantAggregate.removeHearingForDefendant(defendantId, hearingId).collect(toList());
+        assertThat(eventStream.size(), is(1));
+        final HearingRemovedForDefendant hearingRemovedForDefendant = (HearingRemovedForDefendant) eventStream.get(0);
+        assertThat(hearingRemovedForDefendant.getHearingId(), is(hearingId));
+        assertThat(hearingRemovedForDefendant.getDefendantId(), is(defendantId));
+    }
+
+    @Test
     public void testHearingIdsRemovedWhenMarkedForDuplicateOrRemoveOrDelete() {
 
         final UUID defendantId = randomUUID();

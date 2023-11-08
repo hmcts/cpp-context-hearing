@@ -4,6 +4,7 @@ import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
@@ -33,6 +34,9 @@ public class UpdateOffencesForDefendantEventListener {
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
 
     @Inject
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Inject
     private HearingRepository hearingRepository;
 
     @Inject
@@ -46,6 +50,7 @@ public class UpdateOffencesForDefendantEventListener {
 
     @Inject
     private UpdateOffencesForDefendantService updateOffencesForDefendantService;
+
 
     @Transactional
     @Handles("hearing.events.offence-added")
@@ -68,7 +73,7 @@ public class UpdateOffencesForDefendantEventListener {
 
         final Defendant defendant = defendantRepository.findBy(new HearingSnapshotKey(offenceUpdated.getDefendantId(), offenceUpdated.getHearingId()));
 
-        if(nonNull(defendant)) {
+        if (nonNull(defendant)) {
             if (defendant.getOffences().removeIf(o -> o.getId().getId().equals(offenceUpdated.getOffence().getId()))) {
                 defendant.getOffences().add(offence);
             }
@@ -84,6 +89,7 @@ public class UpdateOffencesForDefendantEventListener {
         final OffenceDeleted offenceDeleted = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceDeleted.class);
 
         final Offence offence = offenceRepository.findBy(new HearingSnapshotKey(offenceDeleted.getId(), offenceDeleted.getHearingId()));
+
         offence.getDefendant().getOffences().removeIf(o -> o.getId().getId().equals(offenceDeleted.getId()));
 
         defendantRepository.save(offence.getDefendant());

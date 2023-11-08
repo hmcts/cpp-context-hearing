@@ -26,10 +26,12 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.core.courts.ApprovalType.CHANGE;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
 import static uk.gov.justice.services.messaging.spi.DefaultJsonMetadata.metadataBuilder;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopeMatcher.jsonEnvelope;
@@ -41,6 +43,7 @@ import static uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.xhibit.
 
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
@@ -62,6 +65,7 @@ import uk.gov.moj.cpp.hearing.domain.CourtRoom;
 import uk.gov.moj.cpp.hearing.domain.DefendantDetail;
 import uk.gov.moj.cpp.hearing.domain.DefendantInfoQueryResult;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.dto.DefendantSearch;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialType;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
@@ -69,7 +73,10 @@ import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Pr
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConverter;
+import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
+import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.DraftResultResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
@@ -99,9 +106,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 import javax.persistence.NoResultException;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -170,7 +181,13 @@ public class HearingQueryViewTest {
     private JsonObject draftResult;
 
     @Mock
+    private CrackedIneffectiveTrial mockCrackedIneffectiveTrial;
+
+    @Mock
     private Function<Object, JsonEnvelope> enveloperFunction;
+
+    @Mock
+    private GetShareResultsV2Response getShareResultsV2ResponseMockEnvelope;
 
     @InjectMocks
     private HearingQueryView target;
@@ -427,6 +444,22 @@ public class HearingQueryViewTest {
     }
 
     @Test
+    public void shouldNotGetNowsByExistingId() {
+        when(hearingService.getHearingById(HEARING_ID)).thenReturn(of(new uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing()));
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-now"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .build());
+
+        final Envelope<NowListResponse> nows = target.findNows(query);
+
+        verify(hearingService,times(1)).getHearingById(HEARING_ID);
+        assertThat(nows.payload(), is((JsonObject) null));
+        assertThat(nows.metadata().name(), is("hearing.get-nows"));
+    }
+
+    @Test
     public void shouldNotGetDraftResultByNonExistingId() {
         when(hearingService.getTargets(HEARING_ID)).thenReturn(new TargetListResponse());
 
@@ -495,6 +528,50 @@ public class HearingQueryViewTest {
         final JsonEnvelope draftResultV2 = target.getDraftResultV2(query);
 
         verify(hearingService).getDraftResult(HEARING_ID, HEARING_DAY);
+    }
+
+    @Test
+    public void shouldGetHearingResultsByHearingIdAndHearingDay() throws IOException {
+        final JsonEnvelope jsonEnvelopeMock = mock(JsonEnvelope.class);
+        when(hearingService.getDraftResult(HEARING_ID, HEARING_DAY)).thenReturn(buildDraftResultResponse(true));
+        when(enveloper.withMetadataFrom(any(JsonEnvelope.class), anyString())).thenReturn(enveloperFunction);
+        when(enveloperFunction.apply(any(JsonObject.class))).thenReturn(jsonEnvelopeMock);
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.results"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .build());
+
+        final JsonEnvelope draftResultV2 = target.getDraftResultV2(query);
+
+        verify(hearingService).getDraftResult(HEARING_ID, HEARING_DAY);
+    }
+
+    @Test
+    public void shouldGetSharedResultsV2(){
+        when(hearingService.getShareResultsByDate(HEARING_ID, HEARING_DAY)).thenReturn(getShareResultsV2ResponseMockEnvelope);
+        final JsonEnvelope query = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-share-result-v2"),
+                createObjectBuilder()
+                        .add(FIELD_HEARING_ID, HEARING_ID.toString())
+                        .add(FIELD_HEARING_DAY, HEARING_DAY)
+                        .build());
+        final Envelope<GetShareResultsV2Response> shareResultsV2 = target.getShareResultsV2(query);
+        assertThat(shareResultsV2.metadata().name(),is("hearing.get-share-result-v2"));
+    }
+
+    @Test
+    public void shouldSearchByMaterialId(){
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.query.search-by-material-id"),
+                createObjectBuilder()
+                        .add("q", "q")
+                        .build());
+        when(hearingService.getNowsRepository(envelope.payloadAsJsonObject().getString("q"))).thenReturn(Json.createObjectBuilder().build());
+        final JsonEnvelope jsonEnvelope = target.searchByMaterialId(envelope);
+        verify(hearingService,times(1)).getNowsRepository("q");
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.query.search-by-material-id"));
     }
 
     @Test
@@ -870,6 +947,139 @@ public class HearingQueryViewTest {
         verify(hearingService).getProsecutionCaseForHearings(HEARING_ID);
         assertThat(prosecutionCaseResult.payload().getProsecutionCases(), Matchers.hasSize(1));
         assertThat(prosecutionCaseResult.metadata().name(), is("hearing.get-prosecutioncase-result"));
+    }
+
+    @Test
+    public void shouldFindHearings(){
+        final LocalDate date = LocalDate.now();
+        final List<UUID> accessibleCasesAndApplicationIds = Stream.of(UUID.randomUUID(),UUID.randomUUID(),UUID.randomUUID()).collect(Collectors.toList());
+        final UUID courtCentreId = UUID.randomUUID();
+        final UUID roomId = UUID.randomUUID();
+
+        when(hearingService.getHearings(date,"00:00","23:59",courtCentreId,roomId,accessibleCasesAndApplicationIds,true)).thenReturn(SampleData.getHearings());
+        JsonEnvelope envelope = envelopeFrom(metadataBuilder().withId(randomUUID())
+                .withName("hearing.get.hearings"),
+                Json.createObjectBuilder()
+                        .add("date",date.toString())
+                        .add("courtCentreId",courtCentreId.toString())
+                        .add("roomId", roomId.toString())
+                        .build());
+        final Envelope<GetHearings> hearings = target.findHearings(envelope, accessibleCasesAndApplicationIds, true);
+        assertThat(hearings.payload().getHearingSummaries().size(), is(2));
+        assertThat(hearings.metadata().name(), is("hearing.get.hearings"));
+    }
+
+    @Test
+    public void shouldFindHearingsForToday(){
+        final String userId = randomUUID().toString();
+        when(hearingService.getHearingsForToday(LocalDate.now(), fromString(userId))).thenReturn(SampleData.getHearings());
+        JsonEnvelope envelope = envelopeFrom(metadataBuilder().withUserId(userId)
+                        .withId(randomUUID())
+                        .withName("hearing.get.hearings-for-today"),
+                Json.createObjectBuilder().build());
+        final Envelope<GetHearings> hearings = target.findHearingsForToday(envelope);
+        assertThat(hearings.payload().getHearingSummaries().size(), is(2));
+        assertThat(hearings.metadata().name(), is("hearing.get.hearings-for-today"));
+    }
+
+    @Test
+    public void shouldFindHearingsForFuture(){
+        final String userId = randomUUID().toString();
+        final String defendantId = randomUUID().toString();
+        final HearingTypes hearingTypes = SampleData.getHearingTypes();
+        when(hearingService.getHearingsForFuture(LocalDate.now(), UUID.fromString(defendantId), hearingTypes.getHearingTypes())).thenReturn(SampleData.getHearings());
+        JsonEnvelope envelope = envelopeFrom(metadataBuilder().withUserId(userId)
+                        .withId(randomUUID())
+                        .withName("hearing.get.hearings-for-future"),
+                Json.createObjectBuilder().add("defendantId",defendantId).build());
+        final Envelope<GetHearings> hearings = target.findHearingsForFuture(envelope,hearingTypes);
+        assertThat(hearings.payload().getHearingSummaries().size(), is(2));
+        assertThat(hearings.metadata().name(), is("hearing.get.hearings-for-future"));
+    }
+
+    @Test
+    public void shouldRetrieveSubscriptions(){
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.retrieve-subscriptions"),
+                Json.createObjectBuilder().add("referenceDate","referenceDate")
+                        .add("nowTypeId","nowTypeId").build());
+        when(hearingService.getSubscriptions("referenceDate", "nowTypeId")).thenReturn(Json.createObjectBuilder().build());
+        final JsonEnvelope jsonEnvelope = target.retrieveSubscriptions(envelope);
+        verify(hearingService,times(1)).getSubscriptions("referenceDate", "nowTypeId");
+        assertThat(jsonEnvelope.metadata().name(), is("hearing.retrieve-subscriptions"));
+    }
+
+    @Test
+    public void shouldGetCrackedIneffectiveTrialReason(){
+        final UUID typeTrialId = randomUUID();
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = getCrackedIneffectiveVacatedTrialTypes();
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.get-cracked-ineffective-reason"),
+                Json.createObjectBuilder().add("trialTypeId",typeTrialId.toString()).build());
+        when(hearingService.fetchCrackedIneffectiveTrial(typeTrialId, crackedIneffectiveVacatedTrialTypes))
+                .thenReturn(mockCrackedIneffectiveTrial);
+        final Envelope<CrackedIneffectiveTrial> crackedIneffectiveTrialReason = target.getCrackedIneffectiveTrialReason(envelope, crackedIneffectiveVacatedTrialTypes);
+        verify(hearingService,times(1)).fetchCrackedIneffectiveTrial(typeTrialId,crackedIneffectiveVacatedTrialTypes);
+        assertThat(crackedIneffectiveTrialReason.metadata().name(),is("hearing.get-cracked-ineffective-reason"));
+    }
+
+    @Test
+    public void shouldGetTimeline(){
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = getCrackedIneffectiveVacatedTrialTypes();
+        final JsonObject allCourtRooms = Json.createObjectBuilder().build();
+        final UUID fieldId = randomUUID();
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.timeline"),
+                Json.createObjectBuilder().add("id",fieldId.toString()).build());
+        when(hearingService.getTimeLineByCaseId(fieldId, crackedIneffectiveVacatedTrialTypes, allCourtRooms)).thenReturn(getTimeLineHearingSummary());
+        final Envelope<Timeline> timeline = target.getTimeline(envelope, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+
+        verify(hearingService,times(1)).getTimeLineByCaseId(fieldId, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+        assertThat(timeline.metadata().name(), is("hearing.timeline"));
+        assertThat(timeline.payload().getHearingSummaries().size(), is(1));
+        assertThat(timeline.payload().getHearingSummaries().get(0).getHearingType(), is("hearingType"));
+        assertThat(timeline.payload().getHearingSummaries().get(0).getHearingDate(), is(LocalDate.now().plusMonths(12)));
+    }
+
+    @Test
+    public void shouldGetTimelineByApplicationId(){
+        final CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes = getCrackedIneffectiveVacatedTrialTypes();
+        final JsonObject allCourtRooms = Json.createObjectBuilder().build();
+        final UUID fieldId = randomUUID();
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.timeline"),
+                Json.createObjectBuilder().add("id",fieldId.toString()).build());
+        when(hearingService.getTimeLineByApplicationId(fieldId, crackedIneffectiveVacatedTrialTypes, allCourtRooms)).thenReturn(getTimeLineHearingSummary());
+        final Envelope<Timeline> timeline = target.getTimelineByApplicationId(envelope, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+
+        verify(hearingService,times(1)).getTimeLineByApplicationId(fieldId, crackedIneffectiveVacatedTrialTypes, allCourtRooms);
+        assertThat(timeline.metadata().name(), is("hearing.timeline"));
+        assertThat(timeline.payload().getHearingSummaries().size(), is(1));
+        assertThat(timeline.payload().getHearingSummaries().get(0).getHearingType(), is("hearingType"));
+        assertThat(timeline.payload().getHearingSummaries().get(0).getHearingDate(), is(LocalDate.now().plusMonths(12)));
+    }
+
+    @Test
+    public void shouldGetHearingsForCourtCentresForDate(){
+        final String courtCentreId = randomUUID().toString();
+        final String dateOfHearing = "2023-12-31";
+        final JsonEnvelope envelope = envelopeFrom(
+                metadataWithRandomUUID("hearing.hearings-court-centres-for-date"),
+                Json.createObjectBuilder().add("courtCentreIds",courtCentreId)
+                        .add("dateOfHearing",dateOfHearing).build());
+        final Set<UUID> cppHearingEventIds = Stream.of(randomUUID(), randomUUID()).collect(Collectors.toSet());
+        when(hearingService.getHearingsByDate(Stream.of(UUID.fromString(courtCentreId)).collect(Collectors.toList()), LocalDate.parse(dateOfHearing), cppHearingEventIds)).thenReturn(Optional.empty());
+        final JsonEnvelope hearingsForCourtCentresForDate = target.getHearingsForCourtCentresForDate(envelope, cppHearingEventIds);
+        verify(hearingService,times(1)).getHearingsByDate(Stream.of(UUID.fromString(courtCentreId)).collect(Collectors.toList()), LocalDate.parse(dateOfHearing), cppHearingEventIds);
+        assertThat(hearingsForCourtCentresForDate.metadata().name(),is("hearing.hearings-court-centres-for-date"));
+    }
+    private Timeline getTimeLineHearingSummary(){
+        TimelineHearingSummary summary = new TimelineHearingSummary.TimelineHearingSummaryBuilder()
+                .withHearingId(randomUUID())
+                .withHearingType("hearingType")
+                .withHearingDate(LocalDate.now().plusMonths(12)).build();
+        return new Timeline(Stream.of(summary).collect(Collectors.toList()));
+
     }
 
     private List<Prompt> prepareResultPromptsData(final UUID promptId) {

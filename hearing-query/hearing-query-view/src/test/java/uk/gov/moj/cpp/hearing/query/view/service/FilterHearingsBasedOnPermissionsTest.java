@@ -5,6 +5,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.when;
 
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplication;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingApplicationKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 
@@ -14,6 +16,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +55,9 @@ public class FilterHearingsBasedOnPermissionsTest {
     @Mock
     private HearingSnapshotKey hearingSnapshotKey3;
 
+    @Mock
+    private HearingApplication hearingApplication;
+
     @InjectMocks
     FilterHearingsBasedOnPermissions filterHearingsBasedOnPermissions;
 
@@ -71,6 +78,28 @@ public class FilterHearingsBasedOnPermissionsTest {
         final List<UUID> accessableCaseList = new ArrayList();
         final List<Hearing> filterHearings = filterHearingsBasedOnPermissions.filterHearings(hearings, accessableCaseList);
         assertThat(filterHearings.size(), is(0));
+    }
+
+    @Test
+    public void shouldReturnFilterHearings() {
+        final List<Hearing> hearings = new ArrayList();
+        hearings.add(hearing1);
+
+        final List<UUID> accessableCaseList = new ArrayList();
+        final UUID caseId1 = UUID.randomUUID();
+        accessableCaseList.add(caseId1);
+
+        when(hearing1.getProsecutionCases()).thenReturn(Stream.of(prosecutionCase1).collect(Collectors.toSet()));
+        when(prosecutionCase1.getId()).thenReturn(hearingSnapshotKey1);
+        when(hearingSnapshotKey1.getId()).thenReturn(caseId1);
+
+        final HearingApplicationKey hearingApplicationKey = new HearingApplicationKey(caseId1, UUID.randomUUID());
+        when(hearingApplication.getId()).thenReturn(hearingApplicationKey);
+        when(hearing1.getHearingApplications()).thenReturn(Stream.of(hearingApplication).collect(Collectors.toSet()));
+
+        final List<Hearing> filterHearings = filterHearingsBasedOnPermissions.filterHearings(hearings, accessableCaseList);
+
+        assertThat(filterHearings.size(), is(2));
     }
 
 

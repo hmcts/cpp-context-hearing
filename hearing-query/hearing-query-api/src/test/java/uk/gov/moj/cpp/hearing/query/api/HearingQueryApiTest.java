@@ -11,10 +11,17 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.isNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonObjects.getString;
+import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+import static java.time.LocalDate.now;
 
+import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.dispatcher.EnvelopePayloadTypeConverter;
@@ -23,26 +30,40 @@ import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
+import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.LinkedApplicationsSummary;
 import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.PIEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.query.api.service.referencedata.XhibitEventMapperCache;
+import uk.gov.moj.cpp.hearing.query.view.HearingEventQueryView;
 import uk.gov.moj.cpp.hearing.query.view.HearingQueryView;
+import uk.gov.moj.cpp.hearing.query.view.SessionTimeQueryView;
+import uk.gov.moj.cpp.hearing.query.view.response.SessionTimeResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.Timeline;
 import uk.gov.moj.cpp.hearing.query.view.response.TimelineHearingSummary;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.GetShareResultsV2Response;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.NowListResponse;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.ProsecutionCaseResponse;
+import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.TargetListResponse;
 
 import java.io.File;
 import java.lang.reflect.Method;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.inject.Inject;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 
@@ -87,13 +108,41 @@ public class HearingQueryApiTest {
     private Envelope<JsonValue> mockJsonValueEnvelope;
 
     @Mock
+    private Envelope<JsonObject> mockJsonObjectEnvelope;
+
+    @Mock
+    private Envelope<TargetListResponse> mockTargetListResponseEnvelope;
+    @Mock
+    private Envelope<CrackedIneffectiveTrial> mockCrackedIneffectiveTrialEnvelope;
+    @Mock
+    private Envelope<GetShareResultsV2Response> mockGetShareResultsV2ResponseEnvelope;
+
+    @Mock
+    private Envelope<NowListResponse> mockNowListResponseEnvelope;
+
+    @Mock
     private Envelope<GetHearings> mockGetHearingsEnvelope;
+
+    @Mock
+    private Envelope<SessionTimeResponse> mockSessionTimeResponse;
+
+    @Mock
+    private List<Prompt> prompts;
+
+    @Mock
+    private SessionTimeQueryView sessionTimeQueryView;
 
     @Mock
     private Envelope<ProsecutionCaseResponse> mockGetProsecutionCaseEnvelope;
 
     @Mock
     private JsonEnvelope mockJsonEnvelope;
+
+    @Mock
+    private Set<UUID> mockSetUUIDEnvelope;
+
+    @Mock
+    private XhibitEventMapperCache xhibitEventMapperCache;
 
     @Mock
     private EnvelopePayloadTypeConverter mockEnvelopePayloadTypeConverter;
@@ -103,6 +152,18 @@ public class HearingQueryApiTest {
 
     @Mock
     private PIEventMapperCache piEventMapperCache;
+
+    @Inject
+    private PIEventMapperCache piEventMapperCache1;
+
+    @Mock
+    private HearingEventQueryView hearingEventQueryView;
+
+    @Mock
+    private ProsecutionCase prosecutionCase;
+
+    @Mock
+    private CrackedIneffectiveVacatedTrialTypes crackedIneffectiveVacatedTrialTypes;
 
     @InjectMocks
     private HearingQueryApi hearingQueryApi;
@@ -115,6 +176,7 @@ public class HearingQueryApiTest {
         apiMethodsToHandlerNames = stream(HearingQueryApi.class.getMethods())
                 .filter(method -> method.getAnnotation(Handles.class) != null)
                 .collect(toMap(Method::getName, method -> method.getAnnotation(Handles.class).value()));
+        piEventMapperCache1 = new PIEventMapperCache();
     }
 
     @Test
@@ -198,6 +260,36 @@ public class HearingQueryApiTest {
     }
 
     @Test
+    public void shouldReturnTimelineForCaseWhenApplicationSummaryIsNotNull() {
+        final List<TimelineHearingSummary> timelineHearingSummaries = new ArrayList<>();
+        final TimelineHearingSummary timelineHearingSummary = new TimelineHearingSummary.TimelineHearingSummaryBuilder().withHearingType("Review").withHearingId(randomUUID()).build();
+        timelineHearingSummaries.add(timelineHearingSummary);
+
+        final Timeline expectedTimeline = new Timeline(timelineHearingSummaries);
+
+        when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(ProsecutionCase.prosecutionCase().build());
+        when(hearingQueryView.getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class))).thenReturn(mockCaseTimelineEnvelope);
+        when(mockCaseTimelineEnvelope.payload()).thenReturn(expectedTimeline);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.case.timeline", createObjectBuilder()
+                .add("id", CASE_ID.toString())
+                .build());
+
+        List<LinkedApplicationsSummary> linkedApplicationsSummary = new ArrayList<>();
+        linkedApplicationsSummary.add(new LinkedApplicationsSummary.Builder().withApplicationId(UUID.randomUUID()).build());
+
+        when(progressionService.getProsecutionCaseDetails(CASE_ID)).thenReturn(prosecutionCase);
+        when(prosecutionCase.getLinkedApplicationsSummary()).thenReturn(linkedApplicationsSummary);
+
+        hearingQueryApi.getCaseTimeline(query);
+
+        verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
+        verify(referenceDataService, times(1)).getAllCourtRooms(any(JsonEnvelope.class));
+        verify(hearingQueryView, times(1)).getTimeline(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+        verify(hearingQueryView, times(0)).getTimelineByApplicationId(any(JsonEnvelope.class), any(CrackedIneffectiveVacatedTrialTypes.class), any(JsonObject.class));
+    }
+
+    @Test
     public void shouldReturnFutureHearings() {
 
         when(hearingQueryView.findHearingsForFuture(any(), any())).thenReturn(null);
@@ -231,6 +323,30 @@ public class HearingQueryApiTest {
         verify(hearingQueryView).getFutureHearingsByCaseIds(any(JsonEnvelope.class));
         assertThat(result, is(mockJsonEnvelope));
     }
+
+   /* @Test
+    public void shouldGetCasesByPersonDefendant(){
+        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-person-defendant", createObjectBuilder()
+                .add("firstName", randomAlphabetic(5))
+                .add("lastName", randomAlphabetic(5))
+                .add("dateOfBirth", now().minusYears(25).toString())
+                .add("hearingDate", now().toString())
+                .add("caseIds", randomUUID().toString() +","+ randomUUID().toString())
+                .build());
+        hearingQueryApi.getCasesByPersonDefendant(envelope);
+        verify(hearingQueryView).getCasesByPersonDefendant(envelope);
+    }
+
+    @Test
+    public void shouldGetCasesByOrganisationDefendant(){
+        final JsonEnvelope envelope = EnvelopeFactory.createEnvelope("hearing.get.cases-by-organisation-defendant", createObjectBuilder()
+                .add("organisationName", randomAlphabetic(5))
+                .add("hearingDate", now().toString())
+                .add("caseIds", randomUUID().toString() +","+ randomUUID().toString())
+                .build());
+        hearingQueryApi.getCasesByOrganisationDefendant(envelope);
+        verify(hearingQueryView).getCasesByOrganisationDefendant(envelope);
+    }*/
 
     @Test
     public void shouldGetProsecutionCaseIfHearingEventIsPresnet() {
@@ -279,5 +395,262 @@ public class HearingQueryApiTest {
         hearingEventIds.add(cpHearingEventId_1);
         hearingEventIds.add(cpHearingEventId_2);
         return hearingEventIds;
+    }
+
+    @Test
+    public void shouldFindHearingsForToday(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.hearings-for-today", createObjectBuilder()
+                .add("userId", UUID.randomUUID().toString())
+                .build());
+        when(hearingQueryView.findHearingsForToday(query)).thenReturn(mockGetHearingsEnvelope);
+        hearingQueryApi.findHearingsForToday(query);
+
+        verify(hearingQueryView, times(1)).findHearingsForToday(query);
+    }
+
+    @Test
+    public void shouldGetHearingEventDefinitionsVersionTwo(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-definitions", createObjectBuilder()
+                .add("userId", UUID.randomUUID().toString())
+                .build());
+        when(hearingEventQueryView.getHearingEventDefinitions(query)).thenReturn(mockJsonObjectEnvelope);
+        hearingQueryApi.getHearingEventDefinitionsVersionTwo(query);
+
+        verify(hearingEventQueryView, times(1)).getHearingEventDefinitions(query);
+    }
+
+    @Test
+    public void shouldGetHearingEventDefinition(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-definition", createObjectBuilder()
+                .add("hearingEventDefinitionId", UUID.randomUUID().toString())
+                .build());
+        when(hearingEventQueryView.getHearingEventDefinition(query)).thenReturn(mockJsonObjectEnvelope);
+        hearingQueryApi.getHearingEventDefinition(query);
+
+        verify(hearingEventQueryView, times(1)).getHearingEventDefinition(query);
+    }
+
+    @Test
+    public void shouldGetHearingEventLog(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("date", LocalDate.now().toString())
+                .build());
+        when(hearingEventQueryView.getHearingEventLog(query)).thenReturn(mockJsonObjectEnvelope);
+        hearingQueryApi.getHearingEventLog(query);
+
+        verify(hearingEventQueryView, times(1)).getHearingEventLog(query);
+    }
+
+    @Test
+    public void shouldGetResults(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-results", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("hearingDay", "3")
+                .build());
+        when(hearingQueryView.getResults(query)).thenReturn(mockTargetListResponseEnvelope);
+        hearingQueryApi.getResults(query);
+
+        verify(hearingQueryView, times(1)).getResults(query);
+    }
+
+    @Test
+    public void shouldFindNows(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get.nows", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("hearingDay", "3")
+                .build());
+        when(hearingQueryView.findNows(query)).thenReturn(mockNowListResponseEnvelope);
+        hearingQueryApi.findNows(query);
+
+        verify(hearingQueryView, times(1)).findNows(query);
+    }
+
+    @Test
+    public void shouldGetActiveHearingsForCourtRoom(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-active-hearings-for-court-room", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("eventDate", LocalDate.now().toString())
+                .build());
+        when(hearingEventQueryView.getActiveHearingsForCourtRoom(query)).thenReturn(mockJsonObjectEnvelope);
+        hearingQueryApi.getActiveHearingsForCourtRoom(query);
+
+        verify(hearingEventQueryView, times(1)).getActiveHearingsForCourtRoom(query);
+    }
+
+    @Test
+    public void shouldGetCrackedIneffectiveTrialReason(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-cracked-ineffective-reason", createObjectBuilder()
+                .add("trialTypeId", UUID.randomUUID().toString())
+                .build());
+        when(referenceDataService.listAllCrackedIneffectiveVacatedTrialTypes()).thenReturn(crackedIneffectiveVacatedTrialTypes);
+        when(hearingQueryView.getCrackedIneffectiveTrialReason(query, crackedIneffectiveVacatedTrialTypes)).thenReturn(mockCrackedIneffectiveTrialEnvelope);
+        hearingQueryApi.getCrackedIneffectiveTrialReason(query);
+
+        verify(referenceDataService, times(1)).listAllCrackedIneffectiveVacatedTrialTypes();
+        verify(hearingQueryView, times(1)).getCrackedIneffectiveTrialReason(query,crackedIneffectiveVacatedTrialTypes);
+    }
+
+    @Test
+    public void shouldGetDraftResult(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-draft-result", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .build());
+        when(hearingQueryView.getDraftResult(query)).thenReturn(mockTargetListResponseEnvelope);
+        hearingQueryApi.getDraftResult(query);
+
+        verify(hearingQueryView, times(1)).getDraftResult(query);
+    }
+
+    @Test
+    public void shouldGetDraftResultV2(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-draft-result-v2", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("hearingDay", "3")
+                .build());
+        when(hearingQueryView.getDraftResultV2(query)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.getDraftResultV2(query);
+
+        verify(hearingQueryView, times(1)).getDraftResultV2(query);
+    }
+
+    @Test
+    public void shouldGetShareResultV2(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-share-result-v2", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("hearingDay", "3")
+                .build());
+        when(hearingQueryView.getShareResultsV2(query)).thenReturn(mockGetShareResultsV2ResponseEnvelope);
+        hearingQueryApi.getShareResultV2(query);
+
+        verify(hearingQueryView, times(1)).getShareResultsV2(query);
+    }
+
+    @Test
+    public void shouldSearchByMaterialId(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.query.search-by-material-id", createObjectBuilder()
+                .add("q", "query_test")
+                .build());
+        when(hearingQueryView.searchByMaterialId(query)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.searchByMaterialId(query);
+
+        verify(hearingQueryView, times(1)).searchByMaterialId(query);
+    }
+
+    @Test
+    public void shouldRetrieveSubscriptions(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.retrieve-subscriptions", createObjectBuilder()
+                .add("referenceDate", "referenceDate")
+                .add("nowTypeId", "nowTypeId")
+                .build());
+        when(hearingQueryView.retrieveSubscriptions(query)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.retrieveSubscriptions(query);
+
+        verify(hearingQueryView, times(1)).retrieveSubscriptions(query);
+    }
+
+    @Test
+    public void shouldPublishCourtListStatus(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.court.list.publish.status", createObjectBuilder()
+                .add("courtCentreId", "courtCentreId")
+                .build());
+        when(hearingQueryView.getCourtListPublishStatus(query)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.publishCourtListStatus(query);
+
+        verify(hearingQueryView, times(1)).getCourtListPublishStatus(query);
+    }
+
+    @Test
+    public void shouldGetHeringsByCourtCentre(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.latest-hearings-by-court-centres", createObjectBuilder()
+                .add("courtCentreIds", "courtCentreIds")
+                .add("dateOfHearing", "dateOfHearing")
+                .build());
+        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(mockSetUUIDEnvelope);
+        when(hearingQueryView.getLatestHearingsByCourtCentres(query, mockSetUUIDEnvelope)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.getHeringsByCourtCentre(query);
+
+        verify(hearingQueryView, times(1)).getLatestHearingsByCourtCentres(query, mockSetUUIDEnvelope);
+    }
+
+    @Test
+    public void shouldGetHearingsForCourtCentreForDate(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.hearings-court-centres-for-date", createObjectBuilder()
+                .add("courtCentreIds", "courtCentreIds")
+                .add("dateOfHearing", "dateOfHearing")
+                .build());
+        when(xhibitEventMapperCache.getCppHearingEventIds()).thenReturn(mockSetUUIDEnvelope);
+        when(hearingQueryView.getHearingsForCourtCentresForDate(query, mockSetUUIDEnvelope)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.getHearingsForCourtCentreForDate(query);
+
+        verify(hearingQueryView, times(1)).getHearingsForCourtCentresForDate(query, mockSetUUIDEnvelope);
+    }
+
+    @Test
+    public void shouldGetHearingDefendantInfo(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.defendant.info", createObjectBuilder()
+                .add("courtCentreIds", "courtCentreIds")
+                .add("courtRoomIds", "courtRoomIds")
+                .add("dateOfHearing", "dateOfHearing")
+                .build());
+        when(hearingQueryView.getDefendantInfoFromCourtHouseId(query)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.getHearingDefendantInfo(query);
+
+        verify(hearingQueryView, times(1)).getDefendantInfoFromCourtHouseId(query);
+    }
+
+    @Test
+    public void shouldGetReusableInfo(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.query.reusable-info", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("orderedDate", "orderedDate")
+                .build());
+        Map<String, String> map = Stream.of(new String[][] {
+                { "c1","country1" },
+                { "c2","country2" },
+        }).collect(Collectors.toMap(data -> data[0], data -> data[1]));
+
+        when(referenceDataService.getCountryCodesMap()).thenReturn(map);
+        when(referenceDataService.getCacheableResultPrompts(getString(query.payloadAsJsonObject(), "orderedDate"))).thenReturn(prompts);
+        when(hearingQueryView.getReusableInformation(query, prompts, map)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.getReusableInfo(query);
+
+        verify(referenceDataService, times(1)).getCountryCodesMap();
+        verify(referenceDataService, times(1)).getCacheableResultPrompts(getString(query.payloadAsJsonObject(), "orderedDate"));
+        verify(hearingQueryView, times(1)).getReusableInformation(query, prompts, map);
+    }
+
+    @Test
+    public void shouldRetrieveCustodyTimeLimit(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.custody-time-limit", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("offenceId", UUID.randomUUID().toString())
+                .add("hearingDay", UUID.randomUUID().toString())
+                .add("bailStatusCode", "bailStatusCode")
+                .build());
+        when(hearingQueryView.retrieveCustodyTimeLimit(query)).thenReturn(mockJsonEnvelope);
+        hearingQueryApi.retrieveCustodyTimeLimit(query);
+
+        verify(hearingQueryView, times(1)).retrieveCustodyTimeLimit(query);
+    }
+
+    @Test
+    public void shouldGetSessionTime(){
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.query.session-time", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("offenceId", UUID.randomUUID().toString())
+                .add("hearingDay", UUID.randomUUID().toString())
+                .add("bailStatusCode", "bailStatusCode")
+                .build());
+        when(sessionTimeQueryView.getSessionTime(mockEnvelopePayloadTypeConverter.convert(query, JsonObject.class))).thenReturn(mockSessionTimeResponse);
+        hearingQueryApi.sessionTime(query);
+
+        verify(sessionTimeQueryView, times(1)).getSessionTime(mockEnvelopePayloadTypeConverter.convert(query, JsonObject.class));
+    }
+
+    @Test
+    public void shouldInitPIEventMapperCacheAndReturnCppHearingEventIds(){
+        Set<UUID> set =  piEventMapperCache1.getCppHearingEventIds();
+        assertThat(set.size(),is(32));
     }
 }

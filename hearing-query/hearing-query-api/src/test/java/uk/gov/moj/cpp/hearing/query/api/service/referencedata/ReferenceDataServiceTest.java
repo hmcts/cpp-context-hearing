@@ -1,10 +1,13 @@
 package uk.gov.moj.cpp.hearing.query.api.service.referencedata;
 
+import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static javax.json.Json.createReader;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
@@ -21,13 +24,30 @@ import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.justice.services.core.requester.Requester;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.PIEventMappingsList;
+import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMapping;
+import uk.gov.moj.cpp.external.domain.referencedata.XhibitEventMappingsList;
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 
+import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonValue;
+
+import com.google.common.collect.testing.SafeTreeMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +55,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.slf4j.LoggerFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ReferenceDataServiceTest {
@@ -51,13 +72,11 @@ public class ReferenceDataServiceTest {
     @Mock(answer = RETURNS_DEEP_STUBS)
     private Requester requester;
 
-
     @InjectMocks
     private ReferenceDataService referenceDataService;
 
     @Before
     public void setup() {
-
         setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
         setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
     }
@@ -84,6 +103,62 @@ public class ReferenceDataServiceTest {
         final List<Prompt> resultPrompts = referenceDataService.getCacheableResultPrompts(Optional.empty());
         assertThat(resultPrompts.size(), is(1));
         assertThat(resultPrompts.get(0).getReference(), is(promptRef));
+    }
+
+    @Test
+    public void shouldNotGetCacheableResultDefinitionsAndThrowException() {
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenThrow(ExecutionException.class);
+        final List<Prompt> resultPrompts = referenceDataService.getCacheableResultPrompts(Optional.empty());
+        assertThat(resultPrompts.size(), is(0));
+    }
+
+    @Test
+    public void shouldGetCountryCodesMap(){
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(countryCodeResponseEnvelope());
+        final Map<String, String> countryCodesMap = referenceDataService.getCountryCodesMap();
+        assertThat(countryCodesMap.get("isoCode"), is("countryName"));
+    }
+
+    @Test
+    public void shouldListAllEventMappings() {
+        final String firstXhibitEventCode = "exhibitEventCode_1";
+        final String secondXhibitEventCode = "exhibitEventCode_2";
+        final UUID cpHearingEventId_1 = randomUUID();
+        final UUID cpHearingEventId_2 = randomUUID();
+        final XhibitEventMapping xhibitEventMapping1 = new XhibitEventMapping(cpHearingEventId_1, firstXhibitEventCode, EMPTY, EMPTY, EMPTY);
+        final XhibitEventMapping xhibitEventMapping2 = new XhibitEventMapping(cpHearingEventId_2, secondXhibitEventCode, EMPTY, EMPTY, EMPTY);
+
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class)).payload()).thenReturn(new XhibitEventMappingsList(asList(xhibitEventMapping1,xhibitEventMapping2)));
+        XhibitEventMappingsList list = referenceDataService.listAllEventMappings();
+        assertEquals(2,list.getCpXhibitHearingEventMappings().size());
+        assertEquals(cpHearingEventId_1,list.getCpXhibitHearingEventMappings().get(0).getCpHearingEventId());
+        assertEquals(cpHearingEventId_2,list.getCpXhibitHearingEventMappings().get(1).getCpHearingEventId());
+    }
+
+    @Test
+    public void shouldListAllPIEventMappings() {
+        final String eventCode_1 = "eventCode_1";
+        final String eventCode_2 = "eventCode_2";
+        final UUID eventId_1 = randomUUID();
+        final UUID eventId_2 = randomUUID();
+        final String eventDescription_1 = "eventDescription_1";
+        final String eventDescription_2 = "eventDescription_2";
+        final PIEventMapping eventMapping1 = new PIEventMapping(eventId_1, eventCode_1, eventDescription_1);
+        final PIEventMapping eventMapping2 = new PIEventMapping(eventId_2, eventCode_2, eventDescription_2);
+
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class)).payload()).thenReturn(new PIEventMappingsList(asList(eventMapping1,eventMapping2)));
+        PIEventMappingsList list = referenceDataService.listAllPIEventMappings();
+        assertEquals(2,list.getCpPIHearingEventMappings().size());
+        assertEquals(eventId_1,list.getCpPIHearingEventMappings().get(0).getCpHearingEventId());
+        assertEquals(eventId_2,list.getCpPIHearingEventMappings().get(1).getCpHearingEventId());
+    }
+
+    @Test
+    public void shouldGetAllCourtRooms() {
+        when(requester.requestAsAdmin(any(JsonEnvelope.class), any(Class.class))).thenReturn(courtRoomsResponseEnvelope());
+        JsonObject obj = referenceDataService.getAllCourtRooms(courtRoomsRequestEnvelope());
+        assertEquals(1, obj.getJsonArray("organisationunits").size());
+        assertEquals("oucodeL3Name", obj.getJsonArray("organisationunits").getJsonObject(0).getString("oucodeL3Name"));
     }
 
     private Envelope cacheableResultDefinitionsEnvelope(final String promptRef) {
@@ -152,5 +227,40 @@ public class ReferenceDataServiceTest {
                         withId(randomUUID()),
                 createObjectBuilder().build()
         );
+    }
+
+    private JsonEnvelope courtRoomsRequestEnvelope() {
+        return envelopeFrom(
+                metadataBuilder().
+                        withName("referencedata.query.courtrooms").
+                        withId(randomUUID()),
+                createObjectBuilder().build()
+        );
+    }
+
+    private JsonEnvelope courtRoomsResponseEnvelope() {
+        return envelopeFrom(
+                metadataBuilder().
+                        withName("referencedata.query.courtrooms").
+                        withId(randomUUID()),
+                createObjectBuilder().add("organisationunits",
+                        createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("id", randomUUID().toString())
+                                        .add("oucodeL3Name", "oucodeL3Name"))
+                                .build())
+        );
+    }
+
+    private JsonEnvelope countryCodeResponseEnvelope(){
+        return envelopeFrom(metadataBuilder()
+                .withName("referencedata.query.country-nationality")
+                .withId(randomUUID()),
+                createObjectBuilder().add("countryNationality",
+                        createArrayBuilder()
+                                .add(createObjectBuilder()
+                                        .add("isoCode","isoCode")
+                                        .add("countryName","countryName")
+                                        .build()).build()).build());
     }
 }

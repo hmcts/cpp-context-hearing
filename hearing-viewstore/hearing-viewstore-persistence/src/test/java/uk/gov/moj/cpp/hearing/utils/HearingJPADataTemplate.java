@@ -59,6 +59,7 @@ public final class HearingJPADataTemplate {
                 .forEach(prosecutionCase -> {
                     prosecutionCase.setId(aNewHearingSnapshotKey(hearingEntity.getId()));
                     prosecutionCase.setHearing(hearingEntity);
+                    prosecutionCase.setCourtListRestricted(true);
                     hearingEntity.getProsecutionCases().add(prosecutionCase);
                 });
         //
@@ -81,6 +82,7 @@ public final class HearingJPADataTemplate {
                     defendant.setProsecutionCaseId(hearingEntity.getProsecutionCases().iterator().next().getId().getId());
                     defendant.setLegalaidStatus("Granted");
                     defendant.setProceedingsConcluded(true);
+                    defendant.setCourtListRestricted(true);
 
                     hearingEntity.getProsecutionCases().iterator().next().getDefendants().add(defendant);
                 });

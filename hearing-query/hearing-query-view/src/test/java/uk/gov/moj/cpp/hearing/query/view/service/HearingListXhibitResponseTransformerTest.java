@@ -44,6 +44,7 @@ import uk.gov.moj.cpp.hearing.test.FileUtil;
 import uk.gov.moj.cpp.listing.common.xhibit.CommonXhibitReferenceDataService;
 import uk.gov.moj.cpp.listing.domain.referencedata.CourtRoomMapping;
 
+import java.math.BigInteger;
 import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -297,6 +298,7 @@ public class HearingListXhibitResponseTransformerTest {
     @Test
     public void shouldTransformFromWithFinishedEventWithInactiveCaseStatus() {
         final UUID eventDefinitionsId = EventDefinitions.FINISHED.getEventDefinitionsId();
+        final BigInteger progressionCode = EventDefinitions.FINISHED.getProgressCode();
 
         final UUID courtCentreId = randomUUID();
         final UUID courtRoomId = randomUUID();

@@ -1,9 +1,19 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate;
 
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.fail;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
+import uk.gov.moj.cpp.hearing.domain.event.ApplicationDefendantsUpdated;
+import uk.gov.moj.cpp.hearing.domain.event.CourtApplicationEjected;
+import uk.gov.moj.cpp.hearing.domain.event.HearingDeletedForCourtApplication;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstApplication;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,5 +80,52 @@ public class ApplicationAggregateTest {
         Assert.assertEquals(registeredHearingAgainstApplicationTwo.getHearingId(), applicationAggregate.getHearingIds().get(1));
 
 
+    }
+
+    @Test
+    public void testDeleteHearingForCourtApplication(){
+        final UUID courtApplicationId = UUID.randomUUID();
+        final UUID hearingId = UUID.randomUUID();
+        final HearingDeletedForCourtApplication event = (HearingDeletedForCourtApplication)applicationAggregate.deleteHearingForCourtApplication
+                (courtApplicationId, hearingId).collect(Collectors.toList()).get(0);
+        assertThat(event.getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void testApplicationDefendantsUpdated_WhenHearingIdsNotEmpty() {
+        ReflectionUtil.setField(applicationAggregate, "hearingIds", Arrays.asList(UUID.randomUUID(), UUID.randomUUID()));
+        final ApplicationDefendantsUpdated event = (ApplicationDefendantsUpdated)
+                applicationAggregate.applicationDefendantsUpdated(new CourtApplication.Builder().build()).collect(Collectors.toList()).get(0);
+        assertThat(event.getHearingIds(), is(applicationAggregate.getHearingIds()));
+    }
+
+    @Test
+    public void testApplicationDefendantsUpdated_WhenHearingIdsIsEmpty() {
+        final List<Object> event = applicationAggregate.applicationDefendantsUpdated(new CourtApplication.Builder().build()).collect(Collectors.toList());
+        assertThat(event.size(), is(0));
+    }
+
+    @Test
+    public void testEjectApplication_RaiseCourtApplicationEjected_WhenHearingIdsNotEmpty() {
+        final UUID applicationId = UUID.randomUUID();
+        ReflectionUtil.setField(applicationAggregate, "hearingIds", Arrays.asList(UUID.randomUUID(), UUID.randomUUID()));
+        final CourtApplicationEjected event = (CourtApplicationEjected)applicationAggregate.ejectApplication(applicationId, Collections.emptyList()).collect(Collectors.toList()).get(0);
+        assertThat(event.getApplicationId(), is(applicationId));
+    }
+
+    @Test
+    public void testEjectApplication_WhenHearingIdsIsEmpty() {
+        final UUID applicationId = UUID.randomUUID();
+        final List<Object> event = applicationAggregate.ejectApplication(applicationId, Collections.emptyList()).collect(Collectors.toList());
+        assertThat(event.size(), is(0));
+    }
+
+    @Test
+    public void testEjectApplication_RaiseCourtApplicationEjected_WhenHearingIdsPassedIsNotEmpty() {
+        final UUID applicationId = UUID.randomUUID();
+        final List<UUID> hearingIds = Arrays.asList(UUID.randomUUID(), UUID.randomUUID());
+        final List<Object> event = applicationAggregate.ejectApplication(applicationId, hearingIds).collect(Collectors.toList());
+        final CourtApplicationEjected courtApplicationEjected = (CourtApplicationEjected)event.get(0);
+        assertThat(courtApplicationEjected.getHearingIds(), is(hearingIds));
     }
 }

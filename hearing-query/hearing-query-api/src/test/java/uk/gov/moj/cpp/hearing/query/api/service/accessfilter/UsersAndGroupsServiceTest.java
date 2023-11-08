@@ -94,6 +94,23 @@ public class UsersAndGroupsServiceTest{
         assertPermissions(permissions);
     }
 
+    @Test
+    public void shouldReturnUserRoles() {
+        final String userId = randomUUID().toString();
+        final Metadata metadata = metadataBuilder().withName("usersgroups.get-roles-for-user")
+                .withId(randomUUID()).withUserId(userId).build();
+
+        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().add("userId", userId).build());
+        when(requester.request(any(), any())).thenReturn(envelope);
+        when(switchableRolesMapper.mapRoles(envelope)).thenReturn(switchableRoles());
+        final List<UserRole> userRoles = usersAndGroupsService.userRoles(userId);
+        assertThat(userRoles.size(),is(2));
+        assertThat(userRoles.get(0).getRoleId(),is(ROLE_ID1));
+        assertThat(userRoles.get(0).getDescription(),is(DESCRIPTION1));
+        assertThat(userRoles.get(0).getLabel(),is(LABEL1));
+        assertThat(userRoles.get(0).isSelectable(),is(true));
+    }
+
     private void assertGroups(final Permissions permissions) {
         assertThat(permissions.getGroups().size(), is(2));
 

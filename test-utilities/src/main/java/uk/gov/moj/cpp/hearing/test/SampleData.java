@@ -13,12 +13,16 @@ import uk.gov.justice.hearing.courts.GetHearings;
 import uk.gov.justice.hearing.courts.HearingSummaries;
 import uk.gov.justice.hearing.courts.ProsecutionCaseSummaries;
 import uk.gov.justice.hearing.courts.Respondents;
+import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -108,6 +112,18 @@ public class SampleData {
                 .build();
 
 
+    }
+
+    public static HearingTypes getHearingTypes() {
+       final uk.gov.moj.cpp.hearing.domain.referencedata.HearingType hearingType = new
+                uk.gov.moj.cpp.hearing.domain.referencedata.HearingType(UUID.randomUUID(),1,
+                "hearingCode", "hearingDescription",
+                "welshHearingDescription", 10,
+                LocalDate.now(), LocalDate.now().plusDays(10),
+                "exhibitHearingCode", "exhibitHearingDescription", true);
+        final HearingTypes types = new HearingTypes();
+        types.setHearingTypes(Stream.of(hearingType).collect(Collectors.toList()));
+        return types;
     }
 
     @SuppressWarnings({"squid:S2096", "squid:S106", "squid:S1192"})

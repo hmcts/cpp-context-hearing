@@ -12,6 +12,8 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -87,6 +89,12 @@ public class DefendantJPAMapper {
             defendant.setProceedingsConcluded(pojo.getProceedingsConcluded());
         }
         defendant.setAssociatedDefenceOrganisation(associatedDefenceOrganisationJPAMapper.toJPA(pojo.getAssociatedDefenceOrganisation()));
+        if(Objects.nonNull(hearing.getProsecutionCases())) {
+            final Optional<Defendant> matchingDefendantEntity = hearing.getProsecutionCases().stream().filter(caze -> caze.getId().getId().equals(pojo.getProsecutionCaseId()))
+                    .flatMap(def -> def.getDefendants().stream())
+                    .filter(def -> def.getId().getId().equals(defendant.getId().getId())).findFirst();
+            matchingDefendantEntity.ifPresent(defendantEntity -> defendant.setCourtListRestricted(defendantEntity.getCourtListRestricted()));
+        }
         return defendant;
     }
 

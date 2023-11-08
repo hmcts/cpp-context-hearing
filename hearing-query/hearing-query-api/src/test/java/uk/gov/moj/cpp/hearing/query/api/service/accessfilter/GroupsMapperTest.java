@@ -68,6 +68,17 @@ public class GroupsMapperTest {
         assertGroups(groups);
     }
 
+    @Test
+    public void shouldReturnEmptyListWhenNoGroupsExists() {
+        final String userId = randomUUID().toString();
+        final Metadata metadata = metadataBuilder().withName("usersgroups.get-logged-in-user-permissions")
+                .withId(randomUUID()).withUserId(userId).build();
+
+        final Envelope envelope = Envelope.envelopeFrom(metadata, Json.createObjectBuilder().build());
+        final List<Group> groups = groupsMapper.mapGroups(envelope);
+        assertThat(groups.size(), is(0));
+    }
+
     private void assertGroups(final List<Group> groups) {
         assertThat(groups.size(), is(2));
 
