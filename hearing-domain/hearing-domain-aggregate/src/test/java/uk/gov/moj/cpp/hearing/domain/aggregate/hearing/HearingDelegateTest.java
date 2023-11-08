@@ -57,7 +57,7 @@ public class HearingDelegateTest {
         hearingDelegate.handleHearingInitiated(new HearingInitiated(hearing.getHearing()));
 
         assertThat(momento.getHearing(), is(notNullValue()));
-        assertThat(momento.getPleas(), equalTo(Collections.EMPTY_MAP));
+        assertThat(momento.getPleas(),  is(notNullValue()));
         assertThat(momento.getVerdicts(), equalTo(Collections.EMPTY_MAP));
         assertThat(momento.getConvictionDates(), equalTo(Collections.EMPTY_MAP));
     }

@@ -35,6 +35,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffencePlea;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
@@ -56,6 +57,7 @@ import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
+import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.hearing.courts.CourtListRestricted;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
 import uk.gov.moj.cpp.hearing.command.bookprovisional.ProvisionalHearingSlotInfo;
@@ -146,7 +148,10 @@ import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 public class HearingAggregateTest {
 
     private static final String GUILTY = "GUILTY";
+    private static final String NOT_GUILTY ="NOT_GUILTY";
     private static final HearingAggregate HEARING_AGGREGATE = new HearingAggregate();
+    public static final String OFFENCE = "OFFENCE";
+
 
     @Rule
     public final ExpectedException exception = ExpectedException.none();
@@ -169,6 +174,28 @@ public class HearingAggregateTest {
 
         assertThat(result.getHearing().getId(), is(initiateHearingCommand.getHearing().getId()));
     }
+
+    @Test
+    public void shouldNotUpdateHearingEventsNoHearing() {
+
+        final UUID hearingId = randomUUID();
+
+        final UpdateHearingEventsCommand updateHearingEventsCommand = UpdateHearingEventsCommand.builder()
+                .withHearingId(hearingId)
+                .withHearingEvents(singletonList(
+                        HearingEvent.builder()
+                                .withHearingEventId(randomUUID())
+                                .withRecordedLabel(STRING.next())
+                                .build()))
+                .build();
+
+        final HearingEventIgnored result = (HearingEventIgnored) new HearingAggregate()
+                .updateHearingEvents(updateHearingEventsCommand.getHearingId(), updateHearingEventsCommand.getHearingEvents()).findFirst().orElse(null);
+
+        assertNotNull(result);
+        assertThat(result.getHearingId(), is(updateHearingEventsCommand.getHearingId()));
+    }
+
 
     @Test
     public void shouldRaiseSaveDraftResultsFailedEventWhenTargetIsInvalid() {
@@ -260,6 +287,86 @@ public class HearingAggregateTest {
         assertThat(event.getPlea().getDelegatedPowers().getUserId(), is(command.getPlea().getDelegatedPowers().getUserId()));
         assertThat(event.getPlea().getDelegatedPowers().getFirstName(), is(command.getPlea().getDelegatedPowers().getFirstName()));
         assertThat(event.getPlea().getDelegatedPowers().getLastName(), is(command.getPlea().getDelegatedPowers().getLastName()));
+    }
+
+    @Test
+    public void  shouldUpdateExistingPleaIfInheritHearingOffencePleaReceived() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffencePlea();
+
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final Hearing hearing =HEARING_AGGREGATE.getHearing();
+        final UUID offenceId =hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final Offence offence = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+
+        assertThat(offence.getPlea().getPleaValue(), is(NOT_GUILTY));
+
+
+        final InheritedPlea inheritedPlea = InheritedPlea.inheritedPlea()
+                .setPlea(Plea.plea()
+                        .withPleaValue(GUILTY)
+                        .withPleaDate(PAST_LOCAL_DATE.next())
+                        .withOffenceId(offenceId)
+                        .withOriginatingHearingId(hearing.getId())
+                        .withDelegatedPowers(DelegatedPowers.delegatedPowers()
+                                .withUserId(UUID.randomUUID())
+                                .withFirstName(STRING.next())
+                                .withLastName(STRING.next())
+                                .build())
+                        .build())
+                .setHearingId(hearing.getId());
+
+        HEARING_AGGREGATE.apply(inheritedPlea);
+
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), Matchers.is(2));
+
+        final ResultsSharedSuccess resultsSharedSuccess= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+        final Hearing updatedHearing = resultsSharedV3.getHearing();
+        final Offence updatedOffence = updatedHearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        assertThat(resultsSharedV3.getHearingDay(), Matchers.is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), Matchers.is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), Matchers.is(hearingDay));
+        assertThat(resultsSharedV3.getIsReshare(), Matchers.is(false));
+        assertNotNull(resultsSharedSuccess);
+        assertThat(updatedOffence.getPlea().getPleaValue(), is(GUILTY));
+;
     }
 
     @Test
@@ -960,24 +1067,6 @@ public class HearingAggregateTest {
         assertThat(result.getHearingId(), is(updateHearingEventsCommand.getHearingId()));
     }
 
-    @Test
-    public void shouldNotUpdateHearingEventsNoHearing() {
-
-        final UpdateHearingEventsCommand updateHearingEventsCommand = UpdateHearingEventsCommand.builder()
-                .withHearingId(randomUUID())
-                .withHearingEvents(singletonList(
-                        HearingEvent.builder()
-                                .withHearingEventId(randomUUID())
-                                .withRecordedLabel(STRING.next())
-                                .build()))
-                .build();
-
-        final HearingEventIgnored result = (HearingEventIgnored) HEARING_AGGREGATE
-                .updateHearingEvents(updateHearingEventsCommand.getHearingId(), updateHearingEventsCommand.getHearingEvents()).findFirst().orElse(null);
-
-        assertNotNull(result);
-        assertThat(result.getHearingId(), is(updateHearingEventsCommand.getHearingId()));
-    }
 
     @Test
     public void shouldNotLogPauseHearingEventIfNoActiveHearingsReturned() {

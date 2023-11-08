@@ -38,8 +38,7 @@ public class PleaDelegate implements Serializable {
     }
 
     public void handleInheritedPlea(final InheritedPlea inheritedPlea) {
-        this.momento.getPleas().computeIfAbsent(inheritedPlea.getPlea().getOffenceId(),
-                offenceId -> inheritedPlea.getPlea());
+        this.momento.getPleas().put(inheritedPlea.getPlea().getOffenceId(), inheritedPlea.getPlea());
     }
 
     public void handlePleaUpsert(final PleaUpsert pleaUpsert) {
