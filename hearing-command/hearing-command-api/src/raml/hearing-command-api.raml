@@ -200,6 +200,9 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         (mapping):
             requestType: application/vnd.hearing.replicate-shared-results+json
             name: hearing.replicate-shared-results
+        (mapping):
+            requestType: application/vnd.hearing.add-witness+json
+            name: hearing.add-witness
 
         ...
       body:
@@ -333,6 +336,11 @@ baseUri:  http://localhost:8080/hearing-command-api/command/api/rest/hearing
         application/vnd.hearing.replicate-shared-results+json:
             schema: !include json/schema/hearing.replicate-results.json
             example: !include json/hearing.replicate-results.json
+        application/vnd.hearing.add-witness+json:
+            example:
+             !include json/hearing.add-witness.json
+            schema:
+             !include json/schema/hearing.add-witness.json
       responses:
             202:
                 description: OK

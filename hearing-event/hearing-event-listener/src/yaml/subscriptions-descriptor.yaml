@@ -329,4 +329,7 @@ subscriptions_descriptor:
         - name: hearing.events.replicate.results-shared-v3
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing.events.replicate.results-shared-v3.json
 
+        - name: hearing.event.witness-added-to-hearing
+          schema_uri: http://justice.gov.uk/core/courts/hearing.event.witness-added-to-hearing.json
+
       event_source_name: hearing

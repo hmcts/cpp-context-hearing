@@ -5,6 +5,7 @@ import static java.lang.Boolean.FALSE;
 import static java.time.Instant.now;
 import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
+import static java.util.UUID.randomUUID;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED;
@@ -52,6 +53,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ResultLine;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Witness;
 import uk.gov.moj.cpp.hearing.repository.ApprovalRequestedRepository;
 import uk.gov.moj.cpp.hearing.repository.DraftResultRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingApplicationRepository;
@@ -797,4 +799,21 @@ public class HearingEventListener {
             hearingRepository.remove(hearing);
         }
     }
+
+    @Handles("hearing.event.witness-added-to-hearing")
+    public void handleWitnessAddedToHearing(final JsonEnvelope event) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.event.witness-added-to-hearing {}", event.toObfuscatedDebugString());
+        }
+
+        final UUID hearingId = fromString(event.payloadAsJsonObject().getString("hearingId"));
+        final Hearing hearing = hearingRepository.findBy(hearingId);
+        final Witness newWitness = new Witness(randomUUID(), event.payloadAsJsonObject().getString("witness"), hearing);
+        hearing.getWitnesses().add(newWitness);
+        hearingRepository.save(hearing);
+
+
+    }
+
+    //
 }

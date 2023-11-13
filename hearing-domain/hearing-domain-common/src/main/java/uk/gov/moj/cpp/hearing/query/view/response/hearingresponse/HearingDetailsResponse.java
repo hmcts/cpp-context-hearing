@@ -6,8 +6,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 
+import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings({"squid:S2384"})
 public class HearingDetailsResponse {
 
     private Hearing hearing;
@@ -15,6 +17,8 @@ public class HearingDetailsResponse {
     private HearingState hearingState;
 
     private UUID amendedByUserId;
+
+    private List<String> witnesses;
 
     public HearingDetailsResponse() {
     }
@@ -52,5 +56,13 @@ public class HearingDetailsResponse {
 
     public void setAmendedByUserId(UUID amendedByUserId) {
         this.amendedByUserId = amendedByUserId;
+    }
+
+    public List<String> getWitnesses() {
+        return witnesses;
+    }
+
+    public void setWitnesses(List<String> witnesses) {
+        this.witnesses = witnesses;
     }
 }

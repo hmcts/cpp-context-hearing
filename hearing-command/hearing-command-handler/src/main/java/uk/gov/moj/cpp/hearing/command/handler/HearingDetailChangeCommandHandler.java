@@ -7,6 +7,7 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.eventsourcing.source.core.exception.EventStreamException;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAddWitnessCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingAmendCommand;
 import uk.gov.moj.cpp.hearing.command.hearing.details.HearingDetailsUpdateCommand;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
@@ -56,5 +57,17 @@ public class HearingDetailChangeCommandHandler extends AbstractCommandHandler {
 
 
     }
+
+    @Handles("hearing.command.add-witness")
+    public void addWitnessToHearing(final JsonEnvelope envelope) throws EventStreamException {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.add-witnes command received {}", envelope.toObfuscatedDebugString());
+        }
+
+        final HearingAddWitnessCommand hearingAddWitnessCommand = convertToObject(envelope, HearingAddWitnessCommand.class);
+        aggregate(HearingAggregate.class, hearingAddWitnessCommand.getHearingId(), envelope,
+                aggregate -> aggregate.addWitnessToHearing(hearingAddWitnessCommand.getHearingId(), hearingAddWitnessCommand.getWitness()));
+    }
+
 }
 

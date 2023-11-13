@@ -1235,6 +1235,22 @@ public class HearingEventListenerTest {
     }
 
     @Test
+    public void shouldHandleWitnessAddedToHearing() {
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = new Hearing();
+        when(hearingRepository.findBy(hearingId)).thenReturn(hearing);
+        hearingEventListener.handleWitnessAddedToHearing(envelopeFrom(metadataWithDefaults().build(), createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("witness", "test")
+                .build()));
+        verify(hearingRepository).save(hearing);
+        assertThat(hearing.getWitnesses().size(), is(1));
+        assertThat(hearing.getWitnesses().get(0).getName(), is("test"));
+    }
+
+
+
+    @Test
     public void shouldHandleHearingMarkedAsDuplicateWhenExistingHearingNotFound() {
         final UUID hearingId = randomUUID();
         when(hearingRepository.findBy(hearingId)).thenReturn(null);

@@ -49,6 +49,7 @@ public class HearingEventProcessor {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingEventProcessor.class);
+    private static final String PUBLIC_HEARING_HEARING_WITNESS_ADDED = "public.hearing.hearing-witness-added";
 
     private final Enveloper enveloper;
     private final Sender sender;
@@ -257,4 +258,16 @@ public class HearingEventProcessor {
         this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName("public.hearing.hearing-days-cancelled"),
                 envelope.payloadAsJsonObject()));
     }
+
+    @Handles("hearing.event.witness-added-to-hearing")
+    public void handleWitnessAdded(final JsonEnvelope envelope) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.event.witness-added-to-hearing {}", envelope.toObfuscatedDebugString());
+        }
+
+        this.sender.send(envelopeFrom(metadataFrom(envelope.metadata()).withName(PUBLIC_HEARING_HEARING_WITNESS_ADDED),
+                envelope.payloadAsJsonObject()));
+    }
+
+    //
 }
