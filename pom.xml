@@ -14,6 +14,7 @@
     <name>Hearing Context - Parent Module</name>
     <description>Application and Cases has been resulted by Hearing context</description>
 
+
     <properties>
         <sonar.jacoco.itReportPath>${project.basedir}/../target/jacoco-it.exec
         </sonar.jacoco.itReportPath>
