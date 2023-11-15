@@ -909,20 +909,6 @@ public class HearingAggregate implements Aggregate {
                 .withProsecutionCase(prosecutionCase)
                 .build());
 
-        //check if there are new defendants added
-        final ProsecutionCase matchedProsecutionCase = this.momento.getHearing().getProsecutionCases().stream().filter(pc -> pc.getId().equals(prosecutionCase.getId())).findFirst().orElse(null);
-        if (nonNull(matchedProsecutionCase)) {
-            final List<uk.gov.justice.core.courts.Defendant> newDefendants =
-                    prosecutionCase.getDefendants().stream().filter(def -> matchedProsecutionCase.getDefendants().stream().noneMatch(persistentDef -> def.getId().equals(persistentDef.getId()))).collect(Collectors.toList());
-            if (!newDefendants.isEmpty()) {
-                streamBuilder.add(AddCaseDefendantsForHearing.addCaseDefendantsForHearing()
-                        .withCaseId(prosecutionCase.getId())
-                        .withHearingId(hearingId)
-                        .withDefendants(newDefendants)
-                        .build());
-            }
-        }
-
         return apply(streamBuilder.build());
     }
 

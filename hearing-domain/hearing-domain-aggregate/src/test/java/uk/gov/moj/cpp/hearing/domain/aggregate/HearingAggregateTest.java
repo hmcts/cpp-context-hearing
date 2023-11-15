@@ -78,7 +78,6 @@ import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.command.updateEvent.UpdateHearingEventsCommand;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.domain.aggregate.hearing.HearingAggregateMomento;
-import uk.gov.moj.cpp.hearing.domain.event.AddCaseDefendantsForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.BookProvisionalHearingSlots;
 import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.CustodyTimeLimitClockStopped;
@@ -127,7 +126,6 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -1209,13 +1207,10 @@ public class HearingAggregateTest {
 
         final Stream<Object> stream = hearingAggregate.addOrUpdateCaseDefendantsForHearing(hearing.getId(), updatedProsecutionCase);
         final List<Object> objectList = stream.collect(Collectors.toList());
-        assertThat(objectList, hasSize(2));
+        assertThat(objectList, hasSize(1));
 
         CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = (CaseDefendantsUpdatedForHearing) objectList.get(0);
         assertThat(caseDefendantsUpdatedForHearing.getHearingId(), is(hearing.getId()));
-
-        AddCaseDefendantsForHearing addCaseDefendantsForHearing = (AddCaseDefendantsForHearing) objectList.get(1);
-        assertThat(addCaseDefendantsForHearing.getHearingId(), is(hearing.getId()));
     }
 
 

@@ -4,20 +4,29 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static uk.gov.justice.core.courts.HearingLanguage.ENGLISH;
+import static uk.gov.justice.core.courts.JurisdictionType.MAGISTRATES;
+import static uk.gov.justice.core.courts.ProsecutionCaseIdentifier.prosecutionCaseIdentifier;
 import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.requestParams;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataOf;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
+import static uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand.initiateHearingCommand;
 import static uk.gov.moj.cpp.hearing.it.Queries.getHearingPollForMatch;
+import static uk.gov.moj.cpp.hearing.it.UseCases.initiateHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.shareResultsPerDay;
 import static uk.gov.moj.cpp.hearing.it.Utilities.listenFor;
 import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
+import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -33,15 +42,22 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsU
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.restassured.path.json.JsonPath;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.mockito.Spy;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DelegatedPowers;
+import uk.gov.justice.core.courts.Gender;
 import uk.gov.justice.core.courts.Hearing;
+import uk.gov.justice.core.courts.InitiationCode;
 import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.justice.core.courts.Offence;
+import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Target;
@@ -49,11 +65,14 @@ import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.http.HeaderConstants;
+import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
+import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
+import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.io.IOException;
 import java.util.UUID;
@@ -114,6 +133,64 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
                                 )))
                 )
         );
+    }
+
+    @Test
+    public void testTwoHearingsWithDifferentDefendantsSameCaseUrnWhenFirstOneIsResultedItsdefendantShouldNotBeAddedToSecondHearing() throws IOException{
+        final UUID prosecutionCaseId = randomUUID();
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID offenceId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID offenceId2 = UUID.randomUUID();
+
+        final InitiateHearingCommand initiateHearingCommand1 = initiateHearingWith1DefendantAndCaseUrn(defendantId1, offenceId1, prosecutionCaseId);
+        final InitiateHearingCommand initiateHearingCommand2 = initiateHearingWith1DefendantAndCaseUrn(defendantId2, offenceId2, prosecutionCaseId);
+
+        final UUID hearingId1 = initiateHearingCommand1.getHearing().getId();
+        initiateHearing(getRequestSpec(), initiateHearingCommand1);
+
+        final UUID hearingId2 = initiateHearingCommand2.getHearing().getId();
+        initiateHearing(getRequestSpec(), initiateHearingCommand2);
+
+        String eventPayloadString = getStringFromResource("public.progression.hearing-resulted-case-updated.json")
+                .replaceAll("CASE_ID", prosecutionCaseId.toString())
+                .replaceAll("DEFENDANT_ID", defendantId1.toString());
+
+        sendMessage(getPublicTopicInstance().createProducer(),
+                hearingResultedCaseUpdatedEvent,
+                new StringToJsonObjectConverter().convert(eventPayloadString),
+                metadataOf(randomUUID(), hearingResultedCaseUpdatedEvent)
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingId1), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(CoreMatchers.allOf(
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(1)),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants[*].id", contains(defendantId1.toString())),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants.[*].offences[*].id",
+                                        contains(offenceId1.toString()))
+                                )
+                        )
+                );
+
+        poll(requestParams(getURL("hearing.get.hearing", hearingId2), "application/vnd.hearing.get.hearing+json")
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(CoreMatchers.allOf(
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(1)),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants[*].id", contains(defendantId2.toString())),
+                                withJsonPath("$.hearing.prosecutionCases[0].defendants.[*].offences[*].id",
+                                        contains(offenceId2.toString()))
+                                )
+                        )
+                );
     }
 
     @Test
@@ -355,6 +432,53 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
                 shareDaysResultsCommand,
                 command -> command.setCourtClerk(courtClerk1)
         ), targets);
+    }
+
+    private static InitiateHearingCommand initiateHearingWith1DefendantAndCaseUrn(final UUID defendantId1,
+                                                                                 final UUID offenceId1,
+                                                                                 final UUID prosecutionCaseId){
+        final List<ProsecutionCase> prosecutionCases = Collections.singletonList(
+                ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(Arrays.asList(
+                                uk.gov.justice.core.courts.Defendant.defendant()
+                                        .withId(defendantId1)
+                                        .withMasterDefendantId(randomUUID())
+                                        .withProsecutionCaseId(prosecutionCaseId)
+                                        .withCourtProceedingsInitiated(ZonedDateTime.now())
+                                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                                .withPersonDetails(Person.person()
+                                                        .withGender(Gender.FEMALE)
+                                                        .withLastName(STRING.next())
+                                                        .build())
+                                                .build())
+                                        .withOffences(Arrays.asList(Offence.offence()
+                                                .withId(offenceId1)
+                                                .withOffenceDefinitionId(randomUUID())
+                                                .withOffenceCode("OFC")
+                                                .withOffenceTitle("OFC TITLE")
+                                                .withWording("WORDING")
+                                                .withStartDate(LocalDate.now())
+                                                .withOffenceLegislation("OffenceLegislation")
+                                                .build()))
+                                        .build()
+                        ))
+                        .withInitiationCode(InitiationCode.C)
+                        .withProsecutionCaseIdentifier(prosecutionCaseIdentifier()
+                                .withProsecutionAuthorityId(randomUUID())
+                                .withProsecutionAuthorityCode(STRING.next())
+                                .withCaseURN("caseUrn")
+                                .build())
+                        .build());
+
+        return initiateHearingCommand()
+                .setHearing(CoreTestTemplates.hearing(defaultArguments()
+                        .setDefendantType(PERSON)
+                        .setHearingLanguage(ENGLISH)
+                        .setJurisdictionType(MAGISTRATES)
+                )
+                        .withProsecutionCases(prosecutionCases)
+                        .build());
     }
 }
 
