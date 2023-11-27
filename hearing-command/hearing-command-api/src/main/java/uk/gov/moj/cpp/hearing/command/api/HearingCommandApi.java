@@ -319,6 +319,13 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.replicate-shared-results");
     }
 
+    @Handles("hearing.add-witness")
+    public void addWitnessToHearing(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.add-witness");
+    }
+
+    //hearing.add-witness
+
     /**
      * Updates the original envelope with the new name and sends.
      *

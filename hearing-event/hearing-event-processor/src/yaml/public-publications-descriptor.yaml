@@ -217,6 +217,9 @@ subscriptions_descriptor:
         - name: public.hearing.hearing-unlock-failed
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-unlock-failed.json
 
+        - name: public.hearing.hearing-witness-added
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-witness-added.json
+
 
         - name: public.hearing.hearing-breach-applications-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-breach-applications-added.json

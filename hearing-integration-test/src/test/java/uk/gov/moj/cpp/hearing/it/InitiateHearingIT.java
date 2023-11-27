@@ -1149,6 +1149,34 @@ public class InitiateHearingIT extends AbstractIT {
         );
     }
 
+
+    @Test
+    public void shouldAddWitnessToHearingAndReturnInQuery() {
+        stubUsersAndGroupsUserRoles(getLoggedInAdminUser());
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final Hearing hearing = hearingOne.getHearing();
+        final UUID hearingId = hearing.getId();
+        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
+        final UUID prosecutionCaseId = prosecutionCase.getId();
+        final Defendant defendant = prosecutionCase.getDefendants().get(0);
+        final UUID defendantId = defendant.getId();
+        final Offence offence = defendant.getOffences().get(0);
+        final UUID offenceId = offence.getId();
+        final UUID courCentreId = hearing.getCourtCentre().getId();
+
+        stubOrganisationalUnit(courCentreId, OUCODE);
+
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingId))
+                )
+        );
+        addWitnessToHearing(hearingId, "Test witness");
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .withValue(x -> x.getWitnesses().stream().map(y -> y.toString()).collect(Collectors.toList()).get(0), "Test witness")
+        );
+    }
     @Test
     public void shouldRemoveHearingFromViewStoreAndRaisePublicEventWhenMarkedAsDuplicate() {
         stubUsersAndGroupsUserRoles(getLoggedInAdminUser());
@@ -1191,6 +1219,18 @@ public class InitiateHearingIT extends AbstractIT {
 
         makeCommand(getRequestSpec(), "hearing.mark-as-duplicate")
                 .ofType("application/vnd.hearing.duplicate+json")
+                .withArgs(hearingId)
+                .withPayload(payload.toString())
+                .withCppUserId(USER_ID_VALUE_AS_ADMIN)
+                .executeSuccessfully();
+    }
+
+    private void addWitnessToHearing(final UUID hearingId, final String witnessName) {
+        final JsonObject payload = createObjectBuilder().add("witness", witnessName)
+                .build();
+
+        makeCommand(getRequestSpec(), "hearing.add-witness")
+                .ofType("application/vnd.hearing.add-witness+json")
                 .withArgs(hearingId)
                 .withPayload(payload.toString())
                 .withCppUserId(USER_ID_VALUE_AS_ADMIN)

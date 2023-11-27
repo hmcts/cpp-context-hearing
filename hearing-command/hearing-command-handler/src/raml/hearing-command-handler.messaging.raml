@@ -506,6 +506,12 @@ baseUri:  message://command/handler/message/hearing
           schema: !include json/schema/hearing.command.replicate-results.json
           example: !include json/hearing.command.replicate-results.json
 
+# Unlock Hearing
+        application/vnd.hearing.command.add-witness+json:
+          schema: !include json/schema/hearing.command.add-witness.json
+          example: !include json/hearing.command.add-witness.json
+
+
 # Breach Applications to be added
         application/vnd.hearing.command.breach-applications-to-be-added+json:
             schema: !include json/schema/hearing.command.breach-applications-to-be-added.json

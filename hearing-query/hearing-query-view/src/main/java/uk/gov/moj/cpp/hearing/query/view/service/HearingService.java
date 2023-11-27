@@ -118,6 +118,7 @@ public class HearingService {
 
     @Inject
     private HearingRepository hearingRepository;
+
     @Inject
     private HearingEventRepository hearingEventRepository;
     @Inject
@@ -438,6 +439,7 @@ public class HearingService {
                 getHearingState(hearing),
                 hearing.getAmendedByUserId()
         );
+        hearingDetailsResponse.setWitnesses(hearing.getWitnesses().stream().map(x -> x.getName()).collect(toList()));
 
         if (hearing.getTrialTypeId() != null) {
 

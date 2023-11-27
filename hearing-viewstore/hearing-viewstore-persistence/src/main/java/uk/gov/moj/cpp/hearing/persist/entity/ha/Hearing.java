@@ -6,7 +6,9 @@ import uk.gov.moj.cpp.hearing.domain.HearingState;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -103,6 +105,9 @@ public class Hearing {
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
     private Set<ApprovalRequested> approvalsRequested = new HashSet<>();
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
+    private List<Witness> witnesses = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "hearing", orphanRemoval = true)
     private Set<HearingYouthCourtDefendants> hearingYouthCourtDefendants = new HashSet<>();
@@ -438,6 +443,16 @@ public class Hearing {
     @Override
     public int hashCode() {
         return Objects.hash(this.id);
+    }
+
+    @SuppressWarnings({"squid:S2384"})
+    public List<Witness> getWitnesses() {
+        return witnesses;
+    }
+
+    @SuppressWarnings({"squid:S2384"})
+    public void setWitnesses(List<Witness> witnesses) {
+        this.witnesses = witnesses;
     }
 
     @Override

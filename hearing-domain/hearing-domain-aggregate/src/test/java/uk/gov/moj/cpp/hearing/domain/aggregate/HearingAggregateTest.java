@@ -103,6 +103,7 @@ import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.ReusableInfoSaved;
+import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
@@ -3147,5 +3148,18 @@ public class HearingAggregateTest {
         when(hearingAggregateMomento.getHearing()).thenReturn(new Hearing.Builder().withId(hearingId).build());
         final Stream<Object> objectStream = hearingAggregate.receiveDefendantsPartOfYouthCourtHearing(Arrays.asList(randomUUID(), randomUUID()));
         assertThat(((DefendantsInYouthCourtUpdated)objectStream.collect(toList()).get(0)).getHearingId(), is(hearingId));
+    }
+
+    @Test
+    public void shouldReturnEventWitnessAddedToHearing(){
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        final UUID hearingId = randomUUID();
+        HearingAggregateMomento hearingAggregateMomento = mock(HearingAggregateMomento.class);
+        ReflectionUtil.setField(hearingAggregate, "momento", hearingAggregateMomento);
+        when(hearingAggregateMomento.getHearing()).thenReturn(new Hearing.Builder().withId(hearingId).build());
+        final Stream<Object> objectStream = hearingAggregate.addWitnessToHearing(hearingId, "Test witness");
+        final Object event = objectStream.collect(toList()).get(0);
+        assertThat(((WitnessAddedToHearing)event).getHearingId(), is(hearingId));
+        assertThat(((WitnessAddedToHearing)event).getWitness(), is("Test witness"));
     }
 }

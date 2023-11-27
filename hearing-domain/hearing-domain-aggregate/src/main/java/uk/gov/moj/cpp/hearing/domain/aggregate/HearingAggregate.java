@@ -145,6 +145,7 @@ import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.RespondentCounselUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.TargetRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestRejected;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequested;
 import uk.gov.moj.cpp.hearing.domain.event.result.ApprovalRequestedV2;
@@ -1210,6 +1211,11 @@ public class HearingAggregate implements Aggregate {
                         .collect(Collectors.toList());
 
         this.momento.getHearing().setDefendantsWithWelshTranslationList(defendantsWelshRequiringList);
+    }
+
+
+    public Stream<Object> addWitnessToHearing(final UUID hearingId, final String witness) {
+        return apply(Stream.of(new WitnessAddedToHearing(witness, hearingId)));
     }
 
 

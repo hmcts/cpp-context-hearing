@@ -190,6 +190,15 @@ rule "Command - API - Action - hearing.log-hearing-event"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.add-witness"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.add-witness");
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Court Clerks", "Legal Advisers", "Judiciary", "Court Associate", "Deputies", "DJMC", "Judge", "Recorders", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.update-hearing-events"
   when
     $outcome: Outcome();

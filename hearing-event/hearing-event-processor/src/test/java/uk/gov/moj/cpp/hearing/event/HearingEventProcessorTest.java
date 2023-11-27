@@ -52,6 +52,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEventVacatedTrialCleared;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.WitnessAddedToHearing;
 import uk.gov.moj.cpp.hearing.eventlog.PublicHearingEventTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
 
@@ -489,6 +490,19 @@ public class HearingEventProcessorTest {
         assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(futureSittingDay.withZoneSameLocal(of("UTC"))))));
         assertThat(hearingDays, hasItem(hasProperty("isCancelled", is(false))));
         assertThat(hearingDays, hasItem(hasProperty("sittingDay", is(pastSittingDay.withZoneSameLocal(of("UTC"))))));
+    }
+
+    @Test
+    public void shouldHandleWitnessAdded() {
+        final UUID hearingId = randomUUID();
+        final WitnessAddedToHearing witnessAddedToHearing = new WitnessAddedToHearing("Test", hearingId);
+        final JsonEnvelope eventIn = createJsonEnvelope(witnessAddedToHearing);
+
+        this.hearingEventProcessor.handleWitnessAdded(eventIn);
+
+        verify(this.sender).send(this.envelopeArgumentCaptor.capture());
+        final JsonEnvelope envelopeOut = this.envelopeArgumentCaptor.getValue();
+        assertThat(envelopeOut.metadata().name(), is("public.hearing.hearing-witness-added"));
     }
 
     private <E, C> C transactEvent2Command(final E typedEvent, final Consumer<JsonEnvelope> methodUnderTest, final Class<?> commandClass, int sendCount) {
