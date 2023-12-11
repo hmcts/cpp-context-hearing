@@ -17,6 +17,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -85,6 +86,12 @@ public class PleaDelegate implements Serializable {
         return Stream.of(InheritedPlea.inheritedPlea()
                 .setHearingId(hearingId)
                 .setPlea(plea));
+    }
+
+    public Stream<Object> indicatedPlea(final UUID hearingId, final IndicatedPlea indicatedPlea) {
+        return Stream.of(IndicatedPleaUpdated.updateHearingWithIndicatedPlea()
+                .setHearingId(hearingId)
+                .setIndicatedPlea(indicatedPlea));
     }
 
     public Stream<Object> updatePlea(final UUID hearingId, final PleaModel pleaModel, final Set<String> guiltyPleaTypes) {

@@ -62,6 +62,16 @@ public class PleaUpdateEventProcessor {
                 .withName("hearing.command.enrich-update-plea-with-associated-hearings").withMetadataFrom(event));
     }
 
+    @Handles("hearing.events.enrich-associated-hearings-with-indicated-plea")
+    public void enrichAssociatedHearingsWithIndicatedPlea(final JsonEnvelope event) {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.events.enrich-associated-hearings-with-indicated-plea {}", event.toObfuscatedDebugString());
+        }
+        this.sender.send(Enveloper.envelop(event.payloadAsJsonObject())
+                .withName("hearing.command.enrich-associated-hearings-with-indicated-plea").withMetadataFrom(event));
+    }
+
     private boolean isOffenceIdInPayload(JsonEnvelope envelop){
         return envelop.payloadAsJsonObject().getJsonObject(PLEA_MODEL).get(OFFENCE_ID) != null;
     }

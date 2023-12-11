@@ -29,6 +29,7 @@ import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.HearingDay;
 import uk.gov.justice.core.courts.HearingLanguage;
 import uk.gov.justice.core.courts.HearingType;
+import uk.gov.justice.core.courts.IndicatedPlea;
 import uk.gov.justice.core.courts.InterpreterIntermediary;
 import uk.gov.justice.core.courts.JudicialRole;
 import uk.gov.justice.core.courts.JurisdictionType;
@@ -451,6 +452,10 @@ public class HearingAggregate implements Aggregate {
 
     public Stream<Object> inheritPlea(final UUID hearingId, final Plea plea) {
         return apply(this.pleaDelegate.inheritPlea(hearingId, plea));
+    }
+
+    public Stream<Object> updateHearingWithIndicatedPlea(final UUID hearingId, final IndicatedPlea indicatedPlea) {
+        return apply(this.pleaDelegate.indicatedPlea(hearingId, indicatedPlea));
     }
 
     public Stream<Object> logHearingEvent(final UUID hearingId, final UUID hearingEventDefinitionId, final Boolean alterable, final UUID defenceCounselId, final HearingEvent hearingEvent, final List<UUID> hearingTypeIds) {

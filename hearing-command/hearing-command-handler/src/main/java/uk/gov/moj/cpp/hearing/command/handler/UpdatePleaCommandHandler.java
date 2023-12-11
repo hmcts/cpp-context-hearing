@@ -10,6 +10,7 @@ import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.command.handler.service.ReferenceDataService;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.aggregate.OffenceAggregate;
+import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateAssociatedHearingsWithIndicatedPlea;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateInheritedPleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdateOffencePleaCommand;
 import uk.gov.moj.cpp.hearing.domain.updatepleas.UpdatePleaCommand;
@@ -67,6 +68,21 @@ public class UpdatePleaCommandHandler extends AbstractCommandHandler {
         for (final UUID hearingId : command.getHearingIds()) {
             aggregate(HearingAggregate.class, hearingId, envelope,
                     hearingAggregate -> hearingAggregate.inheritPlea(hearingId, command.getPlea()));
+        }
+    }
+
+    @Handles("hearing.command.enrich-associated-hearings-with-indicated-plea")
+    public void updateIndicatedPleaForAllAssociatedHearings(final JsonEnvelope envelope) throws EventStreamException {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("hearing.command.enrich-associated-hearings-with-indicated-plea event received {}", envelope.toObfuscatedDebugString());
+        }
+
+        final UpdateAssociatedHearingsWithIndicatedPlea command = convertToObject(envelope, UpdateAssociatedHearingsWithIndicatedPlea.class);
+
+        for (final UUID hearingId : command.getHearingIds()) {
+            aggregate(HearingAggregate.class, hearingId, envelope,
+                    hearingAggregate -> hearingAggregate.updateHearingWithIndicatedPlea(hearingId, command.getIndicatedPlea()));
         }
     }
 }
