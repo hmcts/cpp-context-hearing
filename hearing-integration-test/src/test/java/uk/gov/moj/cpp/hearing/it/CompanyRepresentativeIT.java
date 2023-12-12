@@ -16,7 +16,6 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import uk.gov.justice.core.courts.CompanyRepresentative;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.hearing.courts.AddCompanyRepresentative;
-import uk.gov.justice.hearing.courts.Position;
 import uk.gov.justice.hearing.courts.RemoveCompanyRepresentative;
 import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
 import uk.gov.moj.cpp.hearing.domain.event.CompanyRepresentativeChangeIgnored;
@@ -66,7 +65,7 @@ public class CompanyRepresentativeIT extends AbstractIT {
         companyRepresentative.setTitle("UpdatedTitle");
         companyRepresentative.setFirstName("UpdatedFirstName");
         companyRepresentative.setLastName("UpdatedLastName");
-        companyRepresentative.setPosition(Position.SECRETARY);
+        companyRepresentative.setPosition("SECRETARY");
 
         final UpdateCompanyRepresentative updateCompanyRepresentativeCommand = UseCases.updateCompanyRepresentative(getRequestSpec(), hearingOne.getHearingId(),
                 updateCompanyRepresentativeCommandTemplate(hearingOne.getHearingId(), companyRepresentative)

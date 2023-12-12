@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 
-import uk.gov.justice.hearing.courts.Position;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingCompanyRepresentative;
@@ -56,7 +55,7 @@ public class HearingCompanyRepresentativeJPAMapper {
                 .add("title", pojo.getTitle())
                 .add("firstName", pojo.getFirstName())
                 .add("lastName", pojo.getLastName())
-                .add("position", pojo.getPosition().toString())
+                .add("position", pojo.getPosition())
                 .add("defendants", defendants)
                 .add("attendanceDays", attendanceDays);
 
@@ -76,7 +75,7 @@ public class HearingCompanyRepresentativeJPAMapper {
                 .withTitle(entityPayload.getString("title"))
                 .withFirstName(entityPayload.getString("firstName"))
                 .withLastName(entityPayload.getString("lastName"))
-                .withPosition(Position.valueOf(entityPayload.getString("position")))
+                .withPosition(entityPayload.getString("position"))
                 .withDefendants(entityPayload.getJsonArray("defendants")
                         .stream()
                         .map(e -> fromString(((JsonString) e).getString()))
