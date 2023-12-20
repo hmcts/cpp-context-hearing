@@ -23,7 +23,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.CompanyRepresentative;
-import uk.gov.justice.hearing.courts.Position;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
@@ -151,7 +150,7 @@ public class CompanyRepresentativeEventListenerTest {
                 .withTitle(STRING.next())
                 .withFirstName(STRING.next())
                 .withLastName(STRING.next())
-                .withPosition(Position.DIRECTOR)
+                .withPosition("DIRECTOR")
                 .withDefendants(Arrays.asList(UUID.randomUUID()))
                 .withAttendanceDays(Arrays.asList(LocalDate.now()))
                 .build();

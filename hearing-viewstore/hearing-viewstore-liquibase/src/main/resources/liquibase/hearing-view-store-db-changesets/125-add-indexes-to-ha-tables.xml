@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.3.xsd">
+
+    <changeSet id="125" author="sridhar.girimaji" logicalFilePath="125-add-indexes-to-ha-tables.xml">
+
+        <createIndex tableName="ha_case_marker" indexName="ha_case_marker_prosecution_case_id_idx">
+            <column name="prosecution_case_id"/>
+        </createIndex>
+        <createIndex tableName="ha_defendant_referral_reason" indexName="ha_defendant_referral_reason_hearing_id_idx">
+            <column name="hearing_id"/>
+        </createIndex>
+        <createIndex tableName="ha_associated_person" indexName="ha_associated_person_defendant_id_idx">
+            <column name="defendant_id"/>
+        </createIndex>
+        <createIndex tableName="ha_draft_result" indexName="ha_draft_result_hearing_id_idx">
+            <column name="hearing_id"/>
+        </createIndex>
+
+        <rollback>
+            <dropIndex indexName="ha_case_marker_prosecution_case_id_idx"
+                       tableName="ha_case_marker"/>
+            <dropIndex indexName="ha_defendant_referral_reason_hearing_id_idx"
+                       tableName="ha_defendant_referral_reason"/>
+            <dropIndex indexName="ha_associated_person_defendant_id_idx"
+                       tableName="ha_associated_person"/>
+            <dropIndex indexName="ha_draft_result_hearing_id_idx"
+                       tableName="hearing_id"/>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog>

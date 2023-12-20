@@ -19,10 +19,11 @@ public class UpdateAssociatedHearingsWithIndicatedPlea {
         this.indicatedPlea = indicatedPlea;
     }
 
+    @SuppressWarnings("squid:S2384")
     public List<UUID> getHearingIds() {
         return hearingIds;
     }
-
+    @SuppressWarnings("squid:S2384")
     public void setHearingIds(List<UUID> hearingIds) {
         this.hearingIds = hearingIds;
     }

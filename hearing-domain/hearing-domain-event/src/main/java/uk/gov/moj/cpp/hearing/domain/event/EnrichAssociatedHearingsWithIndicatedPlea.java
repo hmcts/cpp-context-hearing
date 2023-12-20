@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Event("hearing.events.enrich-associated-hearings-with-indicated-plea")
+@SuppressWarnings({"squid:S2384", "pmd:BeanMembersShouldSerialize", "pmd:BeanMembersShouldSerialize"})
 public class EnrichAssociatedHearingsWithIndicatedPlea implements Serializable {
 
     private static final long serialVersionUID = 1L;

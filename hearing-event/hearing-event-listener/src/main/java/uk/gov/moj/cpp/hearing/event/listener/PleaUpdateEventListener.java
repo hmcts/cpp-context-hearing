@@ -1,15 +1,14 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
-import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
@@ -23,15 +22,15 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
+import javax.inject.Inject;
+import javax.transaction.Transactional;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.inject.Inject;
-import javax.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
 @SuppressWarnings({"squid:CommentedOutCodeLine"})
 @ServiceComponent(EVENT_LISTENER)

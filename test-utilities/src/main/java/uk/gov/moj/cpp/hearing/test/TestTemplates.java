@@ -83,7 +83,6 @@ import uk.gov.justice.hearing.courts.AddDefenceCounsel;
 import uk.gov.justice.hearing.courts.AddProsecutionCounsel;
 import uk.gov.justice.hearing.courts.AddRespondentCounsel;
 import uk.gov.justice.hearing.courts.AttendantType;
-import uk.gov.justice.hearing.courts.Position;
 import uk.gov.justice.hearing.courts.Role;
 import uk.gov.justice.hearing.courts.UpdateApplicantCounsel;
 import uk.gov.justice.hearing.courts.UpdateCompanyRepresentative;
@@ -2055,7 +2054,7 @@ public class TestTemplates {
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
-                    Position.DIRECTOR,
+                    "DIRECTOR",
                     STRING.next()
             );
             return new AddCompanyRepresentative(companyRepresentative, hearingId);
@@ -2077,7 +2076,7 @@ public class TestTemplates {
                     STRING.next(),
                     randomUUID(),
                     STRING.next(),
-                    Position.DIRECTOR,
+                    "DIRECTOR",
                     STRING.next()
             );
             return new UpdateCompanyRepresentative(companyRepresentative, hearingId);
