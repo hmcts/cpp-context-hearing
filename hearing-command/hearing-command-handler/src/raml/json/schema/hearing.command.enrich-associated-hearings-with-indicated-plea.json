@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
-  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.enrich-update-plea-with-associated-hearings.json",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.command.enrich-associated-hearings-with-indicated-plea.json",
   "type": "object",
   "properties": {
     "hearingIds": {
