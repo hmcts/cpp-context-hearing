@@ -103,7 +103,19 @@ public class UpdateOffencesForDefendantCommandHandler extends AbstractCommandHan
         final UUID hearingId = removeOffencesFromExistingHearing.getHearingId();
         final List<UUID> offenceIds = removeOffencesFromExistingHearing.getOffenceIds();
 
-        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.removeOffencesFromExistingHearing(hearingId, offenceIds));
+        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.removeOffencesFromExistingHearing(hearingId, offenceIds, "Hearing"));
+
+    }
+
+    @Handles("hearing.command.remove-offences-from-existing-allocated-hearing")
+    public void removedOffencesFromAllocatedHearing(final JsonEnvelope envelope) throws EventStreamException {
+
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = convertToObject(envelope, RemoveOffencesFromExistingHearing.class);
+
+        final UUID hearingId = removeOffencesFromExistingHearing.getHearingId();
+        final List<UUID> offenceIds = removeOffencesFromExistingHearing.getOffenceIds();
+
+        aggregate(HearingAggregate.class, hearingId, envelope, hearingAggregate -> hearingAggregate.removeOffencesFromExistingHearing(hearingId, offenceIds, "Listing"));
 
     }
 }

@@ -28,8 +28,6 @@ import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
 
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import uk.gov.justice.core.courts.Hearing;
@@ -66,7 +64,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
@@ -359,6 +356,44 @@ public class UpdateOffencesForDefendantCommandHandlerTest {
                 jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.offences-removed-from-existing-hearing"),
                         payloadIsJson(allOf(
                                 withJsonPath("$.hearingId", is(removeOffencesFromExistingHearing.getHearingId().toString())),
+                                withJsonPath("$.sourceContext", is("Hearing")),
+                                withJsonPath("$.offenceIds[0]", is(removeOffencesFromExistingHearing.getOffenceIds().get(0).toString()))
+                        )))));
+    }
+
+    @Test
+    public void shouldRaiseOffencesRemovedFromExistingAllocatedHearingEvent() throws EventStreamException {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing =initiateHearingCommand.getHearing();
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 =Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence2);
+                    });
+                });
+
+        final RemoveOffencesFromExistingHearing removeOffencesFromExistingHearing = new RemoveOffencesFromExistingHearing(hearingId,asList(offence2Id));
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.remove-offences-from-existing-allocated-hearing"),
+                objectToJsonObjectConverter.convert(removeOffencesFromExistingHearing));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+
+        hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        setupMockedEventStream(initiateHearingCommand.getHearing().getId(), this.eventStream, hearingAggregate);
+
+        updateOffencesForDefendantCommandHandler.removedOffencesFromAllocatedHearing(envelope);
+
+        assertThat(verifyAppendAndGetArgumentFrom(this.eventStream), streamContaining(
+                jsonEnvelope(withMetadataEnvelopedFrom(envelope).withName("hearing.events.offences-removed-from-existing-hearing"),
+                        payloadIsJson(allOf(
+                                withJsonPath("$.hearingId", is(removeOffencesFromExistingHearing.getHearingId().toString())),
+                                withJsonPath("$.sourceContext", is("Listing")),
                                 withJsonPath("$.offenceIds[0]", is(removeOffencesFromExistingHearing.getOffenceIds().get(0).toString()))
                         )))));
     }

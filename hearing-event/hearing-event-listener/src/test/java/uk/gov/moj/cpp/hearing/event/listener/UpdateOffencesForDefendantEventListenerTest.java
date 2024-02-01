@@ -70,6 +70,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateOffencesForDefendantEventListenerTest {
 
+    public static final String HEARING = "Hearing";
+
     @InjectMocks
     private UpdateOffencesForDefendantEventListener updateOffencesForDefendantEventListener;
 
@@ -310,7 +312,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
 
         final List<UUID> offenceIds = Collections.singletonList(offenceId1);
 
-        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, new ArrayList<>(), new ArrayList<>(), offenceIds);
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, new ArrayList<>(), new ArrayList<>(), offenceIds, HEARING);
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offencesRemovedFromExistingHearing));
 
         final Offence offence1 = new Offence();
@@ -378,7 +380,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         final List<UUID> defendantIds = Collections.singletonList(defendantId);
         final List<UUID> offenceIds = Collections.singletonList(offenceId1);
 
-        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, new ArrayList<>(), defendantIds, offenceIds);
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, new ArrayList<>(), defendantIds, offenceIds, HEARING);
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offencesRemovedFromExistingHearing));
 
         final Offence offence1 = new Offence();
@@ -434,7 +436,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         final List<UUID> defendantIds = Collections.singletonList(defendantId);
         final List<UUID> offenceIds = Collections.singletonList(offenceId1);
 
-        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, prosecutionCaseIds, defendantIds, offenceIds);
+        final OffencesRemovedFromExistingHearing offencesRemovedFromExistingHearing = new OffencesRemovedFromExistingHearing(hearingId, prosecutionCaseIds, defendantIds, offenceIds, HEARING);
         final JsonEnvelope envelope = envelopeFrom((Metadata) null, objectToJsonObjectConverter.convert(offencesRemovedFromExistingHearing));
 
         final Offence offence1 = new Offence();

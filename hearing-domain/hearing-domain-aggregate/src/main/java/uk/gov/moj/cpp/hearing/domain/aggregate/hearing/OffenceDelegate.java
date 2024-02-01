@@ -182,7 +182,7 @@ public class OffenceDelegate implements Serializable {
                 .build());
     }
 
-    public Stream<Object> removeOffencesFromAllocatedHearing(final UUID hearingId, final List<UUID> offenceIds) {
+    public Stream<Object> removeOffencesFromAllocatedHearing(final UUID hearingId, final List<UUID> offenceIds, final String source) {
 
         if (this.momento.isPublished()) {
             return empty();
@@ -229,7 +229,7 @@ public class OffenceDelegate implements Serializable {
         }
 
 
-        return Stream.of(new OffencesRemovedFromExistingHearing(hearingId, prosecutionCasesToBeRemoved, defendantsToBeRemoved, offenceIds));
+        return Stream.of(new OffencesRemovedFromExistingHearing(hearingId, prosecutionCasesToBeRemoved, defendantsToBeRemoved, offenceIds, source));
 
     }
 

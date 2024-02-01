@@ -153,6 +153,7 @@ public class HearingAggregateTest {
     private static final String NOT_GUILTY ="NOT_GUILTY";
     private static final HearingAggregate HEARING_AGGREGATE = new HearingAggregate();
     public static final String OFFENCE = "OFFENCE";
+    public static final String HEARING = "Hearing";
 
 
     @Rule
@@ -2414,7 +2415,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
-        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearingId, Arrays.asList(randomUUID()));
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearingId, Arrays.asList(randomUUID()), HEARING);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -2466,7 +2467,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -2475,6 +2476,7 @@ public class HearingAggregateTest {
         assertThat(offencesRemovedFromExistingHearing.getOffenceIds().get(0), is(offence2Id));
         assertThat(offencesRemovedFromExistingHearing.getDefendantIds().size(), is(0));
         assertThat(offencesRemovedFromExistingHearing.getProsecutionCaseIds().size(), is(0));
+        assertThat(offencesRemovedFromExistingHearing.getSourceContext(), is (HEARING));
 
 
     }
@@ -2503,7 +2505,7 @@ public class HearingAggregateTest {
                 .map(Offence::getId)
                 .collect(toList());
 
-        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), offenceIds);
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), offenceIds, HEARING);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -2532,7 +2534,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
@@ -2592,7 +2594,7 @@ public class HearingAggregateTest {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
@@ -2649,7 +2651,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
@@ -2712,7 +2714,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
 
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")

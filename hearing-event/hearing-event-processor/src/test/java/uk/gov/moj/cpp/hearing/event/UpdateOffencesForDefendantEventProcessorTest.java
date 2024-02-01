@@ -248,11 +248,60 @@ public class UpdateOffencesForDefendantEventProcessorTest {
 
         verify(this.sender, times(1)).send(this.commandEnvelopeArgumentCaptor.capture());
         final Envelope<JsonObject> command = this.commandEnvelopeArgumentCaptor.getAllValues().get(0);
-        assertThat(command.metadata().name(), is("hearing.command.remove-offences-from-existing-hearing"));
+        assertThat(command.metadata().name(), is("hearing.command.remove-offences-from-existing-allocated-hearing"));
         assertThat(command.payload().getString("hearingId"), is(hearingId.toString()));
         final List<JsonString> offenceIds = command.payload().getJsonArray("offenceIds").getValuesAs(JsonString.class);
         assertThat(offenceIds.get(0).getString(), is(offenceId1.toString()));
         assertThat(offenceIds.get(1).getString(), is(offenceId2.toString()));
+
+    }
+
+    @Test
+    public void ShouldRaisePublicEventIfSourceIsHearingContext(){
+        final UUID hearingId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final JsonObject envelopePayload = createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("sourceContext", "Hearing")
+                .add("offenceIds", createArrayBuilder()
+                        .add(offenceId1.toString())
+                        .add(offenceId2.toString())
+                        .build())
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.offences-removed-from-existing-hearing"), envelopePayload);
+        updateOffencesForDefendantEventProcessor.handleOffenceOrDefendantRemovalToListAssist(event);
+
+        verify(this.sender, times(1)).send(this.commandEnvelopeArgumentCaptor.capture());
+        final Envelope<JsonObject> command = this.commandEnvelopeArgumentCaptor.getAllValues().get(0);
+        assertThat(command.metadata().name(), is("public.hearing.selected-offences-removed-from-existing-hearing"));
+        assertThat(command.payload().getString("hearingId"), is(hearingId.toString()));
+        final List<JsonString> offenceIds = command.payload().getJsonArray("offenceIds").getValuesAs(JsonString.class);
+        assertThat(offenceIds.get(0).getString(), is(offenceId1.toString()));
+        assertThat(offenceIds.get(1).getString(), is(offenceId2.toString()));
+    }
+
+    @Test
+    public void ShouldNotRaisePublicEventIfSourceIsListingContext(){
+        final UUID hearingId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+
+        final JsonObject envelopePayload = createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("sourceContext", "Listing")
+                .add("offenceIds", createArrayBuilder()
+                        .add(offenceId1.toString())
+                        .add(offenceId2.toString())
+                        .build())
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.offences-removed-from-existing-hearing"), envelopePayload);
+        updateOffencesForDefendantEventProcessor.handleOffenceOrDefendantRemovalToListAssist(event);
+
+        verify(this.sender, times(0)).send(this.commandEnvelopeArgumentCaptor.capture());
 
     }
 }
