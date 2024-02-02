@@ -11,6 +11,7 @@ import uk.gov.justice.core.courts.Marker;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
+import uk.gov.justice.core.courts.Prosecutor;
 import uk.gov.moj.cpp.hearing.domain.event.CaseMarkersUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.CpsProsecutorUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.DefendantLegalAidStatusUpdatedForHearing;
@@ -213,5 +214,49 @@ public class ProsecutionCaseDelegateTest {
                         .withHearingId(hearingId)
                         .withLegalAidStatus("legalAid")
                         .build());
+    }
+
+    @Test
+    public void shouldHandleProsecutorUpdatedChangeProsecutor(){
+        final UUID prosecutionCaseId = UUID.randomUUID();
+        final UUID hearingId = UUID.randomUUID();
+        final UUID prosecutorId1 = UUID.randomUUID();
+        final String prosecutorCode1 = "SURRPF";
+        final String prosecutorName1 = "Surrey Police";
+
+        final UUID prosecutorId2 = UUID.randomUUID();
+        final String prosecutorCode2 = "CPP-EM";
+        final String prosecutorName2 = "CPS East Midland";
+
+        final HearingAggregateMomento hearingAggregateMomento = new HearingAggregateMomento();
+        hearingAggregateMomento.setHearing(Hearing.hearing()
+                .withProsecutionCases(asList(ProsecutionCase.prosecutionCase()
+                        .withId(prosecutionCaseId)
+                        .withDefendants(asList(Defendant.defendant()
+                                .withOffences(asList(Offence.offence()
+                                        .withId(UUID.randomUUID())
+                                        .build()))
+                                .build()))
+                        .withProsecutor(Prosecutor.prosecutor().withProsecutorId(prosecutorId1)
+                                .withProsecutorCode(prosecutorCode1)
+                                .withProsecutorName(prosecutorName1).build())
+                        .build()))
+                .build());
+
+        final ProsecutionCaseDelegate prosecutionCaseDelegate = new ProsecutionCaseDelegate(hearingAggregateMomento);
+
+        prosecutionCaseDelegate.handleProsecutorUpdated(new CpsProsecutorUpdated(
+                hearingId,
+                prosecutionCaseId,
+                prosecutorId2,
+                prosecutorCode2,
+                prosecutorName2,
+                "",
+                "",
+                Address.address().build()));
+
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getProsecutor().getProsecutorId(), is(prosecutorId2));
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getProsecutor().getProsecutorCode(), is(prosecutorCode2));
+        assertThat(hearingAggregateMomento.getHearing().getProsecutionCases().get(0).getProsecutor().getProsecutorName(), is(prosecutorName2));
     }
 }
