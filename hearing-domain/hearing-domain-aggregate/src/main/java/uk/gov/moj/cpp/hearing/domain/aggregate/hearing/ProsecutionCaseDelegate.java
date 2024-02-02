@@ -117,7 +117,7 @@ public class ProsecutionCaseDelegate implements Serializable {
     private void setProsecutor(final ProsecutionCase prosecutionCase, final CpsProsecutorUpdated cpsProsecutorUpdated) {
         // isCps flag need to set from CpsProsecutorUpdated
         prosecutionCase.setProsecutor(Prosecutor.prosecutor().withProsecutorCode(cpsProsecutorUpdated.getProsecutionAuthorityCode())
-                .withProsecutorId(cpsProsecutorUpdated.getProsecutionCaseId())
+                .withProsecutorId(cpsProsecutorUpdated.getProsecutionAuthorityId())
                 .withProsecutorName(cpsProsecutorUpdated.getProsecutionAuthorityName())
                 .withAddress(cpsProsecutorUpdated.getAddress())
                 .withIsCps(true).build());
