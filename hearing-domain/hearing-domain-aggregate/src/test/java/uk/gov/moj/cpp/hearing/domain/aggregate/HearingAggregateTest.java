@@ -2850,7 +2850,7 @@ public class HearingAggregateTest {
                 .build();
 
 
-        final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict);
+        final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict, Collections.emptySet());
         final List<Object> objectList = objectStream.collect(Collectors.toList());
         assertThat(objectList, hasSize(0));
 
@@ -2885,7 +2885,7 @@ public class HearingAggregateTest {
                 .build();
 
 
-        final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict);
+        final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict, Collections.emptySet());
         final List<Object> objectList = objectStream.collect(Collectors.toList());
 
         assertThat(objectList, hasSize(1));

@@ -71,10 +71,41 @@ public class VerdictDelegate implements Serializable {
 
     public Stream<Object> updateVerdict(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes) {
         final List<Object> events = new ArrayList<>();
+
+        verdict.setOriginatingHearingId(hearingId);
+
+        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
+                .setHearingId(hearingId)
+                .setVerdict(verdict);
+
+        events.add(verdictUpsert);
+
+        addOrRemoveConvictionDate(hearingId, verdict, guiltyPleaTypes, events);
+
+        return events.stream();
+    }
+
+    public void handleInheritedVerdict(final InheritedVerdictAdded inheritedVerdict) {
+        this.momento.getVerdicts().put(inheritedVerdict.getVerdict().getOffenceId(),
+                 inheritedVerdict.getVerdict());
+    }
+
+    public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes) {
+        final List<Object> events = new ArrayList<>();
+        events.add(new InheritedVerdictAdded(hearingId, verdict));
+
+        addOrRemoveConvictionDate(hearingId, verdict, guiltyPleaTypes, events);
+
+        return events.stream();
+    }
+
+    private void addOrRemoveConvictionDate(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes, final List<Object> events) {
+
         final UUID prosecutionCaseId;
         final UUID courtApplicationId;
         final UUID offenceId = verdict.getOffenceId();
-        if(offenceId != null) {
+
+        if (offenceId != null) {
             prosecutionCaseId = ofNullable(this.momento.getHearing().getProsecutionCases()).orElse(emptyList()).stream()
                     .filter(pc -> pc.getDefendants().stream()
                             .flatMap(de -> de.getOffences().stream())
@@ -96,17 +127,10 @@ public class VerdictDelegate implements Serializable {
             if (prosecutionCaseId == null && courtApplicationId == null) {
                 throw new RuntimeException("Offence id is not present");
             }
-        }else{
+        } else {
             prosecutionCaseId = null;
             courtApplicationId = verdict.getApplicationId();
         }
-        verdict.setOriginatingHearingId(hearingId);
-
-        final VerdictUpsert verdictUpsert = VerdictUpsert.verdictUpsert()
-                .setHearingId(hearingId)
-                .setVerdict(verdict);
-
-        events.add(verdictUpsert);
 
         final Plea existingOffencePlea = momento.getPleas().get(ofNullable(offenceId).orElse(courtApplicationId));
         final boolean convictionDateAlreadySetForOffence = momento.getConvictionDates().containsKey(ofNullable(offenceId).orElse(courtApplicationId));
@@ -128,16 +152,5 @@ public class VerdictDelegate implements Serializable {
                     .setOffenceId(offenceId)
                     .setCourtApplicationId(courtApplicationId));
         }
-
-        return events.stream();
-    }
-
-    public void handleInheritedVerdict(final InheritedVerdictAdded inheritedVerdict) {
-        this.momento.getVerdicts().put(inheritedVerdict.getVerdict().getOffenceId(),
-                 inheritedVerdict.getVerdict());
-    }
-
-    public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {
-        return Stream.of(new InheritedVerdictAdded(hearingId, verdict));
     }
 }

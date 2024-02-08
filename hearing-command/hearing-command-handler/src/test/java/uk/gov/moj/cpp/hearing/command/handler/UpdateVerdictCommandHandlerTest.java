@@ -38,6 +38,7 @@ import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -253,10 +254,11 @@ public class UpdateVerdictCommandHandlerTest {
 
         CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
         final UUID hearingId = hearing.getHearingId();
+        final UUID offenceId = hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
 
         final UpdateInheritedVerdictCommand command = new UpdateInheritedVerdictCommand();
         command.setHearingIds(asList(hearingId));
-        command.setVerdict(verdictTemplate(randomUUID(), TestTemplates.VerdictCategoryType.GUILTY));
+        command.setVerdict(verdictTemplate(offenceId, TestTemplates.VerdictCategoryType.GUILTY));
 
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearing.getHearing()));
@@ -272,7 +274,72 @@ public class UpdateVerdictCommandHandlerTest {
 
         final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
 
+        assertThat(events.size(), is(2));
         assertThat(((JsonEnvelope) events.get(0)).metadata().name(), is("hearing.events.inherited-verdict-added"));
+    }
+
+    @Test
+    public void updateInheritVerdictAndSetConvictionDateWhenGuilty() throws EventStreamException {
+
+        CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearing.getHearingId();
+        final UUID offenceId = hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+
+        hearing.getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(null);
+
+        final UpdateInheritedVerdictCommand command = new UpdateInheritedVerdictCommand();
+        command.setHearingIds(asList(hearingId));
+        command.setVerdict(verdictTemplate(offenceId, TestTemplates.VerdictCategoryType.GUILTY));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing.getHearing()));
+        }};
+
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-verdict-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritVerdict(envelope);
+
+        final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(((JsonEnvelope) events.get(0)).metadata().name(), is("hearing.events.inherited-verdict-added"));
+        assertThat(((JsonEnvelope) events.get(1)).metadata().name(), is("hearing.conviction-date-added"));
+    }
+
+    @Test
+    public void updateInheritVerdictAndRemoveConvictionDateWhenNotGuilty() throws EventStreamException {
+
+        CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearing.getHearingId();
+        final UUID offenceId = hearing.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+
+        hearing.getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(LocalDate.now());
+
+        final UpdateInheritedVerdictCommand command = new UpdateInheritedVerdictCommand();
+        command.setHearingIds(asList(hearingId));
+        command.setVerdict(verdictTemplate(offenceId, TestTemplates.VerdictCategoryType.NOT_GUILTY));
+
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing.getHearing()));
+        }};
+
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
+
+        final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-verdict-with-associated-hearings"),
+                objectToJsonObjectConverter.convert(command));
+
+        this.hearingCommandHandler.updateInheritVerdict(envelope);
+
+        final List<?> events = verifyAppendAndGetArgumentFrom(this.hearingEventStream).collect(Collectors.toList());
+
+        assertThat(events.size(), is(2));
+        assertThat(((JsonEnvelope) events.get(0)).metadata().name(), is("hearing.events.inherited-verdict-added"));
+        assertThat(((JsonEnvelope) events.get(1)).metadata().name(), is("hearing.conviction-date-removed"));
     }
 
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
@@ -288,7 +355,4 @@ public class UpdateVerdictCommandHandlerTest {
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
-
-
-
 }

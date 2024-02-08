@@ -802,10 +802,10 @@ public class HearingAggregate implements Aggregate {
         return apply(this.defendantDelegate.updateDefendantAttendance(hearingId, defendantId, attendanceDay));
     }
 
-    public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict) {
+    public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict, final Set<String> guiltyPleaTypes) {
 
         if (!HearingState.SHARED.equals(this.hearingState)) {
-            return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict));
+            return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict, guiltyPleaTypes));
         }
         return Stream.empty();
     }
