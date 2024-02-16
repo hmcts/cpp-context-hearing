@@ -4,7 +4,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.common</groupId>
         <artifactId>service-parent-pom</artifactId>
-        <version>10.9.5</version>
+        <version>10.9.10</version>
     </parent>
     <groupId>uk.gov.moj.cpp.hearing</groupId>
     <artifactId>hearing-parent</artifactId>
@@ -37,7 +37,7 @@
         <maven.cucumber.reporting.plugin.version>2.0.0</maven.cucumber.reporting.plugin.version>
         <domain.test.dsl.version>0.2.0</domain.test.dsl.version>
         <test-utils-enveloper-provider.version>5.1.2</test-utils-enveloper-provider.version>
-        <usersgroups.version>8.0.7</usersgroups.version>
+        <usersgroups.version>8.0.36</usersgroups.version>
         <listing.version>8.0.31</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
         <systemdocgenerator.version>8.0.85</systemdocgenerator.version>
@@ -87,14 +87,12 @@
         <module>hearing-event</module>
         <module>hearing-integration-test</module>
         <module>hearing-performance-test</module>
-        <module>hearing-notepad-parsing-service</module>
         <module>hearing-service</module>
         <module>test-utilities</module>
         <module>hearing-json</module>
         <module>pojo-plugin</module>
         <module>hearing-event-sources</module>
         <module>hearing-common</module>
-        <module>hearing-cache</module>
     </modules>
 
     <build>
@@ -128,11 +126,6 @@
                     <archiveClasses>true</archiveClasses>
                     <attachClasses>true</attachClasses>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-                <version>3.11.0.3922</version>
             </plugin>
         </plugins>
     </build>
