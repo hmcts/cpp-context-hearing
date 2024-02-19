@@ -4,14 +4,17 @@ package uk.gov.moj.cpp.hearing.event;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
 
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 import uk.gov.justice.core.courts.Defendant;
+import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +24,7 @@ import javax.json.JsonObject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 
 @ServiceComponent(EVENT_PROCESSOR)
 public class CaseDefendantsUpdatedForHearingProcessor {
@@ -36,16 +40,19 @@ public class CaseDefendantsUpdatedForHearingProcessor {
     @Inject
     private Sender sender;
 
-    @Handles("hearing.case-defendants-updated-for-hearing")
+    @Handles("hearing.events.existing-hearing-updated")
     public void caseDefendantsUpdatedForHearing(final JsonEnvelope event) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("hearing.case-defendants-updated-for-hearing event received {}", event.toObfuscatedDebugString());
+            LOGGER.debug("hearing.events.existing-hearing-updated event received {}", event.toObfuscatedDebugString());
         }
-        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), CaseDefendantsUpdatedForHearing.class);
-        final List<Defendant> defendants = caseDefendantsUpdatedForHearing.getProsecutionCase().getDefendants();
-        final UUID hearingId = caseDefendantsUpdatedForHearing.getHearingId();
+        final ExistingHearingUpdated existingHearingUpdated = jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), ExistingHearingUpdated.class);
+        final List<Defendant> defendants = existingHearingUpdated.getProsecutionCases().stream()
+                .map(ProsecutionCase::getDefendants)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+        final UUID hearingId = existingHearingUpdated.getHearingId();
 
-        defendants.stream().forEach(defendant ->
+        defendants.forEach(defendant ->
                 sender.send(enveloper.withMetadataFrom(event, "hearing.command.register-hearing-against-defendant")
                         .apply(registerHearingPayload(defendant, hearingId))));
     }

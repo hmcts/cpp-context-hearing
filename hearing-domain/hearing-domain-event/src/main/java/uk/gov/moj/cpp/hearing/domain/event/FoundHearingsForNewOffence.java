@@ -21,7 +21,7 @@ public class FoundHearingsForNewOffence implements Serializable {
     private uk.gov.justice.core.courts.Offence offence;
     private List<UUID> hearingIds;
 
-    private FoundHearingsForNewOffence() {
+    public FoundHearingsForNewOffence() {
     }
 
     @JsonCreator

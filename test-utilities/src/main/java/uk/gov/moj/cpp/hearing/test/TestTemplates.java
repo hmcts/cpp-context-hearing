@@ -536,12 +536,12 @@ public class TestTemplates {
                             .build());
         }
 
-        public static InitiateHearingCommand initiateHearingWith2Defendants(final UUID defendantId1,
+        public static InitiateHearingCommand initiateHearingWith2Defendants( final UUID prosecutionCaseId,
+                                                                             final UUID defendantId1,
                                                                              final UUID offenceId1,
                                                                              final UUID offenceId2,
                                                                              final UUID defendantId2,
                                                                              final UUID offenceId3) {
-            final UUID prosecutionCaseId = randomUUID();
 
             final List<ProsecutionCase> prosecutionCases = Collections.singletonList(
                     ProsecutionCase.prosecutionCase()

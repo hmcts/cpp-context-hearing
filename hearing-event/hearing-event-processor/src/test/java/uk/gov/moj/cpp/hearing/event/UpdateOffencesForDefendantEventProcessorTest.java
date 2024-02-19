@@ -304,4 +304,38 @@ public class UpdateOffencesForDefendantEventProcessorTest {
         verify(this.sender, times(0)).send(this.commandEnvelopeArgumentCaptor.capture());
 
     }
+
+    @Test
+    public void shouldDeleteHearingFromDefendantAggregateWhenDefendantDeletedFromHearing(){
+        final UUID hearingId = randomUUID();
+        final UUID offenceId1 = randomUUID();
+        final UUID offenceId2 = randomUUID();
+        final UUID defendantId1 = randomUUID();
+        final UUID defendantId2 = randomUUID();
+
+        final JsonObject envelopePayload = createObjectBuilder()
+                .add("hearingId", hearingId.toString())
+                .add("sourceContext", "Listing")
+                .add("defendantIds", createArrayBuilder()
+                        .add(defendantId1.toString())
+                        .add(defendantId2.toString())
+                        .build())
+                .add("offenceIds", createArrayBuilder()
+                        .add(offenceId1.toString())
+                        .add(offenceId2.toString())
+                        .build())
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.offences-removed-from-existing-hearing"), envelopePayload);
+        updateOffencesForDefendantEventProcessor.handleOffenceOrDefendantRemovalToListAssist(event);
+
+        verify(this.sender, times(1)).send(this.commandEnvelopeArgumentCaptor.capture());
+        final Envelope<JsonObject> command = this.commandEnvelopeArgumentCaptor.getAllValues().get(0);
+        assertThat(command.metadata().name(), is("hearing.command.delete-hearing-for-defendants"));
+        assertThat(command.payload().getString("hearingId"), is(hearingId.toString()));
+        final List<JsonString> defendantIds = command.payload().getJsonArray("defendantIds").getValuesAs(JsonString.class);
+        assertThat(defendantIds.get(0).getString(), is(defendantId1.toString()));
+        assertThat(defendantIds.get(1).getString(), is(defendantId2.toString()));
+    }
+
 }

@@ -14,6 +14,9 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+
+import java.util.ArrayList;
+import java.util.Collections;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -22,7 +25,6 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.core.sender.Sender;
 import uk.gov.justice.services.messaging.JsonEnvelope;
-import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 
 import java.util.Arrays;
 import java.util.List;
@@ -39,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,16 +81,13 @@ public class CaseDefendantsUpdatedForHearingProcessorTest extends TestCase {
         final UUID defendantId2 = UUID.randomUUID();
         final Defendant defendant1 = Defendant.defendant().withId(defendantId1).withProsecutionCaseId(caseId).build();
         final Defendant defendant2 = Defendant.defendant().withId(defendantId2).withProsecutionCaseId(caseId).build();
-        final CaseDefendantsUpdatedForHearing caseDefendantsUpdatedForHearing = CaseDefendantsUpdatedForHearing
-                .caseDefendantsUpdatedForHearing()
-                .withHearingId(hearingID)
-                .withProsecutionCase(ProsecutionCase.prosecutionCase()
-                        .withDefendants(Arrays.asList(defendant1, defendant2))
-                        .build())
-                .build();
+        final ExistingHearingUpdated existingHearingUpdated = new ExistingHearingUpdated(hearingID, Collections.singletonList(ProsecutionCase.prosecutionCase()
+                .withDefendants(Arrays.asList(defendant1, defendant2))
+                .build()), new ArrayList<>());
 
-        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.case-defendants-updated-for-hearing"),
-                objectToJsonObjectConverter.convert(caseDefendantsUpdatedForHearing));
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("hearing.events.existing-hearing-updated"),
+                objectToJsonObjectConverter.convert(existingHearingUpdated));
 
         caseDefendantsUpdatedForHearingProcessor.caseDefendantsUpdatedForHearing(event);
 

@@ -1,8 +1,13 @@
 package uk.gov.moj.cpp.hearing.event.listener;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.stream.Stream;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -17,6 +22,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
@@ -58,6 +64,18 @@ public class UpdateOffencesForDefendantEventListener {
 
         final OffenceAdded offenceAdded = jsonObjectToObjectConverter.convert(envelope.payloadAsJsonObject(), OffenceAdded.class);
         final Hearing hearing = hearingRepository.findBy(offenceAdded.getHearingId());
+        if(isNull(hearing)){
+            return;
+        }
+
+        if(Optional.ofNullable(hearing.getProsecutionCases()).map(Collection::stream).orElseGet(Stream::empty)
+                .map(ProsecutionCase::getDefendants)
+                .flatMap(Collection::stream)
+                .map(Defendant::getId)
+                .noneMatch(id -> id.getId().equals(offenceAdded.getDefendantId()))){
+            return;
+        }
+
         final Offence offence = offenceJPAMapper.toJPA(hearing, offenceAdded.getDefendantId(), offenceAdded.getOffence());
 
         offenceRepository.saveAndFlush(offence);
