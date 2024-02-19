@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing.get-hearing-event-log-count.json",
+  "type": "object",
+  "properties": {
+    "eventLogCountByHearingIdAndDate": {
+      "type": "integer"
+    },
+    "eventLogCountByHearingId": {
+      "type": "integer"
+    }
+  }
+}

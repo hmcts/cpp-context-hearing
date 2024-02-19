@@ -92,6 +92,7 @@ public class HearingLogEventListener {
                 .setAlterable(hearingEventLogged.isAlterable())
                 .setDefenceCounselId(hearingEventLogged.getDefenceCounselId())
                 .setNote(hearingEventLogged.getNote())
+                .setUserId(hearingEventLogged.getUserId())
         );
     }
 
@@ -103,7 +104,11 @@ public class HearingLogEventListener {
         LOGGER.info("hearing.hearing-event-deleted for eventHearingID {} ", hearingEventDeleted.getHearingEventId());
 
         final Optional<HearingEvent> optionalHearingEvent = hearingEventRepository.findOptionalById(hearingEventDeleted.getHearingEventId());
-        optionalHearingEvent.ifPresent(hearingEvent -> hearingEventRepository.save(hearingEvent.setDeleted(true)));
+        optionalHearingEvent.ifPresent(hearingEvent -> {
+            hearingEvent.setUserId(hearingEventDeleted.getUserId());
+            hearingEvent.setDeleted(true);
+            hearingEventRepository.save(hearingEvent);
+        });
     }
 
     @Handles("hearing.hearing-events-updated")

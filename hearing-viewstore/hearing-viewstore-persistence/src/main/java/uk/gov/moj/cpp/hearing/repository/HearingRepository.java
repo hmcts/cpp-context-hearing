@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.repository;
 
 import static org.apache.deltaspike.data.api.SingleResultType.OPTIONAL;
 
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.moj.cpp.hearing.persist.entity.application.ApplicationDraftResult;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
@@ -67,13 +68,28 @@ public abstract class HearingRepository extends AbstractEntityRepository<Hearing
     public abstract List<Hearing> findByDefendantAndHearingType(@QueryParam("date") final LocalDate date,
                                                                 @QueryParam("defendantId") final UUID defendantId);
 
+    @Query(value = "SELECT hearing FROM Hearing hearing  " +
+            "WHERE hearing.id = :hearingId " +
+            "AND  hearing.jurisdictionType = :jurisdictionType")
+    public abstract Hearing findByHearingIdAndJurisdictionType(@QueryParam("hearingId") final UUID hearingId, @QueryParam("jurisdictionType") final JurisdictionType jurisdictionType);
+
     @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
             "WHERE prosecutionCase.id.id = :caseId")
     public abstract List<Hearing> findByCaseId(@QueryParam("caseId") final UUID caseId);
 
+    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.prosecutionCases prosecutionCase " +
+            "WHERE prosecutionCase.id.id = :caseId " +
+            "AND  hearing.jurisdictionType = :jurisdictionType")
+    public abstract List<Hearing> findByCaseIdAndJurisdictionType(@QueryParam("caseId") final UUID caseId, @QueryParam("jurisdictionType") final JurisdictionType jurisdictionType);
+
     @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
             "WHERE hearingApplication.id.applicationId = :applicationId")
     public abstract List<Hearing> findAllHearingsByApplicationId(@QueryParam("applicationId") final UUID applicationId);
+
+    @Query(value = "SELECT hearing FROM Hearing hearing INNER JOIN hearing.hearingApplications hearingApplication " +
+            "WHERE hearingApplication.id.applicationId = :applicationId " +
+            "AND  hearing.jurisdictionType = :jurisdictionType")
+    public abstract List<Hearing> findAllHearingsByApplicationIdAndJurisdictionType(@QueryParam("applicationId") final UUID applicationId, @QueryParam("jurisdictionType") final JurisdictionType jurisdictionType);
 
 
     @Query(value = "SELECT hearing " +

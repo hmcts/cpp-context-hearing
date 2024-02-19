@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.query.view;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.io.Resources.getResource;
 import static com.jayway.jsonassert.impl.matcher.IsCollectionWithSize.hasSize;
 import static com.jayway.jsonassert.impl.matcher.IsEmptyCollection.empty;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
@@ -8,44 +9,91 @@ import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasNoJsonPath;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
+import static java.nio.charset.Charset.defaultCharset;
+import static java.time.ZonedDateTime.now;
 import static java.time.ZonedDateTime.parse;
+import static java.util.Objects.nonNull;
 import static java.util.UUID.fromString;
 import static java.util.UUID.randomUUID;
 import static java.util.stream.Collectors.joining;
 import static javax.json.Json.createObjectBuilder;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.Person.person;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUIDAndName;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.BOOLEAN;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static java.util.Arrays.asList;
 
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.test.utils.core.enveloper.EnvelopeFactory;
+import uk.gov.justice.services.test.utils.core.random.Generator;
+import uk.gov.justice.services.test.utils.core.random.StringGenerator;
+import uk.gov.moj.cpp.hearing.mapping.CourtApplicationsSerializer;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDay;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingProsecutionCounsel;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingType;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.JudicialRole;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.Person;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.PersonDefendant;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCaseIdentifier;
 import uk.gov.moj.cpp.hearing.persist.entity.heda.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.query.view.service.HearingService;
+import uk.gov.moj.cpp.hearing.query.view.service.ProgressionService;
+import uk.gov.moj.cpp.hearing.query.view.service.ctl.ReferenceDataService;
+import uk.gov.moj.cpp.hearing.query.view.service.userdata.UserDataService;
+import uk.gov.moj.cpp.hearing.test.FileUtil;
 
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.json.JsonObject;
+import javax.json.JsonValue;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Resources;
 import org.hamcrest.Matchers;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -141,14 +189,48 @@ public class HearingEventQueryViewTest {
     private static final UUID DEFENDANT_ID_2 = randomUUID();
     private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final UUID COURT_ROOM_ID = randomUUID();
+    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    private static final DateTimeFormatter reportTimeFormatter = DateTimeFormatter.ofPattern("HH:mm 'on' dd MMM yyyy");
+    private static final DateTimeFormatter eventTimeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+    private static final Generator<String> STRING = new StringGenerator();
+
     @Spy
     private final Enveloper enveloper = createEnveloper();
 
     @Mock
     private HearingService hearingService;
 
+    @Mock
+    private ProgressionService progressionService;
+
+    @Mock
+    private UserDataService userDataService;
+
+    @Mock
+    private ReferenceDataService referenceDataService;
+
     @InjectMocks
     private HearingEventQueryView target;
+
+    @Spy
+    private CourtApplicationsSerializer courtApplicationsSerializer;
+
+    @Spy
+    private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+
+    @Spy
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
+    @Spy
+    private StringToJsonObjectConverter stringToJsonObjectConverter;
+
+    @Before
+    public void setup() {
+        setField(this.jsonObjectToObjectConverter, "objectMapper", new ObjectMapperProducer().objectMapper());
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        setField(this.courtApplicationsSerializer, "jsonObjectToObjectConverter", jsonObjectToObjectConverter);
+        setField(this.courtApplicationsSerializer, "objectToJsonObjectConverter", objectToJsonObjectConverter);
+    }
 
     @Test
     public void shouldGetHearingEventLogByHearingId() {
@@ -500,6 +582,843 @@ public class HearingEventQueryViewTest {
         );
     }
 
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearing() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing(hearingId1, 2);
+        HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingForSingleDay() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing(hearingId1, 2);
+        HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "startDate"), notNullValue()),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingWithMutliDays() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing1(hearingId1, 2019, 7, 1, 3);
+        HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "startDate"), equalTo("2019-07-01")),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "endDate"), equalTo("2019-07-05")),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingNoUserIdAndNoCourtClerks() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing(hearingId1,2);
+        HearingEvent hearingEvent = mockHearingEventNoUserId();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+        if(nonNull(query.metadata().userId())) {
+            when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        }
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingWithUserIdAndClerk() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing(hearingId1,2);
+        HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldReturnEmptyPayloadIfNoEventLogForHeraing() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        UUID hearingId1 = randomUUID();
+        Hearing hearing = mockHearing(hearingId1,2);
+        HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(new ArrayList<>());
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().get("hearings"),  is(JsonValue.NULL));
+
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingAndDate() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final  LocalDate hearingDate = LocalDate.now();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        final HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, hearingDate)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .add("hearingDate", hearingDate.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, hearingDate);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByHearingAndDateWithDefendantAndProsecutionAttendees() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final  LocalDate hearingDate = LocalDate.of(2022,10,12);
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        final HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(hearing);
+        when(hearingService.getHearingEvents(hearingId1, hearingDate)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId1.toString())
+                        .add("hearingDate", hearingDate.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId1);
+        verify(hearingService).getHearingEvents(hearingId1, hearingDate);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "defendantAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "prosecutionAttendees", hasSize(1))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+                ));
+    }
+
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByCaseWithSingleHearing() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID caseId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        final HearingEvent hearingEvent = mockHearingEvent();
+
+        when(hearingService.getHearingDetailsByCaseForDocuments(any())).thenReturn(asList(hearing));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("caseId", caseId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByCaseForDocuments(caseId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+
+    }
+
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByCaseWithOrderedSingleAndMultiDayHearings() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID hearingId3 = randomUUID();
+        final UUID hearingId4 = randomUUID();
+
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID caseId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        Hearing hearing1 = mockHearing1(hearingId2, 2020, 7, 1, 3);
+        Hearing hearing2 = mockHearing1(hearingId3,2023, 2, 21, 5);
+        Hearing hearing3 = mockHearing1(hearingId4,2019, 5, 2, 4);
+
+        final HearingEvent hearingEvent = mockHearingEvent();
+        final HearingEvent hearingEvent1 = mockHearingEvent();
+        final HearingEvent hearingEvent2 = mockHearingEvent();
+        final HearingEvent hearingEvent3 = mockHearingEvent();
+
+
+        when(hearingService.getHearingDetailsByCaseForDocuments(any())).thenReturn(asList(hearing,hearing1,hearing2,hearing3));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(hearingEvent1));
+        when(hearingService.getHearingEvents(hearingId3, null)).thenReturn(asList(hearingEvent2));
+        when(hearingService.getHearingEvents(hearingId4, null)).thenReturn(asList(hearingEvent3));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("caseId", caseId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByCaseForDocuments(caseId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(4))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId4.toString())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[3].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+
+    }
+
+     @Test
+        public void shouldGetHearingEventReportForDocumentByCaseWithOrderedSingleDayHearings() throws IOException{
+            setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+            final UUID hearingId1 = randomUUID();
+            final UUID hearingId2 = randomUUID();
+            final UUID hearingId3 = randomUUID();
+            final UUID hearingId4 = randomUUID();
+
+            final LocalDate hearingDate = LocalDate.now();
+            final UUID caseId = randomUUID();
+
+            Hearing hearing = mockHearing(hearingId1,5);
+            Hearing hearing1 = mockHearing(hearingId2,4);
+            Hearing hearing2 = mockHearing(hearingId3,3);
+            Hearing hearing3 = mockHearing(hearingId4,2);
+
+            final HearingEvent hearingEvent = mockHearingEvent();
+            final HearingEvent hearingEvent1 = mockHearingEvent();
+            final HearingEvent hearingEvent2 = mockHearingEvent();
+            final HearingEvent hearingEvent3 = mockHearingEvent();
+
+
+            when(hearingService.getHearingDetailsByCaseForDocuments(any())).thenReturn(asList(hearing,hearing1,hearing2,hearing3));
+            when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+            when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(hearingEvent1));
+            when(hearingService.getHearingEvents(hearingId3, null)).thenReturn(asList(hearingEvent2));
+            when(hearingService.getHearingEvents(hearingId4, null)).thenReturn(asList(hearingEvent3));
+            when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+            when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+            final JsonEnvelope query = envelopeFrom(
+                    JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                    createObjectBuilder().add("caseId", caseId.toString())
+                            .build());
+
+            final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+            verify(hearingService).getHearingDetailsByCaseForDocuments(caseId);
+            verify(hearingService).getHearingEvents(hearingId1, null);
+
+            assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(4))),
+                    hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId4.toString())),
+                    hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                    hasJsonPath(format("$.%s[1].%s", "hearings", "hearingId"), equalTo(hearingId3.toString())),
+                    hasJsonPath(format("$.%s[2].%s", "hearings", "hearingId"), equalTo(hearingId2.toString())),
+                    hasJsonPath(format("$.%s[3].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                    hasJsonPath(format("$.%s[0].%s[0]", "hearings", "caseUrns"), equalTo("TFL102345")),
+                    hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                    hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                    hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+            ));
+
+        }
+
+    @Test
+    public void shouldGetHearingEventReportForDocumentByCaseWithMultipleHearing() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID caseId = randomUUID();
+
+        when(hearingService.getHearingDetailsByCaseForDocuments(any())).thenReturn(asList(mockHearing(hearingId1,2), mockHearing1(hearingId2,2019, 7, 1, 3)));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(mockHearingEvents());
+        when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(mockHearingEvent()));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("caseId", caseId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByCaseForDocuments(caseId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+        verify(hearingService).getHearingEvents(hearingId2, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(2))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForCdesDocumentByCaseWithSingleHearingAndMultipleCourtClerks() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId = randomUUID();
+
+        when(hearingService.getHearingDetailsByHearingForDocuments(any())).thenReturn(mockHearing(hearingId, 2));
+        when(hearingService.getHearingEvents(hearingId, null)).thenReturn(mockHearingEvents());
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("hearingId", hearingId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByHearingForDocuments(hearingId);
+        verify(hearingService).getHearingEvents(hearingId, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf(hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks", hasSize(2))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingEventReportForCdesDocumentByApplication() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID applicationId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        final HearingEvent hearingEvent = mockHearingEvent();
+        final JsonObject courtApplicationResponse = stringToJsonObjectConverter.convert(Resources.toString(getResource("progression.query.application.aaag.json"), defaultCharset()));
+        final CourtApplication courtApplication = getCourtApplication(applicationId);
+
+        when(hearingService.getHearingDetailsByApplicationForDocuments(any())).thenReturn(asList(hearing));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(progressionService.retrieveApplication(any(JsonEnvelope.class), any())).thenReturn(courtApplicationResponse);
+
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(courtApplication));
+
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("applicationId", applicationId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+
+        verify(hearingService).getHearingDetailsByApplicationForDocuments(applicationId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationReferences"), equalTo(courtApplication.getApplicationReference())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationIds"), equalTo(courtApplication.getId().toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "thirdParties"), equalTo(courtApplication.getThirdParties().get(0).getPersonDetails().getFirstName()+" "+ courtApplication.getThirdParties().get(0).getPersonDetails().getLastName())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+
+    }
+
+     @Test
+    public void shouldGetHearingEventReportForCdesDocumentByApplicationInOrder() throws IOException{
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID hearingId3 = randomUUID();
+        final UUID hearingId4 = randomUUID();
+
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID caseId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        Hearing hearing1 = mockHearing1(hearingId2, 2021, 7, 1, 3);
+        Hearing hearing2 = mockHearing1(hearingId3,2023, 6, 3, 5);
+        Hearing hearing3 = mockHearing1(hearingId4,2020, 5, 2, 4);
+
+        final HearingEvent hearingEvent = mockHearingEvent();
+        final HearingEvent hearingEvent1 = mockHearingEvent();
+        final HearingEvent hearingEvent2 = mockHearingEvent();
+        final HearingEvent hearingEvent3 = mockHearingEvent();
+        final UUID applicationId = randomUUID();
+         final JsonObject courtApplicationResponse = stringToJsonObjectConverter.convert(Resources.toString(getResource("progression.query.application.aaag.json"), defaultCharset()));
+
+        final CourtApplication courtApplication = getCourtApplication(applicationId);
+
+        when(hearingService.getHearingDetailsByApplicationForDocuments(any())).thenReturn(asList(hearing, hearing1, hearing2, hearing3));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(hearingEvent1));
+        when(hearingService.getHearingEvents(hearingId3, null)).thenReturn(asList(hearingEvent2));
+        when(hearingService.getHearingEvents(hearingId4, null)).thenReturn(asList(hearingEvent3));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(progressionService.retrieveApplication(any(JsonEnvelope.class), any())).thenReturn(courtApplicationResponse);
+
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(courtApplication));
+
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("applicationId", applicationId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByApplicationForDocuments(applicationId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId4.toString())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[3].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationReferences"), equalTo(courtApplication.getApplicationReference())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationIds"), equalTo(courtApplication.getId().toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "respondents"), equalTo("WBHE1n0bUr")),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicants"), equalTo("IuXmrISMSm zKUPL1pbbN")),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "thirdParties"), equalTo(courtApplication.getThirdParties().get(0).getPersonDetails().getFirstName()+" "+ courtApplication.getThirdParties().get(0).getPersonDetails().getLastName())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+
+    }
+
+    @Test
+    public void shouldGetHearingEventLogCount() throws IOException{
+        final UUID hearingId1 = randomUUID();
+        final LocalDate hearingDate = LocalDate.now();
+
+        JsonObject jsonObject = createObjectBuilder()
+                .add("eventLogCountByHearingIdAndDate",1)
+                .add("eventLogCountByHearingId",2)
+                .build();
+
+        when(hearingService.getHearingEventLogCount(any(), any())).thenReturn(jsonObject);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-count", createObjectBuilder()
+                .add("hearingId", hearingId1.toString())
+                .add("hearingDate", LocalDate.now().toString())
+                .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogCount(query);
+
+        verify(hearingService).getHearingEventLogCount(hearingId1, hearingDate);
+
+        assertThat(actualHearingEventLog.payload().toString(),
+                allOf(hasJsonPath("$.eventLogCountByHearingIdAndDate", is(1)),
+                hasJsonPath("$.eventLogCountByHearingId", is(2))
+
+        ));
+
+    }
+
+    @Test
+    public void shouldProcesAaagHearingLogDocumentNoApplicantRespondent() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID hearingId3 = randomUUID();
+        final UUID hearingId4 = randomUUID();
+
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID caseId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        Hearing hearing1 = mockHearing1(hearingId2, 2021, 7, 1, 3);
+        Hearing hearing2 = mockHearing1(hearingId3,2023, 6, 3, 5);
+        Hearing hearing3 = mockHearing1(hearingId4,2020, 5, 2, 4);
+
+        final HearingEvent hearingEvent = mockHearingEvent();
+        final HearingEvent hearingEvent1 = mockHearingEvent();
+        final HearingEvent hearingEvent2 = mockHearingEvent();
+        final HearingEvent hearingEvent3 = mockHearingEvent();
+        final UUID applicationId = randomUUID();
+        final JsonObject courtApplicationResponse = stringToJsonObjectConverter.convert(Resources.toString(getResource("progression.query.application.aaag-no-applicant-respondent.json"), defaultCharset()));
+
+        final CourtApplication courtApplication = getCourtApplication(applicationId);
+
+        when(hearingService.getHearingDetailsByApplicationForDocuments(any())).thenReturn(asList(hearing, hearing1, hearing2, hearing3));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(hearingEvent1));
+        when(hearingService.getHearingEvents(hearingId3, null)).thenReturn(asList(hearingEvent2));
+        when(hearingService.getHearingEvents(hearingId4, null)).thenReturn(asList(hearingEvent3));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(progressionService.retrieveApplication(any(JsonEnvelope.class), any())).thenReturn(courtApplicationResponse);
+
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(courtApplication));
+
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("applicationId", applicationId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query); //failed
+
+        verify(hearingService).getHearingDetailsByApplicationForDocuments(applicationId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId4.toString())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[3].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationReferences"), equalTo(courtApplication.getApplicationReference())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationIds"), equalTo(courtApplication.getId().toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "thirdParties"), equalTo(courtApplication.getThirdParties().get(0).getPersonDetails().getFirstName()+" "+ courtApplication.getThirdParties().get(0).getPersonDetails().getLastName())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldGetHearingLogDocumentWithNoRespondent() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID hearingId3 = randomUUID();
+        final UUID hearingId4 = randomUUID();
+
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID caseId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        Hearing hearing1 = mockHearing1(hearingId2, 2021, 7, 1, 3);
+        Hearing hearing2 = mockHearing1(hearingId3,2023, 6, 3, 5);
+        Hearing hearing3 = mockHearing1(hearingId4,2020, 5, 2, 4);
+
+        final HearingEvent hearingEvent = mockHearingEvent();
+        final HearingEvent hearingEvent1 = mockHearingEvent();
+        final HearingEvent hearingEvent2 = mockHearingEvent();
+        final HearingEvent hearingEvent3 = mockHearingEvent();
+        final UUID applicationId = randomUUID();
+        final JsonObject courtApplicationResponse = stringToJsonObjectConverter.convert(Resources.toString(getResource("progression.query.application.aaag-no-respondent.json"), defaultCharset()));
+
+        final CourtApplication courtApplication = getCourtApplication(applicationId);
+
+        when(hearingService.getHearingDetailsByApplicationForDocuments(any())).thenReturn(asList(hearing, hearing1, hearing2, hearing3));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(hearingEvent1));
+        when(hearingService.getHearingEvents(hearingId3, null)).thenReturn(asList(hearingEvent2));
+        when(hearingService.getHearingEvents(hearingId4, null)).thenReturn(asList(hearingEvent3));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(progressionService.retrieveApplication(any(JsonEnvelope.class), any())).thenReturn(courtApplicationResponse);
+
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(courtApplication));
+
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("applicationId", applicationId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);//failed
+
+        verify(hearingService).getHearingDetailsByApplicationForDocuments(applicationId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId4.toString())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[3].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationReferences"), equalTo(courtApplication.getApplicationReference())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationIds"), equalTo(courtApplication.getId().toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicants"), equalTo("IuXmrISMSm zKUPL1pbbN")),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "thirdParties"), equalTo(courtApplication.getThirdParties().get(0).getPersonDetails().getFirstName()+" "+ courtApplication.getThirdParties().get(0).getPersonDetails().getLastName())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
+    @Test
+    public void shouldProcesAaagHearingLogDocumentNoApplicant() throws IOException {
+        setField(this.objectToJsonObjectConverter, "mapper", new ObjectMapperProducer().objectMapper());
+        final UUID hearingId1 = randomUUID();
+        final UUID hearingId2 = randomUUID();
+        final UUID hearingId3 = randomUUID();
+        final UUID hearingId4 = randomUUID();
+
+        final LocalDate hearingDate = LocalDate.now();
+        final UUID caseId = randomUUID();
+
+        Hearing hearing = mockHearing(hearingId1,2);
+        Hearing hearing1 = mockHearing1(hearingId2, 2021, 7, 1, 3);
+        Hearing hearing2 = mockHearing1(hearingId3,2023, 6, 3, 5);
+        Hearing hearing3 = mockHearing1(hearingId4,2020, 5, 2, 4);
+
+        final HearingEvent hearingEvent = mockHearingEvent();
+        final HearingEvent hearingEvent1 = mockHearingEvent();
+        final HearingEvent hearingEvent2 = mockHearingEvent();
+        final HearingEvent hearingEvent3 = mockHearingEvent();
+        final UUID applicationId = randomUUID();
+        final JsonObject courtApplicationResponse = stringToJsonObjectConverter.convert(Resources.toString(getResource("progression.query.application.aaag-no-applicant.json"), defaultCharset()));
+
+        final CourtApplication courtApplication = getCourtApplication(applicationId);
+
+        when(hearingService.getHearingDetailsByApplicationForDocuments(any())).thenReturn(asList(hearing, hearing1, hearing2, hearing3));
+        when(hearingService.getHearingEvents(hearingId1, null)).thenReturn(asList(hearingEvent));
+        when(hearingService.getHearingEvents(hearingId2, null)).thenReturn(asList(hearingEvent1));
+        when(hearingService.getHearingEvents(hearingId3, null)).thenReturn(asList(hearingEvent2));
+        when(hearingService.getHearingEvents(hearingId4, null)).thenReturn(asList(hearingEvent3));
+        when(userDataService.getUserDetails(any(), any())).thenReturn(asList("Jacob John"));
+        when(referenceDataService.getJudiciaryTitle(any(), any())).thenReturn(asList("Martin Thomas"));
+        when(progressionService.retrieveApplication(any(JsonEnvelope.class), any())).thenReturn(courtApplicationResponse);
+
+        when(courtApplicationsSerializer.courtApplications(anyString())).thenReturn(asList(courtApplication));
+
+
+        final JsonEnvelope query = envelopeFrom(
+                JsonEnvelope.metadataBuilder().withUserId(randomUUID().toString()).withId(randomUUID()).withName("hearing.get-hearing-event-log-for-cdes-document").build(),
+                createObjectBuilder().add("applicationId", applicationId.toString())
+                        .build());
+
+        final Envelope<JsonObject> actualHearingEventLog = target.getHearingEventLogForDocuments(query);
+
+        verify(hearingService).getHearingDetailsByApplicationForDocuments(applicationId);
+        verify(hearingService).getHearingEvents(hearingId1, null);
+
+        assertThat(actualHearingEventLog.payload().toString(), allOf( hasJsonPath(format("$.%s[0]", "hearings", hasSize(1))),
+                hasJsonPath(format("$.%s[0].%s", "hearings", "hearingId"), equalTo(hearingId4.toString())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[3].%s", "hearings", "hearingId"), equalTo(hearingId1.toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationReferences"), equalTo(courtApplication.getApplicationReference())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "applicationIds"), equalTo(courtApplication.getId().toString())),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "respondents"), equalTo("WBHE1n0bUr")),
+                hasJsonPath(format("$.%s[0].%s[0]", "hearings", "thirdParties"), equalTo(courtApplication.getThirdParties().get(0).getPersonDetails().getFirstName()+" "+ courtApplication.getThirdParties().get(0).getPersonDetails().getLastName())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0]", "hearings", "loggedHearingEvents", "courtClerks"), equalTo("Jacob John")),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "label"), equalTo(hearingEvent.getRecordedLabel())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "note"), equalTo(hearingEvent.getNote())),
+                hasJsonPath(format("$.%s[0].%s[0].%s[0].%s", "hearings", "loggedHearingEvents", "eventLogs", "time"), equalTo(hearingEvent.getEventTime().format(eventTimeFormatter))),
+                hasJsonPath(format("$.%s", "requestedUser", equalTo("Jacob John"))),
+                hasJsonPath(format("$.%s", "requestedTime", equalTo(now().format(formatter))))
+        ));
+    }
+
     private HearingEventDefinition prepareHearingEventDefinition() {
         return new HearingEventDefinition(java.util.UUID.fromString(ID_1), RECORDED_LABEL_1, ACTION_LABEL_1, ACTION_SEQUENCE_1, null, GROUP_LABEL_1, GROUP_SEQUENCE_1, ALTERABLE);
     }
@@ -695,4 +1614,205 @@ public class HearingEventQueryViewTest {
 
         return hearing;
     }
+
+    private List<HearingEvent> mockHearingEvents(){
+        final HearingEvent hearingEvent1 = new HearingEvent();
+        hearingEvent1.setUserId(randomUUID());
+        hearingEvent1.setRecordedLabel("hearing started-1");
+        hearingEvent1.setEventTime(now());
+        hearingEvent1.setNote("note1");
+
+        final HearingEvent hearingEvent2 = new HearingEvent();
+        hearingEvent2.setUserId(randomUUID());
+        hearingEvent2.setRecordedLabel("hearing started-2");
+        hearingEvent2.setEventTime(now());
+        hearingEvent2.setNote("note2");
+
+        return Arrays.asList(hearingEvent1, hearingEvent2);
+    }
+
+    private Hearing mockHearing(final UUID hearingId, final int days) throws IOException {
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        hearing.setProsecutionCases(new HashSet(Arrays.asList(mockProsecutionCase())));
+        hearing.setCourtCentre(mockCourtCentre());
+        hearing.setHearingType(mockHearingType());
+        hearing.setHearingDays(new HashSet(Arrays.asList(mockHearingDay(days))));
+        hearing.setJudicialRoles(new HashSet(Arrays.asList(mockJudicialRole())));
+        hearing.setDefenceCounsels(new HashSet(Arrays.asList(mockDefenceCounsel())));
+        hearing.setProsecutionCounsels(new HashSet(Arrays.asList(mockProsecutionCounsel())));
+
+        return hearing;
+    }
+
+    private Hearing mockHearing1(final UUID hearingId, final int year, final int month, final int day, final int sequence) throws IOException {
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(randomUUID());
+        hearing.setId(hearingId);
+        hearing.setProsecutionCases(new HashSet(Arrays.asList(mockProsecutionCase())));
+        hearing.setCourtCentre(mockCourtCentre());
+        hearing.setHearingType(mockHearingType());
+        final Set<HearingDay> hearingDays1 = generateHearingDays(hearing.getId(), year, month, day, sequence);
+        hearing.setHearingDays(hearingDays1);
+        hearing.setJudicialRoles(new HashSet(Arrays.asList(mockJudicialRole())));
+        hearing.setDefenceCounsels(new HashSet(Arrays.asList(mockDefenceCounsel())));
+        hearing.setProsecutionCounsels(new HashSet(Arrays.asList(mockProsecutionCounsel())));
+        hearing.setCourtApplicationsJson("{}");
+        return hearing;
+    }
+
+    private ProsecutionCase mockProsecutionCase(){
+        final HearingSnapshotKey hearingSnapshotKey = new HearingSnapshotKey();
+        hearingSnapshotKey.setId(randomUUID());
+
+        final ProsecutionCaseIdentifier prosecutionCaseIdentifier = new ProsecutionCaseIdentifier();
+        prosecutionCaseIdentifier.setCaseURN("TFL102345");
+
+        final ProsecutionCase prosecutionCase = new ProsecutionCase();
+        prosecutionCase.setProsecutionCaseIdentifier(prosecutionCaseIdentifier);
+        prosecutionCase.setId(hearingSnapshotKey);
+
+        Person person = new Person();
+        person.setFirstName("Mark");
+        person.setLastName("Taylor");
+        PersonDefendant personDefendant = new PersonDefendant();
+        personDefendant.setPersonDetails(person);
+
+        Defendant defendant = new Defendant();
+        defendant.setPersonDefendant(personDefendant);
+
+        prosecutionCase.setDefendants(new HashSet(Arrays.asList(defendant)));
+
+        return prosecutionCase;
+    }
+
+    private HearingDay mockHearingDay(final int days){
+        final HearingDay hearingDay = new HearingDay();
+        hearingDay.setDate(LocalDate.now().plusDays(days));
+        return hearingDay;
+    }
+
+    private CourtCentre mockCourtCentre(){
+        final CourtCentre courtCentre = new CourtCentre();
+        courtCentre.setId(COURT_CENTRE_ID);
+        courtCentre.setRoomId(COURT_ROOM_ID);
+        return courtCentre;
+    }
+
+    private JudicialRole mockJudicialRole(){
+        final JudicialRole judicialRole = new JudicialRole();
+        judicialRole.setJudicialId(randomUUID());
+        return judicialRole;
+    }
+
+    private HearingType mockHearingType(){
+        final HearingType hearingType = new HearingType();
+        hearingType.setDescription("sentence");
+        return hearingType;
+    }
+
+    private HearingDefenceCounsel mockDefenceCounsel() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        HearingDefenceCounsel hearingDefenceCounsel = new HearingDefenceCounsel();
+        String jsonStr = "{ \"firstName\" : \"James\", \"lastName\" : \"Peter\"," +
+                " \"attendanceDays\" : [\"2022-10-12\", \"2022-10-13\", \"2023-07-24\"] }";
+        hearingDefenceCounsel.setPayload(objectMapper.readValue(jsonStr, JsonNode.class));
+        return hearingDefenceCounsel;
+    }
+
+    private HearingProsecutionCounsel mockProsecutionCounsel() throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        HearingProsecutionCounsel hearingProsecutionCounsel = new HearingProsecutionCounsel();
+        String jsonStr = "{ \"firstName\" : \"James\", \"lastName\" : \"Peter\"," +
+                " \"attendanceDays\" : [\"2022-10-12\", \"2022-10-13\", \"2023-07-24\"] }";
+        hearingProsecutionCounsel.setPayload(objectMapper.readValue(jsonStr, JsonNode.class));
+        return hearingProsecutionCounsel;
+    }
+
+
+    private HearingEvent mockHearingEvent(){
+        final HearingEvent hearingEvent = new HearingEvent();
+        hearingEvent.setUserId(randomUUID());
+        hearingEvent.setRecordedLabel("hearing started-3");
+        hearingEvent.setEventTime(now());
+        hearingEvent.setNote("note3");
+        return hearingEvent;
+    }
+
+    private HearingEvent mockHearingEventNoUserId(){
+        final HearingEvent hearingEvent = new HearingEvent();
+        hearingEvent.setRecordedLabel("hearing started-3");
+        hearingEvent.setEventTime(now());
+        hearingEvent.setNote("note3");
+        return hearingEvent;
+    }
+
+
+    private CourtApplication getCourtApplication(UUID applicationId) {
+
+        return CourtApplication.courtApplication()
+                .withId(applicationId)
+                .withApplicationReference(STRING.next())
+                .withApplicant(CourtApplicationParty.courtApplicationParty()
+                        .withPersonDetails(person().withFirstName(STRING.next()).withLastName(STRING.next()).build())
+                        .build())
+                .withRespondents(ImmutableList.of(CourtApplicationParty.courtApplicationParty()
+                        .withPersonDetails(person().withFirstName(STRING.next()).withLastName(STRING.next()).build())
+                        .build()))
+                .withThirdParties(ImmutableList.of(CourtApplicationParty.courtApplicationParty()
+                        .withPersonDetails(person().withFirstName(STRING.next()).withLastName(STRING.next()).build())
+                        .build()))
+                .build();
+    }
+
+    private Hearing mockHearingv1(final UUID hearingId, final int days) throws IOException {
+
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        hearing.setProsecutionCases(new HashSet(Arrays.asList(mockProsecutionCase())));
+        hearing.setCourtCentre(mockCourtCentre());
+        hearing.setHearingType(mockHearingType());
+        hearing.setHearingDays(new HashSet(Arrays.asList(mockHearingDay(days))));
+        hearing.setJudicialRoles(new HashSet(Arrays.asList(mockJudicialRole())));
+        hearing.setDefenceCounsels(new HashSet(Arrays.asList(mockDefenceCounsel())));
+        hearing.setProsecutionCounsels(new HashSet(Arrays.asList(mockProsecutionCounsel())));
+        hearing.setCourtApplicationsJson((FileUtil.getPayload("court-applications-v1.json")));
+
+        return hearing;
+    }
+
+    private static Set<HearingDay> generateHearingDays(final UUID hearingId, final int year, final int month, int day, final int sequence) {
+
+        final Set<HearingDay> hearingDays = new HashSet<>(); //add 5 days
+
+        final HearingDay hearingDay1 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay2 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay3 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay4 = getHearingDay(hearingId, year, month, day++, sequence);
+        final HearingDay hearingDay5 = getHearingDay(hearingId, year, month, day++, sequence);
+
+        hearingDays.add(hearingDay1);
+        hearingDays.add(hearingDay2);
+        hearingDays.add(hearingDay3);
+        hearingDays.add(hearingDay4);
+        hearingDays.add(hearingDay5);
+
+        return hearingDays;
+    }
+
+    private static HearingDay getHearingDay(final UUID hearingId, final int year, final int month, final int day, final int sequence) {
+        final HearingDay hearingDay = new HearingDay();
+        hearingDay.setId(new HearingSnapshotKey(randomUUID(), hearingId));
+        hearingDay.setListingSequence(sequence);
+
+        final ZonedDateTime zonedDateTime = ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.parse("11:00:11.297"), ZoneId.of("UTC"));
+        hearingDay.setDate(zonedDateTime.toLocalDate());
+        hearingDay.setSittingDay(zonedDateTime);
+        hearingDay.setDateTime(zonedDateTime);
+
+        return hearingDay;
+    }
+
 }

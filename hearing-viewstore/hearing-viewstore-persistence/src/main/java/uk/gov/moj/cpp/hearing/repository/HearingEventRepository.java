@@ -115,4 +115,10 @@ public abstract class HearingEventRepository extends AbstractEntityRepository<He
     @Query(value = GET_LATEST_HEARINGS_FOR_COURT_CENTRE_LIST)
     public abstract List<HearingEventPojo> findLatestHearingsForThatDay(@QueryParam("courtCentreList") final List<UUID> courtCentreList, @QueryParam("eventDate") final LocalDate eventDate, @QueryParam("cppHearingEventIds") final Set<UUID> cppHearingEventIds);
 
+    @Query(value="SELECT COUNT(he.id) FROM HearingEvent he WHERE he.hearingId = :hearingId AND he.eventDate = :hearingDate AND he.deleted = false AND he.recordedLabel = 'Hearing started'")
+    public abstract Long findEventLogCountByHearingIdAndEventDate(@QueryParam("hearingId") final UUID hearingId, @QueryParam("hearingDate") final LocalDate hearingDate);
+
+    @Query(value="SELECT COUNT(he.id) FROM HearingEvent he WHERE he.hearingId = :hearingId AND he.deleted = false AND he.recordedLabel = 'Hearing started'")
+    public abstract Long findEventLogCountByHearingId(@QueryParam("hearingId") final UUID hearingId);
+
 }

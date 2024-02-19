@@ -16,9 +16,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
-import static uk.gov.justice.services.messaging.JsonObjects.getUUID;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloper;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
 import static java.time.LocalDate.now;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
@@ -35,6 +32,7 @@ import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCa
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService;
 import uk.gov.moj.cpp.hearing.query.api.service.progression.ProgressionService;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.PIEventMapperCache;
 import uk.gov.moj.cpp.hearing.query.api.service.referencedata.ReferenceDataService;
@@ -54,7 +52,6 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -168,6 +165,9 @@ public class HearingQueryApiTest {
     @InjectMocks
     private HearingQueryApi hearingQueryApi;
 
+    @Mock
+    private UserGroupQueryService userGroupQueryService;
+
     private Map<String, String> apiMethodsToHandlerNames;
 
     @Before
@@ -186,6 +186,9 @@ public class HearingQueryApiTest {
                 .filter(line -> line.contains(NAME))
                 .map(line -> line.replaceAll(NAME, "").trim())
                 .collect(toList());
+
+        //The below one is not implemented in HearingQueryApi, it is implemented in DefaultQueryApiHearingEventLogReportResource, so removing from map
+        ramlActionNames.remove("hearing.get-hearing-event-log-extract-for-documents");
 
         assertThat(apiMethodsToHandlerNames.values(), containsInAnyOrder(ramlActionNames.toArray()));
     }
@@ -388,6 +391,64 @@ public class HearingQueryApiTest {
         assertThat(result, is(query));
     }
 
+    @Test
+    public void shouldProcessGetHearingEventLogForCdesDocument() { 
+        when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
+        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-for-cdes-document", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .build());
+
+        hearingQueryApi.getHearingEventLogForDocuments(query);
+
+        verify(hearingEventQueryView, times(1)).getHearingEventLogForDocuments(any(JsonEnvelope.class));
+    }
+
+    @Test
+    public void shouldNotProcessGetHearingEventLogForCdesDocumentForNonHMCTSUser() {
+        when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(false);
+        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-for-cdes-document", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .build());
+
+        hearingQueryApi.getHearingEventLogForDocuments(query);
+
+        verify(hearingEventQueryView, times(0)).getHearingEventLogForDocuments(any(JsonEnvelope.class));
+    }
+
+    @Test
+    public void shouldProcessGetHearingEventLogCount() { 
+        when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
+        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-count", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("hearingDate", LocalDate.now().toString())
+                .build());
+
+        hearingQueryApi.getHearingEventLogCount(query);
+
+        verify(hearingEventQueryView, times(1)).getHearingEventLogCount(any(JsonEnvelope.class));
+    }
+
+    @Test
+    public void shouldNotProcessGetHearingEventLogCountForNonHMCTSUser() {
+        when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(false);
+        when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
+
+        final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log-count", createObjectBuilder()
+                .add("hearingId", UUID.randomUUID().toString())
+                .add("hearingDate", LocalDate.now().toString())
+                .build());
+
+        hearingQueryApi.getHearingEventLogCount(query);
+
+        verify(hearingEventQueryView, times(0)).getHearingEventLogCount(any(JsonEnvelope.class));
+    }
+
     private Set<UUID> buildPIEventCache() {
         final UUID cpHearingEventId_1 = randomUUID();
         final UUID cpHearingEventId_2 = UUID.fromString("abdaeb88-8952-4c07-99c4-d27c39d4e63a");
@@ -431,7 +492,8 @@ public class HearingQueryApiTest {
     }
 
     @Test
-    public void shouldGetHearingEventLog(){
+    public void shouldGetHearingEventLog(){ 
+        when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())
                 .add("date", LocalDate.now().toString())

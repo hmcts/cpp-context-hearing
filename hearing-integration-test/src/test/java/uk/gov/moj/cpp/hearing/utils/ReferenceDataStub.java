@@ -377,6 +377,20 @@ public class ReferenceDataStub {
                 REFERENCE_DATA_RESULT_CRACKED_INEFFECTIVE_TRIAL_TYPES_MEDIA_TYPE);
     }
 
+    private static void stubGetReferenceDataJudiciaries(final String judiciaryId) {
+        InternalEndpointMockUtils.stubPingFor(REFERENCE_DATA_SERVICE_NAME);
+
+        final String urlPath = "/referencedata-service/query/api/rest/referencedata/judiciaries?.*";
+        stubFor(get(urlPathEqualTo(urlPath))
+                .willReturn(aResponse().withStatus(SC_OK)
+                        .withHeader("CPPID", randomUUID().toString())
+                        .withHeader("Content-Type", "application/vnd.reference-data.judiciaries+json")
+                        .withBody(getPayload("/stub-data/referencedata.query.judiciaries.json"))));
+
+        waitForStubToBeReady(urlPath, "application/vnd.reference-data.judiciaries+json");
+    }
+
+
     private static void stub(final Object result, final String queryUrl, final String mediaType) {
         final String strPayload;
         try {

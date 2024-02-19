@@ -1,0 +1,30 @@
+{
+  "judiciaries": [
+    {
+      "id": "7e2f843e-d639-40b3-8611-8015f3a13333",
+      "seqId": 1,
+      "titlePrefix": "Mr",
+      "titlePrefixWelsh": "Mr",
+      "titleJudicialPrefix": "Recorder",
+      "titleJudicialPrefixWelsh": "Recorder",
+      "titleSuffix": "",
+      "titleSuffixWelsh": "",
+      "surname": "Ainsworth",
+      "forenames": "Mark J",
+      "personId": "30644",
+      "judiciaryType": "Recorder",
+      "validFrom": "2017-08-01",
+      "validTo": "2017-08-01",
+      "cpUserId": "12345678-d639-40b3-8611-8015f3a13333",
+      "emailAddress": "Laura.Sydney.JP@ejudiciary.net",
+      "baseLocationOuCode": "C43AY00",
+      "compulsoryRetireDate": "2027-08-01",
+      "currentJobStartDate": "2017-08-01",
+      "requestedName": "HER HONOUR JUDGE K WANT QC, HONORARY RECORDER OF WALES",
+      "personalCode": "A6298",
+      "appointmentId": "998876",
+      "roleNameId": "99998",
+      "baseLocationId": "9998"
+    }
+  ]
+}

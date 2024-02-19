@@ -12,8 +12,9 @@ import static java.util.Optional.of;
 import static java.util.UUID.fromString;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
+import static java.util.Collections.emptyList;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.justice.hearing.courts.GetHearings;
@@ -391,12 +392,54 @@ public class HearingService {
 
     @Transactional
     public List<HearingEvent> getHearingEvents(UUID hearingId, LocalDate date) {
-        final List<HearingEvent> hearingEvents = hearingEventRepository.findByHearingIdOrderByEventTimeAsc(hearingId, date);
+
+        final List<HearingEvent> hearingEvents = nonNull(date) ? hearingEventRepository.findByHearingIdOrderByEventTimeAsc(hearingId, date):
+                hearingEventRepository.findByHearingIdOrderByEventTimeAsc(hearingId);
+
         if (nonNull(hearingEvents)) {
             return hearingEvents;
         }
-        return Collections.emptyList();
+        return emptyList();
     }
+
+    @Transactional
+    public JsonObject getHearingEventLogCount(UUID hearingId, LocalDate hearingDate) {
+
+        final Long eventLogCountByHearingIdAndDate=  hearingEventRepository.findEventLogCountByHearingIdAndEventDate(hearingId, hearingDate);
+        final Long eventLogCountByHearingId=  hearingEventRepository.findEventLogCountByHearingId(hearingId);
+
+        return createObjectBuilder()
+                .add("eventLogCountByHearingIdAndDate", eventLogCountByHearingIdAndDate)
+                .add("eventLogCountByHearingId", eventLogCountByHearingId)
+                .build();
+
+    }
+
+
+    @Transactional
+    public List<Hearing> getHearingDetailsByCaseForDocuments(UUID caseId) {
+        final List<Hearing> hearings = hearingRepository.findByCaseIdAndJurisdictionType(caseId, CROWN);
+        if (nonNull(hearings)) {
+            return hearings;
+        }
+        return emptyList();
+    }
+
+    @Transactional
+    public List<Hearing> getHearingDetailsByApplicationForDocuments(UUID applicationId) {
+        final List<Hearing> hearings = hearingRepository.findAllHearingsByApplicationIdAndJurisdictionType(applicationId, CROWN);
+        if (nonNull(hearings)) {
+            return hearings;
+        }
+        return emptyList();
+    }
+
+
+    @Transactional
+    public Hearing getHearingDetailsByHearingForDocuments(UUID hearingId) {
+        return hearingRepository.findByHearingIdAndJurisdictionType(hearingId, CROWN);
+    }
+
 
     @Transactional
     public List<HearingEventDefinition> getHearingEventDefinitions() {

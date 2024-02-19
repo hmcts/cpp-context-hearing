@@ -25,12 +25,12 @@
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
         <coredomain.version>1.0.211</coredomain.version>
-        <referencedata.version>8.0.44</referencedata.version>
+        <referencedata.version>8.0.48</referencedata.version>
         <material.version>8.0.9</material.version>
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>8.0.2</stagingenforcement.version>
-        <progression.version>8.0.151</progression.version>
+        <progression.version>8.0.155</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
@@ -40,6 +40,7 @@
         <usersgroups.version>8.0.7</usersgroups.version>
         <listing.version>8.0.31</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
+        <systemdocgenerator.version>8.0.63-INFINITY-SNAPSHOT</systemdocgenerator.version>
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
             **/uk/gov/moj/cpp/hearing/common/**/*,

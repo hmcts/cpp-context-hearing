@@ -20,6 +20,7 @@ public class LogEventCommand {
     private final Boolean alterable;
     private final UUID defenceCounselId;
     private final List<UUID> hearingTypeIds;
+    private final UUID userId;
 
     @JsonCreator
     public LogEventCommand(@JsonProperty("hearingEventId") final UUID hearingEventId,
@@ -31,7 +32,8 @@ public class LogEventCommand {
                            @JsonProperty("lastModifiedTime") final ZonedDateTime lastModifiedTime,
                            @JsonProperty("alterable") final Boolean alterable,
                            @JsonProperty("defenceCounselId") final UUID defenceCounselId,
-                           @JsonProperty("hearingTypeIds") final List<UUID> hearingTypeIds) {
+                           @JsonProperty("hearingTypeIds") final List<UUID> hearingTypeIds,
+                           @JsonProperty("userId") final UUID userId) {
         this.hearingEventId = hearingEventId;
         this.hearingId = hearingId;
         this.hearingEventDefinitionId = hearingEventDefinitionId;
@@ -42,6 +44,7 @@ public class LogEventCommand {
         this.alterable = alterable;
         this.defenceCounselId = defenceCounselId;
         this.hearingTypeIds = hearingTypeIds;
+        this.userId = userId;
     }
 
     public static Builder builder() {
@@ -89,6 +92,10 @@ public class LogEventCommand {
         return hearingTypeIds;
     }
 
+    public UUID getUserId() {
+        return userId;
+    }
+
     public static class Builder {
         private UUID hearingEventId;
         private UUID hearingId;
@@ -100,6 +107,7 @@ public class LogEventCommand {
         private Boolean alterable;
         private UUID defenceCounselId;
         private List<UUID> hearingTypeIds;
+        private UUID userId;
 
         public Builder withHearingEventId(final UUID hearingEventId) {
             this.hearingEventId = hearingEventId;
@@ -151,9 +159,14 @@ public class LogEventCommand {
             return this;
         }
 
+        public Builder withUserId(final UUID userId) {
+            this.userId = userId;
+            return this;
+        }
+
         public LogEventCommand build() {
             return new LogEventCommand(hearingEventId, hearingId, hearingEventDefinitionId,
-                    recordedLabel, note, eventTime, lastModifiedTime, alterable, defenceCounselId, hearingTypeIds);
+                    recordedLabel, note, eventTime, lastModifiedTime, alterable, defenceCounselId, hearingTypeIds, userId);
         }
     }
 }

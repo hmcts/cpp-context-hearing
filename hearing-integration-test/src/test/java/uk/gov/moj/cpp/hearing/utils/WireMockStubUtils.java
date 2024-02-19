@@ -441,5 +441,40 @@ public class WireMockStubUtils {
         return eventMapperCache.keySet();
     }
 
+    public static void stubUsersAndGroupsForNames(final UUID userId) {
+        final String response = getPayload("stub-data/usersgroups.users.json");
+        final String url = format("/usersgroups-service/query/api/rest/usersgroups/users?userIds={0}", userId.toString());
 
+        final ResponseDefinitionBuilder responseDefBuilder = aResponse().withStatus(SC_OK)
+                .withHeader(ID, randomUUID().toString())
+                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                .withBody(response);
+        stubFor(get(urlPathEqualTo(url))
+                .willReturn(responseDefBuilder));
+
+        waitForStubToBeReady(url, "application/vnd.usersgroups.search-users+json");
+    }
+
+    public static void stubUserAndOrganisation(final UUID userId, final String response) {
+        final String url = format("/usersgroups-service/query/api/rest/usersgroups/users/logged-in-user");
+
+        final ResponseDefinitionBuilder responseDefBuilder = aResponse().withStatus(SC_OK)
+                .withHeader(ID, userId.toString())
+                .withHeader(HttpHeaders.CONTENT_TYPE, APPLICATION_JSON)
+                .withBody(response);
+        stubFor(get(urlPathEqualTo(url))
+                .willReturn(responseDefBuilder));
+
+        waitForStubToBeReady(url, "application/vnd.usersgroups.logged-in-user-details+json");
+    }
+
+    public static void stubAaagDetails(final String applicationId, final String responsePayLoad) {
+        stubPingFor("progression-service");
+                stubFor(get(urlPathEqualTo(format("/progression-service/query/api/rest/progression/applications/{0}", applicationId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(responsePayLoad)));
+        waitForStubToBeReady(format("/progression-service/query/api/rest/progression/applications/{0}", applicationId), "application/vnd.progression.query.application.aaag+json");
+    }
 }
