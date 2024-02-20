@@ -12,7 +12,7 @@ rule "Command - API - Action - hearing.initiate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.initiate");
-   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate", "Magistrates"))
+   eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate"))
    || eval(userAndGroupProvider.hasPermission($action, RuleConstants.expectedPermissionsForCase()));
   then
     $outcome.setSuccess(true);
