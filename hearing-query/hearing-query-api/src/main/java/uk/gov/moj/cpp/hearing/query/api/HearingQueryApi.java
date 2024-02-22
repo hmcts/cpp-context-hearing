@@ -1,6 +1,8 @@
 package uk.gov.moj.cpp.hearing.query.api;
 
+import static java.util.UUID.fromString;
 import static javax.json.Json.createArrayBuilder;
+import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.enveloper.Enveloper.envelop;
 import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
 import static uk.gov.justice.services.messaging.JsonObjects.getString;
@@ -21,6 +23,7 @@ import uk.gov.moj.cpp.external.domain.progression.prosecutioncases.ProsecutionCa
 import uk.gov.moj.cpp.hearing.domain.referencedata.HearingTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.nows.CrackedIneffectiveVacatedTrialTypes;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.moj.cpp.hearing.query.api.service.usergroups.UserGroupQueryService;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleApplications;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.AccessibleCases;
 import uk.gov.moj.cpp.hearing.query.api.service.accessfilter.DDJChecker;
@@ -59,11 +62,17 @@ import javax.ws.rs.BadRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+
 @ServiceComponent(Component.QUERY_API)
 public class HearingQueryApi {
     public static final String STAGINGENFORCEMENT_QUERY_OUTSTANDING_FINES = "stagingenforcement.defendant.outstanding-fines";
     private static final Logger LOGGER = LoggerFactory.getLogger(HearingQueryApi.class);
     private static final String FIELD_HEARING_EVENT_DEFINITION_ID = "hearingEventDefinitionId";
+    private static final String EVENT_LOG_COUNT_FAILED = "Hearing Event Log Count failed due to Organisation ID mismatch";
+    private static final String EVENT_LOG_FAILED = "Hearing Event Log For Document failed due to Organisation ID mismatch";
+    private static final String REASON = "reason";
+    private static final String GET_HEARING_EVENT_LOG_COUNT = "hearing.get-hearing-event-log-count";
+    private static final String GET_HEARING_EVENT_LOG_FOR_DOCUMENTS= "hearing.get-hearing-event-log-for-documents";
 
     @Inject
     private Requester requester;
@@ -100,6 +109,9 @@ public class HearingQueryApi {
 
     @Inject
     private AccessibleCases accessibleCases;
+
+    @Inject
+    private UserGroupQueryService userGroupQueryService;
 
     @Inject
     private AccessibleApplications accessibleApplications;
@@ -175,6 +187,34 @@ public class HearingQueryApi {
     public JsonEnvelope getHearingEventLog(final JsonEnvelope query) {
         final Envelope<JsonObject> envelope = this.hearingEventQueryView.getHearingEventLog(query);
         return getJsonEnvelope(envelope);
+    }
+
+    @SuppressWarnings("squid:S3655")
+    @Handles(GET_HEARING_EVENT_LOG_FOR_DOCUMENTS)
+    public JsonEnvelope getHearingEventLogForDocuments(final JsonEnvelope query) {
+        final UUID userId = query.metadata().userId().isPresent() ? fromString(query.metadata().userId().get()) : null;
+        final boolean flag = userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId);
+        if(flag) {
+            return getJsonEnvelope(this.hearingEventQueryView.getHearingEventLogForDocuments(query));
+        } else {
+            return getJsonEnvelope(envelop(createObjectBuilder().add(REASON, EVENT_LOG_FAILED).build())
+                    .withName(GET_HEARING_EVENT_LOG_FOR_DOCUMENTS)
+                    .withMetadataFrom(query));
+        }
+    }
+
+    @SuppressWarnings("squid:S3655")
+    @Handles(GET_HEARING_EVENT_LOG_COUNT)
+    public JsonEnvelope getHearingEventLogCount(final JsonEnvelope query) {
+        final UUID userId = query.metadata().userId().isPresent() ? fromString(query.metadata().userId().get()) : null;
+        final boolean flag = userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId);
+        if(flag) {
+            return getJsonEnvelope(this.hearingEventQueryView.getHearingEventLogCount(query));
+        } else {
+            return getJsonEnvelope(envelop(createObjectBuilder().add(REASON, EVENT_LOG_COUNT_FAILED).build())
+                    .withName(GET_HEARING_EVENT_LOG_COUNT)
+                    .withMetadataFrom(query));
+        }
     }
 
     @Handles("hearing.get-draft-result")

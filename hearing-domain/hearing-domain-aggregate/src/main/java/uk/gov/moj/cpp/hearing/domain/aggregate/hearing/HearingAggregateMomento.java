@@ -15,7 +15,6 @@ import uk.gov.justice.core.courts.Verdict;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
-import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -34,7 +33,7 @@ import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRe
 @SuppressWarnings("pmd:BeanMembersShouldSerialize")
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569300L;
+    private static final long serialVersionUID = -561416825201569229L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();

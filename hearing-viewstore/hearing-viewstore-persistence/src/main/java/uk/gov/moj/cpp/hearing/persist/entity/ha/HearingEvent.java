@@ -47,6 +47,9 @@ public class HearingEvent {
     @Column(name = "note")
     private String note;
 
+    @Column(name = "user_id")
+    private UUID userId;
+
     public HearingEvent() {
         // for JPA
     }
@@ -151,6 +154,15 @@ public class HearingEvent {
 
     public HearingEvent setNote(String note) {
         this.note = note;
+        return this;
+    }
+
+    public UUID getUserId() {
+        return userId;
+    }
+
+    public HearingEvent setUserId(final UUID userId) {
+        this.userId = userId;
         return this;
     }
 

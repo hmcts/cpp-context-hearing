@@ -13,6 +13,7 @@ import static uk.gov.justice.core.courts.HearingDay.hearingDay;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.util.UtcClock;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
@@ -331,6 +332,20 @@ public class HearingRepositoryTest {
     }
 
     @Test
+    public void shouldFindHearingsByCaseIdAndJurisdictionType() {
+
+        final UUID caseId = hearings.get(0).getProsecutionCases().get(0).getId();
+        final JurisdictionType jurisdictionType = hearings.get(0).getJurisdictionType();
+
+        final List<Hearing> hearingEntityRetrieved = hearingRepository.findByCaseIdAndJurisdictionType(caseId, jurisdictionType);
+
+        assertNotNull(hearingEntityRetrieved);
+
+        final Hearing hearing = hearingEntityRetrieved.get(0);
+        assertThat(hearing.getId(), is(hearings.get(0).getId()));
+    }
+
+    @Test
     public void shouldFindAllHearingsByApplicationId() {
 
         final UUID applicationId = hearings.get(0).getCourtApplications().get(0).getId();
@@ -345,6 +360,32 @@ public class HearingRepositoryTest {
         assertThat(hearingDay.getSittingDay(), is(hearings.get(0).getHearingDays().get(0).getSittingDay()));
         assertThat(hearingDay.getListedDurationMinutes(), is(hearings.get(0).getHearingDays().get(0).getListedDurationMinutes()));
         assertThat(hearingDay.getListingSequence(), is(hearings.get(0).getHearingDays().get(0).getListingSequence()));
+    }
+
+    @Test
+    public void shouldFindAllHearingsByApplicationIdAndJurisdictionType() {
+
+        final UUID applicationId = hearings.get(0).getCourtApplications().get(0).getId();
+        final Hearing hearingSaved = hearingRepository.findBy(hearings.get(0).getId());
+        final JurisdictionType jurisdictionType = hearingSaved.getJurisdictionType();
+        saveHearingApplication(hearingSaved, applicationId);
+
+        final List<Hearing> hearingEntityRetrieved = hearingRepository.findAllHearingsByApplicationIdAndJurisdictionType(applicationId, jurisdictionType);
+        assertNotNull(hearingEntityRetrieved);
+        final Hearing hearing = hearingEntityRetrieved.get(0);
+        assertThat(hearing.getId(), is(hearings.get(0).getId()));
+    }
+
+    @Test
+    public void shouldFindHearingsByHearingIdIdAndJurisdictionType() {
+
+        final UUID hearingId = hearings.get(0).getId();
+        final JurisdictionType jurisdictionType = hearings.get(0).getJurisdictionType();
+
+        final Hearing hearingEntityRetrieved = hearingRepository.findByHearingIdAndJurisdictionType(hearingId, jurisdictionType);
+
+        assertNotNull(hearingEntityRetrieved);
+        assertThat(hearingEntityRetrieved.getId(), is(hearings.get(0).getId()));
     }
 
     @Test

@@ -29,7 +29,9 @@ import uk.gov.justice.services.core.aggregate.AggregateService;
 import uk.gov.justice.services.core.enveloper.Enveloper;
 import uk.gov.justice.services.eventsourcing.source.core.EventSource;
 import uk.gov.justice.services.eventsourcing.source.core.EventStream;
+import uk.gov.justice.services.messaging.Envelope;
 import uk.gov.justice.services.messaging.JsonEnvelope;
+import uk.gov.justice.services.messaging.Metadata;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.CreateHearingEventDefinitionsCommand;
@@ -123,7 +125,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId, randomUUID(), STRING.next(), STRING.next(),
-                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID(), Arrays.asList(randomUUID()));
+                PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID(), Arrays.asList(randomUUID()), randomUUID());
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -168,7 +170,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()));
+                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()), randomUUID());
 
         setupMockedEventStream(hearingId, this.eventStream, with(new HearingAggregate(), a -> {
             a.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
@@ -195,7 +197,7 @@ public class HearingEventCommandHandlerTest {
                             .withDescription(initiateHearingCommand.getHearing().getType().getDescription())
                             .build(),
                     initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN(),
-                    JurisdictionType.CROWN, logEventCommand.getNote())); //TODO: GPE-5657 Which case URN is expected to be set?
+                    JurisdictionType.CROWN, logEventCommand.getNote(), randomUUID())); //TODO: GPE-5657 Which case URN is expected to be set?
         }));
 
         final JsonEnvelope jsonEnvelopCommand = envelopeFrom(metadataWithRandomUUID("hearing.log-hearing-event"), objectToJsonObjectConverter.convert(logEventCommand));
@@ -223,7 +225,7 @@ public class HearingEventCommandHandlerTest {
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
         final LogEventCommand logEventCommand = new LogEventCommand(randomUUID(), hearingId,
-                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()));
+                randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, null, Arrays.asList(randomUUID()), randomUUID());
 
         final CorrectLogEventCommand correctLogEvenCommand = new CorrectLogEventCommand(logEventCommand.getHearingEventId(), randomUUID(), hearingId,
                 randomUUID(), STRING.next(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), false, randomUUID() );
@@ -253,7 +255,7 @@ public class HearingEventCommandHandlerTest {
                             .withDescription(initiateHearingCommand.getHearing().getType().getDescription())
                             .build(),
                     initiateHearingCommand.getHearing().getProsecutionCases().get(0).getProsecutionCaseIdentifier().getCaseURN(),
-                    JurisdictionType.CROWN, logEventCommand.getNote())); //TODO: GPE-5657 Which case URN is expected to be set?
+                    JurisdictionType.CROWN, logEventCommand.getNote(), randomUUID())); //TODO: GPE-5657 Which case URN is expected to be set?
         }));
 
         final JsonEnvelope command = envelopeFrom(metadataWithRandomUUID("hearing.command.correct-hearing-event"), objectToJsonObjectConverter.convert(correctLogEvenCommand));

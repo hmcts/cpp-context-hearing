@@ -1,0 +1,56 @@
+{
+  "hearings": [
+    {
+      "hearingId": "a317fc30-8441-4d81-b41c-b048dc8441f5",
+      "courtCentre": "Lavender hill mags",
+      "courtRoom": "Room 1",
+      "hearingType": "amrzZ1ChsU",
+      "startDate": "2020-12-29",
+      "endDate": "2020-12-29",
+      "judiciary": [
+        "85b3a5e1-823d-4c80-ae9a-a262116260d3"
+      ],
+      "caseUrns": [
+        "CX10FGT"
+      ],
+      "defendants": [
+        "john smith"
+      ],
+      "defendantAttendees": ["Mark Taylor"],
+      "prosecutionAttendees": ["Martin Thomas"],
+      "applicationReferences": [
+        "CX10FGT"
+      ],
+      "applicants": [
+        "John Smith"
+      ],
+      "respondents": [
+        "Elen Boyle"
+      ],
+      "thirdParties": [
+        "Adam Denisov"
+      ],
+      "hearingDates": [
+        "2020-12-29"
+      ],
+      "loggedHearingEvents": [
+        {
+          "hearingDate": "2023-07-07",
+          "courtClerks": [
+            "3562596f-df26-4ae9-9398-360351b4b223"
+          ],
+          "eventLogs": [
+            {
+              "time": "2023-07-07T14:07:13.426Z",
+              "label": "2BiOQLKuGh",
+              "note": "testNote",
+              "userId": "3562596f-df26-4ae9-9398-360351b4b223"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "requestedTime": "15:35 on 11 Jul 2023",
+  "requestedUser": "Alex Thomas"
+}

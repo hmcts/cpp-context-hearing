@@ -15,6 +15,7 @@ import static uk.gov.justice.services.test.utils.core.http.RequestParamsBuilder.
 import static uk.gov.justice.services.test.utils.core.matchers.ResponsePayloadMatcher.payload;
 import static uk.gov.justice.services.test.utils.core.matchers.ResponseStatusMatcher.status;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_ZONED_DATE_TIME;
+import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.moj.cpp.hearing.domain.HearingState.SHARED_AMEND_LOCKED_ADMIN_ERROR;
 import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
 import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
@@ -23,31 +24,32 @@ import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventForOverrideCourtRoom;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
 import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
-import static uk.gov.moj.cpp.hearing.it.UseCases.amendHearing;
-import static uk.gov.moj.cpp.hearing.it.UseCases.asDefault;
-import static uk.gov.moj.cpp.hearing.it.UseCases.correctLogEvent;
-import static uk.gov.moj.cpp.hearing.it.UseCases.logEvent;
-import static uk.gov.moj.cpp.hearing.it.UseCases.logEventForOverrideCourtRoom;
-import static uk.gov.moj.cpp.hearing.it.UseCases.logEventThatIsIgnored;
 import static uk.gov.moj.cpp.hearing.it.UseCases.logPIEvent;
-import static uk.gov.moj.cpp.hearing.it.UseCases.updateHearingEvents;
 import static uk.gov.moj.cpp.hearing.steps.HearingEventStepDefinitions.findEventDefinitionWithActionLabel;
 import static uk.gov.moj.cpp.hearing.steps.HearingStepDefinitions.givenAUserHasLoggedInAsACourtClerk;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForCrowns;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetPIReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
+import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
+import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
 import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import uk.gov.moj.cpp.hearing.utils.FileUtil;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
@@ -62,6 +64,8 @@ import javax.annotation.concurrent.NotThreadSafe;
 import javax.json.JsonObject;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.Matcher;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -71,6 +75,7 @@ public class HearingEventsIT extends AbstractIT {
 
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));
     private final UUID DEFENCE_COUNSEL_ID = randomUUID();
+    private static final String DOCUMENT_TEXT = STRING.next();
 
     @BeforeClass
     public static void setupPerClass() {
@@ -590,5 +595,286 @@ public class HearingEventsIT extends AbstractIT {
                 );
     }
 
+
+    @Test
+    public void shouldRetrieveHearingEvenLogDForDocumentByHearing() {
+        final UUID userId = getLoggedInUser();
+        stubUsersAndGroupsForNames(userId);
+        stubGetReferenceDataJudiciaries();
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final String progressionAAAGResponsePayload = getPayload("stub-data/progression.query.application.aaag.json")
+                .replace("%APPLICATION_ID%", hearingOne.getCourtApplication().getId().toString());
+        stubAaagDetails(hearingOne.getCourtApplication().getId().toString(), progressionAAAGResponsePayload);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
+        stubUserAndOrganisation(userId, response);
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote2");
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID,  ZonedDateTime.now().plusDays(1), "new note");
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-hearing",hearingOne.getHearingId()),
+                "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearings[0].hearingId", is(hearingOne.getHearingId().toString()))
+                        ))
+                );
+    }
+
+    @Test
+    public void shouldNotRetrieveHearingEvenLogDForDocumentByHearingForNonHMCTSUser() {
+        final UUID userId = getLoggedInUser();
+        stubUsersAndGroupsForNames(userId);
+        stubGetReferenceDataJudiciaries();
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final String progressionAAAGResponsePayload = getPayload("stub-data/progression.query.application.aaag.json")
+                .replace("%APPLICATION_ID%", hearingOne.getCourtApplication().getId().toString());
+        stubAaagDetails(hearingOne.getCourtApplication().getId().toString(), progressionAAAGResponsePayload);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final String response = FileUtil.getPayload("stub-data/usersgroups.users.nonhmcts.organisation.json").replace("USER_ID", userId.toString());
+        stubUserAndOrganisation(userId, response);
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote2");
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID,  ZonedDateTime.now().plusDays(1), "new note");
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-hearing",hearingOne.getHearingId()),
+                "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.reason", is("Hearing Event Log For Document failed due to Organisation ID mismatch"))
+                        ))
+                );
+    }
+
+    @Test
+    public void shouldRetrieveHearingEvenLogForDocumentByCase() {
+        final UUID userId = getLoggedInUser();
+        stubUsersAndGroupsForNames(userId);
+        stubGetReferenceDataJudiciaries();
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
+        stubUserAndOrganisation(userId, response);
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-case",hearingOne.getFirstCase().getId()),
+                "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearings[0].hearingId", is(hearingOne.getHearingId().toString()))
+
+                        ))
+                );
+    }
+
+    @Test
+    public void shouldRetrieveHearingEvenLogForDocumentByApplication() {
+        final UUID userId = getLoggedInUser();
+        stubUsersAndGroupsForNames(userId);
+        stubGetReferenceDataJudiciaries();
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final String progressionAAAGResponsePayload = getPayload("stub-data/progression.query.application.aaag.json")
+                .replace("%APPLICATION_ID%", hearingOne.getCourtApplication().getId().toString());
+        stubAaagDetails(hearingOne.getCourtApplication().getId().toString(), progressionAAAGResponsePayload);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final String responsePayload = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
+        stubUserAndOrganisation(userId, responsePayload);
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-application",hearingOne.getCourtApplication().getId()),
+                "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearings[0].hearingId", is(hearingOne.getHearingId().toString()))
+
+                        ))
+                );
+    }
+
+
+
+    @Test
+    public void shouldGeneratePdfForHearingEventLogExtract(){
+
+        final UUID userId = getLoggedInUser();
+        stubUsersAndGroupsForNames(userId);
+        stubGetReferenceDataJudiciaries();
+        stubDcumentCreateForHearingEventLog(DOCUMENT_TEXT);
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final String progressionAAAGResponsePayload = getPayload("stub-data/progression.query.application.aaag.json")
+                .replace("%APPLICATION_ID%", hearingOne.getCourtApplication().getId().toString());
+        stubAaagDetails(hearingOne.getCourtApplication().getId().toString(), progressionAAAGResponsePayload);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
+        stubUserAndOrganisation(userId, response);
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "testNote");
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(1), "Hearing started", "testNote");
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(3), "Hearing started", "testNote");
+
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-for-document-by-hearing",hearingOne.getHearingId()),
+                "application/vnd.hearing.get-hearing-event-log-for-documents+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.hearings[0].hearingId", is(hearingOne.getHearingId().toString()))
+                        ))
+                );
+
+        final String documentContentResponse = pollForResponse(userId.toString(), hearingOne.getHearingId());
+
+        assertThat(documentContentResponse, is(notNullValue()));
+
+    }
+
+    @Test
+    public void shouldRetrieveHearingEvenLogCount() {
+        final UUID userId = getLoggedInUser();
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
+        stubUserAndOrganisation(userId, response);
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "Hearing started", "testNote");
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(1), "Hearing started", "testNote");
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-count",hearingOne.getHearingId(), LocalDate.now().toString()),
+                "application/vnd.hearing.get-hearing-event-log-count+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.eventLogCountByHearingIdAndDate", is(1)),
+                                withJsonPath("$.eventLogCountByHearingId", is(2))
+                        ))
+                );
+    }
+
+    @Test
+    public void shouldNotRetrieveHearingEvenLogCountForNonHMCTSUser() {
+        final UUID userId = getLoggedInUser();
+
+        final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
+
+        givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
+        final String response = FileUtil.getPayload("stub-data/usersgroups.users.nonhmcts.organisation.json").replace("USER_ID", userId.toString());
+        stubUserAndOrganisation(userId, response);
+
+        final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
+
+        assertThat(hearingEventDefinition.isAlterable(), is(false));
+
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now(), "Hearing started", "testNote");
+        logEvent(getRequestSpec(), asDefault(), hearingOne.it(),
+                hearingEventDefinition.getId(), false, DEFENCE_COUNSEL_ID, ZonedDateTime.now().minusDays(1), "Hearing started", "testNote");
+
+        poll(requestParams(getURL("hearing.get-hearing-event-log-count",hearingOne.getHearingId(), LocalDate.now().toString()),
+                "application/vnd.hearing.get-hearing-event-log-count+json").withHeader(USER_ID, userId))
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        print(),
+                        payload().isJson(allOf(
+                                withJsonPath("$.reason", is("Hearing Event Log Count failed due to Organisation ID mismatch"))
+                        ))
+                );
+    }
+
+
+    private static String pollForResponse(final String userId, final UUID hearingId, final Matcher... payloadMatchers) {
+
+        return RestPoller.poll(requestParams(getURL("hearing.get-hearing-event-log-extract-for-document-by-hearing", hearingId),
+                        "application/vnd.hearing.get-hearing-event-log-extract-for-documents+json")
+                        .withHeader(USER_ID, userId).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(
+                        status().is(OK),
+                        payload().isJson(CoreMatchers.allOf(payloadMatchers))
+                )
+                .getPayload();
+    }
 
 }

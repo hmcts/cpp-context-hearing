@@ -1,0 +1,137 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://justice.gov.uk/json/schemas/hearing/hearing.get-hearing-event-log-for-cdes-document.json",
+  "type": "object",
+  "properties": {
+    "hearings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "hearingId": {
+            "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "courtCentre": {
+            "type": "string"
+          },
+          "courtRoom": {
+            "type": "string"
+          },
+          " hearingType": {
+            "type": "string"
+          },
+          "judiciary": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caseUrns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defendants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "defendantAttendees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "prosecutionAttendees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "applicationReferences": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "applicants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "respondents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "thirdParties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "loggedHearingEvents": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "hearingDate": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "courtClerks": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "eventLogs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "time": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "note": {
+                        "type": "string"
+                      },
+                      "userId": {
+                        "type": "string"
+                      }
+                    },
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        }
+      }
+    },
+    "requestedUser": {
+      "type": "string"
+    },
+    "requestedTime": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": false
+}

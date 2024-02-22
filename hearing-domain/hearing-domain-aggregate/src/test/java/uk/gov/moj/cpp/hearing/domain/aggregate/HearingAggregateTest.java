@@ -390,7 +390,7 @@ public class HearingAggregateTest {
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) new HearingAggregate()
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Hearing not found"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -426,10 +426,10 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Already logged"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -465,7 +465,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Hearing Event Log not allowed for Box Hearing"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -513,7 +513,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final HearingEventLogged hearingEventLogged = (HearingEventLogged) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         assertHearingEventLogged(hearingEventLogged, logEventCommand, initiateHearingCommand);
     }
@@ -559,7 +559,7 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()));
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID());
 
 
         final List<Object> events = hearingAggregate.correctHearingEvent(correctLogEventCommand.getLatestHearingEventId(),
@@ -567,7 +567,8 @@ public class HearingAggregateTest {
                 correctLogEventCommand.getHearingEventDefinitionId(),
                 correctLogEventCommand.getAlterable(),
                 correctLogEventCommand.getDefenceCounselId(),
-                hearingEventCorrection).collect(Collectors.toList());
+                hearingEventCorrection,
+                randomUUID()).collect(Collectors.toList());
 
         final HearingEventDeleted hearingEventDeleted = (HearingEventDeleted) events.get(0);
         assertThat(hearingEventDeleted.getHearingEventId(), is(previousHearingEventId));
@@ -798,7 +799,7 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommand.getLastModifiedTime())
                 .withRecordedLabel(logEventCommand.getRecordedLabel()).build();
 
-        final List<Object> events = hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList());
+        final List<Object> events = hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList());
         assertThat(events.size(), is(1));
 
     }
@@ -835,7 +836,8 @@ public class HearingAggregateTest {
                         correctLogEventCommand.getHearingEventDefinitionId(),
                         correctLogEventCommand.getAlterable(),
                         correctLogEventCommand.getDefenceCounselId(),
-                        hearingEventCorrection).collect(Collectors.toList()).get(0);
+                        hearingEventCorrection,
+                        randomUUID()).collect(Collectors.toList()).get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Hearing event not found"));
         assertThat(hearingEventIgnored.getHearingId(), is(correctLogEventCommand.getHearingId()));
@@ -872,7 +874,7 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommandArbitrary.getLastModifiedTime())
                 .withRecordedLabel(logEventCommandArbitrary.getRecordedLabel()).build();
 
-        hearingAggregate.logHearingEvent(logEventCommandArbitrary.getHearingId(), logEventCommandArbitrary.getHearingEventDefinitionId(), logEventCommandArbitrary.getAlterable(), logEventCommandArbitrary.getDefenceCounselId(), hearingEventArbitrary, Arrays.asList(randomUUID()));
+        hearingAggregate.logHearingEvent(logEventCommandArbitrary.getHearingId(), logEventCommandArbitrary.getHearingEventDefinitionId(), logEventCommandArbitrary.getAlterable(), logEventCommandArbitrary.getDefenceCounselId(), hearingEventArbitrary, Arrays.asList(randomUUID()), randomUUID());
 
         final CorrectLogEventCommand logEventCommandCorrectionArbitrary = CorrectLogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
@@ -890,9 +892,9 @@ public class HearingAggregateTest {
                 .withLastModifiedTime(logEventCommandCorrectionArbitrary.getLastModifiedTime())
                 .withRecordedLabel(logEventCommandCorrectionArbitrary.getRecordedLabel()).build();
 
-        hearingAggregate.correctHearingEvent(logEventCommandCorrectionArbitrary.getLatestHearingEventId(), logEventCommandCorrectionArbitrary.getHearingId(), logEventCommandCorrectionArbitrary.getHearingEventDefinitionId(), logEventCommandCorrectionArbitrary.getAlterable(), logEventCommandCorrectionArbitrary.getDefenceCounselId(), hearingEventCorrectionArbitrary);
+        hearingAggregate.correctHearingEvent(logEventCommandCorrectionArbitrary.getLatestHearingEventId(), logEventCommandCorrectionArbitrary.getHearingId(), logEventCommandCorrectionArbitrary.getHearingEventDefinitionId(), logEventCommandCorrectionArbitrary.getAlterable(), logEventCommandCorrectionArbitrary.getDefenceCounselId(), hearingEventCorrectionArbitrary, randomUUID());
 
-        hearingAggregate.logHearingEvent(logEventCommandArbitrary.getHearingId(), logEventCommandArbitrary.getHearingEventDefinitionId(), logEventCommandArbitrary.getAlterable(), logEventCommandArbitrary.getDefenceCounselId(), hearingEventArbitrary, Arrays.asList(randomUUID()));
+        hearingAggregate.logHearingEvent(logEventCommandArbitrary.getHearingId(), logEventCommandArbitrary.getHearingEventDefinitionId(), logEventCommandArbitrary.getAlterable(), logEventCommandArbitrary.getDefenceCounselId(), hearingEventArbitrary, Arrays.asList(randomUUID()), randomUUID());
 
         final LogEventCommand logEventCommand = LogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
@@ -911,7 +913,7 @@ public class HearingAggregateTest {
 
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Already deleted"));
         assertThat(hearingEventIgnored.getHearingId(), is(logEventCommand.getHearingId()));
@@ -953,7 +955,7 @@ public class HearingAggregateTest {
         hearingAggregate.logHearingEvent(logEventCommandArbitrary.getHearingId(),
                 logEventCommandArbitrary.getHearingEventDefinitionId(),
                 logEventCommandArbitrary.getAlterable(),
-                logEventCommandArbitrary.getDefenceCounselId(), hearingEventArbitrary, Arrays.asList(randomUUID()));
+                logEventCommandArbitrary.getDefenceCounselId(), hearingEventArbitrary, Arrays.asList(randomUUID()), randomUUID());
 
         final CorrectLogEventCommand correctLogEventCommand = CorrectLogEventCommand.builder()
                 .withHearingEventId(previousHearingEventId)
@@ -976,7 +978,8 @@ public class HearingAggregateTest {
                 correctLogEventCommand.getHearingEventDefinitionId(),
                 correctLogEventCommand.getAlterable(),
                 correctLogEventCommand.getDefenceCounselId(),
-                hearingEventCorrection);
+                hearingEventCorrection,
+                randomUUID());
 
         final HearingEventIgnored hearingEventIgnored = (HearingEventIgnored) hearingAggregate
                 .correctHearingEvent(correctLogEventCommand.getLatestHearingEventId(),
@@ -984,7 +987,8 @@ public class HearingAggregateTest {
                         correctLogEventCommand.getHearingEventDefinitionId(),
                         correctLogEventCommand.getAlterable(),
                         correctLogEventCommand.getDefenceCounselId(),
-                        hearingEventCorrection).collect(Collectors.toList()).get(0);
+                        hearingEventCorrection,
+                        randomUUID()).collect(Collectors.toList()).get(0);
 
         assertThat(hearingEventIgnored.getReason(), is("Already deleted"));
         assertThat(hearingEventIgnored.getHearingId(), is(correctLogEventCommand.getHearingId()));
@@ -1094,7 +1098,7 @@ public class HearingAggregateTest {
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
         final List<Object> events = hearingAggregate
-                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList());
+                .logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList());
 
         final HearingEventLogged startHearingEventLogged = (HearingEventLogged) events.get(0);
         assertHearingEventLogged(startHearingEventLogged, logEventCommand, initiateHearingCommand);
@@ -1287,7 +1291,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
@@ -1322,7 +1326,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         final List<Object> events = hearingAggregate.addDefenceCounsel(defenceCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final DefenceCounselChangeIgnored defenceCounselChangeIgnored = (DefenceCounselChangeIgnored) events.get(0);
@@ -1404,7 +1408,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
@@ -1449,7 +1453,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
 
-        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID())).collect(Collectors.toList()).get(0);
+        hearingAggregate.logHearingEvent(logEventCommand.getHearingId(), logEventCommand.getHearingEventDefinitionId(), logEventCommand.getAlterable(), logEventCommand.getDefenceCounselId(), hearingEvent, Arrays.asList(randomUUID()), randomUUID()).collect(Collectors.toList()).get(0);
 
         final List<Object> events = hearingAggregate.addProsecutionCounsel(prosecutionCounsel, logEventCommand.getHearingId()).collect(Collectors.toList());
         final ProsecutionCounselChangeIgnored prosecutionCounselChangeIgnored = (ProsecutionCounselChangeIgnored) events.get(0);
@@ -2417,7 +2421,6 @@ public class HearingAggregateTest {
         final HearingChangeIgnored hearingChangeIgnored = (HearingChangeIgnored) objectList.get(0);
         assertThat(hearingChangeIgnored.getHearingId(), is(hearingId));
     }
-
 
     @Test
     public void shouldRaiseHearingIgnoredForUpdateHearingVacateTrialDetailsIfNoHearingExist() {

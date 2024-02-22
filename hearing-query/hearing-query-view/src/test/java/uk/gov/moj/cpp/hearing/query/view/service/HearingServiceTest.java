@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.query.view.service;
 
+import static com.jayway.jsonpath.matchers.JsonPathMatchers.hasJsonPath;
 import static java.math.BigInteger.valueOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -26,6 +27,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.justice.core.courts.JurisdictionType.CROWN;
 import static uk.gov.justice.core.courts.Level.OFFENCE;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.STRING;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
@@ -142,6 +144,8 @@ import javax.json.JsonString;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import org.hamcrest.CoreMatchers;
+import org.hamcrest.core.Is;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1233,6 +1237,44 @@ public class HearingServiceTest {
         assertNull(response.getHearingSummaries());
     }
 
+    @Test
+    public void shouldFindHearingDetailsForDocumentByHearingId() {
+        final UUID hearingId = randomUUID();
+        final Hearing hearing = new Hearing();
+        hearing.setId(hearingId);
+        when(hearingRepository.findByHearingIdAndJurisdictionType(any(), eq(CROWN))).thenReturn(hearing);
+
+        final Hearing result = hearingService.getHearingDetailsByHearingForDocuments(hearingId);
+
+        verify(hearingRepository).findByHearingIdAndJurisdictionType(eq(hearingId), eq(CROWN));
+        assertThat(result, is(hearing));
+    }
+
+    @Test
+    public void shouldFindHearingDetailsForDocumentByCaseId() {
+        final UUID caseId = randomUUID();
+        final Hearing hearing = new Hearing();
+        hearing.setId(randomUUID());
+        when(hearingRepository.findByCaseIdAndJurisdictionType(any(), eq(CROWN))).thenReturn(Arrays.asList(hearing));
+        final List<Hearing> result = hearingService.getHearingDetailsByCaseForDocuments(caseId);
+
+        verify(hearingRepository).findByCaseIdAndJurisdictionType(caseId, CROWN);
+        assertThat(result, is(Arrays.asList(hearing)));
+    }
+
+    @Test
+    public void shouldFindHearingDetailsForDocumentByApplicationId() {
+        final UUID applicationId = randomUUID();
+        final Hearing hearing = new Hearing();
+        hearing.setId(randomUUID());
+        when(hearingRepository.findAllHearingsByApplicationIdAndJurisdictionType(applicationId, CROWN)).thenReturn(Arrays.asList(hearing));
+
+        final List<Hearing> result = hearingService.getHearingDetailsByApplicationForDocuments(applicationId);
+
+        verify(hearingRepository).findAllHearingsByApplicationIdAndJurisdictionType(applicationId, CROWN);
+        assertThat(result, is(Arrays.asList(hearing)));
+    }
+
     private void assertCasesByDefendant(final JsonArray prosecutionCases, final UUID caseId1, final UUID caseId2){
         assertThat(getString(prosecutionCases.getJsonObject(0), "caseId").get(), is(caseId1.toString()));
         assertThat(getString(prosecutionCases.getJsonObject(0), "urn").get(), notNullValue());
@@ -1408,6 +1450,23 @@ public class HearingServiceTest {
         assertThat(response.getHearingSummaries().size(), is(1));
         assertThat(response.getHearingSummaries().get(0).getId(), is(firstHearingSummaryId));
 
+    }
+
+    @Test
+    public void shouldGetHearingEventLogCount() {
+        when(hearingEventRepository.findEventLogCountByHearingId(any())).thenReturn(2L);
+        when(hearingEventRepository.findEventLogCountByHearingIdAndEventDate(any(), any())).thenReturn(1L);
+
+        final JsonObject responsePayload  = hearingService.getHearingEventLogCount(randomUUID(), LocalDate.now());
+
+        verify(hearingEventRepository).findEventLogCountByHearingId(any());
+        verify(hearingEventRepository).findEventLogCountByHearingIdAndEventDate(any(), any());
+
+        assertThat(responsePayload.toString(),
+                CoreMatchers.allOf(hasJsonPath("$.eventLogCountByHearingIdAndDate", is(1)),
+                        hasJsonPath("$.eventLogCountByHearingId", is(2))
+
+                ));
     }
 
     private void assertCurrentCourtStatus(final CurrentCourtStatus actual, final CurrentCourtStatus expected) {

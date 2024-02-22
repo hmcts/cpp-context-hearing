@@ -1575,4 +1575,14 @@ public class UseCases {
         }
         return logEvent;
     }
+
+    public static LogEventCommand logEvent(final RequestSpecification requestSpec,
+                                           final Consumer<LogEventCommand.Builder> consumer,
+                                           final InitiateHearingCommand initiateHearingCommand,
+                                           final UUID hearingEventDefinitionId,
+                                           final boolean alterable,
+                                           final UUID defenceCounselId,
+                                           final ZonedDateTime eventTime, String recordedLabel, String note) {
+        return logEvent(randomUUID(), requestSpec, consumer, initiateHearingCommand, hearingEventDefinitionId, alterable, defenceCounselId, eventTime, recordedLabel, note);
+    }
 }

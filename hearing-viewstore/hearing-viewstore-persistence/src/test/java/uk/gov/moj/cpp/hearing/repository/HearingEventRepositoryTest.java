@@ -16,6 +16,7 @@ import uk.gov.moj.cpp.hearing.persist.entity.ha.CourtCentre;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingEvent;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,6 +60,8 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
 
     private static final UUID COURT_CENTRE_ID = randomUUID();
     private static final UUID COURT_ROOM_ID = randomUUID();
+
+    private static final String HEARING_STARTED_LABEL = "Hearing started";
 
     @Inject
     private HearingEventRepository hearingEventRepository;
@@ -304,6 +307,40 @@ public class HearingEventRepositoryTest extends BaseTransactionalTest {
         assertThat(hearingEvents.get(1).getRecordedLabel(), is(RECORDED_LABEL_2));
         assertThat(hearingEvents.get(1).getEventTime(), is(EVENT_TIME_2));
         assertThat(hearingEvents.get(1).getLastModifiedTime(), is(LAST_MODIFIED_TIME_2));
+    }
+
+    @Test
+    public void shouldGetHearingEventLogCountByHearingId() {
+        populateAndSaveHearingEvent();
+        final Long eventLogCount = hearingEventRepository.findEventLogCountByHearingId(HEARING_ID_1);
+        assertThat(eventLogCount, is(2L));
+    }
+
+    @Test
+    public void shouldGetHearingEventLogCountByHearingIdAndEventDate() {
+        populateAndSaveHearingEvent();
+        final Long eventLogCount = hearingEventRepository.findEventLogCountByHearingIdAndEventDate(HEARING_ID_1, LocalDate.now());
+        assertThat(eventLogCount, is(1L));
+    }
+
+    private void populateAndSaveHearingEvent(){
+        final HearingEvent hearingEvent1 = HearingEvent.hearingEvent()
+                .setId(randomUUID())
+                .setHearingId(HEARING_ID_1)
+                .setRecordedLabel(HEARING_STARTED_LABEL)
+                .setEventDate(LocalDate.now())
+                .setEventTime(ZonedDateTime.now())
+                .setDeleted(false);
+        final HearingEvent hearingEvent2 = HearingEvent.hearingEvent()
+                .setId(randomUUID())
+                .setHearingId(HEARING_ID_1)
+                .setRecordedLabel(HEARING_STARTED_LABEL)
+                .setEventDate(LocalDate.now().plusDays(1))
+                .setEventTime(ZonedDateTime.now().plusDays(1))
+                .setDeleted(false);
+
+        hearingEventRepository.save(hearingEvent1);
+        hearingEventRepository.save(hearingEvent2);
     }
 
     private void givenHearingEventsExistWithNotRequiredEventDefinitions() {

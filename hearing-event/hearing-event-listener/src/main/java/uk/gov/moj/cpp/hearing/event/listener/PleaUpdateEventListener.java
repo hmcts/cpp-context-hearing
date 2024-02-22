@@ -9,8 +9,6 @@ import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.messaging.JsonEnvelope;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
-import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
 import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
 import uk.gov.moj.cpp.hearing.mapping.AllocationDecisionJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.HearingJPAMapper;

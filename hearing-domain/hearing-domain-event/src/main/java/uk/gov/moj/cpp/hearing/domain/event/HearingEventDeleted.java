@@ -8,16 +8,20 @@ import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@SuppressWarnings("pmd:BeanMembersShouldSerialize")
 @Event("hearing.hearing-event-deleted")
 public class HearingEventDeleted implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     private UUID hearingEventId;
+    private UUID userId;
 
     @JsonCreator
-    public HearingEventDeleted(@JsonProperty("hearingEventId") final UUID hearingEventId) {
+    public HearingEventDeleted(@JsonProperty("hearingEventId") final UUID hearingEventId,
+                               @JsonProperty("userId") final UUID userId) {
         this.hearingEventId = hearingEventId;
+        this.userId = userId;
     }
 
     public HearingEventDeleted() {
@@ -28,4 +32,7 @@ public class HearingEventDeleted implements Serializable {
         return hearingEventId;
     }
 
+    public UUID getUserId() {
+        return userId;
+    }
 }

@@ -1,5 +1,6 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
+import static java.util.UUID.fromString;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.services.core.annotation.Handles;
@@ -48,6 +49,7 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
         aggregate(HearingEventDefinitionAggregate.class, createHearingEventDefinitionsCommand.getId(), jsonEnvelope, a -> a.createEventDefinitions(createHearingEventDefinitionsCommand.getId(), createHearingEventDefinitionsCommand.getEventDefinitions()));
     }
 
+    @SuppressWarnings("squid:S3655")
     @Handles("hearing.command.log-hearing-event")
     public void logHearingEvent(final JsonEnvelope jsonEnvelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
@@ -55,6 +57,8 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
         }
 
         final LogEventCommand logEventCommand = convertToObject(jsonEnvelope, LogEventCommand.class);
+
+        final UUID userId = jsonEnvelope.metadata().userId().isPresent() ? fromString(jsonEnvelope.metadata().userId().get()) : null;
 
         final HearingEvent hearingEvent = HearingEvent.builder()
                 .withHearingEventId(logEventCommand.getHearingEventId())
@@ -91,11 +95,11 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
 
                 final UUID activeHearingId = UUID.fromString(activeHearings.getString(index));
 
-                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent, hearingTypeIds));
+                aggregate(HearingAggregate.class, activeHearingId, jsonEnvelope, a -> a.logHearingEvent(activeHearingId, PAUSE_HEARING_EVENT_DEFINITION_ID, alterable, defenceCounselId, pauseHearingEvent, hearingTypeIds, userId));
             }
         }
 
-        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, hearingTypeIds));
+        aggregate(HearingAggregate.class, logEventCommand.getHearingId(), jsonEnvelope, a -> a.logHearingEvent(hearingId, hearingEventDefinitionId, alterable, defenceCounselId, hearingEvent, hearingTypeIds, userId));
     }
 
     @Handles("hearing.command.update-hearing-events")
@@ -109,6 +113,7 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
         aggregate(HearingAggregate.class, updateHearingEventsCommand.getHearingId(), jsonEnvelope, a -> a.updateHearingEvents(updateHearingEventsCommand.getHearingId(), updateHearingEventsCommand.getHearingEvents()));
     }
 
+    @SuppressWarnings("squid:S3655")
     @Handles("hearing.command.correct-hearing-event")
     public void correctEvent(final JsonEnvelope jsonEnvelope) throws EventStreamException {
         if (LOGGER.isDebugEnabled()) {
@@ -116,6 +121,9 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
         }
 
         final CorrectLogEventCommand correctLogEventCommand = convertToObject(jsonEnvelope, CorrectLogEventCommand.class);
+
+        final UUID userId = jsonEnvelope.metadata().userId().isPresent() ? fromString(jsonEnvelope.metadata().userId().get()) : null;
+
         final HearingEvent hearingEvent = HearingEvent.builder()
                 .withHearingEventId(correctLogEventCommand.getHearingEventId())
                 .withEventTime(correctLogEventCommand.getEventTime())
@@ -127,6 +135,7 @@ public class HearingEventCommandHandler extends AbstractCommandHandler {
                 correctLogEventCommand.getHearingEventDefinitionId(),
                 correctLogEventCommand.getAlterable(),
                 correctLogEventCommand.getDefenceCounselId(),
-                hearingEvent));
+                hearingEvent,
+                userId));
     }
 }

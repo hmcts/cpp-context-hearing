@@ -636,3 +636,82 @@ protocols: [ HTTP, HTTPS ]
                 application/vnd.hearing.prosecution-case-by-hearingid+json:
                   example:  !include json/hearing.get-prosecutioncase-result.json
                   schema:  !include  json/schema/hearing.get-prosecutioncase-result.json
+
+/hearings/event-log:
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.get-hearing-event-log-for-documents+json
+                name: hearing.get-hearing-event-log-for-documents
+            ...
+        queryParameters:
+            caseId:
+              type: string
+              required: false
+            hearingId:
+              type: string
+              required: false
+            applicationId:
+              type: string
+              required: false
+            hearingDate:
+              type: string
+              required: false
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.get-hearing-event-log-for-documents+json:
+                        example: !include json/hearing.get-hearing-event-log-for-documents.json
+                        schema: !include json/schema/hearing.get-hearing-event-log-for-documents.json
+
+/hearings/event-log/extract:
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.get-hearing-event-log-extract-for-documents+json
+                name: hearing.get-hearing-event-log-extract-for-documents
+            ...
+        queryParameters:
+            caseId:
+              type: string
+              required: false
+            hearingId:
+              type: string
+              required: false
+            applicationId:
+              type: string
+              required: false
+            hearingDate:
+              type: string
+              required: false
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.get-hearing-event-log-extract-for-documents+json:
+
+/hearings/event-log-count:
+    get:
+        description: |
+            ...
+            (mapping):
+                responseType: application/vnd.hearing.get-hearing-event-log-count+json
+                name: hearing.get-hearing-event-log-count
+            ...
+        queryParameters:
+            hearingId:
+              type: string
+              required: true
+            hearingDate:
+              type: string
+              required: false
+        responses:
+            200:
+                description: OK
+                body:
+                     application/vnd.hearing.get-hearing-event-log-count+json:
+                        example: !include json/hearing.get-hearing-event-log-count.json
+                        schema: !include json/schema/hearing.get-hearing-event-log-count.json

@@ -67,6 +67,18 @@
                             </exclusion>
                         </exclusions>
                     </dependency>
+                    <dependency>
+                        <groupId>uk.gov.moj.cpp.systemdocgenerator</groupId>
+                        <artifactId>systemdocgenerator-command-api</artifactId>
+                        <version>${systemdocgenerator.version}</version>
+                        <classifier>raml</classifier>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>*</groupId>
+                                <artifactId>*</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
                 </dependencies>
             </plugin>
         </plugins>
@@ -99,6 +111,11 @@
             <groupId>uk.gov.justice.framework-api</groupId>
             <artifactId>framework-api-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>uk.gov.moj.cpp.system.documentgenerator</groupId>
+            <artifactId>system-documentgenerator-client</artifactId>
+        </dependency>
+
         <!-- Test dependencies -->
         <dependency>
             <groupId>uk.gov.justice.services</groupId>

@@ -122,7 +122,7 @@ public class LogEventHearingEventProcessorTest {
         final HearingEventLogged hearingEventLogged = new HearingEventLogged(randomUUID(), null, randomUUID(), randomUUID(),
                 randomUUID(), STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(),
                 new uk.gov.moj.cpp.hearing.domain.CourtCentre(courtCentreId, STRING.next(), randomUUID(), STRING.next(), STRING.next(), STRING.next()),
-                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next());
+                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID());
 
         Optional<ProsecutionCaseResponse> prosecutionCaseResponse = getProsecutionCaseResponse();
 
@@ -209,7 +209,7 @@ public class LogEventHearingEventProcessorTest {
         final HearingEventLogged hearingEventLogged = new HearingEventLogged(randomUUID(), randomUUID(), randomUUID(), randomUUID(),
                 null, STRING.next(), PAST_ZONED_DATE_TIME.next(), PAST_ZONED_DATE_TIME.next(), BOOLEAN.next(),
                 new uk.gov.moj.cpp.hearing.domain.CourtCentre(randomUUID(), STRING.next(), randomUUID(), STRING.next(), STRING.next(), STRING.next()),
-                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next());
+                new uk.gov.moj.cpp.hearing.domain.HearingType(STRING.next(), randomUUID()), STRING.next(), JurisdictionType.CROWN, STRING.next(), randomUUID());
 
         Optional<ProsecutionCaseResponse> prosecutionCaseResponse = getProsecutionCaseResponse();
 
