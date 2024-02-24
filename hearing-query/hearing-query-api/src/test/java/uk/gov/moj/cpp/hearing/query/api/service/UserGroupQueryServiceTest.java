@@ -46,25 +46,46 @@ public class UserGroupQueryServiceTest {
     public void shouldReturnFalseWhenQueryResponseIsNull() {
 
         JsonEnvelope jsonEnvelope = buildJsonEnvelope();
+        JsonEnvelope orgJsonEnvelope = buildEmptyOrganisationJsonEnvelope();
         when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(jsonEnvelope);
+        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(orgJsonEnvelope);
         assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(false));
     }
 
     @Test
     public void shouldReturnTrueWhenResponseWithMatchingOrgId() {
 
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildOrgJsonEnvelope());
-        assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(true));
+        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildJsonEnvelope());
+        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildNoMatchingOrganisationJsonEnvelope());
+        assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(false));
     }
 
     @Test
     public void shouldReturnFalseWhenResponseWithNoMatchingOrgId() {
-        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildOrgJsonEnvelope());
+        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildJsonEnvelope());
+        when(requester.request(any(JsonEnvelope.class), any(Class.class))).thenReturn(buildOrganisationJsonEnvelope());
         assertThat(userGroupQueryService.doesUserBelongsToHmctsOrganisation(userId), is(true));
     }
 
+    public static JsonEnvelope buildOrganisationJsonEnvelope() {
+        return JsonEnvelope.envelopeFrom(
+                JsonEnvelope.metadataBuilder().withId(randomUUID()).withName("usersgroups.get-organisation-details").build(),
+                createObjectBuilder().add("organisationId", "b2d57737-6163-4bb9-88cb-97b45090d29d")
+                        .add("organisationType", "HMCTS").build());
+    }
 
+    public static JsonEnvelope buildNoMatchingOrganisationJsonEnvelope() {
+        return JsonEnvelope.envelopeFrom(
+                JsonEnvelope.metadataBuilder().withId(randomUUID()).withName("usersgroups.get-organisation-details").build(),
+                createObjectBuilder().add("organisationId", "b2d57737-6163-4bb9-88cb-97b45090d29d")
+                        .add("organisationType", "NONHMCTS").build());
+    }
 
+    public static JsonEnvelope buildEmptyOrganisationJsonEnvelope() {
+        return JsonEnvelope.envelopeFrom(
+                JsonEnvelope.metadataBuilder().withId(randomUUID()).withName("usersgroups.get-organisation-details").build(),
+                createObjectBuilder().add("organisationId", "b2d57737-6163-4bb9-88cb-97b45090d29d").build());
+    }
     private MetadataBuilder getMetadataBuilder(final UUID userId) {
         return JsonEnvelope.metadataBuilder()
                 .withId(randomUUID())
@@ -79,13 +100,6 @@ public class UserGroupQueryServiceTest {
         return JsonEnvelope.envelopeFrom(
                 JsonEnvelope.metadataBuilder().withId(randomUUID()).withName("usersgroups.get-logged-in-user-details").build(),
                 createObjectBuilder().add("userId", "a085e359-6069-4694-8820-7810e7dfe762").build());
-    }
-
-    public static JsonEnvelope buildOrgJsonEnvelope() {
-        return JsonEnvelope.envelopeFrom(
-                JsonEnvelope.metadataBuilder().withId(randomUUID()).withName("usersgroups.get-logged-in-user-details").build(),
-                createObjectBuilder().add("userId", "a085e359-6069-4694-8820-7810e7dfe762")
-                        .add("organisationId", "1371dfe8-8aa5-47f7-bb76-275b83fc312d").build());
     }
 
     public static JsonEnvelope buildNoOrgJsonEnvelope() {
