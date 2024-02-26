@@ -506,6 +506,7 @@ public class HearingDelegateTest {
         momento.getNextHearingStartDates().put(hearingId2, ZonedDateTime.now().plusDays(3));
         final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId1, seedingHearingId, nextHearingStartDate).collect(toList());
 
+
         assertThat(eventStream.size(), is(1));
 
         final NextHearingStartDateRecorded nextHearingStartDateRecorded = (NextHearingStartDateRecorded) eventStream.get(0);
@@ -513,6 +514,35 @@ public class HearingDelegateTest {
         assertThat(nextHearingStartDateRecorded.getSeedingHearingId(), is(seedingHearingId));
         assertThat(nextHearingStartDateRecorded.getNextHearingStartDate(), is(nextHearingStartDate));
 
+
+    }
+    @Test
+    public void shouldNotRaiseEventIfHearingIsAlreadyMarkedAsDuplicate(){
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
+
+        momento.setDuplicate(true);
+
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(0));
+
+    }
+
+    @Test
+    public void shouldNotRaiseEventIfHearingIsAlreadyMarkedAsDeleted(){
+
+        final UUID hearingId = UUID.randomUUID();
+        final UUID seedingHearingId = UUID.randomUUID();
+        final ZonedDateTime nextHearingStartDate = ZonedDateTime.now().plusDays(5);
+
+        momento.setDeleted(true);
+
+        final List<Object> eventStream = hearingDelegate.changeNextHearingStartDate(hearingId, seedingHearingId, nextHearingStartDate).collect(toList());
+
+        assertThat(eventStream.size(), is(0));
 
     }
 
@@ -598,6 +628,8 @@ public class HearingDelegateTest {
                 .withDefendants(defendants)
                 .build();
     }
+
+
 
 
 }

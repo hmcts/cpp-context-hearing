@@ -542,6 +542,10 @@ public class HearingDelegate implements Serializable {
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingStartDate) {
 
+        if (this.momento.isDuplicate() || this.momento.isDeleted()) {
+            return Stream.empty();
+        }
+
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         streamBuilder.add(new NextHearingStartDateRecorded(hearingId, seedingHearingId, nextHearingStartDate));
 
