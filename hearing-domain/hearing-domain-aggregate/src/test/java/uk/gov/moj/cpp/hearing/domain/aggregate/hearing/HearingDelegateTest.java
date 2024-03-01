@@ -25,6 +25,7 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.Verdict;
 import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.moj.cpp.hearing.domain.event.EarliestNextHearingDateChanged;
+import uk.gov.moj.cpp.hearing.domain.event.HearingBreachApplicationsAdded;
 import uk.gov.moj.cpp.hearing.domain.event.HearingChangeIgnored;
 import uk.gov.moj.cpp.hearing.domain.event.HearingExtended;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
@@ -272,12 +273,32 @@ public class HearingDelegateTest {
     }
 
     @Test
+    public void shouldExtendHearingWithHearingBreachApplicationsAddedEvent() {
+        final UUID hearingId = UUID.randomUUID();
+        final UUID caseId = UUID.randomUUID();
+        final UUID defendantID = UUID.randomUUID();
+        final UUID newOffenceID = UUID.randomUUID();
+        final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
+        final CourtApplication courtApplication = createCourtApplication(UUID.randomUUID());
+        final UUID secondApplicationId = UUID.randomUUID();
+        momento.setHearing(Hearing.hearing()
+                .withId(hearingId)
+                .withCourtApplications(asList(courtApplication))
+                .build());
+        momento.setBreachApplicationsToBeAdded(asList(courtApplication.getId(), secondApplicationId));
+        final List<Object> eventStream = hearingDelegate.extend(hearingId, Collections.singletonList(HearingDay.hearingDay().build()), CourtCentre.courtCentre().build(), JurisdictionType.MAGISTRATES, CourtApplication.courtApplication().withId(secondApplicationId).build(), extendedCases, null).collect(toList());
+        assertThat(eventStream.size(), is(2));
+        final HearingBreachApplicationsAdded hearingBreachApplicationsAdded = (HearingBreachApplicationsAdded) eventStream.get(0);
+        assertThat(hearingBreachApplicationsAdded, notNullValue());
+
+    }
+
+    @Test
     public void shouldSkipExtendHearingIfHearingIsNotCreatedYet() {
         final UUID hearingId = UUID.randomUUID();
         final UUID caseId = UUID.randomUUID();
         final UUID defendantID = UUID.randomUUID();
         final UUID newOffenceID = UUID.randomUUID();
-        final UUID currentOffenceID = UUID.randomUUID();
         final List<ProsecutionCase> extendedCases = caseList(createProsecutionCases(caseId, defendantID, newOffenceID));
         momento.setHearing(null);
         final List<Object> eventStream = hearingDelegate.extend(hearingId,Collections.singletonList(HearingDay.hearingDay().build()), CourtCentre.courtCentre().build(), JurisdictionType.MAGISTRATES, CourtApplication.courtApplication().build(), extendedCases,null).collect(toList());
@@ -517,6 +538,10 @@ public class HearingDelegateTest {
         return new ArrayList(Arrays.asList(cases));
     }
 
+    private List<CourtApplication> applicationList(CourtApplication... applications) {
+        return new ArrayList(Arrays.asList(applications));
+    }
+
     private ProsecutionCase createProsecutionCases(final UUID caseId, final UUID newDefendantID) {
         final List<Defendant> defendants = new ArrayList<>();
         defendants.add(Defendant.defendant()
@@ -530,6 +555,10 @@ public class HearingDelegateTest {
                 .build();
     }
 
+
+    private CourtApplication createCourtApplication(final UUID id) {
+        return  new CourtApplication.Builder().withId(id).build();
+    }
     private ProsecutionCase createProsecutionCases(final UUID caseId, final UUID newDefendantID, final UUID offenceId) {
         final List<Offence> offences = new ArrayList<>();
         offences.add(Offence.offence()

@@ -1,17 +1,6 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
-import uk.gov.justice.core.courts.AllocationDecision;
-import uk.gov.justice.core.courts.ApplicantCounsel;
-import uk.gov.justice.core.courts.CompanyRepresentative;
-import uk.gov.justice.core.courts.DefenceCounsel;
-import uk.gov.justice.core.courts.Hearing;
-import uk.gov.justice.core.courts.IndicatedPlea;
-import uk.gov.justice.core.courts.InterpreterIntermediary;
-import uk.gov.justice.core.courts.Plea;
-import uk.gov.justice.core.courts.ProsecutionCounsel;
-import uk.gov.justice.core.courts.RespondentCounsel;
-import uk.gov.justice.core.courts.Target2;
-import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.*;
 import uk.gov.moj.cpp.hearing.command.nowsdomain.variants.Variant;
 import uk.gov.moj.cpp.hearing.command.result.CompletedResultLineStatus;
 import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
@@ -19,21 +8,16 @@ import uk.gov.moj.cpp.hearing.command.result.SharedResultsCommandResultLineV2;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 import static uk.gov.moj.cpp.util.DuplicateApplicationsHelper.dedupAllApplications;
 import static uk.gov.moj.cpp.util.DuplicateOffencesHelper.filterDuplicateOffencesByIdForHearing;
 import static uk.gov.moj.cpp.util.ReportingRestrictionHelper.dedupAllReportingRestrictions;
 
-@SuppressWarnings("pmd:BeanMembersShouldSerialize")
+@SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})
 public class HearingAggregateMomento implements Serializable {
 
-    private static final long serialVersionUID = -561416825201569229L;
+    private static final long serialVersionUID = -561416825201569300L;
 
     private final Map<UUID, HearingEventDelegate.HearingEvent> hearingEvents = new HashMap<>();
     private final Map<UUID, ProsecutionCounsel> prosecutionCounsels = new HashMap<>();
@@ -62,6 +46,9 @@ public class HearingAggregateMomento implements Serializable {
     private Map<LocalDate, Map<UUID, Target2>> multiDaySavedTargets = new HashMap<>();
     private Map<LocalDate, Map<UUID, CompletedResultLineStatus>> multiDayCompletedResultLinesStatus = new HashMap<>();
     private Map<LocalDate, Boolean> isHearingDayPreviouslyShared = new HashMap<>();
+
+    private  List<UUID> breachApplicationsToBeAdded;
+
 
 
 
@@ -215,6 +202,11 @@ public class HearingAggregateMomento implements Serializable {
         return sharedResultsCommandResultLineV2s;
     }
 
+    public List<UUID> getBreachApplicationsToBeAdded() {
+        return breachApplicationsToBeAdded;
+    }
 
-
+    public void setBreachApplicationsToBeAdded(final List<UUID> breachApplicationsToBeAdded) {
+        this.breachApplicationsToBeAdded = breachApplicationsToBeAdded;
+    }
 }

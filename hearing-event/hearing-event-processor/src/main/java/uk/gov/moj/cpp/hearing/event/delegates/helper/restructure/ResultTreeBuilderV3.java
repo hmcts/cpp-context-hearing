@@ -208,7 +208,8 @@ public class ResultTreeBuilderV3 {
                 .withCanBeSubjectOfVariation(resultDefinition.getCanBeSubjectOfVariation())
                 .withDvlaCode(resultDefinition.getDvlaCode())
                 .withLevel(resultDefinition.getLevel())
-                .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle());
+                .withPoliceSubjectLineTitle(resultDefinition.getPoliceSubjectLineTitle())
+                .withPreserveActiveOrder(resultDefinition.getPreserveActiveOrder());
         if(resultTextConfHelper.isOldResultDefinition(resultLine.getOrderedDate())) {
             judicialResult.withResultText(ResultTextHelperV3.getResultText(resultDefinition, resultLine));
         }

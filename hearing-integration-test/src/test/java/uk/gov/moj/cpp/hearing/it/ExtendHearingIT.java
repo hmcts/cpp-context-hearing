@@ -26,6 +26,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import javax.json.Json;
 import javax.json.JsonObject;
 
 import org.junit.Test;
@@ -43,6 +44,11 @@ public class ExtendHearingIT extends AbstractIT {
     @Test
     public void amendCourtApplication() throws Exception {
         extend(false);
+    }
+
+    @Test
+    public void addBreachCourtApplication() throws Exception {
+        extendBreachApplication(true);
     }
 
     @Test
@@ -145,6 +151,64 @@ public class ExtendHearingIT extends AbstractIT {
                         ))
                         .with(Hearing::getHearingDays, hasItem(isBean(HearingDay.class)
                         .withValue(HearingDay::getListedDurationMinutes, listedDurationMin)))
+                )
+        );
+
+
+    }
+
+    private void extendBreachApplication(boolean insert) throws Exception {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearingWithoutBreachApplication(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final Hearing hearing = hearingOne.getHearing();
+
+        UUID courtApplicationId = UUID.randomUUID();
+
+        final JsonObject publicEventBreachApplicationsToBeAdded = Json.createObjectBuilder()
+                .add("hearingId", hearing.getId().toString())
+                .add("breachedApplications", Json.createArrayBuilder().add(courtApplicationId.toString()))
+                .build();
+
+        sendMessage(getPublicTopicInstance().createProducer(),
+                "public.progression.breach-applications-to-be-added-to-hearing",
+                publicEventBreachApplicationsToBeAdded,
+                metadataOf(randomUUID(), "public.progression.breach-applications-to-be-added-to-hearing")
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+
+        ExtendHearingCommand extendHearingCommand = new ExtendHearingCommand();
+        final CourtApplication newCourtApplication = (new HearingFactory()).courtApplication().build();
+        extendHearingCommand.setHearingId(hearing.getId());
+
+        extendHearingCommand.setHearingDays(of(HearingDay.hearingDay().withSittingDay(ZonedDateTime.now()).withListedDurationMinutes(20).build()));
+        newCourtApplication.setId(courtApplicationId);
+
+        extendHearingCommand.setCourtApplication(newCourtApplication);
+
+        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
+
+        sendMessage(getPublicTopicInstance().createProducer(),
+                eventName,
+                commandJson,
+                metadataOf(randomUUID(), eventName)
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+
+        int expectedApplicationCount = 1;
+        int listedDurationMin = 20;
+
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .withValue(h -> h.getCourtApplications().size(), expectedApplicationCount)
+                        .with(Hearing::getCourtApplications, hasItem(isBean(CourtApplication.class)
+                                .withValue(CourtApplication::getId, extendHearingCommand.getCourtApplication().getId())
+                                .withValue(CourtApplication::getApplicationReference, extendHearingCommand.getCourtApplication().getApplicationReference())
+                        ))
+                        .with(Hearing::getHearingDays, hasItem(isBean(HearingDay.class)
+                                .withValue(HearingDay::getListedDurationMinutes, listedDurationMin)))
                 )
         );
 
