@@ -515,11 +515,20 @@ rule "Command - API - Action - hearing.add-master-defendant-id-to-defendant"
     $outcome.setSuccess(true);
 end
 
+rule "Command - API - Action - hearing.mark-as-duplicate-v2"
+  when
+    $outcome: Outcome();
+    $action: Action(name == "hearing.mark-as-duplicate-v2");
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "System Users", "Court Administrators"));
+  then
+    $outcome.setSuccess(true);
+end
+
 rule "Command - API - Action - hearing.mark-as-duplicate"
   when
     $outcome: Outcome();
     $action: Action(name == "hearing.mark-as-duplicate");
-    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "Listing Officers", "Court Clerks", "Legal Advisers", "Court Associate", "System Users", "Court Administrators"));
+    eval(userAndGroupProvider.isMemberOfAnyOfTheSuppliedGroups($action, "System Users"));
   then
     $outcome.setSuccess(true);
 end
