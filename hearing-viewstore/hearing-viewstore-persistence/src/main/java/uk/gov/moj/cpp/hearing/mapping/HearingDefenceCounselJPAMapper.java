@@ -45,7 +45,7 @@ public class HearingDefenceCounselJPAMapper {
         defenceCounsel.setHearing(hearing);
 
         final JsonArrayBuilder defendants = createArrayBuilder();
-        pojo.getDefendants().forEach(caseId -> defendants.add(caseId.toString()));
+        pojo.getDefendants().forEach(defendantId -> defendants.add(defendantId.toString()));
 
         final JsonArrayBuilder attendanceDays = createArrayBuilder();
         pojo.getAttendanceDays().forEach(localDate -> attendanceDays.add(localDate.toString()));

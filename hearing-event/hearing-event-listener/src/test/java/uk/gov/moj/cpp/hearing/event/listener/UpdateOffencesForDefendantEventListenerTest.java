@@ -7,6 +7,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anySetOf;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -405,7 +406,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         prosecutionCase1.getDefendants().add(defendant1);
         hearing1.getProsecutionCases().add(prosecutionCase1);
 
-        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class))).thenReturn(hearing1);
+        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class), anySetOf(UUID.class))).thenReturn(hearing1);
 
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
@@ -463,7 +464,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         prosecutionCase1.setId(new HearingSnapshotKey(prosecutionId, hearingId));
         hearing1.getProsecutionCases().add(prosecutionCase1);
 
-        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class))).thenReturn(hearing1);
+        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class), anySetOf(UUID.class))).thenReturn(hearing1);
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
 
@@ -516,7 +517,7 @@ public class UpdateOffencesForDefendantEventListenerTest {
         final Hearing hearing1 = new Hearing();
         hearing1.setId(hearingId);
 
-        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class))).thenReturn(hearing1);
+        when(updateOffencesForDefendantService.removeOffencesFromExistingHearing(Matchers.any(Hearing.class), anyListOf(UUID.class), anyListOf(UUID.class), anyListOf(UUID.class), anySetOf(UUID.class))).thenReturn(hearing1);
 
         updateOffencesForDefendantEventListener.removeOffencesFromExistingAllocatedHearing(envelope);
 

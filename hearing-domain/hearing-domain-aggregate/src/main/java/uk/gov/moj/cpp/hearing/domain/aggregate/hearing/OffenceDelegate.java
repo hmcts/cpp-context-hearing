@@ -26,9 +26,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.collections.CollectionUtils;
+
 public class OffenceDelegate implements Serializable {
 
-    private static final long serialVersionUID = 3L;
+    private static final long serialVersionUID = 4L;
 
     private final HearingAggregateMomento momento;
 
@@ -133,6 +135,17 @@ public class OffenceDelegate implements Serializable {
         momento.getHearing().getProsecutionCases()
                 .removeIf(prosecutionCase -> prosecutionCasesToBeRemoved.contains(prosecutionCase.getId()));
 
+        if(CollectionUtils.isNotEmpty(momento.getHearing().getDefenceCounsels())){
+            // Remove defendant from defence counsels from the hearing
+            momento.getHearing().getDefenceCounsels().forEach(
+                    defenceCounsel -> defenceCounsel.getDefendants()
+                            .removeIf(defendantId -> defendantsToBeRemoved.contains(defendantId))
+            );
+
+            // Remove defence counsels for no defendant(s) left for defence counsel on the hearing
+            momento.getHearing().getDefenceCounsels()
+                    .removeIf(defenceCounsel -> CollectionUtils.isEmpty(defenceCounsel.getDefendants()));
+        }
     }
 
     public Stream<Object> addOffence(final UUID hearingId, final UUID defendantId, final UUID prosecutionCaseId,
