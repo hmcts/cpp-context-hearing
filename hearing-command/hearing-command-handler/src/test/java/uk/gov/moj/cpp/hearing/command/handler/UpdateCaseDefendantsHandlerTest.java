@@ -189,6 +189,9 @@ public class UpdateCaseDefendantsHandlerTest {
 
     }
 
+
+  
+
     @Test
     public void testApplicationDefendantsForHearingUpdated() throws EventStreamException{
         final UUID applicationId = randomUUID();
@@ -214,6 +217,7 @@ public class UpdateCaseDefendantsHandlerTest {
                 )));
 
     }
+
 
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
         when(this.eventSource.getStreamById(id)).thenReturn(eventStream);

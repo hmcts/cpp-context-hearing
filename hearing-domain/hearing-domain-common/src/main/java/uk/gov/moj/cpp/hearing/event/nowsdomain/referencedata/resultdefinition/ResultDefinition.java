@@ -488,11 +488,6 @@ public class ResultDefinition {
         return dependantResultDefinitionGroup;
     }
 
-    public ResultDefinition setDependantResultDefinitionGroup(final String dependantResultDefinitionGroup) {
-        this.dependantResultDefinitionGroup = dependantResultDefinitionGroup;
-        return this;
-    }
-
 
     public Boolean getPreserveActiveOrder() {
         return preserveActiveOrder;

@@ -73,6 +73,7 @@ public class WireMockStubUtils {
 
     private static final String QUERY_ROLES_FOR_USER = "/usersgroups-service/query/api/rest/usersgroups/users/{0}/roles";
     private static final String CONTENT_TYPE_QUERY_ROLES_FOR_USER = "application/vnd.usersgroups.roles+json";
+    private static final String CONTENT_TYPE_QUERY_LOGGEDIN_USER_ORGANISATION = "application/vnd.usersgroups.get-organisation-details+json";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WireMockStubUtils.class);
 
@@ -466,6 +467,20 @@ public class WireMockStubUtils {
                 .willReturn(responseDefBuilder));
 
         waitForStubToBeReady(url, "application/vnd.usersgroups.logged-in-user-details+json");
+    }
+
+    public static void stubGetUserOrganisation(final String organisationId, final String responsePayLoad) {
+
+        stubPingFor("usersgroups-service");
+
+        stubFor(get(urlPathEqualTo(format("/usersgroups-service/query/api/rest/usersgroups/organisations/{0}", organisationId)))
+                .willReturn(aResponse().withStatus(OK.getStatusCode())
+                        .withHeader(ID, randomUUID().toString())
+                        .withHeader(CONTENT_TYPE, APPLICATION_JSON)
+                        .withBody(responsePayLoad)));
+
+        waitForStubToBeReady(format("/usersgroups-service/query/api/rest/usersgroups/organisations/{0}", organisationId), CONTENT_TYPE_QUERY_LOGGEDIN_USER_ORGANISATION);
+
     }
 
     public static void stubAaagDetails(final String applicationId, final String responsePayLoad) {

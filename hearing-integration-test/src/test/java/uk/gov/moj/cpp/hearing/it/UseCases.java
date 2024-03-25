@@ -154,6 +154,11 @@ public class UseCases {
         return initiateHearing(requestSpec, initiateHearing, true, true, true, false, false);
     }
 
+    public static InitiateHearingCommand initiateHearingWithoutBreachApplication(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
+
+        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, false);
+    }
+
     public static InitiateHearingCommand initiateHearingWithNsp(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
         return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true);

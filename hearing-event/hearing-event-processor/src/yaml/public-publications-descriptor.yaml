@@ -221,6 +221,8 @@ subscriptions_descriptor:
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-witness-added.json
 
 
+        - name: public.hearing.hearing-extended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public-hearing-extended.json
         - name: public.hearing.hearing-breach-applications-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/public.hearing.hearing-breach-applications-added.json
 

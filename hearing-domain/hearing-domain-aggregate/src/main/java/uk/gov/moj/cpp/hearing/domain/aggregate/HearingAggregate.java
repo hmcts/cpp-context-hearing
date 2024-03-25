@@ -1030,6 +1030,7 @@ public class HearingAggregate implements Aggregate {
         } else if(this.hearingState == SHARED) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'unAllocateHearing' event as hearing already shared", hearingId));
         }
+
         return apply(this.hearingDelegate.unAllocateHearing(hearingId, removedOffenceIds));
     }
 

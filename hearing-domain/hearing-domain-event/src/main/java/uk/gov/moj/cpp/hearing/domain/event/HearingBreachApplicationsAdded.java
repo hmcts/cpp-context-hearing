@@ -5,7 +5,6 @@ import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 
 @Event("hearing.events.hearing-breach-applications-added")
 @SuppressWarnings({"squid:S2384", "PMD.BeanMembersShouldSerialize"})

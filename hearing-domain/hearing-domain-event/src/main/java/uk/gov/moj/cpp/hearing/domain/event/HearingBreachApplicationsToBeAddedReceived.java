@@ -1,12 +1,5 @@
 package uk.gov.moj.cpp.hearing.domain.event;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.justice.core.courts.CourtApplication;
-import uk.gov.justice.core.courts.CourtCentre;
-import uk.gov.justice.core.courts.HearingDay;
-import uk.gov.justice.core.courts.JurisdictionType;
-import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.domain.annotation.Event;
 
 import java.io.Serializable;

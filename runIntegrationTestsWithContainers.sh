@@ -24,6 +24,7 @@ source $CPP_DOCKER_DIR/build-scripts/integration-test-scipt-functions.sh
 
 runLiquibase() {
    runEventLogLiquibase
+   runEventLogAggregateSnapshotLiquibase
    runEventBufferLiquibase
    runViewStoreLiquibase
    runSystemLiquibase

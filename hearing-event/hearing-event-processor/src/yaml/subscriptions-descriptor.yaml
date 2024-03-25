@@ -346,6 +346,8 @@ subscriptions_descriptor:
         - name: hearing.event.witness-added-to-hearing
           schema_uri: http://justice.gov.uk/core/courts/hearing.event.witness-added-to-hearing.json
 
+        - name: hearing.events.hearing-extended
+          schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-extended.json
         # breach-applications-added For Hearing
         - name: hearing.events.hearing-breach-applications-added
           schema_uri: http://cpp.moj.gov.uk/hearing/json/schema/event/hearing-breach-applications-added.json

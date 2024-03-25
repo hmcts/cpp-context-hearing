@@ -48,6 +48,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -214,15 +215,24 @@ public class HearingDelegate implements Serializable {
                                  final List<UUID> shadowListedOffences) {
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         if (this.momento.getHearing() == null) {
-            return streamBuilder.add(generateHearingIgnoredMessage("Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet",hearingId)).build();
+            return streamBuilder.add(generateHearingIgnoredMessage("Skipping 'hearing.events.hearing-extended' event as hearing has not been created yet", hearingId)).build();
         }
-        if(courtApplication != null &&  this.momento.getBreachApplicationsToBeAdded() != null && !this.momento.getBreachApplicationsToBeAdded().isEmpty()) {
-            final List<UUID> courtApplicationsInHearing =  this.momento.getHearing().getCourtApplications() != null ?
-                    this.momento.getHearing().getCourtApplications().stream().map(a -> a.getId()).collect(toList()) : new ArrayList<>();
+        if (courtApplication != null && this.momento.getBreachApplicationsToBeAdded() != null && !this.momento.getBreachApplicationsToBeAdded().isEmpty()) {
+            final List<CourtApplication> hearingCourtApplicationList = this.momento.getHearing().getCourtApplications();
+            final List<UUID> courtApplicationsInHearing = isNotEmpty(hearingCourtApplicationList) ?
+                    hearingCourtApplicationList.stream()
+                            .map(CourtApplication::getId)
+                            .collect(toList())
+                    : new ArrayList<>();
             courtApplicationsInHearing.add(courtApplication.getId());
-            final boolean allBreachApplicationsAdded = this.momento.getBreachApplicationsToBeAdded().stream().allMatch(a -> courtApplicationsInHearing.contains(a));
-            if(allBreachApplicationsAdded) {
-                final List<CourtApplication> courtApplicationListAlreadyInHearing =  this.momento.getHearing().getCourtApplications().stream().filter(ap -> this.momento.getBreachApplicationsToBeAdded().contains(ap.getId())).collect(toList());
+            final boolean allBreachApplicationsAdded = new HashSet<>(courtApplicationsInHearing).containsAll(this.momento.getBreachApplicationsToBeAdded());
+
+            if (allBreachApplicationsAdded) {
+                final List<CourtApplication> courtApplicationListAlreadyInHearing = isNotEmpty(hearingCourtApplicationList) ?
+                        hearingCourtApplicationList.stream()
+                                .filter(ap -> this.momento.getBreachApplicationsToBeAdded().contains(ap.getId()))
+                                .collect(toList())
+                        : new ArrayList<>();
                 courtApplicationListAlreadyInHearing.add(courtApplication);
                 streamBuilder.add(new HearingBreachApplicationsAdded(courtApplicationListAlreadyInHearing));
             }
@@ -531,6 +541,10 @@ public class HearingDelegate implements Serializable {
     }
 
     public Stream<Object> changeNextHearingStartDate(final UUID hearingId, final UUID seedingHearingId, final ZonedDateTime nextHearingStartDate) {
+
+        if (this.momento.isDuplicate() || this.momento.isDeleted()) {
+            return Stream.empty();
+        }
 
         final Stream.Builder<Object> streamBuilder = Stream.builder();
         streamBuilder.add(new NextHearingStartDateRecorded(hearingId, seedingHearingId, nextHearingStartDate));

@@ -35,6 +35,8 @@ import static uk.gov.moj.cpp.hearing.test.FileUtil.getPayload;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetPIReferenceDataEventMappings;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
+import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
@@ -42,6 +44,7 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsF
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
 import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
 import uk.gov.justice.services.test.utils.core.http.RestPoller;
 import uk.gov.moj.cpp.hearing.command.logEvent.CorrectLogEventCommand;
@@ -49,6 +52,11 @@ import uk.gov.moj.cpp.hearing.command.logEvent.LogEventCommand;
 import uk.gov.moj.cpp.hearing.command.updateEvent.HearingEvent;
 import uk.gov.moj.cpp.hearing.domain.HearingEventDefinition;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers.InitiateHearingCommandHelper;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubGetUserOrganisation;
 import uk.gov.moj.cpp.hearing.utils.FileUtil;
 
 import java.text.MessageFormat;
@@ -76,6 +84,7 @@ public class HearingEventsIT extends AbstractIT {
     private static final ZonedDateTime EVENT_TIME = PAST_ZONED_DATE_TIME.next().withZoneSameLocal(ZoneId.of("UTC"));
     private final UUID DEFENCE_COUNSEL_ID = randomUUID();
     private static final String DOCUMENT_TEXT = STRING.next();
+    private final StringToJsonObjectConverter stringToJsonObjectConverter = new StringToJsonObjectConverter();
 
     @BeforeClass
     public static void setupPerClass() {
@@ -610,8 +619,12 @@ public class HearingEventsIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
-        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
-        stubUserAndOrganisation(userId, response);
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.hmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
 
@@ -652,8 +665,13 @@ public class HearingEventsIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
-        final String response = FileUtil.getPayload("stub-data/usersgroups.users.nonhmcts.organisation.json").replace("USER_ID", userId.toString());
-        stubUserAndOrganisation(userId, response);
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.nonhmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-non-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
+
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
 
@@ -689,8 +707,14 @@ public class HearingEventsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
-        stubUserAndOrganisation(userId, response);
+
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.hmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
+
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
 
@@ -726,8 +750,14 @@ public class HearingEventsIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
-        final String responsePayload = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
-        stubUserAndOrganisation(userId, responsePayload);
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.hmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
+
+
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
 
@@ -767,8 +797,13 @@ public class HearingEventsIT extends AbstractIT {
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
-        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
-        stubUserAndOrganisation(userId, response);
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.hmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
+
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
 
@@ -805,8 +840,12 @@ public class HearingEventsIT extends AbstractIT {
 
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
-        final String response = FileUtil.getPayload("stub-data/usersgroups.users.hmcts.organisation.json").replace("%USER_ID%", userId.toString());
-        stubUserAndOrganisation(userId, response);
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.hmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
 
@@ -839,8 +878,12 @@ public class HearingEventsIT extends AbstractIT {
         final InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate()));
 
         givenAUserHasLoggedInAsACourtClerk(getLoggedInUser());
-        final String response = FileUtil.getPayload("stub-data/usersgroups.users.nonhmcts.organisation.json").replace("USER_ID", userId.toString());
-        stubUserAndOrganisation(userId, response);
+        final String loggedInUsersResponsePayload = getPayload("stub-data/usersgroups.users.nonhmcts.organisation.json");
+        stubUserAndOrganisation(userId, loggedInUsersResponsePayload.replace("%USER_ID%", userId.toString()));
+        final JsonObject loggedInUserObject = stringToJsonObjectConverter.convert(loggedInUsersResponsePayload);
+        final String organisation = getPayload("stub-data/usersgroups.get-non-hmcts-organisation-details.json")
+                .replace("%ORGANISATION_ID%", loggedInUserObject.getString("organisationId"));
+        stubGetUserOrganisation(loggedInUserObject.getString("organisationId"), organisation);
 
         final HearingEventDefinition hearingEventDefinition = findEventDefinitionWithActionLabel("Start Hearing");
 

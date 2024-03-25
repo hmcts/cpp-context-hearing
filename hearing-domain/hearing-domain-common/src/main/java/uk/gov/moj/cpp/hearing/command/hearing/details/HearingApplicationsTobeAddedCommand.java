@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import java.util.List;
 import java.util.UUID;
 
+@SuppressWarnings("squid:S2384")
 public class HearingApplicationsTobeAddedCommand {
 
     private final List<UUID> breachedApplications;
