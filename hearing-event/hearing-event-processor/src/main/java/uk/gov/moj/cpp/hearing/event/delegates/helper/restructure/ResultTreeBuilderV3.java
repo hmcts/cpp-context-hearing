@@ -229,7 +229,7 @@ public class ResultTreeBuilderV3 {
 
         if (nonNull(judicialResultPrompts) && !judicialResultPrompts.isEmpty()) {
             final Optional<NextHearing> nextHearing = nextHearingHelper.getNextHearing(context, resultDefinition, resultLines, resultLine, judicialResultPrompts, resultsSharedV3, resultDefinitions);
-            final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, resultDefinition);
+            final Optional<JudicialResultPromptDurationElement> judicialResultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(judicialResultPrompts, resultDefinition, resultLine.getOrderedDate());
             final Optional<String> qualifier = new ResultQualifier().populate(resultDefinition.getQualifier(), judicialResultPrompts, this.referenceDataService, context, resultLine.getOrderedDate());
 
             qualifier.ifPresent(builder::withQualifier);
