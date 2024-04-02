@@ -790,12 +790,12 @@ public class HearingAggregate implements Aggregate {
         return apply(this.offenceDelegate.deleteOffence(offenceId, hearingId));
     }
 
-    public Stream<Object> removeOffencesFromExistingHearing(final UUID hearingId, final List<UUID> offenceIds) {
+    public Stream<Object> removeOffencesFromExistingHearing(final UUID hearingId, final List<UUID> offenceIds, final String source) {
         if (this.momento.getHearing() == null) {
             return Stream.of(hearingDelegate.generateHearingIgnoredMessage("Ignoring 'removeOffencesFromExistingHearing' event as hearing not found", hearingId));
         }
 
-        return apply(this.offenceDelegate.removeOffencesFromAllocatedHearing(hearingId, offenceIds));
+        return apply(this.offenceDelegate.removeOffencesFromAllocatedHearing(hearingId, offenceIds, source));
     }
 
     public Stream<Object> updateDefendantAttendance(final UUID hearingId, final UUID defendantId, final AttendanceDay attendanceDay) {
@@ -803,7 +803,11 @@ public class HearingAggregate implements Aggregate {
     }
 
     public Stream<Object> inheritVerdict(final UUID hearingId, final Verdict verdict) {
-        return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict));
+
+        if (!HearingState.SHARED.equals(this.hearingState)) {
+            return apply(this.verdictDelegate.inheritVerdict(hearingId, verdict));
+        }
+        return Stream.empty();
     }
 
 

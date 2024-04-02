@@ -21,17 +21,20 @@ public class OffencesRemovedFromExistingHearing implements Serializable {
 
     private List<UUID> offenceIds;
 
+    private String sourceContext;
+
     @JsonCreator
     public OffencesRemovedFromExistingHearing(@JsonProperty("hearingId") final UUID hearingId,
                                               @JsonProperty("prosecutionCaseIds") final List<UUID> prosecutionCaseIds,
                                               @JsonProperty("defendantIds") final List<UUID> defendantIds,
-                                              @JsonProperty("offenceIds") final List<UUID> offenceIds) {
+                                              @JsonProperty("offenceIds") final List<UUID> offenceIds,
+                                              @JsonProperty("sourceContext") final String sourceContext) {
 
         this.hearingId = hearingId;
         this.prosecutionCaseIds = prosecutionCaseIds;
         this.defendantIds = defendantIds;
         this.offenceIds = offenceIds;
-
+        this.sourceContext = sourceContext;
     }
 
     public UUID getHearingId() {
@@ -48,6 +51,10 @@ public class OffencesRemovedFromExistingHearing implements Serializable {
 
     public List<UUID> getOffenceIds() {
         return offenceIds;
+    }
+
+    public String getSourceContext() {
+        return sourceContext;
     }
 
     @Override

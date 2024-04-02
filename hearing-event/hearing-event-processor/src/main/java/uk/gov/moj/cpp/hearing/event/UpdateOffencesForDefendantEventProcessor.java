@@ -29,8 +29,12 @@ public class UpdateOffencesForDefendantEventProcessor {
     private static final Logger LOGGER = getLogger(UpdateOffencesForDefendantEventProcessor.class);
     private static final String PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING = "public.events.listing.offences-removed-from-existing-allocated-hearing";
     private static final String HEARING_COMMAND_REMOVE_OFFENCES_FROM_EXISTING_HEARING = "hearing.command.remove-offences-from-existing-hearing";
+    private static final String HEARING_COMMAND_REMOVE_OFFENCES_FROM_EXISTING_ALLOCATED_HEARING = "hearing.command.remove-offences-from-existing-allocated-hearing";
     public static final String PUBLIC_PROGRESSION_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING = "public.progression.offences-removed-from-existing-allocated-hearing";
     public static final String EVENT_RECEIVED_WITH_METADATA_AND_PAYLOAD = "{} event received with metadata {} and payload {}";
+    public static final String DEFENDANT_IDS = "defendantIds";
+    public static final String HEARING_ID = "hearingId";
+
 
     @Inject
     private Enveloper enveloper;
@@ -85,7 +89,7 @@ public class UpdateOffencesForDefendantEventProcessor {
                     PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
         }
 
-        sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata()).withName(HEARING_COMMAND_REMOVE_OFFENCES_FROM_EXISTING_HEARING),
+        sender.send(envelopeFrom(metadataFrom(jsonEnvelope.metadata()).withName(HEARING_COMMAND_REMOVE_OFFENCES_FROM_EXISTING_ALLOCATED_HEARING),
                 jsonEnvelope.payloadAsJsonObject()));
     }
 
@@ -93,7 +97,7 @@ public class UpdateOffencesForDefendantEventProcessor {
     public void handleProgressionOffencesRemovedFromExistingAllocatedHearingPublicEvent(final JsonEnvelope jsonEnvelope) {
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("{} event received with metadata {} and payload {}",
+            LOGGER.debug(EVENT_RECEIVED_WITH_METADATA_AND_PAYLOAD,
                     PUBLIC_PROGRESSION_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING, jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
         }
 
@@ -104,13 +108,24 @@ public class UpdateOffencesForDefendantEventProcessor {
     @Handles("hearing.events.offences-removed-from-existing-hearing")
     public void handleOffenceOrDefendantRemovalToListAssist(final JsonEnvelope jsonEnvelope) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("{} event received with metadata {} and payload {}",
+            LOGGER.info(EVENT_RECEIVED_WITH_METADATA_AND_PAYLOAD,
                     "hearing.events.offences-removed-from-existing-hearing", jsonEnvelope.metadata(), jsonEnvelope.payloadAsJsonObject());
         }
-        final JsonObject payload = Json.createObjectBuilder()
-                .add("hearingId", jsonEnvelope.payloadAsJsonObject().get("hearingId"))
-                .add("offenceIds", jsonEnvelope.payloadAsJsonObject().get("offenceIds"))
-                .build();
-        sender.send(Enveloper.envelop(payload).withName("public.hearing.selected-offences-removed-from-existing-hearing").withMetadataFrom(jsonEnvelope));
+
+        if( jsonEnvelope.payloadAsJsonObject().containsKey(DEFENDANT_IDS) && !jsonEnvelope.payloadAsJsonObject().getJsonArray(DEFENDANT_IDS).isEmpty() ) {
+            final JsonObject cmdPayload = Json.createObjectBuilder()
+                    .add(HEARING_ID, jsonEnvelope.payloadAsJsonObject().get(HEARING_ID))
+                    .add(DEFENDANT_IDS, jsonEnvelope.payloadAsJsonObject().get(DEFENDANT_IDS))
+                    .build();
+            sender.send(Enveloper.envelop(cmdPayload).withName("hearing.command.delete-hearing-for-defendants").withMetadataFrom(jsonEnvelope));
+        }
+
+        if("Hearing".equals(jsonEnvelope.payloadAsJsonObject().getString("sourceContext", "Hearing"))) {
+            final JsonObject payload = Json.createObjectBuilder()
+                    .add(HEARING_ID, jsonEnvelope.payloadAsJsonObject().get(HEARING_ID))
+                    .add("offenceIds", jsonEnvelope.payloadAsJsonObject().get("offenceIds"))
+                    .build();
+            sender.send(Enveloper.envelop(payload).withName("public.hearing.selected-offences-removed-from-existing-hearing").withMetadataFrom(jsonEnvelope));
+        }
     }
 }

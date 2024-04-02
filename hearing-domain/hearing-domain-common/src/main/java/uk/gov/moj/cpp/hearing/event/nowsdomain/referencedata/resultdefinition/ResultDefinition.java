@@ -505,4 +505,5 @@ public class ResultDefinition {
     public void setPoliceSubjectLineTitle(final String policeSubjectLineTitle) {
         this.policeSubjectLineTitle = policeSubjectLineTitle;
     }
+
 }

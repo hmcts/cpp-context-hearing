@@ -3,6 +3,8 @@ package uk.gov.moj.cpp.hearing.it;
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
 import static java.util.UUID.randomUUID;
 import static javax.ws.rs.core.Response.Status.OK;
+import static org.hamcrest.CoreMatchers.allOf;
+import static org.hamcrest.CoreMatchers.anyOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -27,6 +29,7 @@ import static uk.gov.moj.cpp.hearing.it.Utilities.makeCommand;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.DefendantType.PERSON;
 import static uk.gov.moj.cpp.hearing.test.CoreTestTemplates.defaultArguments;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingWith2Defendants;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.minimumInitiateHearingTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.ShareResultsCommandTemplates.basicShareResultsCommandV2Template;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.with;
@@ -47,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import org.hamcrest.Matchers;
+import org.hamcrest.core.Is;
 import org.mockito.Spy;
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
@@ -67,28 +72,26 @@ import uk.gov.justice.services.common.converter.jackson.ObjectMapperProducer;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.result.ShareDaysResultsCommand;
+import uk.gov.moj.cpp.hearing.domain.event.CaseDefendantsUpdatedForHearing;
 import uk.gov.moj.cpp.hearing.domain.event.RegisteredHearingAgainstDefendant;
 import uk.gov.moj.cpp.hearing.domain.event.result.PublicHearingResultedV2;
 import uk.gov.moj.cpp.hearing.query.view.response.hearingresponse.HearingDetailsResponse;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.CoreTestTemplates;
-import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import org.hamcrest.CoreMatchers;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
-
+    private static final String GET_HEARING_QUERY_ENDPOINT_NAME = "hearing.get.hearing";
+    private static final String GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE = "application/vnd.hearing.get.hearing+json";
     private final String hearingResultedCaseUpdatedEvent = "public.progression.hearing-resulted-case-updated";
     private final String publicProgressionDefendantOffencesChanged = "public.progression.defendant-offences-changed";
     private static final String HEARING_CASE_DEFENDANTS_UPDATED_FOR_HEARING = "hearing.case-defendants-updated-for-hearing";
-    private static final String HEARING_EVENTS_EXISTING_HEARING_UPDATED = "hearing.events.existing-hearing-updated";
-    private static final String HEARING_COMMAND_UPDATE_RELATED_HEARING = "hearing.update-related-hearing";
     private final String hearingResultedApplicationUpdatedEvent = "public.progression.hearing-resulted-application-updated";
 
     private final ObjectMapper objectMapper = new ObjectMapperProducer().objectMapper();
@@ -305,7 +308,6 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
         }
     }
 
-    @Ignore("passing locally, but flaky in jenkin build")
     @Test
     public void testCaseDefendantsUpdatedForMergedCase() throws Exception {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
@@ -318,6 +320,17 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
         final UUID defendantId1 = prosecutionCase1.getDefendants().get(0).getId();
         final UUID offenceId1 = prosecutionCase1.getDefendants().get(0).getOffences().get(0).getId();
 
+        poll(requestParams(getURL(GET_HEARING_QUERY_ENDPOINT_NAME, h1.getId()), GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(
+                                anyOf(allOf(withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", Is.is(defendantId1.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", anyOf(Is.is(offenceId1.toString()), Is.is(offenceId1.toString())))
+                                ))));
+
         final CommandHelpers.InitiateHearingCommandHelper hearingTwo = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
 
         final Hearing h2 = hearingTwo.getHearing();
@@ -325,6 +338,17 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
         final ProsecutionCase prosecutionCase2 = h2.getProsecutionCases().get(0);
         final UUID defendantId2 = prosecutionCase2.getDefendants().get(0).getId();
         final UUID offenceId2 = prosecutionCase2.getDefendants().get(0).getOffences().get(0).getId();
+        poll(requestParams(getURL(GET_HEARING_QUERY_ENDPOINT_NAME, h2.getId()), GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(
+                                anyOf(allOf(withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", Is.is(defendantId2.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", anyOf(Is.is(offenceId1.toString()), Is.is(offenceId2.toString())))
+                                ))));
+
 
         final String publicProgressionHearingResultedPayload = getStringFromResource("public.progression.hearing-resulted-case-updated-merged-case.json")
                 .replaceAll("CASE_ID", caseId1.toString())
@@ -370,30 +394,19 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
         //Add offence 3 to defendant2 recently moved to Hearing1
         final UUID offenceId3 = UUID.randomUUID();
 
-        try (final Utilities.EventListener registeredHearingAgainstDefendant = listenFor("hearing.events.registered-hearing-against-defendant", "hearing.event")
-                .withFilter(convertStringTo(RegisteredHearingAgainstDefendant.class, isBean(RegisteredHearingAgainstDefendant.class)
-                        .with(RegisteredHearingAgainstDefendant::getHearingId, is(hearingId1))
-                        .with(RegisteredHearingAgainstDefendant::getDefendantId, is(defendantId2))
-                ))) {
+        final String eventPayloadForDefendantOffencesChanged = getStringFromResource("public.progression.defendant-offences-changed.json")
+                .replaceAll("CASE_ID", caseId1.toString())
+                .replaceAll("DEFENDANT_ID", defendantId2.toString())
+                .replaceAll("OFFENCE_ID", offenceId3.toString());
 
 
-            final String eventPayloadForDefendantOffencesChanged = getStringFromResource("public.progression.defendant-offences-changed.json")
-                    .replaceAll("CASE_ID", caseId1.toString())
-                    .replaceAll("DEFENDANT_ID", defendantId2.toString())
-                    .replaceAll("OFFENCE_ID", offenceId3.toString());
-
-
-            sendMessage(getPublicTopicInstance().createProducer(),
-                    publicProgressionDefendantOffencesChanged,
-                    new StringToJsonObjectConverter().convert(eventPayloadForDefendantOffencesChanged),
-                    metadataOf(randomUUID(), publicProgressionDefendantOffencesChanged)
-                            .withUserId(randomUUID().toString())
-                            .build()
-            );
-
-            registeredHearingAgainstDefendant.waitFor();
-
-        }
+        sendMessage(getPublicTopicInstance().createProducer(),
+                publicProgressionDefendantOffencesChanged,
+                new StringToJsonObjectConverter().convert(eventPayloadForDefendantOffencesChanged),
+                metadataOf(randomUUID(), publicProgressionDefendantOffencesChanged)
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
 
         poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
                 .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
@@ -408,6 +421,68 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
                                 )
                         )
                 );
+    }
+
+    @Test
+    public void shouldNotAddDefendantToOtherHearing() throws IOException {
+        final UUID defendantId1 = UUID.randomUUID();
+        final UUID defendantId2 = UUID.randomUUID();
+        final UUID defendantId3 = UUID.randomUUID();
+        final UUID prosecutionCaseId = UUID.randomUUID();
+
+        initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+
+        final UUID hearingId2 = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId2, defendantId3, UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID());
+
+        String eventPayloadString = getStringFromResource("public.progression.hearing-resulted-case-updated.json")
+                .replaceAll("CASE_ID", prosecutionCaseId.toString())
+                .replaceAll("DEFENDANT_ID", defendantId1.toString());
+
+        try (final Utilities.EventListener caseDefendantsUpdatedForHearing = listenFor(HEARING_CASE_DEFENDANTS_UPDATED_FOR_HEARING, "hearing.event")
+                .withFilter(convertStringTo(CaseDefendantsUpdatedForHearing.class, isBean(CaseDefendantsUpdatedForHearing.class)
+                                .with(CaseDefendantsUpdatedForHearing::getProsecutionCase, isBean(ProsecutionCase.class)
+                                        .with(ProsecutionCase::getId, Matchers.is(prosecutionCaseId)))
+                         .with(CaseDefendantsUpdatedForHearing::getHearingId, Matchers.is(hearingId2))
+                ))) {
+            sendMessage(getPublicTopicInstance().createProducer(),
+                    hearingResultedCaseUpdatedEvent,
+                    new StringToJsonObjectConverter().convert(eventPayloadString),
+                    metadataOf(randomUUID(), hearingResultedCaseUpdatedEvent)
+                            .withUserId(randomUUID().toString())
+                            .build()
+            );
+
+            caseDefendantsUpdatedForHearing.waitFor();
+
+        }
+        final UUID offenceId4 = UUID.randomUUID();
+
+        try (final Utilities.EventListener registeredHearingAgainstDefendant = listenFor("hearing.events.registered-hearing-against-defendant", "hearing.event")
+                .withFilter(convertStringTo(RegisteredHearingAgainstDefendant.class, isBean(RegisteredHearingAgainstDefendant.class)
+                        .with(RegisteredHearingAgainstDefendant::getDefendantId, Matchers.is(defendantId1))
+                        .with(RegisteredHearingAgainstDefendant::getHearingId, Matchers.is(hearingId2))
+                ))) {
+
+
+            final String eventPayloadForDefendantOffencesChanged = getStringFromResource("public.progression.defendant-offences-changed.json")
+                    .replaceAll("CASE_ID", prosecutionCaseId.toString())
+                    .replaceAll("DEFENDANT_ID", defendantId1.toString())
+                    .replaceAll("OFFENCE_ID", offenceId4.toString());
+
+
+            sendMessage(getPublicTopicInstance().createProducer(),
+                    publicProgressionDefendantOffencesChanged,
+                    new StringToJsonObjectConverter().convert(eventPayloadForDefendantOffencesChanged),
+                    metadataOf(randomUUID(), publicProgressionDefendantOffencesChanged)
+                            .withUserId(randomUUID().toString())
+                            .build()
+            );
+
+            registeredHearingAgainstDefendant.expectNone();
+
+        }
+
+
     }
 
     private void shareDaysResultWithCourtClerk(final Hearing hearing, final List<Target> targets, final LocalDate hearingDay) {
@@ -479,6 +554,38 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
                 )
                         .withProsecutionCases(prosecutionCases)
                         .build());
+    }
+
+
+    private UUID initiateHearingAndAssertDefendantAndOffencesInHearing(final UUID prosecutionCaseId, final UUID defendantId1, final UUID defendantId2, final UUID offenceId1, final UUID offenceId2, final UUID offenceId3) {
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingWith2Defendants(prosecutionCaseId, defendantId1, offenceId1, offenceId2, defendantId2, offenceId3);
+
+        final UUID hearingId = initiateHearingCommand.getHearing().getId();
+
+        initiateHearing(getRequestSpec(), initiateHearingCommand);
+
+        poll(requestParams(getURL(GET_HEARING_QUERY_ENDPOINT_NAME, hearingId), GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(
+                                anyOf(allOf(withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", Is.is(defendantId1.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(2)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", anyOf(Is.is(offenceId1.toString()), Is.is(offenceId2.toString()))),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[1].id", anyOf(Is.is(offenceId1.toString()), Is.is(offenceId2.toString()))),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", Is.is(defendantId2.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", Is.is(offenceId3.toString()))),
+                                        allOf(withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", Is.is(defendantId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", Is.is(offenceId3.toString()))),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", Is.is(defendantId1.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(2)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", anyOf(Is.is(offenceId1.toString()), Is.is(offenceId2.toString()))),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[1].id", anyOf(Is.is(offenceId1.toString()), Is.is(offenceId2.toString())))
+                                )));
+        return hearingId;
     }
 }
 

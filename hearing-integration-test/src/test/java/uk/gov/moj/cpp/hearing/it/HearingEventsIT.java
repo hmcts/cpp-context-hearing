@@ -37,6 +37,12 @@ import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
 import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.setupAsAuthorisedUser;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
+import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
+import static uk.gov.moj.cpp.hearing.utils.ReferenceDataStub.stubGetReferenceDataJudiciaries;
+import static uk.gov.moj.cpp.hearing.utils.DocumentGeneratorStub.stubDcumentCreateForHearingEventLog;
 
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.ZonedDateTimes;
@@ -51,6 +57,7 @@ import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubAaagDetails;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUserAndOrganisation;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubUsersAndGroupsForNames;
 import static uk.gov.moj.cpp.hearing.utils.WireMockStubUtils.stubGetUserOrganisation;
+import uk.gov.moj.cpp.hearing.utils.FileUtil;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;

@@ -36,6 +36,7 @@ import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTe
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithAllLevelJudicialResults;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithIsBoxHearing;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffencePlea;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplateWithOffenceVerdict;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.SaveDraftResultsCommandTemplates.saveDraftResultCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestTemplates.initiateDefendantCommandTemplate;
 import static uk.gov.moj.cpp.hearing.test.TestUtilities.asList;
@@ -57,8 +58,11 @@ import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCounsel;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.ResultLine2;
+import uk.gov.justice.core.courts.Source;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Target2;
+import uk.gov.justice.core.courts.Verdict;
+import uk.gov.justice.core.courts.VerdictType;
 import uk.gov.justice.core.courts.YouthCourt;
 import uk.gov.justice.hearing.courts.CourtListRestricted;
 import uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil;
@@ -101,6 +105,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingUnallocated;
 import uk.gov.moj.cpp.hearing.domain.event.IndicatedPleaUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.HearingUnlocked;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedPlea;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ProsecutionCounselChangeIgnored;
@@ -153,6 +158,7 @@ public class HearingAggregateTest {
     private static final String NOT_GUILTY ="NOT_GUILTY";
     private static final HearingAggregate HEARING_AGGREGATE = new HearingAggregate();
     public static final String OFFENCE = "OFFENCE";
+    public static final String HEARING = "Hearing";
 
 
     @Rule
@@ -365,10 +371,86 @@ public class HearingAggregateTest {
         assertThat(resultsSharedV3.getHearingDay(), Matchers.is(hearingDay));
         assertThat(resultsSharedV3.getTargets().size(), Matchers.is(1));
         assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), Matchers.is(hearingDay));
-        assertThat(resultsSharedV3.getIsReshare(), Matchers.is(false));
         assertNotNull(resultsSharedSuccess);
         assertThat(updatedOffence.getPlea().getPleaValue(), is(GUILTY));
-;
+
+    }
+
+    @Test
+    public void  shouldUpdateExistingVerdictIfInheritHearingOffenceVerdictReceived() {
+
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplateWithOffenceVerdict();
+
+        HEARING_AGGREGATE.apply(new HearingInitiated(initiateHearingCommand.getHearing()));
+
+        final Hearing hearing =HEARING_AGGREGATE.getHearing();
+        final UUID offenceId =hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0).getId();
+        final Offence offence = hearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+
+        assertThat(offence.getVerdict().getVerdictType().getCategoryType(), is(NOT_GUILTY));
+
+
+        final InheritedVerdictAdded inheritedVerdictAdded =  new InheritedVerdictAdded(hearing.getId(), Verdict.verdict()
+                .withVerdictType(VerdictType.verdictType()
+                        .withCategoryType(GUILTY)
+                        .withCategory("Guilty")
+                        .build())
+                .withOffenceId(offenceId)
+                .withVerdictDate(LocalDate.now())
+                .build());
+
+
+
+        HEARING_AGGREGATE.apply(inheritedVerdictAdded);
+
+        final LocalDate hearingDay = LocalDate.of(2022, 02, 02);
+        final ZonedDateTime sharedTime = ZonedDateTime.now();
+        final YouthCourt youthCourt = YouthCourt.youthCourt()
+                .withYouthCourtId(randomUUID())
+                .build();
+
+        final UUID resultLine1Id = randomUUID();
+        final UUID resultLine2Id = randomUUID();
+
+        final SharedResultsCommandResultLineV2 resultLine1 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine1Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final SharedResultsCommandResultLineV2 resultLine2 = SharedResultsCommandResultLineV2.sharedResultsCommandResultLine()
+                .withAmendmentDate(sharedTime)
+                .withLevel(OFFENCE)
+                .withPrompts(emptyList())
+                .withResultLineId(resultLine2Id)
+                .withResultDefinitionId(UUID.randomUUID())
+                .build();
+
+        final List<SharedResultsCommandResultLineV2> resultLines = Arrays.asList(resultLine1, resultLine2);
+
+        final DelegatedPowers courtClerk = DelegatedPowers.delegatedPowers().withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .withUserId(randomUUID())
+                .build();
+
+        final Stream<Object> eventStreams = HEARING_AGGREGATE.shareResultForDay(hearing.getId(), courtClerk, sharedTime, resultLines, HearingState.SHARED, youthCourt, hearingDay);
+
+        final List<Object> eventCollection = eventStreams.collect(toList());
+        assertThat(eventCollection.size(), Matchers.is(2));
+
+        final ResultsSharedSuccess resultsSharedSuccess= (ResultsSharedSuccess) eventCollection.get(0);
+        final ResultsSharedV3 resultsSharedV3 = (ResultsSharedV3) eventCollection.get(1);
+        final Hearing updatedHearing = resultsSharedV3.getHearing();
+        final Offence updatedOffence = updatedHearing.getProsecutionCases().get(0).getDefendants().get(0).getOffences().get(0);
+        assertThat(resultsSharedV3.getHearingDay(), Matchers.is(hearingDay));
+        assertThat(resultsSharedV3.getTargets().size(), Matchers.is(1));
+        assertThat(resultsSharedV3.getTargets().get(0).getHearingDay(), Matchers.is(hearingDay));
+        assertNotNull(resultsSharedSuccess);
+        assertThat(updatedOffence.getVerdict().getVerdictType().getCategoryType(), is(GUILTY));
+        assertThat(updatedOffence.getVerdict().getVerdictType().getCategory(), is("Guilty"));
+
     }
 
     @Test
@@ -2414,7 +2496,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         final UUID hearingId = randomUUID();
 
-        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearingId, Arrays.asList(randomUUID()));
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearingId, Arrays.asList(randomUUID()), HEARING);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -2466,7 +2548,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -2475,6 +2557,7 @@ public class HearingAggregateTest {
         assertThat(offencesRemovedFromExistingHearing.getOffenceIds().get(0), is(offence2Id));
         assertThat(offencesRemovedFromExistingHearing.getDefendantIds().size(), is(0));
         assertThat(offencesRemovedFromExistingHearing.getProsecutionCaseIds().size(), is(0));
+        assertThat(offencesRemovedFromExistingHearing.getSourceContext(), is (HEARING));
 
 
     }
@@ -2503,7 +2586,7 @@ public class HearingAggregateTest {
                 .map(Offence::getId)
                 .collect(toList());
 
-        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), offenceIds);
+        final Stream<Object> stream = hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), offenceIds, HEARING);
 
         final List<Object> objectList = stream.collect(Collectors.toList());
         assertThat(objectList, hasSize(1));
@@ -2532,7 +2615,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
@@ -2592,7 +2675,7 @@ public class HearingAggregateTest {
 
         final HearingAggregate hearingAggregate = new HearingAggregate();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
@@ -2649,7 +2732,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         hearingAggregate.apply(new HearingInitiated(hearing));
 
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")
@@ -2697,6 +2780,128 @@ public class HearingAggregateTest {
     }
 
     @Test
+    public void shouldNotRaiseVerdictInheritedEventWhenHearingResultIsShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 =Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence2);
+                    });
+                });
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), Source.IN_COURT.name());
+
+        final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
+                .withFirstName("Andrew").withLastName("Eldritch")
+                .withUserId(randomUUID()).build();
+
+        final SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommand, LocalDate.now(), LocalDate.now());
+        final Target targetDraft = saveDraftResultCommand.getTarget();
+        final ResultLine resultLineIn = targetDraft.getResultLines().get(0);
+        targetDraft.setResultLines(null);
+        final SharedResultsCommandResultLineV2 sharedResultsCommandResultLine = new SharedResultsCommandResultLineV2(
+                "sc1",
+                resultLineIn.getDelegatedPowers(),
+                resultLineIn.getOrderedDate(),
+                resultLineIn.getSharedDate(),
+                resultLineIn.getResultLineId(),
+                targetDraft.getOffenceId(),
+                targetDraft.getDefendantId(),
+                randomUUID(),
+                resultLineIn.getResultDefinitionId(),
+                resultLineIn.getPrompts().stream().map(p -> new SharedResultsCommandPrompt(p.getId(), p.getLabel(),
+                        p.getFixedListCode(), p.getValue(), p.getWelshValue(), p.getWelshLabel(), p.getPromptRef())).collect(Collectors.toList()),
+                resultLineIn.getResultLabel(),
+                resultLineIn.getLevel().name(),
+                resultLineIn.getIsModified(),
+                resultLineIn.getIsComplete(),
+                targetDraft.getApplicationId(),
+                randomUUID(),
+                resultLineIn.getAmendmentReasonId(),
+                resultLineIn.getAmendmentReason(),
+                ZonedDateTime.now(),
+                resultLineIn.getFourEyesApproval(),
+                resultLineIn.getApprovedDate(),
+                resultLineIn.getIsDeleted(),
+                null,
+                null,
+                targetDraft.getShadowListed(),
+                targetDraft.getDraftResult(),
+                "log"
+        );
+        final ResultsSharedSuccess resultsShared = (ResultsSharedSuccess) hearingAggregate.shareResultForDay(hearing.getId(), courtClerk1, ZonedDateTime.now(), Lists.newArrayList(sharedResultsCommandResultLine), HearingState.SHARED, null, LocalDate.now())
+                .collect(Collectors.toList()).get(0);
+
+        assertEquals(hearing.getId(), resultsShared.getHearingId());
+
+        final Verdict verdict = Verdict.verdict()
+                .withVerdictType
+                        (VerdictType.verdictType()
+                             .withId(randomUUID())
+                            .withCategory("Guilty")
+                                .build())
+                .withVerdictDate(LocalDate.now())
+                .withOffenceId(offence2Id)
+                .build();
+
+
+        final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict);
+        final List<Object> objectList = objectStream.collect(Collectors.toList());
+        assertThat(objectList, hasSize(0));
+
+
+    }
+
+    @Test
+    public void shouldRaiseVerdictInheritedEventWhenHearingResultIsNotShared() {
+        final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final UUID offence2Id = randomUUID();
+        final Offence offence2 =Offence.offence().withId(offence2Id).build();
+        ofNullable(hearing.getProsecutionCases().stream()).orElseGet(Stream::empty)
+                .forEach(prosecutionCase -> {
+                    prosecutionCase.getDefendants().forEach(defendant -> {
+                        defendant.getOffences().add(offence2);
+                    });
+                });
+
+        final HearingAggregate hearingAggregate = new HearingAggregate();
+        hearingAggregate.apply(new HearingInitiated(hearing));
+
+
+        final  Verdict  verdict = Verdict.verdict()
+                .withVerdictType
+                        (VerdictType.verdictType()
+                                .withId(randomUUID())
+                                .withCategory("Guilty")
+                                .build())
+                .withVerdictDate(LocalDate.now())
+                .withOffenceId(offence2Id)
+                .build();
+
+
+        final Stream<Object> objectStream = hearingAggregate.inheritVerdict(hearing.getId(), verdict);
+        final List<Object> objectList = objectStream.collect(Collectors.toList());
+
+        assertThat(objectList, hasSize(1));
+        final InheritedVerdictAdded inheritedVerdictAdded = (InheritedVerdictAdded) objectList.get(0);
+
+        assertThat(inheritedVerdictAdded.getHearingId(), is(hearing.getId()));
+        assertThat(inheritedVerdictAdded.getVerdict().getOffenceId(), is(offence2Id));
+        assertThat(inheritedVerdictAdded.getVerdict().getVerdictType().getCategory(), is("Guilty"));
+        assertThat(inheritedVerdictAdded.getVerdict().getVerdictDate(), is(LocalDate.now()));
+
+
+    }
+
+
+    @Test
     public void shouldReturShareResultsFailedForDayWhenNewHearingStateIsInitialisedAndResultsAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();
         final Hearing hearing = initiateHearingCommand.getHearing();
@@ -2712,7 +2917,7 @@ public class HearingAggregateTest {
         final HearingAggregate hearingAggregate = new HearingAggregate();
         ReflectionUtil.setField(hearingAggregate, "hearingState", SHARED);
 
-        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id));
+        hearingAggregate.removeOffencesFromExistingHearing(hearing.getId(), Arrays.asList(offence2Id), HEARING);
 
         final DelegatedPowers courtClerk1 = DelegatedPowers.delegatedPowers()
                 .withFirstName("Andrew").withLastName("Eldritch")

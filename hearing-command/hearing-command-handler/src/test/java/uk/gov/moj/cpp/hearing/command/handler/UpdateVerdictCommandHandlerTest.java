@@ -1,22 +1,12 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
-import static java.util.Arrays.asList;
-import static java.util.UUID.randomUUID;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
-import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
-import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
-import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
-import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
-import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
-import static uk.gov.moj.cpp.hearing.command.handler.util.PleaTypeUtil.guiltyPleaTypes;
-import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
-import static uk.gov.moj.cpp.hearing.test.TestTemplates.verdictTemplate;
-import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
-
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.Jurors;
 import uk.gov.justice.core.courts.LesserOrAlternativeOffence;
 import uk.gov.justice.core.courts.Verdict;
@@ -45,6 +35,7 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
 import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceVerdictUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
+import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 import uk.gov.moj.cpp.hearing.test.TestTemplates;
 
 import java.util.Arrays;
@@ -53,13 +44,22 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import static java.util.Arrays.asList;
+import static java.util.UUID.randomUUID;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.when;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.test.utils.core.enveloper.EnveloperFactory.createEnveloperWithEvents;
+import static uk.gov.justice.services.test.utils.core.helper.EventStreamMockHelper.verifyAppendAndGetArgumentFrom;
+import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
+import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
+import static uk.gov.moj.cpp.hearing.command.handler.util.PleaTypeUtil.guiltyPleaTypes;
+import static uk.gov.moj.cpp.hearing.test.ObjectConverters.asPojo;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.initiateHearingTemplateForMagistrates;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.InitiateHearingCommandTemplates.standardInitiateHearingTemplate;
+import static uk.gov.moj.cpp.hearing.test.TestTemplates.verdictTemplate;
+import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UpdateVerdictCommandHandlerTest {
@@ -251,13 +251,19 @@ public class UpdateVerdictCommandHandlerTest {
     @Test
     public void updateInheritVerdict() throws EventStreamException {
 
-        final UUID hearingId = randomUUID();
+        CommandHelpers.InitiateHearingCommandHelper hearing = CommandHelpers.h(standardInitiateHearingTemplate());
+        final UUID hearingId = hearing.getHearingId();
 
         final UpdateInheritedVerdictCommand command = new UpdateInheritedVerdictCommand();
         command.setHearingIds(asList(hearingId));
         command.setVerdict(verdictTemplate(randomUUID(), TestTemplates.VerdictCategoryType.GUILTY));
 
-        setupMockedEventStream(hearingId, this.hearingEventStream, new HearingAggregate());
+        final HearingAggregate hearingAggregate = new HearingAggregate() {{
+            apply(new HearingInitiated(hearing.getHearing()));
+        }};
+
+        when(eventSource.getStreamById(hearing.getHearingId())).thenReturn(hearingEventStream);
+        when(aggregateService.get(hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
         final JsonEnvelope envelope = envelopeFrom(metadataWithRandomUUID("hearing.command.enrich-update-verdict-with-associated-hearings"),
                 objectToJsonObjectConverter.convert(command));
@@ -271,6 +277,7 @@ public class UpdateVerdictCommandHandlerTest {
 
     private <T extends Aggregate> void setupMockedEventStream(UUID id, EventStream eventStream, T aggregate) {
         setupMockedEventStream(id, eventStream, aggregate, a -> {
+
         });
     }
 
@@ -281,6 +288,7 @@ public class UpdateVerdictCommandHandlerTest {
         Class<T> clz = (Class<T>) aggregate.getClass();
         when(this.aggregateService.get(eventStream, clz)).thenReturn(aggregate);
     }
+
 
 
 }

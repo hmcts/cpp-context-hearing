@@ -222,6 +222,7 @@ public class UseCases {
                 .executeSuccessfully();
 
         publicEventTopic.waitFor();
+        publicEventTopic.close();
         BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
         final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
         if (prosecutionCases != null && !prosecutionCases.isEmpty()) {

@@ -392,7 +392,7 @@ public class HearingQueryApiTest {
     }
 
     @Test
-    public void shouldProcessGetHearingEventLogForCdesDocument() { 
+    public void shouldProcessGetHearingEventLogForCdesDocument() {
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
         when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
 
@@ -420,7 +420,7 @@ public class HearingQueryApiTest {
     }
 
     @Test
-    public void shouldProcessGetHearingEventLogCount() { 
+    public void shouldProcessGetHearingEventLogCount() {
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
         when(hearingEventQueryView.getHearingEventLogForDocuments(any())).thenReturn(null);
 
@@ -492,7 +492,7 @@ public class HearingQueryApiTest {
     }
 
     @Test
-    public void shouldGetHearingEventLog(){ 
+    public void shouldGetHearingEventLog(){
         when(userGroupQueryService.doesUserBelongsToHmctsOrganisation(any())).thenReturn(true);
         final JsonEnvelope query = EnvelopeFactory.createEnvelope("hearing.get-hearing-event-log", createObjectBuilder()
                 .add("hearingId", UUID.randomUUID().toString())

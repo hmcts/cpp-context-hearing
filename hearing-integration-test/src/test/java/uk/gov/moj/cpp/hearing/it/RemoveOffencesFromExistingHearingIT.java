@@ -25,16 +25,21 @@ import static uk.gov.moj.cpp.hearing.test.matchers.BeanMatcher.isBean;
 import static uk.gov.moj.cpp.hearing.test.matchers.MapStringToTypeMatcher.convertStringTo;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.getPublicTopicInstance;
 import static uk.gov.moj.cpp.hearing.utils.QueueUtil.sendMessage;
+import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.DEFAULT_POLL_TIMEOUT_IN_SEC;
 import static uk.gov.moj.cpp.hearing.utils.RestUtils.poll;
 
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.restassured.path.json.JsonPath;
+import java.io.IOException;
 import javax.json.JsonObject;
 import org.hamcrest.Matchers;
+import org.junit.Before;
+import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
 import uk.gov.justice.services.common.http.HeaderConstants;
 import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
+import uk.gov.moj.cpp.hearing.domain.event.FoundHearingsForNewOffence;
 import uk.gov.moj.cpp.hearing.domain.event.PublicSelectedOffencesRemovedFromExistingHearing;
 import uk.gov.moj.cpp.hearing.domain.event.RemoveOffencesFromExistingHearing;
 
@@ -53,17 +58,32 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
     private static final String GET_HEARING_QUERY_ENDPOINT_NAME = "hearing.get.hearing";
     private static final String GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE = "application/vnd.hearing.get.hearing+json";
     public static final String PUBLIC_PROGRESSION_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING = "public.progression.offences-removed-from-existing-allocated-hearing";
+    public static final String PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING = "public.events.listing.offences-removed-from-existing-allocated-hearing";
+    private final String publicProgressionDefendantOffencesChanged = "public.progression.defendant-offences-changed";
 
+    UUID defendantId1 ;
+    UUID defendantId2 ;
+    UUID offenceId1 ;
+    UUID offenceId2 ;
+    UUID offenceId3 ;
+    UUID prosecutionCaseId;
+
+    @Before
+    public void setUp(){
+        defendantId1 = UUID.randomUUID();
+        defendantId2 = UUID.randomUUID();
+        offenceId1 = UUID.randomUUID();
+        offenceId2 = UUID.randomUUID();
+        offenceId3 = UUID.randomUUID();
+        prosecutionCaseId = UUID.randomUUID();
+
+    }
 
     @Test
     public void shouldRemove1OffenceOutOf2FromDefendant1ForExistingHearing() {
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID offenceId1 = UUID.randomUUID();
-        final UUID offenceId2 = UUID.randomUUID();
-        final UUID offenceId3 = UUID.randomUUID();
 
-        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
+
+        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
 
         try (final Utilities.EventListener publicEventResultedListener = listenFor("public.hearing.selected-offences-removed-from-existing-hearing")
                 .withFilter(convertStringTo(PublicSelectedOffencesRemovedFromExistingHearing.class, isBean(PublicSelectedOffencesRemovedFromExistingHearing.class)
@@ -104,14 +124,10 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
     }
 
     @Test
-    public void shouldRemoveBoth2OffencesFrom1DefendantOutOf2FromExistingHearing() {
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID offenceId1 = UUID.randomUUID();
-        final UUID offenceId2 = UUID.randomUUID();
-        final UUID offenceId3 = UUID.randomUUID();
+    public void shouldRemoveBoth2OffencesFrom1DefendantOutOf2FromExistingHearing() throws IOException {
 
-        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
+
+        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
 
         commandRemoveOffencesFromExistingHearing(hearingId, asList(offenceId1, offenceId2));
 
@@ -126,17 +142,40 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId3.toString())))
                         ));
+
+        // public.progression.defendant-offences-changed
+        final UUID offenceId4 = UUID.randomUUID();
+
+        try (final Utilities.EventListener foundHearingsForNewOffence = listenFor("hearing.events.found-hearings-for-new-offence", "hearing.event")
+                .withFilter(convertStringTo(FoundHearingsForNewOffence.class, isBean(FoundHearingsForNewOffence.class)
+                        .with(FoundHearingsForNewOffence::getDefendantId, Matchers.is(defendantId1))
+                ))) {
+
+
+            final String eventPayloadForDefendantOffencesChanged = getStringFromResource("public.progression.defendant-offences-changed.json")
+                    .replaceAll("CASE_ID", prosecutionCaseId.toString())
+                    .replaceAll("DEFENDANT_ID", defendantId1.toString())
+                    .replaceAll("OFFENCE_ID", offenceId4.toString());
+
+
+            sendMessage(getPublicTopicInstance().createProducer(),
+                    publicProgressionDefendantOffencesChanged,
+                    new StringToJsonObjectConverter().convert(eventPayloadForDefendantOffencesChanged),
+                    metadataOf(randomUUID(), publicProgressionDefendantOffencesChanged)
+                            .withUserId(randomUUID().toString())
+                            .build()
+            );
+
+            foundHearingsForNewOffence.expectNone();
+
+        }
     }
 
     @Test
     public void shouldRemoveBoth2OffencesFrom1DefendantOutOf2FromExistingHearingWhenPublicEventCatch() throws JsonProcessingException {
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID offenceId1 = UUID.randomUUID();
-        final UUID offenceId2 = UUID.randomUUID();
-        final UUID offenceId3 = UUID.randomUUID();
 
-        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
+
+        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
 
         publicEventRemoveOffencesFromExistingHearing(hearingId, asList(offenceId1, offenceId2));
 
@@ -155,13 +194,8 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
 
     @Test
     public void shouldRemove1OffenceForEachDefendantFromExistingHearing() {
-        final UUID defendantId1 = UUID.randomUUID();
-        final UUID defendantId2 = UUID.randomUUID();
-        final UUID offenceId1 = UUID.randomUUID();
-        final UUID offenceId2 = UUID.randomUUID();
-        final UUID offenceId3 = UUID.randomUUID();
 
-        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
+        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
 
         commandRemoveOffencesFromExistingHearing(hearingId, asList(offenceId2, offenceId3));
 
@@ -176,6 +210,48 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
                                                 withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId1.toString()))
                                         )
+                        ));
+    }
+
+    @Test
+    public void shouldNotCallListingContextIfSourceIsListingForRemoveFlow() throws JsonProcessingException {
+
+        final UUID hearingId = initiateHearingAndAssertDefendantAndOffencesInHearing(prosecutionCaseId, defendantId1, defendantId2, offenceId1, offenceId2, offenceId3);
+
+        try (final Utilities.EventListener publicEventResultedListener = listenFor("public.hearing.selected-offences-removed-from-existing-hearing")
+                .withFilter(convertStringTo(PublicSelectedOffencesRemovedFromExistingHearing.class, isBean(PublicSelectedOffencesRemovedFromExistingHearing.class)
+                        .with(PublicSelectedOffencesRemovedFromExistingHearing::getHearingId, Matchers.is(hearingId))))) {
+
+            publicEventRemoveOffencesFromExistingAllocatedHearing(hearingId, singletonList(offenceId1));
+
+            publicEventResultedListener.expectNoneWithin(DEFAULT_NOT_HAPPENED_TIMEOUT_IN_MILLIS);
+
+        }
+
+
+        poll(requestParams(getURL(GET_HEARING_QUERY_ENDPOINT_NAME, hearingId), GET_HEARING_QUERY_ENDPOINT_MEDIA_TYPE)
+                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                .until(status().is(OK),
+                        print(),
+                        payload().isJson(
+                                anyOf(allOf(
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId1.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId2.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId2.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId3.toString()))),
+
+                                        allOf(
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants", hasSize(2)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].id", is(defendantId2.toString())),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences", hasSize(1)),
+                                                withJsonPath("$.hearing.prosecutionCases[0].defendants[0].offences[0].id", is(offenceId3.toString()))),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].id", is(defendantId1.toString())),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences", hasSize(1)),
+                                        withJsonPath("$.hearing.prosecutionCases[0].defendants[1].offences[0].id", is(offenceId1.toString())))
                         ));
     }
 
@@ -201,8 +277,19 @@ public class RemoveOffencesFromExistingHearingIT extends AbstractIT {
         );
     }
 
-    private UUID initiateHearingAndAssertDefendantAndOffencesInHearing(final UUID defendantId1, final UUID defendantId2, final UUID offenceId1, final UUID offenceId2, final UUID offenceId3) {
-        final InitiateHearingCommand initiateHearingCommand = initiateHearingWith2Defendants(defendantId1, offenceId1, offenceId2, defendantId2, offenceId3);
+    private void publicEventRemoveOffencesFromExistingAllocatedHearing(final UUID hearingId, final List<UUID> uuids) throws JsonProcessingException {
+        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(new RemoveOffencesFromExistingHearing(hearingId, uuids));
+        sendMessage(getPublicTopicInstance().createProducer(),
+                PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING,
+                commandJson,
+                metadataOf(randomUUID(), PUBLIC_EVENTS_LISTING_OFFENCES_REMOVED_FROM_EXISTING_ALLOCATED_HEARING)
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+    }
+
+    private UUID initiateHearingAndAssertDefendantAndOffencesInHearing(final UUID prosecutionCaseId, final UUID defendantId1, final UUID defendantId2, final UUID offenceId1, final UUID offenceId2, final UUID offenceId3) {
+        final InitiateHearingCommand initiateHearingCommand = initiateHearingWith2Defendants(prosecutionCaseId, defendantId1, offenceId1, offenceId2, defendantId2, offenceId3);
 
         final UUID hearingId = initiateHearingCommand.getHearing().getId();
 
