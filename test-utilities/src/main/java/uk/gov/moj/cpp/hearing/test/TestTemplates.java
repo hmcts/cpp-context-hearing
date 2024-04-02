@@ -424,6 +424,14 @@ public class TestTemplates {
                             .setJurisdictionType(CROWN)).build());
         }
 
+        public static InitiateHearingCommand standardInitiateHearingTemplateWithOffenceVerdict() {
+            return initiateHearingCommand()
+                    .setHearing(CoreTestTemplates.hearingWithOffenceVerdict(defaultArguments()
+                            .setDefendantType(PERSON)
+                            .setHearingLanguage(ENGLISH)
+                            .setJurisdictionType(CROWN)).build());
+        }
+
         public static InitiateHearingCommand standardInitiateHearingTemplateWithConvictingCourt(final boolean withConvictingCourt) {
             return initiateHearingCommand()
                     .setHearing(CoreTestTemplates.hearing(defaultArguments()

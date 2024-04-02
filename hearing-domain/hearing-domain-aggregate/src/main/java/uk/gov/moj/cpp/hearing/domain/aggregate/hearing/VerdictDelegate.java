@@ -133,8 +133,8 @@ public class VerdictDelegate implements Serializable {
     }
 
     public void handleInheritedVerdict(final InheritedVerdictAdded inheritedVerdict) {
-        this.momento.getVerdicts().computeIfAbsent(inheritedVerdict.getVerdict().getOffenceId(),
-                offenceId -> inheritedVerdict.getVerdict());
+        this.momento.getVerdicts().put(inheritedVerdict.getVerdict().getOffenceId(),
+                 inheritedVerdict.getVerdict());
     }
 
     public Stream<Object> inheritVerdict(UUID hearingId, Verdict verdict) {
