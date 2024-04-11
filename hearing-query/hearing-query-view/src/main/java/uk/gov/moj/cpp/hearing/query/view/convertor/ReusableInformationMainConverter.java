@@ -10,6 +10,7 @@ import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIX
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLM;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLOM;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INT;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INTC;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.NAMEADDRESS;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT;
 import static uk.gov.moj.cpp.hearing.query.view.service.ReusableInfoService.NATIONALITY;
@@ -60,6 +61,9 @@ public class ReusableInformationMainConverter {
 
     @Inject
     private ReusableInformationFixlomConverter reusableInformationFixlomConverter;
+
+    @Inject
+    private ReusableInformationINTCConverter reusableInformationINTCConverter;
 
     @Inject
     private ReusableInformationObjectTypeConverter reusableInformationObjectTypeConverter;
@@ -126,10 +130,10 @@ public class ReusableInformationMainConverter {
             final JsonObject caseJsonObject = objectToJsonObjectConverter.convert(prosecutionCase);
             final String caseJsonObjectString = caseJsonObject.toString();
 
-            addReusableInformationForObjectTypeIfPresent(prompts, CASE,prosecutionCase.getId(), jsonObjects, caseJsonObjectString, ADDRESS);
-            addReusableInformationForObjectTypeIfPresent(prompts, CASE,prosecutionCase.getId(), jsonObjects, caseJsonObjectString, NAMEADDRESS);
+            addReusableInformationForObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseJsonObjectString, ADDRESS);
+            addReusableInformationForObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseJsonObjectString, NAMEADDRESS);
 
-            addReusableInformationForNonObjectTypeIfPresent(prompts, CASE,prosecutionCase.getId(), jsonObjects, caseJsonObjectString);
+            addReusableInformationForNonObjectTypeIfPresent(prompts, CASE, prosecutionCase.getId(), jsonObjects, caseJsonObjectString);
 
             caseListMap.put(prosecutionCase, jsonObjects);
         });
@@ -168,6 +172,9 @@ public class ReusableInformationMainConverter {
         } else if (FIXLOM.name().equals(prompt.getType())) {
 
             addReusableInformationForFixlom(idType, id, jsonObjects, defendantJsonObjectString, prompt);
+        } else if (INTC.name().equals(prompt.getType())) {
+
+            addReusableInformationForINTCIfPresent(idType, id, jsonObjects, defendantJsonObjectString, prompt);
         } else {
             LOGGER.warn("Unsupported Prompt Type: {}", prompt.getType());
         }
@@ -238,8 +245,25 @@ public class ReusableInformationMainConverter {
                 toTxtValue(defendantJsonObjectString, promptPath).ifPresent(promptValueOptional -> promptValue.append(StringUtils.SPACE + promptValueOptional))
         );
 
-        if(promptValue.capacity() > 0) {
+        if (promptValue.capacity() > 0) {
             jsonObjects.add(reusableInformationTxtConverter.toJsonObject(getStringReusableInformation(prompt.getReference(),
+                    idType,
+                    id,
+                    promptValue.toString().trim(),
+                    prompt.getCacheable(),
+                    prompt.getCacheDataPath())));
+        }
+    }
+    private void addReusableInformationForINTCIfPresent(final IdType idType, final UUID id, final List<JsonObject> jsonObjects, final String defendantJsonObjectString, final Prompt prompt) {
+        final StringBuilder promptValue = new StringBuilder(StringUtils.EMPTY);
+
+        final List<String> cacheDataPathList = Arrays.asList(prompt.getCacheDataPath().split(PATH_SPLITTER));
+        cacheDataPathList.forEach(promptPath ->
+                toTxtValue(defendantJsonObjectString, promptPath).ifPresent(promptValueOptional -> promptValue.append(StringUtils.SPACE + promptValueOptional))
+        );
+
+        if (promptValue.capacity() > 0) {
+            jsonObjects.add(reusableInformationINTCConverter.toJsonObject(getStringReusableInformation(prompt.getReference(),
                     idType,
                     id,
                     promptValue.toString().trim(),
