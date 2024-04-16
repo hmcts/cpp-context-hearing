@@ -5,6 +5,7 @@ import uk.gov.justice.core.courts.ResultLine2;
 import uk.gov.moj.cpp.hearing.event.delegates.helper.JudicialResultPromptDurationHelper;
 import uk.gov.moj.cpp.hearing.event.helper.TreeNode;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +22,8 @@ public class DurationElementHelperV3 {
     }
 
     private static void setDurationElement(final TreeNode<ResultLine2> treeNode) {
-        final Optional<JudicialResultPromptDurationElement> resultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(treeNode.getJudicialResult().getJudicialResultPrompts(), treeNode.getResultDefinition().getData());
+        final LocalDate orderedDate = treeNode.getJudicialResult().getOrderedDate();
+        final Optional<JudicialResultPromptDurationElement> resultPromptDurationElement = new JudicialResultPromptDurationHelper().populate(treeNode.getJudicialResult().getJudicialResultPrompts(), treeNode.getResultDefinition().getData(), orderedDate);
         resultPromptDurationElement.ifPresent(judicialResultPromptDurationElement -> treeNode.getJudicialResult().setDurationElement(judicialResultPromptDurationElement));
     }
 }

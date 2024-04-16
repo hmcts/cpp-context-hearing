@@ -2,6 +2,8 @@ package uk.gov.moj.cpp.hearing.event.delegates.helper;
 
 import static java.lang.Integer.parseInt;
 import static java.lang.String.valueOf;
+import static java.time.temporal.ChronoUnit.DAYS;
+import static java.util.Arrays.asList;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static java.util.Optional.empty;
@@ -15,11 +17,14 @@ import uk.gov.justice.core.courts.JudicialResultPrompt;
 import uk.gov.justice.core.courts.JudicialResultPromptDurationElement;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.ResultDefinition;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiFunction;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -32,21 +37,21 @@ public class JudicialResultPromptDurationHelper {
     private static final String DURATION_UNIT = "L";
     private static final Integer DURATION_VALUE = 1;
     private static final Logger LOGGER = LoggerFactory.getLogger(JudicialResultPromptDurationHelper.class);
+    private static final String INTM = "INTM";
 
-    private final BiFunction<List<JudicialResultPrompt>, Integer, Optional<Pair<String, Integer>>> getValue = (judicialResultPrompts, durationType) -> {
+    private Optional<Pair<String, Integer>> getValue(List<JudicialResultPrompt> judicialResultPrompts, Integer durationType, final LocalDate orderedDate) {
         final Optional<JudicialResultPrompt> judicialResultPromptOptional = getJudicialResultPromptDurationElement(judicialResultPrompts, durationType);
         if (judicialResultPromptOptional.isPresent()) {
-            return splitDuration(judicialResultPromptOptional);
+            return splitDuration(judicialResultPromptOptional, orderedDate);
         }
         return empty();
-    };
-
-
-    public Optional<JudicialResultPromptDurationElement> populate(final List<JudicialResultPrompt> judicialResultPrompts, final ResultDefinition resultDefinition) {
-        return populateDurationElement(judicialResultPrompts, resultDefinition);
     }
 
-    private Optional<JudicialResultPromptDurationElement> populateDurationElement(final List<JudicialResultPrompt> judicialResultPrompts, final ResultDefinition resultDefinition) {
+    public Optional<JudicialResultPromptDurationElement> populate(final List<JudicialResultPrompt> judicialResultPrompts, final ResultDefinition resultDefinition, LocalDate orderedDate) {
+        return populateDurationElement(judicialResultPrompts, resultDefinition, orderedDate);
+    }
+
+    private Optional<JudicialResultPromptDurationElement> populateDurationElement(final List<JudicialResultPrompt> judicialResultPrompts, final ResultDefinition resultDefinition, final LocalDate orderedDate) {
 
         final JudicialResultPromptDurationElement.Builder builder = judicialResultPromptDurationElement();
 
@@ -57,8 +62,8 @@ public class JudicialResultPromptDurationHelper {
         }
 
         final AtomicBoolean updated = new AtomicBoolean();
-        final Optional<Pair<String, Integer>> primaryValue = getValue.apply(judicialResultPrompts, PRIMARY_DURATION_TYPE);
-        final Optional<Pair<String, Integer>> secondaryValue = getValue.apply(judicialResultPrompts, SECONDARY_DURATION_TYPE);
+        final Optional<Pair<String, Integer>> primaryValue = getValue(judicialResultPrompts, PRIMARY_DURATION_TYPE, orderedDate);
+        final Optional<Pair<String, Integer>> secondaryValue = getValue(judicialResultPrompts, SECONDARY_DURATION_TYPE, orderedDate);
 
         if (primaryValue.isPresent()) {
             LOGGER.info("Primary duration value present");
@@ -142,13 +147,38 @@ public class JudicialResultPromptDurationHelper {
     }
 
     private Optional<Pair<String, Integer>> splitDuration(
-            final Optional<JudicialResultPrompt> judicialResultPromptOptional) {
+            final Optional<JudicialResultPrompt> judicialResultPromptOptional, final LocalDate orderedDate) {
         final String[] splitDuration = judicialResultPromptOptional.map(JudicialResultPrompt::getValue).map(s -> s.split("\\s+")).orElse(null);
-        if (splitDuration != null && splitDuration.length == 2) {
-            final int value = parseInt(splitDuration[0]);
-            final String unit = upperCase(valueOf(splitDuration[1].charAt(0)));
-            return of(Pair.of(unit, value));
+        if (nonNull(splitDuration)) {
+            if (splitDuration.length < 2) {
+                return empty();
+            }
+            if (splitDuration.length > 2) {
+                final String promptType = judicialResultPromptOptional.map(JudicialResultPrompt::getType).orElse(null);
+                final String totalNumOfDays = getTotalNumOfDays(asList(splitDuration), orderedDate, promptType);
+                return of(Pair.of("D", parseInt(totalNumOfDays)));
+            } else {
+                final int value = parseInt(splitDuration[0]);
+                final String unit = upperCase(valueOf(splitDuration[1].charAt(0)));
+                return of(Pair.of(unit, value));
+            }
         }
         return empty();
+    }
+
+    private String getTotalNumOfDays(List<String> splitDuration, final LocalDate orderedDate, final String promptType) {
+        final Map<String, AtomicInteger> durationMap = new HashMap<>();
+        for (int i = 0; i < splitDuration.size(); i += 2) {
+            final int value = parseInt(splitDuration.get(i));
+            final String unit = upperCase(valueOf(splitDuration.get(i + 1).charAt(0)));
+            durationMap.computeIfAbsent(unit, k -> new AtomicInteger()).set(value);
+        }
+        final LocalDate futureDate = orderedDate
+                .plusYears(durationMap.getOrDefault("Y", new AtomicInteger()).get())
+                .plusMonths(durationMap.getOrDefault("M", new AtomicInteger()).get())
+                .plusWeeks(durationMap.getOrDefault("W", new AtomicInteger()).get())
+                .plusDays(durationMap.getOrDefault("D", new AtomicInteger()).get());
+        final long total = DAYS.between(orderedDate, futureDate);
+        return (nonNull(promptType) && INTM.equalsIgnoreCase(promptType)) ? valueOf(total - 1) : valueOf(total);
     }
 }

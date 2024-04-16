@@ -85,7 +85,17 @@ public class ReusableInfoService {
                 .convertMasterDefendant(masterDefendants.values(), resultPrompts.stream()
                         .filter(prompt -> isNotBlank(prompt.getCacheDataPath())).collect(toList()));
 
-        return reusableInfoMapForDefendant.values().stream().flatMap(List::stream).collect(toList());
+        final Map<CourtApplication, List<JsonObject>> reusableInfoMapForApplication = reusableInformationMainConverter
+                .convertApplication(applications, resultPrompts.stream()
+                         .filter(prompt -> isNotBlank(prompt.getCacheDataPath())).collect(toList()));
+
+        final List<JsonObject> masterDefendantsList = reusableInfoMapForDefendant.values().stream().flatMap(List::stream).collect(toList());
+
+        final List<JsonObject> applicationList = reusableInfoMapForApplication.values().stream().flatMap(List::stream).collect(toList());
+
+        applicationList.addAll(masterDefendantsList);
+
+        return applicationList;
 
     }
 

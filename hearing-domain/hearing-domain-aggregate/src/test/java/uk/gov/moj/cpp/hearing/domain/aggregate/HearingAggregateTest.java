@@ -2901,7 +2901,6 @@ public class HearingAggregateTest {
     }
 
 
-
     @Test
     public void shouldReturShareResultsFailedForDayWhenNewHearingStateIsInitialisedAndResultsAlreadyShared() {
         final InitiateHearingCommand initiateHearingCommand = standardInitiateHearingTemplate();

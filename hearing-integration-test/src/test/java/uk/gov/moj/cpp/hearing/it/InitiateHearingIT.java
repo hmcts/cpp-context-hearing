@@ -1212,6 +1212,41 @@ public class InitiateHearingIT extends AbstractIT {
 
         assertHearingHasBeenRemovedFromViewStore(hearingId);
     }
+    @Test
+    public void shouldRemoveHearingFromViewStoreAndRaisePublicEventWhenMarkedAsDuplicateV2() {
+        stubUsersAndGroupsUserRoles(getLoggedInAdminUser());
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+        final Hearing hearing = hearingOne.getHearing();
+        final UUID hearingId = hearing.getId();
+        final ProsecutionCase prosecutionCase = hearing.getProsecutionCases().get(0);
+        final UUID prosecutionCaseId = prosecutionCase.getId();
+        final Defendant defendant = prosecutionCase.getDefendants().get(0);
+        final UUID defendantId = defendant.getId();
+        final Offence offence = defendant.getOffences().get(0);
+        final UUID offenceId = offence.getId();
+        final UUID courCentreId = hearing.getCourtCentre().getId();
+
+        stubOrganisationalUnit(courCentreId, OUCODE);
+
+        Queries.getHearingPollForMatch(hearingId, DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearingId))
+                )
+        );
+
+        try (final Utilities.EventListener publicEventResulted = listenFor("public.events.hearing.marked-as-duplicate")
+                .withFilter(isJson(withJsonPath("$.hearingId", Is.is(hearingId.toString()))))
+                .withFilter(isJson(withJsonPath("$.prosecutionCaseIds[0]", Is.is(prosecutionCaseId.toString()))))
+                .withFilter(isJson(withJsonPath("$.defendantIds[0]", Is.is(defendantId.toString()))))
+                .withFilter(isJson(withJsonPath("$.offenceIds[0]", Is.is(offenceId.toString()))))
+                .withFilter(isJson(withoutJsonPath("$.courtCentreId")))) {
+            markHearingAsADuplicateV2(hearingId);
+            publicEventResulted.waitFor();
+        }
+
+        assertHearingHasBeenRemovedFromViewStore(hearingId);
+    }
 
     private void markHearingAsADuplicate(final UUID hearingId) {
         final JsonObject payload = createObjectBuilder()
@@ -1221,7 +1256,19 @@ public class InitiateHearingIT extends AbstractIT {
                 .ofType("application/vnd.hearing.duplicate+json")
                 .withArgs(hearingId)
                 .withPayload(payload.toString())
-                .withCppUserId(USER_ID_VALUE_AS_ADMIN)
+                .withCppUserId(getLoggedInAdminUser())
+                .executeSuccessfully();
+    }
+
+    private void markHearingAsADuplicateV2(final UUID hearingId) {
+        final JsonObject payload = createObjectBuilder()
+                .build();
+
+        makeCommand(getRequestSpec(), "hearing.mark-as-duplicate-v2")
+                .ofType("application/vnd.hearing.duplicate.v2+json")
+                .withArgs(hearingId)
+               .withPayload(payload.toString())
+                .withCppUserId(getLoggedInUser())
                 .executeSuccessfully();
     }
 

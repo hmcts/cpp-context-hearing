@@ -2122,7 +2122,7 @@ public class ShareResultsIT extends AbstractIT {
                                         .setDefendantType(PERSON)
                                         .setHearingLanguage(ENGLISH)
                                         .setJurisdictionType(CROWN)
-                        ).build()), true, false, false, true, false));
+                        ).build()), true, false, false, true, false, false));
     }
 
     private InitiateHearingCommandHelper getHearingCommandForApplicationCourtOrder(final HashMap<UUID, Map<UUID, List<UUID>>> caseStructure) {
@@ -2133,7 +2133,7 @@ public class ShareResultsIT extends AbstractIT {
                                         .setDefendantType(PERSON)
                                         .setHearingLanguage(ENGLISH)
                                         .setJurisdictionType(CROWN)
-                        ).build()), false, true, false, true, false));
+                        ).build()), false, true, false, true, false, false));
     }
 
     private HashMap<UUID, Map<UUID, List<UUID>>> getUuidMapForMultipleCaseStructure() {

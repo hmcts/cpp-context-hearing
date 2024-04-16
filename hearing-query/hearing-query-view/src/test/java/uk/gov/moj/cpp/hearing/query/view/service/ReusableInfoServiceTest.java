@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.query.view.service;
 
 import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -11,11 +12,22 @@ import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIX
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.FIXLM;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.INT;
 import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.TXT;
+import static uk.gov.moj.cpp.hearing.common.ReusableInformationConverterType.NAMEADDRESS;
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 
 import uk.gov.justice.core.courts.CourtApplication;
 import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.MasterDefendant;
+import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
+import uk.gov.justice.core.courts.Address;
+import uk.gov.justice.core.courts.ContactNumber;
+import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.moj.cpp.hearing.event.nowsdomain.referencedata.resultdefinition.Prompt;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ReusableInfo;
 import uk.gov.moj.cpp.hearing.query.view.convertor.ReusableInformationMainConverter;
@@ -26,11 +38,16 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.UUID;
+
+import javax.inject.Inject;
 
 import javax.json.Json;
 import javax.json.JsonObject;

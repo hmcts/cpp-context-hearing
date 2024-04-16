@@ -274,6 +274,15 @@ public class HearingCommandApi {
         sendEnvelopeWithName(envelope, "hearing.command.mark-as-duplicate");
     }
 
+    /**
+     * The new method has created for the hearing UI to avoid deleting resulted hearings.
+     * @param envelope - envelope
+     */
+    @Handles("hearing.mark-as-duplicate-v2")
+    public void markAsDuplicateHearingV2(final JsonEnvelope envelope) {
+        sendEnvelopeWithName(envelope, "hearing.command.mark-as-duplicate");
+    }
+
     @Handles("hearing.request-approval")
     public void requestApproval(final JsonEnvelope envelope) {
         sendEnvelopeWithName(envelope, "hearing.command.request-approval");

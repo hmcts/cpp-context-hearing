@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 @SuppressWarnings("squid:S00112")
 public class VerdictDelegate implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     private final HearingAggregateMomento momento;
 
