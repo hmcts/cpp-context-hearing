@@ -199,7 +199,7 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
     @Test
     public void testApplicationDefendantsUpdated() throws IOException {
         stubUsersAndGroupsUserRoles(getLoggedInUser());
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate(), false, true, false, true, false));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate(), false, true, false, true, false, false));
 
         final UUID hearingId = hearingOne.getHearingId();
         final UUID defendantId = hearingOne.getHearing().getCourtApplications().get(0).getApplicant().getMasterDefendant().getMasterDefendantId();
@@ -275,7 +275,7 @@ public class CaseDefendantsUpdatedForHearingIT extends AbstractIT {
     public void shouldUpdateDefendantWhenPromptHasDrivingNumberForApplication() throws IOException {
         final LocalDate hearingDay = LocalDate.now();
         stubUsersAndGroupsUserRoles(getLoggedInUser());
-        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate(), true, false, false, true, false));
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate(), true, false, false, true, false, false));
 
         final UUID hearingId = hearingOne.getHearingId();
         final UUID defendantId = hearingOne.getHearing().getCourtApplications().get(0).getSubject().getMasterDefendant().getMasterDefendantId();

@@ -39,6 +39,7 @@ import java.io.IOException;
 import uk.gov.justice.core.courts.Address;
 import uk.gov.justice.core.courts.ContactNumber;
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.CourtApplicationParty;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.DefendantCase;
 import uk.gov.justice.core.courts.Gender;
@@ -51,6 +52,7 @@ import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Person;
 import uk.gov.justice.core.courts.PersonDefendant;
+import uk.gov.justice.core.courts.ProsecutingAuthority;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.core.courts.ProsecutionCaseIdentifier;
 import uk.gov.justice.core.courts.RespondentCounsel;
@@ -151,24 +153,24 @@ public class UseCases {
 
     public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, true, true, true, false, false);
+        return initiateHearing(requestSpec, initiateHearing, true, true, true, false, false, false);
     }
 
     public static InitiateHearingCommand initiateHearingWithoutBreachApplication(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, false);
+        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, false, false);
     }
 
     public static InitiateHearingCommand initiateHearingWithNsp(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
 
-        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true);
+        return initiateHearing(requestSpec, initiateHearing, false, false, true, false, true, false);
     }
 
     public static InitiateHearingCommand initiateHearingForApplication(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing) {
-        return initiateHearing(requestSpec, initiateHearing, true, true, false, false, false);
+        return initiateHearing(requestSpec, initiateHearing, true, true, false, false, false, false);
     }
 
-    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp) {
+    public static InitiateHearingCommand initiateHearing(final RequestSpecification requestSpec, final InitiateHearingCommand initiateHearing, final boolean includeApplicationCases, final boolean includeApplicationOrder, final boolean includeProsecutionCase, final boolean includeMasterDefandantInSubject, final boolean isNsp, final boolean includeProsecutingAuthority) {
 
         Hearing hearing = initiateHearing.getHearing();
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
@@ -202,6 +204,28 @@ public class UseCases {
         }
         if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
             hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
+
+            if (includeProsecutingAuthority) {
+                Address address = Address.address().withAddress1("address1")
+                        .withAddress2("address2")
+                        .withPostcode("CB3 0GU").build();
+                ContactNumber contact = ContactNumber.contactNumber().withPrimaryEmail("James.Thomas@gmail.com").build();
+                ProsecutingAuthority prosecutingAuthority = ProsecutingAuthority.prosecutingAuthority()
+                        .withProsecutionAuthorityId(randomUUID())
+                        .withProsecutionAuthorityCode("ABC")
+                        .withName("ABC Org")
+                        .withAddress(address)
+                        .withContact(contact)
+                        .build();
+                CourtApplicationParty party = CourtApplicationParty.courtApplicationParty()
+                        .withProsecutingAuthority(prosecutingAuthority)
+                        .withId(randomUUID())
+                        .withSummonsRequired(false)
+                        .withNotificationRequired(false)
+                        .build();
+                hearing.getCourtApplications().get(0).setRespondents(Arrays.asList(party));
+            }
+
         }
         if (!includeProsecutionCase) {
             hearing.setProsecutionCases(null);
