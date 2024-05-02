@@ -27,6 +27,6 @@ public class RuleConstants {
     }
 
     public static String[] getUsersForInitiateHearing() {
-        return new String[]{"Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate"};
+        return new String[]{"Probation Admin", "Listing Officers", "Court Clerks", "Legal Advisers", "Court Administrators", "Crown Court Admin", "System Users","Court Associate", "Magistrates"};
     }
 }
