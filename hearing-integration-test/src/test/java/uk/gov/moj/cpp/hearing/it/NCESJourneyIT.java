@@ -129,7 +129,7 @@ public class NCESJourneyIT extends AbstractIT {
     private InitiateHearingCommandHelper getInitiateHearingCommandHelper() {
         testStartTime = ZonedDateTime.now();
         orderedDate = PAST_LOCAL_DATE.next();
-        InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(), false, false, true, false, false, false));
+        InitiateHearingCommandHelper hearingCommandHelper = h(UseCases.initiateHearing(getRequestSpec(), standardInitiateHearingTemplate(), false, false, true, false, false));
         return hearingCommandHelper;
     }
 

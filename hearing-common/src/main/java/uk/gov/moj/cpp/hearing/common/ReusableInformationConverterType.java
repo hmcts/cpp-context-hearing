@@ -8,8 +8,7 @@ public enum ReusableInformationConverterType {
     INT,
     TXT,
     ADDRESS,
-    NAMEADDRESS,
-    INTC;
+    NAMEADDRESS;
 
     ReusableInformationConverterType() {
     }
