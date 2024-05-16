@@ -84,6 +84,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class InitiateHearingEventListenerTest {
     private static final String GUILTY = "GUILTY";
 
+    private static final String CHANGE_TO_GUILTY_MAGISTRATES_COURT = "CHANGE_TO_GUILTY_MAGISTRATES_COURT";
+
     @Mock
     private HearingRepository hearingRepository;
 
@@ -742,6 +744,68 @@ public class InitiateHearingEventListenerTest {
                 .withOriginatingHearingId(randomUUID())
                 .withPleaDate(PAST_LOCAL_DATE.next())
                 .withPleaValue(GUILTY)
+                .withDelegatedPowers(delegatedPowersPojo)
+                .build();
+
+        final InheritedPlea event = new InheritedPlea()
+                .setHearingId(randomUUID())
+                .setPlea(pleaPojo);
+
+        final HearingSnapshotKey snapshotKey = new HearingSnapshotKey(event.getPlea().getOffenceId(), event.getHearingId());
+
+        final Offence offence = new Offence();
+        offence.setId(snapshotKey);
+        final LocalDate convictionDate = LocalDate.now();
+        offence.setConvictionDate(convictionDate);
+        when(offenceRepository.findBy(snapshotKey)).thenReturn(offence);
+
+        final DelegatedPowers delegatedPowers = new DelegatedPowers();
+        delegatedPowers.setDelegatedPowersUserId(delegatedPowersPojo.getUserId());
+        delegatedPowers.setDelegatedPowersLastName(delegatedPowersPojo.getLastName());
+        delegatedPowers.setDelegatedPowersFirstName(delegatedPowersPojo.getFirstName());
+
+        final Plea plea = new Plea();
+        plea.setPleaValue(pleaPojo.getPleaValue());
+        plea.setPleaDate(pleaPojo.getPleaDate());
+        plea.setOriginatingHearingId(pleaPojo.getOriginatingHearingId());
+        plea.setDelegatedPowers(delegatedPowers);
+
+        when(pleaJPAMapper.toJPA(Mockito.any())).thenReturn(plea);
+
+        initiateHearingEventListener.hearingInitiatedPleaData(envelopeFrom(metadataWithRandomUUID("hearing.initiate-hearing-offence-plead"),
+                objectToJsonObjectConverter.convert(event)));
+
+        verify(this.offenceRepository).save(offence);
+
+        assertThat(offence, isBean(Offence.class)
+                .with(Offence::getId, is(snapshotKey))
+                .with(Offence::getConvictionDate, is(pleaPojo.getPleaDate()))
+                .with(Offence::getPlea, isBean(Plea.class)
+                        .with(Plea::getOriginatingHearingId, is(event.getPlea().getOriginatingHearingId()))
+                        .with(Plea::getPleaDate, is(event.getPlea().getPleaDate()))
+                        .with(Plea::getPleaValue, is(event.getPlea().getPleaValue()))
+                        .with(Plea::getDelegatedPowers, isBean(DelegatedPowers.class)
+                                .with(DelegatedPowers::getDelegatedPowersUserId, is(event.getPlea().getDelegatedPowers().getUserId()))
+                                .with(DelegatedPowers::getDelegatedPowersFirstName, is(event.getPlea().getDelegatedPowers().getFirstName()))
+                                .with(DelegatedPowers::getDelegatedPowersLastName, is(event.getPlea().getDelegatedPowers().getLastName()))
+                        )
+                )
+        );
+    }
+
+    @Test
+    public void convictionDateIsSetForChangeToGuiltyMagistrateCourt() {
+
+        final uk.gov.justice.core.courts.DelegatedPowers delegatedPowersPojo = uk.gov.justice.core.courts.DelegatedPowers.delegatedPowers()
+                .withUserId(randomUUID())
+                .withFirstName(STRING.next())
+                .withLastName(STRING.next())
+                .build();
+        final uk.gov.justice.core.courts.Plea pleaPojo = uk.gov.justice.core.courts.Plea.plea()
+                .withOffenceId(randomUUID())
+                .withOriginatingHearingId(randomUUID())
+                .withPleaDate(PAST_LOCAL_DATE.next())
+                .withPleaValue(CHANGE_TO_GUILTY_MAGISTRATES_COURT)
                 .withDelegatedPowers(delegatedPowersPojo)
                 .build();
 
