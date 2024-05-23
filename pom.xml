@@ -24,7 +24,7 @@
         <datafactory.version>0.8</datafactory.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <authorisation.service.version>0.1.96</authorisation.service.version>
-        <coredomain.version>17.21.11</coredomain.version>
+        <coredomain.version>17.21.12</coredomain.version>
         <referencedata.version>17.0.22</referencedata.version>
         <material.version>17.0.19</material.version>
         <results.version>17.0.1</results.version>

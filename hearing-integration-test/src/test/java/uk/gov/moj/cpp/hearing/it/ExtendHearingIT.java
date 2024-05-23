@@ -36,6 +36,7 @@ public class ExtendHearingIT extends AbstractIT {
 
     final String eventName = "public.progression.events.hearing-extended";
 
+
     @Test
     public void insertCourtApplication() throws Exception {
         extend(true);
@@ -89,6 +90,47 @@ public class ExtendHearingIT extends AbstractIT {
         );
 
     }
+
+    @Test
+    public void insertProsecutionCasesForAdhocHearing() throws Exception {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearingOne = h(UseCases.initiateHearing(getRequestSpec(), minimumInitiateHearingTemplate()));
+
+        final Hearing hearing = hearingOne.getHearing();
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .withValue(h -> h.getProsecutionCases().size(), 1)
+                )
+        );
+
+        ExtendHearingCommand extendHearingCommand = new ExtendHearingCommand();
+        extendHearingCommand.setHearingId(hearing.getId());
+        final UUID caseId = UUID.randomUUID();
+        extendHearingCommand.setProsecutionCases(cloneCase(hearing, caseId));
+
+        JsonObject commandJson = Utilities.JsonUtil.objectToJsonObject(extendHearingCommand);
+
+        sendMessage(getPublicTopicInstance().createProducer(),
+                "public.progression.related-hearing-updated-for-adhoc-hearing",
+                commandJson,
+                metadataOf(randomUUID(), "public.progression.related-hearing-updated-for-adhoc-hearing")
+                        .withUserId(randomUUID().toString())
+                        .build()
+        );
+
+        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getId, is(hearing.getId()))
+                        .withValue(h -> h.getProsecutionCases().size(), 2)
+                        .with(Hearing::getProsecutionCases, hasItem(isBean(ProsecutionCase.class)
+                                .withValue(ProsecutionCase::getId, caseId)
+                        ))
+                )
+        );
+
+    }
+
 
     private List<ProsecutionCase> cloneCase(final Hearing hearing, final UUID caseId){
         final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();

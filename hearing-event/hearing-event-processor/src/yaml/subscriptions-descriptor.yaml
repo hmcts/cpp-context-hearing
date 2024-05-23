@@ -460,4 +460,7 @@ subscriptions_descriptor:
         - name: public.progression.case-removed-from-group-cases
           schema_uri: http://moj.gov.uk/cpp/progression/events/public.progression.case-removed-from-group-cases.json
 
+        - name : public.progression.related-hearing-updated-for-adhoc-hearing
+          schema_uri: http://justice.gov.uk/listing/courts/public.progression.related-hearing-updated-for-adhoc-hearing.json
+
       event_source_name: public.event.source

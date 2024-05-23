@@ -1,6 +1,7 @@
 package uk.gov.moj.cpp.hearing.event;
 
 import static com.jayway.jsonpath.matchers.JsonPathMatchers.withJsonPath;
+import static java.util.UUID.randomUUID;
 import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -14,6 +15,11 @@ import static uk.gov.justice.services.test.utils.core.matchers.JsonEnvelopePaylo
 import static uk.gov.justice.services.test.utils.core.messaging.MetadataBuilderFactory.metadataWithRandomUUID;
 import static uk.gov.justice.services.test.utils.core.reflection.ReflectionUtil.setField;
 
+
+import java.util.ArrayList;
+import java.util.Collections;
+import javax.json.Json;
+import javax.json.JsonObject;
 import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
@@ -40,6 +46,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.justice.services.messaging.spi.DefaultEnvelope;
+import uk.gov.moj.cpp.hearing.domain.event.ExistingHearingUpdated;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -60,6 +68,9 @@ public class CaseDefendantsUpdatedForHearingProcessorTest {
 
     @Captor
     private ArgumentCaptor<JsonEnvelope> envelopeArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<DefaultEnvelope> envelopeArgumentCaptorForCommand;
 
     @InjectMocks
     private CaseDefendantsUpdatedForHearingProcessor caseDefendantsUpdatedForHearingProcessor;
@@ -106,4 +117,20 @@ public class CaseDefendantsUpdatedForHearingProcessorTest {
 
     }
 
+    @Test
+    public void shouldCallCommand(){
+        final String hearingId = randomUUID().toString();
+        JsonObject relatedHearingUpdatedforAdhocHearing = Json.createObjectBuilder()
+                .add("hearingId", hearingId)
+                .build();
+
+        final JsonEnvelope event = envelopeFrom(metadataWithRandomUUID("public.progression.related-hearing-updated-for-adhoc-hearing"), relatedHearingUpdatedforAdhocHearing);
+        caseDefendantsUpdatedForHearingProcessor.handleExistingHearingUpdated(event);
+
+        verify(this.sender, times(1)).send(this.envelopeArgumentCaptorForCommand.capture());
+        final DefaultEnvelope<JsonObject> command = this.envelopeArgumentCaptorForCommand.getValue();
+
+        assertThat(command.metadata().name(), is ("hearing.command.update-related-hearing"));
+        assertThat(command.payload().getString("hearingId"), is(hearingId));
+    }
 }

@@ -57,6 +57,18 @@ public class CaseDefendantsUpdatedForHearingProcessor {
                         .apply(registerHearingPayload(defendant, hearingId))));
     }
 
+    @Handles("public.progression.related-hearing-updated-for-adhoc-hearing")
+    public void handleExistingHearingUpdated(final JsonEnvelope event){
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("public.progression.related-hearing-updated-for-adhoc-hearing event received {}", event.toObfuscatedDebugString());
+        }
+
+        sender.send(Enveloper.envelop(event.payloadAsJsonObject())
+                .withName("hearing.command.update-related-hearing")
+                .withMetadataFrom(event));
+
+    }
+
     private JsonObject registerHearingPayload(final Defendant defendant, final UUID hearingId) {
         return createObjectBuilder()
                 .add("defendantId", defendant.getId().toString())
