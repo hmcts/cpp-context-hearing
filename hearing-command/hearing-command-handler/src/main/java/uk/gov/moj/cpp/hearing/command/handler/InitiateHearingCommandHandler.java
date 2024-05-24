@@ -1,9 +1,11 @@
 package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toList;
 import static uk.gov.justice.services.core.annotation.Component.COMMAND_HANDLER;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Defendant;
 import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
@@ -71,11 +73,20 @@ public class InitiateHearingCommandHandler extends AbstractCommandHandler {
                 command.getHearingDays(), command.getCourtCentre(), command.getJurisdictionType(),
                 command.getCourtApplication(), command.getProsecutionCases(), command.getShadowListedOffences()));
 
-        if(nonNull(command.getCourtApplication())){
+        if (nonNull(command.getCourtApplication())) {
             final UUID applicationId = command.getCourtApplication().getId();
             aggregate(ApplicationAggregate.class, applicationId, envelope, a -> a.registerHearingId(applicationId, hearingId));
         }
 
+        if (nonNull(command.getProsecutionCases())) {
+            final List<Defendant> defendants = command.getProsecutionCases().stream()
+                    .flatMap(pc -> pc.getDefendants().stream())
+                    .collect(toList());
+
+            for (final Defendant defendant : defendants) {
+                aggregate(DefendantAggregate.class, defendant.getId(), envelope, a -> a.registerHearing(defendant.getId(), hearingId));
+            }
+        }
     }
 
     /**
