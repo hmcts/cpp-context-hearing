@@ -18,6 +18,7 @@ import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import uk.gov.justice.core.courts.DelegatedPowers;
 import uk.gov.justice.core.courts.HearingDay;
+import uk.gov.justice.core.courts.JurisdictionType;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.common.converter.StringToJsonObjectConverter;
@@ -1452,7 +1453,7 @@ public class HearingEventListenerTest {
         final UUID courtCentreId = randomUUID();
         final Hearing hearingEntity = new Hearing()
                 .setId(hearingId);
-        final HearingTrialVacated hearingTrialVacated = new HearingTrialVacated(hearingId, vacateTrialTypeId, "A", "Vacated", "full description", courtCentreId);
+        final HearingTrialVacated hearingTrialVacated = new HearingTrialVacated(hearingId, vacateTrialTypeId, "A", "Vacated", "full description", courtCentreId, false, null, new ArrayList<>(), new ArrayList<>(), JurisdictionType.CROWN);
         when(hearingRepository.findBy(hearingId)).thenReturn(hearingEntity);
 
         hearingEventListener.setHearingVacateTrialType(envelopeFrom(metadataWithRandomUUID("hearing.trial-vacated"),

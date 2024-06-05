@@ -17,7 +17,9 @@ import uk.gov.moj.cpp.hearing.command.TrialType;
 import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
+import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,7 +51,7 @@ public class SetTrialTypeCommandHandler extends AbstractCommandHandler {
 
             final JsonObject vacateReason = constructVacateTrial(envelope);
 
-            aggregate(HearingAggregate.class, trialType.getHearingId(), envelope, a -> a.setTrialType(trialType.getHearingId(), getUUID(vacateReason, "id").get(), vacateReason.getString("code"), vacateReason.getString("type"), vacateReason.getString("description")));
+            aggregate(HearingAggregate.class, trialType.getHearingId(), envelope, a -> a.setTrialType(new HearingTrialVacated(trialType.getHearingId(), getUUID(vacateReason, "id").get(), vacateReason.getString("code"), vacateReason.getString("type"), vacateReason.getString("description"), null, false, null, new ArrayList<>(), new ArrayList<>(), null)));
 
         }
 
@@ -73,12 +75,10 @@ public class SetTrialTypeCommandHandler extends AbstractCommandHandler {
     private JsonObject getCrackedIneffectiveTrial(final JsonEnvelope command) {
         final JsonObject payload = command.payloadAsJsonObject();
 
-
-        final JsonEnvelope query = enveloper.withMetadataFrom(command, "hearing.get-cracked-ineffective-reason")
-                .apply(createObjectBuilder()
-                        .add(TRIAL_TYPE_ID, payload.getString(TRIAL_TYPE_ID))
-                        .build()
-                );
+        final MetadataBuilder metadata = metadataFrom(command.metadata()).withName("hearing.get-cracked-ineffective-reason");
+        final JsonEnvelope query = envelopeFrom(metadata, createObjectBuilder()
+                .add(TRIAL_TYPE_ID, payload.getString(TRIAL_TYPE_ID))
+                .build());
 
         return requester.request(query).payloadAsJsonObject();
     }

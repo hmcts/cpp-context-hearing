@@ -8,6 +8,34 @@
     },
     "vacatedTrialReasonId": {
       "$ref": "http://justice.gov.uk/domain/core/common/definitions.json#/definitions/uuid"
+    },
+    "hasInterpreter": {
+      "description": "Optional field, for when trial is vacated. TRUE if one or more interpreters are required for hearing",
+      "type": "boolean"
+    },
+    "hearingDateTime:": {
+      "description": "Optional field, for when trial is vacated. The first sitting day (date/time) of the hearing",
+      "type": "string",
+      "format": "date-time"
+    },
+    "caseDetails": {
+      "description": "Optional field, for when trial is vacated. Core case and defendant information",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/hearing/courts/hearing.case-details.json"
+      }
+    },
+    "applicationDetails": {
+      "description": "Optional field, for when trial is vacated. Core case and defendant information",
+      "type": "array",
+      "minItems": 0,
+      "items": {
+        "$ref": "http://justice.gov.uk/hearing/courts/hearing.application-details.json"
+      }
+    },
+    "jurisdictionType": {
+      "$ref": "http://justice.gov.uk/core/courts/jurisdictionType.json"
     }
   },
   "required": [

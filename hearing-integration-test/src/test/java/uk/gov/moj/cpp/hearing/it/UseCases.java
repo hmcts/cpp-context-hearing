@@ -174,65 +174,66 @@ public class UseCases {
         final Utilities.EventListener publicEventTopic = listenFor("public.hearing.initiated")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))));
 
-        if (!includeApplicationCases && !includeApplicationOrder) {
-            hearing.setCourtApplications(null);
-        } else if (!includeApplicationCases) {
-            hearing.getCourtApplications().forEach(app -> app.setCourtApplicationCases(null));
-        } else if (!includeApplicationOrder) {
-            hearing.getCourtApplications().forEach(app -> app.setCourtOrder(null));
-        }
-        if (includeMasterDefandantInSubject) {
-            final UUID masterDefendantId = randomUUID();
+            if (!includeApplicationCases && !includeApplicationOrder) {
+                hearing.setCourtApplications(null);
+            } else if (!includeApplicationCases) {
+                hearing.getCourtApplications().forEach(app -> app.setCourtApplicationCases(null));
+            } else if (!includeApplicationOrder) {
+                hearing.getCourtApplications().forEach(app -> app.setCourtOrder(null));
+            }
+            if (includeMasterDefandantInSubject) {
+                final UUID masterDefendantId = randomUUID();
 
-            hearing.getCourtApplications().get(0).getSubject().setMasterDefendant(MasterDefendant.masterDefendant()
-                    .withMasterDefendantId(masterDefendantId)
-                    .withDefendantCase(Arrays.asList(DefendantCase.defendantCase()
-                            .withDefendantId(masterDefendantId)
-                            .withCaseId(hearing.getProsecutionCases().get(0).getId())
-                            .withCaseReference(hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
-                            .build()))
-                    .withPersonDefendant(PersonDefendant.personDefendant()
-                            .withPersonDetails(Person.person()
-                                    .withLastName(STRING.next())
-                                    .withGender(Gender.MALE)
-                                    .build())
-                            .withDriverNumber("DVLA12345")
-                            .build())
-                    .build());
-        }
-        if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
-            hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
-        }
-        if (!includeProsecutionCase) {
-            hearing.setProsecutionCases(null);
-        }
+                hearing.getCourtApplications().get(0).getSubject().setMasterDefendant(MasterDefendant.masterDefendant()
+                        .withMasterDefendantId(masterDefendantId)
+                        .withDefendantCase(Arrays.asList(DefendantCase.defendantCase()
+                                .withDefendantId(masterDefendantId)
+                                .withCaseId(hearing.getProsecutionCases().get(0).getId())
+                                .withCaseReference(hearing.getProsecutionCases().get(0).getProsecutionCaseIdentifier().getProsecutionAuthorityReference())
+                                .build()))
+                        .withPersonDefendant(PersonDefendant.personDefendant()
+                                .withPersonDetails(Person.person()
+                                        .withLastName(STRING.next())
+                                        .withGender(Gender.MALE)
+                                        .build())
+                                .withDriverNumber("DVLA12345")
+                                .build())
+                        .build());
+            }
+            if (nonNull(hearing.getCourtApplications()) && nonNull(hearing.getCourtApplications().get(0))) {
+                hearing.getCourtApplications().get(0).setHearingIdToBeVacated(UUID.randomUUID());
+            }
+            if (!includeProsecutionCase) {
+                hearing.setProsecutionCases(null);
+            }
 
-        if (isNsp) {
-            hearing.getProsecutionCases().stream().forEach(prosecutionCase -> prosecutionCase.getProsecutionCaseIdentifier().setAddress(Address.address()
-                            .withPostcode("E14 4EX").withAddress1("line 1").withAddress2("line 2").withAddress3("line 3").withAddress4("line 4").withAddress5("line 5").build())
-                    .setProsecutionAuthorityName("ProsecutionAuthorityName")
-                    .setContact(ContactNumber.contactNumber().withPrimaryEmail("contact@cpp.co.uk").build())
-                    .setProsecutorCategory("Charity")
-                    .setMajorCreditorCode(null));
-        }
+            if (isNsp) {
+                hearing.getProsecutionCases().stream().forEach(prosecutionCase -> prosecutionCase.getProsecutionCaseIdentifier().setAddress(Address.address()
+                                .withPostcode("E14 4EX").withAddress1("line 1").withAddress2("line 2").withAddress3("line 3").withAddress4("line 4").withAddress5("line 5").build())
+                        .setProsecutionAuthorityName("ProsecutionAuthorityName")
+                        .setContact(ContactNumber.contactNumber().withPrimaryEmail("contact@cpp.co.uk").build())
+                        .setProsecutorCategory("Charity")
+                        .setMajorCreditorCode(null));
+            }
 
-        makeCommand(requestSpec, "hearing.initiate")
-                .ofType("application/vnd.hearing.initiate+json")
-                .withPayload(initiateHearing)
-                .executeSuccessfully();
+            makeCommand(requestSpec, "hearing.initiate")
+                    .ofType("application/vnd.hearing.initiate+json")
+                    .withPayload(initiateHearing)
+                    .executeSuccessfully();
 
-        publicEventTopic.waitFor();
-        publicEventTopic.close();
-        BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
-        final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
-        if (prosecutionCases != null && !prosecutionCases.isEmpty()) {
-            resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
-                    .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(prosecutionCases))
-            );
-        }
-        Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
+            publicEventTopic.waitFor();
+            publicEventTopic.close();
+            BeanMatcher<HearingDetailsResponse> resultMatcher = isBean(HearingDetailsResponse.class);
+            final List<ProsecutionCase> prosecutionCases = hearing.getProsecutionCases();
+            if (prosecutionCases != null && !prosecutionCases.isEmpty()) {
+                resultMatcher.with(HearingDetailsResponse::getHearing, isBean(Hearing.class)
+                        .with(Hearing::getProsecutionCases, getProsecutionCasesMatcher(prosecutionCases))
+                );
+            }
+            Queries.getHearingPollForMatch(hearing.getId(), DEFAULT_POLL_TIMEOUT_IN_SEC, 0, resultMatcher);
 
-        return initiateHearing;
+            return initiateHearing;
+
     }
 
     private static Matcher<Iterable<ProsecutionCase>> getProsecutionCasesMatcher(final List<ProsecutionCase> prosecutionCases) {

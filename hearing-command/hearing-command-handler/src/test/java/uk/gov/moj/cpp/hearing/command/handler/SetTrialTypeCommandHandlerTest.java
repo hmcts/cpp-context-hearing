@@ -2,6 +2,7 @@ package uk.gov.moj.cpp.hearing.command.handler;
 
 import static java.util.UUID.randomUUID;
 import static javax.json.Json.createObjectBuilder;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -31,10 +32,12 @@ import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.hamcrest.Matchers;
@@ -99,7 +102,7 @@ public class SetTrialTypeCommandHandlerTest {
         final UUID hearingId = hearingObject.getHearingId();
 
 
-        HearingTrialType trailType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "Some Description");
+        HearingTrialType trialType = new HearingTrialType(hearingId, trialTypeId, "A", "Effective", "Some Description");
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearingObject.getHearing()));
         }};
@@ -107,7 +110,9 @@ public class SetTrialTypeCommandHandlerTest {
         when(this.eventSource.getStreamById(hearingObject.getHearingId())).thenReturn(this.hearingEventStream);
         when(this.aggregateService.get(this.hearingEventStream, HearingAggregate.class)).thenReturn(hearingAggregate);
 
-        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(HEARING_SET_TRIAL_TYPE), objectToJsonObjectConverter.convert(trailType));
+        final JsonObject payload = objectToJsonObjectConverter.convert(trialType);
+
+        final JsonEnvelope jsonEnvelope = envelopeFrom(metadataWithRandomUUID(HEARING_SET_TRIAL_TYPE), payload);
 
         when(requester.request(any(JsonEnvelope.class))).thenReturn(prepareActiveHearingsResponse());
 
@@ -121,14 +126,13 @@ public class SetTrialTypeCommandHandlerTest {
         );
     }
 
-
     @Test
-    public void eventHearingSetVacateTrialTypeShouldBeCreated() throws EventStreamException {
+    public void eventHearingSetVacateTrialTypeShouldBeCreatedWithInterpreter() throws EventStreamException {
         CommandHelpers.InitiateHearingCommandHelper hearingObject = CommandHelpers.h(standardInitiateHearingTemplate());
         final UUID hearingId = hearingObject.getHearingId();
         final UUID courtCentreId = hearingObject.getCourtCentre().getId();
 
-        HearingTrialVacated vacateTrialType = new HearingTrialVacated(hearingId, vacatedTrialReasonId, "A", "Vacated", "Vacated Trial", courtCentreId);
+        HearingTrialVacated vacateTrialType = new HearingTrialVacated(hearingId, vacatedTrialReasonId, "A", "Vacated", "Vacated Trial", courtCentreId, false, null, new ArrayList<>(), new ArrayList<>(), null);
         final HearingAggregate hearingAggregate = new HearingAggregate() {{
             apply(new HearingInitiated(hearingObject.getHearing()));
         }};
@@ -150,8 +154,17 @@ public class SetTrialTypeCommandHandlerTest {
                 .with(HearingTrialVacated::getCourtCentreId, Matchers.is(courtCentreId))
         );
 
+        final JsonObject payloadJson = events.get(0).payloadAsJsonObject();
+        final HearingTrialVacated hearingTrialVacated = jsonObjectToObjectConverter.convert(payloadJson, HearingTrialVacated.class);
+        assertThat(hearingTrialVacated.getHearingDay().toLocalDate(), is(hearingObject.getHearing().getHearingDays().get(0).getSittingDay().toLocalDate()));
+        assertThat(hearingTrialVacated.getCaseDetails().size(), is(hearingObject.getHearing().getProsecutionCases().size()));
+        assertThat(hearingTrialVacated.getCaseDetails().get(0).getCaseId(), is(hearingObject.getHearing().getProsecutionCases().get(0).getId()));
+        assertThat(hearingTrialVacated.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantId(), is(hearingObject.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getId()));
+        assertThat(hearingTrialVacated.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantFirstName(), is(hearingObject.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getFirstName()));
+        assertThat(hearingTrialVacated.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantLastName(), is(hearingObject.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getPersonDetails().getLastName()));
+        assertThat(hearingTrialVacated.getCaseDetails().get(0).getDefendantDetails().get(0).getDefendantRemandStatus(), is(hearingObject.getHearing().getProsecutionCases().get(0).getDefendants().get(0).getPersonDefendant().getBailStatus().getDescription()));
+        assertThat(hearingTrialVacated.getHasInterpreter(), is(true));
     }
-
 
     private JsonEnvelope prepareActiveHearingsResponse() {
         return envelopeFrom(metadataWithRandomUUIDAndName(), mockCrackedIneffectiveReasonPayload());

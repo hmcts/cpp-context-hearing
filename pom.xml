@@ -30,7 +30,7 @@
         <results.version>8.0.0</results.version>
         <notification.notify.version>7.0.13</notification.notify.version>
         <stagingenforcement.version>8.0.2</stagingenforcement.version>
-        <progression.version>8.0.176</progression.version>
+        <progression.version>8.0.185</progression.version>
         <jaxb.version>2.2.11</jaxb.version>
         <org.xmlunit.version>2.6.3</org.xmlunit.version>
         <sardine.version>5.7</sardine.version>
@@ -40,7 +40,7 @@
         <usersgroups.version>8.0.7</usersgroups.version>
         <listing.version>8.0.31</listing.version>
         <lettuce.core.version>5.2.1.RELEASE</lettuce.core.version>
-        <systemdocgenerator.version>8.0.81</systemdocgenerator.version>
+        <systemdocgenerator.version>8.0.85</systemdocgenerator.version>
         <sonar.coverage.exclusions>
             **/uk/gov/moj/cpp/hearing/nows/events/**/*,
             **/uk/gov/moj/cpp/hearing/common/**/*,
@@ -128,6 +128,11 @@
                     <archiveClasses>true</archiveClasses>
                     <attachClasses>true</attachClasses>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.11.0.3922</version>
             </plugin>
         </plugins>
     </build>

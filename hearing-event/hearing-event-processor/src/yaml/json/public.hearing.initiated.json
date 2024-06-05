@@ -1,6 +1,45 @@
 {
-  "hearingId": "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63d",
-  "cases": [
-    "6bb8a527-2a23-4d7d-b6e2-dd94d2a7d63e"
+  "hearingId": "f16f6539-2a7c-4bc8-bca3-f1b17ebcfa46",
+  "cases": ["22ff0722-c287-11e9-9cb5-2a2ae2dbcce4"],
+  "hearingDateTime": "2022-08-24T01:46:36.068Z",
+  "caseDetails": [
+    {
+      "caseId": "22ff0722-c287-11e9-9cb5-2a2ae2dbcce4",
+      "caseURN": "TFL34652354",
+      "defendantDetails": [
+        {
+          "defendantId":"32ff0722-c287-11e9-9cb5-2a2ae2dbcce4",
+          "defendantFirstName": "Abbie",
+          "defendantLastName": "ARMSTRONG",
+          "defendantRemandStatus": "status",
+          "interpreterLanguageNeeds": "Welsh"
+        }
+      ]
+    }
+  ],
+  "applicationDetails": [
+    {
+      "applicationId": "11ff0722-q487-66e9-8bb5-3b1ae2dbcce4",
+      "applicationReference": "TFL34652354",
+      "subject": {
+        "defendantId": "32ff0722-c287-11e9-9cb5-2a2ae2dbcce4",
+        "defendantFirstName": "Abbie",
+        "defendantLastName": "ARMSTRONG",
+        "defendantRemandStatus": "status",
+        "interpreterLanguageNeeds": "Welsh"
+      }
+    },
+    {
+      "applicationId": "11ff0744-c347-66e9-8bb5-3b1ae2dbcce4",
+      "applicationReference": "TFL12352354",
+      "subject": {
+        "defendantId": "42ee0722-d286-22e9-8cb5-2a2ae3dbcce9",
+        "defendantFirstName": "John",
+        "defendantLastName": "Doe",
+        "defendantRemandStatus": "status",
+        "interpreterLanguageNeeds": "French"
+      }
+    }
   ]
 }
+

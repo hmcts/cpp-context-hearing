@@ -863,8 +863,8 @@ public class HearingAggregate implements Aggregate {
         return apply(this.hearingTrialTypeDelegate.setTrialType(hearingEffectiveTrial));
     }
 
-    public Stream<Object> setTrialType(final UUID hearingId, final UUID vacatedTrialReasonId, final String code, final String description, final String type) {
-        return apply(this.hearingTrialTypeDelegate.setTrialType(hearingId, vacatedTrialReasonId, code, description, type));
+    public Stream<Object> setTrialType(final HearingTrialVacated trialType) {
+        return apply(this.hearingTrialTypeDelegate.setTrialType(trialType));
     }
 
     public Stream<Object> addCompanyRepresentative(final CompanyRepresentative companyRepresentative, final UUID hearingId) {

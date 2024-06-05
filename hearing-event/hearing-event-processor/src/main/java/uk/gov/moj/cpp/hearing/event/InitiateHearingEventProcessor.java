@@ -4,10 +4,14 @@ import static java.util.Optional.ofNullable;
 import static javax.json.Json.createArrayBuilder;
 import static javax.json.Json.createObjectBuilder;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_PROCESSOR;
+import static uk.gov.justice.services.messaging.JsonEnvelope.envelopeFrom;
+import static uk.gov.justice.services.messaging.JsonEnvelope.metadataFrom;
 
 import uk.gov.justice.core.courts.CourtApplication;
+import uk.gov.justice.core.courts.Hearing;
 import uk.gov.justice.core.courts.ProsecutionCase;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
+import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
 import uk.gov.justice.services.core.annotation.ServiceComponent;
 import uk.gov.justice.services.core.enveloper.Enveloper;
@@ -17,15 +21,20 @@ import uk.gov.moj.cpp.hearing.command.initiate.InitiateHearingCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstCaseCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstDefendantCommand;
 import uk.gov.moj.cpp.hearing.command.initiate.RegisterHearingAgainstOffenceCommand;
+import uk.gov.moj.cpp.hearing.eventlog.PublicHearingInitiated;
+import uk.gov.moj.cpp.util.HearingDetailUtil;
 
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.json.JsonArrayBuilder;
+import javax.json.JsonObject;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
@@ -47,7 +56,6 @@ public class InitiateHearingEventProcessor {
             .build();
 
     private static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-    private static final String HEARING_ID = "hearingId";
     private static final Logger LOGGER = LoggerFactory.getLogger(InitiateHearingEventProcessor.class);
     @Inject
     private Enveloper enveloper;
@@ -55,6 +63,9 @@ public class InitiateHearingEventProcessor {
     private Sender sender;
     @Inject
     private JsonObjectToObjectConverter jsonObjectToObjectConverter;
+    @Inject
+    private ObjectToJsonObjectConverter objectToJsonObjectConverter;
+
 
     @Handles("hearing.events.initiated")
     public void hearingInitiated(final JsonEnvelope event) {
@@ -64,7 +75,7 @@ public class InitiateHearingEventProcessor {
 
         final InitiateHearingCommand initiateHearingCommand = this.jsonObjectToObjectConverter.convert(event.payloadAsJsonObject(), InitiateHearingCommand.class);
 
-        final JsonArrayBuilder cases = createArrayBuilder();
+        final List<UUID> cases = new ArrayList<>();
 
         final List<ProsecutionCase> prosecutionCases = initiateHearingCommand.getHearing().getProsecutionCases();
 
@@ -80,7 +91,7 @@ public class InitiateHearingEventProcessor {
 
                     for (final uk.gov.justice.core.courts.Offence offence : defendant.getOffences()) {
 
-                        cases.add(prosecutionCase.getId().toString());
+                        cases.add(prosecutionCase.getId());
 
                         this.sender.send(Enveloper.envelop(RegisterHearingAgainstOffenceCommand.registerHearingAgainstOffenceDefendantCommand()
                                 .setHearingId(initiateHearingCommand.getHearing().getId())
@@ -99,10 +110,19 @@ public class InitiateHearingEventProcessor {
             });
         }
 
-        this.sender.send(Enveloper.envelop(createObjectBuilder()
-                .add(HEARING_ID, initiateHearingCommand.getHearing().getId().toString())
-                .add("cases", cases.build())
-                .build()).withName("public.hearing.initiated").withMetadataFrom(event));
+        final Hearing hearing = initiateHearingCommand.getHearing();
+        final PublicHearingInitiated publicHearingInitiated = PublicHearingInitiated.publicHearingInitiated()
+                .setHearingId(hearing.getId())
+                .setCases(cases)
+                .setApplicationDetails(HearingDetailUtil.getApplicationDetails(hearing))
+                .setCaseDetails(HearingDetailUtil.getCaseDetails(hearing))
+                .setHearingDateTime(hearing.getHearingDays().get(0).getSittingDay())
+                .setJurisdictionType(hearing.getJurisdictionType());
+
+
+        final JsonObject eventPayload = this.objectToJsonObjectConverter.convert(publicHearingInitiated);
+        this.sender.send(envelopeFrom(metadataFrom(event.metadata()).withName("public.hearing.initiated"), eventPayload));
+
 
         final List<CourtApplication> courtApplications = initiateHearingCommand.getHearing().getCourtApplications();
         ofNullable(courtApplications).map(Collection::stream).orElseGet(Stream::empty)

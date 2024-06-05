@@ -1,16 +1,25 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 
 import uk.gov.justice.core.courts.CrackedIneffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingEffectiveTrial;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialType;
 import uk.gov.moj.cpp.hearing.domain.event.HearingTrialVacated;
+import uk.gov.moj.cpp.hearing.eventlog.HearingApplicationDetail;
+import uk.gov.moj.cpp.hearing.eventlog.HearingCaseDetail;
+import uk.gov.moj.cpp.hearing.eventlog.HearingDefendantDetail;
+import uk.gov.moj.cpp.util.HearingDetailUtil;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+@SuppressWarnings({"pmd:BeanMembersShouldSerialize", "PMD:BeanMembersShouldSerialize"})
 public class HearingTrialTypeDelegate implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -63,8 +72,37 @@ public class HearingTrialTypeDelegate implements Serializable {
         return Stream.of(hearingEffectiveTrial);
     }
 
-    public Stream<Object> setTrialType(final UUID hearingId, final UUID vacatedTrialReasonId, final String code, final String description, final String type) {
+    public Stream<Object> setTrialType(final HearingTrialVacated hearingTrialVacated) {
+
+        final List<HearingCaseDetail> caseDetails = HearingDetailUtil.getCaseDetails(this.momento.getHearing());
+        final List<HearingApplicationDetail> applicationDetails = HearingDetailUtil.getApplicationDetails(this.momento.getHearing());
+        final ZonedDateTime hearingDate = this.momento.getHearing().getHearingDays().get(0).getSittingDay();
         final UUID courtCentreId = momento.getHearing().getCourtCentre().getId();
-        return Stream.of(new HearingTrialVacated(hearingId, vacatedTrialReasonId, code, description, type, courtCentreId));
+
+        hearingTrialVacated.setHearingDay(hearingDate);
+        hearingTrialVacated.setCaseDetails(caseDetails);
+        hearingTrialVacated.setApplicationDetails(applicationDetails);
+        hearingTrialVacated.setHasInterpreter(hasInterpreterNeeded(caseDetails, applicationDetails));
+        hearingTrialVacated.setJurisdictionType(this.momento.getHearing().getJurisdictionType());
+        hearingTrialVacated.setCourtCentreId(courtCentreId);
+        return Stream.of(hearingTrialVacated);
+    }
+
+    private boolean hasInterpreterNeeded(final List<HearingCaseDetail> caseDetails, final List<HearingApplicationDetail> applicationDetails) {
+        boolean hasInterpreter = false;
+        if (!caseDetails.isEmpty()) {
+            hasInterpreter = caseDetails.stream().filter(Objects::nonNull)
+                    .flatMap(hearingCaseDetail -> hearingCaseDetail.getDefendantDetails() == null ? null : hearingCaseDetail.getDefendantDetails().stream())
+                    .filter(Objects::nonNull)
+                    .map(HearingDefendantDetail::getInterpreterLanguageNeeds)
+                    .anyMatch(interpreterLanguage -> interpreterLanguage != null && !EMPTY.equals(interpreterLanguage.trim()));
+        }
+
+        if (!hasInterpreter && !applicationDetails.isEmpty()) {
+            hasInterpreter = applicationDetails.stream().filter(Objects::nonNull)
+                    .map(hearingApplicationDetail -> hearingApplicationDetail.getSubject() == null ? EMPTY : hearingApplicationDetail.getSubject().getInterpreterLanguageNeeds())
+                    .anyMatch(interpreterLanguage -> interpreterLanguage != null && !EMPTY.equals(interpreterLanguage.trim()));
+        }
+        return hasInterpreter;
     }
 }

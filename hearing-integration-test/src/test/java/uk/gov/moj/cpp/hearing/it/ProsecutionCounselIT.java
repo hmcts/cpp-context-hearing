@@ -57,31 +57,32 @@ public class ProsecutionCounselIT extends AbstractIT {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProsecutionCounselIT.class);
 
     public static ProsecutionCounsel createFirstProsecutionCounsel(final InitiateHearingCommandHelper hearingOne) {
-        final Utilities.EventListener publicProsecutionCounselAdded = listenFor("public.hearing.prosecution-counsel-added")
-                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))));
+        try (final Utilities.EventListener publicProsecutionCounselAdded = listenFor("public.hearing.prosecution-counsel-added")
+                .withFilter(isJson(withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))))) {
 
-        final AddProsecutionCounsel firstProsecutionCounselCommand = UseCases.addProsecutionCounsel(getRequestSpec(), hearingOne.getHearingId(),
-                addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
-        );
+            final AddProsecutionCounsel firstProsecutionCounselCommand = UseCases.addProsecutionCounsel(getRequestSpec(), hearingOne.getHearingId(),
+                    addProsecutionCounselCommandTemplate(hearingOne.getHearingId())
+            );
 
-        publicProsecutionCounselAdded.waitFor();
+            publicProsecutionCounselAdded.waitFor();
 
-        ProsecutionCounsel firstProsecutionCounsel = firstProsecutionCounselCommand.getProsecutionCounsel();
-        poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
-                .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
-                .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
-                .until(status().is(OK),
-                        print(),
-                        payload().isJson(allOf(
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].status", is(firstProsecutionCounsel.getStatus())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].firstName", is(firstProsecutionCounsel.getFirstName())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].lastName", is(firstProsecutionCounsel.getLastName())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].title", is(firstProsecutionCounsel.getTitle())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].middleName", is(firstProsecutionCounsel.getMiddleName())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].attendanceDays.[0]", is(firstProsecutionCounsel.getAttendanceDays().get(0).toString())),
-                                withJsonPath("$.hearing.prosecutionCounsels.[0].prosecutionCases.[0]", is(firstProsecutionCounsel.getProsecutionCases().get(0).toString()))
-                        )));
-        return firstProsecutionCounsel;
+            ProsecutionCounsel firstProsecutionCounsel = firstProsecutionCounselCommand.getProsecutionCounsel();
+            poll(requestParams(getURL("hearing.get.hearing", hearingOne.getHearingId()), "application/vnd.hearing.get.hearing+json")
+                    .withHeader(HeaderConstants.USER_ID, AbstractIT.getLoggedInUser()).build())
+                    .timeout(DEFAULT_POLL_TIMEOUT_IN_SEC, TimeUnit.SECONDS)
+                    .until(status().is(OK),
+                            print(),
+                            payload().isJson(allOf(
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].status", is(firstProsecutionCounsel.getStatus())),
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].firstName", is(firstProsecutionCounsel.getFirstName())),
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].lastName", is(firstProsecutionCounsel.getLastName())),
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].title", is(firstProsecutionCounsel.getTitle())),
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].middleName", is(firstProsecutionCounsel.getMiddleName())),
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].attendanceDays.[0]", is(firstProsecutionCounsel.getAttendanceDays().get(0).toString())),
+                                    withJsonPath("$.hearing.prosecutionCounsels.[0].prosecutionCases.[0]", is(firstProsecutionCounsel.getProsecutionCases().get(0).toString()))
+                            )));
+            return firstProsecutionCounsel;
+        }
     }
 
     @Test

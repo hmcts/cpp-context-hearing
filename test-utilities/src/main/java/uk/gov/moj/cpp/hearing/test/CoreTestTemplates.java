@@ -99,7 +99,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@SuppressWarnings({"WeakerAccess", "squid:S1067","pmd:NullAssignment"})
+@SuppressWarnings({"WeakerAccess", "squid:S1067", "pmd:NullAssignment"})
 public class CoreTestTemplates {
 
     private static final UUID BAIL_STATUS_ID = randomUUID();
@@ -1115,6 +1115,7 @@ public class CoreTestTemplates {
                 .withAllocationDecisionDate(now())
                 .withCourtIndicatedSentence(courtIndicatedSentence().build());
     }
+
     @SuppressWarnings("squid:S107")
     public static Hearing.Builder hearingWithParam(final CoreTemplateArguments args,
                                                    final UUID courtId,
@@ -1286,6 +1287,7 @@ public class CoreTestTemplates {
                 .withHearingIdToBeVacated(hearingIdToBeVacated)
                 .withVacatedTrialReasonShortDesc(vacatedTrialReasonShortDesc);
     }
+
     public static Target2.Builder target2(final UUID hearingId, final UUID defendantId, final UUID offenceId, final UUID resultLineId) {
         return Target2.target2()
                 .withTargetId(randomUUID())
@@ -1612,9 +1614,11 @@ public class CoreTestTemplates {
             return this;
         }
 
-        public Boolean getIsBoxHearing() { return isBoxHearing;}
+        public Boolean getIsBoxHearing() {
+            return isBoxHearing;
+        }
 
-        public CoreTemplateArguments setIsBoxHearing(final boolean isBoxHearing){
+        public CoreTemplateArguments setIsBoxHearing(final boolean isBoxHearing) {
             this.isBoxHearing = isBoxHearing;
             return this;
         }

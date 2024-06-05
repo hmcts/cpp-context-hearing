@@ -129,17 +129,18 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
 
-        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
                                 .with(Hearing::getHearingDays, first(hasProperty("isCancelled", is(expectedFirstHearingDay))))
                                 .with(Hearing::getHearingDays, second(hasProperty("isCancelled", is(expectedSecondHearingDay))))
                                 .with(Hearing::getHasSharedResults, is(true)
-                                ))));
+                                ))))) {
 
-        shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
-        publicEventResulted.waitFor();
+            shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
+            publicEventResulted.waitFor();
+        }
 
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), crackedHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
@@ -179,13 +180,14 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
         shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
 
-        final EventListener publicDaysCancelled = listenFor("public.hearing.hearing-days-cancelled")
+        try (final EventListener publicDaysCancelled = listenFor("public.hearing.hearing-days-cancelled")
                 .withFilter(isJson(withJsonPath("$.hearingId", is(hearing.getId().toString()))))
                 .withFilter(isJson(withJsonPath("$.hearingDays", hasSize(2))))
                 .withFilter(isJson(withoutJsonPath("$.hearingDays.[0].isCancelled")))
-                .withFilter(isJson(withJsonPath("$.hearingDays.[1].isCancelled", is(Boolean.TRUE))));
+                .withFilter(isJson(withJsonPath("$.hearingDays.[1].isCancelled", is(Boolean.TRUE))))) {
 
-        publicDaysCancelled.waitFor();
+            publicDaysCancelled.waitFor();
+        }
     }
 
     private void shouldNotCancelAfterResultSharedDaysWhenMultidayHearing(final UUID trialTypeId,
@@ -204,17 +206,18 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
 
-        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
                                 .with(Hearing::getHearingDays, first(hasProperty("isCancelled", is(expectedFirstHearingDay))))
                                 .with(Hearing::getHearingDays, second(hasProperty("isCancelled", is(expectedSecondHearingDay))))
                                 .with(Hearing::getHasSharedResults, is(true)
-                                ))));
+                                ))))) {
 
-        shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
-        publicEventResulted.waitFor();
+            shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
+            publicEventResulted.waitFor();
+        }
 
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), firstHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
@@ -248,17 +251,18 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
         SaveDraftResultCommand saveDraftResultCommand = saveDraftResultCommandTemplate(initiateHearingCommandHelper.it(), orderDate, LocalDate.now());
         setTrialType(getRequestSpec(), hearing.getId(), trialType, false);
 
-        final EventListener publicEventResulted = listenFor("public.hearing.resulted")
+        try (final EventListener publicEventResulted = listenFor("public.hearing.resulted")
                 .withFilter(convertStringTo(PublicHearingResulted.class, isBean(PublicHearingResulted.class)
                         .with(PublicHearingResulted::getHearing, isBean(Hearing.class)
                                 .with(Hearing::getId, is(initiateHearingCommandHelper.getHearingId()))
                                 .with(Hearing::getHearingDays, hasSize(1))
                                 .with(Hearing::getHearingDays, first(hasProperty("isCancelled", is(expectedHearingDay))))
                                 .with(Hearing::getHasSharedResults, is(true)
-                                ))));
+                                ))))) {
 
-        shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
-        publicEventResulted.waitFor();
+            shareResults(allNowsReferenceDataHelper, initiateHearingCommandHelper, saveDraftResultCommand, orderDate);
+            publicEventResulted.waitFor();
+        }
 
         Queries.getHearingsByDatePollForMatch(hearing.getCourtCentre().getId(), hearing.getCourtCentre().getRoomId(), crackedHearingDay.getSittingDay().withZoneSameInstant(ZoneId.of("UTC")).toLocalDate().toString(), "00:00", "23:59", DEFAULT_POLL_TIMEOUT_IN_SEC,
                 isBean(GetHearings.class)
@@ -272,8 +276,8 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
     private List<CrackedIneffectiveVacatedTrialType> buildTrialTypes(final UUID reasonId, final String reasonCode, final String trialType) {
         List<CrackedIneffectiveVacatedTrialType> trialList = new ArrayList<>();
-        trialList.add(new CrackedIneffectiveVacatedTrialType(reasonId, reasonCode, trialType,"On the date of trial the prosecution "
-                ,"On the date of trial the prosecution agrees to the defendant being bound-over having previously rejected the offer.", null));
+        trialList.add(new CrackedIneffectiveVacatedTrialType(reasonId, reasonCode, trialType, "On the date of trial the prosecution "
+                , "On the date of trial the prosecution agrees to the defendant being bound-over having previously rejected the offer.", null));
         return trialList;
     }
 
@@ -317,23 +321,24 @@ public class CrackedAndIneffectiveHearingIT extends AbstractIT {
 
     private CommandHelpers.UpdateVerdictCommandHelper changeVerdict(final CommandHelpers.InitiateHearingCommandHelper hearingOne, final UUID verdictTypeId, final String verdictCode) {
 
-        final EventListener verdictUpdatedPublicEventListener = listenFor("public.hearing.verdict-updated")
+        try (final EventListener verdictUpdatedPublicEventListener = listenFor("public.hearing.verdict-updated")
                 .withFilter(isJson(allOf(
                         withJsonPath("$.hearingId", is(hearingOne.getHearingId().toString()))
                         ))
-                );
+                )) {
 
-        final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
-                TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate(
-                        hearingOne.getHearingId(),
-                        hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
-                        TestTemplates.VerdictCategoryType.GUILTY,
-                        verdictTypeId,
-                        verdictCode)
-        ));
+            final CommandHelpers.UpdateVerdictCommandHelper updateVerdict = h(UseCases.updateVerdict(getRequestSpec(), hearingOne.getHearingId(),
+                    TestTemplates.UpdateVerdictCommandTemplates.updateVerdictTemplate(
+                            hearingOne.getHearingId(),
+                            hearingOne.getFirstOffenceForFirstDefendantForFirstCase().getId(),
+                            TestTemplates.VerdictCategoryType.GUILTY,
+                            verdictTypeId,
+                            verdictCode)
+            ));
 
-        verdictUpdatedPublicEventListener.waitFor();
-        return updateVerdict;
+            verdictUpdatedPublicEventListener.waitFor();
+            return updateVerdict;
+        }
     }
 
     private void shareResults(AllNowsReferenceDataHelper allNows, CommandHelpers.InitiateHearingCommandHelper initiateHearingCommandHelper, SaveDraftResultCommand saveDraftResultCommand, LocalDate orderDate) {

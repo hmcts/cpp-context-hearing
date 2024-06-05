@@ -1,16 +1,12 @@
 package uk.gov.moj.cpp.hearing.domain.aggregate.hearing;
 
 
-import org.junit.Assert;
-import org.junit.Assume;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import static java.util.Arrays.asList;
+import static java.util.Optional.empty;
+import static java.util.UUID.fromString;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+
 import uk.gov.moj.cpp.hearing.nces.ApplicationDetailsForDefendant;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithApplicationDetails;
 import uk.gov.moj.cpp.hearing.nces.DefendantUpdateWithFinancialOrderDetails;
@@ -28,11 +24,16 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static java.util.Optional.empty;
-import static java.util.UUID.fromString;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 @RunWith(Parameterized.class)
 public class NCESNotificationDecisionDelegateTest {
