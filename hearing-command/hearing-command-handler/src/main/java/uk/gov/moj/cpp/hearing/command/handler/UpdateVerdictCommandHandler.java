@@ -66,11 +66,13 @@ public class UpdateVerdictCommandHandler extends AbstractCommandHandler {
             LOGGER.debug("hearing.command.enrich-update-verdict-with-associated-hearings event received {}", envelope.toObfuscatedDebugString());
         }
 
+        final Set<String> guiltyPleaTypes = referenceDataService.retrieveGuiltyPleaTypes();
+
         final UpdateInheritedVerdictCommand command = convertToObject(envelope, UpdateInheritedVerdictCommand.class);
 
         for (final UUID hearingId : command.getHearingIds()) {
             aggregate(HearingAggregate.class, hearingId, envelope,
-                    hearingAggregate -> hearingAggregate.inheritVerdict(hearingId, command.getVerdict()));
+                    hearingAggregate -> hearingAggregate.inheritVerdict(hearingId, command.getVerdict(), guiltyPleaTypes));
         }
     }
 }

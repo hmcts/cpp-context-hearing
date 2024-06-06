@@ -9,6 +9,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.when;
 import static uk.gov.justice.services.test.utils.core.random.RandomGenerator.PAST_LOCAL_DATE;
 import static uk.gov.moj.cpp.hearing.domain.aggregate.util.PleaTypeUtil.guiltyPleaTypes;
 import static uk.gov.moj.cpp.hearing.test.CommandHelpers.h;
@@ -34,7 +35,6 @@ import uk.gov.justice.core.courts.MasterDefendant;
 import uk.gov.justice.core.courts.Offence;
 import uk.gov.justice.core.courts.Plea;
 import uk.gov.justice.core.courts.PleaModel;
-import uk.gov.justice.core.courts.Prompt;
 import uk.gov.justice.core.courts.ResultLine;
 import uk.gov.justice.core.courts.Target;
 import uk.gov.justice.core.courts.Verdict;
@@ -47,29 +47,46 @@ import uk.gov.moj.cpp.hearing.domain.aggregate.HearingAggregate;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateAdded;
 import uk.gov.moj.cpp.hearing.domain.event.ConvictionDateRemoved;
 import uk.gov.moj.cpp.hearing.domain.event.HearingInitiated;
-import uk.gov.moj.cpp.hearing.domain.event.PleaUpsert;
+import uk.gov.moj.cpp.hearing.domain.event.InheritedVerdictAdded;
 import uk.gov.moj.cpp.hearing.domain.event.VerdictUpsert;
 import uk.gov.moj.cpp.hearing.domain.event.result.ResultsShared;
 import uk.gov.moj.cpp.hearing.test.CommandHelpers;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.MatcherAssert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class VerdictDelegateTest {
     private static final String PLEA_GUILTY = "GUILTY";
     private static final String PLEA_NOT_GUILTY = "NOT_GUILTY";
 
+    private VerdictDelegate delegate;
+
+    @Mock
+    private HearingAggregateMomento momento;
+
     @Rule
     public final ExpectedException exception = ExpectedException.none();
+
+    private final Set<String> GUILTY_TYPES = new HashSet<>(Arrays.asList("GUILTY", "NOT_GUILTY", "NO_VERDICT"));
 
     @Test
     public void updateVerdict_shouldUpdateVerdict() {
@@ -565,6 +582,94 @@ public class VerdictDelegateTest {
 
         assertEquals("GUILTY", resultsShared.getHearing().getCourtApplications().get(0).getVerdict().getVerdictType().getCategoryType());
         assertEquals(null, resultsShared.getHearing().getCourtApplications().get(0).getCourtApplicationCases().get(0).getOffences().get(0).getVerdict());
+    }
+
+    @Test
+    public void inheritVerdict() {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+
+        when(momento.getHearing()).thenReturn(hearing.getHearing());
+
+        delegate = new VerdictDelegate(momento);
+
+        final Verdict verdict = Verdict.verdict()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withVerdictType(VerdictType.verdictType().withCategoryType("NO_VERDICT").build())
+                .withVerdictDate(LocalDate.now())
+                .build();
+
+        Stream<Object> events = delegate.inheritVerdict(hearing.getHearingId(), verdict, GUILTY_TYPES);
+
+        assertEquals(1l, events.count());
+    }
+
+    @Test
+    public void inheritVerdictAndAddConvictionDateIfPleaIsNotGuiltyAndVerdictIsGuilty() {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withPleaValue("NOT_GUILTY")
+                .build();
+
+        hearing.getFirstOffenceForFirstDefendantForFirstCase().setPlea(plea);
+
+        final Map<UUID, Plea> pleas = new HashMap<>();
+        pleas.put(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId(), hearing.getFirstOffenceForFirstDefendantForFirstCase().getPlea());
+
+        when(momento.getHearing()).thenReturn(hearing.getHearing());
+        when(momento.getPleas()).thenReturn(pleas);
+
+        delegate = new VerdictDelegate(momento);
+
+        final Verdict verdict = Verdict.verdict()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withVerdictType(VerdictType.verdictType().withCategoryType("GUILTY").build())
+                .withVerdictDate(LocalDate.now())
+                .build();
+
+        final List<Object> events = delegate.inheritVerdict(hearing.getHearingId(), verdict, GUILTY_TYPES).collect(Collectors.toList());
+
+        assertEquals(2, events.size());
+        assertEquals(InheritedVerdictAdded.class, events.get(0).getClass());
+        assertEquals(ConvictionDateAdded.class, events.get(1).getClass());
+    }
+
+    @Test
+    public void inheritVerdictAndRemoveConvictionDateIfPleaIsGuiltyAndVerdictNotGuilty() {
+
+        final CommandHelpers.InitiateHearingCommandHelper hearing = h(standardInitiateHearingTemplate());
+
+        final Plea plea = Plea.plea()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withPleaValue("GUILTY")
+                .build();
+
+        hearing.getFirstOffenceForFirstDefendantForFirstCase().setConvictionDate(LocalDate.now());
+        hearing.getFirstOffenceForFirstDefendantForFirstCase().setPlea(plea);
+
+        final Map<UUID, LocalDate> convictionDates = new HashMap<>();
+        final LocalDate convictionDate = LocalDate.now();
+        convictionDates.put(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId(), convictionDate);
+
+        when(momento.getHearing()).thenReturn(hearing.getHearing());
+        when(momento.getConvictionDates()).thenReturn(convictionDates);
+
+        delegate = new VerdictDelegate(momento);
+
+        final Verdict verdict = Verdict.verdict()
+                .withOffenceId(hearing.getFirstOffenceForFirstDefendantForFirstCase().getId())
+                .withVerdictType(VerdictType.verdictType().withCategoryType("NOT_GUILTY").build())
+                .withVerdictDate(LocalDate.now())
+                .build();
+
+        final List<Object> events = delegate.inheritVerdict(hearing.getHearingId(), verdict, GUILTY_TYPES).collect(Collectors.toList());
+
+        assertEquals(2, events.size());
+        assertEquals(InheritedVerdictAdded.class, events.get(0).getClass());
+        assertEquals(ConvictionDateRemoved.class, events.get(1).getClass());
     }
 
 

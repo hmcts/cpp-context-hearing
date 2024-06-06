@@ -4,10 +4,7 @@ import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static uk.gov.justice.services.core.annotation.Component.EVENT_LISTENER;
 
-
-import java.util.Collection;
-import java.util.Optional;
-import java.util.stream.Stream;
+import uk.gov.justice.core.courts.DefenceCounsel;
 import uk.gov.justice.services.common.converter.JsonObjectToObjectConverter;
 import uk.gov.justice.services.common.converter.ObjectToJsonObjectConverter;
 import uk.gov.justice.services.core.annotation.Handles;
@@ -17,21 +14,32 @@ import uk.gov.moj.cpp.hearing.domain.event.OffenceAdded;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceDeleted;
 import uk.gov.moj.cpp.hearing.domain.event.OffenceUpdated;
 import uk.gov.moj.cpp.hearing.domain.event.OffencesRemovedFromExistingHearing;
+import uk.gov.moj.cpp.hearing.mapping.HearingDefenceCounselJPAMapper;
 import uk.gov.moj.cpp.hearing.mapping.OffenceJPAMapper;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Defendant;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Hearing;
+import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingDefenceCounsel;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.HearingSnapshotKey;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.Offence;
 import uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase;
 import uk.gov.moj.cpp.hearing.repository.DefendantRepository;
+import uk.gov.moj.cpp.hearing.repository.HearingDefenceCounselRepository;
 import uk.gov.moj.cpp.hearing.repository.HearingRepository;
 import uk.gov.moj.cpp.hearing.repository.OffenceRepository;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+
+import org.apache.commons.collections.CollectionUtils;
 
 @ServiceComponent(EVENT_LISTENER)
 public class UpdateOffencesForDefendantEventListener {
@@ -56,6 +64,12 @@ public class UpdateOffencesForDefendantEventListener {
 
     @Inject
     private UpdateOffencesForDefendantService updateOffencesForDefendantService;
+
+    @Inject
+    private HearingDefenceCounselRepository hearingDefenceCounselRepository;
+
+    @Inject
+    private HearingDefenceCounselJPAMapper hearingDefenceCounselJPAMapper;
 
 
     @Transactional
@@ -123,11 +137,51 @@ public class UpdateOffencesForDefendantEventListener {
         final List<UUID> prosecutionCaseIds = offencesRemovedFromExistingHearing.getProsecutionCaseIds();
         final List<UUID> defendantIds = offencesRemovedFromExistingHearing.getDefendantIds();
         final List<UUID> offenceIds = offencesRemovedFromExistingHearing.getOffenceIds();
-
-        final Hearing hearing = updateOffencesForDefendantService.removeOffencesFromExistingHearing(hearingRepository.findBy(hearingId), prosecutionCaseIds, defendantIds, offenceIds);
+        final Set<UUID> removedDefendantIdsFromHearing = new HashSet<>();
+        final Hearing hearing = updateOffencesForDefendantService.removeOffencesFromExistingHearing(hearingRepository.findBy(hearingId), prosecutionCaseIds, defendantIds, offenceIds, removedDefendantIdsFromHearing);
 
         hearingRepository.save(hearing);
 
+        if(CollectionUtils.isNotEmpty(hearing.getDefenceCounsels()) && CollectionUtils.isNotEmpty(removedDefendantIdsFromHearing)){
+            removeDefenceCounselsFromHearing(hearing, removedDefendantIdsFromHearing);
+        }
+    }
+
+    private void removeDefenceCounselsFromHearing(final Hearing hearing, final Set<UUID> removedDefendantIdsFromHearing) {
+        final Set<HearingDefenceCounsel> defenceCounselDBEntities = hearing.getDefenceCounsels();
+        final List<DefenceCounsel> preFilterDefenceCounselList = new ArrayList<>();
+        final List<DefenceCounsel> postFilterDefenceCounselList = new ArrayList<>();
+
+        defenceCounselDBEntities.forEach(hdc -> {
+            final DefenceCounsel defenceCounsel =  hearingDefenceCounselJPAMapper.fromJPA(hdc);
+            if(nonNull(defenceCounsel)){
+                preFilterDefenceCounselList.add(defenceCounsel);
+                postFilterDefenceCounselList.add(DefenceCounsel.defenceCounsel().withValuesFrom(defenceCounsel)
+                        .withDefendants(new ArrayList<>(defenceCounsel.getDefendants()))
+                        .build());
+            }
+        });
+
+
+        postFilterDefenceCounselList.forEach(dc -> dc.getDefendants().removeIf(defId-> removedDefendantIdsFromHearing.contains(defId)));
+        postFilterDefenceCounselList.removeIf(dc -> dc.getDefendants().isEmpty());
+
+        defenceCounselDBEntities.forEach(dce -> {
+           final DefenceCounsel defenceCounsel = postFilterDefenceCounselList.stream().filter(dc -> dc.getId().equals(dce.getId().getId()))
+                    .findFirst().orElse(null);
+            if(nonNull(defenceCounsel)){
+                if(!preFilterDefenceCounselList.contains(defenceCounsel)){
+                    // Update defence counsels with remaining defendants
+                    final HearingDefenceCounsel hearingDefenceCounsel = hearingDefenceCounselJPAMapper.toJPA(hearing, defenceCounsel);
+                    hearingDefenceCounsel.setId(new HearingSnapshotKey(defenceCounsel.getId(), hearing.getId()));
+                    hearingDefenceCounselRepository.saveAndFlush(hearingDefenceCounsel);
+                }
+            } else {
+                // Remove defence counsels from DB, when there are no defendants
+                dce.setDeleted(true);
+                hearingDefenceCounselRepository.saveAndFlush(dce);
+            }
+        });
     }
 
 }

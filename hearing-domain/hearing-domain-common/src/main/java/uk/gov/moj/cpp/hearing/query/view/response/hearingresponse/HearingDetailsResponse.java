@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.moj.cpp.hearing.domain.HearingState;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,6 +20,10 @@ public class HearingDetailsResponse {
     private UUID amendedByUserId;
 
     private List<String> witnesses;
+
+    private ZonedDateTime firstSharedDate;
+
+
 
     public HearingDetailsResponse() {
     }
@@ -65,4 +70,14 @@ public class HearingDetailsResponse {
     public void setWitnesses(List<String> witnesses) {
         this.witnesses = witnesses;
     }
+
+    public ZonedDateTime getFirstSharedDate() {
+        return firstSharedDate;
+    }
+
+    public void setFirstSharedDate(ZonedDateTime firstSharedDate) {
+        this.firstSharedDate = firstSharedDate;
+    }
+
+
 }

@@ -843,13 +843,16 @@ public class HearingServiceTest {
     public void shouldFilterHearingForDDJ() {
         final UUID hearingId1 = randomUUID();
         final UUID hearingId2 = randomUUID();
+        final ZonedDateTime firstSharedDate = ZonedDateTime.now();
         final Defendant defendant1 = buildDefendant1(hearingId1);
         final Defendant defendant2 = buildDefendant2(hearingId2);
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase1 = buildLegalCase1(hearingId1, asSet(defendant1));
         final uk.gov.moj.cpp.hearing.persist.entity.ha.ProsecutionCase prosecutionCase2 = buildLegalCase1(hearingId2, asSet(defendant2));
         final Hearing hearing1 = populateHearing(hearingId1, START_DATE_1, END_DATE_1, asSet(prosecutionCase1, prosecutionCase2));
+        hearing1.setFirstSharedDate(firstSharedDate);
         final List<UUID> accessibleCasesId = Arrays.asList(prosecutionCase1.getId().getId());
         final Hearing hearing2 = populateHearing(hearingId2, START_DATE_1, END_DATE_1, asSet(prosecutionCase1));
+        hearing2.setFirstSharedDate(firstSharedDate);
 
         final uk.gov.justice.core.courts.Hearing hearingPojo = uk.gov.justice.core.courts.Hearing.hearing().withProsecutionCases(singletonList(
                 ProsecutionCase.prosecutionCase()
@@ -872,6 +875,9 @@ public class HearingServiceTest {
 
         assertThat(response, isBean(HearingDetailsResponse.class)
                 .with(HearingDetailsResponse::getHearing, is(hearingPojo))
+        );
+        assertThat(response, isBean(HearingDetailsResponse.class)
+                .with(HearingDetailsResponse::getFirstSharedDate, is(firstSharedDate))
         );
 
 
