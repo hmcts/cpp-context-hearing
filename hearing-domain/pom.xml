@@ -3,7 +3,7 @@
     <parent>
         <groupId>uk.gov.moj.cpp.hearing</groupId>
         <artifactId>hearing-parent</artifactId>
-        <version>8.0.130-RELEASE-3RD-LINE-SNAPSHOT</version>
+        <version>8.0.131-RELEASE-3RD-LINE-SNAPSHOT</version>
     </parent>
     <artifactId>hearing-domain</artifactId>
     <packaging>pom</packaging>
